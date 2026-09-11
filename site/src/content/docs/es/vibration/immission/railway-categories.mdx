@@ -1,0 +1,329 @@
+---
+title: "Vibración ferroviaria por categorías (E DIN 4150-2)"
+description: "Lo que el borrador de agosto de 2023 cambia en cómo se juzga un ferrocarril para las personas de un edificio: un intervalo por paso, una KB_Fmax que es 1,5 veces el eficaz de una categoría, un factor de ponderación por tipo de tren y trazado, el valor superior nocturno de una línea nueva, la regla del 25 % para una modificada, y el resto de los cambios del borrador a la DIN 4150-2, con un conmutador de edición."
+references:
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2023
+    title: "Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden"
+    designation: "E DIN 4150-2:2023-08"
+    primary: true
+    note: "Un borrador, destinado a sustituir a la DIN 4150-2:1999-06. La tabla 1 con su única celda cambiada, las fórmulas (5) a (8) y la tabla 2 del 6.5.3, el valor superior nocturno del 6.5.3.5, la regla del 25 % del 6.5.3.6, la tolerancia de la carretera existente del 6.5.2, el suceso sísmico inducido del 6.5.1.3, y la tabla 3 tal como está impresa. El anexo B, ejemplos 8 y 9, es el oráculo de las filas de conformidad; los ejemplos 1, 2 y 4 a 7 son los de la edición de 1999, y el ejemplo 3 está rehecho sin el argumento del 15 %."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 1999
+    title: "Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden"
+    designation: "DIN 4150-2:1999-06"
+    note: "La edición en vigor, que la biblioteca lee por defecto; los cambios del borrador se leen con edition='2023'."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+La [edición de 1999 de la DIN 4150-2](/phonometry/es/vibration/immission/people-in-buildings/)
+trata un ferrocarril como un conjunto de clases de tren, cada una ocupando los
+intervalos por los que pasaron sus trenes, y multiplica por 1,5 los valores
+de referencia de una línea urbana. El borrador que va a sustituirla, publicado para
+comentarios en agosto de 2023, reescribe esa parte desde cero y toca poco más:
+una celda de la tabla 1, un ejemplo resuelto, dos fuentes nuevas, y los días
+dos a seis de una obra impresos en lugar de leídos de una curva. Esta página es
+el ferrocarril; el resto del borrador es la última sección, y la biblioteca lee
+cualquiera de las dos ediciones con un solo argumento.
+
+## 1. Un intervalo por paso, y una KB_Fmax que no es un máximo
+
+La primera decisión del borrador es que cada paso de tren cuenta como un
+intervalo, dure lo que dure (6.5.3.2). Así que el eficaz de los máximos por
+intervalo de una **categoría** de tren, un tipo de vehículo sobre una vía en un
+sentido, es el eficaz de un máximo por intervalo por paso sobre los pasos
+medidos (fórmula (5)), y, a diferencia de la (A.1) de la edición de 1999 y de
+la propia fórmula (1) del vibrómetro, nada por debajo de 0,1 se pone a cero
+por el camino, porque el número siguiente se construye sobre él: la `KB_Fmax`
+de la categoría no es el mayor máximo por intervalo que nadie observó sino
+**1,5 veces** su eficaz (fórmula (7)), ya que un solo paso con un plano en una
+rueda no dice nada de la línea. La `KB_Fmax` del ferrocarril es la mayor sobre
+las categorías (fórmula (8)).
+
+El ejemplo 8 del anexo B mide 2,5 h en un edificio residencial nuevo junto a
+un tranvía y un metro: 14 pasos de metro en cada sentido bajo tierra y 9 y 10
+pasos de tranvía en cada sentido en superficie.
+
+```python
+from phonometry import vibration
+
+# Anexo B, tabla B.1: el máximo por intervalo de cada paso, por categoría.
+metro_north = [0.017, 0.036, 0.024, 0.035, 0.025, 0.036, 0.035, 0.037, 0.041, 0.042,
+               0.068, 0.040, 0.022, 0.025]
+metro_south = [0.076, 0.034, 0.025, 0.054, 0.033, 0.018, 0.033, 0.060, 0.019, 0.092,
+               0.030, 0.019, 0.024, 0.058]
+tram_east = [0.379, 0.369, 0.348, 0.288, 0.270, 0.549, 0.320, 0.290, 0.663]
+tram_west = [0.649, 0.717, 0.658, 0.508, 0.423, 0.332, 0.735, 0.363, 0.441, 0.663]
+
+kb_ftm = [vibration.train_category_rms(c) for c in (metro_north, metro_south, tram_east, tram_west)]
+print([round(v, 3) for v in kb_ftm])  # [0.037, 0.047, 0.406, 0.568]
+print(vibration.train_kb_fmax(kb_ftm).round(3))  # [0.055 0.07  0.609 0.851]
+print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
+```
+
+## 2. Un factor de ponderación por el tipo de tren
+
+La intensidad de valoración de un ferrocarril es la fórmula (6): cada
+categoría ponderada por el número de sus trenes en el periodo, de los 1920
+intervalos del día o los 960 de la noche, y por un **factor de ponderación**
+`α_Zug` de la tabla 2 según el tipo de tren y según la línea vaya en
+superficie o bajo tierra. Un tranvía, un metro ligero o un metro en superficie
+es 0,7, una S-Bahn 0,8, otro tren de viajeros 0,9, un tren de mercancías de
+hasta 600 m 1,0, y un tren de mercancías de más de 600 m 1,3 vaya por donde
+vaya; bajo tierra todo salvo el mercancías largo es 1,0. Una categoría cuyo
+eficaz es igual o inferior a 0,1 entra en la suma como cero, que es donde se
+aplica la supresión de la que se libraron los pasos. Las horas de descanso del
+día no se aplican a un ferrocarril, como tampoco se aplicaban en 1999.
+
+```python
+from phonometry import vibration
+
+print(vibration.train_weighting_factor("freight_long"))  # 1.3
+print(vibration.train_weighting_factor("s_bahn", alignment="underground"))  # 1.0
+
+# Ejemplo 8: 144 metros por vía y día a 1,0, cuyo eficaz está por debajo de
+# 0,1 y cuenta como cero, y 80 tranvías por vía a 0,7.
+kb_ftm = [0.03654, 0.04676, 0.40606, 0.56758]
+day = vibration.train_assessment_severity(kb_ftm, [144, 144, 80, 80], alpha=[1.0, 1.0, 0.7, 0.7])
+print(f"KB_FTr = {day:.4f}")  # 0.0997, impreso 0,099 8
+
+guide = vibration.guide_values("residential", edition="2023")
+verdict = vibration.assess_people_in_buildings(
+    vibration.railway_kb_fmax(kb_ftm), guide, kb_ftr=day, source="railway", edition="2023"
+)
+print(verdict.complies, verdict.criterion)  # False A_r
+```
+
+Con el borrador un ferrocarril se compara con `A_o` como cualquier otra
+fuente, cosa que la edición de 1999 no hacía; los tranvías del ejemplo 8
+superan el `A_o` nocturno de 0,2 de un edificio residencial nuevo y el
+requisito no se cumple de noche antes siquiera de formar `KB_FTr`.
+
+```python
+from phonometry import vibration
+
+night = vibration.guide_values("residential", time_of_day="night", edition="2023")
+verdict = vibration.assess_people_in_buildings(0.851, night, source="railway", edition="2023")
+print(verdict.complies, verdict.criterion)  # False A_o
+```
+
+## 3. Una línea nueva, y una vieja que se hace más grande
+
+Una línea de nueva construcción se sujeta de noche a un valor superior propio
+(6.5.3.5): 0,6 en superficie sea cual sea la zona, y bajo tierra el valor de
+la tabla 1 en una zona industrial o comercial y 0,3 en las demás. De día rige
+la tabla 1 tal cual.
+
+```python
+from phonometry import vibration
+
+print(vibration.railway_guide_values("mixed", time_of_day="night"))
+# GuideValues(a_u=0.1, a_o=0.6, a_r=0.07, time_of_day='night', edition='2023')
+print(vibration.railway_guide_values("residential", time_of_day="night", alignment="underground"))
+# GuideValues(a_u=0.1, a_o=0.3, a_r=0.05, time_of_day='night', edition='2023')
+```
+
+Una línea existente que se modifica o se amplía se juzga por el **cambio** que
+trae (6.5.3.6). El caso sin el proyecto, con el horario presente o el
+previsto, se pone frente al caso proyectado; el caso proyectado se sujeta
+primero a los valores de referencia como cualquier inmisión, con una
+`KB_Fmax` igual o inferior a `A_u` que lo zanja por sí sola, y donde `KB_Fmax`
+supera `A_o` o `KB_FTr` supera `A_r` el requisito sigue contando como cumplido
+si la magnitud crece menos de un 25 %, el menor aumento que un estudio de
+laboratorio encontró que la gente nota. El apartado dice que los requisitos se
+cumplen si se da una de sus condiciones; su propio ejemplo 9, cuya `KB_Fmax`
+no cambia en absoluto, va a medidas correctoras porque `KB_FTr` crece más, así
+que tienen que darse todas las condiciones que se aplican, y la biblioteca lo
+lee así. El ejemplo 9 añade una segunda vía a
+una línea de vía única que pasa junto a una casa en una zona mixta: 28 trenes
+regionales y 8 de mercancías al día pasan a ser 34 y 12, y un tercio de los
+mercancías crece por encima de los 600 m.
+
+```python
+from phonometry import vibration
+
+# Anexo B, ejemplo 9. Vía existente: regionales 0,24, mercancías 0,44; vía
+# nueva: 0,22 y 0,40; los mercancías largos a 1,3.
+nullfall_day = vibration.train_assessment_severity([0.24, 0.44], [28, 8], alpha=[0.9, 1.0])
+nullfall_night = vibration.train_assessment_severity(
+    [0.24, 0.44], [12, 18], alpha=[0.9, 1.0], time_of_day="night"
+)
+kb_ftm = [0.24, 0.22, 0.44, 0.40, 0.44, 0.40]
+alpha = [0.9, 0.9, 1.0, 1.0, 1.3, 1.3]
+planfall_day = vibration.train_assessment_severity(kb_ftm, [17, 17, 4, 4, 2, 2], alpha=alpha)
+planfall_night = vibration.train_assessment_severity(
+    kb_ftm, [7, 7, 12, 12, 6, 6], alpha=alpha, time_of_day="night"
+)
+print(f"{nullfall_day:.3f} {nullfall_night:.3f} {planfall_day:.3f} {planfall_night:.3f}")
+# 0.039 0.065 0.046 0.094
+
+change = vibration.assess_railway_change(
+    kb_fmax_before=0.66,
+    kb_fmax_after=0.66,
+    kb_ftr_before=nullfall_night,
+    kb_ftr_after=planfall_night,
+    guide=vibration.railway_guide_values("mixed", time_of_day="night"),
+    time_of_day="night",
+)
+print(change.complies, change.kb_fmax_met, change.kb_ftr_met)  # False True False
+print(f"{change.kb_ftr_increase_percent:.0f} %")  # 44 %
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_change_example.svg" alt="Un gráfico de barras de la intensidad de valoración de día y de noche, sobre un eje de 0 a 0,13. En cada grupo una barra verde es el caso sin el proyecto y una barra azul el caso con la segunda vía: 0,039 y 0,046 de día, 0,065 y 0,094 de noche. Una línea roja marca A r, 0,1 de día y 0,07 de noche, y una línea gris discontinua un 25 por ciento por encima de la barra verde, en 0,048 de día y 0,081 de noche. De día las dos barras quedan por debajo de las dos líneas; de noche la barra azul sube por encima de la línea del 25 por ciento y por encima de A r, y una nota dice mitigación" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+before = [
+    vibration.train_assessment_severity([0.24, 0.44], [28, 8], alpha=[0.9, 1.0]),
+    vibration.train_assessment_severity([0.24, 0.44], [12, 18], alpha=[0.9, 1.0], time_of_day="night"),
+]
+kb_ftm = [0.24, 0.22, 0.44, 0.40, 0.44, 0.40]
+alpha = [0.9, 0.9, 1.0, 1.0, 1.3, 1.3]
+after = [
+    vibration.train_assessment_severity(kb_ftm, [17, 17, 4, 4, 2, 2], alpha=alpha),
+    vibration.train_assessment_severity(kb_ftm, [7, 7, 12, 12, 6, 6], alpha=alpha, time_of_day="night"),
+]
+x = np.arange(2)
+fig, ax = plt.subplots(figsize=(10, 6.2))
+ax.bar(x - 0.19, before, 0.38, label="sin el proyecto")
+ax.bar(x + 0.19, after, 0.38, label="con la segunda vía")
+for i, which in enumerate(("day", "night")):
+    a_r = vibration.railway_guide_values("mixed", time_of_day=which).a_r
+    ax.hlines(a_r, x[i] - 0.45, x[i] + 0.45, color="red")
+    ax.hlines(before[i] * 1.25, x[i] - 0.45, x[i] + 0.45, color="grey", linestyle="--")
+ax.set_xticks(x, ["de día", "de noche"])
+ax.legend()
+```
+
+</details>
+
+La noche del ejemplo 9 está impresa sobre 920 intervalos, lo que da los 0,066
+y 0,096 de la página; el 6.5.3.2 fija la noche en 960, lo que da 0,065 y
+0,094, y la conclusión es la misma. La
+[página de erratas](/phonometry/es/reference/errata/) lo recoge, con la
+condición única del 6.5.3.6, un resultado del ejemplo 8 que sus propias
+entradas de cuatro decimales no dan, una decisión del diagrama de flujo de las
+obras dibujada al revés, diez máximos por intervalo impresos en la figura B.2
+que no dan el 0,39 que usa el texto, un ejemplo que cita el apartado de una
+línea nueva mientras aplica el de una ampliación, dos referencias cruzadas que
+nombran la fórmula y el apartado equivocados, y un suceso raro cumplido por
+debajo de `A_o` en una frase y en él en el apartado siguiente y en el
+diagrama.
+
+## 4. Qué más cambia el borrador
+
+Los valores de referencia llevan la edición y el periodo para los que se
+leyeron, así que el veredicto sabe qué reglas aplicar sin que se le diga, y
+pedir los valores de una edición bajo las reglas de la otra se rechaza. Todo
+lo de abajo es lo que `edition="2023"` lee de forma distinta a la
+[edición de 1999](/phonometry/es/vibration/immission/people-in-buildings/);
+los números que no se nombran aquí son los mismos en las dos.
+
+- **La tabla 1** cambia una celda: el `A_u` nocturno de una zona mixta, ahora
+  con las zonas urbanas en la fila, pasa de 0,15 a 0,1.
+- **El 15 %** de incertidumbre de una medida de `KB_F` ya no excusa una
+  `KB_Fmax` por encima de `A_u`. El ejemplo 3 de 1999 leía 0,17 frente a 0,15
+  como cumplido por ese motivo; el ejemplo 3 del borrador lee 0,114 frente a
+  0,10, sigue hasta `KB_FTr`, encuentra 0,075 frente a un `A_r` de 0,07, y lo
+  da por incumplido.
+- **Una carretera de noche** no se juzga por `A_o`: el 6.5.2 dice que una
+  superación rara del valor superior nocturno no incumple el requisito, y
+  pone un máximo por intervalo aislado por encima de 0,6, en cualquier zona,
+  como motivo para buscar la causa y corregirla, que es lo que la edición de
+  1999 decía de un ferrocarril. **Una carretera existente** junto a un
+  edificio existente: los vecinos tienen que soportar `A_u` y `A_r` superados
+  hasta en un 50 %, de día y de noche (6.5.2), que `source="road_existing"`
+  da como valores de referencia multiplicados por 1,5.
+- **Un suceso sísmico inducido**, unos segundos con su energía por debajo de
+  15 Hz, años después de la intervención que lo causa (6.5.1.3): `KB_Fmax` es
+  más o menos 0,44 veces la velocidad de pico, y se sujeta de día y de noche
+  al `A_o` del día, sin `KB_FTr`.
+- **Una obra**: la tabla 3 del borrador imprime los días dos a seis que la
+  figura 3 de 1999 obligaba a leer de una curva, celda por celda lo que da la
+  interpolación, y dice que `D` cuenta solo los días en que se supera la
+  tabla 1.
+- El **ferrocarril urbano** de 1999, con su factor 1,5 sobre `A_u` y `A_r`,
+  desaparece; en su lugar está el factor 0,7 de la tabla 2 sobre el eficaz.
+
+```python
+from phonometry import vibration
+
+print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
+# GuideValues(a_u=0.1, a_o=0.3, a_r=0.07, time_of_day='night', edition='2023')
+
+# El ejemplo 3 del borrador: dentro del 15 % y ya no excusado por él.
+guide = vibration.guide_values("mixed", time_of_day="night", edition="2023")
+verdict = vibration.assess_people_in_buildings(0.114, guide, kb_ftr=0.075, edition="2023")
+print(verdict.complies, verdict.criterion)  # False A_r
+
+print(vibration.guide_values("residential", source="road_existing", edition="2023"))
+# GuideValues(a_u=0.225, a_o=3.0, a_r=0.105, time_of_day='day', edition='2023')
+print(vibration.induced_seismic_kb_fmax(5.0))  # 2.2
+print(vibration.guide_values("residential", time_of_day="night", source="induced_seismic", edition="2023"))
+# GuideValues(a_u=0.1, a_o=3.0, a_r=0.05, time_of_day='night', edition='2023')
+```
+
+<Scope>
+
+## Qué cubre esta guía
+
+<ScopeClaim status="covered">
+**El ferrocarril del 6.5.3**: el eficaz de una categoría de tren sobre sus
+pasos (fórmula (5)), 1,5 veces eso y el mayor de ellos (fórmulas (7) y (8)),
+la intensidad de valoración con los factores de la tabla 2 (fórmula (6)), el
+valor superior nocturno de una línea nueva (6.5.3.5) y la regla del 25 % de
+una modificada (6.5.3.6).
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+**El resto del borrador** detrás de `edition="2023"`: la única celda de la
+tabla 1, el procedimiento sin el atajo del 15 %, un ferrocarril comparado con
+`A_o`, la carretera existente del 6.5.2 y el suceso sísmico inducido del
+6.5.1.3, y la tabla 3 tal como está impresa.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+**Ninguna decisión que el borrador deja abierta.** Una línea existente que no
+se modifica (6.5.3.4) no tiene regla numérica y no se inventa ninguna; la
+concesión del 6.5.3.7 a un edificio nuevo, un `A_o` de 0,6 para una categoría
+con pasos raros, es un juicio y sigue siéndolo.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ninguna medida y ningún seguimiento.** El apartado 5, incluidos los puntos
+de medida sustitutivos y las funciones de transferencia de un seguimiento de
+larga duración, y el apartado 8, el informe, son texto.
+</ScopeClaim>
+
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Vibración y personas en edificios (DIN 4150-2)](/phonometry/es/vibration/immission/people-in-buildings/):
+  la edición de 1999, el procedimiento y los valores de referencia que
+  comparten las dos ediciones.
+- [Predecir la vibración ferroviaria (E DIN 45672-3)](/phonometry/es/vibration/immission/railway-prediction/):
+  de dónde sale el eficaz de una categoría cuando todavía no hay nada que
+  medir.
+- [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
+  los máximos por intervalo de los que se forman las categorías.
+- Referencia de API:
+  [`vibration.immission.train_categories`](/phonometry/es/reference/api/vibration/train-categories/)
+  y [`vibration.immission.people`](/phonometry/es/reference/api/vibration/people/).
+
+</SeeAlso>

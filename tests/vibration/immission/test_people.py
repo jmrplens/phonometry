@@ -366,8 +366,147 @@ def test_table_2_is_not_applicable_to_a_sensitive_area_or_to_part_days() -> None
         im.construction_guide_values(a_flag)
 
 
+# -- The draft of 2023 (E DIN 4150-2:2023-08) --------------------------------------------
+
+
+def test_the_draft_changes_one_cell_of_table_1() -> None:
+    """Printed page 14 of the draft: the night A_u of a mixed area is 0,1."""
+    for area in im.GUIDE_VALUES:
+        for period in ("day", "night"):
+            printed = im.guide_values(area, time_of_day=period)
+            draft = im.guide_values(area, time_of_day=period, edition="2023")
+            if area == "mixed" and period == "night":
+                assert draft == im.GuideValues(
+                    0.1, 0.3, 0.07, time_of_day="night", edition="2023"
+                )
+            else:
+                assert (draft.a_u, draft.a_o, draft.a_r) == (
+                    printed.a_u,
+                    printed.a_o,
+                    printed.a_r,
+                )
+            assert (draft.time_of_day, draft.edition) == (period, "2023")
+            assert (printed.time_of_day, printed.edition) == (period, "1999")
+    assert im.GUIDE_VALUES_2023["mixed"]["night"].a_u == 0.1
+    with pytest.raises(ValueError, match="edition"):
+        im.guide_values("mixed", edition="2019")
+
+
+def test_draft_example_3_goes_on_to_a_r_and_fails() -> None:
+    """B.3 of the draft: 0,114 against A_u = 0,10 by night in a mixed area is
+    inside the 15 %, and the draft no longer stops there; KB_FTr = KB_FTm =
+    0,075 exceeds A_r = 0,07, not met.
+    """
+    guide = im.guide_values("mixed", time_of_day="night", edition="2023")
+    verdict = im.assess_people_in_buildings(0.114, guide, kb_ftr=0.075, edition="2023")
+    assert not verdict.complies
+    assert verdict.criterion == "A_r"
+    assert not verdict.within_uncertainty
+    with pytest.raises(ValueError, match="supply kb_ftr"):
+        im.assess_people_in_buildings(0.114, guide, edition="2023")
+    # The edition is the one the guide values were read from; the 1999
+    # edition reads the same numbers as met, and mixing the two is refused.
+    assert not im.assess_people_in_buildings(0.114, guide, kb_ftr=0.075).complies
+    with pytest.raises(ValueError, match="2023 edition"):
+        im.assess_people_in_buildings(0.114, guide, edition="1999")
+    old = im.guide_values("mixed", time_of_day="night")
+    assert im.assess_people_in_buildings(0.114, old).complies
+    with pytest.raises(ValueError, match="1999 edition"):
+        im.assess_people_in_buildings(0.114, old, edition="2023")
+
+
+def test_the_draft_holds_a_railway_to_a_o_and_drops_the_urban_factor() -> None:
+    guide = im.guide_values("residential", time_of_day="night", edition="2023")
+    verdict = im.assess_people_in_buildings(
+        0.85, guide, kb_ftr=0.04, source="railway", edition="2023"
+    )
+    assert not verdict.complies
+    assert verdict.criterion == "A_o"
+    with pytest.raises(ValueError, match="source"):
+        im.guide_values("residential", source="urban_railway", edition="2023")
+    with pytest.raises(ValueError, match="source"):
+        im.assess_people_in_buildings(
+            0.5, guide, source="urban_railway", edition="2023"
+        )
+
+
+def test_the_draft_tolerates_an_existing_road_by_half() -> None:
+    """6.5.2 of the draft: A_u and A_r exceeded by up to 50 % at an existing
+    road by an existing building, by day and by night; A_o as printed.
+    """
+    plain = im.guide_values("residential", edition="2023")
+    tolerated = im.guide_values("residential", source="road_existing", edition="2023")
+    assert tolerated == im.GuideValues(0.225, 3.0, 0.105, edition="2023")
+    assert tolerated.a_o == plain.a_o
+    assert im.ROAD_EXISTING_TOLERANCE_FACTOR == 1.5
+    with pytest.raises(ValueError, match="source"):
+        im.guide_values("residential", source="road_existing")
+
+
+def test_the_draft_bounds_an_induced_seismic_event_by_the_daytime_a_o() -> None:
+    """6.5.1.3 of the draft: KB_Fmax = 0,44 v_max, held by day and by night to
+    the daytime A_o, with no KB_FTr.
+    """
+    assert im.induced_seismic_kb_fmax(5.0) == pytest.approx(2.2)
+    night = im.guide_values(
+        "residential", time_of_day="night", source="induced_seismic", edition="2023"
+    )
+    assert night == im.GuideValues(0.1, 3.0, 0.05, time_of_day="night", edition="2023")
+    verdict = im.assess_people_in_buildings(
+        im.induced_seismic_kb_fmax(5.0), night, source="induced_seismic", edition="2023"
+    )
+    assert verdict.complies
+    assert verdict.criterion == "A_o"
+    assert verdict.kb_ftr is None
+    with pytest.raises(ValueError, match="peak_velocity_mm_s"):
+        im.induced_seismic_kb_fmax(-1.0)
+
+
+def test_the_draft_prints_the_construction_days_the_figure_made_one_read() -> None:
+    """Table 3 of the draft (printed page 24): days 2 to 6 as printed, cell for
+    cell what the interpolation of the 1999 Figure 3 gives.
+    """
+    printed = {
+        "I": ([0.73, 0.67, 0.60, 0.53, 0.47], [0.38, 0.37, 0.35, 0.33, 0.32]),
+        "II": ([1.13, 1.07, 1.00, 0.93, 0.87], [0.77, 0.73, 0.70, 0.67, 0.63]),
+        "III": ([1.53, 1.47, 1.40, 1.33, 1.27], [1.17, 1.13, 1.10, 1.07, 1.03]),
+    }
+    for stage, (a_u, a_r) in printed.items():
+        guides = [im.construction_guide_values(d, stage=stage) for d in range(2, 7)]
+        assert [g.a_u for g in guides] == a_u, stage
+        assert [g.a_r for g in guides] == a_r, stage
+    assert im.BLASTING_MAX_PER_WEEK == 15
+
+
 def test_the_module_lists_what_it_publishes() -> None:
     from phonometry.vibration.immission import people
 
     for name in people.__all__:
         assert getattr(im, name) is getattr(people, name)
+
+
+def test_the_draft_does_not_judge_a_road_on_a_o_by_night() -> None:
+    """Printed page 18, 6.5.2 of the draft: a rare exceedance of the night-time
+    A_o does not fail a road, and single clock maxima above 0,6 are a reason
+    to look into the cause; by day, and under the 1999 edition, the road is
+    judged on A_o like any other source.
+    """
+    night = im.guide_values(
+        "residential", time_of_day="night", source="road", edition="2023"
+    )
+    verdict = im.assess_people_in_buildings(0.25, night, kb_ftr=0.03, source="road")
+    assert verdict.complies
+    assert verdict.criterion == "A_r"
+    existing = im.guide_values(
+        "residential", time_of_day="night", source="road_existing", edition="2023"
+    )
+    assert im.assess_people_in_buildings(
+        0.25, existing, kb_ftr=0.03, source="road_existing"
+    ).complies
+    assert im.ROAD_NIGHT_INVESTIGATION_KB == 0.6
+    day = im.guide_values("residential", source="road", edition="2023")
+    assert not im.assess_people_in_buildings(3.5, day, source="road").complies
+    old = im.guide_values("residential", time_of_day="night", source="road")
+    assert not im.assess_people_in_buildings(
+        0.25, old, kb_ftr=0.03, source="road"
+    ).complies

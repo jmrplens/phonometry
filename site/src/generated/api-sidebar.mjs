@@ -201,6 +201,9 @@ export const apiSections = {
       'reference/api/vibration/ground',
       'reference/api/vibration/coupling',
       'reference/api/vibration/people',
+      'reference/api/vibration/train-categories',
+      'reference/api/vibration/railway-prediction',
+      'reference/api/vibration/prediction',
     ],
   },
   'environment': {

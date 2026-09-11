@@ -46,6 +46,7 @@ UNITS: frozenset[str] = frozenset(
     {
         "%",
         "1/kg",
+        "1/m",
         "1/s",
         "Cam",
         "EPNdB",

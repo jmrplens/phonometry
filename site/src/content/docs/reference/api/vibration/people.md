@@ -63,6 +63,20 @@ it is one.
 mean of squares with no root over it; Formula (A.1a) beside it, Formula (A.2)
 and the worked Example 8 all take the root. Registered in `docs/ERRATA.md`.
 
+**The draft of 2023.** E DIN 4150-2:2023-08 is to replace the 1999 edition,
+and `edition="2023"` reads it: Table 1 with one cell changed, the night
+$A_u$ of a mixed area down from 0,15 to 0,1; no shortcut for a
+$KB_{F\mathrm{max}}$ within the 15 % above $A_u$, which its
+Example 3 sends on to $A_r$ and fails; a railway compared with
+$A_o$ like any other source, its $KB_{F\mathrm{max}}$ and
+$KB_{FTr}$ formed by category of train in
+[`phonometry.vibration.immission.train_categories`](/phonometry/reference/api/vibration/train-categories/); an existing road
+whose neighbours must put up with $A_u$ and $A_r$ exceeded by up
+to 50 % (6.5.2); and an induced seismic event, held by day and by night to
+the daytime $A_o$ (6.5.1.3). The rest of the numbers are the same, and
+the draft's Table 3 prints the days two to six that the 1999 Figure 3 made
+one read off a curve, cell for cell what the interpolation gives.
+
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
 ## admissible_exposure_s
@@ -137,6 +151,7 @@ assess_people_in_buildings(
     kb_ftr: float | None = None,
     source: str = 'general',
     rare_short_events: bool = False,
+    edition: str | None = None,
 ) -> PeopleAssessment
 ```
 
@@ -162,15 +177,32 @@ which is how Example 4 reads a $KB_{FTr}$ of 0,154 as meeting an
 $A_r$ of 0,15; and the standard says the values are not to be
 applied mechanically in any case.
 
+The draft of 2023 reads the same order (its 6.3 and Figure 2) with three
+differences: a $KB_{F\mathrm{max}}$ within the 15 % above
+$A_u$ goes on to $A_r$ like any other, which is how its
+Example 3 fails 0,114 against 0,10; a railway is compared with
+$A_o$ as well, its $KB_{F\mathrm{max}}$ being the 1,5 times
+$KB_{FTm,Zug}$ of [`railway_kb_fmax`](/phonometry/reference/api/vibration/train-categories/#railway_kb_fmax) and
+its $KB_{FTr}$ that of
+[`train_assessment_severity`](/phonometry/reference/api/vibration/train-categories/#train_assessment_severity); and a road is
+not, by night, its 6.5.2 saying that a rare exceedance of the night-time
+$A_o$ does not fail the requirement, with
+[`ROAD_NIGHT_INVESTIGATION_KB`](/phonometry/reference/api/vibration/people/#road_night_investigation_kb) in its place as a reason to look
+into the cause. An induced seismic event is a rare short event by
+definition (6.5.1.3). The edition is the one the guide values were read
+from, and asking for the other is refused: the values of one edition
+under the rules of the other is not an assessment of either.
+
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `kb_fmax` | $KB_{F\mathrm{max}}$, the largest of the three directions. |
-| `guide` | The guide values, from [`guide_values`](/phonometry/reference/api/vibration/people/#guide_values-1) or [`construction_guide_values`](/phonometry/reference/api/vibration/people/#construction_guide_values-1). |
+| `guide` | The guide values, from [`guide_values`](/phonometry/reference/api/vibration/people/#guide_values-1), [`construction_guide_values`](/phonometry/reference/api/vibration/people/#construction_guide_values-1) or, for a railway under the draft, [`railway_guide_values`](/phonometry/reference/api/vibration/train-categories/#railway_guide_values). |
 | `kb_ftr` | $KB_{FTr}$, needed only when the verdict comes down to it. |
-| `source` | `"general"` (default), `"road"`, `"railway"`, `"urban_railway"` or `"quarry_blasting"`, which is a rare short event by definition. |
+| `source` | `"general"` (default), `"road"`, `"railway"`, `"urban_railway"` or `"quarry_blasting"`, which is a rare short event by definition; under the draft, `"road_existing"` and `"induced_seismic"` in place of `"urban_railway"`. |
 | `rare_short_events` | Whether the immission is at most three short events a day, such as blasting, which 6.5.1 judges on $A_o$ alone. |
+| `edition` | `"1999"` or `"2023"`, the draft; `None` (default) takes the edition of the guide values. |
 
 **Returns:** The verdict, as a [`PeopleAssessment`](/phonometry/reference/api/vibration/people/#peopleassessment).
 
@@ -178,7 +210,7 @@ applied mechanically in any case.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a negative severity, an unknown source, or a verdict that needs $KB_{FTr}$ without one given. |
+| ValueError | For a negative severity, an unknown source or edition, an edition other than the guide values are of, or a verdict that needs $KB_{FTr}$ without one given. |
 
 ## ASSESSMENT_PERIOD_S
 
@@ -242,6 +274,14 @@ not applied to road or rail traffic.
 BLASTING_EXCEPTION_KB_FMAX = 8.0
 ```
 
+## BLASTING_MAX_PER_WEEK
+
+*Constant* (`int`).
+
+```python
+BLASTING_MAX_PER_WEEK = 15
+```
+
 ## CONSTRUCTION_BLASTING_A_O
 
 *Constant* (`float`).
@@ -255,7 +295,7 @@ CONSTRUCTION_BLASTING_A_O = 8.0
 *Constant* (`dict`).
 
 ```python
-CONSTRUCTION_GUIDE_VALUES = {'I': {1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4), 26: GuideValues(a_u=0.4, a_o=5.0, a_r=0.3), 78: GuideValues(a_u=0.3, a_o=5.0, a_r=0.2)}, 'II': {1: GuideValues(a_u=1.2, a_o=5.0, a_r=0.8), 26: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6), 78: GuideValues(a_u=0.6, a_o=5.0, a_r=0.4)}, 'III': {1: GuideValues(a_u=1.6, a_o=5.0, a_r=1.2), 26: GuideValues(a_u=1.2, a_o=5.0, a_r=1.0), 78: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6)}}
+CONSTRUCTION_GUIDE_VALUES = {'I': {1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4, time_of_day='day', edition='1999'), 26: GuideValues(a_u=0.4, a_o=5.0, a_r=0.3, time_of_day='day', edition='1999'), 78: GuideValues(a_u=0.3, a_o=5.0, a_r=0.2, time_of_day='day', edition='1999')}, 'II': {1: GuideValues(a_u=1.2, a_o=5.0, a_r=0.8, time_of_day='day', edition='1999'), 26: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6, time_of_day='day', edition='1999'), 78: GuideValues(a_u=0.6, a_o=5.0, a_r=0.4, time_of_day='day', edition='1999')}, 'III': {1: GuideValues(a_u=1.6, a_o=5.0, a_r=1.2, time_of_day='day', edition='1999'), 26: GuideValues(a_u=1.2, a_o=5.0, a_r=1.0, time_of_day='day', edition='1999'), 78: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6, time_of_day='day', edition='1999')}}
 ```
 
 ## construction_guide_values
@@ -317,7 +357,7 @@ DAY_REST_TIME_S = 14400.0
 *Constant* (`dict`).
 
 ```python
-GUIDE_VALUES = {'industrial': {'day': GuideValues(a_u=0.4, a_o=6.0, a_r=0.2), 'night': GuideValues(a_u=0.3, a_o=0.6, a_r=0.15)}, 'commercial': {'day': GuideValues(a_u=0.3, a_o=6.0, a_r=0.15), 'night': GuideValues(a_u=0.2, a_o=0.4, a_r=0.1)}, 'mixed': {'day': GuideValues(a_u=0.2, a_o=5.0, a_r=0.1), 'night': GuideValues(a_u=0.15, a_o=0.3, a_r=0.07)}, 'residential': {'day': GuideValues(a_u=0.15, a_o=3.0, a_r=0.07), 'night': GuideValues(a_u=0.1, a_o=0.2, a_r=0.05)}, 'sensitive': {'day': GuideValues(a_u=0.1, a_o=3.0, a_r=0.05), 'night': GuideValues(a_u=0.1, a_o=0.15, a_r=0.05)}}
+GUIDE_VALUES = {'industrial': {'day': GuideValues(a_u=0.4, a_o=6.0, a_r=0.2, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.3, a_o=0.6, a_r=0.15, time_of_day='night', edition='1999')}, 'commercial': {'day': GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.2, a_o=0.4, a_r=0.1, time_of_day='night', edition='1999')}, 'mixed': {'day': GuideValues(a_u=0.2, a_o=5.0, a_r=0.1, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.15, a_o=0.3, a_r=0.07, time_of_day='night', edition='1999')}, 'residential': {'day': GuideValues(a_u=0.15, a_o=3.0, a_r=0.07, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.1, a_o=0.2, a_r=0.05, time_of_day='night', edition='1999')}, 'sensitive': {'day': GuideValues(a_u=0.1, a_o=3.0, a_r=0.05, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.1, a_o=0.15, a_r=0.05, time_of_day='night', edition='1999')}}
 ```
 
 ## guide_values
@@ -328,6 +368,7 @@ guide_values(
     *,
     time_of_day: str = 'day',
     source: str = 'general',
+    edition: str = '1999',
 ) -> GuideValues
 ```
 
@@ -339,7 +380,8 @@ The guide values of Table 1 for one area, time of day and kind of source.
 | :--- | :--- |
 | `area` | The row of Table 1, as [`GUIDE_VALUES`](/phonometry/reference/api/vibration/people/#guide_values) keys it. |
 | `time_of_day` | `"day"` (default) or `"night"`. |
-| `source` | `"general"` (default), `"road"` or `"railway"`, for which Table 1 applies as printed; `"urban_railway"`, the surface line of a public transport system, for which 6.5.3.3 raises $A_u$ and $A_r$ by the factor 1,5; or `"quarry_blasting"`, blasts on working days with the neighbours warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day, for which 6.5.1 lets a mixed or residential area take the daytime $A_o$ of row 1, which is 6. |
+| `source` | `"general"` (default), `"road"` or `"railway"`, for which Table 1 applies as printed; `"urban_railway"`, the surface line of a public transport system, for which 6.5.3.3 raises $A_u$ and $A_r$ by the factor 1,5; or `"quarry_blasting"`, blasts on working days with the neighbours warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day, for which 6.5.1 lets a mixed or residential area take the daytime $A_o$ of row 1, which is 6. The draft of 2023 has no `"urban_railway"` and adds `"road_existing"`, an existing road by an existing building, whose $A_u$ and $A_r$ its neighbours must put up with exceeded by up to 50 % (6.5.2), and `"induced_seismic"`, which the daytime $A_o$ bounds by night as well (6.5.1.3). |
+| `edition` | `"1999"` (default), DIN 4150-2:1999-06, or `"2023"`, E DIN 4150-2:2023-08, whose Table 1 has the night $A_u$ of a mixed area at 0,1. |
 
 **Returns:** The three values, as a [`GuideValues`](/phonometry/reference/api/vibration/people/#guidevalues).
 
@@ -347,12 +389,26 @@ The guide values of Table 1 for one area, time of day and kind of source.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For an unknown area, time of day or source. |
+| ValueError | For an unknown area, time of day, source or edition, or a source the edition does not have. |
+
+## GUIDE_VALUES_2023
+
+*Constant* (`dict`).
+
+```python
+GUIDE_VALUES_2023 = {'industrial': {'day': GuideValues(a_u=0.4, a_o=6.0, a_r=0.2, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.3, a_o=0.6, a_r=0.15, time_of_day='night', edition='2023')}, 'commercial': {'day': GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.2, a_o=0.4, a_r=0.1, time_of_day='night', edition='2023')}, 'mixed': {'day': GuideValues(a_u=0.2, a_o=5.0, a_r=0.1, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.1, a_o=0.3, a_r=0.07, time_of_day='night', edition='2023')}, 'residential': {'day': GuideValues(a_u=0.15, a_o=3.0, a_r=0.07, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.1, a_o=0.2, a_r=0.05, time_of_day='night', edition='2023')}, 'sensitive': {'day': GuideValues(a_u=0.1, a_o=3.0, a_r=0.05, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.1, a_o=0.15, a_r=0.05, time_of_day='night', edition='2023')}}
+```
 
 ## GuideValues
 
 ```python
-GuideValues(a_u: float, a_o: float, a_r: float)
+GuideValues(
+    a_u: float,
+    a_o: float,
+    a_r: float,
+    time_of_day: str = 'day',
+    edition: str = '1999',
+)
 ```
 
 One row of Table 1 or Table 2 for one period: the three guide values.
@@ -364,6 +420,43 @@ One row of Table 1 or Table 2 for one period: the three guide values.
 | `a_u` | $A_u$, the lower value, which $KB_{F\mathrm{max}}$ is compared with first. |
 | `a_o` | $A_o$, the upper value, above which the requirement is not met however short the exposure. |
 | `a_r` | $A_r$, the value the assessment vibration severity $KB_{FTr}$ is compared with. |
+| `time_of_day` | The period the row is for, `"day"` or `"night"`; Table 2 is daytime only. |
+| `edition` | The edition the values are read from, `"1999"` or `"2023"`, which is the edition [`assess_people_in_buildings`](/phonometry/reference/api/vibration/people/#assess_people_in_buildings) judges them under unless told otherwise. |
+
+## induced_seismic_kb_fmax
+
+```python
+induced_seismic_kb_fmax(peak_velocity_mm_s: float) -> float
+```
+
+The $KB_{F\mathrm{max}}$ of an induced seismic event, E DIN 4150-2:2023-08 6.5.1.3.
+
+$KB_{F\mathrm{max}} = 0{,}44 \, v_{\max}$, the simplified estimate
+the draft gives for an event of a few seconds with its energy below
+15 Hz, which is held by day and by night to the daytime $A_o$
+alone; $KB_{FTr}$ is not formed for it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `peak_velocity_mm_s` | $v_{\max}$, in millimetres per second. |
+
+**Returns:** $KB_{F\mathrm{max}}$.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For a negative velocity. |
+
+## INDUCED_SEISMIC_PEAK_FACTOR
+
+*Constant* (`float`).
+
+```python
+INDUCED_SEISMIC_PEAK_FACTOR = 0.44
+```
 
 ## kb_fmax_from_peak_velocity
 
@@ -640,6 +733,22 @@ RARE_EVENTS_PER_DAY = 3
 
 ```python
 REST_TIME_WEIGHT = 2.0
+```
+
+## ROAD_EXISTING_TOLERANCE_FACTOR
+
+*Constant* (`float`).
+
+```python
+ROAD_EXISTING_TOLERANCE_FACTOR = 1.5
+```
+
+## ROAD_NIGHT_INVESTIGATION_KB
+
+*Constant* (`float`).
+
+```python
+ROAD_NIGHT_INVESTIGATION_KB = 0.6
 ```
 
 ## URBAN_RAILWAY_FACTOR

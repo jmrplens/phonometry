@@ -5491,6 +5491,541 @@ dos ediciones con las mismas entradas y en el mismo orden.
   toma la raíz, y los tests lo fijan a los 0,82 y 0,22 del ejemplo 8.
 - **Estado:** sin comunicar.
 
+## E DIN 4150-2:2023-08, anexo B, ejemplo 9 (la noche valorada sobre 920 intervalos en vez de 960)
+
+- **Localización:** B.9.3.3, las dos fórmulas de la noche en la página impresa
+  44 (página 44 del PDF de la copia leída aquí, que imprime sus folios sin
+  desplazamiento), frente al 6.5.3.2 de la página impresa 19.
+- **Lo impreso:** $KB_{FTr,\mathrm{nachts}} = \sqrt{\tfrac{1}{920} \cdot (12 \cdot
+  (0{,}9 \cdot 0{,}24)^2 + 18 \cdot (1{,}0 \cdot 0{,}44)^2)} = 0{,}066$ para el
+  caso sin el proyecto y, con el mismo divisor, $0{,}096 > 0{,}07$ para el caso
+  planificado; las fórmulas del día de la misma página dividen por 1920.
+- **El problema:** el 6.5.3.2 fija $N_r$ de la fórmula (6) en 1920 intervalos
+  de día y 960 de noche, que es lo que son 8 h de intervalos de 30 s. Los dos
+  resultados de la noche reproducen 920 exactamente, 0,0663 y 0,0957, y con
+  960 son 0,0649 y 0,0937, que se imprimen 0,065 y 0,094. La prueba del 25 %
+  que sigue, $0{,}096 > 1{,}25 \cdot 0{,}066 = 0{,}082$, pasa a ser $0{,}094 >
+  1{,}25 \cdot 0{,}065 = 0{,}081$ y llega a la misma conclusión.
+- **Evidencia:** el divisor 920 en las dos fórmulas de la noche de la página
+  impresa 44 y la definición de $N_r$ en la página impresa 19. Verificado en la
+  página 44 del PDF (p. impresa 44) y en la página 19 del PDF (p. impresa 19)
+  de la E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la conclusión
+  del ejemplo se sostiene de las dos formas.
+- **Comportamiento de la biblioteca:**
+  [`train_assessment_severity`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/train_categories.py)
+  divide la noche por los 960 del 6.5.3.2, y las filas de conformidad del
+  ejemplo 9 comparan con 0,065 y 0,094 diciendo lo que da lo impreso.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, anexo B, figura B.2 b) (máximos por intervalo impresos en la figura que no dan el 0,39 que usa el ejemplo)
+
+- **Localización:** figura B.2 b) en la página impresa 33 (página 33 del PDF) y
+  el texto de B.4.3.3 en la página impresa 34.
+- **Lo impreso:** la figura rotula los diez intervalos del martillo B con
+  $KB_{FTi}$ = 0,3; 0,41; 0,47; 0,43; 0,47; 0,37; 0,31; 0,04; 0,3; 0,41, y el
+  texto pone el 0,04 a cero y encuentra «$KB_{FTmb}$ = 0,39».
+- **El problema:** el eficaz de esos diez valores con el 0,04 a cero es
+  $\sqrt{1{,}3759 / 10} = 0{,}371$, no 0,39. Los rótulos del martillo A de la
+  misma figura sí dan el 0,16 que usa el texto. La figura C.3 de la edición de
+  1999 no llevaba rótulos y el 0,39 se heredó de ella; el borrador añadió los
+  rótulos y no se ajustaron al número. Los ejemplos 4 y 5 usan 0,39 y sus
+  veredictos no cambian con 0,37: 0,150 y 0,188 en lugar de 0,154 y 0,195.
+- **Evidencia:** los diez rótulos de la página impresa 33 y, en la página
+  impresa 34, la frase «Somit ergibt sich aus Bild B.2.» con la línea
+  «$KB_{FTma}$ = 0,16 und $KB_{FTmb}$ = 0,39» debajo. Verificado en la página 33 del PDF (p. impresa 33) y en la
+  página 34 del PDF (p. impresa 34) de la E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna; los ejemplos 4
+  y 5 concluyen lo mismo con cualquiera de los dos valores.
+- **Comportamiento de la biblioteca:** las filas de conformidad de los
+  ejemplos 4 y 5 de la edición de 1999, cuyo texto y cuyos números repiten
+  los ejemplos 4 y 5 del borrador, toman como entradas el 0,16 y el 0,39 que
+  imprime el texto; nada se lee de la figura.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, anexo A, figura A.1 (una decisión dibujada con la respuesta al revés)
+
+- **Localización:** figura A.1 en la página impresa 28 (página 28 del PDF), el
+  rombo de la columna central bajo la línea de trazos, frente a la misma figura
+  de la DIN 4150-2:1999-06, figura B.1 en su página impresa 12.
+- **Lo impreso:** el rombo pregunta «KB-Werte > Stufe III?» y su salida «ja»
+  lleva a «Weiterer Betrieb ohne besondere Maßnahmen», su salida «nein» a
+  «Weiterer Betrieb nur mit besonderen Maßnahmen».
+- **El problema:** un valor por encima del escalón III es el caso que necesita
+  medidas especiales, que es como está dibujado el rombo de la derecha de la
+  misma figura, con la misma pregunta: «ja» hacia las medidas especiales. La
+  figura de 1999 imprime el rombo central como «KB-Werte < Stufe III?» con las
+  mismas salidas, que se lee bien; la figura redibujada dio la vuelta a la
+  comparación y conservó las salidas.
+- **Evidencia:** los tres rombos bajo la línea de trazos de la página impresa
+  28 del borrador y el rombo central de la página impresa 12 de la edición de
+  1999. Verificado en la página 28 del PDF (p. impresa 28) de la
+  E DIN 4150-2:2023-08 y en la página 12 del PDF (p. impresa 12) de la
+  DIN 4150-2:1999-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la figura es
+  un flujo de gestión y nada de la norma se calcula con ella.
+- **Comportamiento de la biblioteca:** ninguno; el flujo del anexo A no está
+  implementado.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, anexo B, B.9.3.1 (una ampliación valorada por el apartado de una línea nueva)
+
+- **Localización:** B.9.3.1 en la página impresa 42 (página 42 del PDF).
+- **Lo impreso:** «Die Beurteilung erfolgt nach 6.5.3.5.»
+- **El problema:** el 6.5.3.5 es la valoración de una línea de nueva
+  construcción. El ejemplo 9 es la ampliación de una línea existente con una
+  segunda vía, que es el 6.5.3.6, y el ejemplo aplica a continuación la regla
+  del 25 % del 6.5.3.6 a su Nullfall y su Planfall.
+- **Evidencia:** la frase de la página impresa 42, el título del 6.5.3.5 en la
+  página impresa 21 y el del 6.5.3.6 en la página impresa 21. Verificado en la
+  página 42 del PDF (p. impresa 42) y en la página 21 del PDF (p. impresa 21)
+  de la E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna; el ejemplo
+  aplica el apartado correcto.
+- **Comportamiento de la biblioteca:**
+  [`assess_railway_change`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/train_categories.py)
+  es el 6.5.3.6 y su docstring nombra el ejemplo 9 como su caso resuelto.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, 6.5.3.6 (requisitos cumplidos cuando se da una condición, y un ejemplo que las necesita todas)
+
+- **Localización:** 6.5.3.6 en la página impresa 22 (página 22 del PDF de la
+  copia leída aquí, que imprime sus folios sin desplazamiento), frente a
+  B.9.3.3 y B.9.4 en la página impresa 44.
+- **Lo impreso:** «Falls eine der folgenden Bedingungen für den
+  Prognoseplanfall vorliegt, gelten die Anforderungen dieses Dokuments als
+  eingehalten:», seguido de a) para $KB_{F\mathrm{max}}$ de día, b) para
+  $KB_{F\mathrm{max}}$ de noche y c) para $KB_{FTr}$, cada una cumplida bien
+  respetando su valor de referencia, bien con un aumento inferior al 25 %
+  frente al caso sin el proyecto.
+- **El problema:** leído tal como está impreso, basta una condición. El
+  ejemplo 9 tiene la b) cumplida, «Für den Prognosefall bleibt der
+  $KB_{F\mathrm{max}}$-Wert unverändert bei 0,66», un aumento nulo, y aun así
+  concluye en B.9.4 que hay que estudiar medidas correctoras porque
+  $KB_{FTr}$ de noche supera $A_r$ y crece más de un 25 %. Las tres letras
+  son tres valoraciones de dos magnitudes, y el ejemplo aplica todas las que
+  encajan en el caso; «eine der» dice lo contrario.
+- **Evidencia:** la frase y sus tres letras en la página impresa 22, y el
+  0,66 sin cambios con la conclusión en la página impresa 44. Verificado en la
+  página 22 del PDF (p. impresa 22) y en la página 44 del PDF (p. impresa 44)
+  de la E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna; el ejemplo
+  llega a la conclusión para la que está el apartado.
+- **Comportamiento de la biblioteca:**
+  [`assess_railway_change`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/train_categories.py)
+  exige todas las condiciones que se aplican, como hace el ejemplo, y su
+  docstring dice por qué.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, anexo B, B.8.3.4 (un resultado que sus propias entradas de cuatro decimales no dan)
+
+- **Localización:** la última fórmula de B.8.3.4 en la página impresa 39
+  (página 39 del PDF), frente a la tabla B.1 en la página impresa 38.
+- **Lo impreso:** $KB_{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
+  \cdot 0)^2 + 144 \cdot (1{,}0 \cdot 0)^2 + 80 \cdot (0{,}7 \cdot 0{,}406\,1)^2 +
+  80 \cdot (0{,}7 \cdot 0{,}567\,6)^2)} = 0{,}099\,8 > 0{,}07$.
+- **El problema:** con los 0,406 1 y 0,567 6 de cuatro decimales la fórmula
+  da 0,099 72, que se imprime 0,099 7; el 0,099 8 impreso es lo que dan los
+  0,406 y 0,568 de tres decimales de la tabla B.1, 0,099 76. Los propios
+  pasos de la tabla B.1 dan 0,099 72. Una unidad en el cuarto decimal, y el
+  veredicto, 0,07 superado, no depende de ella.
+- **Evidencia:** la fórmula y su resultado en la página impresa 39 y los
+  valores eficaces de la tabla B.1 en la página impresa 38. Verificado en la
+  página 39 del PDF (p. impresa 39) y en la página 38 del PDF (p. impresa 38)
+  de la E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:** la fila de conformidad del ejemplo 8
+  compara
+  [`train_assessment_severity`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/train_categories.py)
+  a partir de los 47 pasos con 0,099 7 a media unidad del cuarto decimal, y
+  dice lo que da lo impreso.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, anexo B, B.4.3.3 (el eficaz de los máximos por intervalo atribuido a la fórmula (2))
+
+- **Localización:** B.4.3.3 en la página impresa 34 (página 34 del PDF),
+  frente a 4.2.5 en la página impresa 12 y 6.4.2 en la página impresa 16.
+- **Lo impreso:** «Wegen der Annahme, dass Bild B.2 repräsentativ für die
+  gesamten Teileinwirkungszeiten $T_{ea}$ und $T_{eb}$ sei, gilt nach
+  Gleichung (2):», seguido de $KB_{FTma} = \sqrt{\tfrac{1}{10} \sum_{i=1}^{10}
+  KB^2_{FTia}}$ y lo mismo para el martillo B.
+- **El problema:** eso es la fórmula (1) de 4.2.5, el eficaz de los máximos
+  por intervalo sobre $N$ intervalos. La fórmula (2) de 6.4.2 es la
+  intensidad de valoración a partir de exposiciones parciales, que el
+  ejemplo aplica dos líneas después, y el borrador renumeró como (1) la
+  fórmula (3) de la edición de 1999, que citaba el ejemplo de 1999.
+- **Evidencia:** la frase en la página impresa 34, la fórmula (1) en la
+  página impresa 12 y la fórmula (2) en la página impresa 16. Verificado en
+  la página 34 del PDF (p. impresa 34), la página 12 del PDF (p. impresa 12)
+  y la página 16 del PDF (p. impresa 16) de la E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la
+  aritmética es la de la fórmula (1).
+- **Comportamiento de la biblioteca:** nada que tomar.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, anexo B, B.3.2 (una nota citada bajo el apartado del que se la sacó)
+
+- **Localización:** el último guion de B.3.2 en la página impresa 31 (página
+  31 del PDF), frente a la nota bajo 6.3 en la página impresa 15.
+- **Lo impreso:** «Es ist zu prüfen, ob das $A_r$-Kriterium hier nicht zu
+  berücksichtigen ist (siehe Anmerkung zu 6.2).»
+- **El problema:** la nota sobre el criterio $A_r$, las 4 h de día y 2 h de
+  noche por encima de las cuales una vibración estacionaria hace que no
+  merezca la pena formar $KB_{FTr}$, está impresa bajo 6.3 en el borrador;
+  6.2 son los valores de referencia. En la edición de 1999 la misma nota
+  estaba bajo 6.2, el procedimiento, y la referencia cruzada del ejemplo no
+  se movió con ella.
+- **Evidencia:** el guion en la página impresa 31, la nota bajo 6.3 en la
+  página impresa 15 y el encabezado de 6.2 en la página impresa 14.
+  Verificado en la página 31 del PDF (p. impresa 31), la página 15 del PDF
+  (p. impresa 15) y la página 14 del PDF (p. impresa 14) de la
+  E DIN 4150-2:2023-08, y la nota bajo 6.2 en la página 6 del PDF
+  (p. impresa 6) de la DIN 4150-2:1999-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:** nada que tomar.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 4150-2:2023-08, 6.3 (un suceso raro cumplido por debajo del valor superior en la prosa y en él en el diagrama)
+
+- **Localización:** el cuarto guion de 6.3 en la página impresa 15 (página
+  15 del PDF), frente a 6.5.1.1 en la página impresa 17 y la figura 2 en la
+  página impresa 15.
+- **Lo impreso:** «Für selten auftretende, kurzzeitige Einwirkungen ist die
+  Anforderung dieses Dokuments eingehalten, wenn $KB_{F\mathrm{max}}$ kleiner
+  als $A_o$ ist (siehe 6.5.1)»; 6.5.1.1 dice «wenn die maximale bewertete
+  Schwingstärke $KB_{F\mathrm{max}}$ kleiner oder gleich dem (oberen)
+  Anhaltswert $A_o$ nach Tabelle 1 ist», y el rombo de la figura 2 pregunta
+  «$KB_{F\mathrm{max}} \le A_o$?».
+- **El problema:** un suceso raro cuyo $KB_{F\mathrm{max}}$ es igual a $A_o$
+  cumple según el apartado y la figura y no según el guion que remite a
+  ellos.
+- **Evidencia:** el guion y el rombo en la página impresa 15 y la frase de
+  6.5.1.1 en la página impresa 17. Verificado en la página 15 del PDF
+  (p. impresa 15) y en la página 17 del PDF (p. impresa 17) de la
+  E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:**
+  [`assess_people_in_buildings`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/people.py)
+  lee la frontera como el apartado y el diagrama, igual o por debajo.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 45672-3:2023-02, anexo C, C.3 (dos intensidades de valoración que ponderan por el factor una vez donde la fórmula (11) lo eleva al cuadrado)
+
+- **Localización:** C.3 en la página impresa 34 (página 34 del PDF de la copia
+  leída aquí, que imprime sus folios sin desplazamiento) y en la página impresa
+  35, frente a la fórmula (11) de la página impresa 23 y al anexo E de la
+  página impresa 37.
+- **Lo impreso:** con 200 pasos de día y 20 de noche, el factor $\alpha$ = 0,7
+  de un tranvía en superficie y $KB_{FTm,Zug}$ = 0,4, la fórmula (11) da
+  «$KB_{FTr,Zug,Tag}$ = 0,11» y «$KB_{FTr,Zug,Nacht}$ = 0,05», y C.4 encuentra el
+  día superado, «0,11 > $A_{r,Tag}$ = 0,1».
+- **El problema:** la fórmula (11) con esas entradas y $N_r$ = 1920 de día y
+  960 de noche es $0{,}7 \cdot 0{,}4 \cdot \sqrt{200/1920} = 0{,}090$ y $0{,}7
+  \cdot 0{,}4 \cdot \sqrt{20/960} = 0{,}040$. Los valores impresos son lo que
+  dan esas mismas entradas con $\alpha$ bajo la raíz una vez en lugar de al
+  cuadrado, $0{,}4 \sqrt{0{,}7 \cdot 200/1920} = 0{,}108$ y
+  $0{,}4 \sqrt{0{,}7 \cdot 20/960} = 0{,}048$: el ejemplo pondera por el factor
+  la energía de la categoría donde la fórmula (11) pondera su amplitud. Con
+  el 0,090 de la fórmula el veredicto de C.4 sobre el día se invierte: 0,09
+  está por debajo del $A_r$ de 0,1 y el requisito se cumple.
+- **Evidencia:** las entradas de la página impresa 34, los dos resultados al
+  principio de la página impresa 35 y la valoración debajo de ellos, la
+  fórmula y su $N_r$ en la página impresa 23 y los factores en la página
+  impresa 37. Verificado en la página 34 del PDF
+  (p. impresa 34), la página 35 del PDF (p. impresa 35), la página 23 del PDF
+  (p. impresa 23) y la página 37 del PDF (p. impresa 37) de la
+  E DIN 45672-3:2023-02.
+- **Consecuencia para las tablas de la propia norma:** la conclusión del
+  ejemplo para el día, que hay que planificar medidas correctoras, no se sigue
+  de sus números.
+- **Comportamiento de la biblioteca:**
+  [`train_assessment_severity`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/train_categories.py)
+  eleva el factor al cuadrado como imprime la fórmula (11), y las filas de
+  conformidad de C.3 comparan con el 0,090 y el 0,040 que da para las
+  entradas impresas, diciendo que lo impreso pone 0,11 y 0,05.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 45672-3:2023-02, anexo C, tabla C.1 (un nivel suma formado sin la ponderación que prescribe el apartado 7.1)
+
+- **Localización:** tabla C.1 y resultados de C.3 en la página impresa 34
+  (página 34 del PDF), frente a las fórmulas (8) y (9) de las páginas impresas
+  21 y 22.
+- **Lo impreso:** la tabla cierra con la fila
+  «Schwinggeschwindigkeitssummenpegel der betrachteten Zugkategorie
+  ($L_{v,Zug}$):» y 78,1 dB en su última columna, y C.3 lo lleva a la
+  fórmula (9),
+  $KB_{FTm,Zug} = c_{T1} v_0 10^{L/20} = 0{,}4$, luego 0,6 por la fórmula (10) y
+  «$v_{\max}$ = 1,81 mm/s» por la fórmula (12).
+- **El problema:** el apartado 7.1 a) suma primero a cada banda la ponderación
+  KB de la tabla 2 (fórmula (8)) y suma las bandas de 4 Hz a 80 Hz. La suma
+  energética de los 19 $L_v$ impresos sin ponderación alguna es 78,08 dB, que
+  es el 78,1 impreso; la suma ponderada de 4 Hz a 80 Hz es 77,7 dB, y la cadena
+  desde ella es 0,385, 0,577 y 1,73 mm/s. El 1,81 mm/s impreso es $3 \cdot
+  1{,}5 \cdot 5 \cdot 10^{-5} \cdot 10^{78{,}1/20} = 1{,}808$, así que el ejemplo
+  arrastró la suma sin ponderar.
+- **Evidencia:** la suma y los tres resultados de la página impresa 34 y las
+  fórmulas de las páginas impresas 21 y 22. Verificado en la página 34 del PDF
+  (p. impresa 34), la página 21 del PDF (p. impresa 21) y la página 22 del PDF
+  (p. impresa 22) de la E DIN 45672-3:2023-02.
+- **Consecuencia para las tablas de la propia norma:** los resultados de C.3
+  están un 4 % altos frente al procedimiento de la propia norma; los veredictos
+  de C.4 son los mismos de las dos formas, 0,6 redondea ambos.
+- **Comportamiento de la biblioteca:**
+  [`predict_train_category`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
+  pondera las bandas como dice el 7.1 a) antes de sumarlas; las filas de
+  conformidad fijan la cadena impresa desde 78,1 dB y el test fija la
+  ponderada.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 45672-3:2023-02, anexo C, C.2 y tabla C.1 (una transmisión al forjado que no sale de ninguna tabla del anexo A, y una figura citada con el número equivocado)
+
+- **Localización:** C.2 en la página impresa 33 (página 33 del PDF) y la
+  columna $\Delta L_{v,DF}$ de la tabla C.1 en la página impresa 34, frente a la
+  tabla A.5 de la página impresa 27 y la figura 4 de la página impresa 15.
+- **Lo impreso:** C.2 dice que la transmisión de la cimentación al forjado del
+  ejemplo es «die Übertragungen vom Fundament zur Geschossdecke mit einer
+  Deckeneigenfrequenz von 20 Hz aus Bild 3», y la tabla C.1 imprime la columna
+  1,9; 2,3; 3,1; 3,5; 5,0; 6,9; 11,5; 17,3; 10,0; 5,4; 1,9; 1,5; −0,8; −2,3;
+  −3,8; −5,4; −6,5; −8,1; −9,6 dB de 4 Hz a 250 Hz.
+- **El problema:** la figura 3 es la transmisión del terreno a una cimentación
+  a nivel del suelo; la transmisión de la cimentación al forjado de un forjado
+  de hormigón es la figura 4 y la tabla A.5. Leída en los cocientes de las
+  bandas a 20 Hz, la media de la tabla A.5 da 1,60; 2,06; 2,52; 3,26; 4,19;
+  6,35; 9,94; 17,26; 9,85; 4,41; 3,27; 3,25; 1,42; 3,89; 2,83 dB hasta 100 Hz y
+  nada por encima de un cociente de 5. Solo coincide el pico; ni la media ni
+  ninguna de las dos desviaciones de la tabla A.5, ni la columna de 20 Hz de la
+  tabla A.1, dan la columna impresa, y la tabla no tiene valores para las cuatro
+  últimas bandas que la columna rellena.
+- **Evidencia:** la frase de la página impresa 33, la columna de la página
+  impresa 34 y la tabla A.5 en las páginas impresas 27 y 28. Verificado en la
+  página 33 del PDF (p. impresa 33), la página 34 del PDF (p. impresa 34), la
+  página 27 del PDF (p. impresa 27) y la página 28 del PDF (p. impresa 28) de
+  la E DIN 45672-3:2023-02.
+- **Consecuencia para las tablas de la propia norma:** el ejemplo no puede
+  reproducirse a partir de las tablas de la propia norma; su columna de
+  transmisión es una entrada.
+- **Comportamiento de la biblioteca:** las filas de conformidad de la tabla
+  C.1 toman la columna impresa como entrada de la fórmula (1) y fijan la suma;
+  [`foundation_to_floor_transfer_db`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
+  lee la tabla A.5 tal como está impresa.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 45672-3:2023-02, anexo A, tabla A.6 (una desviación hacia abajo impresa por encima de la media de la que se desvía)
+
+- **Localización:** tabla A.6 en la página impresa 28 (página 28 del PDF), y
+  figura 5 en la página impresa 16.
+- **Lo impreso:** en los cocientes 0,20, 3,10, 4,00 y 5,00 la columna
+  «Standardabweichung nach unten (E–u)» pone 2,37; 5,26; 5,42 y 7,63 dB frente
+  a un «Mittelwert (E–m)» de 2,19; 3,55; 3,24 y 3,01 dB, y en 5,00 la
+  «Standardabweichung nach oben (E–o)» es 5,40 dB, por debajo de la de abajo.
+- **El problema:** una desviación hacia abajo respecto de una media no puede
+  estar por encima de ella, y la desviación hacia arriba no puede estar por
+  debajo de la de abajo. La figura 5 dibuja el mismo cruce, con su curva 1
+  acabando por encima de las curvas 2 y 3, así que la figura se hizo con los
+  mismos datos; si se intercambiaron dos columnas en la cola o la estadística
+  está mal no se puede saber por la página. La tabla A.5, el forjado de
+  hormigón, guarda el orden en todas sus filas.
+- **Evidencia:** las cuatro filas de la página impresa 28 y la cola de las
+  curvas de la página impresa 16. Verificado en la página 28 del PDF
+  (p. impresa 28) y en la página 16 del PDF (p. impresa 16) de la
+  E DIN 45672-3:2023-02.
+- **Consecuencia para las tablas de la propia norma:** quien tome la desviación
+  hacia abajo como el lado seguro de la transmisión de un forjado de madera
+  está por encima de la media en esos cocientes.
+- **Comportamiento de la biblioteca:**
+  [`FOUNDATION_TO_FLOOR_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
+  lleva la tabla tal como está impresa, su docstring dice dónde falla el orden,
+  y no se impone orden alguno entre los tres estadísticos.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 45672-3:2023-02, figuras 5, 6 y 7 (leyendas que nombran la tabla equivocada y la magnitud equivocada)
+
+- **Localización:** la leyenda de la figura 5 en la página impresa 16 (página
+  16 del PDF) y las leyendas de eje de las figuras 6 y 7 en las páginas
+  impresas 17 y 18.
+- **Lo impreso:** la figura 5, la transmisión de la cimentación al forjado de
+  los forjados de madera, rotula sus curvas 1, 2 y 3 «Übertragung Fundament →
+  Erdgeschoss und Obergeschosse bei Holzbalkendecken» con «(D–u)», «(D–m)» y
+  «(D–o)»; las figuras 6 y 7, la transmisión del terreno al forjado, rotulan su eje
+  vertical «Pegeldifferenz $\Delta L_{v,DF}(f_{Tn})$ in dB».
+- **El problema:** la tabla que dibuja la figura 5, la A.6, llama a sus
+  columnas E–u, E–m y E–o; D–u, D–m y D–o son las columnas de la tabla A.5, el
+  forjado de hormigón de la figura 4. Y las figuras 6 y 7 dibujan
+  $\Delta L_{v,DB}$, la diferencia del terreno al forjado de las tablas A.1 y
+  A.2, como dicen sus pies; $\Delta L_{v,DF}$ es la diferencia de la
+  cimentación al forjado de las figuras 4 y 5.
+- **Evidencia:** las leyendas de las páginas impresas 16, 17 y 18 y las
+  cabeceras de columna de las páginas impresas 28, 24 y 25. Verificado en la
+  página 16 del PDF (p. impresa 16), la página 17 del PDF (p. impresa 17), la
+  página 18 del PDF (p. impresa 18), la página 24 del PDF (p. impresa 24), la
+  página 25 del PDF (p. impresa 25) y la página 28 del PDF (p. impresa 28) de
+  la E DIN 45672-3:2023-02.
+- **Consecuencia para las tablas de la propia norma:** ninguna; los pies y las
+  tablas están bien.
+- **Comportamiento de la biblioteca:** nada que adoptar; lo implementado son
+  las tablas.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 45672-3:2023-02, 5.4.4 (un anexo llamado normativo donde está impreso informativo)
+
+- **Localización:** 5.4.4 en la página impresa 16 (página 16 del PDF de la
+  copia leída aquí, que imprime sus folios sin desplazamiento), frente al
+  encabezado del anexo A en la página impresa 24.
+- **Lo impreso:** «Im normativen Anhang A sind die Werte in Tabellenform für
+  alle relevanten Deckeneigenfrequenzen zusammengefasst.»; el anexo se
+  encabeza «Anhang A (informativ)».
+- **El problema:** las seis tablas de las que se hace la predicción son
+  parte de los requisitos o una información, y las dos páginas dicen una
+  cosa cada una.
+- **Evidencia:** la frase en la página impresa 16 y el encabezado en la
+  página impresa 24. Verificado en la página 16 del PDF (p. impresa 16) y en
+  la página 24 del PDF (p. impresa 24) de la E DIN 45672-3:2023-02.
+- **Consecuencia para las tablas de la propia norma:** ninguna para sus
+  valores.
+- **Comportamiento de la biblioteca:** las tablas están implementadas tal
+  como están impresas, sea cual sea su estatus.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## E DIN 45672-3:2023-02, fórmula (11) (la suma de valoración impresa sin la regla que anula una categoría silenciosa)
+
+- **Localización:** la fórmula (11) y sus símbolos en la página impresa 23
+  (página 23 del PDF), frente a la fórmula (6) de la E DIN 4150-2:2023-08 en
+  sus páginas impresas 19 y 20.
+- **Lo impreso:** «$KB_{FTr} = \sqrt{\sum_{Zug=1}^{N_Z} \tfrac{n_{Zug}}{N_r}
+  (\alpha_{Zug} \cdot KB_{FTm,Zug})^2}$», introducida por «Berechnung der
+  Beurteilungs-Schwingstärke ($KB_{FTr}$) für den jeweiligen
+  Beurteilungszeitraum entsprechend DIN 4150-2», con $N_r$, $N_Z$,
+  $n_{Zug}$, $KB_{FTm,Zug}$ y $\alpha_{Zug}$ «nach informativem Anhang E»
+  listados debajo y nada más.
+- **El problema:** la suma, sus símbolos y los factores del anexo E son la
+  fórmula (6) y la tabla 2 del borrador de la DIN 4150-2, que imprime bajo
+  su fórmula que una categoría cuyo $KB_{FTm,Zug}$ es igual o inferior a 0,1
+  entra como cero. La frase no se reproduce, así que una categoría predicha
+  igual o inferior a 0,1 cuenta aquí y no en la valoración que la fórmula
+  dice realizar.
+- **Evidencia:** la fórmula y su lista de símbolos en la página impresa 23,
+  y la frase bajo la fórmula (6) en la página impresa 20 del otro borrador.
+  Verificado en la página 23 del PDF (p. impresa 23) de la
+  E DIN 45672-3:2023-02 y en la página 20 del PDF (p. impresa 20) de la
+  E DIN 4150-2:2023-08.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la
+  categoría del anexo C está en 0,4.
+- **Comportamiento de la biblioteca:** la cadena de
+  [`predict_train_category`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/railway_prediction.py)
+  acaba en
+  [`train_assessment_severity`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/train_categories.py),
+  que aplica la regla de la valoración que representa.
+- **Estado:** sin comunicar; el documento es un borrador en consulta.
+
+## DIN 4150-1:2001-06, fórmulas (5) y (6) (una distancia cuya unidad está impresa en milímetros)
+
+- **Localización:** las listas de símbolos de la fórmula (5) en la página
+  impresa 9 (página 9 del PDF de la copia leída aquí, que imprime sus folios
+  sin desplazamiento) y de la fórmula (6) en la página impresa 10.
+- **Lo impreso:** «$R$ die Entfernung von der Sprengstelle, in mm;» bajo la
+  fórmula (5) y «$R$ die Entfernung von der Fallstelle, in mm;» bajo la fórmula
+  (6), cada una con «$R_0$ = 1 m (Bezugsgröße)» en la línea siguiente.
+- **El problema:** la distancia entra en las dos fórmulas solo como el
+  cociente $R/R_0$ frente a una referencia de 1 m, la fórmula (2) de la página
+  impresa 5 define $R$ «in m», y todos los ejes de distancia del anexo A están
+  en metros. Una distancia en milímetros frente a una referencia en metros
+  pondría el cociente mil veces demasiado alto.
+- **Evidencia:** las dos listas de símbolos de las páginas impresas 9 y 10 y
+  la definición de $R$ bajo la fórmula (2) en la página impresa 5. Verificado
+  en la página 9 del PDF (p. impresa 9), la página 10 del PDF (p. impresa 10)
+  y la página 5 del PDF (p. impresa 5) de la DIN 4150-1:2001-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la norma no
+  imprime valores de $k$, $b$ ni $m$ con los que calcular nada.
+- **Comportamiento de la biblioteca:**
+  [`blast_peak_velocity_mm_s`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/prediction.py)
+  e `impact_peak_velocity_mm_s` toman la distancia en metros frente a la
+  referencia de 1 m, y sus docstrings dicen que lo impreso pone milímetros.
+- **Estado:** sin comunicar.
+
+## DIN 4150-1:2001-06, apartado 5.2.3 (una frecuencia de trabajo baja escrita como alta)
+
+- **Localización:** la primera frase de la página impresa 11 (página 11 del
+  PDF), tercer párrafo del apartado 5.2.3.
+- **Lo impreso:** «Vibrationsbäre mit tiefer Arbeitsfrequenz ($f$ > 30 Hz)
+  können …».
+- **El problema:** una frecuencia de trabajo baja no puede ser una por encima
+  de 30 Hz, y el párrafo anterior, en la página impresa 10, acaba de decir que
+  los vibradores con frecuencias de trabajo altas, $f$ > 35 Hz, son los
+  favorables. El signo está al revés; la lectura pretendida es una frecuencia
+  por debajo de 30 Hz.
+- **Evidencia:** la frase de la página impresa 11 y el «$f$ > 35 Hz» del 5.2.3
+  en la página impresa 10. Verificado en la página 11 del PDF (p. impresa 11) y
+  en la página 10 del PDF (p. impresa 10) de la DIN 4150-1:2001-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:** nada que adoptar; el apartado es texto.
+- **Estado:** sin comunicar.
+
+## DIN 4150-1:2001-06, anexo A, figura A.2 (una leyenda que intercambia dos estilos de línea)
+
+- **Localización:** figura A.2 en la página impresa 18 (página 18 del PDF).
+- **Lo impreso:** la leyenda dice «—— Ausgleichsgerade Z-Komponente» y «–·–
+  Ausgleichsgerade X-Komponente», con ▽ para las medidas Z y ○ para las X.
+- **El problema:** en el dibujo la línea de trazo y punto es la más empinada
+  de las tres y pasa por las marcas ▽, que son los valores Z que la figura A.1
+  imprime en la página impresa 17, de 6,90 mm/s a 270 m a 0,12 mm/s a 1470 m;
+  la línea continua es la más tendida y pasa por las marcas ○ de la componente
+  X. La línea de trazos y las marcas □ de la componente Y concuerdan con su
+  leyenda. Los dos estilos están intercambiados entre la leyenda y el dibujo.
+- **Evidencia:** las líneas y las marcas de la página impresa 18 frente a los
+  picos Z de la página impresa 17. Verificado en la página 18 del PDF
+  (p. impresa 18) y en la página 17 del PDF (p. impresa 17) de la
+  DIN 4150-1:2001-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la figura es
+  una ilustración y el anexo A dice que sus números no son base para una
+  previsión.
+- **Comportamiento de la biblioteca:** nada que adoptar.
+- **Estado:** sin comunicar.
+
+## DIN 4150-1:2001-06, anexo A, A.5.1 (un momento excéntrico con la unidad de una fuerza)
+
+- **Localización:** la línea «Vorgang» de A.5.1 en la página impresa 25
+  (página 25 del PDF).
+- **Lo impreso:** «Vibrator (Exzentermoment 320 N, Frequenz $f$ = 32 Hz)».
+- **El problema:** un momento excéntrico es una masa a un radio, en kg·m o
+  N·m, que es como A.5.2 imprime en la página impresa 27 su «statisches Moment
+  5 kg · m»; un newton es una fuerza. Lo que se quiso decir, 320 N·m o
+  32 kg·m, no se puede saber por la página.
+- **Evidencia:** la línea de la página impresa 25 y el momento de A.5.2 en la
+  página impresa 27. Verificado en la página 25 del PDF (p. impresa 25) y en la
+  página 27 del PDF (p. impresa 27) de la DIN 4150-1:2001-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:** nada que adoptar; el caso es una
+  ilustración.
+- **Estado:** sin comunicar.
+
+## DIN 4150-1:2001-06, anexo A, figura A.18 (un punto rotulado todos los grupos en el recuento de una nave)
+
+- **Localización:** la figura A.18 y su leyenda en la página impresa 33
+  (página 33 del PDF de la copia leída aquí, que imprime sus folios sin
+  desplazamiento), frente a la figura A.16 y A.8.1 en la página impresa 32.
+- **Lo impreso:** el sexto punto medido está dibujado en unas 110 máquinas y
+  su leyenda dice «6) alle Gruppen»; A.8.1 dice «Betrieb bis 252 Maschinen
+  in zwei Maschinensälen», y la tabla de la figura A.16 cuenta 63, 7, 8, 6,
+  57, 1, 23, 31, 12, 32, 4, 3 y 5 máquinas en los grupos A a Ge, que son
+  252.
+- **El problema:** todos los grupos son 252 máquinas, y 110 es lo que suman
+  los grupos E, F y G de la nave derecha, la más cercana al punto de medida
+  (23, 31 y 56). El punto anterior, «Gruppen F und G», está en 87, que es lo
+  que suman esos dos, así que la abscisa es el recuento de los grupos en
+  marcha; el rótulo del sexto punto no lo es.
+- **Evidencia:** el punto y su leyenda en la página impresa 33, la frase de
+  A.8.1 y la tabla en la página impresa 32. Verificado en la página 33 del
+  PDF (p. impresa 33) y en la página 32 del PDF (p. impresa 32) de la
+  DIN 4150-1:2001-06.
+- **Consecuencia para las tablas de la propia norma:** ninguna; el texto
+  bajo la figura dice que los valores medidos se quedan quietos por encima
+  de unas 60 máquinas porque los grupos que se conectan después están más
+  lejos, que es lo que la figura muestra de cualquier modo.
+- **Comportamiento de la biblioteca:** nada que tomar; las filas de
+  conformidad de la figura A.18 leen la curva dibujada, no los puntos
+  medidos.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

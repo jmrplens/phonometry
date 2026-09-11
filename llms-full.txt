@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1055 numerical conformance checks against 412 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1108 numerical conformance checks against 415 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1055 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 80 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1108 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 83 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -240,6 +240,9 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/)
 - [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/)
 - [Vibration and people in buildings (DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/)
+- [Railway vibration by category of train (E DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/)
+- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/)
+- [Predicting vibration before measuring (DIN 4150-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/)
 
 ## Environment and transport
 
@@ -610,10 +613,13 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [vibration/multiple-shock](https://jmrplens.github.io/phonometry/reference/api/vibration/multiple-shock/)
 - [vibration/people](https://jmrplens.github.io/phonometry/reference/api/vibration/people/)
 - [vibration/point-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/point-mobility/)
+- [vibration/prediction](https://jmrplens.github.io/phonometry/reference/api/vibration/prediction/)
 - [vibration/radiation-efficiency](https://jmrplens.github.io/phonometry/reference/api/vibration/radiation-efficiency/)
 - [vibration/railway](https://jmrplens.github.io/phonometry/reference/api/vibration/railway/)
+- [vibration/railway-prediction](https://jmrplens.github.io/phonometry/reference/api/vibration/railway-prediction/)
 - [vibration/seat-vibration](https://jmrplens.github.io/phonometry/reference/api/vibration/seat-vibration/)
 - [vibration/signal-burst](https://jmrplens.github.io/phonometry/reference/api/vibration/signal-burst/)
+- [vibration/train-categories](https://jmrplens.github.io/phonometry/reference/api/vibration/train-categories/)
 - [vibration/transfer-stiffness](https://jmrplens.github.io/phonometry/reference/api/vibration/transfer-stiffness/)
 - [vibration/vibration-meter](https://jmrplens.github.io/phonometry/reference/api/vibration/vibration-meter/)
 
@@ -41188,6 +41194,20 @@ documents, one page per module.
 | `kb_from_peak_velocity` / `kb_fmax_from_peak_velocity` / `PEAK_TO_KB_FACTORS` | `function` / `constant` | **Clause 7: an estimate of `KB_Fmax` from an unweighted record, Formulae (6) and (7) with Table 3.**<br>• `peak_velocity_mm_s` [mm/s], `frequency_hz` [Hz], keyword-only `kind` (the row of Table 3, `'harmonic'` to `'single_event'`)<br>• `KB = v_max / (√2 √(1 + (5,6 Hz / f)²))`, times `c_F` | `vibration.kb_fmax_from_peak_velocity(4.0, 14.0, kind='single_event_resonant')  # 2.10` |
 | `ASSESSMENT_PERIOD_S` / `ASSESSMENT_TAKT_COUNT` / `DAY_REST_TIME_S` / `REST_TIME_WEIGHT` / `KB_UNCERTAINTY_PERCENT` | `constant` | **The times and the weights of DIN 4150-2.**<br>• 16 h by day and 8 h by night (3.7.3), 1920 and 960 clock intervals (Annex A)<br>• 4 h of rest hours in the day (3.7.4), the weight 2 of Formula (5), the 15 % of 5.4 | `vibration.ASSESSMENT_TAKT_COUNT['night']  # 960` |
 | `RARE_EVENTS_PER_DAY` / `BLASTING_EXCEPTION_KB_FMAX` / `CONSTRUCTION_BLASTING_A_O` / `URBAN_RAILWAY_FACTOR` / `RAILWAY_NIGHT_INVESTIGATION_KB` | `constant` | **The source-specific numbers of 6.5.**<br>• up to 3 short events a day are judged on `A_o` alone; quarry blasting under the conditions of 6.5.1 may reach 8 a few times a year; a site's blasting is held to `A_o` = 8<br>• 1,5 on `A_u` and `A_r` for an urban surface railway; by night a clock maximum above 0,6 on a surface line or 0,3 underground is a reason to look into the cause (6.5.3.5) | `vibration.URBAN_RAILWAY_FACTOR  # 1.5` |
+| `GUIDE_VALUES_2023` / `ROAD_EXISTING_TOLERANCE_FACTOR` / `ROAD_NIGHT_INVESTIGATION_KB` / `INDUCED_SEISMIC_PEAK_FACTOR` / `BLASTING_MAX_PER_WEEK` / `induced_seismic_kb_fmax` | `constant` / `function` | **What E DIN 4150-2:2023-08 changes: Table 1 with the night `A_u` of a mixed area at 0,1, and two sources of its own.**<br>• `guide_values(..., edition='2023')` reads the draft, and its `GuideValues` carry the edition and the period, which `assess_people_in_buildings` follows: no shortcut inside the 15 % above `A_u`, a railway compared with `A_o` and a road by night not, with a clock maximum above 0,6 as a reason to look into the cause (6.5.2), `source='road_existing'` with `A_u` and `A_r` tolerated 1,5 times over (6.5.2), `source='induced_seismic'` held by night to the daytime `A_o` (6.5.1.3)<br>• `induced_seismic_kb_fmax(peak_velocity_mm_s)` = 0,44 `v_max`; at most 15 blasts a week where successive ones count as one | `vibration.guide_values('mixed', time_of_day='night', edition='2023').a_u  # 0.1` |
+| `train_category_rms` / `train_kb_fmax` / `railway_kb_fmax` | `function` | **E DIN 4150-2:2023-08 6.5.3.2, Formulae (5), (7) and (8): a railway by category of train.**<br>• `train_category_rms(kb_fti_zug)`: the r.m.s. of one clock maximum per passage, nothing zeroed below 0,1<br>• `train_kb_fmax(kb_ftm_zug)`: 1,5 times the r.m.s. of each category; `railway_kb_fmax` the largest of them, the `KB_Fmax` of the line | `vibration.train_category_rms([0.379, 0.369, 0.348])  # 0.366` |
+| `train_assessment_severity` / `train_weighting_factor` / `TRAIN_WEIGHTING_FACTORS` / `TRAIN_KINDS` / `TRAIN_KB_FMAX_FACTOR` | `function` / `constant` | **Formula (6) and Table 2 of the draft, and Formula (11) and Table E.1 of E DIN 45672-3:2023-02.**<br>• `train_assessment_severity(kb_ftm_zug, trains, *, alpha, time_of_day)`: each category weighted by its trains out of the 1920 or 960 intervals and by `alpha`; a category at or below 0,1 counts as zero<br>• `train_weighting_factor(kind, *, alignment)`: 0,7 for a tram on the surface to 1,3 for a freight train over 600 m | `vibration.train_assessment_severity([0.24, 0.44], [28, 8], alpha=[0.9, 1.0])  # 0.039` |
+| `railway_guide_values` / `RAILWAY_NEW_LINE_NIGHT_A_O` / `assess_railway_change` / `RailwayChange` / `RAILWAY_CHANGE_TOLERANCE_PERCENT` | `function` / `constant` / `dataclass` | **6.5.3.5 and 6.5.3.6 of the draft: a line to be built new, and one to be altered.**<br>• `railway_guide_values(area, *, time_of_day, alignment)`: Table 1 with the night `A_o` of a new line, 0,6 on the surface, 0,3 underground outside an industrial or commercial area<br>• `assess_railway_change(*, kb_fmax_before, kb_fmax_after, kb_ftr_before, kb_ftr_after, guide, time_of_day)`: met where the planned case keeps to `A_u`, or to `A_o` and `A_r`, or exceeds those by an increase under 25 %, every condition that applies holding, as the draft's Example 9 does; `.complies`, `.kb_fmax_met`, `.kb_ftr_met`, `.kb_ftr_increase_percent` | `vibration.railway_guide_values('mixed', time_of_day='night').a_o  # 0.6` |
+| `predict_floor_spectrum` / `predict_train_category` / `TrainCategoryPrediction` | `function` / `dataclass` | **E DIN 45672-3:2023-02 Formula (1) and the chain of Clause 7: the spectrum a floor will feel, and the KB values from it.**<br>• `predict_floor_spectrum(emission_db, *, ground_db, foundation_db, floor_db, mitigation_db)`: every term added, band by band, so a mitigation goes in negative<br>• `predict_train_category(emission_db, *, frequencies_hz, ...)` runs (1), the Table 2 weighting (8), the sum (9), 1,5 times it (10) and 3 times that (12): `.floor_db`, `.weighted_db`, `.sum_level_db`, `.kb_ftm`, `.kb_fmax`, `.peak_velocity_mm_s`, `.plot()` | `vibration.predict_train_category(emission, ground_db=bb, floor_db=df).kb_ftm` |
+| `kb_weighted_levels_db` / `takt_maximum_kb` / `peak_velocity_from_kb_mm_s` / `velocity_spectrum_um_s` / `KB_WEIGHTING_TABLE_DB` / `KB_ASSESSMENT_BANDS_HZ` / `TAKT_MAXIMUM_FACTOR` / `PEAK_VELOCITY_FACTOR` | `function` / `constant` | **Clause 7 of E DIN 45672-3 piece by piece.**<br>• Table 2, the KB weighting rounded to a tenth of a decibel from 4 Hz to 80 Hz, added by `kb_weighted_levels_db(levels_db, frequencies_hz)`<br>• `takt_maximum_kb(weighted_levels_db)` = `c_T1 v_0 10^(L/20)` with `c_T1` = 1 and `v_0` = 5·10⁻⁵ mm/s (Formula (9)); `peak_velocity_from_kb_mm_s(kb_fmax_zug)` = 3 times it (Formula (12)); `velocity_spectrum_um_s(levels_db)` in micrometres per second (Formula (13)) | `vibration.takt_maximum_kb([78.1])  # 0.4018` |
+| `rescale_emission_for_speed` / `ground_transmission_db` / `ground_attenuation_coefficient_per_m` / `SPEED_RESCALING_LIMIT` / `GEOMETRIC_DECAY_EXPONENT_RANGE` | `function` / `constant` | **Clauses 5.2 and 5.3 of E DIN 45672-3: the emission at another speed and the way through the ground.**<br>• `rescale_emission_for_speed(levels_db, *, speed_from_km_h, speed_to_km_h)`: 20 lg of the ratio, for a change of up to 30 % (Formula (3))<br>• `ground_transmission_db(frequencies_hz, *, distance_m, reference_distance_m, exponent, damping_ratio, shear_wave_speed_m_s)`: spreading with `n`, usually 0,2 to 0,4 on the surface, and damping with `alpha_R` = 2π f D / c_s (Formulae (4) to (6)) | `vibration.ground_transmission_db([8.0], distance_m=20.0, reference_distance_m=10.0, exponent=0.3)  # -1.81` |
+| `ground_to_floor_transfer_db` / `ground_to_foundation_transfer_db` / `foundation_to_floor_transfer_db` / `GROUND_TO_FLOOR_DB` / `GROUND_TO_FOUNDATION_DB` / `FOUNDATION_TO_FLOOR_DB` / `FOUNDATION_TO_FLOOR_RATIOS` / `FLOOR_NATURAL_FREQUENCIES_HZ` / `PREDICTION_BAND_CENTRES_HZ` | `function` / `constant` | **Annex A of E DIN 45672-3: the six tables of level differences into and inside a building.**<br>• ground to floor (Tables A.1 and A.2) for a concrete or timber floor by its natural frequency, one column per frequency, for every storey<br>• ground to foundation (Tables A.3 and A.4) for a basement or a ground floor, as `'mean'`, `'lower'` or `'upper'`<br>• foundation to floor (Tables A.5 and A.6) against the ratio of the band to the natural frequency, interpolated in decibels over the logarithm of the ratio, `nan` where the print has none | `vibration.ground_to_floor_transfer_db('concrete', floor_natural_frequency_hz=8.0)[3]  # 15.0` |
+| `point_to_line_transition_distance_m` / `line_source_correction_db` / `train_decay_exponent` / `train_velocity_ratio` / `LINE_SOURCE_EXPONENT_CORRECTION` / `RECOMMENDED_DISTANCES_M` | `function` / `constant` | **Annex B and Table 1 of E DIN 45672-3: a train is a line of point sources, and how far a prediction should reach.**<br>• `R_0` = `L² / lambda` (Formula (B.1)); `20 n_Korr lg(r / r_0)` with `n_Korr` 0,3 or 0,5 by how the point decay was fitted (Formula (B.2)); the exponent of a train and the piecewise decay of Figure B.1<br>• the distances of Table 1: 25 m from a surface tram to 200 m from freight on soft ground | `vibration.train_decay_exponent(1.0)  # 0.7` |
+| `far_field_velocity_mm_s` / `geometric_exponent` / `reference_distance_m` / `attenuation_coefficient_per_m` / `material_damping_factor` / `SOURCE_EXPONENTS` / `TRAIN_CHAIN_EXPONENT_RANGE` / `LOOSE_GROUND_DAMPING_RATIO` | `function` / `constant` | **DIN 4150-1:2001-06 Clause 4.2: how far vibration carries through the ground.**<br>• `far_field_velocity_mm_s(reference_velocity_mm_s, distance_m, *, reference_distance_m, exponent, attenuation_per_m)`: Formula (2), spreading with the exponent of Figure 1 and damping with `alpha` = 2π D / lambda, beyond `R_1` = `a/2 + lambda_R` (Formula (1))<br>• `geometric_exponent(*, geometry, character, wave)`: 0, 0,5, 1 or 1,5; a train decays with 0,3 to 0,5; loose ground has a damping ratio of 0,01 at most in a first estimate | `vibration.far_field_velocity_mm_s(0.44, [80.0], reference_distance_m=13.0, exponent=1.0, attenuation_per_m=0.005)  # 0.051` |
+| `soil_building_natural_frequency_hz` / `soil_building_frequency_guide_hz` / `foundation_transfer_max` / `floor_transfer_max` / `storey_frequency_hz` / `LOOSE_GROUND_SYSTEM_DAMPING` / `FOUNDATION_TRANSFER_ABOVE_RESONANCE` / `FLOOR_DAMPING_RATIO_RANGE` / `MEDIUM_SOIL_SHEAR_WAVE_SPEED_M_S` / `STOREY_FORMULA_MIN_STOREYS` | `function` / `constant` | **DIN 4150-1 Clause 4.3: the building on its ground.**<br>• Formula (3), the natural frequency of the building as a mass on the spring of the ground, about 15 Hz for one or two storeys, 8 Hz to 12 Hz for two to six and under 8 above six on medium ground (`c_s` 150 to 200 m/s), two storeys taking the union of the two ranges it is printed in<br>• the most a foundation passes at resonance, `1 / (2 D_0)` = 2 for loose ground, and 0,5 above it; the most a floor amplifies, `1 / (2 D_1)` = 10 to 25 for concrete; `10 / n` Hz for the lowest horizontal mode of `n` ≥ 5 storeys (Formula (4)) | `vibration.floor_transfer_max(0.02)  # 25.0` |
+| `blast_peak_velocity_mm_s` / `impact_peak_velocity_mm_s` / `fall_energy_kj` / `BLASTING_RELEVANT_DISTANCE_M` | `function` / `constant` | **DIN 4150-1 Clause 5.1: single events in the far field.**<br>• `blast_peak_velocity_mm_s(charge_kg, distance_m, *, coefficient_mm_s, charge_exponent, distance_exponent)`: `k (L/L_0)^b (R/R_0)^-m` with constants from trial blasts (Formula (5))<br>• `impact_peak_velocity_mm_s(fall_energy_kj, distance_m, *, coefficient_mm_s, distance_exponent)`: the same with the root of the fall energy `G h` (Formula (6)); quarry blasting is rarely relevant beyond 1500 m, construction blasting beyond 400 m | `vibration.fall_energy_kj(25506.0, drop_height_m=70.0)  # 1.79e6` |
+| `track_excitation_frequency_hz` / `RAIL_SUPPORT_SPACING_M` / `VEHICLE_NATURAL_FREQUENCIES_HZ` / `TRACK_TRANSMITTED_BANDS_HZ` / `RAIL_INFLUENCE_RANGE_M` / `MACHINE_FREQUENCY_BANDS_HZ` | `function` / `constant` | **DIN 4150-1 Clauses 5.3 and 5.4: what a track and a machine excite at.**<br>• `f_A` = `v_Z / d` and its multiples for sleepers 0,6 m to 0,9 m apart; the car body at 1 Hz to 3 Hz and the bogie at 6 Hz to 10 Hz whatever the speed; ballast passes 40 Hz to 80 Hz, a mass-spring system 5 Hz to 20 Hz; rail vibration reaches 80 m<br>• counter-blow hammers 4 Hz to 8 Hz, forging presses 5 Hz to 15 Hz sideways, frame saws 4 Hz to 8 Hz | `vibration.track_excitation_frequency_hz(20.0, spacing_m=0.6)  # [33.3]` |
+| `machine_hall_velocity_mm_s` / `machine_count_correction` / `MACHINE_COUNT_CORRECTION` / `MACHINE_COUNT_AXIS` | `function` / `constant` | **DIN 4150-1 Clause 5.4.2, Formula (7) and Figure 3: a hall of similar machines.**<br>• `machine_hall_velocity_mm_s(reference_velocity_mm_s, machine_count, *, reference_count)`: `chi v_B sqrt(N)`, measured with `N_B` of them running<br>• `chi` is printed only as a nomogram, for `N_B` of 3, 5, 10, 30, 60 or 100 from 4 to 100 machines, and is here as the curves read off the page at a five-hundredth | `vibration.machine_hall_velocity_mm_s(0.44, [60.0], reference_count=3)  # 1.0` |
 | `evaluate_train_passage` / `TrainPassage` | `function` / `dataclass` | **One train passage reduced the way DIN 45672-2 reduces it (Clauses 5 to 7).**<br>• `velocity_mm_s` [mm/s] as the transducer gives it, `fs_hz` [Hz], an integer<br>• keyword-only: `t2_s` (the passage, read off the record), `t1_s` (Default: 4 s centred on the peak, never longer than `T₂`), `t3_s` (Default: the whole record), `upper_band_hz` (Default: 315; down to 80)<br>• `.intervals_s`, `.interval_rms_mm_s`, `.peak_velocity_mm_s`, `.running_rms_max_mm_s`, `.kbf_max`, `.event_velocity_mm_s`, `.event_level_db`, `.band_centres_hz`, `.band_interval_levels_db` (one row per stretch), `.band_max_levels_db`, `.plot()`, `.plot_spectrum()`<br>• the record goes through the railway band limitation of DIN 45669-1 before anything is read | `p = vibration.evaluate_train_passage(v, 2048, t2_s=(6.75, 23.25))`<br><br>• `p.event_velocity_mm_s`, `p.band_max_levels_db` |
 | `running_velocity_rms` / `running_velocity_level` / `running_acceleration_level` | `function` | **Formulae (1) to (3): the running r.m.s. with τ = 125 ms, and its levels.**<br>• levels re `v₀ = 5·10⁻⁸ m/s` and `a₀ = 10⁻⁶ m/s²`<br>• started from rest: the mean square is 14 % short after 2τ and 2 % after 4τ, the r.m.s. about half that | `vibration.running_velocity_level(v, 2048)[-1]` |
 | `interval_rms` / `centred_interval` | `function` | **Formulae (4) and (5), and the stretch `T₁` of Clause 5 a).**<br>• `interval_rms(values, fs_hz, interval_s=(start, end))`: handed the velocity it is Formula (4), handed the running r.m.s. it is Formula (5)<br>• `centred_interval(v, fs_hz, duration_s=4)`: the largest amplitude in the middle, moved rather than cut where the record ends | `vibration.interval_rms(v, 2048, interval_s=(8.0, 20.0))` |
@@ -55561,7 +55581,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1055 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1108 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -56244,7 +56264,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1055 numerical conformance checks across 80 domains and 412 standards, covering
+1108 numerical conformance checks across 83 domains and 415 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -61144,6 +61164,15 @@ method of reducing what was measured, so that the vibration of one train can be
 compared with the next, one point on the way to the building with another, and
 the track before a mitigation measure with the track after it.
 
+And before any of it is measured, two documents say what to expect.
+DIN 4150-1 gives every prediction its shape, the decay with distance, the
+building's amplification and the sources, with the few constants experience
+has fixed; the draft of DIN 45672-3 builds a railway's spectrum on a floor
+term by term from an emission spectrum and six tables of building transfer.
+The draft of DIN 4150-2 that is to replace the 1999 edition is here too,
+with a railway assessed by category of train and the rest of its changes
+behind an edition switch.
+
 ## Pages in this section
 
 - [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
@@ -61164,6 +61193,20 @@ the track before a mitigation measure with the track after it.
   (5) with the rest-time weight, the rules of 6.5 for blasting, roads,
   railways and construction sites with Table 2, the railway classes of Annex A
   and the estimate of Clause 7 from a peak velocity (DIN 4150-2:1999-06).
+- [Railway vibration by category of train (E DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/):
+  the draft's Formulae (5) to (8) and Table 2, the night-time upper value of
+  a new line, the 25 % rule of an altered one, and its changes to Table 1,
+  the procedure and the sources (E DIN 4150-2:2023-08).
+- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+  Formula (1) with the emission, ground, foundation, floor and mitigation
+  terms, the ground transmission of Formulae (4) to (6), the six tables of
+  Annex A, and the KB values of Clause 7 from the spectrum
+  (E DIN 45672-3:2023-02).
+- [Predicting vibration before measuring (DIN 4150-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/):
+  the far field of Formula (1), the decay of Formula (2) with the exponents
+  of Figure 1, the building of Formulae (3) and (4), the blast, the falling
+  mass and the machine hall of Formulae (5) to (7) with the nomogram of
+  Figure 3 (DIN 4150-1:2001-06).
 
 ## See also
 
@@ -61196,6 +61239,12 @@ page; where they do not reach, neither does the library.
 on the way from the track to the building, the directions, the trains to
 record and the report to write. Only its Clause 4.5, the ground constants, is
 arithmetic, and only that is here.
+
+**No work plan for a prediction.** Clause 6 of the draft of DIN 45672-3, the
+phases from the site visit to the choice of a measure, and the measured
+cases of Annex A of DIN 4150-1, which the standard says are not a basis for
+a prediction, are described and not computed; the constants of a blast or
+an impact are the user's.
 
 ---
 
@@ -61242,7 +61291,7 @@ Figure 2 draws as a flowchart:
 from phonometry import vibration
 
 guide = vibration.guide_values("commercial")
-print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15)
+print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', edition='1999')
 
 # Annex C, Example 1: a sawmill's stationary 5 Hz vibration at KB_Fmax = 0.25.
 verdict = vibration.assess_people_in_buildings(0.25, guide)
@@ -61385,7 +61434,7 @@ for days in (1, 3, 6, 7, 30):
 # 30 working days: A_u 0.30, A_r 0.20
 
 urban = vibration.guide_values("residential", time_of_day="night", source="urban_railway")
-print(urban)  # GuideValues(a_u=0.15, a_o=0.2, a_r=0.075)
+print(urban)  # GuideValues(a_u=0.15, a_o=0.2, a_r=0.075, time_of_day='night', edition='1999')
 ```
 
 ## 4. A railway, class by class
@@ -61486,6 +61535,27 @@ uses `KB²_FTm,j` for the mean square, and Example 8 applies (A.1b) with the
 root. The library takes the root, the tests hold it to the example, and the
 [errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the reading.
 
+## 7. The draft of 2023
+
+E DIN 4150-2:2023-08 is to replace this edition, and the library reads it
+with `edition="2023"` on `guide_values` and `assess_people_in_buildings`.
+It changes one cell of Table 1, the night `A_u` of a mixed area down to 0,1;
+no longer excuses a `KB_Fmax` within the 15 % above `A_u`; compares a
+railway with `A_o` and forms its numbers by category of train, with a
+weighting factor per kind of train, and a road by night not; and adds an
+existing road whose neighbours must put up with 50 % more, and an induced
+seismic event held to the daytime `A_o`. The guide values carry the edition
+they were read for and the verdict follows it. The railway and the rest of
+the changes have
+[their own page](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/).
+
+```python
+from phonometry import vibration
+
+print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
+# GuideValues(a_u=0.1, a_o=0.3, a_r=0.07, time_of_day='night', edition='2023')
+```
+
 ## What this guide covers
 
 The **guide values** of Table 1 by area, time of day and kind of source, the
@@ -61538,6 +61608,657 @@ of DIN 45669-1, whose page forms them from a record.
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
   The meter whose KB_Fmax and clock maxima this standard judges, and the 5.6 Hz
   corner frequency Formula (6) carries.
+
+---
+
+
+<!-- source: docs/vibration/immission/railway-categories.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/ -->
+Source: https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/
+
+# Railway vibration by category of train (E DIN 4150-2)
+
+The [1999 edition of DIN 4150-2](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/)
+treats a railway as a set of classes of train, each occupying the clock
+intervals its trains ran through, and lifts the guide values by 1,5 for an
+urban line. The draft that is to replace it, published for comment in
+August 2023, rewrites that part from the ground up and touches little else:
+one cell of Table 1, one worked example, two new sources, and the days two
+to six of a construction site printed instead of read off a curve. This
+page is the railway; the rest of the draft is the last section, and the
+library reads either edition with one argument.
+
+## 1. One interval per passage, and a KB_Fmax that is not a maximum
+
+The draft's first decision is that every train passage counts as one clock
+interval, however long it lasts (6.5.3.2). So the clock maximum r.m.s. of a
+**category** of train, a kind of vehicle on a track in a direction, is the
+r.m.s. of one clock maximum per passage over the passages measured (Formula
+(5)), and, unlike the 1999 edition's (A.1) and the meter's own Formula (1),
+nothing below 0,1 is set to zero on the way, because the next number is
+built on it: the `KB_Fmax` of the category is not the largest clock maximum
+anyone observed but **1,5 times** its r.m.s. (Formula (7)), since a single
+passage with a flat spot on a wheel says nothing about the line. The
+`KB_Fmax` of the railway is the largest over the categories (Formula (8)).
+
+Example 8 of Annex B measures 2,5 h in a new residential building next to a
+tram and a metro: 14 metro passages each way underground and 9 and 10 tram
+passages each way on the surface.
+
+```python
+from phonometry import vibration
+
+# Annex B, Table B.1: the clock maximum of every passage, by category.
+metro_north = [0.017, 0.036, 0.024, 0.035, 0.025, 0.036, 0.035, 0.037, 0.041, 0.042,
+               0.068, 0.040, 0.022, 0.025]
+metro_south = [0.076, 0.034, 0.025, 0.054, 0.033, 0.018, 0.033, 0.060, 0.019, 0.092,
+               0.030, 0.019, 0.024, 0.058]
+tram_east = [0.379, 0.369, 0.348, 0.288, 0.270, 0.549, 0.320, 0.290, 0.663]
+tram_west = [0.649, 0.717, 0.658, 0.508, 0.423, 0.332, 0.735, 0.363, 0.441, 0.663]
+
+kb_ftm = [vibration.train_category_rms(c) for c in (metro_north, metro_south, tram_east, tram_west)]
+print([round(v, 3) for v in kb_ftm])  # [0.037, 0.047, 0.406, 0.568]
+print(vibration.train_kb_fmax(kb_ftm).round(3))  # [0.055 0.07  0.609 0.851]
+print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
+```
+
+## 2. A weighting factor for the kind of train
+
+The assessment vibration severity of a railway is Formula (6): each
+category weighted by the number of its trains in the period, out of the
+1920 clock intervals of the day or the 960 of the night, and by a
+**weighting factor** `α_Zug` of Table 2 for the kind of train and whether
+the line runs on the surface or underground. A tram, light rail or metro on
+the surface is 0,7, an S-Bahn 0,8, another passenger train 0,9, a freight
+train up to 600 m 1,0, and a freight train over 600 m 1,3 wherever it runs;
+underground everything but the long freight train is 1,0. A category whose
+r.m.s. is at or below 0,1 enters the sum as zero, which is where the
+suppression the passages were spared is applied. The rest hours of the day
+are not applied to a railway, as they were not in 1999.
+
+```python
+from phonometry import vibration
+
+print(vibration.train_weighting_factor("freight_long"))  # 1.3
+print(vibration.train_weighting_factor("s_bahn", alignment="underground"))  # 1.0
+
+# Example 8: 144 metros a track a day at 1,0, whose r.m.s. is below 0,1 and
+# counts as zero, and 80 trams a track at 0,7.
+kb_ftm = [0.03654, 0.04676, 0.40606, 0.56758]
+day = vibration.train_assessment_severity(kb_ftm, [144, 144, 80, 80], alpha=[1.0, 1.0, 0.7, 0.7])
+print(f"KB_FTr = {day:.4f}")  # 0.0997, printed 0,099 8
+
+guide = vibration.guide_values("residential", edition="2023")
+verdict = vibration.assess_people_in_buildings(
+    vibration.railway_kb_fmax(kb_ftm), guide, kb_ftr=day, source="railway", edition="2023"
+)
+print(verdict.complies, verdict.criterion)  # False A_r
+```
+
+Under the draft a railway is compared with `A_o` like any other source,
+which the 1999 edition did not do; the trams of Example 8 exceed the night
+`A_o` of 0,2 of a new residential building and the requirement is not met
+by night before `KB_FTr` is even formed.
+
+```python
+from phonometry import vibration
+
+night = vibration.guide_values("residential", time_of_day="night", edition="2023")
+verdict = vibration.assess_people_in_buildings(0.851, night, source="railway", edition="2023")
+print(verdict.complies, verdict.criterion)  # False A_o
+```
+
+## 3. A new line, and an old one made bigger
+
+A line to be built new is held at night to an upper value of its own
+(6.5.3.5): 0,6 on the surface whatever the area, and underground the
+Table 1 value in an industrial or commercial area and 0,3 elsewhere. By day
+Table 1 applies as it stands.
+
+```python
+from phonometry import vibration
+
+print(vibration.railway_guide_values("mixed", time_of_day="night"))
+# GuideValues(a_u=0.1, a_o=0.6, a_r=0.07, time_of_day='night', edition='2023')
+print(vibration.railway_guide_values("residential", time_of_day="night", alignment="underground"))
+# GuideValues(a_u=0.1, a_o=0.3, a_r=0.05, time_of_day='night', edition='2023')
+```
+
+An existing line that is altered or extended is judged by the **change** it
+brings (6.5.3.6). The case without the project, with the present or the
+forecast timetable, is set against the planned case; the planned case is
+first held to the guide values like any immission, a `KB_Fmax` at or below
+`A_u` settling it on its own, and where `KB_Fmax` exceeds `A_o` or `KB_FTr`
+exceeds `A_r` the requirement still counts as met if the quantity grows by
+less than 25 %, the least increase a laboratory study found people to
+notice. The clause says the requirements are met if one of its conditions
+holds; its own Example 9, whose `KB_Fmax` does not change at all, goes to
+mitigation because `KB_FTr` grows by more, so every condition that applies
+has to hold, and the library reads it that way. Example 9 adds a second
+track to a single-track line
+past a house in a mixed area: 28 regional and 8 freight trains a day become
+34 and 12, and a third of the freight trains grow past 600 m.
+
+```python
+from phonometry import vibration
+
+# Annex B, Example 9. Existing track: regional 0,24, freight 0,44; new track:
+# 0,22 and 0,40; the long freight trains at 1,3.
+nullfall_day = vibration.train_assessment_severity([0.24, 0.44], [28, 8], alpha=[0.9, 1.0])
+nullfall_night = vibration.train_assessment_severity(
+    [0.24, 0.44], [12, 18], alpha=[0.9, 1.0], time_of_day="night"
+)
+kb_ftm = [0.24, 0.22, 0.44, 0.40, 0.44, 0.40]
+alpha = [0.9, 0.9, 1.0, 1.0, 1.3, 1.3]
+planfall_day = vibration.train_assessment_severity(kb_ftm, [17, 17, 4, 4, 2, 2], alpha=alpha)
+planfall_night = vibration.train_assessment_severity(
+    kb_ftm, [7, 7, 12, 12, 6, 6], alpha=alpha, time_of_day="night"
+)
+print(f"{nullfall_day:.3f} {nullfall_night:.3f} {planfall_day:.3f} {planfall_night:.3f}")
+# 0.039 0.065 0.046 0.094
+
+change = vibration.assess_railway_change(
+    kb_fmax_before=0.66,
+    kb_fmax_after=0.66,
+    kb_ftr_before=nullfall_night,
+    kb_ftr_after=planfall_night,
+    guide=vibration.railway_guide_values("mixed", time_of_day="night"),
+    time_of_day="night",
+)
+print(change.complies, change.kb_fmax_met, change.kb_ftr_met)  # False True False
+print(f"{change.kb_ftr_increase_percent:.0f} %")  # 44 %
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_change_example_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_change_example.svg" alt="A bar chart of the assessment vibration severity by day and by night, on an axis from 0 to 0.13. In each group a green bar is the case without the project and a blue bar the case with the second track: 0.039 and 0.046 by day, 0.065 and 0.094 by night. A red line marks A r, 0.1 by day and 0.07 by night, and a grey dashed line 25 percent above the green bar, at 0.048 by day and 0.081 by night. By day both bars stay under both lines; by night the blue bar rises above the 25 percent line and above A r, and a note says mitigation" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+before = [
+    vibration.train_assessment_severity([0.24, 0.44], [28, 8], alpha=[0.9, 1.0]),
+    vibration.train_assessment_severity([0.24, 0.44], [12, 18], alpha=[0.9, 1.0], time_of_day="night"),
+]
+kb_ftm = [0.24, 0.22, 0.44, 0.40, 0.44, 0.40]
+alpha = [0.9, 0.9, 1.0, 1.0, 1.3, 1.3]
+after = [
+    vibration.train_assessment_severity(kb_ftm, [17, 17, 4, 4, 2, 2], alpha=alpha),
+    vibration.train_assessment_severity(kb_ftm, [7, 7, 12, 12, 6, 6], alpha=alpha, time_of_day="night"),
+]
+x = np.arange(2)
+fig, ax = plt.subplots(figsize=(10, 6.2))
+ax.bar(x - 0.19, before, 0.38, label="without the project")
+ax.bar(x + 0.19, after, 0.38, label="with the second track")
+for i, which in enumerate(("day", "night")):
+    a_r = vibration.railway_guide_values("mixed", time_of_day=which).a_r
+    ax.hlines(a_r, x[i] - 0.45, x[i] + 0.45, color="red")
+    ax.hlines(before[i] * 1.25, x[i] - 0.45, x[i] + 0.45, color="grey", linestyle="--")
+ax.set_xticks(x, ["by day", "by night"])
+ax.legend()
+```
+
+</details>
+
+The night of Example 9 is printed over 920 clock intervals, which gives the
+0,066 and 0,096 on the page; 6.5.3.2 fixes the night at 960, which gives
+0,065 and 0,094, and the conclusion is the same. The
+[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has it, with the one condition
+of 6.5.3.6, a result of Example 8 that its own four-decimal inputs do not
+give, a decision in the construction flowchart drawn the wrong way round,
+ten clock maxima printed on Figure B.2 that do not give the 0,39 the text
+uses, an example that cites the clause for a new line while applying the one
+for an extension, two cross-references that name the wrong formula and the
+wrong clause, and a rare event met below `A_o` in one sentence and at it in
+the next clause and the flowchart.
+
+## 4. What else the draft changes
+
+The guide values carry the edition and the period they were read for, so
+the verdict knows which rules to apply without being told, and asking for
+the values of one edition under the rules of the other is refused.
+Everything below is what `edition="2023"` reads differently from the
+[1999 edition](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/); the
+numbers not named here are the same in both.
+
+- **Table 1** changes one cell: the night `A_u` of a mixed area, now with
+  urban areas in the row, goes from 0,15 to 0,1.
+- **The 15 %** a measurement of `KB_F` is uncertain by no longer excuses a
+  `KB_Fmax` above `A_u`. The 1999 Example 3 read 0,17 against 0,15 as met on
+  that ground; the draft's Example 3 reads 0,114 against 0,10, goes on to
+  `KB_FTr`, finds 0,075 against an `A_r` of 0,07, and fails it.
+- **A road by night** is not judged on `A_o`: 6.5.2 says a rare exceedance
+  of the night-time upper value does not fail the requirement, and puts a
+  single clock maximum above 0,6, in any area, down as a reason to look into
+  the cause and put it right, which is what the 1999 edition said of a
+  railway. **An existing road** by an existing building: the neighbours must
+  put up with `A_u` and `A_r` exceeded by up to 50 %, by day and by night
+  (6.5.2), which `source="road_existing"` gives as guide values 1,5 times
+  over.
+- **An induced seismic event**, a few seconds with its energy below 15 Hz,
+  years after the intervention that causes it (6.5.1.3): `KB_Fmax` is about
+  0,44 times the peak velocity, and it is held by day and by night to the
+  daytime `A_o`, with no `KB_FTr`.
+- **A construction site**: the draft's Table 3 prints the days two to six
+  that the 1999 Figure 3 made one read off a curve, cell for cell what the
+  interpolation gives, and says that `D` counts only the days on which
+  Table 1 is exceeded.
+- The **urban railway** of 1999, with its factor 1,5 on `A_u` and `A_r`, is
+  gone; its place is the factor 0,7 of Table 2 on the r.m.s.
+
+```python
+from phonometry import vibration
+
+print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
+# GuideValues(a_u=0.1, a_o=0.3, a_r=0.07, time_of_day='night', edition='2023')
+
+# The draft's Example 3: inside the 15 % and no longer excused by it.
+guide = vibration.guide_values("mixed", time_of_day="night", edition="2023")
+verdict = vibration.assess_people_in_buildings(0.114, guide, kb_ftr=0.075, edition="2023")
+print(verdict.complies, verdict.criterion)  # False A_r
+
+print(vibration.guide_values("residential", source="road_existing", edition="2023"))
+# GuideValues(a_u=0.225, a_o=3.0, a_r=0.105, time_of_day='day', edition='2023')
+print(vibration.induced_seismic_kb_fmax(5.0))  # 2.2
+print(vibration.guide_values("residential", time_of_day="night", source="induced_seismic", edition="2023"))
+# GuideValues(a_u=0.1, a_o=3.0, a_r=0.05, time_of_day='night', edition='2023')
+```
+
+## What this guide covers
+
+**The railway of 6.5.3**: the r.m.s. of a category of train over its
+passages (Formula (5)), 1,5 times it and the largest of those (Formulae (7)
+and (8)), the assessment vibration severity with the factors of Table 2
+(Formula (6)), the night-time upper value of a new line (6.5.3.5) and the
+25 % rule of an altered one (6.5.3.6).
+
+**The rest of the draft** behind `edition="2023"`: the one cell of Table 1,
+the procedure without the 15 % shortcut, a railway compared with `A_o`, the
+existing road of 6.5.2 and the induced seismic event of 6.5.1.3, and Table 3
+as printed.
+
+**No decision the draft leaves open.** An existing line that is not being
+altered (6.5.3.4) has no numeric rule and none is invented; the concession
+of 6.5.3.7 to a new building, an `A_o` of 0,6 for a category with rare
+passages, is a judgement and stays one.
+
+**No measurement and no monitoring.** Clause 5, the substitute measuring
+points and transfer functions of a long-term monitoring included, and
+Clause 8, the report, are text.
+
+## See also
+
+- [Vibration and people in buildings (DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/):
+  the 1999 edition, the procedure and the guide values both editions share.
+- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+  where the r.m.s. of a category comes from when there is nothing to
+  measure yet.
+- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+  the clock maxima the categories are formed from.
+- API reference:
+  [`vibration.immission.train_categories`](https://jmrplens.github.io/phonometry/reference/api/vibration/train-categories/)
+  and [`vibration.immission.people`](https://jmrplens.github.io/phonometry/reference/api/vibration/people/).
+## References
+
+- Deutsches Institut für Normung. (2023). *Erschütterungen im Bauwesen —
+  Teil 2: Einwirkungen auf Menschen in Gebäuden* (E DIN 4150-2:2023-08). A
+  draft, intended to replace DIN 4150-2:1999-06. Table 1 with its one changed
+  cell, Formulae (5) to (8) and Table 2 of 6.5.3, the night-time upper value
+  of 6.5.3.5, the 25 % rule of 6.5.3.6, the existing-road tolerance of 6.5.2,
+  the induced seismic event of 6.5.1.3, and Table 3 as printed. Annex B,
+  Examples 8 and 9, is the oracle of the conformance rows; Examples 1, 2
+  and 4 to 7 are those of the 1999 edition, and Example 3 is reworked
+  without the 15 % argument.
+- Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen —
+  Teil 2: Einwirkungen auf Menschen in Gebäuden* (DIN 4150-2:1999-06). The
+  edition in force, which the library reads by default.
+
+---
+
+
+<!-- source: docs/vibration/immission/railway-prediction.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/ -->
+Source: https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/
+
+# Predicting railway vibration (E DIN 45672-3)
+
+[DIN 45672-1](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/) measures
+next to a line and Part 2 reduces what was measured. Part 3, which has only
+ever existed as the draft of February 2023, answers the question that comes
+before both: a line is planned, or a building next to one, and someone has to
+say how much the floors will move before there is anything to measure. The
+answer is a third-octave velocity spectrum on a floor, built by adding what
+is known about the source, the ground and the building, and from it the two
+numbers [DIN 4150-2](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/)
+judges.
+
+## 1. A spectrum is a sum of what is known
+
+Formula (1) is the whole method in one line. The level in each band on the
+floor is the emission of the line at some known point, plus what the ground
+does between that point and the building, plus what the foundation does on
+the way in, plus what the floor does on top, plus whatever mitigation takes
+away:
+
+```text
+L_v(f) = L_v,E(f) + ΔL_v,BB(f) + ΔL_v,FB(f) + ΔL_v,DF(f) + D_e(f)
+```
+
+Every term is added as printed, so a mitigation goes in with a minus sign.
+The example of Annex C predicts a tram at 50 km/h for a building 7 m from
+the track, on a concrete floor with a natural frequency of 20 Hz; its
+emission spectrum was already taken at a foundation, so the foundation term
+is zero.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+# Annex C, Table C.1: the emission at the foundation, the ground for the
+# difference in distance, and the floor at 20 Hz, 4 Hz to 250 Hz.
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+
+on_floor = vibration.predict_floor_spectrum(emission, ground_db=ground, floor_db=floor)
+print(np.round(on_floor[:4], 1))  # [28.8 30.2 41.  58.6]
+print(f"{vibration.band_sum_level(on_floor):.1f} dB")  # 78.1 dB
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_prediction_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_prediction_chain.svg" alt="Three third-octave spectra from 4 to 250 hertz on a velocity level axis from 15 to 85 decibels. A dashed green line with squares is the emission at the foundation, flat around 55 decibels from 8 to 80 hertz. A solid blue line with circles is the predicted level on the floor, which rises above the emission to a peak of 75.6 decibels at 20 hertz, the floor's resonance, and falls below it above 100 hertz. A dotted red line with triangles is the KB-weighted spectrum, only from 4 to 80 hertz, a few decibels under the floor line at the lowest bands. A box gives KB F T m 0.38, KB F max 0.58 and v max 1.73 millimetres per second" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+ax = prediction.plot()
+```
+
+</details>
+
+## 2. Where each term comes from
+
+**The emission** (Clause 5.2) is a Max Hold spectrum of the kind of train,
+measured under traffic at a known distance, from 4 Hz to 250 Hz. A spectrum
+taken at one speed is carried to another of the same kind of train by
+20 lg of the ratio (Formula (3)), for a change of up to 30 %; beyond that the
+frequencies bound to a length, the sleeper passing first, move with the
+speed while the resonances do not, and the shift is refused.
+
+```python
+from phonometry import vibration
+
+shifted = vibration.rescale_emission_for_speed([50.0], speed_from_km_h=50.0, speed_to_km_h=60.0)
+print(f"{shifted[0]:.2f} dB")  # 51.58 dB
+```
+
+**The ground** (Clause 5.3) is geometric spreading times material damping.
+The ratio of the velocity at the building to that at the reference distance
+is `(r / r₀)^-n · exp(-α_R (r - r₀))` (Formula (5)) with `α_R = 2π f D / c_s`,
+the damping ratio of the ground over the wavelength, or a power law alone
+with an exponent measured per band (Formula (6)); the level difference is
+20 lg of it (Formula (4)). On the surface the exponent is usually 0,2 to 0,4.
+
+```python
+from phonometry import vibration
+
+delta = vibration.ground_transmission_db(
+    [8.0, 31.5, 125.0],
+    distance_m=25.0,
+    reference_distance_m=8.0,
+    exponent=0.3,
+    damping_ratio=0.03,
+    shear_wave_speed_m_s=200.0,
+)
+print(delta.round(1))  # [ -4.1  -7.4 -20.4]
+```
+
+**The building** (Clause 5.4, Annex A) is six tables from extensive building
+measurements, which are the standard's real content. Ground to foundation
+for a basement or a ground floor (Tables A.3 and A.4), as a mean with the
+deviation either way; foundation to floor for concrete or timber floors
+against the ratio of the band to the natural frequency of the floor (Tables
+A.5 and A.6); and, for those who would rather not split it, ground straight
+to the floor by that natural frequency (Tables A.1 and A.2), for every
+storey. The prediction is run once for each natural frequency the building
+may have, and never with the envelope over all of them, which the standard
+says overestimates considerably.
+
+```python
+from phonometry import vibration
+
+print(vibration.ground_to_foundation_transfer_db("basement")[:5])  # [-4.  -3.5 -3.6 -4.2 -4.2]
+print(vibration.foundation_to_floor_transfer_db(
+    [8.0, 16.0, 20.0, 40.0], floor="concrete", floor_natural_frequency_hz=20.0
+))  # [ 3.26  9.94 17.26  3.27]
+print(vibration.ground_to_floor_transfer_db("timber", floor_natural_frequency_hz=16.0)[4:8])
+# [ 6.03 10.07 16.    8.51]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_transfer_spectra_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_transfer_spectra.svg" alt="Two panels of level difference from the ground to a floor against frequency from 4 to 250 hertz, on an axis from minus 8 to 24 decibels. Left, concrete floors from Table A.1: three curves for natural frequencies of 8, 16 and 63 hertz, each a sharp peak at its own frequency, 15 decibels for 8 and 16 hertz and 9.5 for 63; the first two fall to minus 5 decibels well above their peak and the 63 hertz curve to minus 2.3 at 250 hertz. Right, timber floors from Table A.2: the same three frequencies with peaks of 20, 16 and 10 decibels, wider and higher below the resonance, the 8 hertz curve already at 5 decibels at 4 hertz" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+bands = np.asarray(vibration.PREDICTION_BAND_CENTRES_HZ)
+positions = np.arange(bands.size)
+fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
+for ax, floor in zip(axes, ("concrete", "timber"), strict=True):
+    for natural in (8.0, 16.0, 63.0):
+        ax.plot(
+            positions,
+            vibration.ground_to_floor_transfer_db(floor, floor_natural_frequency_hz=natural),
+            marker="o",
+            label=f"$f_e$ = {natural:g} Hz",
+        )
+    ax.set_xticks(positions[::2], [f"{b:g}" for b in bands[::2]])
+    ax.set_title(floor)
+axes[1].legend()
+```
+
+</details>
+
+**The mitigation** (Clause 5.5) is the spectral insertion loss of a track
+measure from DIN SPEC 45673-2 or -3, or of any other measure determined
+suitably, and it enters Formula (1) as printed, added, so as a negative
+number: the argument is `mitigation_db` and not an insertion loss, because
+an insertion loss in the sense of DIN 45672-2 Annex B is positive for a
+reduction and goes in with its sign changed.
+
+## 3. From the spectrum to the numbers DIN 4150-2 judges
+
+Clause 7 turns the spectrum into the assessment quantities. The KB
+weighting of [DIN 45669-1](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/)
+is printed as a table of third-octave corrections, Table 2, from 4 Hz to
+80 Hz, and added to each band (Formula (8)); the weighted bands are summed;
+and the sum level gives the clock maximum r.m.s. of the kind of train
+(Formula (9)), `KB_FTm,Zug = c_T1 · v₀ · 10^(L/20)` with `c_T1` = 1 for Max
+Hold spectra and `v₀` = 5·10⁻⁵ mm/s, the reference of the level. The value
+is the KB quantity itself, because KB is the velocity in millimetres per
+second. Then 1,5 times it is `KB_Fmax,Zug` (Formula (10)) and 3 times that
+the peak velocity a [DIN 4150-3](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/)
+comparison wants (Formula (12)).
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+print(f"{prediction.sum_level_db:.1f} dB")  # 77.7 dB
+print(f"KB_FTm = {prediction.kb_ftm:.3f}")  # 0.385
+print(f"KB_Fmax = {prediction.kb_fmax:.3f}")  # 0.577
+print(f"v_max = {prediction.peak_velocity_mm_s:.2f} mm/s")  # 1.73 mm/s
+```
+
+The assessment vibration severity over a day's timetable is Formula (11),
+the sum of Formula (6) of the [draft of DIN 4150-2](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/)
+with the same weighting factors, 0,7 for a tram on the surface, printed
+without that formula's sentence that a category at or below 0,1 counts as
+zero; the library applies the sentence, since the assessment is the one the
+draft says it performs. With the
+200 passages by day and 20 by night of the example, and the guide values of
+a core area, the line keeps to the requirement by day and by night:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+
+alpha = vibration.train_weighting_factor("tram_metro", alignment="surface")
+day = vibration.train_assessment_severity([prediction.kb_ftm], [200], alpha=alpha)
+night = vibration.train_assessment_severity([prediction.kb_ftm], [20], alpha=alpha, time_of_day="night")
+print(f"KB_FTr by day {day:.3f}, by night {night:.3f}")  # 0.087, 0.039
+
+guide = vibration.railway_guide_values("mixed", time_of_day="night")
+print(guide)  # GuideValues(a_u=0.1, a_o=0.6, a_r=0.07, time_of_day='night', edition='2023')
+verdict = vibration.assess_people_in_buildings(
+    prediction.kb_fmax, guide, kb_ftr=night, source="railway", edition="2023"
+)
+print(verdict.complies, verdict.criterion)  # True A_r
+```
+
+Formula (13) goes the other way, from a level spectrum back to a velocity
+spectrum in micrometres per second, the form the VC curves of VDI 2038
+Blatt 2 are drawn in:
+
+```python
+from phonometry import vibration
+
+print(vibration.velocity_spectrum_um_s([60.0, 75.6]).round(1))  # [ 50.  301.3]
+```
+
+## 4. A train is a line of points, until it is not
+
+Annex B is for the case where the ground's decay was measured with a point
+excitation, a drop weight or a shaker, and a train is wanted. Nearer than
+`R₀ ≈ L² / λ` (Formula (B.1)) a train of length `L` is a line of point sources
+and its surface waves spread less than a point's; further away it is a
+point. So the exponent measured with the point is made shallower by 0,3 up
+to `R₀`, or by 0,5 if the point fit lumped spreading and damping into one
+power law, and kept as it is beyond (Formula (B.2) and Figure B.1). Within
+the distances of Table 1, 25 m from a surface tram to 200 m from freight on
+soft ground, the line behaviour is the rule.
+
+```python
+from phonometry import vibration
+
+print(vibration.point_to_line_transition_distance_m(75.0, wavelength_m=12.5))  # 450.0
+print(vibration.train_decay_exponent(1.0))  # 0.7
+print(f"{vibration.line_source_correction_db(50.0, reference_distance_m=8.0, exponent_correction=0.3):.2f} dB")  # 4.78 dB
+print(vibration.RECOMMENDED_DISTANCES_M["urban"])  # {'tunnel': 20.0, 'surface': 25.0}
+```
+
+## 5. What the example gets wrong
+
+Annex C is the only worked case, and three things in it do not follow from
+the standard's own text. Its sum level of 78,1 dB is the energy sum of all
+19 bands without the weighting Clause 7.1 prescribes; the weighted sum over
+4 Hz to 80 Hz is 77,7 dB, and the printed 1,81 mm/s can only be reached from
+the unweighted one. Its assessment severities, 0,11 by day and 0,05 by
+night, are what the printed inputs give with the factor 0,7 under the root
+once instead of squared, where Formula (11) gives 0,090 and 0,040, and the
+daytime verdict turns on the difference: the
+example finds `A_r` = 0,1 exceeded, the formula finds it met. And its floor
+transfer column comes from no table of Annex A, and cites Figure 3 for it
+where the concrete floor is Figure 4. The conformance rows hold the chain
+from the printed 78,1 dB and the formula for the printed inputs, and the
+[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the readings, together with
+a timber floor table whose lower deviation is printed above its mean, three
+figure legends that name the wrong table or quantity, the sentence on a
+category at or below 0,1 that Formula (11) leaves out, and an Annex A called
+normative on one page and informative on its own.
+
+## What this guide covers
+
+**The chain** of Formula (1), every term added as printed; the **speed
+rescaling** of Formula (3) with its 30 % limit; the **ground transmission**
+of Formulae (4) to (6), spreading and damping with `α_R`; and the
+**mitigation** as the term of Formula (1), added as printed.
+
+The **six tables of Annex A** read cell by cell off their pages: ground to
+floor for concrete and timber by natural frequency, ground to foundation for
+a basement and a ground floor with both deviations, foundation to floor
+against the ratio to the natural frequency, interpolated in decibels over
+the logarithm of the ratio and `nan` where the print has none.
+
+**Clause 7 entire**: Table 2 as the KB weighting rounded to a tenth of a
+decibel, Formulae (8) to (13), and Formula (11) with the rule of the draft
+of DIN 4150-2 on a category at or below 0,1, which it prints without. **Annex B**: the transition distance, the exponent correction and
+the piecewise decay of Figure B.1. **Table 1**, the recommended distances.
+
+**No work plan.** Clause 6, the phases of a prediction from the site visit
+to the choice of a measure, and Annex D, its table, are procedure. The
+second method of Annex B, an admittance summed over the bogies of a train,
+is described without a formula and is not implemented.
+
+**No emission data.** The standard says where an emission spectrum comes
+from and what it depends on; it prints one, at one foundation, and the
+library carries none. The spectrum is the user's.
+
+## See also
+
+- [Railway vibration by category of train (E DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/):
+  the assessment this prediction feeds, with the same Formula (11) and the
+  same factors.
+- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+  the measurement the emission spectra and the ground decay come from.
+- [Predicting vibration before measuring (DIN 4150-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/):
+  the general decay law this method's Formula (5) is a case of.
+- API reference:
+  [`vibration.immission.railway_prediction`](https://jmrplens.github.io/phonometry/reference/api/vibration/railway-prediction/).
+## References
+
+- Deutsches Institut für Normung. (2023). *Schwingungsmessung an
+  Schienenverkehrswegen — Teil 3: Prognoseverfahren auf Basis von
+  Terzspektren* (E DIN 45672-3:2023-02). A draft: Part 3 has no published
+  edition. Formula (1) of Clause 5.1, the speed rescaling of Formula (3), the
+  ground transmission of Formulae (4) to (6), the six level-difference tables
+  of Annex A, Table 2 and the chain of Clause 7 from Formula (8) to Formula
+  (13), the recommended distances of Table 1, and Formulae (B.1) and (B.2) of
+  Annex B. Clause 6 and Annex D are work plans and are not implemented.
+  Annex C is the oracle of the conformance rows.
+- Deutsches Institut für Normung. (2023). *Erschütterungen im Bauwesen —
+  Teil 2: Einwirkungen auf Menschen in Gebäuden* (E DIN 4150-2:2023-08). The
+  assessment the prediction feeds: Formula (6) and Table 2, which Part 3
+  takes as its Formula (11) and Table E.1.
 
 ---
 
@@ -62477,6 +63198,283 @@ and DIN 4150-3.
 ---
 
 
+<!-- source: docs/vibration/immission/vibration-prediction.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/ -->
+Source: https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/
+
+# Predicting vibration before measuring (DIN 4150-1)
+
+Part 1 of DIN 4150 is the first question of the series. Before a quarry is
+blasted, a chimney felled, a pile driven or a line built, someone has to
+say how much vibration will reach the houses and how much of it the floors
+will feel, and Part 1 gives the shapes of every answer. It gives no recipe,
+and says so in its foreword: the constants of a real case come from trial
+blasts, from comparable ground, from a measurement with a few machines
+running. What it does fix, it fixes plainly, and its Annex A shows the
+shapes in the ground twenty-seven times over.
+
+## 1. How far vibration carries
+
+Every source has a near field and a far field, and the boundary is
+`R₁ = a/2 + λ_R` (Formula (1)): half the extent of the source along the
+direction of propagation plus a wavelength of the surface wave. Nearer than
+that nothing here holds. Beyond it the velocity amplitude decays as
+
+```text
+v = v₁ · (R / R₁)^-n · exp[-α (R - R₁)]
+```
+
+(Formula (2)): geometric spreading with an exponent `n` that Figure 1 fixes
+by three yes-or-no questions, and material damping with
+`α ≈ 2π D / λ`, the damping ratio of the ground over the wavelength that
+matters. The exponent is 0 for a harmonic line source carried by a surface
+wave and gains 0,5 for each of point instead of line, impulsive instead of
+harmonic, and body wave instead of surface wave, up to 1,5 for an impulsive
+point source in a body wave. A train is a chain of point sources not
+excited in phase and decays with something between 0,3 and 0,5. For loose
+ground a first estimate may take a damping ratio of 0,01 at most; more has
+to be proven.
+
+```python
+from phonometry import vibration
+
+print(vibration.geometric_exponent(geometry="point", character="impulsive", wave="surface"))  # 1.0
+print(vibration.geometric_exponent(geometry="line", character="harmonic", wave="surface"))  # 0.0
+print(vibration.reference_distance_m(6.0, rayleigh_wavelength_m=12.5))  # 15.5
+
+# Annex A, Figure A.19: a machine hall measured at 0,44 mm/s 13 m away,
+# with D = 0,01 and a wavelength of 12,5 m.
+alpha = vibration.attenuation_coefficient_per_m(0.01, wavelength_m=12.5)
+print(f"{alpha:.4f} 1/m")  # 0.0050 1/m
+decay = vibration.far_field_velocity_mm_s(
+    0.44, [20.0, 40.0, 80.0], reference_distance_m=13.0, exponent=1.0, attenuation_per_m=alpha
+)
+print(decay.round(3))  # [0.276 0.125 0.051]
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_propagation_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_propagation_decay.svg" alt="Vertical velocity in millimetres per second against distance from 0 to 80 metres, on an axis from 0 to 0.5. Three curves start together at 0.44 at 13 metres: a green solid line for an exponent of 0 that falls gently to 0.31 at 80 metres from the damping alone, a blue dashed line for 0.5 that reaches 0.13, and a red dotted line for 1 that reaches 0.05. Four black crosses are the measured points, at 13, 23, 43 and 73 metres, and they fall between the two lower curves and then below them" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+distances = np.linspace(13.0, 80.0, 200)
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for exponent in (0.0, 0.5, 1.0):
+    ax.plot(
+        distances,
+        vibration.far_field_velocity_mm_s(
+            0.44, distances, reference_distance_m=13.0, exponent=exponent, attenuation_per_m=0.005
+        ),
+        label=f"$n$ = {exponent:g}",
+    )
+ax.plot([13.0, 23.0, 43.0, 73.0], [0.44, 0.27, 0.09, 0.015], "k+", markersize=11, label="measured")
+ax.set_xlabel("Distance [m]")
+ax.set_ylabel("Vertical velocity [mm/s]")
+ax.legend()
+```
+
+</details>
+
+The damping alone is worth drawing, and Figure 2 draws it for a damping
+ratio of 0,01 and a wave speed of 200 m/s: over 100 m the ground takes
+27 % of the amplitude at 10 Hz and 79 % at 50 Hz, which is why the low
+frequencies are what arrives at a distance.
+
+```python
+from phonometry import vibration
+
+for frequency in (10.0, 50.0):
+    left = vibration.material_damping_factor(
+        [100.0], damping_ratio=0.01, frequency_hz=frequency, wave_speed_m_s=200.0
+    )[0]
+    print(f"{frequency:g} Hz: {left:.3f} of the amplitude left after 100 m")
+# 10 Hz: 0.730 of the amplitude left after 100 m
+# 50 Hz: 0.208 of the amplitude left after 100 m
+```
+
+## 2. Into the building, and up the floors
+
+A building on the ground is a mass on a spring, with the natural frequency
+of Formula (3), `f_B = √(k_B / m_B) / 2π`, for the vertical direction and
+predominantly harmonic vibration: about 15 Hz for one or two storeys, 8 Hz
+to 12 Hz for two to six, under 8 Hz above that, on a ground of medium
+stiffness with a shear wave speed of 150 m/s to 200 m/s. At that frequency
+the foundation passes at most `1 / (2 D₀)` of the ground's amplitude, and
+for loose ground `D₀` may be taken as 0,25, so the foundation amplifies by
+2 at most; above it a mean transfer of 0,5 may be assumed, and on rock there
+is no reduction at all. A floor then amplifies by at most `1 / (2 D₁)` at its
+own resonance, 10 to 25 for a concrete floor with a damping ratio between
+0,05 and 0,02, on the assumption that the building is excited in phase over
+its whole footprint, which is the safe side for a source that is close,
+moving or impulsive. And the lowest horizontal natural frequency of a
+building of five storeys or more is about `10 / n` Hz (Formula (4)), which
+matters where a tall slender building meets a low excitation frequency.
+
+```python
+from phonometry import vibration
+
+print(f"{vibration.soil_building_natural_frequency_hz(2.5e9, mass_kg=4.0e5):.1f} Hz")  # 12.6 Hz
+print(vibration.soil_building_frequency_guide_hz(4))  # (8.0, 12.0)
+print(vibration.foundation_transfer_max())  # 2.0
+print(f"{vibration.floor_transfer_max(0.03):.1f}")  # 16.7
+print(vibration.storey_frequency_hz(8))  # 1.25
+```
+
+## 3. Single events: a blast and a falling mass
+
+In the far field a blast follows `v_max = k (L/L₀)^b (R/R₀)^-m` (Formula (5))
+with the charge per delay `L` against 1 kg, the distance against 1 m, and
+three constants that come from trial blasts or from comparable cases in
+ground, method and range of distance, with allowance for scatter; the
+standard prints none of them. A falling mass follows the same with the
+root of its fall energy `G · h` (Formula (6)), which for a felled chimney is
+usually the larger source, the demolition blast the smaller. Quarry
+blasting is very rarely relevant beyond 1500 m, construction blasting
+beyond 400 m.
+
+```python
+from phonometry import vibration
+
+# Constants of the user's own trial blasts; the standard prints none.
+peak = vibration.blast_peak_velocity_mm_s(
+    50.0, [300.0, 600.0], coefficient_mm_s=1200.0, charge_exponent=0.6, distance_exponent=1.7
+)
+print(peak.round(2))  # [0.77 0.24]
+
+# A 2 600 t chimney, its centre of mass 70 m up: 25 506 kN through 70 m.
+energy = vibration.fall_energy_kj(25506.0, drop_height_m=70.0)
+print(f"{energy:.0f} kJ")  # 1785420 kJ
+impact = vibration.impact_peak_velocity_mm_s(energy, [50.0, 150.0], coefficient_mm_s=0.02, distance_exponent=1.0)
+print(impact.round(1))  # [0.5 0.2]
+```
+
+## 4. What a track and a hall of machines excite at
+
+A train excites the ground at its speed over the spacing of whatever
+repeats along the track or around the wheel, the sleepers first at 0,6 m to
+0,9 m, and at the multiples of that, while the parts of the vehicle keep
+their own frequencies whatever the speed: the car body on its secondary
+suspension at 1 Hz to 3 Hz, the bogie on its primary at 6 Hz to 10 Hz.
+Ballasted track passes 40 Hz to 80 Hz on preferentially, a tunnel with
+under-ballast mats 15 Hz to 40 Hz, a mass-spring system 5 Hz to 20 Hz, and
+rail vibration reaches about 80 m, further on soft layers.
+
+```python
+from phonometry import vibration
+
+print(vibration.track_excitation_frequency_hz(80 / 3.6, spacing_m=0.6, harmonics=2).round(1))  # [37.  74.1]
+print(vibration.TRACK_TRANSMITTED_BANDS_HZ["ballast"])  # (40.0, 80.0)
+```
+
+A hall of similar machines running together gives, at a point outside,
+`v_N = χ · v_B · √N` (Formula (7)): the velocity measured with `N_B` of them
+running, scaled to `N` with a correction `χ` that the standard prints only
+as a nomogram, Figure 3, for measurements made with 3, 5, 10, 30, 60 or 100
+machines. The nomogram is here as its six curves read off the page at a
+five-hundredth, the width of their stroke, and the standard's own check of
+it, Figure A.18, drawn for a hall measured at 0,44 mm/s with three machines
+running, is reproduced within 6 %: the measurements follow the curve up to
+about sixty machines, the nearest group, and stay flat beyond, because the
+groups added after that are further off.
+
+```python
+from phonometry import vibration
+
+print(vibration.machine_count_correction([12.0], reference_count=3).round(3))  # [0.448]
+print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], reference_count=3).round(2))
+# [0.68 0.89 0.97], against 0.57, 0.95 and 1.04 measured
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction.svg" alt="Six decreasing curves of the correction chi against the number of machines running from 4 to 100, on an axis from 0 to 0.6, one curve per reference count of 3, 5, 10, 30, 60 and 100 machines, the top curve starting at 0.55 and flattening to 0.29 and the bottom one starting at 0.19 and flattening to 0.10. Small dots mark the points read off the printed nomogram, and a note says they were read at a five-hundredth" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+from phonometry import vibration
+
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for reference, chi in vibration.MACHINE_COUNT_CORRECTION.items():
+    ax.plot(vibration.MACHINE_COUNT_AXIS, chi, marker="o", markersize=3, label=f"$N_B$ = {reference}")
+ax.set_xlabel("Machines running")
+ax.set_ylabel(r"Correction $\chi$")
+ax.legend(ncol=2)
+```
+
+</details>
+
+## 5. Four things printed wrong
+
+The symbol lists of Formulae (5) and (6) give the distance in millimetres
+against a reference of one metre, which Formula (2) and every axis of Annex
+A say is metres. Clause 5.2.3 speaks of vibratory drivers with a low working
+frequency and writes `f > 30 Hz`, the sign the wrong way round after a
+paragraph that calls the high frequencies above 35 Hz the favourable ones.
+Figure A.2's legend gives the continuous line to the vertical component and
+the dash-dot line to the radial one, and the drawing has them the other way
+about. A.5.1 prints an eccentric moment in newtons. And the sixth measured
+point of Figure A.18, labelled all groups of a hall of 252 machines, sits at
+110, the count of the groups of the hall nearest the measuring point. The
+[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has all five with their pages.
+
+## What this guide covers
+
+**Propagation**: the far-field boundary of Formula (1), the decay of
+Formula (2) with the exponents of Figure 1 and the damping of the ground,
+and the damping factor of Figure 2 on its own.
+
+**The building**: the natural frequency of Formula (3) and its guide values
+by storeys, the transfer of a foundation and a floor at resonance, and the
+storey formula of Formula (4). **The sources**: the blast and the falling
+mass of Formulae (5) and (6), the machine hall of Formula (7) with the
+nomogram of Figure 3 read off the page, the excitation frequencies of a
+track, and the frequency bands, ranges and constants Clause 5 gives its
+sources.
+
+**No constants for a real case.** The `k`, `b` and `m` of a blast and the
+`k` and `m` of an impact are the user's; the standard prints none and the
+library carries none. The measured cases of Annex A are described in the
+standard and not reproduced here, and its two figures drawn from the
+formulas are held as conformance rows, not offered as data.
+
+**No near field.** Nearer than `R₁` the standard asks for a numerical or
+experimental investigation of its own, and the library refuses the
+distance.
+
+## See also
+
+- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+  the same decay law as a third-octave chain, with the building's transfer
+  as tables.
+- [Vibration and people in buildings (DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/people-in-buildings/)
+  and [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+  what the predicted numbers are judged against.
+- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+  the wave speeds of the ground that the wavelength here comes from.
+- API reference:
+  [`vibration.immission.prediction`](https://jmrplens.github.io/phonometry/reference/api/vibration/prediction/).
+## References
+
+- Deutsches Institut für Normung. (2001). *Erschütterungen im Bauwesen —
+  Teil 1: Vorermittlung von Schwingungsgrößen* (DIN 4150-1:2001-06).
+  Formulae (1) to (7), the exponents of Figure 1, the damping curves of
+  Figure 2, the nomogram of Figure 3 read off the page, and the guide values
+  and frequency bands Clauses 4 and 5 give for the ground, the building and
+  each kind of source. The measured cases of Annex A are
+  described, not implemented; Figures A.18 and A.19, which the standard draws
+  from Formulae (7) and (2) with every parameter printed, are the conformance
+  rows.
+
+---
+
+
 <!-- source: docs/vibration/index.md | canonical: https://jmrplens.github.io/phonometry/vibration/ -->
 Source: https://jmrplens.github.io/phonometry/vibration/
 
@@ -62597,6 +63595,15 @@ assessment it makes possible, and the railway measurements it is used for.
   the guide values a reading is held to by area and time of day, the order the
   standard reads them in, the assessment vibration severity of a day of
   exposure, and the rules for blasting, roads, railways and construction sites.
+- [Railway vibration by category of train (E DIN 4150-2)](https://jmrplens.github.io/phonometry/vibration/immission/railway-categories/):
+  the draft that is to replace DIN 4150-2, a railway judged by category of
+  train with a weighting factor per kind, and the rest of its changes.
+- [Predicting railway vibration (E DIN 45672-3)](https://jmrplens.github.io/phonometry/vibration/immission/railway-prediction/):
+  a railway's spectrum on a floor built term by term before there is anything
+  to measure, and the KB values formed from it.
+- [Predicting vibration before measuring (DIN 4150-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-prediction/):
+  the decay with distance, what a building does to it, and the shapes of a
+  blast, a falling mass and a hall of machines.
 
 ## What this section does not cover
 

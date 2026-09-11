@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1055/1055 conformance checks pass** across 80 domains and 412 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1108/1108 conformance checks pass** across 83 domains and 415 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -36,13 +36,13 @@
 | ISO/TR 17534-3:2015 Table 3 | Ground-projected path length dp, m | 194.165 m | 0.005 m | 100 % |
 | DIN 4150-2:1999-06 Annex C, Example 5 | KB_FTr with hammer b) in the rest hours, Formula (5) | 0.195 | -0.005 | 100 % |
 | DIN 4150-2:1999-06 Annex C, Example 8 | KB_FTm over the record with the passage maxima alone | 0.3175 | -0.0005 | 100 % |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_FTm,Zug of the metro north by Formula (5) | 0.0365 | -0.0005 | 100 % |
 | Long 2e Table 14.9 (worked duct-borne sheet, supply path) | Fan to room, 8 octave bands -> 52/42/30/18/9/-2/-2/-1 dB at the receiver | 1 dB | 1 dB | 100 % |
+| E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 4 Hz by Formula (1) | 28.8 dB | -0.1 dB | 100 % |
 | IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
 | VDI 2081 Blatt 2:2005-05 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0.0496 dB | 0.0496 dB | 99 % |
 | ISO 11691:1995 | Bounds of the octave insertion loss (Eq. (2)) | 9.744 dB | headroom 0.027 dB | 99 % |
 | IEC 60268-16 Annex M | Step 3 printed intermediates: the operational condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.987 | 99 % |
-| VDI 2081 Blatt 2:2005-05 Table 1, element 20 | Sound pressure level in room 102, worst octave deviation, dB | 0.4913 dB | 0.4913 dB | 98 % |
-| ISO 5136:2003 Table D.1 | C3,4 of the sampling tube for d = 0,5 m at U = +/-5, +/-15, +/-30 m/s, 27 bands | max absolute deviation 0.049 dB | 0.049 dB | 98 % |
 
 <details>
 <summary><b>Numerical validation - filters &amp; weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
@@ -866,6 +866,83 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | DIN 4150-2:1999-06 Figure 3 | Stage I A_u interpolated for 6 working days | 0.47 (+/-0.005) | 0.47 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | DIN 4150-2:1999-06 Annex D, Figure D.1 | Trains an hour at KB_FTm = 0,2 for A_r = 0.05 | 7 (+/-0) | 7 | 0 | 0 % | ![Pass][cv-pass] Pass |
 | DIN 4150-2:1999-06 Annex D, Figure D.1 | Trains an hour at KB_FTm = 0,2 for A_r = 0.07 | 14 (+/-0) | 14 | 0 | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Predicting vibration before it is measured (DIN 4150-1)</b>: 100% (12/12)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| DIN 4150-1:2001-06 Annex A, Figure A.19 | alpha from D = 0,01 and lambda = 12,5 m, as printed, 1/m | 0.005 1/m (+/-0.0005 1/m) | 0.005 1/m | 0 1/m | 5 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Annex A, Figure A.19 | v at 80 m by Formula (2) with n = 0, as drawn, mm/s | 0.32 mm/s (+/-0.01 mm/s) | 0.315 mm/s | -0.005 mm/s | 50 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Annex A, Figure A.19 | v at 80 m by Formula (2) with n = 0.5, as drawn, mm/s | 0.13 mm/s (+/-0.01 mm/s) | 0.127 mm/s | -0.003 mm/s | 30 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Annex A, Figure A.19 | v at 80 m by Formula (2) with n = 1, as drawn, mm/s | 0.05 mm/s (+/-0.01 mm/s) | 0.051 mm/s | 0.001 mm/s | 10 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Figure 2 | Damping factor at 100 m and 10 Hz, as drawn | 0.73 (+/-0.02) | 0.73 | 0 | 2 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Figure 2 | Damping factor at 100 m and 20 Hz, as drawn | 0.53 (+/-0.02) | 0.533 | 0.003 | 15 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Figure 2 | Damping factor at 100 m and 30 Hz, as drawn | 0.39 (+/-0.02) | 0.39 | 0 | 2 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Figure 2 | Damping factor at 100 m and 40 Hz, as drawn | 0.28 (+/-0.02) | 0.285 | 0.005 | 25 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Figure 2 | Damping factor at 100 m and 50 Hz, as drawn | 0.21 (+/-0.02) | 0.208 | -0.002 | 10 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Annex A, Figure A.18 | v_N for 20 machines by Formula (7) with chi of Figure 3, as drawn, mm/s | 0.78 mm/s (+/-6%) | 0.754 mm/s | -0.026 mm/s | 56 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Annex A, Figure A.18 | v_N for 60 machines by Formula (7) with chi of Figure 3, as drawn, mm/s | 1.03 mm/s (+/-6%) | 0.995 mm/s | -0.035 mm/s | 57 % | ![Pass][cv-pass] Pass |
+| DIN 4150-1:2001-06 Annex A, Figure A.18 | v_N for 100 machines by Formula (7) with chi of Figure 3, as drawn, mm/s | 1.27 mm/s (+/-6%) | 1.258 mm/s | -0.012 mm/s | 16 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Railway vibration predicted from third-octave spectra (E DIN 45672-3:2023-02)</b>: 100% (21/21)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| E DIN 45672-3:2023-02 Annex C, Table C.1 | Sum level of the 19 printed bands | 78.1 dB (+/-0.05 dB) | 78.08 dB | -0.022 dB | 44 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, C.3 | KB_FTm,Zug from 78,1 dB by Formula (9), c_T1 = 1 | 0.4 (+/-0.05) | 0.4018 | 0.0018 | 4 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, C.3 | KB_Fmax,Zug by Formula (10), 1,5 times it | 0.6 (+/-0.05) | 0.6026 | 0.0026 | 5 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, C.3 | v_max by Formula (12), 3 times that, mm/s | 1.81 mm/s (+/-0.005 mm/s) | 1.808 mm/s | -0.002 mm/s | 40 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, C.3 | KB_FTr of the day by Formula (11), 200 trams at 0,7 (the print's 0,11 puts alpha under the root once, not squared) | 0.09 (+/-0.0005) | 0.0904 | 0.0004 | 80 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, C.3 | KB_FTr of the night by Formula (11), 20 trams at 0,7 (the print's 0,05 puts alpha under the root once, not squared) | 0.04 (+/-0.0005) | 0.0404 | 0.0004 | 80 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 4 Hz by Formula (1) | 28.9 dB (+/-0.1 dB) | 28.8 dB | -0.1 dB | 100 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 20 Hz by Formula (1) | 75.6 dB (+/-0.1 dB) | 75.6 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 63 Hz by Formula (1) | 61.4 dB (+/-0.1 dB) | 61.4 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 250 Hz by Formula (1) | 20.8 dB (+/-0.1 dB) | 20.8 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Table 2 | KB weighting at 4 Hz | -4.7 dB (+/-0 dB) | -4.7 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Table 2 | KB weighting at 8 Hz | -1.7 dB (+/-0 dB) | -1.7 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Table 2 | KB weighting at 20 Hz | -0.3 dB (+/-0 dB) | -0.3 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Table 2 | KB weighting at 63 Hz | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex A | Table A.1, concrete floor at 8 Hz, the band at 8 Hz | 15 dB (+/-0 dB) | 15 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex A | Table A.1, concrete floor at 20 Hz, the band at 20 Hz | 13.12 dB (+/-0 dB) | 13.12 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex A | Table A.2, timber floor at 8 Hz, the band at 4 Hz | 5.14 dB (+/-0 dB) | 5.14 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex A | Table A.3, ground to a basement, the mean at 31,5 Hz | -9.3 dB (+/-0 dB) | -9.3 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex A | Table A.4, ground to a ground floor, the mean at 12,5 Hz | -1.9 dB (+/-0 dB) | -1.9 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex A | Table A.5, foundation to a concrete floor, the mean at its natural frequency | 17.26 dB (+/-0 dB) | 17.26 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 45672-3:2023-02 Annex A | Table A.6, foundation to a timber floor, the mean at its natural frequency | 21.93 dB (+/-0 dB) | 21.93 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Railway vibration by category of train (E DIN 4150-2:2023-08)</b>: 100% (20/20)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| E DIN 4150-2:2023-08 Annex B, Example 8 | KB_FTr of the day by Formula (6), 144 metros at 1,0 and 80 trams at 0,7 a track (the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal inputs give 0,099 7) | 0.0997 (+/-0.0001) | 0.0997 | 0 | 42 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Table 1 | Night A_u of a mixed area, the one cell that changes | 0.1 (+/-0) | 0.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_FTm,Zug of the metro north by Formula (5) | 0.037 (+/-0.0005) | 0.0365 | -0.0005 | 100 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_Fmax,Zug of the metro north by Formula (7) | 0.055 (+/-0.0005) | 0.0548 | -0.0002 | 40 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_FTm,Zug of the metro south by Formula (5) | 0.047 (+/-0.0005) | 0.0468 | -0.0002 | 40 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_Fmax,Zug of the metro south by Formula (7) | 0.07 (+/-0.0005) | 0.0701 | 0.0001 | 20 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_FTm,Zug of the tram east by Formula (5) | 0.406 (+/-0.0005) | 0.4061 | 0.0001 | 20 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_Fmax,Zug of the tram east by Formula (7) | 0.609 (+/-0.0005) | 0.6091 | 0.0001 | 20 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_FTm,Zug of the tram west by Formula (5) | 0.568 (+/-0.0005) | 0.5676 | -0.0004 | 80 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_Fmax,Zug of the tram west by Formula (7) | 0.851 (+/-0.0005) | 0.8514 | 0.0004 | 80 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Example 9 | KB_FTr of the nullfall by day, Formula (6) with N_r = 1920 | 0.039 (+/-0.0005) | 0.0386 | -0.0004 | 80 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Example 9 | KB_FTr of the nullfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0,066) | 0.065 (+/-0.0005) | 0.0649 | -0.0001 | 20 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Example 9 | KB_FTr of the planfall by day, Formula (6) with N_r = 1920 | 0.046 (+/-0.0005) | 0.046 | 0 | 7 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Annex B, Example 9 | KB_FTr of the planfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0,096) | 0.094 (+/-0.0005) | 0.0937 | -0.0003 | 60 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Table 3 | A_u of stage I for 3 working days, as printed | 0.67 (+/-0.005) | 0.67 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Table 3 | A_r of stage I for 3 working days, as printed | 0.37 (+/-0.005) | 0.37 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Table 3 | A_u of stage II for 5 working days, as printed | 0.93 (+/-0.005) | 0.93 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Table 3 | A_r of stage II for 5 working days, as printed | 0.67 (+/-0.005) | 0.67 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Table 3 | A_u of stage III for 6 working days, as printed | 1.27 (+/-0.005) | 1.27 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| E DIN 4150-2:2023-08 Table 3 | A_r of stage III for 6 working days, as printed | 1.03 (+/-0.005) | 1.03 | 0 | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

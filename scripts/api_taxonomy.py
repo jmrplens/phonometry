@@ -249,6 +249,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.vibration.immission.vibration_meter",
             "phonometry.vibration.immission.railway",
             "phonometry.vibration.immission.ground",
+            "phonometry.vibration.immission.coupling",
         ),
     ),
     Section(

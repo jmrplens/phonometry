@@ -597,6 +597,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [underwater/weston-regimes](https://jmrplens.github.io/phonometry/reference/api/underwater/weston-regimes/)
 - [vibration/building-damage](https://jmrplens.github.io/phonometry/reference/api/vibration/building-damage/)
 - [vibration/building-response](https://jmrplens.github.io/phonometry/reference/api/vibration/building-response/)
+- [vibration/coupling](https://jmrplens.github.io/phonometry/reference/api/vibration/coupling/)
 - [vibration/diagnostics](https://jmrplens.github.io/phonometry/reference/api/vibration/diagnostics/)
 - [vibration/evaluation](https://jmrplens.github.io/phonometry/reference/api/vibration/evaluation/)
 - [vibration/experimental-sea](https://jmrplens.github.io/phonometry/reference/api/vibration/experimental-sea/)

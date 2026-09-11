@@ -8,7 +8,8 @@ it came from. It is regulated on that side of the transmission path, and the
 documents that do it are a set rather than a single standard. DIN 4150-2 fixes
 what people in buildings may be exposed to; DIN 4150-3 fixes what the buildings
 themselves may take; DIN 45669-1 specifies the **instrument** both of them
-presuppose, and DIN 45669-2 the procedure it is used with.
+presuppose, and DIN 45669-2 the procedure it is used with, of which the
+mounting limits and the instrument's share of the error are numbers.
 
 This section is the instrument half of that set. The other half already has a
 page: the guideline values of DIN 4150-3 are in [Vibration damage to
@@ -39,7 +40,8 @@ the track before a mitigation measure with the track after it.
   vibration severity and the clock maximum r.m.s. of Formulae (1) and (2), the
   tolerance bands of Tables 2 and 3, the printed check values of Tables 8 and
   9, and the assessment velocity of Annex E (DIN 45669-1:2010-09 with
-  Corrigendum 1:2012-12).
+  Corrigendum 1:2012-12), with the loose-mounting limits, the mass loading
+  and the instrument confidence limits of DIN 45669-2:2005-06.
 - [Vibration next to a railway (DIN 45672)](railway-vibration.md):
   the three stretches of a passage, the running r.m.s. and the event value
   referred to an hour, the third-octave spectra of Figure 6, the narrow-band
@@ -59,10 +61,12 @@ the track before a mitigation measure with the track after it.
 
 ## What this section does not cover
 
-**No measurement procedure.** DIN 45669-2 fixes the measurement positions, the
-coupling of a transducer to a floor or to the ground, the measurement duration
-and the disturbances that have to be kept out. None of it is arithmetic and
-none of it is here.
+**Almost no measurement procedure.** DIN 45669-2 fixes the measurement
+positions, the coupling of a transducer to a floor or to the ground, the
+measurement duration and the disturbances that have to be kept out. Its
+numbers are on the meter page: the limits a transducer may be set down loose
+within, the mass it may add and the meter's own share of the error. The rest
+is text and is not here.
 
 **No assessment of people in buildings.** DIN 4150-2 judges what the weighted
 vibration severity means for the people who feel it, with its own tables of

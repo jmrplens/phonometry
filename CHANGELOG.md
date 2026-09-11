@@ -146,6 +146,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Part 2: its 14 % and 2 % for the start-up of the running r.m.s. are the
   shortfalls of the mean square, twice what the r.m.s. it names is short by.
 
+- The numbers of **DIN 45669-2:2005-06**, the procedure the meter is used
+  with, in `vibration.immission.coupling`.
+
+  Nearly all of Part 2 is judgement written down: positions, directions,
+  durations, disturbances. What is a number is here. `check_loose_mounting`
+  says whether a transducer may be set down without fastening, which 5.3.2
+  and 5.3.3 allow up to 100 Hz vertically and 40 Hz horizontally at a peak
+  acceleration of 3 m/s² or less, and names what it has to stand on: nothing
+  or the rounded feet on a hard surface, the spiked device of about 2,5 kg on
+  a carpet. `mass_loading_ratio` is the hundredth of 7.2.4, and
+  `instrument_confidence_limit_percent` is Table 3, the 15 % on an r.m.s. and
+  20 % on a peak that a meter meeting every requirement of Part 1 may still be
+  wrong by; the table's second column is for the accuracy class 2 that the
+  2010 edition of Part 1 no longer distinguishes.
+
+  One line of it is in `docs/ERRATA.md`: 5.1.4 sends a measurement on the
+  ground to the coupling methods of 5.3.3, which are the carpet ones, when the
+  ground is 5.3.4.
+
 - A vibration meter can be given the verdict a sound level meter already gets:
   the frequency-weighting tolerances of **ISO 8041-1:2017**, in
   `vibration.verify_weighting`.

@@ -1,6 +1,6 @@
 ---
 title: "Medida de la inmisión de vibración (DIN 45669-1)"
-description: "El instrumento que dan por supuesto la DIN 4150-2 y la DIN 4150-3: la limitación de banda y la ponderación KB de las fórmulas (3) y (4), la intensidad de vibración ponderada KB_F y el eficaz de los máximos por intervalo de la fórmula (2), las bandas de tolerancia de las tablas 2 y 3, y la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante."
+description: "El instrumento que dan por supuesto la DIN 4150-2 y la DIN 4150-3: la limitación de banda y la ponderación KB de las fórmulas (3) y (4), la intensidad de vibración ponderada KB_F y el eficaz de los máximos por intervalo de la fórmula (2), las bandas de tolerancia de las tablas 2 y 3, y la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante, y los números con los que la DIN 45669-2 planifica una medida."
 references:
   - type: standard
     organization: "Deutsches Institut für Normung"
@@ -15,6 +15,12 @@ references:
     title: "Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1"
     designation: "DIN 45669-1 Ber 1:2012-12"
     note: "La redacción corregida de la tabla 8: las ocho duraciones de impulso de una señal de 80 Hz y el KB_Fmax que cada una debe mostrar en porcentaje de la indicación de la señal continua."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2005
+    title: "Messung von Schwingungsimmissionen — Teil 2: Messverfahren"
+    designation: "DIN 45669-2:2005-06"
+    note: "Los límites de montaje suelto del 5.3.2 y el 5.3.3, el límite con cera de la tabla 1, la carga de masa del 7.2.4, la desviación del acoplamiento al terreno del 5.3.4.1 y los límites de confianza de la tabla 3. Los puntos de medida, las direcciones, las duraciones, la elección del acoplamiento al terreno y las perturbaciones son texto y no están implementados."
   - type: standard
     organization: "Deutsches Institut für Normung"
     year: 1999
@@ -347,14 +353,73 @@ valor es sobre lo que la norma tiene evidencia, y superarlo no significa que se
 haya producido un daño, solo que se acabó la comprobación barata y hay que hacer
 en su lugar lo que dicen los apartados 4.2 a 4.4.
 
-## 6. Lo que esta página no es
+## 6. Colocar el captador: a qué le pone número la DIN 45669-2
 
 La DIN 45669 tiene una segunda parte, y es con la que de verdad se planifica una
 medida: la DIN 45669-2 fija dónde van los captadores, cómo se acoplan a un
 forjado o al terreno, cuánto dura una medida y qué perturbaciones hay que dejar
-fuera. Nada de eso es aritmética y nada de eso está aquí. Lo que hay aquí es el
-instrumento que las dos partes describen entre las dos, y las magnitudes que se
-le exige producir.
+fuera. Casi todo es criterio puesto por escrito. Lo poco que es un número está
+aquí, porque un número con el que se planifica una medida pertenece al sitio
+donde se comprueba el plan.
+
+Un captador apoyado sin sujeción se desplaza o se despega cuando la vibración es
+fuerte, y un acoplamiento sin unión de fuerza resuena contra la superficie. Los
+apartados 5.3.2 y 5.3.3 fijan los dos límites: un captador suelto mide sin
+falsear hasta **100 Hz en vertical** y **40 Hz en horizontal**, siempre que el
+pico de aceleración en cualquier dirección se quede en **3 m/s²** o menos. Sobre
+una superficie dura puede apoyarse solo o sobre el útil de pies redondeados;
+sobre una moqueta tiene que ir sobre el útil de puntas de acero templado, unos
+2,5 kg con el captador, apretado y golpeado hasta atravesar el revestimiento.
+Por encima de esos límites el captador se pega, se atornilla o se escayola, y
+sobre baldosas o parqué la cera adhesiva lleva la componente horizontal hasta
+80 Hz.
+
+```python
+from phonometry import vibration
+
+floor = vibration.check_loose_mounting(1.2, 63.0, direction="horizontal")
+print(f"suelto, horizontal hasta 63 Hz: {floor.acceptable}")  # False
+print(f"  límite {floor.frequency_limit_hz:g} Hz, {floor.peak_acceleration_limit_m_s2:g} m/s2")
+
+carpet = vibration.check_loose_mounting(
+    1.2, 80.0, direction="vertical", surface="soft"
+)
+print(f"suelto, vertical hasta 80 Hz sobre moqueta: {carpet.acceptable}")  # True
+print(f"  sobre {carpet.device}")
+```
+
+Dos números más pertenecen al plan. La masa que el captador y su útil añaden al
+objeto debería ser como mucho una centésima de la masa con la que vibra el
+objeto (7.2.4), y `mass_loading_ratio` es esa fracción. Y la tabla 3 dice cuánto
+puede alejarse de la verdad, en una magnitud mostrada, un vibrómetro que cumple
+todos los requisitos de la DIN 45669-1: un 15 % en un valor basado en eficaz y
+un 20 % en un pico, con un nivel de confianza alto. La tabla imprime una segunda
+columna para un vibrómetro de clase 2; la edición de 2010 de la parte 1 suprimió
+las clases de exactitud, así que la primera columna es la que rige para un
+vibrómetro de hoy.
+
+```python
+from phonometry import vibration
+
+print(vibration.instrument_confidence_limit_percent("rms"))   # 15.0
+print(vibration.instrument_confidence_limit_percent("peak"))  # 20.0
+print(f"{vibration.mass_loading_ratio(2.5, vibrating_mass_kg=600.0):.4f}")  # 0.0042
+print(vibration.MASS_LOADING_RATIO_LIMIT)  # 0.01
+```
+
+El acoplamiento al terreno no tiene un número así, solo un aviso: el 5.3.4.1
+dice que el acoplamiento por sí solo puede mover la lectura hasta 15 dB, y que
+las componentes horizontales son las que más lo sufren. Cuál de los cuatro
+procedimientos de la tabla 2 usar es el único juicio que la parte 2 deja por
+entero a quien lee.
+
+## 7. Lo que esta página no es
+
+Los puntos de medida, las direcciones, las duraciones y la lista de
+perturbaciones son el texto de la DIN 45669-2, y nada de eso está aquí. Lo que
+hay aquí es el instrumento que las dos partes describen entre las dos, las
+magnitudes que se le exige producir y los límites con los que se planifica una
+medida con él.
 
 <Scope>
 
@@ -395,10 +460,17 @@ hardware, y aprobar en la respuesta no es un certificado de conformidad de un
 instrumento.
 </ScopeClaim>
 
+<ScopeClaim status="covered">
+Los números de la **DIN 45669-2**: los límites de montaje suelto del 5.3.2 y el
+5.3.3 como veredicto, el límite con cera de la tabla 1, la carga de masa del
+7.2.4 y los límites de confianza del instrumento de la tabla 3.
+</ScopeClaim>
+
 <ScopeClaim status="not-covered">
-**Ningún procedimiento de medida.** El acoplamiento de los captadores, los
-puntos de medida, la duración y el tratamiento de las perturbaciones son la DIN
-45669-2, y la valoración de lo medido son la DIN 4150-2 y la DIN 4150-3.
+**Ningún procedimiento de medida.** Los puntos de medida, las direcciones, las
+duraciones, la elección del acoplamiento al terreno y el tratamiento de las
+perturbaciones son el texto de la DIN 45669-2, y la valoración de lo medido son
+la DIN 4150-2 y la DIN 4150-3.
 </ScopeClaim>
 
 </Scope>
@@ -417,6 +489,7 @@ puntos de medida, la duración y el tratamiento de las perturbaciones son la DIN
   lado de las personas de la misma medida, ponderado de otra manera y juzgado
   por otros documentos.
 - Referencia de API:
-  [`vibration.immission.vibration_meter`](/phonometry/es/reference/api/vibration/vibration-meter/).
+  [`vibration.immission.vibration_meter`](/phonometry/es/reference/api/vibration/vibration-meter/)
+  y [`vibration.immission.coupling`](/phonometry/es/reference/api/vibration/coupling/).
 
 </SeeAlso>

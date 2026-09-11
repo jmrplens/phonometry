@@ -195,6 +195,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`vibration.human.instrumentation`](/phonometry/reference/api/vibration/instrumentation/) | Type-testing a human-vibration meter against ISO 8041-1:2017. |
 | [`vibration.human.signal_burst`](/phonometry/reference/api/vibration/signal-burst/) | The saw-tooth signal burst of ISO 8041-1:2017, 5.9, and what a meter reads. |
 | [`vibration.immission.vibration_meter`](/phonometry/reference/api/vibration/vibration-meter/) | The vibration meter of DIN 45669-1:2010-09 (with Corrigendum 1:2012-12). |
+| [`vibration.immission.railway`](/phonometry/reference/api/vibration/railway/) | Evaluating the vibration of a passing train (DIN 45672-2:1995-07). |
+| [`vibration.immission.ground`](/phonometry/reference/api/vibration/ground/) | The elastic properties of the ground from its wave speeds (DIN 45672-1:2009-12). |
 
 ## Environmental acoustics
 

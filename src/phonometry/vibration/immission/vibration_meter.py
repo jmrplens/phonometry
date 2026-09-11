@@ -279,7 +279,7 @@ def _frequencies(frequencies_hz: ArrayLike) -> NDArray[np.float64]:
     return require_positive_array(frequencies_hz, "frequencies_hz")
 
 
-def _velocity(
+def _record(
     velocity_mm_s: ArrayLike, name: str = "velocity_mm_s"
 ) -> NDArray[np.float64]:
     """A finite one-dimensional record as a float array, reported as *name*."""
@@ -567,7 +567,7 @@ def kb_signal(
     :raises ValueError: For a bad record, a rate that cannot carry the working
         range, or an unknown range.
     """
-    x = _velocity(velocity_mm_s)
+    x = _record(velocity_mm_s)
     name = require_choice(str(working_range), "working_range", _WORKING_RANGES)
     fs = _sample_rate(fs_hz, name)
     return np.asarray(sig.sosfilt(_sos(name, fs, weighted=True), x), dtype=np.float64)
@@ -602,10 +602,40 @@ def kbf_signal(
         rate that cannot carry the working range.
     """
     kb = kb_signal(velocity_mm_s, fs_hz, working_range=working_range)
+    return _exponential_running_rms(kb, fs_hz, time_constant_s=time_constant_s)
+
+
+def _exponential_running_rms(
+    values: ArrayLike,
+    fs_hz: float,
+    *,
+    time_constant_s: float = KB_TIME_CONSTANT_S,
+    name: str = "values",
+) -> NDArray[np.float64]:
+    """The exponential running r.m.s. both DIN 45669-1 and DIN 45672-2 print.
+
+    Formula (1) of DIN 45669-1 and Formula (1) of DIN 45672-2 are the same
+    integral, one applied to the KB signal and the other to a velocity or a
+    band of it, and this is the recursion that realises it:
+    ``y[i] = (1 - a) y[i-1] + a x[i]**2`` with ``a = 1 - exp(-1 / (tau fs))``,
+    started from rest.
+
+    :param values: The signal to average (1-D), in whatever unit it carries;
+        the result is in the same unit.
+    :param fs_hz: Sampling frequency, in hertz.
+    :param time_constant_s: The time constant, in seconds (default 0,125 s,
+        the "Fast" both standards use).
+    :param name: The public name of *values*, for the error a bad signal
+        raises.
+    :return: The running r.m.s., one value per sample.
+    :raises ValueError: For a bad signal or a non-positive rate or constant.
+    """
+    x = _record(values, name)
+    fs = require_positive(fs_hz, "fs_hz")
     tau = require_positive(time_constant_s, "time_constant_s")
-    alpha = 1.0 - math.exp(-1.0 / (tau * float(fs_hz)))
+    alpha = 1.0 - math.exp(-1.0 / (tau * fs))
     mean_square = np.asarray(
-        sig.lfilter([alpha], [1.0, -(1.0 - alpha)], kb**2), dtype=np.float64
+        sig.lfilter([alpha], [1.0, -(1.0 - alpha)], x**2), dtype=np.float64
     )
     return np.sqrt(np.maximum(mean_square, 0.0))
 
@@ -626,7 +656,7 @@ def takt_maxima(
         record is shorter than one interval.
     :raises ValueError: For a bad signal or a non-positive rate or interval.
     """
-    y = _velocity(kbf, "kbf")
+    y = _record(kbf, "kbf")
     fs = require_positive(fs_hz, "fs_hz")
     duration_s = require_positive(takt_duration_s, "takt_duration_s")
     per_takt = int(round(duration_s * fs))
@@ -753,7 +783,7 @@ def measure_vibration_immission(
     :raises ValueError: For a bad record, a rate that cannot carry the working
         range, or a non-positive clock interval.
     """
-    x = _velocity(velocity_mm_s)
+    x = _record(velocity_mm_s)
     name = require_choice(str(working_range), "working_range", _WORKING_RANGES)
     fs = _sample_rate(fs_hz, name)
     band_limited = sig.sosfilt(_sos(name, fs, weighted=False), x)
@@ -883,7 +913,7 @@ def assessment_velocity(
     :raises ValueError: For a bad record, a rate below 630 Hz, or an unknown
         class.
     """
-    x = _velocity(velocity_mm_s)
+    x = _record(velocity_mm_s)
     taps = assessment_weighting_taps(
         fs_hz, building_class=building_class, numtaps=numtaps
     )
@@ -1023,7 +1053,7 @@ def dominant_frequency(
         method, or a record whose largest amplitude has no zero crossing on
         both sides of it.
     """
-    x = _velocity(velocity_mm_s)
+    x = _record(velocity_mm_s)
     fs = require_positive(fs_hz, "fs_hz")
     how = require_choice(str(method), "method", _DOMINANT_METHODS)
     if how == "fourier":

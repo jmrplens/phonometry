@@ -4,11 +4,51 @@
 The German immission-control chain: DIN 45669-1 defines the vibration meter
 that DIN 4150-2 and DIN 4150-3 presuppose, and its Annex E turns the
 frequency-dependent guideline curve of DIN 4150-3 into a comparison with one
-number.
+number. DIN 45672-2 reduces the record of a passing train with that meter, and
+Clause 4.5 of DIN 45672-1 reads the elastic constants of the ground from its
+wave speeds.
 """
 
 from __future__ import annotations
 
+from .ground import (
+    GROUND_WAVE_SPEED_RANGES_M_S,
+    SHEAR_STRAIN_LINEAR_LIMIT,
+    compression_wave_speed,
+    poisson_ratio_from_wave_speeds,
+    shear_modulus_from_wave_speed,
+    shear_strain_amplitude,
+    youngs_modulus_from_wave_speeds,
+)
+from .railway import (
+    EVENT_REFERENCE_DURATION_S,
+    NARROWBAND_RESOLUTION_HZ,
+    PASSAGE_BANDS_HZ,
+    T1_DURATION_S,
+    THIRD_OCTAVE_LINES,
+    VELOCITY_LEVEL_REFERENCE_MM_S,
+    AmplitudeDistribution,
+    TrainPassage,
+    amplitude_distribution,
+    band_sum_level,
+    centred_interval,
+    combined_event_velocity,
+    elastic_insertion_loss,
+    evaluate_train_passage,
+    event_velocity,
+    event_velocity_level,
+    interval_rms,
+    narrowband_psd,
+    passage_average_level,
+    passage_average_velocity,
+    passage_energy_spectral_density,
+    running_acceleration_level,
+    running_velocity_level,
+    running_velocity_rms,
+    spectral_density_level,
+    third_octaves_from_narrowband,
+    velocity_psd_from_voltage,
+)
 from .vibration_meter import (
     ASSESSMENT_GUIDE_VALUES_MM_S,
     ASSESSMENT_WEIGHTING_TOLERANCE,
@@ -83,4 +123,38 @@ __all__ = [
     "takt_maxima",
     "takt_maximum_rms",
     "verify_vibration_meter",
+    "EVENT_REFERENCE_DURATION_S",
+    "NARROWBAND_RESOLUTION_HZ",
+    "PASSAGE_BANDS_HZ",
+    "T1_DURATION_S",
+    "THIRD_OCTAVE_LINES",
+    "VELOCITY_LEVEL_REFERENCE_MM_S",
+    "AmplitudeDistribution",
+    "TrainPassage",
+    "amplitude_distribution",
+    "band_sum_level",
+    "centred_interval",
+    "combined_event_velocity",
+    "elastic_insertion_loss",
+    "evaluate_train_passage",
+    "event_velocity",
+    "event_velocity_level",
+    "interval_rms",
+    "narrowband_psd",
+    "passage_average_level",
+    "passage_average_velocity",
+    "passage_energy_spectral_density",
+    "running_acceleration_level",
+    "running_velocity_level",
+    "running_velocity_rms",
+    "spectral_density_level",
+    "third_octaves_from_narrowband",
+    "velocity_psd_from_voltage",
+    "GROUND_WAVE_SPEED_RANGES_M_S",
+    "SHEAR_STRAIN_LINEAR_LIMIT",
+    "compression_wave_speed",
+    "poisson_ratio_from_wave_speeds",
+    "shear_modulus_from_wave_speed",
+    "shear_strain_amplitude",
+    "youngs_modulus_from_wave_speeds",
 ]

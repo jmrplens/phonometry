@@ -1,6 +1,6 @@
 ---
 title: "Vibration immission"
-description: "The German immission-control chain: the DIN 45669-1 vibration meter that DIN 4150-2 and DIN 4150-3 presuppose, its KB weighting and weighted vibration severity, and the Annex E assessment velocity that judges a building without a dominant frequency."
+description: "The German immission-control chain: the DIN 45669-1 vibration meter that DIN 4150-2 and DIN 4150-3 presuppose, the Annex E assessment velocity that judges a building without a dominant frequency, and the DIN 45672 reduction of a train passage and of the ground it crosses."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -30,6 +30,13 @@ into three filters, one per building class, and with them a short-term event is
 judged against a single number instead of against a curve read at a frequency
 two methods disagree about.
 
+The meter has a second working range, 4 Hz to 315 Hz, and it exists for the
+source that most often brings vibration into a house: a railway. DIN 45672 is
+the pair of standards for it, a method of measuring next to the line and a
+method of reducing what was measured, so that the vibration of one train can be
+compared with the next, one point on the way to the building with another, and
+the track before a mitigation measure with the track after it.
+
 ## Pages in this section
 
 - [Measuring vibration immission (DIN 45669-1)](/phonometry/vibration/immission/vibration-meter/):
@@ -38,6 +45,11 @@ two methods disagree about.
   tolerance bands of Tables 2 and 3, the printed check values of Tables 8 and
   9, and the assessment velocity of Annex E (DIN 45669-1:2010-09 with
   Corrigendum 1:2012-12).
+- [Vibration next to a railway (DIN 45672)](/phonometry/vibration/immission/railway-vibration/):
+  the three stretches of a passage, the running r.m.s. and the event value
+  referred to an hour, the third-octave spectra of Figure 6, the narrow-band
+  density and Table 1 (DIN 45672-2:1995-07), and the ground constants from two
+  wave speeds (DIN 45672-1:2009-12, Clause 4.5).
 
 <SeeAlso>
 
@@ -72,8 +84,9 @@ here; the judgement it feeds is not implemented.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**Nothing about railways yet.** DIN 45672 measures and evaluates vibration
-next to railway lines, which is what the 4 Hz to 315 Hz working range of the
-meter is for. Its evaluation method is not implemented.
+**No railway measuring procedure.** DIN 45672-1 fixes the measurement points
+on the way from the track to the building, the directions, the trains to
+record and the report to write. Only its Clause 4.5, the ground constants, is
+arithmetic, and only that is here.
 </ScopeClaim>
 </Scope>

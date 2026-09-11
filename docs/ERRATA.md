@@ -4968,6 +4968,81 @@ in the same order.
   the peak a record shows is computed from the record rather than from a table.
 - **Status:** unreported.
 
+## DIN 45672-1:2009-12, Clause 4.5.1, Formulae (1) and (5) (the compression-wave speed of a thin rod, and a radicand short of a factor 2)
+
+- **Location:** Clause 4.5.1, Formulae (1) to (4) on printed page 7 and
+  Formula (5) on printed page 8 (PDF pages 7 and 8 of the copy read here, which
+  prints its folios without an offset).
+- **The print:** Formula (1) gives the compression-wave speed as
+  $v_p = \sqrt{E/\rho} = \sqrt{G(1-\nu)/(\rho(1-2\nu))}$, Formula (3) gives
+  Poisson's ratio as $\nu = (v_p^2 - 2 v_s^2)/(2(v_p^2 - v_s^2))$, and
+  Formula (5) gives the two moduli as $G = v_s^2 \rho$ and $E = v_p^2 \rho$.
+- **The problem:** the three cannot all hold. In the unbounded continuum the
+  clause says it is describing, the compression wave travels at
+  $v_p = \sqrt{2G(1-\nu)/(\rho(1-2\nu))}$, and Formula (3) is exactly the
+  inversion of that together with $v_s = \sqrt{G/\rho}$ of Formula (2). The
+  second radical of Formula (1) is short of the factor 2, which makes it
+  $\sqrt{2}$ too slow at every Poisson's ratio. The first, $\sqrt{E/\rho}$, is
+  the speed of a longitudinal wave in a thin rod: with $E = 2G(1+\nu)$ it gives
+  $v_p^2/v_s^2 = 2(1+\nu)$, against $2(1-\nu)/(1-2\nu)$ in the continuum. The
+  two expressions Formula (1) sets equal agree with each other only at
+  $\nu = (\sqrt{17}-1)/8 \approx 0{,}39$. Formula (5) is the rod speed solved
+  for $E$, so from a measured $v_p$ it returns the P-wave modulus
+  $M = 2G(1-\nu)/(1-2\nu)$ rather than $E$, which overstates $E$ by 35 % at
+  $\nu = 0{,}3$ and by a factor of 3,8 at $\nu = 0{,}45$, the range of a
+  saturated soil.
+- **Evidence:** the three formulas against each other on the same two pages,
+  and against the P-wave speed of an isotropic elastic continuum. Verified on
+  PDF page 7 (printed p. 7) for Formulae (1) to (4) and on PDF page 8 (printed
+  p. 8) for Formula (5) of DIN 45672-1:2009-12: the radicals, the factor
+  $(1-\nu)$ over $(1-2\nu)$ and the absence of the factor 2 are all legible on
+  the page.
+- **Consequence for the standard's own tables:** none; the clause prints no
+  worked values. What it changes is a modulus read from two measured speeds.
+- **Library behaviour:**
+  [`compression_wave_speed`](../src/phonometry/vibration/immission/ground.py)
+  and
+  [`youngs_modulus_from_wave_speeds`](../src/phonometry/vibration/immission/ground.py)
+  implement the continuum relations Formula (3) is the inverse of, and the
+  tests hold both printed forms to the factors above, so an edit back to the
+  print fails.
+- **Status:** unreported.
+
+## DIN 45672-2:1995-07, Clause 4 (the start-up of the running r.m.s., quoted in mean square)
+
+- **Location:** Clause 4, last paragraph of printed page 3, and Figure 3 on
+  printed page 4 (PDF pages 3 and 4 of the copy read here, which prints its
+  folios without an offset).
+- **The print:** the running r.m.s. "erst nach einer Dauer von 2τ mit einer
+  Unsicherheit von 14 % und nach einer Dauer von 4τ mit einer Unsicherheit von
+  2 % zur Verfügung steht, wobei der Mittelwert des gleitenden Effektivwertes
+  für ein harmonisches Signal zugrunde gelegt wurde (siehe Bild 3)": it is only
+  available after $2\tau$ to within 14 % and after $4\tau$ to within 2 %, taking
+  the mean of the running r.m.s. of a harmonic signal.
+- **The problem:** 14 % and 2 % are the shortfalls of the running mean square,
+  $e^{-2} = 13{,}5$ % and $e^{-4} = 1{,}8$ %, and not of the running r.m.s. the
+  sentence names. Formula (1) started from rest gives a mean square that grows
+  as $(1 - e^{-t/\tau})$ of its final value once the ripple is averaged out, so
+  the r.m.s. grows as the square root of that, and it is short by
+  $1 - \sqrt{1 - e^{-2}} = 7{,}0$ % after $2\tau$ and by
+  $1 - \sqrt{1 - e^{-4}} = 0{,}9$ % after $4\tau$: about half the printed
+  figures.
+- **Evidence:** Formula (1) on the same page and Figure 3 on the next, which
+  draws $\tilde v_F/\hat v$ of an 8 Hz and a 20 Hz sine against time in units
+  of $\tau$ with the mean marked at 0,707. At $2\tau$ both curves oscillate
+  around 0,66, which is 93 % of 0,707, and at $4\tau$ around 0,70. Verified on
+  PDF page 3 (printed p. 3) and PDF page 4 (printed p. 4) of
+  DIN 45672-2:1995-07.
+- **Consequence for the standard's own tables:** none. The advice the sentence
+  gives, to start the averaging before the train arrives, stands either way;
+  what is overstated is the size of the error a late start costs.
+- **Library behaviour:**
+  [`running_velocity_rms`](../src/phonometry/vibration/immission/railway.py)
+  says which quantity each figure belongs to, and the conformance report
+  reproduces the printed 14 % and 2 % from the mean square of Formula (1)
+  started from rest, which is the reading that matches them.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

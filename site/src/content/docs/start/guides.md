@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 128 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 129 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and twenty-eight guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and twenty-nine guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -563,6 +563,11 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
   measurement is reported in, the tolerance bands a meter is graded by, and
   the Annex E assessment velocity that judges a building without a dominant
   frequency.
+- [Vibration next to a railway (DIN 45672)](/phonometry/vibration/immission/railway-vibration/):
+  one train passage reduced the way DIN 45672-2 reduces it, from the event
+  value of an hour of traffic to the third-octave spectra and the narrow-band
+  density behind them, and the ground constants of DIN 45672-1 from two wave
+  speeds.
 
 ## [Environment and transport](/phonometry/environment/)
 

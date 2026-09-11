@@ -277,7 +277,8 @@ def test_an_edition_dated_to_the_month_keeps_its_month() -> None:
         ("DIN 45692:2009-08 Clause 6", ("DIN 45692", "2009-08", "Clause 6")),
     ):
         reference = references.parse(cite, overrides={})
-        assert (reference.designation, reference.edition, reference.clause) == split
+        read = (reference.designation, reference.edition, reference.clause)
+        assert read == split, cite
 
 
 def test_a_sheet_or_a_corrigendum_is_part_of_the_designation() -> None:
@@ -303,7 +304,8 @@ def test_a_sheet_or_a_corrigendum_is_part_of_the_designation() -> None:
         ),
     ):
         reference = references.parse(cite, overrides={})
-        assert (reference.designation, reference.edition, reference.clause) == split
+        read = (reference.designation, reference.edition, reference.clause)
+        assert read == split, cite
 
 
 def test_no_clause_opens_with_a_sheet_or_a_corrigendum(committed: dict) -> None:

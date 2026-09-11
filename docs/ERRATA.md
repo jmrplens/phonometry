@@ -5101,6 +5101,519 @@ in the same order.
   takes the root, and the tests hold it to the 0,82 and 0,22 of Example 8.
 - **Status:** unreported.
 
+## E DIN 4150-2:2023-08, Annex B, Example 9 (the night assessed over 920 clock intervals instead of 960)
+
+- **Location:** B.9.3.3, the two night-time formulas on printed page 44 (PDF
+  page 44 of the copy read here, which prints its folios without an offset),
+  against 6.5.3.2 on printed page 19.
+- **The print:** $KB_{FTr,\mathrm{nachts}} = \sqrt{\tfrac{1}{920} \cdot (12 \cdot
+  (0{,}9 \cdot 0{,}24)^2 + 18 \cdot (1{,}0 \cdot 0{,}44)^2)} = 0{,}066$ for the
+  case without the project and, with the same divisor, $0{,}096 > 0{,}07$
+  for the planned case; the daytime formulas on the same page divide by 1920.
+- **The problem:** 6.5.3.2 fixes $N_r$ of Formula (6) at 1920 clock
+  intervals by day and 960 by night, which is what 8 h of 30 s intervals
+  are. The two night results reproduce 920 exactly, 0,0663 and 0,0957, and
+  with 960 they are 0,0649 and 0,0937, which print as 0,065 and 0,094. The
+  25 % test that follows, $0{,}096 > 1{,}25 \cdot 0{,}066 = 0{,}082$, becomes
+  $0{,}094 > 1{,}25 \cdot 0{,}065 = 0{,}081$ and reaches the same conclusion.
+- **Evidence:** the divisor 920 in both night formulas on printed page 44
+  and the definition of $N_r$ on printed page 19. Verified on PDF page 44
+  (printed p. 44) and PDF page 19 (printed p. 19) of E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none; the example's
+  conclusion holds either way.
+- **Library behaviour:**
+  [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py)
+  divides the night by the 960 of 6.5.3.2, and the conformance rows of
+  Example 9 compare with 0,065 and 0,094, saying what the print gives.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, Annex B, Figure B.2 b) (clock maxima printed on the figure that do not give the 0,39 the example uses)
+
+- **Location:** Figure B.2 b) on printed page 33 (PDF page 33) and the text
+  of B.4.3.3 on printed page 34.
+- **The print:** the figure labels the ten clock intervals of hammer B with
+  $KB_{FTi}$ = 0,3; 0,41; 0,47; 0,43; 0,47; 0,37; 0,31; 0,04; 0,3; 0,41, and
+  the text sets the 0,04 to zero and finds "$KB_{FTmb}$ = 0,39".
+- **The problem:** the r.m.s. of those ten values with the 0,04 as zero is
+  $\sqrt{1{,}3759 / 10} = 0{,}371$, not 0,39. The labels of hammer A on the
+  same figure do give the 0,16 the text uses. The 1999 edition's Figure C.3
+  carried no labels and the 0,39 was inherited from it; the draft added the
+  labels and they were not fitted to the number. Examples 4 and 5 use 0,39
+  and their verdicts do not change with 0,37: 0,150 and 0,188 in place of
+  0,154 and 0,195.
+- **Evidence:** the ten labels on printed page 33 and, on printed page 34,
+  the sentence "Somit ergibt sich aus Bild B.2." with the line
+  "$KB_{FTma}$ = 0,16 und $KB_{FTmb}$ = 0,39" under it. Verified on PDF page 33 (printed p. 33) and PDF page 34
+  (printed p. 34) of E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none; Examples 4 and 5
+  conclude the same with either value.
+- **Library behaviour:** the conformance rows of Examples 4 and 5 of the
+  1999 edition, whose text and numbers the draft's Examples 4 and 5 repeat,
+  take the 0,16 and 0,39 the text prints as inputs; nothing is read off the
+  figure.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, Annex A, Figure A.1 (a decision drawn with its answer the wrong way round)
+
+- **Location:** Figure A.1 on printed page 28 (PDF page 28), the diamond of
+  the middle column below the dashed line, against the same figure of
+  DIN 4150-2:1999-06, Figure B.1 on its printed page 12.
+- **The print:** the diamond asks "KB-Werte > Stufe III?" and its "ja" exit
+  leads to "Weiterer Betrieb ohne besondere Maßnahmen", its "nein" exit to
+  "Weiterer Betrieb nur mit besonderen Maßnahmen".
+- **The problem:** a value above stage III is the case that needs special
+  measures, which is how the right-hand diamond of the same figure, with the
+  same question, is drawn: "ja" to the special measures. The 1999 figure
+  prints the middle diamond as "KB-Werte < Stufe III?" with the same exits,
+  which reads correctly; the redrawn figure turned the comparison round and
+  kept the exits.
+- **Evidence:** the three diamonds below the dashed line on printed page 28
+  of the draft and the middle diamond on printed page 12 of the 1999
+  edition. Verified on PDF page 28 (printed p. 28) of E DIN 4150-2:2023-08
+  and PDF page 12 (printed p. 12) of DIN 4150-2:1999-06.
+- **Consequence for the standard's own tables:** none; the figure is a
+  management flow and nothing in the standard is computed from it.
+- **Library behaviour:** none; the flow of Annex A is not implemented.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, Annex B, B.9.3.1 (an extension assessed by the clause for a new line)
+
+- **Location:** B.9.3.1 on printed page 42 (PDF page 42).
+- **The print:** "Die Beurteilung erfolgt nach 6.5.3.5."
+- **The problem:** 6.5.3.5 is the assessment of a line to be built new.
+  Example 9 is the extension of an existing line by a second track, which
+  is 6.5.3.6, and the example goes on to apply the 25 % rule of 6.5.3.6 to
+  its Nullfall and Planfall.
+- **Evidence:** the sentence on printed page 42, the heading of 6.5.3.5 on
+  printed page 21 and of 6.5.3.6 on printed page 21. Verified on PDF page 42
+  (printed p. 42) and PDF page 21 (printed p. 21) of E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none; the example applies
+  the right clause.
+- **Library behaviour:**
+  [`assess_railway_change`](../src/phonometry/vibration/immission/train_categories.py)
+  is 6.5.3.6 and its docstring names Example 9 as its worked case.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, 6.5.3.6 (requirements met when one condition holds, and an example that needs them all)
+
+- **Location:** 6.5.3.6 on printed page 22 (PDF page 22 of the copy read
+  here, which prints its folios without an offset), against B.9.3.3 and
+  B.9.4 on printed page 44.
+- **The print:** "Falls eine der folgenden Bedingungen für den
+  Prognoseplanfall vorliegt, gelten die Anforderungen dieses Dokuments als
+  eingehalten:", followed by a) for $KB_{F\mathrm{max}}$ by day, b) for
+  $KB_{F\mathrm{max}}$ by night and c) for $KB_{FTr}$, each met either by
+  keeping to its guide value or by an increase under 25 % against the case
+  without the project.
+- **The problem:** read as printed, one condition is enough. Example 9 has
+  b) met, "Für den Prognosefall bleibt der $KB_{F\mathrm{max}}$-Wert
+  unverändert bei 0,66", an increase of nought, and still concludes in B.9.4
+  that mitigation is to be looked into because $KB_{FTr}$ by night exceeds
+  $A_r$ and grows by more than 25 %. The three letters are three assessments
+  of two quantities, and the example applies every one that fits the case;
+  "eine der" says the opposite.
+- **Evidence:** the sentence and its three letters on printed page 22, and
+  the unchanged 0,66 with the conclusion on printed page 44. Verified on PDF
+  page 22 (printed p. 22) and PDF page 44 (printed p. 44) of
+  E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none; the example reaches
+  the conclusion the clause is for.
+- **Library behaviour:**
+  [`assess_railway_change`](../src/phonometry/vibration/immission/train_categories.py)
+  requires every condition that applies, as the example does, and its
+  docstring says why.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, Annex B, B.8.3.4 (a result that its own four-decimal inputs do not give)
+
+- **Location:** the last formula of B.8.3.4 on printed page 39 (PDF page
+  39), against Table B.1 on printed page 38.
+- **The print:** $KB_{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
+  \cdot 0)^2 + 144 \cdot (1{,}0 \cdot 0)^2 + 80 \cdot (0{,}7 \cdot 0{,}406\,1)^2 +
+  80 \cdot (0{,}7 \cdot 0{,}567\,6)^2)} = 0{,}099\,8 > 0{,}07$.
+- **The problem:** with the four-decimal 0,406 1 and 0,567 6 the formula
+  gives 0,099 72, which prints as 0,099 7; the 0,099 8 printed is what the
+  three-decimal 0,406 and 0,568 of Table B.1 give, 0,099 76. The passages of
+  Table B.1 themselves give 0,099 72. One unit in the fourth decimal, and
+  the verdict, 0,07 exceeded, does not depend on it.
+- **Evidence:** the formula and its result on printed page 39 and the
+  r.m.s. values of Table B.1 on printed page 38. Verified on PDF page 39
+  (printed p. 39) and PDF page 38 (printed p. 38) of E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none.
+- **Library behaviour:** the conformance row of Example 8 compares
+  [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py)
+  from the 47 passages with 0,099 7 at half a unit of the fourth decimal,
+  and says what the print gives.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, Annex B, B.4.3.3 (the clock maximum r.m.s. attributed to Formula (2))
+
+- **Location:** B.4.3.3 on printed page 34 (PDF page 34), against 4.2.5 on
+  printed page 12 and 6.4.2 on printed page 16.
+- **The print:** "Wegen der Annahme, dass Bild B.2 repräsentativ für die
+  gesamten Teileinwirkungszeiten $T_{ea}$ und $T_{eb}$ sei, gilt nach
+  Gleichung (2):", followed by $KB_{FTma} = \sqrt{\tfrac{1}{10} \sum_{i=1}^{10}
+  KB^2_{FTia}}$ and the same for hammer B.
+- **The problem:** that is Formula (1) of 4.2.5, the clock maximum r.m.s.
+  over $N$ intervals. Formula (2) of 6.4.2 is the assessment vibration
+  severity from partial exposures, which the example applies two lines
+  later, and the draft renumbered the 1999 edition's Formula (3), which the
+  1999 example cited, as its (1).
+- **Evidence:** the sentence on printed page 34, Formula (1) on printed page
+  12 and Formula (2) on printed page 16. Verified on PDF page 34 (printed
+  p. 34), PDF page 12 (printed p. 12) and PDF page 16 (printed p. 16) of
+  E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none; the arithmetic is
+  that of Formula (1).
+- **Library behaviour:** none to take.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, Annex B, B.3.2 (a note cited under the clause it was moved out of)
+
+- **Location:** the last bullet of B.3.2 on printed page 31 (PDF page 31),
+  against the note under 6.3 on printed page 15.
+- **The print:** "Es ist zu prüfen, ob das $A_r$-Kriterium hier nicht zu
+  berücksichtigen ist (siehe Anmerkung zu 6.2)."
+- **The problem:** the note on the $A_r$ criterion, the 4 h by day and 2 h
+  by night above which a steady vibration makes $KB_{FTr}$ not worth
+  forming, is printed under 6.3 in the draft; 6.2 is the guide values. In
+  the 1999 edition the same note stood under 6.2, the procedure, and the
+  example's cross-reference was not moved with it.
+- **Evidence:** the bullet on printed page 31, the note under 6.3 on
+  printed page 15 and the heading of 6.2 on printed page 14. Verified on
+  PDF page 31 (printed p. 31), PDF page 15 (printed p. 15) and PDF page 14
+  (printed p. 14) of E DIN 4150-2:2023-08, and the note under 6.2 on PDF
+  page 6 (printed p. 6) of DIN 4150-2:1999-06.
+- **Consequence for the standard's own tables:** none.
+- **Library behaviour:** none to take.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 4150-2:2023-08, 6.3 (a rare event met below the upper value in the prose and at it in the flowchart)
+
+- **Location:** the fourth bullet of 6.3 on printed page 15 (PDF page 15),
+  against 6.5.1.1 on printed page 17 and Figure 2 on printed page 15.
+- **The print:** "Für selten auftretende, kurzzeitige Einwirkungen ist die
+  Anforderung dieses Dokuments eingehalten, wenn $KB_{F\mathrm{max}}$ kleiner
+  als $A_o$ ist (siehe 6.5.1)"; 6.5.1.1 reads "wenn die maximale bewertete
+  Schwingstärke $KB_{F\mathrm{max}}$ kleiner oder gleich dem (oberen)
+  Anhaltswert $A_o$ nach Tabelle 1 ist", and the diamond of Figure 2 asks
+  "$KB_{F\mathrm{max}} \le A_o$?".
+- **The problem:** a rare event whose $KB_{F\mathrm{max}}$ equals $A_o$ is
+  met by the clause and the figure and not by the bullet that refers to
+  them.
+- **Evidence:** the bullet and the diamond on printed page 15 and the
+  sentence of 6.5.1.1 on printed page 17. Verified on PDF page 15 (printed
+  p. 15) and PDF page 17 (printed p. 17) of E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none.
+- **Library behaviour:**
+  [`assess_people_in_buildings`](../src/phonometry/vibration/immission/people.py)
+  reads the boundary as the clause and the flowchart do, at or below.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 45672-3:2023-02, Annex C, C.3 (two assessment severities that weight by the factor once where Formula (11) squares it)
+
+- **Location:** C.3 on printed page 34 (PDF page 34 of the copy read here,
+  which prints its folios without an offset) and printed page 35, against
+  Formula (11) on printed page 23 and Annex E on printed page 37.
+- **The print:** with 200 passages by day and 20 by night, the factor
+  $\alpha$ = 0,7 of a surface tram and $KB_{FTm,Zug}$ = 0,4, Formula (11)
+  gives "$KB_{FTr,Zug,Tag}$ = 0,11" and "$KB_{FTr,Zug,Nacht}$ = 0,05", and C.4
+  finds the day exceeded, "0,11 > $A_{r,Tag}$ = 0,1".
+- **The problem:** Formula (11) with those inputs and $N_r$ = 1920 by day and
+  960 by night is $0{,}7 \cdot 0{,}4 \cdot \sqrt{200/1920} = 0{,}090$ and
+  $0{,}7 \cdot 0{,}4 \cdot \sqrt{20/960} = 0{,}040$. The printed values are
+  what the same inputs give with $\alpha$ under the root once instead of
+  squared, $0{,}4 \sqrt{0{,}7 \cdot 200/1920} = 0{,}108$ and
+  $0{,}4 \sqrt{0{,}7 \cdot 20/960} = 0{,}048$: the example weights the energy
+  of the category by the factor where Formula (11) weights its amplitude.
+  With the 0,090 of the formula the verdict of C.4 on the day turns round:
+  0,09 is below the $A_r$ of 0,1 and the requirement is met.
+- **Evidence:** the inputs on printed page 34, the two results at the top
+  of printed page 35 and the assessment below them, the formula and its
+  $N_r$ on printed page 23 and the factors on printed page 37. Verified on PDF page 34 (printed p. 34), PDF
+  page 35 (printed p. 35), PDF page 23 (printed p. 23) and PDF page 37
+  (printed p. 37) of E DIN 45672-3:2023-02.
+- **Consequence for the standard's own tables:** the example's daytime
+  conclusion, that mitigation is to be planned, does not follow from its
+  numbers.
+- **Library behaviour:**
+  [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py)
+  squares the factor as Formula (11) prints it, and the conformance rows of
+  C.3 compare with the 0,090 and 0,040 it gives for the printed inputs,
+  saying that the print reads 0,11 and 0,05.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 45672-3:2023-02, Annex C, Table C.1 (a sum level formed without the weighting Clause 7.1 prescribes)
+
+- **Location:** Table C.1 and the results of C.3 on printed page 34 (PDF
+  page 34), against Formulae (8) and (9) on printed pages 21 and 22.
+- **The print:** the table closes with the row
+  "Schwinggeschwindigkeitssummenpegel der betrachteten Zugkategorie
+  ($L_{v,Zug}$):" and 78,1 dB in its last column, and C.3 feeds it to
+  Formula (9),
+  $KB_{FTm,Zug} = c_{T1} v_0 10^{L/20} = 0{,}4$, then 0,6 by Formula (10) and
+  "$v_{\max}$ = 1,81 mm/s" by Formula (12).
+- **The problem:** Clause 7.1 a) first adds the KB weighting of Table 2 to
+  each band (Formula (8)) and sums the bands from 4 Hz to 80 Hz. The energy
+  sum of the 19 printed $L_v$ without any weighting is 78,08 dB, which is
+  the 78,1 printed; the weighted sum over 4 Hz to 80 Hz is 77,7 dB, and the
+  chain from it is 0,385, 0,577 and 1,73 mm/s. The printed 1,81 mm/s is
+  $3 \cdot 1{,}5 \cdot 5 \cdot 10^{-5} \cdot 10^{78{,}1/20} = 1{,}808$, so the
+  example carried the unweighted sum through.
+- **Evidence:** the sum and the three results on printed page 34 and the
+  formulas on printed pages 21 and 22. Verified on PDF page 34 (printed
+  p. 34), PDF page 21 (printed p. 21) and PDF page 22 (printed p. 22) of
+  E DIN 45672-3:2023-02.
+- **Consequence for the standard's own tables:** the results of C.3 are
+  4 % high against the standard's own procedure; the verdicts of C.4 are
+  the same either way, 0,6 rounds both.
+- **Library behaviour:**
+  [`predict_train_category`](../src/phonometry/vibration/immission/railway_prediction.py)
+  weights the bands as 7.1 a) says before it sums them; the conformance rows
+  hold the printed chain from 78,1 dB and the test holds the weighted one.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 45672-3:2023-02, Annex C, C.2 and Table C.1 (a floor transfer that comes from no table of Annex A, and a figure cited by the wrong number)
+
+- **Location:** C.2 on printed page 33 (PDF page 33) and the column
+  $\Delta L_{v,DF}$ of Table C.1 on printed page 34, against Table A.5 on
+  printed page 27 and Figure 4 on printed page 15.
+- **The print:** C.2 says the foundation-to-floor transfer of the example
+  is "die Übertragungen vom Fundament zur Geschossdecke mit einer
+  Deckeneigenfrequenz von 20 Hz aus Bild 3", and Table C.1 prints the
+  column 1,9; 2,3; 3,1; 3,5; 5,0; 6,9; 11,5; 17,3; 10,0; 5,4; 1,9; 1,5;
+  −0,8; −2,3; −3,8; −5,4; −6,5; −8,1; −9,6 dB from 4 Hz to 250 Hz.
+- **The problem:** Figure 3 is the transfer from the ground into a
+  foundation at ground level; the foundation-to-floor transfer of a concrete
+  floor is Figure 4 and Table A.5. Read at the ratios of the bands to 20 Hz,
+  Table A.5's mean gives 1,60; 2,06; 2,52; 3,26; 4,19; 6,35; 9,94; 17,26;
+  9,85; 4,41; 3,27; 3,25; 1,42; 3,89; 2,83 dB up to 100 Hz and nothing
+  above a ratio of 5. Only the peak agrees; neither the mean nor either
+  deviation of Table A.5, nor the 20 Hz column of Table A.1, gives the
+  printed column, and the table has no values for the last four bands the
+  column fills.
+- **Evidence:** the sentence on printed page 33, the column on printed
+  page 34 and Table A.5 on printed pages 27 and 28. Verified on PDF page 33
+  (printed p. 33), PDF page 34 (printed p. 34), PDF page 27 (printed p. 27)
+  and PDF page 28 (printed p. 28) of E DIN 45672-3:2023-02.
+- **Consequence for the standard's own tables:** the example cannot be
+  reproduced from the standard's own tables; its transfer column is an
+  input.
+- **Library behaviour:** the conformance rows of Table C.1 take the printed
+  column as an input of Formula (1) and hold the sum;
+  [`foundation_to_floor_transfer_db`](../src/phonometry/vibration/immission/railway_prediction.py)
+  reads Table A.5 as printed.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 45672-3:2023-02, Annex A, Table A.6 (a lower deviation printed above the mean it deviates from)
+
+- **Location:** Table A.6 on printed page 28 (PDF page 28), and Figure 5 on
+  printed page 16.
+- **The print:** at the ratios 0,20, 3,10, 4,00 and 5,00 the column
+  "Standardabweichung nach unten (E–u)" reads 2,37; 5,26; 5,42 and 7,63 dB
+  against a "Mittelwert (E–m)" of 2,19; 3,55; 3,24 and 3,01 dB, and at 5,00
+  the "Standardabweichung nach oben (E–o)" is 5,40 dB, below the lower
+  one.
+- **The problem:** a deviation downward from a mean cannot lie above it, and
+  the upper deviation cannot lie below the lower. Figure 5 draws the same
+  crossing, its curve 1 ending above curves 2 and 3, so the figure was made
+  from the same data; whether two columns were swapped at the tail or the
+  statistics are wrong cannot be told from the page. Table A.5, the concrete
+  floor, keeps its order in every row.
+- **Evidence:** the four rows on printed page 28 and the tail of the curves
+  on printed page 16. Verified on PDF page 28 (printed p. 28) and PDF page
+  16 (printed p. 16) of E DIN 45672-3:2023-02.
+- **Consequence for the standard's own tables:** a reader who takes the
+  lower deviation as the safe side of a timber floor's transfer is above
+  the mean at those ratios.
+- **Library behaviour:**
+  [`FOUNDATION_TO_FLOOR_DB`](../src/phonometry/vibration/immission/railway_prediction.py)
+  carries the table as printed, its docstring says where the order fails,
+  and no order between the three statistics is enforced.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 45672-3:2023-02, Figures 5, 6 and 7 (legends that name the wrong table and the wrong quantity)
+
+- **Location:** the legend of Figure 5 on printed page 16 (PDF page 16) and
+  the axis legends of Figures 6 and 7 on printed pages 17 and 18.
+- **The print:** Figure 5, the foundation-to-floor transfer of timber
+  floors, labels its curves 1, 2 and 3 "Übertragung Fundament → Erdgeschoss
+  und Obergeschosse bei Holzbalkendecken" with "(D–u)", "(D–m)" and
+  "(D–o)"; Figures 6
+  and 7, the ground-to-floor transfer, label their vertical axis
+  "Pegeldifferenz $\Delta L_{v,DF}(f_{Tn})$ in dB".
+- **The problem:** the table Figure 5 draws, Table A.6, names its columns
+  E–u, E–m and E–o; D–u, D–m and D–o are the columns of Table A.5, the
+  concrete floor of Figure 4. And Figures 6 and 7 draw $\Delta L_{v,DB}$,
+  the ground-to-floor difference of Tables A.1 and A.2, as their captions
+  say; $\Delta L_{v,DF}$ is the foundation-to-floor difference of Figures 4
+  and 5.
+- **Evidence:** the legends on printed pages 16, 17 and 18 and the column
+  headings on printed pages 28, 24 and 25. Verified on PDF page 16 (printed
+  p. 16), PDF page 17 (printed p. 17), PDF page 18 (printed p. 18), PDF page
+  24 (printed p. 24), PDF page 25 (printed p. 25) and PDF page 28 (printed
+  p. 28) of E DIN 45672-3:2023-02.
+- **Consequence for the standard's own tables:** none; the captions and the
+  tables are right.
+- **Library behaviour:** none to take; the tables are what is implemented.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 45672-3:2023-02, 5.4.4 (an annex called normative where it is printed informative)
+
+- **Location:** 5.4.4 on printed page 16 (PDF page 16 of the copy read here,
+  which prints its folios without an offset), against the heading of
+  Annex A on printed page 24.
+- **The print:** "Im normativen Anhang A sind die Werte in Tabellenform für
+  alle relevanten Deckeneigenfrequenzen zusammengefasst."; the annex is
+  headed "Anhang A (informativ)".
+- **The problem:** the six tables the prediction is made from are either
+  part of the requirements or an information, and the two pages say one
+  each.
+- **Evidence:** the sentence on printed page 16 and the heading on printed
+  page 24. Verified on PDF page 16 (printed p. 16) and PDF page 24 (printed
+  p. 24) of E DIN 45672-3:2023-02.
+- **Consequence for the standard's own tables:** none to their values.
+- **Library behaviour:** the tables are implemented as printed, whatever
+  their status.
+- **Status:** not reported; the document is a draft under comment.
+
+## E DIN 45672-3:2023-02, Formula (11) (the assessment sum printed without the rule that zeroes a quiet category)
+
+- **Location:** Formula (11) and its symbols on printed page 23 (PDF page
+  23), against Formula (6) of E DIN 4150-2:2023-08 on its printed pages 19
+  and 20.
+- **The print:** "$KB_{FTr} = \sqrt{\sum_{Zug=1}^{N_Z} \tfrac{n_{Zug}}{N_r}
+  (\alpha_{Zug} \cdot KB_{FTm,Zug})^2}$", introduced by "Berechnung der
+  Beurteilungs-Schwingstärke ($KB_{FTr}$) für den jeweiligen
+  Beurteilungszeitraum entsprechend DIN 4150-2", with $N_r$, $N_Z$,
+  $n_{Zug}$, $KB_{FTm,Zug}$ and $\alpha_{Zug}$ "nach informativem Anhang E"
+  listed under it and nothing else.
+- **The problem:** the sum, its symbols and the factors of Annex E are
+  Formula (6) and Table 2 of the draft of DIN 4150-2, which prints under
+  its formula that a category whose $KB_{FTm,Zug}$ is at or below 0,1 enters
+  as zero. The sentence is not reproduced, so a predicted category at or
+  below 0,1 counts here and not in the assessment the formula says it
+  performs.
+- **Evidence:** the formula and its symbol list on printed page 23, and
+  the sentence under Formula (6) on printed page 20 of the other draft.
+  Verified on PDF page 23 (printed p. 23) of E DIN 45672-3:2023-02 and PDF
+  page 20 (printed p. 20) of E DIN 4150-2:2023-08.
+- **Consequence for the standard's own tables:** none; the category of
+  Annex C is at 0,4.
+- **Library behaviour:** the chain of
+  [`predict_train_category`](../src/phonometry/vibration/immission/railway_prediction.py)
+  ends in
+  [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py),
+  which applies the rule of the assessment it stands for.
+- **Status:** not reported; the document is a draft under comment.
+
+## DIN 4150-1:2001-06, Formulae (5) and (6) (a distance whose unit is printed as millimetres)
+
+- **Location:** the symbol lists of Formula (5) on printed page 9 (PDF page
+  9 of the copy read here, which prints its folios without an offset) and of
+  Formula (6) on printed page 10.
+- **The print:** "$R$ die Entfernung von der Sprengstelle, in mm;" under
+  Formula (5) and "$R$ die Entfernung von der Fallstelle, in mm;" under
+  Formula (6), each with "$R_0$ = 1 m (Bezugsgröße)" on the line below.
+- **The problem:** the distance enters both formulas only as the ratio
+  $R/R_0$ against a reference of 1 m, Formula (2) on printed page 5 defines
+  $R$ "in m", and every distance axis of Annex A is in metres. A distance in
+  millimetres against a reference in metres would put the ratio a thousand
+  times too high.
+- **Evidence:** the two symbol lists on printed pages 9 and 10 and the
+  definition of $R$ under Formula (2) on printed page 5. Verified on PDF
+  page 9 (printed p. 9), PDF page 10 (printed p. 10) and PDF page 5 (printed
+  p. 5) of DIN 4150-1:2001-06.
+- **Consequence for the standard's own tables:** none; the standard prints
+  no values of $k$, $b$ or $m$ to compute anything with.
+- **Library behaviour:**
+  [`blast_peak_velocity_mm_s`](../src/phonometry/vibration/immission/prediction.py)
+  and `impact_peak_velocity_mm_s` take the distance in metres against the
+  1 m reference, and their docstrings say the print has millimetres.
+- **Status:** not reported.
+
+## DIN 4150-1:2001-06, Clause 5.2.3 (a low working frequency written as a high one)
+
+- **Location:** the first sentence on printed page 11 (PDF page 11), the
+  third paragraph of Clause 5.2.3.
+- **The print:** "Vibrationsbäre mit tiefer Arbeitsfrequenz ($f$ > 30 Hz)
+  können …".
+- **The problem:** a low working frequency cannot be one above 30 Hz, and
+  the previous paragraph, on printed page 10, has just said that vibrators
+  with high working frequencies, $f$ > 35 Hz, are the favourable ones. The
+  sign is the wrong way round; the intended reading is a frequency below
+  30 Hz.
+- **Evidence:** the sentence on printed page 11 and the "$f$ > 35 Hz" of
+  5.2.3 on printed page 10. Verified on PDF page 11 (printed p. 11) and PDF
+  page 10 (printed p. 10) of DIN 4150-1:2001-06.
+- **Consequence for the standard's own tables:** none.
+- **Library behaviour:** none to take; the clause is prose.
+- **Status:** not reported.
+
+## DIN 4150-1:2001-06, Annex A, Figure A.2 (a legend that swaps two line styles)
+
+- **Location:** Figure A.2 on printed page 18 (PDF page 18).
+- **The print:** the legend reads "—— Ausgleichsgerade Z-Komponente" and
+  "–·– Ausgleichsgerade X-Komponente", with ▽ for the Z and ○ for the X
+  measurements.
+- **The problem:** in the drawing the dash-dot line is the steepest of the
+  three and runs through the ▽ markers, which are the Z values Figure A.1
+  prints on printed page 17, from 6,90 mm/s at 270 m to 0,12 mm/s at
+  1470 m; the continuous line is the flattest and runs through the ○
+  markers of the X component. The dashed line and the □ markers of the Y
+  component agree with their legend. The two styles are swapped between
+  legend and drawing.
+- **Evidence:** the lines and markers on printed page 18 against the Z
+  peaks of printed page 17. Verified on PDF page 18 (printed p. 18) and PDF
+  page 17 (printed p. 17) of DIN 4150-1:2001-06.
+- **Consequence for the standard's own tables:** none; the figure is an
+  illustration and Annex A says its numbers are not a basis for a
+  prediction.
+- **Library behaviour:** none to take.
+- **Status:** not reported.
+
+## DIN 4150-1:2001-06, Annex A, A.5.1 (an eccentric moment with the unit of a force)
+
+- **Location:** the "Vorgang" line of A.5.1 on printed page 25 (PDF page
+  25).
+- **The print:** "Vibrator (Exzentermoment 320 N, Frequenz $f$ = 32 Hz)".
+- **The problem:** an eccentric moment is a mass at a radius, in kg·m or
+  N·m, which is how A.5.2 on printed page 27 prints its "statisches Moment
+  5 kg · m"; a newton is a force. What was meant, 320 N·m or 32 kg·m,
+  cannot be told from the page.
+- **Evidence:** the line on printed page 25 and the moment of A.5.2 on
+  printed page 27. Verified on PDF page 25 (printed p. 25) and PDF page 27
+  (printed p. 27) of DIN 4150-1:2001-06.
+- **Consequence for the standard's own tables:** none.
+- **Library behaviour:** none to take; the case is an illustration.
+- **Status:** not reported.
+
+## DIN 4150-1:2001-06, Annex A, Figure A.18 (a point labelled all groups at the count of one hall)
+
+- **Location:** Figure A.18 and its legend on printed page 33 (PDF page 33
+  of the copy read here, which prints its folios without an offset),
+  against Figure A.16 and A.8.1 on printed page 32.
+- **The print:** the sixth measured point is drawn at about 110 machines and
+  its legend reads "6) alle Gruppen"; A.8.1 says "Betrieb bis 252 Maschinen
+  in zwei Maschinensälen", and the table of Figure A.16 counts 63, 7, 8, 6,
+  57, 1, 23, 31, 12, 32, 4, 3 and 5 machines in the groups A to Ge, which is
+  252.
+- **The problem:** all groups are 252 machines, and 110 is what the groups
+  E, F and G of the right-hand hall, the one nearest the measuring point,
+  add up to (23, 31 and 56). The point before it, "Gruppen F und G", is at
+  87 as those two add up, so the abscissa is the count of the groups
+  running; the label of the sixth point is not.
+- **Evidence:** the point and its legend on printed page 33, the sentence of
+  A.8.1 and the table on printed page 32. Verified on PDF page 33 (printed
+  p. 33) and PDF page 32 (printed p. 32) of DIN 4150-1:2001-06.
+- **Consequence for the standard's own tables:** none; the text under the
+  figure says the measured values stay put above about 60 machines because
+  the groups switched on after that are farther off, which is what the
+  figure shows either way.
+- **Library behaviour:** none to take; the conformance rows of Figure A.18
+  read the drawn curve, not the measured points.
+- **Status:** not reported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

@@ -3,18 +3,19 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1055,
-    "passing": 1055,
+    "checks": 1108,
+    "passing": 1108,
     "failing": 0,
-    "domains": 80,
-    "standards": 412,
-    "citations": 708,
-    "designations": 151,
-    "sources": 83
+    "domains": 83,
+    "standards": 415,
+    "citations": 720,
+    "designations": 152,
+    "sources": 85
   },
   "units": [
     "%",
     "1/kg",
+    "1/m",
     "1/s",
     "Cam",
     "EPNdB",
@@ -246,6 +247,24 @@
       "title": "Vibration and people in buildings (DIN 4150-2)",
       "checks": 21,
       "passing": 21
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "title": "Predicting vibration before it is measured (DIN 4150-1)",
+      "checks": 12,
+      "passing": 12
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "title": "Railway vibration predicted from third-octave spectra (E DIN 45672-3:2023-02)",
+      "checks": 21,
+      "passing": 21
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "title": "Railway vibration by category of train (E DIN 4150-2:2023-08)",
+      "checks": 20,
+      "passing": 20
     },
     {
       "id": "speech-intelligibility-ansi-s3-5-1997",
@@ -17112,6 +17131,1473 @@
         "value": 0.0
       },
       "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-annex-a-figure-a-19/alpha-from-d-0-01-and-lambda-12-5-m-as-printed-1-m",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Annex A, Figure A.19",
+        "cite": "DIN 4150-1:2001-06 Annex A, Figure A.19"
+      },
+      "quantity": "alpha from D = 0,01 and lambda = 12,5 m, as printed, 1/m",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.005
+      },
+      "computed": {
+        "value": 0.005
+      },
+      "unit": "1/m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 2.65e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-annex-a-figure-a-19/v-at-80-m-by-formula-2-with-n-0-as-drawn-mm-s",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Annex A, Figure A.19",
+        "cite": "DIN 4150-1:2001-06 Annex A, Figure A.19"
+      },
+      "quantity": "v at 80 m by Formula (2) with n = 0, as drawn, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.32
+      },
+      "computed": {
+        "value": 0.315
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.01
+      },
+      "deviation": {
+        "value": -0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-annex-a-figure-a-19/v-at-80-m-by-formula-2-with-n-0-5-as-drawn-mm-s",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Annex A, Figure A.19",
+        "cite": "DIN 4150-1:2001-06 Annex A, Figure A.19"
+      },
+      "quantity": "v at 80 m by Formula (2) with n = 0.5, as drawn, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.13
+      },
+      "computed": {
+        "value": 0.127
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.01
+      },
+      "deviation": {
+        "value": -0.003
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-annex-a-figure-a-19/v-at-80-m-by-formula-2-with-n-1-as-drawn-mm-s",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Annex A, Figure A.19",
+        "cite": "DIN 4150-1:2001-06 Annex A, Figure A.19"
+      },
+      "quantity": "v at 80 m by Formula (2) with n = 1, as drawn, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.05
+      },
+      "computed": {
+        "value": 0.051
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.01
+      },
+      "deviation": {
+        "value": 0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-figure-2/damping-factor-at-100-m-and-10-hz-as-drawn",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Figure 2",
+        "cite": "DIN 4150-1:2001-06 Figure 2"
+      },
+      "quantity": "Damping factor at 100 m and 10 Hz, as drawn",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.73
+      },
+      "computed": {
+        "value": 0.73
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": 0.000403
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-figure-2/damping-factor-at-100-m-and-20-hz-as-drawn",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Figure 2",
+        "cite": "DIN 4150-1:2001-06 Figure 2"
+      },
+      "quantity": "Damping factor at 100 m and 20 Hz, as drawn",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.53
+      },
+      "computed": {
+        "value": 0.533
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": 0.003
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-figure-2/damping-factor-at-100-m-and-30-hz-as-drawn",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Figure 2",
+        "cite": "DIN 4150-1:2001-06 Figure 2"
+      },
+      "quantity": "Damping factor at 100 m and 30 Hz, as drawn",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.39
+      },
+      "computed": {
+        "value": 0.39
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": -0.000339
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-figure-2/damping-factor-at-100-m-and-40-hz-as-drawn",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Figure 2",
+        "cite": "DIN 4150-1:2001-06 Figure 2"
+      },
+      "quantity": "Damping factor at 100 m and 40 Hz, as drawn",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.28
+      },
+      "computed": {
+        "value": 0.285
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": 0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-figure-2/damping-factor-at-100-m-and-50-hz-as-drawn",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Figure 2",
+        "cite": "DIN 4150-1:2001-06 Figure 2"
+      },
+      "quantity": "Damping factor at 100 m and 50 Hz, as drawn",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.21
+      },
+      "computed": {
+        "value": 0.208
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-annex-a-figure-a-18/v-n-for-20-machines-by-formula-7-with-chi-of-figure-3-as-drawn-mm-s",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Annex A, Figure A.18",
+        "cite": "DIN 4150-1:2001-06 Annex A, Figure A.18"
+      },
+      "quantity": "v_N for 20 machines by Formula (7) with chi of Figure 3, as drawn, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.78
+      },
+      "computed": {
+        "value": 0.754
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.06
+      },
+      "deviation": {
+        "value": -0.026
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-annex-a-figure-a-18/v-n-for-60-machines-by-formula-7-with-chi-of-figure-3-as-drawn-mm-s",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Annex A, Figure A.18",
+        "cite": "DIN 4150-1:2001-06 Annex A, Figure A.18"
+      },
+      "quantity": "v_N for 60 machines by Formula (7) with chi of Figure 3, as drawn, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.03
+      },
+      "computed": {
+        "value": 0.995
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.06
+      },
+      "deviation": {
+        "value": -0.035
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "predicting-vibration-before-it-is-measured-din-4150-1/din-4150-1-2001-06-annex-a-figure-a-18/v-n-for-100-machines-by-formula-7-with-chi-of-figure-3-as-drawn-mm-s",
+      "domain": "predicting-vibration-before-it-is-measured-din-4150-1",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-1",
+        "edition": "2001-06",
+        "clause": "Annex A, Figure A.18",
+        "cite": "DIN 4150-1:2001-06 Annex A, Figure A.18"
+      },
+      "quantity": "v_N for 100 machines by Formula (7) with chi of Figure 3, as drawn, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.27
+      },
+      "computed": {
+        "value": 1.258
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "relative",
+        "value": 0.06
+      },
+      "deviation": {
+        "value": -0.012
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-table-c-1/sum-level-of-the-19-printed-bands",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, Table C.1",
+        "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1"
+      },
+      "quantity": "Sum level of the 19 printed bands",
+      "kind": "scalar",
+      "expected": {
+        "value": 78.1
+      },
+      "computed": {
+        "value": 78.08
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.022
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-c-3/kb-ftm-zug-from-78-1-db-by-formula-9-c-t1-1",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, C.3",
+        "cite": "E DIN 45672-3:2023-02 Annex C, C.3"
+      },
+      "quantity": "KB_FTm,Zug from 78,1 dB by Formula (9), c_T1 = 1",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.4
+      },
+      "computed": {
+        "value": 0.4018
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0018
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-c-3/kb-fmax-zug-by-formula-10-1-5-times-it",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, C.3",
+        "cite": "E DIN 45672-3:2023-02 Annex C, C.3"
+      },
+      "quantity": "KB_Fmax,Zug by Formula (10), 1,5 times it",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.6
+      },
+      "computed": {
+        "value": 0.6026
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0026
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-c-3/v-max-by-formula-12-3-times-that-mm-s",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, C.3",
+        "cite": "E DIN 45672-3:2023-02 Annex C, C.3"
+      },
+      "quantity": "v_max by Formula (12), 3 times that, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.81
+      },
+      "computed": {
+        "value": 1.808
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-c-3/kb-ftr-of-the-day-by-formula-11-200-trams-at-0-7-the-print-s-0-11-puts-alpha-under-the-root-once-not-squared",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, C.3",
+        "cite": "E DIN 45672-3:2023-02 Annex C, C.3"
+      },
+      "quantity": "KB_FTr of the day by Formula (11), 200 trams at 0,7 (the print's 0,11 puts alpha under the root once, not squared)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.09
+      },
+      "computed": {
+        "value": 0.0904
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0004
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-c-3/kb-ftr-of-the-night-by-formula-11-20-trams-at-0-7-the-print-s-0-05-puts-alpha-under-the-root-once-not-squared",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, C.3",
+        "cite": "E DIN 45672-3:2023-02 Annex C, C.3"
+      },
+      "quantity": "KB_FTr of the night by Formula (11), 20 trams at 0,7 (the print's 0,05 puts alpha under the root once, not squared)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.04
+      },
+      "computed": {
+        "value": 0.0404
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0004
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-table-c-1/l-v-at-4-hz-by-formula-1",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, Table C.1",
+        "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1"
+      },
+      "quantity": "L_v at 4 Hz by Formula (1)",
+      "kind": "scalar",
+      "expected": {
+        "value": 28.9
+      },
+      "computed": {
+        "value": 28.8
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.100000001
+      },
+      "deviation": {
+        "value": -0.1
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-table-c-1/l-v-at-20-hz-by-formula-1",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, Table C.1",
+        "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1"
+      },
+      "quantity": "L_v at 20 Hz by Formula (1)",
+      "kind": "scalar",
+      "expected": {
+        "value": 75.6
+      },
+      "computed": {
+        "value": 75.6
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.100000001
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-table-c-1/l-v-at-63-hz-by-formula-1",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, Table C.1",
+        "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1"
+      },
+      "quantity": "L_v at 63 Hz by Formula (1)",
+      "kind": "scalar",
+      "expected": {
+        "value": 61.4
+      },
+      "computed": {
+        "value": 61.4
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.100000001
+      },
+      "deviation": {
+        "value": 7.11e-15
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-c-table-c-1/l-v-at-250-hz-by-formula-1",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex C, Table C.1",
+        "cite": "E DIN 45672-3:2023-02 Annex C, Table C.1"
+      },
+      "quantity": "L_v at 250 Hz by Formula (1)",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.8
+      },
+      "computed": {
+        "value": 20.8
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.100000001
+      },
+      "deviation": {
+        "value": -3.55e-15
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-table-2/kb-weighting-at-4-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Table 2",
+        "cite": "E DIN 45672-3:2023-02 Table 2"
+      },
+      "quantity": "KB weighting at 4 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": -4.7
+      },
+      "computed": {
+        "value": -4.7
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-table-2/kb-weighting-at-8-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Table 2",
+        "cite": "E DIN 45672-3:2023-02 Table 2"
+      },
+      "quantity": "KB weighting at 8 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": -1.7
+      },
+      "computed": {
+        "value": -1.7
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-table-2/kb-weighting-at-20-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Table 2",
+        "cite": "E DIN 45672-3:2023-02 Table 2"
+      },
+      "quantity": "KB weighting at 20 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": -0.3
+      },
+      "computed": {
+        "value": -0.3
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-table-2/kb-weighting-at-63-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Table 2",
+        "cite": "E DIN 45672-3:2023-02 Table 2"
+      },
+      "quantity": "KB weighting at 63 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-a/table-a-1-concrete-floor-at-8-hz-the-band-at-8-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex A",
+        "cite": "E DIN 45672-3:2023-02 Annex A"
+      },
+      "quantity": "Table A.1, concrete floor at 8 Hz, the band at 8 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 15.0
+      },
+      "computed": {
+        "value": 15.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-a/table-a-1-concrete-floor-at-20-hz-the-band-at-20-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex A",
+        "cite": "E DIN 45672-3:2023-02 Annex A"
+      },
+      "quantity": "Table A.1, concrete floor at 20 Hz, the band at 20 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 13.12
+      },
+      "computed": {
+        "value": 13.12
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-a/table-a-2-timber-floor-at-8-hz-the-band-at-4-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex A",
+        "cite": "E DIN 45672-3:2023-02 Annex A"
+      },
+      "quantity": "Table A.2, timber floor at 8 Hz, the band at 4 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.14
+      },
+      "computed": {
+        "value": 5.14
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-a/table-a-3-ground-to-a-basement-the-mean-at-31-5-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex A",
+        "cite": "E DIN 45672-3:2023-02 Annex A"
+      },
+      "quantity": "Table A.3, ground to a basement, the mean at 31,5 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": -9.3
+      },
+      "computed": {
+        "value": -9.3
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-a/table-a-4-ground-to-a-ground-floor-the-mean-at-12-5-hz",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex A",
+        "cite": "E DIN 45672-3:2023-02 Annex A"
+      },
+      "quantity": "Table A.4, ground to a ground floor, the mean at 12,5 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": -1.9
+      },
+      "computed": {
+        "value": -1.9
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-a/table-a-5-foundation-to-a-concrete-floor-the-mean-at-its-natural-frequency",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex A",
+        "cite": "E DIN 45672-3:2023-02 Annex A"
+      },
+      "quantity": "Table A.5, foundation to a concrete floor, the mean at its natural frequency",
+      "kind": "scalar",
+      "expected": {
+        "value": 17.26
+      },
+      "computed": {
+        "value": 17.26
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02/e-din-45672-3-2023-02-annex-a/table-a-6-foundation-to-a-timber-floor-the-mean-at-its-natural-frequency",
+      "domain": "railway-vibration-predicted-from-third-octave-spectra-e-din-45672-3-2023-02",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 45672-3:2023-02",
+        "clause": "Annex A",
+        "cite": "E DIN 45672-3:2023-02 Annex A"
+      },
+      "quantity": "Table A.6, foundation to a timber floor, the mean at its natural frequency",
+      "kind": "scalar",
+      "expected": {
+        "value": 21.93
+      },
+      "computed": {
+        "value": 21.93
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-example-8/kb-ftr-of-the-day-by-formula-6-144-metros-at-1-0-and-80-trams-at-0-7-a-track-the-print-says-0-099-8-which-its-three-decimal-r-m-s-give-its-four-decimal-inputs-give-0-099-7",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Example 8",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Example 8"
+      },
+      "quantity": "KB_FTr of the day by Formula (6), 144 metros at 1,0 and 80 trams at 0,7 a track (the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal inputs give 0,099 7)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0997
+      },
+      "computed": {
+        "value": 0.0997
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 2.08e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-table-1/night-a-u-of-a-mixed-area-the-one-cell-that-changes",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Table 1",
+        "cite": "E DIN 4150-2:2023-08 Table 1"
+      },
+      "quantity": "Night A_u of a mixed area, the one cell that changes",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.1
+      },
+      "computed": {
+        "value": 0.1
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-ftm-zug-of-the-metro-north-by-formula-5",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_FTm,Zug of the metro north by Formula (5)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.037
+      },
+      "computed": {
+        "value": 0.0365
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-fmax-zug-of-the-metro-north-by-formula-7",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_Fmax,Zug of the metro north by Formula (7)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.055
+      },
+      "computed": {
+        "value": 0.0548
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-ftm-zug-of-the-metro-south-by-formula-5",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_FTm,Zug of the metro south by Formula (5)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.047
+      },
+      "computed": {
+        "value": 0.0468
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-fmax-zug-of-the-metro-south-by-formula-7",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_Fmax,Zug of the metro south by Formula (7)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.07
+      },
+      "computed": {
+        "value": 0.0701
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-ftm-zug-of-the-tram-east-by-formula-5",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_FTm,Zug of the tram east by Formula (5)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.406
+      },
+      "computed": {
+        "value": 0.4061
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-fmax-zug-of-the-tram-east-by-formula-7",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_Fmax,Zug of the tram east by Formula (7)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.609
+      },
+      "computed": {
+        "value": 0.6091
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-ftm-zug-of-the-tram-west-by-formula-5",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_FTm,Zug of the tram west by Formula (5)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.568
+      },
+      "computed": {
+        "value": 0.5676
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0004
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-table-b-1/kb-fmax-zug-of-the-tram-west-by-formula-7",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Table B.1",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Table B.1"
+      },
+      "quantity": "KB_Fmax,Zug of the tram west by Formula (7)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.851
+      },
+      "computed": {
+        "value": 0.8514
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0004
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-example-9/kb-ftr-of-the-nullfall-by-day-formula-6-with-n-r-1920",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Example 9",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Example 9"
+      },
+      "quantity": "KB_FTr of the nullfall by day, Formula (6) with N_r = 1920",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.039
+      },
+      "computed": {
+        "value": 0.0386
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0004
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-example-9/kb-ftr-of-the-nullfall-by-night-formula-6-with-n-r-960-the-print-divides-by-920-and-gets-0-066",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Example 9",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Example 9"
+      },
+      "quantity": "KB_FTr of the nullfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0,066)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.065
+      },
+      "computed": {
+        "value": 0.0649
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-example-9/kb-ftr-of-the-planfall-by-day-formula-6-with-n-r-1920",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Example 9",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Example 9"
+      },
+      "quantity": "KB_FTr of the planfall by day, Formula (6) with N_r = 1920",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.046
+      },
+      "computed": {
+        "value": 0.046
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 3.66e-05
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-annex-b-example-9/kb-ftr-of-the-planfall-by-night-formula-6-with-n-r-960-the-print-divides-by-920-and-gets-0-096",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Annex B, Example 9",
+        "cite": "E DIN 4150-2:2023-08 Annex B, Example 9"
+      },
+      "quantity": "KB_FTr of the planfall by night, Formula (6) with N_r = 960 (the print divides by 920 and gets 0,096)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.094
+      },
+      "computed": {
+        "value": 0.0937
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0003
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-table-3/a-u-of-stage-i-for-3-working-days-as-printed",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Table 3",
+        "cite": "E DIN 4150-2:2023-08 Table 3"
+      },
+      "quantity": "A_u of stage I for 3 working days, as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.67
+      },
+      "computed": {
+        "value": 0.67
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-table-3/a-r-of-stage-i-for-3-working-days-as-printed",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Table 3",
+        "cite": "E DIN 4150-2:2023-08 Table 3"
+      },
+      "quantity": "A_r of stage I for 3 working days, as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.37
+      },
+      "computed": {
+        "value": 0.37
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-table-3/a-u-of-stage-ii-for-5-working-days-as-printed",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Table 3",
+        "cite": "E DIN 4150-2:2023-08 Table 3"
+      },
+      "quantity": "A_u of stage II for 5 working days, as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.93
+      },
+      "computed": {
+        "value": 0.93
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-table-3/a-r-of-stage-ii-for-5-working-days-as-printed",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Table 3",
+        "cite": "E DIN 4150-2:2023-08 Table 3"
+      },
+      "quantity": "A_r of stage II for 5 working days, as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.67
+      },
+      "computed": {
+        "value": 0.67
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-table-3/a-u-of-stage-iii-for-6-working-days-as-printed",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Table 3",
+        "cite": "E DIN 4150-2:2023-08 Table 3"
+      },
+      "quantity": "A_u of stage III for 6 working days, as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.27
+      },
+      "computed": {
+        "value": 1.27
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08/e-din-4150-2-2023-08-table-3/a-r-of-stage-iii-for-6-working-days-as-printed",
+      "domain": "railway-vibration-by-category-of-train-e-din-4150-2-2023-08",
+      "reference": {
+        "kind": "book",
+        "designation": "E DIN 4150-2:2023-08",
+        "clause": "Table 3",
+        "cite": "E DIN 4150-2:2023-08 Table 3"
+      },
+      "quantity": "A_r of stage III for 6 working days, as printed",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.03
+      },
+      "computed": {
+        "value": 1.03
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
       "verdict": "pass"
     },
     {

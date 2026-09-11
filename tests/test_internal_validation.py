@@ -35,6 +35,7 @@ from phonometry._internal.validation import (
     check_engine,
     require_1d_signal,
     require_above_absolute_zero_array,
+    require_count,
     require_equal_shapes,
     require_finite_array,
     require_finite_fields,
@@ -373,3 +374,19 @@ def test_a_non_numeric_field_is_refused_naming_the_field() -> None:
         result = _Result(first=garbage)
         with pytest.raises(ValueError, match="_Result: 'first' must be numeric"):
             require_finite_fields(result, "first")
+
+
+def test_a_count_is_a_whole_number_and_nothing_else() -> None:
+    """A count of storeys or harmonics: an int, a numpy integer or a whole
+    float, never a bool, a string, an infinity or a fraction, and at least
+    the minimum asked for.
+    """
+    assert require_count(3, "storeys") == 3
+    assert require_count(3.0, "storeys") == 3
+    assert require_count(np.int64(4), "storeys") == 4
+    assert require_count(0, "storeys", minimum=0) == 0
+    for bad in (True, "3", float("inf"), float("nan"), 2.9, 0, -1, None, [3]):
+        with pytest.raises(
+            ValueError, match="'storeys' must be a whole number, at least 1"
+        ):
+            require_count(bad, "storeys")

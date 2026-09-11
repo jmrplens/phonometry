@@ -199,6 +199,9 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`vibration.immission.ground`](/phonometry/reference/api/vibration/ground/) | The elastic properties of the ground from its wave speeds (DIN 45672-1:2009-12). |
 | [`vibration.immission.coupling`](/phonometry/reference/api/vibration/coupling/) | Mounting the transducer, and what the meter may be wrong by (DIN 45669-2:2005-06). |
 | [`vibration.immission.people`](/phonometry/reference/api/vibration/people/) | Vibration and the people in a building (DIN 4150-2:1999-06). |
+| [`vibration.immission.train_categories`](/phonometry/reference/api/vibration/train-categories/) | Railway vibration by category of train (E DIN 4150-2:2023-08, 6.5.3). |
+| [`vibration.immission.railway_prediction`](/phonometry/reference/api/vibration/railway-prediction/) | Predicting railway vibration from third-octave spectra (E DIN 45672-3:2023-02). |
+| [`vibration.immission.prediction`](/phonometry/reference/api/vibration/prediction/) | Predicting vibration before it is measured (DIN 4150-1:2001-06). |
 
 ## Environmental acoustics
 

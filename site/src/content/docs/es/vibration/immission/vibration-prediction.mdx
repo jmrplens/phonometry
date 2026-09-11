@@ -1,0 +1,298 @@
+---
+title: "Predecir la vibración antes de medir (DIN 4150-1)"
+description: "Las formas que la DIN 4150-1 da a toda predicción: el decaimiento de la vibración con la distancia más allá del límite del campo lejano, con un exponente según el tipo de fuente y de onda y un amortiguamiento del terreno; lo que le hacen una cimentación y un forjado; una voladura, una masa que cae y una nave de máquinas en el campo lejano; y a qué frecuencias excita una vía. Las constantes que la norma fija, las dos figuras que dibuja a partir de sus propias fórmulas, y los errores de su impresión."
+references:
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2001
+    title: "Erschütterungen im Bauwesen — Teil 1: Vorermittlung von Schwingungsgrößen"
+    designation: "DIN 4150-1:2001-06"
+    primary: true
+    note: "Las fórmulas (1) a (7), los exponentes de la figura 1, las curvas de amortiguamiento de la figura 2, el nomograma de la figura 3 leído de la página, y los valores de referencia y bandas de frecuencia que los apartados 4 y 5 dan para el terreno, el edificio y cada tipo de fuente. Los casos medidos del anexo A se describen, no se implementan; las figuras A.18 y A.19, que la norma dibuja a partir de las fórmulas (7) y (2) con todos los parámetros impresos, son las filas de conformidad."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+La parte 1 de la DIN 4150 es la primera pregunta de la serie. Antes de volar
+una cantera, abatir una chimenea, hincar un pilote o construir una línea,
+alguien tiene que decir cuánta vibración llegará a las casas y cuánta de ella
+sentirán los forjados, y la parte 1 da las formas de todas las respuestas. No
+da receta, y lo dice en su prólogo: las constantes de un caso real salen de
+voladuras de prueba, de un terreno comparable, de una medida con unas pocas
+máquinas en marcha. Lo que sí fija, lo fija con claridad, y su anexo A enseña
+las formas en el terreno veintisiete veces.
+
+## 1. Hasta dónde llega la vibración
+
+Toda fuente tiene un campo cercano y un campo lejano, y el límite es
+`R₁ = a/2 + λ_R` (fórmula (1)): la mitad de la extensión de la fuente en la
+dirección de propagación más una longitud de onda de la onda superficial. Más
+cerca de eso nada de lo de aquí vale. Más allá, la amplitud de velocidad decae
+como
+
+```text
+v = v₁ · (R / R₁)^-n · exp[-α (R - R₁)]
+```
+
+(fórmula (2)): divergencia con un exponente `n` que la figura 1 fija con tres
+preguntas de sí o no, y amortiguamiento del material con `α ≈ 2π D / λ`, la
+relación de amortiguamiento del terreno sobre la longitud de onda que importa.
+El exponente es 0 para una fuente lineal armónica transportada por una onda
+superficial y gana 0,5 por cada una de estas tres cosas: puntual en vez de
+lineal, impulsiva en vez de armónica, y onda de volumen en vez de onda
+superficial, hasta 1,5 para una fuente puntual impulsiva en una onda de
+volumen. Un tren es una cadena de fuentes puntuales no excitadas en fase y
+decae con algo entre 0,3 y 0,5. Para un terreno suelto una primera estimación
+puede tomar una relación de amortiguamiento de 0,01 como mucho; más hay que
+demostrarlo.
+
+```python
+from phonometry import vibration
+
+print(vibration.geometric_exponent(geometry="point", character="impulsive", wave="surface"))  # 1.0
+print(vibration.geometric_exponent(geometry="line", character="harmonic", wave="surface"))  # 0.0
+print(vibration.reference_distance_m(6.0, rayleigh_wavelength_m=12.5))  # 15.5
+
+# Anexo A, figura A.19: una nave de máquinas medida a 0,44 mm/s a 13 m,
+# con D = 0,01 y una longitud de onda de 12,5 m.
+alpha = vibration.attenuation_coefficient_per_m(0.01, wavelength_m=12.5)
+print(f"{alpha:.4f} 1/m")  # 0.0050 1/m
+decay = vibration.far_field_velocity_mm_s(
+    0.44, [20.0, 40.0, 80.0], reference_distance_m=13.0, exponent=1.0, attenuation_per_m=alpha
+)
+print(decay.round(3))  # [0.276 0.125 0.051]
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_propagation_decay.svg" alt="Velocidad vertical en milímetros por segundo frente a la distancia de 0 a 80 metros, sobre un eje de 0 a 0,5. Tres curvas arrancan juntas en 0,44 a 13 metros: una línea verde continua para un exponente de 0 que cae suave hasta 0,31 a 80 metros solo por el amortiguamiento, una línea azul discontinua para 0,5 que llega a 0,13, y una línea roja de puntos para 1 que llega a 0,05. Cuatro cruces negras son los puntos medidos, a 13, 23, 43 y 73 metros, y caen entre las dos curvas inferiores y luego por debajo de ellas" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+distances = np.linspace(13.0, 80.0, 200)
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for exponent in (0.0, 0.5, 1.0):
+    ax.plot(
+        distances,
+        vibration.far_field_velocity_mm_s(
+            0.44, distances, reference_distance_m=13.0, exponent=exponent, attenuation_per_m=0.005
+        ),
+        label=f"$n$ = {exponent:g}",
+    )
+ax.plot([13.0, 23.0, 43.0, 73.0], [0.44, 0.27, 0.09, 0.015], "k+", markersize=11, label="medido")
+ax.set_xlabel("Distancia [m]")
+ax.set_ylabel("Velocidad vertical [mm/s]")
+ax.legend()
+```
+
+</details>
+
+El amortiguamiento solo ya merece dibujarse, y la figura 2 lo dibuja para una
+relación de amortiguamiento de 0,01 y una velocidad de onda de 200 m/s: en
+100 m el terreno se queda con el 27 % de la amplitud a 10 Hz y con el 79 % a
+50 Hz, que es por lo que las frecuencias bajas son lo que llega a distancia.
+
+```python
+from phonometry import vibration
+
+for frequency in (10.0, 50.0):
+    left = vibration.material_damping_factor(
+        [100.0], damping_ratio=0.01, frequency_hz=frequency, wave_speed_m_s=200.0
+    )[0]
+    print(f"{frequency:g} Hz: queda {left:.3f} de la amplitud a los 100 m")
+# 10 Hz: queda 0.730 de la amplitud a los 100 m
+# 50 Hz: queda 0.208 de la amplitud a los 100 m
+```
+
+## 2. Hacia dentro del edificio, y planta arriba
+
+Un edificio sobre el terreno es una masa sobre un muelle, con la frecuencia
+propia de la fórmula (3), `f_B = √(k_B / m_B) / 2π`, para la dirección
+vertical y vibración predominantemente armónica: unos 15 Hz para una o dos
+plantas, de 8 Hz a 12 Hz para de dos a seis, por debajo de 8 Hz a partir de
+ahí, sobre un terreno de rigidez media con una velocidad de onda de cizalla de
+150 m/s a 200 m/s. A esa frecuencia la cimentación deja pasar como mucho
+`1 / (2 D₀)` de la amplitud del terreno, y para un terreno suelto `D₀` puede
+tomarse como 0,25, así que la cimentación amplifica por 2 como máximo; por
+encima puede suponerse una transferencia media de 0,5, y sobre roca no hay
+reducción ninguna. Un forjado amplifica después por como mucho `1 / (2 D₁)` en
+su propia resonancia, de 10 a 25 para un forjado de hormigón con una relación
+de amortiguamiento entre 0,05 y 0,02, bajo el supuesto de que el edificio se
+excita en fase en toda su huella, que es el lado seguro para una fuente
+cercana, móvil o impulsiva. Y la frecuencia propia horizontal más baja de un
+edificio de cinco plantas o más es de unos `10 / n` Hz (fórmula (4)), que
+importa donde un edificio alto y esbelto se encuentra con una frecuencia de
+excitación baja.
+
+```python
+from phonometry import vibration
+
+print(f"{vibration.soil_building_natural_frequency_hz(2.5e9, mass_kg=4.0e5):.1f} Hz")  # 12.6 Hz
+print(vibration.soil_building_frequency_guide_hz(4))  # (8.0, 12.0)
+print(vibration.foundation_transfer_max())  # 2.0
+print(f"{vibration.floor_transfer_max(0.03):.1f}")  # 16.7
+print(vibration.storey_frequency_hz(8))  # 1.25
+```
+
+## 3. Sucesos aislados: una voladura y una masa que cae
+
+En el campo lejano una voladura sigue `v_max = k (L/L₀)^b (R/R₀)^-m`
+(fórmula (5)) con la carga por retardo `L` frente a 1 kg, la distancia frente
+a 1 m, y tres constantes que salen de voladuras de prueba o de casos
+comparables en terreno, método y rango de distancias, con margen para la
+dispersión; la norma no imprime ninguna. Una masa que cae sigue lo mismo con
+la raíz de su energía de caída `G · h` (fórmula (6)), que para una chimenea
+abatida suele ser la fuente mayor, y la voladura de demolición la menor. La
+voladura de cantera muy rara vez importa más allá de 1500 m, la de obra más
+allá de 400 m.
+
+```python
+from phonometry import vibration
+
+# Constantes de las voladuras de prueba del propio usuario; la norma no imprime ninguna.
+peak = vibration.blast_peak_velocity_mm_s(
+    50.0, [300.0, 600.0], coefficient_mm_s=1200.0, charge_exponent=0.6, distance_exponent=1.7
+)
+print(peak.round(2))  # [0.77 0.24]
+
+# Una chimenea de 2 600 t con el centro de masas a 70 m de altura: 25 506 kN a lo largo de 70 m.
+energy = vibration.fall_energy_kj(25506.0, drop_height_m=70.0)
+print(f"{energy:.0f} kJ")  # 1785420 kJ
+impact = vibration.impact_peak_velocity_mm_s(energy, [50.0, 150.0], coefficient_mm_s=0.02, distance_exponent=1.0)
+print(impact.round(1))  # [0.5 0.2]
+```
+
+## 4. A qué frecuencias excitan una vía y una nave de máquinas
+
+Un tren excita el terreno a su velocidad sobre el espaciado de lo que se
+repite a lo largo de la vía o alrededor de la rueda, las traviesas primero, a
+entre 0,6 m y 0,9 m, y en los múltiplos de eso, mientras las partes del
+vehículo conservan sus propias frecuencias sea cual sea la velocidad: la caja
+sobre su suspensión secundaria de 1 Hz a 3 Hz, el bogie sobre la primaria de
+6 Hz a 10 Hz. La vía sobre balasto deja pasar con preferencia de 40 Hz a
+80 Hz, un túnel con mantas bajo balasto de 15 Hz a 40 Hz, un sistema
+masa-muelle de 5 Hz a 20 Hz, y la vibración del carril llega a unos 80 m, más
+lejos sobre capas blandas.
+
+```python
+from phonometry import vibration
+
+print(vibration.track_excitation_frequency_hz(80 / 3.6, spacing_m=0.6, harmonics=2).round(1))  # [37.  74.1]
+print(vibration.TRACK_TRANSMITTED_BANDS_HZ["ballast"])  # (40.0, 80.0)
+```
+
+Una nave de máquinas parecidas funcionando juntas da, en un punto exterior,
+`v_N = χ · v_B · √N` (fórmula (7)): la velocidad medida con `N_B` de ellas en
+marcha, escalada a `N` con una corrección `χ` que la norma imprime solo como
+un nomograma, la figura 3, para medidas hechas con 3, 5, 10, 30, 60 o 100
+máquinas. El nomograma está aquí como sus seis curvas leídas de la página a
+1/500, el grosor de su trazo, y la propia comprobación que la norma hace de
+él, la figura A.18, dibujada para una nave medida a 0,44 mm/s con tres
+máquinas en marcha, se reproduce dentro del 6 %: las medidas siguen la curva
+hasta unas sesenta máquinas, el grupo más cercano, y se quedan planas más
+allá, porque los grupos añadidos después están más lejos.
+
+```python
+from phonometry import vibration
+
+print(vibration.machine_count_correction([12.0], reference_count=3).round(3))  # [0.448]
+print(vibration.machine_hall_velocity_mm_s(0.44, [12.0, 44.0, 56.0], reference_count=3).round(2))
+# [0.68 0.89 0.97], frente a 0.57, 0.95 y 1.04 medidos
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/machine_count_correction.svg" alt="Seis curvas decrecientes de la corrección chi frente al número de máquinas en marcha de 4 a 100, sobre un eje de 0 a 0,6, una curva por recuento de referencia de 3, 5, 10, 30, 60 y 100 máquinas, la curva superior arrancando en 0,55 y aplanándose hasta 0,29 y la inferior arrancando en 0,19 y aplanándose hasta 0,10. Unos puntos pequeños marcan los puntos leídos del nomograma impreso, y una nota dice que se leyeron a 1/500" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+
+from phonometry import vibration
+
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for reference, chi in vibration.MACHINE_COUNT_CORRECTION.items():
+    ax.plot(vibration.MACHINE_COUNT_AXIS, chi, marker="o", markersize=3, label=f"$N_B$ = {reference}")
+ax.set_xlabel("Máquinas en marcha")
+ax.set_ylabel(r"Corrección $\chi$")
+ax.legend(ncol=2)
+```
+
+</details>
+
+## 5. Cuatro cosas mal impresas
+
+Las listas de símbolos de las fórmulas (5) y (6) dan la distancia en
+milímetros frente a una referencia de un metro, cuando la fórmula (2) y todos
+los ejes del anexo A dicen que son metros. El apartado 5.2.3 habla de
+vibrohincadores de frecuencia de trabajo baja y escribe `f > 30 Hz`, el signo
+al revés tras un párrafo que llama favorables a las frecuencias altas por
+encima de 35 Hz. La leyenda de la figura A.2 da la línea continua a la
+componente vertical y la de trazo y punto a la radial, y el dibujo las tiene
+al revés. El A.5.1 imprime un momento excéntrico en newtons. Y el sexto
+punto medido de la figura A.18, rotulado todos los grupos de una nave de 252
+máquinas, está en 110, el recuento de los grupos de la nave más cercana al
+punto de medida. La [página de erratas](/phonometry/es/reference/errata/)
+tiene las cinco con sus páginas.
+
+<Scope>
+
+## Qué cubre esta guía
+
+<ScopeClaim status="covered">
+**La propagación**: el límite del campo lejano de la fórmula (1), el
+decaimiento de la fórmula (2) con los exponentes de la figura 1 y el
+amortiguamiento del terreno, y el factor de amortiguamiento de la figura 2 por
+sí solo.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+**El edificio**: la frecuencia propia de la fórmula (3) y sus valores de
+referencia por plantas, la transferencia de una cimentación y de un forjado en
+resonancia, y la fórmula de plantas de la fórmula (4). **Las fuentes**: la
+voladura y la masa que cae de las fórmulas (5) y (6), la nave de máquinas de
+la fórmula (7) con el nomograma de la figura 3 leído de la página, las
+frecuencias de excitación de una vía, y las bandas de frecuencia, los
+intervalos y las constantes que el apartado 5 da a sus fuentes.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+**Ninguna constante para un caso real.** Los `k`, `b` y `m` de una voladura y
+los `k` y `m` de un impacto los pone el usuario; la norma no imprime ninguno y
+la biblioteca no lleva ninguno. Los casos medidos del anexo A se describen en
+la norma y no se reproducen aquí, y sus dos figuras dibujadas a partir de las
+fórmulas se sujetan como filas de conformidad, no se ofrecen como datos.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún campo cercano.** Más cerca de `R₁` la norma pide una investigación
+numérica o experimental propia, y la biblioteca rechaza la distancia.
+</ScopeClaim>
+
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Predecir la vibración ferroviaria (E DIN 45672-3)](/phonometry/es/vibration/immission/railway-prediction/):
+  la misma ley de decaimiento como cadena en tercios de octava, con la
+  transferencia del edificio como tablas.
+- [Vibración y personas en edificios (DIN 4150-2)](/phonometry/es/vibration/immission/people-in-buildings/)
+  y [Daños por vibración en estructuras (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  contra qué se juzgan los números predichos.
+- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
+  las velocidades de onda del terreno de las que sale la longitud de onda de
+  aquí.
+- Referencia de API:
+  [`vibration.immission.prediction`](/phonometry/es/reference/api/vibration/prediction/).
+
+</SeeAlso>

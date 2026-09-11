@@ -117,6 +117,15 @@ assessment it makes possible, and the railway measurements it is used for.
   the guide values a reading is held to by area and time of day, the order the
   standard reads them in, the assessment vibration severity of a day of
   exposure, and the rules for blasting, roads, railways and construction sites.
+- [Railway vibration by category of train (E DIN 4150-2)](immission/railway-categories.md):
+  the draft that is to replace DIN 4150-2, a railway judged by category of
+  train with a weighting factor per kind, and the rest of its changes.
+- [Predicting railway vibration (E DIN 45672-3)](immission/railway-prediction.md):
+  a railway's spectrum on a floor built term by term before there is anything
+  to measure, and the KB values formed from it.
+- [Predicting vibration before measuring (DIN 4150-1)](immission/vibration-prediction.md):
+  the decay with distance, what a building does to it, and the shapes of a
+  blast, a falling mass and a hall of machines.
 
 ## What this section does not cover
 

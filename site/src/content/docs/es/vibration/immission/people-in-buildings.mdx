@@ -59,7 +59,7 @@ que su figura 2 dibuja como diagrama de flujo:
 from phonometry import vibration
 
 guide = vibration.guide_values("commercial")
-print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15)
+print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', edition='1999')
 
 # Anexo C, ejemplo 1: la vibración estacionaria de 5 Hz de una serrería, KB_Fmax = 0.25.
 verdict = vibration.assess_people_in_buildings(0.25, guide)
@@ -204,7 +204,7 @@ for days in (1, 3, 6, 7, 30):
 # 30 días laborables: A_u 0.30, A_r 0.20
 
 urban = vibration.guide_values("residential", time_of_day="night", source="urban_railway")
-print(urban)  # GuideValues(a_u=0.15, a_o=0.2, a_r=0.075)
+print(urban)  # GuideValues(a_u=0.15, a_o=0.2, a_r=0.075, time_of_day='night', edition='1999')
 ```
 
 ## 4. Un ferrocarril, clase a clase
@@ -303,6 +303,27 @@ encima, mientras la (A.1a) de al lado sí lleva la raíz, la (A.2) de debajo usa
 `KB²_FTm,j` para el cuadrado medio y el ejemplo 8 aplica la (A.1b) con la
 raíz. La biblioteca toma la raíz, los tests la fijan al ejemplo y la [página de
 erratas](/phonometry/es/reference/errata/) tiene la lectura.
+
+## 7. El borrador de 2023
+
+La E DIN 4150-2:2023-08 va a sustituir a esta edición, y la biblioteca la lee
+con `edition="2023"` en `guide_values` y `assess_people_in_buildings`. Cambia
+una celda de la tabla 1, el `A_u` nocturno de una zona mixta baja a 0,1; deja
+de excusar una `KB_Fmax` dentro del 15 % por encima de `A_u`; compara un
+ferrocarril con `A_o` y forma sus números por categoría de tren, con un factor
+de ponderación por tipo de tren, y una carretera de noche no; y añade una
+carretera existente cuyos vecinos tienen que soportar un 50 % más, y un suceso
+sísmico inducido sujeto al `A_o` del día. Los valores de referencia llevan la
+edición para la que se leyeron y el veredicto la sigue. El ferrocarril y el
+resto de los cambios tienen
+[su propia página](/phonometry/es/vibration/immission/railway-categories/).
+
+```python
+from phonometry import vibration
+
+print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
+# GuideValues(a_u=0.1, a_o=0.3, a_r=0.07, time_of_day='night', edition='2023')
+```
 
 <Scope>
 

@@ -251,6 +251,9 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.vibration.immission.ground",
             "phonometry.vibration.immission.coupling",
             "phonometry.vibration.immission.people",
+            "phonometry.vibration.immission.train_categories",
+            "phonometry.vibration.immission.railway_prediction",
+            "phonometry.vibration.immission.prediction",
         ),
     ),
     Section(
@@ -453,6 +456,15 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "KB_CORNER_HZ": "phonometry.vibration.immission.vibration_meter",
     "TAKT_DURATION_S": "phonometry.vibration.immission.vibration_meter",
     "TAKT_SUPPRESSION_THRESHOLD": "phonometry.vibration.immission.vibration_meter",
+    # The draft railway assessment and the draft prediction share names
+    # with the people module, the meter and the Part 2 evaluation.
+    "ASSESSMENT_TAKT_COUNT": "phonometry.vibration.immission.people",
+    "GUIDE_VALUES": "phonometry.vibration.immission.people",
+    "GUIDE_VALUES_2023": "phonometry.vibration.immission.people",
+    "GuideValues": "phonometry.vibration.immission.people",
+    "TRAIN_KB_FMAX_FACTOR": "phonometry.vibration.immission.train_categories",
+    "VELOCITY_LEVEL_REFERENCE_MM_S": "phonometry.vibration.immission.railway",
+    "band_sum_level": "phonometry.vibration.immission.railway",
     # The ERB_N / Cam constants are owned by erb_scale and imported by the
     # ISO 532-2 loudness model, so a plain scan sees them in both modules.
     "ERB_C1": "phonometry.psychoacoustics.erb_scale",

@@ -45,9 +45,7 @@ def test_reading_figure_draws_the_two_numbers_a_meter_displays() -> None:
         if len(set(np.asarray(line.get_ydata()).tolist())) == 1
     ]
     assert reading.kbf_max == pytest.approx(max(horizontals))
-    assert any(
-        value == pytest.approx(reading.kbf_takt_rms) for value in horizontals
-    )
+    assert any(value == pytest.approx(reading.kbf_takt_rms) for value in horizontals)
     markers = [line for line in ax.lines if line.get_marker() == "s"]
     assert len(markers) == 1
     assert markers[0].get_ydata() == pytest.approx(reading.takt_maxima)

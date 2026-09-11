@@ -38,8 +38,8 @@ import phonometry as ph
 from ..registry import Outcome, numeric, register
 
 _IMMISSION = "Vibration immission measurement (DIN 45669)"
-_EDITION = "DIN 45669-1:2010"
-_CORRIGENDUM = "DIN 45669-1:2010 Ber 1"
+_EDITION = "DIN 45669-1:2010-09"
+_CORRIGENDUM = "DIN 45669-1 Ber 1:2012-12"
 
 #: A rate that carries the whole building working range with room above it,
 #: and a record long enough for the running r.m.s. to have settled. 315 Hz is
@@ -277,7 +277,7 @@ def _register_pulse_response() -> None:
         printed = "continuous" if math.isinf(duration_ms) else f"{duration_ms:g} ms"
         register(
             _IMMISSION,
-            f"{_CORRIGENDUM}, Table 8",
+            f"{_CORRIGENDUM} Table 8",
             f"KB_Fmax of an 80 Hz burst train, {printed}, % of continuous",
         )(functools.partial(_chk_table_8, duration_ms))
 

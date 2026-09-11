@@ -149,9 +149,18 @@ _BODY_ALTERNATION = "|".join(re.escape(body) for body in _BODIES)
 #: because ``ISO 10140-5:2010+A1`` otherwise matches no year at all and the
 #: whole of ``10140-5:2010+A1`` falls into the clause, leaving the bare body as
 #: the document.
+#:
+#: Two more shapes a German designation is written in. The edition takes a
+#: month, because DIN and VDI identify an edition by it: ``DIN 45669-1:2010-09``
+#: matched no edition at all while the group stopped at the year, and fell
+#: back to the bare body. And a sheet, part or corrigendum number belongs to
+#: the designation, ``VDI 2081 Blatt 1`` and ``DIN 45669-1 Ber 1`` being
+#: documents of their own with dates of their own: read as the start of the
+#: clause, both sheets of VDI 2081 were one designation with no edition.
 _STANDARD = re.compile(
-    rf"^(?P<designation>(?:{_BODY_ALTERNATION})[ ]?[A-Za-z]?[\w./()-]*?)"
-    r"(?:(?P<sep>[:-])(?P<edition>\d{4}(?:\+A\d+)?))?"
+    rf"^(?P<designation>(?:{_BODY_ALTERNATION})[ ]?[A-Za-z]?[\w./()-]*?"
+    r"(?:\s(?:Blatt|Teil|Ber|Berichtigung)\s\d+)?)"
+    r"(?:(?P<sep>[:-])(?P<edition>\d{4}(?:-(?:0[1-9]|1[0-2]))?(?:\+A\d+)?))?"
     r"(?:\s+(?P<clause>\S.*))?$"
 )
 

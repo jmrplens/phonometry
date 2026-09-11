@@ -34,6 +34,21 @@ import check_conformance_artifact as gate
 import conformance_report as cr
 from conformance import artifact, compare, metrics, references, registry, units
 
+#: A clause that opens with a sheet, part or corrigendum number, which belongs
+#: to the designation of a standard rather than to the place inside it.
+_SHEET_OPENER = re.compile(r"(?:Blatt|Teil|Ber|Berichtigung)\s+\d+\b")
+
+#: The documentation tree whose frontmatter names every document a guide cites.
+_DOCS = (
+    pathlib.Path(__file__).resolve().parent.parent / "site" / "src" / "content" / "docs"
+)
+
+#: An edition identified by year and month, the way DIN and VDI identify one.
+_MONTH_DATED = re.compile(r":(?:19|20)\d{2}-(?:0[1-9]|1[0-2])$")
+
+#: One ``designation:`` line of a page's frontmatter reference list.
+_FRONTMATTER_DESIGNATION = re.compile(r'^\s*designation:\s*"([^"]+)"', re.MULTILINE)
+
 # One xdist worker runs this module with the report smoke tests: the registry
 # memoizes each check per process, so building the document here and rendering
 # the report there compute every check once instead of once per worker.
@@ -244,6 +259,130 @@ def test_an_amended_edition_is_still_an_edition() -> None:
         "ISO 10140-5",
         "2010+A1",
         "Annex B, Table B.1",
+    )
+
+
+def test_an_edition_dated_to_the_month_keeps_its_month() -> None:
+    """DIN and VDI identify an edition by year and month, and so must the split.
+
+    The edition group took four digits and nothing after them, so
+    ``DIN 45669-1:2010-09`` matched no edition at all and fell back to the
+    bare body, and the way round it that the tree took was to cut the month
+    off the citation until it fitted. That is the reference losing exactly
+    what distinguishes one edition of a DIN from the next.
+    """
+    for cite, split in (
+        ("DIN 45669-1:2010-09 Table 9", ("DIN 45669-1", "2010-09", "Table 9")),
+        ("DIN 4150-3:1999-02 Bild 1", ("DIN 4150-3", "1999-02", "Bild 1")),
+        ("DIN 45692:2009-08 Clause 6", ("DIN 45692", "2009-08", "Clause 6")),
+    ):
+        reference = references.parse(cite, overrides={})
+        assert (reference.designation, reference.edition, reference.clause) == split
+
+
+def test_a_sheet_or_a_corrigendum_is_part_of_the_designation() -> None:
+    """``VDI 2081 Blatt 1`` and ``Blatt 2`` are two documents, and so is a
+    corrigendum: each has its own date and its own entry in a bibliography.
+
+    Read with the sheet in the clause, both sheets of VDI 2081 were one
+    designation with no edition, and the report joined an equation of the 2001
+    guideline and a worked example of the 2005 one onto a single row.
+    """
+    for cite, split in (
+        (
+            "VDI 2081 Blatt 1:2001-07 Eq. (13)",
+            ("VDI 2081 Blatt 1", "2001-07", "Eq. (13)"),
+        ),
+        (
+            "VDI 2081 Blatt 2:2005-05 Table 1, element 1",
+            ("VDI 2081 Blatt 2", "2005-05", "Table 1, element 1"),
+        ),
+        (
+            "DIN 45669-1 Ber 1:2012-12 Table 8",
+            ("DIN 45669-1 Ber 1", "2012-12", "Table 8"),
+        ),
+    ):
+        reference = references.parse(cite, overrides={})
+        assert (reference.designation, reference.edition, reference.clause) == split
+
+
+def test_no_clause_opens_with_a_sheet_or_a_corrigendum(committed: dict) -> None:
+    """The committed artefact, asked the question the parser was not.
+
+    A sheet, part or corrigendum number that opens a clause is a piece of the
+    designation that the split dropped, whatever the designation it left
+    behind looks like: ``VDI 2081`` carries digits, so the check above that
+    catches a bare body never fired for it.
+    """
+    dropped = [
+        reference["cite"]
+        for check in committed["checks"]
+        for reference in [check["reference"]]
+        if reference["kind"] in {"standard", "report"}
+        and _SHEET_OPENER.match(reference.get("clause") or "")
+    ]
+    assert dropped == []
+
+
+def test_a_dated_edition_is_the_edition_the_guides_cite(committed: dict) -> None:
+    """For the bodies that date an edition to the month, the report and the
+    guides name the same document.
+
+    The site bibliography carries each designation as the guide that
+    implements it cites it, and the conformance rows were free to drift from
+    it: DIN 4150-3 was 1999-02 on its page and 1999 in the report. Asked only
+    of DIN and VDI, because those are the bodies whose month is part of the
+    edition rather than a publication detail.
+    """
+    cited = set()
+    for page in _DOCS.rglob("*.md*"):
+        cited.update(_FRONTMATTER_DESIGNATION.findall(page.read_text(encoding="utf-8")))
+    drifted = sorted(
+        {
+            named
+            for check in committed["checks"]
+            for reference in [check["reference"]]
+            if reference["designation"].split(" ", 1)[0] in {"DIN", "VDI"}
+            for named in [_named_edition(reference)]
+            if named not in cited
+        }
+    )
+    assert drifted == []
+
+
+def test_every_dated_edition_in_the_guides_carries_its_month() -> None:
+    """The half the cross-check above cannot see.
+
+    Comparing the report with the guides catches a citation that drifted from
+    its page, and passes both when both were cut the same way: DIN 45692 was
+    ``2009`` on its pages and in the report, while the title page reads August
+    2009. So the guides are asked on their own, and a DIN or VDI designation
+    they cite has to name the month its edition is identified by.
+    """
+    undated = sorted(
+        {
+            designation
+            for page in _DOCS.rglob("*.md*")
+            for designation in _FRONTMATTER_DESIGNATION.findall(
+                page.read_text(encoding="utf-8")
+            )
+            if designation.split(" ", 1)[0] in {"DIN", "VDI", "E"}
+            and not _MONTH_DATED.search(designation)
+        }
+    )
+    assert undated == []
+
+
+def _named_edition(reference: dict) -> str:
+    """The designation with its edition, as a frontmatter reference writes it.
+
+    A citation of one of these bodies with no edition at all is itself the
+    drift the test is after, and comes back as the bare designation, which no
+    dated frontmatter entry can equal.
+    """
+    edition = reference.get("edition")
+    return (
+        f"{reference['designation']}:{edition}" if edition else reference["designation"]
     )
 
 

@@ -1,6 +1,6 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1030 numerical conformance checks against 409 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1030 numerical conformance checks against 410 standards enforced in CI.
 
 phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1030 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 78 domains.
 
@@ -37386,7 +37386,7 @@ STI/STIPA, and [Theory](https://jmrplens.github.io/phonometry/reference/theory/p
 
 ## Standards
 
-DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
+DIN 45692:2009-08, *Messtechnische Simulation der Hörempfindung
 Schärfe*: sharpness in acum (clause 6 weighting, Annex B von Bismarck and
 Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
 for ITT equipment — Part 2 (methods for describing human perception based on
@@ -42994,7 +42994,7 @@ check that pins each quantity to its standard's own expected value.
 | $N$ | Loudness: the perceived magnitude of a sound, anchored so that a 1 kHz tone at 40 dB SPL is exactly 1 sone. | sone | ISO 532-1:2017, clause 5 (stationary) and clause 6 (time-varying) | [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) |
 | $N'$ | Specific loudness: the loudness density along the critical-band scale, whose integral is $N$. | sone/Bark | ISO 532-1:2017 (sone/Cam form in ISO 532-2:2017, Formula 7) | [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) |
 | $L_\mathrm{N}$ | Loudness level: the level of the 1 kHz free-field tone judged equally loud as the sound. | phon | ISO 226:2023, Formula (2) (contours in Formula (1)) | [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) |
-| $S$ | Sharpness: the position of the centre of gravity of the specific loudness on the critical-band scale, normalised so that the reference narrow-band noise is exactly 1 acum. | acum | DIN 45692:2009, clause 6 | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
+| $S$ | Sharpness: the position of the centre of gravity of the specific loudness on the critical-band scale, normalised so that the reference narrow-band noise is exactly 1 acum. | acum | DIN 45692:2009-08, clause 6 | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
 | $R$ | Roughness: the perceived harshness of fast amplitude modulation, around 70 Hz, normalised so that the reference modulated tone is 1 asper. | asper | ECMA-418-2:2025, clause 7 (Formula 104) | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
 | $F$ | Fluctuation strength: the perceived slow amplitude modulation, around 4 Hz, normalised so that the reference modulated tone is 1 vacil. | vacil | ECMA-418-2:2025, clause 9 (Formula 163) | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
 | $T$ | Tonality: the perceived tonal content of a sound, derived from the autocorrelation of the band envelopes. | tu | ECMA-418-2:2025, clause 6 | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
@@ -44076,7 +44076,7 @@ degree.*
 
 ### Sharpness (DIN 45692)
 
-Sharpness condenses the high-frequency emphasis of a sound into one number: the $g(z)$-weighted first moment of the ISO 532-1 stationary specific-loudness pattern (DIN 45692:2009, Equation 1):
+Sharpness condenses the high-frequency emphasis of a sound into one number: the $g(z)$-weighted first moment of the ISO 532-1 stationary specific-loudness pattern (DIN 45692:2009-08, Equation 1):
 
 $$
 S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz} \ \text{acum}, \qquad
@@ -56212,7 +56212,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1030 numerical conformance checks across 78 domains and 409 standards, covering
+1030 numerical conformance checks across 78 domains and 410 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

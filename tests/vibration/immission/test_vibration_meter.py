@@ -51,7 +51,9 @@ def _settled(values: np.ndarray) -> np.ndarray:
     return values[int((RAMP_S + 3.0) * FS_HZ) :]
 
 
-@pytest.mark.parametrize(("frequency_hz", "printed"), list(im.KB_TEST_INDICATIONS.items()))
+@pytest.mark.parametrize(
+    ("frequency_hz", "printed"), list(im.KB_TEST_INDICATIONS.items())
+)
 def test_table_9_weighted_rows(frequency_hz: float, printed: tuple[float, ...]) -> None:
     """Table 9: the KB_F, KB_Fmax and KB_FTm a 1 mm/s sine has to display.
 
@@ -96,7 +98,9 @@ def test_reference_kbf_fluctuation_stays_inside_the_printed_two_percent() -> Non
     assert 0.0 < swing <= 0.04  # a band of +-2 % is a swing of 4 %
 
 
-@pytest.mark.parametrize(("duration_ms", "cycles", "percent"), im.KB_PULSE_RESPONSE_PERCENT)
+@pytest.mark.parametrize(
+    ("duration_ms", "cycles", "percent"), im.KB_PULSE_RESPONSE_PERCENT
+)
 def test_table_8_pulse_response(
     duration_ms: float, cycles: int, percent: float
 ) -> None:
@@ -145,7 +149,9 @@ def test_the_band_limits_sit_where_the_note_of_5_2_3_2_says() -> None:
     """1 Hz to 80 Hz is made by corners at 0,8 Hz and 100 Hz, 3 dB down."""
     at_corners = np.abs(im.band_limitation_response([0.8, 100.0]))
     assert at_corners == pytest.approx([1.0 / math.sqrt(2.0)] * 2, rel=1e-7)
-    railway = np.abs(im.band_limitation_response([3.2, 393.75], working_range="railway"))
+    railway = np.abs(
+        im.band_limitation_response([3.2, 393.75], working_range="railway")
+    )
     assert railway == pytest.approx([1.0 / math.sqrt(2.0)] * 2, rel=1e-7)
 
 
@@ -229,9 +235,7 @@ def test_formula_2_counts_a_suppressed_interval_in_n() -> None:
 
 def test_a_reading_below_the_detection_limits_says_so() -> None:
     """5.2.2 stops requiring a meter to resolve anything below them."""
-    quiet = im.measure_vibration_immission(
-        np.full(int(35.0 * FS_HZ), 1e-4), FS_HZ
-    )
+    quiet = im.measure_vibration_immission(np.full(int(35.0 * FS_HZ), 1e-4), FS_HZ)
     assert not quiet.above_detection_limit
     assert im.measure_vibration_immission(_sine(16.0), FS_HZ).above_detection_limit
 
@@ -285,7 +289,9 @@ def test_annex_e_filter_stays_inside_the_five_percent_band(
     taps = im.assessment_weighting_taps(fs_hz, building_class=building_class)
     freqs, response = sig.freqz(taps, worN=4096, fs=fs_hz)
     graded = (freqs >= 1.0) & (freqs <= im.WORKING_RANGES_HZ["railway"][1])
-    target = im.assessment_weighting_response(freqs[graded], building_class=building_class)
+    target = im.assessment_weighting_response(
+        freqs[graded], building_class=building_class
+    )
     deviation = np.abs(np.abs(response)[graded] / target - 1.0)
     assert deviation.max() < im.ASSESSMENT_WEIGHTING_TOLERANCE
 

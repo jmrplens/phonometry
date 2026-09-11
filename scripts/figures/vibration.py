@@ -5851,9 +5851,7 @@ def generate_kb_weighting(output_dir: str) -> None:
         linewidth=2.0,
         label="KB weighting, 4 Hz to 315 Hz",
     )
-    ax.axvline(
-        vibration.KB_CORNER_HZ, color=COLOR_SECONDARY, linewidth=1.0, alpha=0.7
-    )
+    ax.axvline(vibration.KB_CORNER_HZ, color=COLOR_SECONDARY, linewidth=1.0, alpha=0.7)
     ax.plot(
         [vibration.KB_CORNER_HZ],
         [20.0 * math.log10(1.0 / math.sqrt(2.0))],

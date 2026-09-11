@@ -116,7 +116,8 @@ _OUTSIDE_LABEL = "outside tolerance"
 #: numbers a meter displays, named once so the label a line carries and the
 #: key its translation is filed under cannot drift apart.
 _TIME_LABEL = "Time [s]"
-_KBF_LABEL = "Weighted vibration severity $KB_F$"
+_KB_SEVERITY = "Weighted vibration severity"
+_KBF_LABEL = f"{_KB_SEVERITY} $KB_F$"
 _KBF_MAX_LABEL = r"$KB_{{F\mathrm{{max}}}}$ = {value}"
 _KBFTM_LABEL = r"$KB_{{FTm}}$ = {value}"
 #: The DIN 45672-2 passage figures: the running r.m.s. of Formula (1), its
@@ -293,7 +294,7 @@ _STRINGS: dict[str, str] = {
     _MAX_LEVEL_LABEL: r"nivel máximo $L_{vF\mathrm{max}}$",
     "Third-octave spectra of one passage (DIN 45672-2)": "Espectros en tercios de octava de un paso (DIN 45672-2)",
     # People in buildings (DIN 4150-2 Clause 6.2).
-    "Weighted vibration severity": "Intensidad de vibración ponderada",
+    _KB_SEVERITY: "Intensidad de vibración ponderada",
     "guide value": "valor de referencia",
     "not needed": "no necesario",
     "People in buildings by DIN 4150-2 ({source}): {verdict}": "Personas en edificios según DIN 4150-2 ({source}): {verdict}",
@@ -2425,15 +2426,13 @@ def plot_people_assessment(
     guide = result.guide
     labels = [_KB_FMAX_LABEL, _GUIDE_LABELS["a_u"], _GUIDE_LABELS["a_o"]]
     values = [result.kb_fmax, guide.a_u, guide.a_o]
-    colours = [_C_PRIMARY, _C_TERTIARY, _C_TERTIARY]
     labels += [_KB_FTR_LABEL, _GUIDE_LABELS["a_r"]]
     values += [result.kb_ftr if result.kb_ftr is not None else 0.0, guide.a_r]
-    colours += [_C_PRIMARY, _C_TERTIARY]
     positions = np.array([0.0, 1.0, 2.0, 3.5, 4.5])
     measured = np.array([0, 3])
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "width", 0.8)
-    kwargs.setdefault("label", _t("Weighted vibration severity", language))
+    kwargs.setdefault("label", _t(_KB_SEVERITY, language))
     ax.bar(positions[measured], np.asarray(values)[measured], **kwargs)
     ax.bar(
         positions[[1, 2, 4]],
@@ -2455,7 +2454,7 @@ def plot_people_assessment(
     ax.set_xticks(positions)
     ax.set_xticklabels(labels)
     ax.set_yscale("log")
-    ax.set_ylabel(_t("Weighted vibration severity", language))
+    ax.set_ylabel(_t(_KB_SEVERITY, language))
     ax.set_title(
         _t("People in buildings by DIN 4150-2 ({source}): {verdict}", language).format(
             source=_t(result.source.replace("_", " "), language),

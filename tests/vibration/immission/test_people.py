@@ -149,7 +149,7 @@ def test_a_railway_is_judged_on_a_u_and_a_r_only() -> None:
     verdict = im.assess_people_in_buildings(0.9, guide, kb_ftr=0.04, source="railway")
     assert verdict.complies
     assert verdict.criterion == "A_r"
-    assert 0.9 > guide.a_o
+    assert guide.a_o < 0.9
 
 
 def test_an_urban_surface_railway_raises_a_u_and_a_r_by_half() -> None:

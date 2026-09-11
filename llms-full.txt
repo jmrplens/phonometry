@@ -597,6 +597,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [underwater/weston-regimes](https://jmrplens.github.io/phonometry/reference/api/underwater/weston-regimes/)
 - [vibration/building-damage](https://jmrplens.github.io/phonometry/reference/api/vibration/building-damage/)
 - [vibration/building-response](https://jmrplens.github.io/phonometry/reference/api/vibration/building-response/)
+- [vibration/coupling](https://jmrplens.github.io/phonometry/reference/api/vibration/coupling/)
 - [vibration/diagnostics](https://jmrplens.github.io/phonometry/reference/api/vibration/diagnostics/)
 - [vibration/evaluation](https://jmrplens.github.io/phonometry/reference/api/vibration/evaluation/)
 - [vibration/experimental-sea](https://jmrplens.github.io/phonometry/reference/api/vibration/experimental-sea/)
@@ -41172,6 +41173,11 @@ documents, one page per module.
 | `KB_REFERENCE_FREQUENCY_HZ` / `KB_REFERENCE_INDICATIONS` / `KB_INDICATION_TOLERANCE_PERCENT` | `constant` | **The reference conditions of 5.2.10 and what they must show (6.2.3.12).**<br>• a 1 mm/s sine at 16 Hz, and the four values it produces: 1,00 mm/s, 0,667, 0,680 and 0,680<br>• 4 % is how far the display may sit from them | `vibration.KB_REFERENCE_INDICATIONS['kbf_max']  # 0.68` |
 | `KB_TEST_INDICATIONS` / `KB_PULSE_RESPONSE_PERCENT` | `constant` | **Table 9 and Table 8, as data.**<br>• the `KB_F`, `KB_Fmax` and `KB_FTm` a 1 mm/s sine shows at 1, 5,6, 31,5, 80 and 315 Hz<br>• Corrigendum 1's redraft of the burst table: eight burst durations of an 80 Hz sine and the `KB_Fmax` each shows as a percentage of the continuous display<br>• the `\|v\|max` row of Table 9 is not here; it contradicts Formula (5), see `docs/ERRATA.md` | `vibration.KB_TEST_INDICATIONS[31.5]`<br><br>• (0.693, 0.7, 0.7) |
 | `ASSESSMENT_GUIDE_VALUES_MM_S` / `ASSESSMENT_WEIGHTING_TOLERANCE` | `constant` | **Table E.2 and the band Table E.1 allows a realised filter.**<br>• 20, 5 and 3 mm/s, one per building class, independent of frequency<br>• 5 % either side of the target magnitude | `vibration.ASSESSMENT_GUIDE_VALUES_MM_S['sensitive']  # 3.0` |
+| `check_loose_mounting` / `MountingCheck` | `function` / `dataclass` | **May the transducer be set down without fastening? (DIN 45669-2 5.3.2, 5.3.3)**<br>• `peak_acceleration_m_s2` [m/s²], `upper_frequency_hz` [Hz], keyword-only `direction` (`'vertical'` or `'horizontal'`) and `surface` (`'hard'` Default, `'soft'`)<br>• `.acceptable`, `.frequency_limit_hz` (100 vertical, 40 horizontal), `.peak_acceleration_limit_m_s2` (3), `.device` (what it stands on: rounded feet, or the spiked device on a covering) | `vibration.check_loose_mounting(1.2, 63.0, direction='horizontal').acceptable  # False` |
+| `instrument_confidence_limit_percent` / `INSTRUMENT_CONFIDENCE_LIMITS_PERCENT` | `function` / `constant` | **Table 3 of DIN 45669-2: how far a conforming meter may still be from the truth.**<br>• `quantity` `'rms'` (15 %, 25 %) or `'peak'` (20 %, 35 %), `accuracy_class` 1 (Default) or 2<br>• the classes are those of the 1995 Part 1; the 2010 edition dropped them, so class 1 is the column for a meter of today | `vibration.instrument_confidence_limit_percent('peak')  # 20.0` |
+| `mass_loading_ratio` / `MASS_LOADING_RATIO_LIMIT` | `function` / `constant` | **7.2.4: the mass the transducer adds to the object, at most a hundredth.**<br>• `coupled_mass_kg` [kg], keyword-only `vibrating_mass_kg` [kg]<br>• the ratio to compare with 0.01 | `vibration.mass_loading_ratio(2.5, vibrating_mass_kg=600.0)  # 0.0042` |
+| `LOOSE_MOUNTING_LIMITS_HZ` / `LOOSE_MOUNTING_PEAK_ACCELERATION_M_S2` / `WAX_MOUNTING_HORIZONTAL_LIMIT_HZ` / `SPIKED_DEVICE_MASS_KG` | `constant` | **The mounting numbers of DIN 45669-2.**<br>• 100 Hz vertically and 40 Hz horizontally for a loose transducer, at up to 3 m/s² peak<br>• 80 Hz for the horizontal component on a sensitive hard surface with adhesive wax (Table 1)<br>• about 2.5 kg for the spiked device with the transducer (5.3.3.1) | `vibration.LOOSE_MOUNTING_LIMITS_HZ['horizontal']  # 40.0` |
+| `GROUND_COUPLING_DEVIATION_DB` / `EMISSION_POINT_TRACK_DISTANCE_M` / `CLEARANCE_TO_DISTURBING_BODY_FACTOR` | `constant` | **The placement numbers of 5.1.4 and 5.3.4.1.**<br>• up to 15 dB from the ground coupling alone<br>• 8 m from the nearest track for a railway emission point, and at least 1.5 times the largest dimension of a disturbing body away from it | `vibration.GROUND_COUPLING_DEVIATION_DB  # 15.0` |
 | `evaluate_train_passage` / `TrainPassage` | `function` / `dataclass` | **One train passage reduced the way DIN 45672-2 reduces it (Clauses 5 to 7).**<br>• `velocity_mm_s` [mm/s] as the transducer gives it, `fs_hz` [Hz], an integer<br>• keyword-only: `t2_s` (the passage, read off the record), `t1_s` (Default: 4 s centred on the peak, never longer than `T₂`), `t3_s` (Default: the whole record), `upper_band_hz` (Default: 315; down to 80)<br>• `.intervals_s`, `.interval_rms_mm_s`, `.peak_velocity_mm_s`, `.running_rms_max_mm_s`, `.kbf_max`, `.event_velocity_mm_s`, `.event_level_db`, `.band_centres_hz`, `.band_interval_levels_db` (one row per stretch), `.band_max_levels_db`, `.plot()`, `.plot_spectrum()`<br>• the record goes through the railway band limitation of DIN 45669-1 before anything is read | `p = vibration.evaluate_train_passage(v, 2048, t2_s=(6.75, 23.25))`<br><br>• `p.event_velocity_mm_s`, `p.band_max_levels_db` |
 | `running_velocity_rms` / `running_velocity_level` / `running_acceleration_level` | `function` | **Formulae (1) to (3): the running r.m.s. with τ = 125 ms, and its levels.**<br>• levels re `v₀ = 5·10⁻⁸ m/s` and `a₀ = 10⁻⁶ m/s²`<br>• started from rest: the mean square is 14 % short after 2τ and 2 % after 4τ, the r.m.s. about half that | `vibration.running_velocity_level(v, 2048)[-1]` |
 | `interval_rms` / `centred_interval` | `function` | **Formulae (4) and (5), and the stretch `T₁` of Clause 5 a).**<br>• `interval_rms(values, fs_hz, interval_s=(start, end))`: handed the velocity it is Formula (4), handed the running r.m.s. it is Formula (5)<br>• `centred_interval(v, fs_hz, duration_s=4)`: the largest amplitude in the middle, moved rather than cut where the record ends | `vibration.interval_rms(v, 2048, interval_s=(8.0, 20.0))` |
@@ -61100,7 +61106,8 @@ it came from. It is regulated on that side of the transmission path, and the
 documents that do it are a set rather than a single standard. DIN 4150-2 fixes
 what people in buildings may be exposed to; DIN 4150-3 fixes what the buildings
 themselves may take; DIN 45669-1 specifies the **instrument** both of them
-presuppose, and DIN 45669-2 the procedure it is used with.
+presuppose, and DIN 45669-2 the procedure it is used with, of which the
+mounting limits and the instrument's share of the error are numbers.
 
 This section is the instrument half of that set. The other half already has a
 page: the guideline values of DIN 4150-3 are in [Vibration damage to
@@ -61131,7 +61138,8 @@ the track before a mitigation measure with the track after it.
   vibration severity and the clock maximum r.m.s. of Formulae (1) and (2), the
   tolerance bands of Tables 2 and 3, the printed check values of Tables 8 and
   9, and the assessment velocity of Annex E (DIN 45669-1:2010-09 with
-  Corrigendum 1:2012-12).
+  Corrigendum 1:2012-12), with the loose-mounting limits, the mass loading
+  and the instrument confidence limits of DIN 45669-2:2005-06.
 - [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
   the three stretches of a passage, the running r.m.s. and the event value
   referred to an hour, the third-octave spectra of Figure 6, the narrow-band
@@ -61151,10 +61159,12 @@ the track before a mitigation measure with the track after it.
 
 ## What this section does not cover
 
-**No measurement procedure.** DIN 45669-2 fixes the measurement positions, the
-coupling of a transducer to a floor or to the ground, the measurement duration
-and the disturbances that have to be kept out. None of it is arithmetic and
-none of it is here.
+**Almost no measurement procedure.** DIN 45669-2 fixes the measurement
+positions, the coupling of a transducer to a floor or to the ground, the
+measurement duration and the disturbances that have to be kept out. Its
+numbers are on the meter page: the limits a transducer may be set down loose
+within, the mass it may add and the meter's own share of the error. The rest
+is text and is not here.
 
 **No assessment of people in buildings.** DIN 4150-2 judges what the weighted
 vibration severity means for the people who feel it, with its own tables of
@@ -61957,14 +61967,69 @@ standard has evidence about, and exceeding it does not mean damage has
 occurred, only that the cheap check has run out and Clauses 4.2 to 4.4 have to
 be done instead.
 
-## 6. What this page is not
+## 6. Setting the transducer down: what DIN 45669-2 puts a number to
 
 DIN 45669 has a second part, and it is the one a measurement is actually
 planned with: DIN 45669-2 fixes where the transducers go, how they are coupled
 to a floor or to the ground, how long a measurement runs and which
-disturbances have to be kept out of it. None of that is arithmetic and none of
-it is here. What is here is the instrument the two parts describe between
-them, and the quantities it is required to produce.
+disturbances have to be kept out of it. Nearly all of it is judgement written
+down. The little that is a number is here, because a number a measurement is
+planned by belongs where the plan is checked.
+
+A transducer set down without fastening walks or lifts off when the vibration
+is strong, and a coupling that is not force-locked resonates against the
+surface. Clauses 5.3.2 and 5.3.3 fix both limits: a loose transducer measures
+without falsification up to **100 Hz vertically** and **40 Hz horizontally**,
+provided the peak acceleration in every direction stays at or below
+**3 m/s²**. On a hard surface it may stand on its own or on the device with
+rounded feet; on a carpet it has to stand on the device with hardened steel
+spikes, about 2,5 kg with the transducer, pressed and tapped through the
+covering. Above those limits the transducer is glued, screwed or plastered on,
+and on tiles or parquet adhesive wax carries the horizontal component to 80 Hz.
+
+```python
+from phonometry import vibration
+
+floor = vibration.check_loose_mounting(1.2, 63.0, direction="horizontal")
+print(f"loose, horizontal to 63 Hz: {floor.acceptable}")  # False
+print(f"  limit {floor.frequency_limit_hz:g} Hz, {floor.peak_acceleration_limit_m_s2:g} m/s2")
+
+carpet = vibration.check_loose_mounting(
+    1.2, 80.0, direction="vertical", surface="soft"
+)
+print(f"loose, vertical to 80 Hz on a carpet: {carpet.acceptable}")  # True
+print(f"  on {carpet.device}")
+```
+
+Two more numbers belong to the plan. The mass the transducer and its device
+add to the object should be at most a hundredth of the mass the object
+vibrates with (7.2.4), and `mass_loading_ratio` is that fraction. And Table 3
+says how far a meter that meets every requirement of DIN 45669-1 may still be
+from the truth on one displayed quantity: 15 % on a value based on an r.m.s.
+and 20 % on a peak, at a high confidence level. The table prints a second
+column for a class 2 meter; the 2010 edition of Part 1 dropped the accuracy
+classes, so the first column is the one a meter of today is held to.
+
+```python
+from phonometry import vibration
+
+print(vibration.instrument_confidence_limit_percent("rms"))   # 15.0
+print(vibration.instrument_confidence_limit_percent("peak"))  # 20.0
+print(f"{vibration.mass_loading_ratio(2.5, vibrating_mass_kg=600.0):.4f}")  # 0.0042
+print(vibration.MASS_LOADING_RATIO_LIMIT)  # 0.01
+```
+
+The coupling to the ground has no such number, only a warning: 5.3.4.1 says
+that the coupling alone can move the reading by up to 15 dB, and that the
+horizontal components suffer most. Which of the four methods of Table 2 to
+use is the one judgement Part 2 leaves entirely to the reader.
+
+## 7. What this page is not
+
+Measurement positions, directions, durations and the list of disturbances are
+the text of DIN 45669-2, and none of that is here. What is here is the
+instrument the two parts describe between them, the quantities it is required
+to produce, and the limits a measurement with it is planned by.
 
 ## What this guide covers
 
@@ -61992,9 +62057,14 @@ the digital interfaces, temperature, humidity and electromagnetic
 susceptibility. Those are measurements on hardware and a pass on the response
 is not a conformity certificate for an instrument.
 
-**No measurement procedure.** Transducer coupling, measurement positions,
-measurement duration and the treatment of disturbances are DIN 45669-2, and
-the assessment of what was measured is DIN 4150-2 and DIN 4150-3.
+The numbers of **DIN 45669-2**: the loose-mounting limits of 5.3.2 and 5.3.3
+as a verdict, the wax limit of Table 1, the mass loading of 7.2.4 and the
+instrument confidence limits of Table 3.
+
+**No measurement procedure.** Measurement positions, directions, durations,
+the choice of a ground coupling and the treatment of disturbances are the
+text of DIN 45669-2, and the assessment of what was measured is DIN 4150-2
+and DIN 4150-3.
 
 ## See also
 
@@ -62008,7 +62078,8 @@ the assessment of what was measured is DIN 4150-2 and DIN 4150-3.
   people side of the same measurement, weighted differently and judged by
   other documents.
 - API reference:
-  [`vibration.immission.vibration_meter`](https://jmrplens.github.io/phonometry/reference/api/vibration/vibration-meter/).
+  [`vibration.immission.vibration_meter`](https://jmrplens.github.io/phonometry/reference/api/vibration/vibration-meter/)
+  and [`vibration.immission.coupling`](https://jmrplens.github.io/phonometry/reference/api/vibration/coupling/).
 
 ## References
 
@@ -62028,6 +62099,12 @@ the assessment of what was measured is DIN 4150-2 and DIN 4150-3.
   (DIN 45669-1 Ber 1:2012-12).
   The redraft of Table 8, the eight burst durations of an 80 Hz signal and the
   KB_Fmax each must show as a percentage of the continuous indication.
+- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
+  Teil 2: Messverfahren* (DIN 45669-2:2005-06).
+  The loose-mounting limits of 5.3.2 and 5.3.3, the wax limit of Table 1, the
+  mass loading of 7.2.4, the ground coupling deviation of 5.3.4.1 and the
+  confidence limits of Table 3. Measurement positions, durations and
+  disturbances are text and are not implemented.
 - Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil 3:
   Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
   Table 1, whose guideline curve the Annex E weightings invert, and the three

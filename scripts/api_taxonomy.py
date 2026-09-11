@@ -250,6 +250,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.vibration.immission.railway",
             "phonometry.vibration.immission.ground",
             "phonometry.vibration.immission.coupling",
+            "phonometry.vibration.immission.people",
         ),
     ),
     Section(
@@ -447,6 +448,11 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # imported by the DIN 45672-2 evaluation, whose Formula (1) is the same
     # integral with the same "Fast", so a plain scan sees it in both.
     "KB_TIME_CONSTANT_S": "phonometry.vibration.immission.vibration_meter",
+    # The KB corner and the clock interval are the meter's, and the DIN 4150-2
+    # assessment imports them for Formula (6) and the interval count N_r.
+    "KB_CORNER_HZ": "phonometry.vibration.immission.vibration_meter",
+    "TAKT_DURATION_S": "phonometry.vibration.immission.vibration_meter",
+    "TAKT_SUPPRESSION_THRESHOLD": "phonometry.vibration.immission.vibration_meter",
     # The ERB_N / Cam constants are owned by erb_scale and imported by the
     # ISO 532-2 loudness model, so a plain scan sees them in both modules.
     "ERB_C1": "phonometry.psychoacoustics.erb_scale",

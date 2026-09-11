@@ -6257,3 +6257,123 @@ def generate_ground_wave_speeds(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "ground_wave_speeds.svg")
     plt.close()
+
+
+def generate_people_guide_values(output_dir: str) -> None:
+    """DIN 4150-2 Table 1: the three guide values by area, day and night."""
+    print("Generating people_guide_values...")
+    from matplotlib.ticker import NullFormatter
+
+    from phonometry import vibration
+
+    areas = list(vibration.GUIDE_VALUES)
+    positions = np.arange(len(areas), dtype=float)
+    width = 0.38
+    _fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
+    for ax, time_of_day in zip(axes, ("day", "night"), strict=True):
+        values = [
+            vibration.guide_values(area, time_of_day=time_of_day) for area in areas
+        ]
+        ax.bar(
+            positions - width / 2,
+            [v.a_u for v in values],
+            width,
+            color=COLOR_PRIMARY,
+            label="$A_u$, the lower value",
+        )
+        ax.bar(
+            positions + width / 2,
+            [v.a_r for v in values],
+            width,
+            color=COLOR_TERTIARY,
+            label="$A_r$, for the assessment severity",
+        )
+        ax.plot(
+            positions,
+            [v.a_o for v in values],
+            color=COLOR_SECONDARY,
+            marker="v",
+            markersize=8,
+            linestyle="none",
+            label="$A_o$, the upper value",
+        )
+        ax.set_yscale("log")
+        ax.set_ylim(0.03, 10.0)
+        ax.set_yticks([0.05, 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0])
+        ax.set_yticklabels(["0.05", "0.1", "0.2", "0.5", "1", "2", "5", "10"])
+        ax.yaxis.set_minor_formatter(NullFormatter())
+        ax.set_xticks(positions)
+        ax.set_xticklabels(areas, rotation=20, ha="right")
+        ax.set_title(
+            "by day, 16 h" if time_of_day == "day" else "by night, 8 h", pad=10
+        )
+        ax.grid(axis="y", which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
+        ax.set_axisbelow(True)
+    axes[0].set_ylabel("Guide value, dimensionless KB")
+    axes[1].legend(loc="upper right", fontsize=9)
+    _fig.suptitle("The guide values of DIN 4150-2 Table 1 by kind of area", y=0.98)
+    plt.tight_layout()
+    save_figure(output_dir, "people_guide_values.svg")
+    plt.close()
+
+
+def generate_people_trains_per_hour(output_dir: str) -> None:
+    """DIN 4150-2 Figure D.1: KB_FTm against trains an hour at each A_r."""
+    print("Generating people_trains_per_hour...")
+    from matplotlib.ticker import NullFormatter
+
+    from phonometry import vibration
+
+    trains = np.geomspace(0.5, 100.0, 200)
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    colours = {
+        0.2: COLOR_PRIMARY,
+        0.15: COLOR_TERTIARY,
+        0.1: COLOR_QUATERNARY,
+        0.07: COLOR_SECONDARY,
+        0.05: COLOR_MUTED,
+    }
+    takte_per_hour = 3600.0 / vibration.TAKT_DURATION_S
+    for a_r, colour in colours.items():
+        # KB_FTm at which n trains an hour reach A_r: A_r sqrt(120 / n).
+        kb_ftm = a_r * np.sqrt(takte_per_hour / trains)
+        ax.loglog(trains, kb_ftm, color=colour, linewidth=1.8, label=f"$A_r$ = {a_r:g}")
+    for a_r in (0.05, 0.07):
+        n = vibration.admissible_trains_per_hour(0.2, a_r)
+        ax.plot(
+            [n], [0.2], color=colours[a_r], marker="o", markersize=7, linestyle="none"
+        )
+        ax.annotate(
+            f"{int(n)} trains an hour at $KB_{{FTm}}$ = 0.2",
+            xy=(n, 0.2),
+            xytext=(n * 1.9, 0.2 * (1.55 if a_r == 0.05 else 0.6)),
+            fontsize=9,
+            color=COLOR_FG,
+            arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
+            bbox={
+                "boxstyle": "round,pad=0.35",
+                "facecolor": COLOR_PANEL,
+                "edgecolor": COLOR_GRID,
+            },
+        )
+    ax.set_title(
+        "A railway class against $A_r$, one clock interval per train "
+        "(DIN 4150-2 Figure D.1)",
+        pad=12,
+    )
+    ax.set_xlabel("Trains an hour")
+    ax.set_ylabel("Clock maximum r.m.s. $KB_{FTm}$")
+    ax.set_xlim(0.5, 100.0)
+    ax.set_ylim(0.1, 5.0)
+    ax.set_xticks([0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0, 100.0])
+    ax.set_xticklabels(["0.5", "1", "2", "5", "10", "20", "50", "100"])
+    ax.set_yticks([0.1, 0.2, 0.3, 0.5, 1.0, 2.0, 3.0, 5.0])
+    ax.set_yticklabels(["0.1", "0.2", "0.3", "0.5", "1", "2", "3", "5"])
+    ax.xaxis.set_minor_formatter(NullFormatter())
+    ax.yaxis.set_minor_formatter(NullFormatter())
+    ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=10)
+    plt.tight_layout()
+    save_figure(output_dir, "people_trains_per_hour.svg")
+    plt.close()

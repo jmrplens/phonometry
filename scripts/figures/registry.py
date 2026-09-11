@@ -599,6 +599,8 @@ from .vibration import (
     generate_mobility_random_error,
     generate_mobility_result_lines,
     generate_multiple_shock,
+    generate_people_guide_values,
+    generate_people_trains_per_hour,
     generate_railway_passage,
     generate_railway_spectra,
     generate_rigid_mass_calibration,
@@ -880,6 +882,10 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_railway_passage,
     generate_railway_spectra,
     generate_ground_wave_speeds,
+    # People in buildings (DIN 4150-2): the guide values of Table 1 and
+    # Figure D.1, trains an hour against the assessment value.
+    generate_people_guide_values,
+    generate_people_trains_per_hour,
     generate_meter_tolerance_regions,
     generate_meter_signal_burst_response,
     generate_meter_running_rms_decay,

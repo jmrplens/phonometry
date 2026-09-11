@@ -165,6 +165,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   ground to the coupling methods of 5.3.3, which are the carpet ones, when the
   ground is 5.3.4.
 
+- The assessment the meter's readings are for: **DIN 4150-2:1999-06**, the
+  effect of vibration on the people in a building, in
+  `vibration.immission.people`.
+
+  `guide_values` is Table 1, by area, time of day and source, with the factor
+  1,5 of an urban railway on `A_u` and `A_r` and the `A_o` of row 1 that
+  quarry blasting under the conditions of 6.5.1 takes in a mixed or
+  residential area, and `construction_guide_values` is Table 2 with the
+  interpolation of Figure 3 between one working day and seven, at the two
+  decimals the figure prints; a sensitive area is refused, since 6.5.4.2 says
+  the table does not apply there. `assess_people_in_buildings` reads them in
+  the order of 6.2: `A_u` settles it, and so, as a rule, does a `KB_Fmax`
+  above it by less than the 15 % of 5.4, which is how Example 3 concludes and
+  what `within_uncertainty` says; `A_o` settles it the other way unless the
+  events are rare, and between the two `KB_FTr` decides against `A_r`. The
+  verdict carries the criterion that decided it, and compares at the decimals
+  the guide value is printed with, half up, which is what Example 4 does when
+  it writes 0,154 as 0,15 and finds it met. A railway skips `A_o`, as 6.5.3.1
+  says; the night-time thresholds 6.5.3.5 puts in its place, 0,6 on a surface
+  line and 0,3 underground, are `RAILWAY_NIGHT_INVESTIGATION_KB`.
+
+  `assessment_vibration_severity` is Formulae (4a), (4b) and (5): the clock
+  maximum r.m.s. of each stretch of exposure weighted by its share of 16 h or
+  8 h, the rest hours counted twice, and `admissible_exposure_s` is the same
+  formula turned round. Annex A is entire: the clock maximum r.m.s. of a class
+  of trains over the intervals it occupies, the spread of its square, the
+  assessment severity by classes and the interval the spread puts on it, and
+  `admissible_trains_per_hour` is Figure D.1 as the formula behind it. Clause 7
+  estimates `KB_Fmax` from a peak velocity and its frequency with the factors
+  of Table 3.
+
+  Every worked example of Annex C is a conformance row, with the five steps of
+  Figure 3 and the two readings of Figure D.1. One formula is printed wrong and
+  is in `docs/ERRATA.md`: (A.1b) gives `KB_FTm,j` as a mean of squares with no
+  root over it, while (A.1a) beside it has the root and Example 8 takes it.
+
 - A vibration meter can be given the verdict a sound level meter already gets:
   the frequency-weighting tolerances of **ISO 8041-1:2017**, in
   `vibration.verify_weighting`.

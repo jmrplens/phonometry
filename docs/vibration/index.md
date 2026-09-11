@@ -113,6 +113,10 @@ assessment it makes possible, and the railway measurements it is used for.
   one train passage reduced to the numbers that can be compared, from the event
   value of an hour of traffic to the third-octave spectra and the narrow-band
   density behind them, and the ground constants from two wave speeds.
+- [Vibration and people in buildings (DIN 4150-2)](immission/people-in-buildings.md):
+  the guide values a reading is held to by area and time of day, the order the
+  standard reads them in, the assessment vibration severity of a day of
+  exposure, and the rules for blasting, roads, railways and construction sites.
 
 ## What this section does not cover
 

@@ -1,0 +1,362 @@
+---
+title: "Vibración y personas en edificios (DIN 4150-2)"
+description: "Cuánto pueden valer las lecturas de un vibrómetro DIN 45669-1 para las personas que viven donde llega la vibración: los valores de referencia de la tabla 1 por zona y franja horaria, el orden en que los lee el apartado 6.2, la intensidad de valoración de las fórmulas (4) y (5), las reglas para voladuras, carreteras, ferrocarriles y obras, y la estimación del apartado 7 desde un registro sin ponderar."
+references:
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 1999
+    title: "Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden"
+    designation: "DIN 4150-2:1999-06"
+    primary: true
+    note: "Las magnitudes de valoración del apartado 6.1, el procedimiento del 6.2 con la figura 2, los valores de referencia de la tabla 1, la intensidad de valoración de las fórmulas (4a), (4b) y (5), las reglas por fuente del 6.5 con la tabla 2 y la interpolación de la figura 3, la estimación del apartado 7 con las fórmulas (6) y (7) y la tabla 3, y el anexo A con las fórmulas (A.1) a (A.4). El anexo C es el oráculo de las filas de conformidad. El informe de medida del apartado 8 es texto."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2010
+    title: "Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen"
+    designation: "DIN 45669-1:2010-09"
+    note: "El vibrómetro cuyos KB_Fmax y máximos por intervalo valora esta norma, y la frecuencia de esquina de 5,6 Hz que lleva la fórmula (6)."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un [vibrómetro](/phonometry/es/vibration/immission/vibration-meter/) convierte
+un registro en dos números, la intensidad de vibración ponderada máxima
+`KB_Fmax` y el eficaz de los máximos por intervalo `KB_FTm`, y ahí se para. La
+DIN 4150-2 es donde se juzgan esos números para las personas que viven o
+trabajan donde llega la vibración: una tabla de valores de referencia por tipo
+de zona y franja horaria, un procedimiento que los lee en un orden fijo, y un
+conjunto de reglas para las fuentes que más a menudo sacuden una casa, desde
+el martillo del taller de al lado hasta el ferrocarril del final de la calle.
+
+No es una norma de límites, y lo dice. Los valores de referencia «no se aplican
+de forma esquemática», el anexo que los explica los llama valores recomendados y
+no vinculantes, y uno de sus propios ejemplos resueltos encuentra una lectura un
+13 % por encima del valor inferior y da el requisito por cumplido, porque una
+medida de `KB_F` tiene más o menos esa incertidumbre. Lo que la norma sí fija
+es el procedimiento, y el procedimiento es lo que implementa esta página.
+
+## 1. Dos magnitudes, y el orden en que se leen
+
+`KB_Fmax` dice cómo de mala fue la vibración en su peor momento. La
+**intensidad de valoración** `KB_FTr` dice a cuánto sumó sobre todo el
+**periodo de valoración**, 16 h de día (de 6:00 a 22:00) y 8 h de noche. Las
+dos se forman para las tres direcciones y se valora la mayor.
+
+El apartado 6.2 lee los valores de referencia de la tabla 1 en un orden fijo,
+que su figura 2 dibuja como diagrama de flujo:
+
+- `KB_Fmax` igual o inferior al **valor inferior** `A_u`: el requisito se
+  cumple y no se pregunta nada más.
+- `KB_Fmax` superior al **valor superior** `A_o`: no se cumple, por corta que
+  sea la exposición.
+- Entre los dos: hasta tres sucesos breves al día se dan por cumplidos tal
+  cual; cualquier otra cosa la decide `KB_FTr` frente a `A_r`.
+
+```python
+from phonometry import vibration
+
+guide = vibration.guide_values("commercial")
+print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15)
+
+# Anexo C, ejemplo 1: la vibración estacionaria de 5 Hz de una serrería, KB_Fmax = 0.25.
+verdict = vibration.assess_people_in_buildings(0.25, guide)
+print(verdict.complies, verdict.criterion)  # True A_u
+
+# Por encima de A_o la pregunta se acaba al revés, salvo que los sucesos sean raros.
+print(vibration.assess_people_in_buildings(6.5, guide).criterion)  # A_o
+blast = vibration.assess_people_in_buildings(2.0, guide, rare_short_events=True)
+print(blast.complies)  # True
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/people_guide_values.svg" alt="Dos paneles, de día y de noche, con los cinco tipos de zona de la tabla 1 en el eje horizontal y los valores de referencia en un eje vertical logarítmico de 0,05 a 10. En cada panel una barra azul es el valor inferior A u, una barra verde a su lado el valor de valoración A r, y un triángulo rojo encima el valor superior A o. De día los valores inferiores bajan de 0,4 en una zona industrial a 0,1 en una sensible y los superiores de 6 a 3; de noche los inferiores bajan de 0,3 a 0,1 y los superiores de 0,6 a 0,15, una década entera por debajo del día" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+areas = list(vibration.GUIDE_VALUES)
+x = np.arange(len(areas))
+fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
+for ax, time_of_day in zip(axes, ("day", "night"), strict=True):
+    values = [vibration.guide_values(a, time_of_day=time_of_day) for a in areas]
+    ax.bar(x - 0.19, [v.a_u for v in values], 0.38, label="$A_u$")
+    ax.bar(x + 0.19, [v.a_r for v in values], 0.38, label="$A_r$")
+    ax.plot(x, [v.a_o for v in values], "v", label="$A_o$")
+    ax.set_yscale("log")
+    ax.set_xticks(x, areas)
+    ax.set_title(time_of_day)
+axes[0].legend()
+```
+
+</details>
+
+El veredicto compara con los decimales con que está impreso el valor de
+referencia, redondeando medio hacia arriba como se hace a mano, porque eso es
+lo que hace la norma: su ejemplo 4 forma una `KB_FTr` de 0,154, la escribe
+como 0,15 y la encuentra en el `A_r` de 0,15, cumplida. Y sigue al ejemplo 3
+con una `KB_Fmax` por encima de `A_u` en menos del 15 % de incertidumbre de
+una medida de `KB_F`: el requisito «por regla general puede darse todavía por
+cumplido», concluye la norma, y el veredicto lo dice así, con
+`within_uncertainty` activado para quien quiera leerlo con más rigor.
+
+## 2. La intensidad de valoración
+
+`KB_FTr` es el eficaz de los máximos por intervalo de cada tramo de exposición,
+ponderado por la fracción del periodo de valoración que dura (fórmula (4a); con
+un solo tramo, fórmula (4b)):
+
+```text
+KB_FTr = √( (1 / T_r) · Σ_j T_e,j · KB²_FTm,j )
+```
+
+Un tramo que cae en las **horas de descanso** del día, de 6:00 a 7:00 y de
+19:00 a 22:00 los días laborables y todo el día los domingos y festivos, lleva
+peso 2 (fórmula (5)). El anexo C pasa los mismos dos martillos de forja por las dos
+fórmulas: el martillo a) durante 6 h con una `KB_FTm` de 0,16 y el martillo b)
+durante 1,5 h con 0,39, primero los dos fuera de las horas de descanso y luego
+con el martillo b) dentro de ellas.
+
+```python
+from phonometry import vibration
+
+hour = 3600.0
+hammers = [0.16, 0.39]
+hours = [6 * hour, 1.5 * hour]
+
+# Anexo C, ejemplo 4: fórmula (4a), los dos martillos fuera de las horas de descanso.
+kb_ftr = vibration.assessment_vibration_severity(hammers, hours)
+print(f"KB_FTr = {kb_ftr:.3f}")  # 0.154, que la norma escribe como 0.15
+
+# Ejemplo 5: el martillo b) trabaja de 19:00 a 20:30, en las horas de descanso, fórmula (5).
+evening = vibration.assessment_vibration_severity(
+    hammers, hours, in_rest_time=[False, True]
+)
+print(f"KB_FTr = {evening:.2f}")  # 0.20
+
+guide = vibration.guide_values("commercial")
+print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=kb_ftr).complies)   # True
+print(vibration.assess_people_in_buildings(0.47, guide, kb_ftr=evening).complies)  # False
+```
+
+La misma fórmula dada la vuelta dice cuánto tiempo puede actuar una fuente antes
+de que `KB_FTr` llegue a `A_r`, que es lo que pregunta el ejemplo 2: la
+serrería del ejemplo 1 en una zona residencial, donde `A_r` es 0,07, puede
+funcionar 1,48 h de las 16 h del día.
+
+```python
+from phonometry import vibration
+
+exposure = vibration.admissible_exposure_s(0.23, 0.07)
+print(f"{exposure / 3600:.2f} h")  # 1.48 h
+```
+
+## 3. Las fuentes con reglas propias
+
+El apartado 6.5 añade una regla por tipo de fuente, y cada una es un argumento:
+
+- **Sucesos breves y raros**, hasta tres al día, las voladuras entre ellos:
+  `KB_Fmax` se compara solo con `A_o`, que es lo que pide
+  `rare_short_events=True`. Las voladuras de cantera tienen más: las que se
+  suceden de inmediato pueden contar como un solo suceso, como mucho quince a
+  la semana si se hace así; y las de días laborables con aviso a los vecinos,
+  entre las 7:00 y las 13:00 o entre las 15:00 y las 19:00, una al día, se
+  sujetan en una zona mixta o residencial al `A_o` de una industrial, 6, que
+  es lo que pide `source="quarry_blasting"`, con una `KB_Fmax` de 8 admitida
+  unas pocas veces al año en casos excepcionales.
+- El **tráfico rodado** usa el procedimiento tal cual, sin la ponderación de las
+  horas de descanso.
+- Un **ferrocarril** se juzga solo con `A_u` y `A_r`, tampoco con la
+  ponderación de las horas de descanso, que es lo que pide `source="railway"`;
+  `A_o` no es un veredicto para él, y el 6.5.3.5 pone en su lugar sus propios
+  umbrales: un máximo por intervalo de noche por encima de 0,6 en una línea en
+  superficie o de 0,3 en una subterránea es un motivo para indagar la causa,
+  planos en las ruedas por ejemplo, y corregirla. Una **línea urbana en superficie**, un
+  tranvía, un metro ligero o una S-Bahn, tiene `A_u` y `A_r` elevados por el
+  factor 1,5 con `source="urban_railway"`. Una línea nueva se sujeta a la
+  tabla 1; una existente a menudo la supera, y la norma deja ese caso al
+  criterio.
+- Una **obra** tiene su propia tabla 2, por los días laborables en que sacude a
+  los vecinos y por el escalón al que se sujeta al contratista, el escalón I por
+  debajo del cual no se espera molestia considerable, el II que exige las
+  medidas del 6.5.4.3, y el III por encima del cual la exposición es inasumible.
+  Los valores para dos a seis días se interpolan entre la columna de un día y la
+  que empieza en siete, como los dibuja la figura 3; de noche rige la tabla 1;
+  y las voladuras de la obra se sujetan a un `A_o` de 8.
+
+```python
+from phonometry import vibration
+
+for days in (1, 3, 6, 7, 30):
+    guide = vibration.construction_guide_values(days, stage="I")
+    print(f"{days:2d} días laborables: A_u {guide.a_u:.2f}, A_r {guide.a_r:.2f}")
+#  1 días laborables: A_u 0.80, A_r 0.40
+#  3 días laborables: A_u 0.67, A_r 0.37
+#  6 días laborables: A_u 0.47, A_r 0.32
+#  7 días laborables: A_u 0.40, A_r 0.30
+# 30 días laborables: A_u 0.30, A_r 0.20
+
+urban = vibration.guide_values("residential", time_of_day="night", source="urban_railway")
+print(urban)  # GuideValues(a_u=0.15, a_o=0.2, a_r=0.075)
+```
+
+## 4. Un ferrocarril, clase a clase
+
+Los trenes de un ferrocarril ocupan unos pocos intervalos cada uno y dejan el
+resto en silencio, así que el anexo A forma `KB_FTm` para cada **clase** de
+tren sobre los intervalos que sus trenes ocuparon (fórmula (A.1)), pone una
+desviación típica sobre su cuadrado (fórmula (A.2)) y pondera cada clase en
+`KB_FTr` por los intervalos que ocupa en el periodo, 1920 de día y 960 de
+noche (fórmula (A.3)). El ejemplo 8 lo hace para un registro de diez minutos
+con tres pasos, el tercero de los cuales ocupa tres intervalos: el intervalo
+de pico de cada tren es una clase y los dos intervalos de flanco del tercer
+tren otra, extrapolado a un día de 288 y 192 intervalos ocupados:
+
+```python
+from phonometry import vibration
+
+class_1 = [0.92, 0.6, 0.9]  # los máximos por intervalo que ocuparon los trenes de la clase 1
+class_2 = [0.2, 0.24]
+
+kb_ftm = [vibration.railway_takt_maximum_rms(c) for c in (class_1, class_2)]
+spread = [vibration.railway_takt_spread(c) for c in (class_1, class_2)]
+print([round(v, 2) for v in kb_ftm])  # [0.82, 0.22]
+
+railway = vibration.railway_assessment_severity(kb_ftm, [288, 192], spread=spread)
+print(f"KB_FTr = {railway.kb_ftr:.3f}")  # 0.325
+print(f"  de {railway.lower:.3f} a {railway.upper:.3f}")  # 0.253 a 0.384
+
+guide = vibration.guide_values("residential")
+verdict = vibration.assess_people_in_buildings(
+    0.92, guide, kb_ftr=railway.kb_ftr, source="railway"
+)
+print(verdict.complies, verdict.criterion)  # False A_r
+```
+
+El anexo D da la vuelta a la fórmula (A.3) y la convierte en una figura: con una
+sola clase de tren y cada tren ocupando un intervalo, cuántos por hora mantienen
+`KB_FTr` en `A_r`. Lee 7 trenes para el 0,05 de una vivienda de noche y 14 para
+el 0,07 de una zona mixta, los dos con una `KB_FTm` de 0,2, y la fórmula que hay
+detrás de la figura es `120 (A_r / KB_FTm)²`.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/people_trains_per_hour.svg" alt="Un gráfico log-log del eficaz de los máximos por intervalo de un tren, de 0,1 a 5, frente a trenes por hora de 0,5 a 100. Cinco rectas caen de arriba a la izquierda hacia abajo a la derecha, una por valor de A r desde 0,2 hasta 0,05, cada una el lugar donde tantos trenes por hora de esa intensidad alcanzan A r. Dos puntos sobre las dos rectas más bajas, a una intensidad de 0,2, están rotulados 7 trenes por hora y 14 trenes por hora, las lecturas que cita el anexo D" width="94%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+trains = np.geomspace(0.5, 100.0, 200)
+fig, ax = plt.subplots(figsize=(10, 6.2))
+for a_r in (0.2, 0.15, 0.1, 0.07, 0.05):
+    ax.loglog(trains, a_r * np.sqrt(120.0 / trains), label=f"$A_r$ = {a_r:g}")
+for a_r in (0.05, 0.07):
+    n = vibration.admissible_trains_per_hour(0.2, a_r)
+    ax.plot([n], [0.2], "o")
+ax.set_xlabel("Trenes por hora")
+ax.set_ylabel("$KB_{FTm}$")
+ax.legend()
+```
+
+</details>
+
+```python
+from phonometry import vibration
+
+print(int(vibration.admissible_trains_per_hour(0.2, 0.05)))  # 7
+print(int(vibration.admissible_trains_per_hour(0.2, 0.07)))  # 14
+```
+
+## 5. Desde un registro sin ponderar
+
+Donde solo existe un registro de velocidad sin ponderar, el apartado 7 estima
+`KB_Fmax` a partir de su pico y de su frecuencia: la fórmula (6) es lo que la
+ponderación KB dejaría de un seno de ese pico, con la esquina de 5,6 Hz del
+vibrómetro, y la fórmula (7) lo escala por un factor empírico de la tabla 3
+según el tipo de vibración, de 0,9 para una señal armónica limpia a 0,6 para un
+suceso breve aislado sin resonancia del forjado. La norma marca el resultado
+con un asterisco porque es una estimación, y sitúa los factores en un ±15 %.
+
+```python
+from phonometry import vibration
+
+# Anexo C, ejemplo 7: una voladura sobre un techo, 4 mm/s de pico a 14 Hz.
+estimate = vibration.kb_fmax_from_peak_velocity(4.0, 14.0, kind="single_event_resonant")
+print(f"KB*_Fmax = {estimate:.1f}")  # 2.1, frente a un A_o de 3
+```
+
+## 6. Una fórmula mal impresa
+
+La fórmula (A.1b) imprime `KB_FTm,j` igual a una media de cuadrados sin raíz
+encima, mientras la (A.1a) de al lado sí lleva la raíz, la (A.2) de debajo usa
+`KB²_FTm,j` para el cuadrado medio y el ejemplo 8 aplica la (A.1b) con la
+raíz. La biblioteca toma la raíz, los tests la fijan al ejemplo y la [página de
+erratas](/phonometry/es/reference/errata/) tiene la lectura.
+
+<Scope>
+
+## Qué cubre esta guía
+
+<ScopeClaim status="covered">
+Los **valores de referencia** de la tabla 1 por zona, franja horaria y tipo de
+fuente, el **procedimiento** del apartado 6.2 como veredicto con el criterio
+que lo decidió, y la **intensidad de valoración** de las fórmulas (4a), (4b) y
+(5) con la exposición que permite `A_r`.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+Las **reglas por fuente** del apartado 6.5: los sucesos breves y raros solo
+con `A_o`, el ferrocarril con `A_u` y `A_r` y el factor 1,5 de una línea urbana
+en superficie, y la **tabla 2** de la obra por duración y escalón con la
+interpolación de la figura 3.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+El **anexo A** entero: el eficaz de los máximos por intervalo de una clase de
+tren, la dispersión de su cuadrado, la intensidad de valoración por clases y el
+intervalo que la dispersión le pone; y la **figura D.1**, trenes por hora frente
+a `A_r`. Y el **apartado 7**, la estimación de `KB_Fmax` desde una velocidad de
+pico con la tabla 3.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+**Ningún juicio sobre los casos que la norma deja abiertos.** Una línea
+ferroviaria existente, una obra de más de 78 días laborables, un hospital
+junto a una obra y lo que el 6.2 remite a una valoración individual se
+deciden caso a caso en la norma, y aquí no se deciden.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ninguna medida.** Dónde van los captadores y cuánto dura una medida son el
+apartado 5 y la DIN 45669-2; las magnitudes vienen del vibrómetro de la
+DIN 45669-1, cuya página las forma a partir de un registro.
+</ScopeClaim>
+
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
+  de dónde salen `KB_Fmax` y los máximos por intervalo, y los números de la
+  DIN 45669-2 con los que se planifica una medida.
+- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
+  los mismos pasos reducidos para comparar, no para valorar.
+- [Daños por vibración en estructuras (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  la otra mitad de la DIN 4150, lo que aguanta el propio edificio.
+- Referencia de API:
+  [`vibration.immission.people`](/phonometry/es/reference/api/vibration/people/).
+
+</SeeAlso>

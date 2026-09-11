@@ -581,6 +581,18 @@ def _assessment_velocity() -> object:
     )
 
 
+def _people_assessment() -> object:
+    """DIN 4150-2 Clause 6.2: two hammers in a commercial area, decided on A_r."""
+    from phonometry.vibration.immission import (
+        assess_people_in_buildings,
+        assessment_vibration_severity,
+        guide_values,
+    )
+
+    kb_ftr = assessment_vibration_severity([0.16, 0.39], [6 * 3600.0, 1.5 * 3600.0])
+    return assess_people_in_buildings(0.47, guide_values("commercial"), kb_ftr=kb_ftr)
+
+
 def _train_passage() -> object:
     """DIN 45672-2: a twelve-second passage with two tones and some noise."""
     from phonometry.vibration.immission import evaluate_train_passage

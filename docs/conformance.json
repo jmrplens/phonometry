@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1034,
-    "passing": 1034,
+    "checks": 1055,
+    "passing": 1055,
     "failing": 0,
-    "domains": 79,
-    "standards": 411,
-    "citations": 700,
-    "designations": 150,
+    "domains": 80,
+    "standards": 412,
+    "citations": 708,
+    "designations": 151,
     "sources": 83
   },
   "units": [
@@ -44,6 +44,7 @@
     "dBqps",
     "deg",
     "ft",
+    "h",
     "kPa",
     "kg",
     "kg/m³",
@@ -239,6 +240,12 @@
       "title": "Railway vibration evaluation (DIN 45672)",
       "checks": 4,
       "passing": 4
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2",
+      "title": "Vibration and people in buildings (DIN 4150-2)",
+      "checks": 21,
+      "passing": 21
     },
     {
       "id": "speech-intelligibility-ansi-s3-5-1997",
@@ -16516,6 +16523,595 @@
         "value": -0.168
       },
       "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-2/admissible-exposure-at-a-r-h",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 2",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 2"
+      },
+      "quantity": "Admissible exposure at A_r, h",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.48
+      },
+      "computed": {
+        "value": 1.482
+      },
+      "unit": "h",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.002
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-4/kb-ftr-of-two-hammers-formula-4a",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 4",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 4"
+      },
+      "quantity": "KB_FTr of two hammers, Formula (4a)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.15
+      },
+      "computed": {
+        "value": 0.154
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.004
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-5/kb-ftr-with-hammer-b-in-the-rest-hours-formula-5",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 5",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 5"
+      },
+      "quantity": "KB_FTr with hammer b) in the rest hours, Formula (5)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.2
+      },
+      "computed": {
+        "value": 0.195
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-6/kb-ftr-of-hammer-a-over-16-h-with-4-h-in-the-rest-hours",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 6",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 6"
+      },
+      "quantity": "KB_FTr of hammer a) over 16 h with 4 h in the rest hours",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.18
+      },
+      "computed": {
+        "value": 0.179
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-7/kb-fmax-from-4-mm-s-at-14-hz-formulae-6-and-7",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 7",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 7"
+      },
+      "quantity": "KB*_Fmax from 4 mm/s at 14 Hz, Formulae (6) and (7)",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.1
+      },
+      "computed": {
+        "value": 2.101
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.001
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/kb-ftm-of-class-1-by-formula-a-1",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "KB_FTm of class 1 by Formula (A.1)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.82
+      },
+      "computed": {
+        "value": 0.8198
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/kb-ftm-of-class-2-by-formula-a-1",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "KB_FTm of class 2 by Formula (A.1)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.22
+      },
+      "computed": {
+        "value": 0.2209
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0009
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/s-kb-ftm-of-class-1-by-formula-a-2",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "s(KB²_FTm) of class 1 by Formula (A.2)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.27
+      },
+      "computed": {
+        "value": 0.2709
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0009
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/s-kb-ftm-of-class-2-by-formula-a-2",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "s(KB²_FTm) of class 2 by Formula (A.2)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.012
+      },
+      "computed": {
+        "value": 0.0124
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0004
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/kb-ftr-of-both-classes-by-formula-a-3",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "KB_FTr of both classes by Formula (A.3)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.325
+      },
+      "computed": {
+        "value": 0.3251
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/kb-ftr-one-spread-up-above-the-value",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "KB_FTr one spread up, above the value",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.059
+      },
+      "computed": {
+        "value": 0.0591
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/kb-ftr-one-spread-down-below-the-value",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "KB_FTr one spread down, below the value",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.073
+      },
+      "computed": {
+        "value": 0.0725
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0015
+      },
+      "deviation": {
+        "value": -0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/kb-ftm-over-the-20-intervals-of-the-record-formula-3",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "KB_FTm over the 20 intervals of the record, Formula (3)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.325
+      },
+      "computed": {
+        "value": 0.3251
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-c-example-8/kb-ftm-over-the-record-with-the-passage-maxima-alone",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex C, Example 8",
+        "cite": "DIN 4150-2:1999-06 Annex C, Example 8"
+      },
+      "quantity": "KB_FTm over the record with the passage maxima alone",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.318
+      },
+      "computed": {
+        "value": 0.3175
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-figure-3/stage-i-a-u-interpolated-for-2-working-days",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Figure 3",
+        "cite": "DIN 4150-2:1999-06 Figure 3"
+      },
+      "quantity": "Stage I A_u interpolated for 2 working days",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.73
+      },
+      "computed": {
+        "value": 0.73
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-figure-3/stage-i-a-u-interpolated-for-3-working-days",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Figure 3",
+        "cite": "DIN 4150-2:1999-06 Figure 3"
+      },
+      "quantity": "Stage I A_u interpolated for 3 working days",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.67
+      },
+      "computed": {
+        "value": 0.67
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-figure-3/stage-i-a-u-interpolated-for-4-working-days",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Figure 3",
+        "cite": "DIN 4150-2:1999-06 Figure 3"
+      },
+      "quantity": "Stage I A_u interpolated for 4 working days",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.6
+      },
+      "computed": {
+        "value": 0.6
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-figure-3/stage-i-a-u-interpolated-for-5-working-days",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Figure 3",
+        "cite": "DIN 4150-2:1999-06 Figure 3"
+      },
+      "quantity": "Stage I A_u interpolated for 5 working days",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.53
+      },
+      "computed": {
+        "value": 0.53
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-figure-3/stage-i-a-u-interpolated-for-6-working-days",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Figure 3",
+        "cite": "DIN 4150-2:1999-06 Figure 3"
+      },
+      "quantity": "Stage I A_u interpolated for 6 working days",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.47
+      },
+      "computed": {
+        "value": 0.47
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-d-figure-d-1/trains-an-hour-at-kb-ftm-0-2-for-a-r-0-05",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex D, Figure D.1",
+        "cite": "DIN 4150-2:1999-06 Annex D, Figure D.1"
+      },
+      "quantity": "Trains an hour at KB_FTm = 0,2 for A_r = 0.05",
+      "kind": "scalar",
+      "expected": {
+        "value": 7.0
+      },
+      "computed": {
+        "value": 7.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-and-people-in-buildings-din-4150-2/din-4150-2-1999-06-annex-d-figure-d-1/trains-an-hour-at-kb-ftm-0-2-for-a-r-0-07",
+      "domain": "vibration-and-people-in-buildings-din-4150-2",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 4150-2",
+        "edition": "1999-06",
+        "clause": "Annex D, Figure D.1",
+        "cite": "DIN 4150-2:1999-06 Annex D, Figure D.1"
+      },
+      "quantity": "Trains an hour at KB_FTm = 0,2 for A_r = 0.07",
+      "kind": "scalar",
+      "expected": {
+        "value": 14.0
+      },
+      "computed": {
+        "value": 14.0
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

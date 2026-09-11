@@ -41,7 +41,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from ..._internal.validation import require_choice, require_positive
+from ..._internal.validation import (
+    require_choice,
+    require_non_negative,
+    require_positive,
+)
 
 __all__ = [
     "CLEARANCE_TO_DISTURBING_BODY_FACTOR",
@@ -166,10 +170,10 @@ def check_loose_mounting(
         ``"soft"`` (a carpet or any elastic floor covering).
     :return: The verdict and the limits it was read against, as a
         :class:`MountingCheck`.
-    :raises ValueError: For a non-positive acceleration or frequency, or an
-        unknown direction or surface.
+    :raises ValueError: For a negative acceleration, a non-positive
+        frequency, or an unknown direction or surface.
     """
-    peak = require_positive(peak_acceleration_m_s2, "peak_acceleration_m_s2")
+    peak = require_non_negative(peak_acceleration_m_s2, "peak_acceleration_m_s2")
     upper = require_positive(upper_frequency_hz, "upper_frequency_hz")
     which = require_choice(str(direction), "direction", _DIRECTIONS)
     where = require_choice(str(surface), "surface", _SURFACES)

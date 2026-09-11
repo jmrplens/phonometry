@@ -88,6 +88,7 @@ def test_bad_arguments_are_refused_by_name() -> None:
     with pytest.raises(ValueError, match="surface"):
         im.check_loose_mounting(1.0, 10.0, direction="vertical", surface="wet")
     with pytest.raises(ValueError, match="peak_acceleration_m_s2"):
-        im.check_loose_mounting(0.0, 10.0, direction="vertical")
+        im.check_loose_mounting(-0.1, 10.0, direction="vertical")
+    assert im.check_loose_mounting(0.0, 10.0, direction="vertical").acceptable
     with pytest.raises(ValueError, match="upper_frequency_hz"):
         im.check_loose_mounting(1.0, -10.0, direction="vertical")

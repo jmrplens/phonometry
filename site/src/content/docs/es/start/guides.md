@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 127 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 128 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento veintisiete guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento veintiocho guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -582,6 +582,15 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
   de envolvente que las encuentra bajo el ruido de banda ancha de una máquina en
   marcha. Listada también en Análisis de señal, junto a los estimadores
   espectrales que utiliza.
+
+**[Inmisión de vibración](/phonometry/es/vibration/immission/)**
+
+- [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
+  el vibrómetro que dan por supuesto la DIN 4150-2 y la DIN 4150-3, con la
+  ponderación KB, la intensidad de vibración ponderada y el eficaz de los
+  máximos por intervalo en que se expresa una medida, las bandas de tolerancia
+  con que se juzga un vibrómetro y la velocidad de valoración del anexo E, que
+  juzga un edificio sin frecuencia dominante.
 
 ## [Medio ambiente y transporte](/phonometry/es/environment/)
 

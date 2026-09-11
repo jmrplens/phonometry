@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 995 numerical conformance checks against 408 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1030 numerical conformance checks against 410 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 995 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 77 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1030 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 78 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -234,6 +234,11 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Machine fault frequencies (Norton & Karczub)](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/)
 - [Evaluating machine vibration (ISO 20816-1)](https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/)
 
+### Vibration immission
+
+- [Overview](https://jmrplens.github.io/phonometry/vibration/immission/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-vibration-immission.txt)
+- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/)
+
 ## Environment and transport
 
 - [Overview](https://jmrplens.github.io/phonometry/environment/)
@@ -396,6 +401,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Structure-borne sources](https://jmrplens.github.io/phonometry/llms/llms-vibration-structural.txt)
 - [Human vibration](https://jmrplens.github.io/phonometry/llms/llms-vibration-human.txt)
 - [Machinery](https://jmrplens.github.io/phonometry/llms/llms-vibration-machinery.txt)
+- [Vibration immission](https://jmrplens.github.io/phonometry/llms/llms-vibration-immission.txt)
 - [Environment and transport](https://jmrplens.github.io/phonometry/llms/llms-environment.txt)
 - [Assessment and regulation](https://jmrplens.github.io/phonometry/llms/llms-environment-assessment.txt)
 - [Outdoor sound](https://jmrplens.github.io/phonometry/llms/llms-environment-propagation.txt)
@@ -603,6 +609,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [vibration/seat-vibration](https://jmrplens.github.io/phonometry/reference/api/vibration/seat-vibration/)
 - [vibration/signal-burst](https://jmrplens.github.io/phonometry/reference/api/vibration/signal-burst/)
 - [vibration/transfer-stiffness](https://jmrplens.github.io/phonometry/reference/api/vibration/transfer-stiffness/)
+- [vibration/vibration-meter](https://jmrplens.github.io/phonometry/reference/api/vibration/vibration-meter/)
 
 
 ---
@@ -37379,7 +37386,7 @@ STI/STIPA, and [Theory](https://jmrplens.github.io/phonometry/reference/theory/p
 
 ## Standards
 
-DIN 45692:2009, *Messtechnische Simulation der Hörempfindung
+DIN 45692:2009-08, *Messtechnische Simulation der Hörempfindung
 Schärfe*: sharpness in acum (clause 6 weighting, Annex B von Bismarck and
 Aures variants, Table A.2 targets). ECMA-418-2:2025, *Psychoacoustic metrics
 for ITT equipment — Part 2 (methods for describing human perception based on
@@ -41148,6 +41155,20 @@ documents, one page per module.
 | `WBV_ELV_A8` | `float` | **Whole-body A(8) limit value [m/s²].**<br>1.15 | `WBV_ELV_A8  # 1.15` |
 | `WBV_EAV_VDV` | `float` | **Whole-body VDV action value [m/s^1.75].**<br>9.1 | `WBV_EAV_VDV  # 9.1` |
 | `WBV_ELV_VDV` | `float` | **Whole-body VDV limit value [m/s^1.75].**<br>21.0 | `WBV_ELV_VDV  # 21.0` |
+| `measure_vibration_immission` / `VibrationMeterReading` | `function` / `dataclass` | **What a DIN 45669-1 vibration meter displays for one record (5.1.6).**<br>• `velocity_mm_s` [mm/s], `fs_hz` [Hz]<br>• keyword-only: `working_range` (`'building'` 1-80 Hz, Default; `'railway'` 4-315 Hz), `takt_duration_s` (Default: 30)<br>• `.peak_velocity_mm_s`, `.kbf`, `.kbf_max`, `.takt_maxima`, `.kbf_takt_rms`, `.measuring_time_s`, `.averaging_time_s`, `.above_detection_limit`, `.plot()`<br>• start the record before the event: a record that opens at full amplitude leaves the filter's switch-on transient in the max-hold | `r = vibration.measure_vibration_immission(v, 2048.0)`<br><br>• `r.kbf_max`, `r.kbf_takt_rms` |
+| `kb_signal` / `kbf_signal` | `function` | **The KB signal and the weighted vibration severity (3.10.1, Formula (1)).**<br>• `KB(t)` is the velocity band-limited, frequency-weighted and normalised by 1 mm/s, so it is dimensionless<br>• `KB_F(t)` is its running r.m.s. with τ = 0,125 s ("Fast")<br>• keyword-only: `working_range`, and `time_constant_s` for a comparison the standard does not allow a meter | `vibration.kbf_signal(v, 2048.0).max()  # KB_Fmax` |
+| `takt_maxima` / `takt_maximum_rms` | `function` | **The clock maxima and their r.m.s., Formula (2).**<br>• one maximum per whole 30 s clock interval; a part-interval is dropped (5.1.6.4)<br>• a maximum at or below 0,1 enters the sum as zero and its interval still counts in N | `vibration.takt_maximum_rms([0.8, 0.05])  # 0.566` |
+| `band_limitation_response` / `kb_weighting_response` | `function` | **Formulae (3) and (4), complex, at the frequencies asked for.**<br>• two-pole Butterworth pairs at `0,8 f_u` and `f_o / 0,8`, and the 5,6 Hz pole that makes the KB weighting<br>• the magnitudes are Formulae (5) and (6) | `abs(vibration.kb_weighting_response([16.0]))  # 0.944` |
+| `verify_vibration_meter` / `VibrationMeterVerification` | `function` / `dataclass` | **Does a meter's amplitude response meet DIN 45669-1 Tables 2 and 3?**<br>• `frequencies_hz`, `measured_response` (any consistent unit: only the shape is graded)<br>• keyword-only: `weighting` (`'kb'` Default, or `'unweighted'`), `working_range`, `reference_frequency_hz` (Default: 16)<br>• `.deviation_percent` (Formula (7)), `.lower_percent`, `.upper_percent`, `.within_tolerance`, `.passes`, `.worst_frequency_hz`, `.plot()`<br>• the response only: Clause 6 also asks for linearity, overload and the environmental tests | `vibration.verify_vibration_meter(f, measured).passes` |
+| `response_tolerance_percent` / `RESPONSE_TOLERANCE_LOWER_PERCENT` / `RESPONSE_TOLERANCE_UPPER_PERCENT` | `function` / `constant` | **Tables 2 and 3, as bands of the working range.**<br>• 10 % from `1,25 f_u` to `0,8 f_o`, 20 % out to `0,5 f_u` and `2 f_o`<br>• 100 % below that band is the absence of a lower limit, and the upper limit applies only where the response is above 0,01 | `vibration.response_tolerance_percent([100.0])`<br><br>• (20.0, 20.0) % |
+| `assessment_weighting_response` / `assessment_weighting_taps` | `function` | **The three Annex E weighting filters (Table E.1).**<br>• the target magnitude is the guideline curve of DIN 4150-3 Table 1 inverted and normalised to its 1-10 Hz value<br>• `assessment_weighting_taps(fs_hz, *, building_class, numtaps=None)` designs the symmetric FIR the annex asks for, which has the linear phase a peak measurement needs | `vibration.assessment_weighting_response([50.0], building_class='residential')`<br><br>• 0.333 |
+| `assessment_velocity` / `assess_short_term_vibration` / `AssessmentVelocity` | `function` / `dataclass` | **Short-term vibration on a building judged without a dominant frequency (Annex E).**<br>• `velocity_mm_s` [mm/s], `fs_hz` [Hz], keyword-only `building_class` and `numtaps`<br>• `.assessment_velocity_mm_s` = `\|v_Bn\|max`, `.guide_value_mm_s`, `.ratio`, `.within_guideline`, `.plot()`<br>• the verdict reads like DIN 4150-3: keeping to the value is what the standard promises about, exceeding it moves the question to Clauses 4.2 to 4.4 | `vibration.assess_short_term_vibration(v, 2048.0, building_class='residential').within_guideline` |
+| `dominant_frequency` / `DominantFrequency` | `function` / `dataclass` | **The dominant frequency of a short-term event (Annex D).**<br>• `method='zero_crossing'` (Default: the crossings around the largest amplitude are half a period apart) or `'fourier'`<br>• `.frequency_hz`, `.method`, `.candidates` (the two largest spectral values, Fourier only)<br>• the two can disagree, which is the ambiguity Annex E removes | `vibration.dominant_frequency(v, 2048.0).frequency_hz` |
+| `WORKING_RANGES_HZ` / `BAND_LIMIT_CORNER_FACTOR` / `KB_CORNER_HZ` / `KB_TIME_CONSTANT_S` | `constant` | **The four numbers the chain is built from (5.2.3, 3.10.1.2).**<br>• 1 Hz to 80 Hz for buildings and 4 Hz to 315 Hz next to a railway<br>• the 0,8 between a band limit and its filter corner, the 5,6 Hz of the weighting and the 0,125 s of the running r.m.s. | `vibration.WORKING_RANGES_HZ['railway']  # (4.0, 315.0)` |
+| `TAKT_DURATION_S` / `TAKT_SUPPRESSION_THRESHOLD` / `KB_DETECTION_LIMIT` / `VELOCITY_DETECTION_LIMIT_MM_S` | `constant` | **The clock interval and the limits below which a meter promises nothing.**<br>• 30 s per clock interval (5.1.6.4), and the 0,1 of Formula (2)<br>• 0,05 mm/s on the peak velocity and 0,02 on the weighted vibration severity (5.2.2) | `vibration.TAKT_DURATION_S  # 30.0` |
+| `KB_REFERENCE_FREQUENCY_HZ` / `KB_REFERENCE_INDICATIONS` / `KB_INDICATION_TOLERANCE_PERCENT` | `constant` | **The reference conditions of 5.2.10 and what they must show (6.2.3.12).**<br>• a 1 mm/s sine at 16 Hz, and the four values it produces: 1,00 mm/s, 0,667, 0,680 and 0,680<br>• 4 % is how far the display may sit from them | `vibration.KB_REFERENCE_INDICATIONS['kbf_max']  # 0.68` |
+| `KB_TEST_INDICATIONS` / `KB_PULSE_RESPONSE_PERCENT` | `constant` | **Table 9 and Table 8, as data.**<br>• the `KB_F`, `KB_Fmax` and `KB_FTm` a 1 mm/s sine shows at 1, 5,6, 31,5, 80 and 315 Hz<br>• Corrigendum 1's redraft of the burst table: eight burst durations of an 80 Hz sine and the `KB_Fmax` each shows as a percentage of the continuous display<br>• the `\|v\|max` row of Table 9 is not here; it contradicts Formula (5), see `docs/ERRATA.md` | `vibration.KB_TEST_INDICATIONS[31.5]`<br><br>• (0.693, 0.7, 0.7) |
+| `ASSESSMENT_GUIDE_VALUES_MM_S` / `ASSESSMENT_WEIGHTING_TOLERANCE` | `constant` | **Table E.2 and the band Table E.1 allows a realised filter.**<br>• 20, 5 and 3 mm/s, one per building class, independent of frequency<br>• 5 % either side of the target magnitude | `vibration.ASSESSMENT_GUIDE_VALUES_MM_S['sensitive']  # 3.0` |
 | `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m]<br>• `duration`: physical time to simulate [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` list<br>• `probes`: `(ix, iy)` pressure-probe cells<br>• `boundaries`: `"rigid"` \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m])<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` / `cfl` / `damping` / `absorbing_layer_cells` / `snapshot_every` | `res = simulation.fdtd_simulation(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3e-4)], probes=[(200, 100)])`<br><br>• `FDTDResult` |
 | `FDTDResult` | `dataclass` | **FDTD simulation result.**<br>• `times` [s] / `pressures` [Pa] per probe / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` / `snapshot_times` / `obstacle_mask`<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: pressure field | `res.pressures, res.times`<br>`res.plot()` |
 | `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask` | `sim = simulation.FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, record_every=10)`<br>• `sim.p` / `sim.vx` / `sim.vy` / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.plot_geometry(probes=...)`: draw the configured domain before running<br>• `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`: one-way plane packet initial condition<br>• `sim.add_contour_probe(ix0, ix1, iy0, iy1, frequencies=...)`: on-the-fly `p`/`v_n` phasor capture on a closed contour |
@@ -42973,7 +42994,7 @@ check that pins each quantity to its standard's own expected value.
 | $N$ | Loudness: the perceived magnitude of a sound, anchored so that a 1 kHz tone at 40 dB SPL is exactly 1 sone. | sone | ISO 532-1:2017, clause 5 (stationary) and clause 6 (time-varying) | [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) |
 | $N'$ | Specific loudness: the loudness density along the critical-band scale, whose integral is $N$. | sone/Bark | ISO 532-1:2017 (sone/Cam form in ISO 532-2:2017, Formula 7) | [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) |
 | $L_\mathrm{N}$ | Loudness level: the level of the 1 kHz free-field tone judged equally loud as the sound. | phon | ISO 226:2023, Formula (2) (contours in Formula (1)) | [Loudness](https://jmrplens.github.io/phonometry/perception/psychoacoustics/loudness/) |
-| $S$ | Sharpness: the position of the centre of gravity of the specific loudness on the critical-band scale, normalised so that the reference narrow-band noise is exactly 1 acum. | acum | DIN 45692:2009, clause 6 | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
+| $S$ | Sharpness: the position of the centre of gravity of the specific loudness on the critical-band scale, normalised so that the reference narrow-band noise is exactly 1 acum. | acum | DIN 45692:2009-08, clause 6 | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
 | $R$ | Roughness: the perceived harshness of fast amplitude modulation, around 70 Hz, normalised so that the reference modulated tone is 1 asper. | asper | ECMA-418-2:2025, clause 7 (Formula 104) | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
 | $F$ | Fluctuation strength: the perceived slow amplitude modulation, around 4 Hz, normalised so that the reference modulated tone is 1 vacil. | vacil | ECMA-418-2:2025, clause 9 (Formula 163) | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
 | $T$ | Tonality: the perceived tonal content of a sound, derived from the autocorrelation of the band envelopes. | tu | ECMA-418-2:2025, clause 6 | [Sound Quality Metrics](https://jmrplens.github.io/phonometry/perception/psychoacoustics/sound-quality/) |
@@ -44055,7 +44076,7 @@ degree.*
 
 ### Sharpness (DIN 45692)
 
-Sharpness condenses the high-frequency emphasis of a sound into one number: the $g(z)$-weighted first moment of the ISO 532-1 stationary specific-loudness pattern (DIN 45692:2009, Equation 1):
+Sharpness condenses the high-frequency emphasis of a sound into one number: the $g(z)$-weighted first moment of the ISO 532-1 stationary specific-loudness pattern (DIN 45692:2009-08, Equation 1):
 
 $$
 S = k\ \frac{\int_0^{24} N'(z)\ g(z)\ z\ dz}{\int_0^{24} N'(z)\ dz} \ \text{acum}, \qquad
@@ -55508,7 +55529,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 995 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1030 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -56191,7 +56212,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-995 numerical conformance checks across 77 domains and 408 standards, covering
+1030 numerical conformance checks across 78 domains and 410 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -61052,6 +61073,467 @@ are not implemented.
 ---
 
 
+<!-- source: docs/vibration/immission/index.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/ -->
+Source: https://jmrplens.github.io/phonometry/vibration/immission/
+
+# Vibration immission
+
+*Immission* is the German term for what arrives, as against *emission*, what
+leaves: the vibration a building or the people in it actually receive, wherever
+it came from. It is regulated on that side of the transmission path, and the
+documents that do it are a set rather than a single standard. DIN 4150-2 fixes
+what people in buildings may be exposed to; DIN 4150-3 fixes what the buildings
+themselves may take; DIN 45669-1 specifies the **instrument** both of them
+presuppose, and DIN 45669-2 the procedure it is used with.
+
+This section is the instrument half of that set. The other half already has a
+page: the guideline values of DIN 4150-3 are in [Vibration damage to
+structures](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/), and they used
+to say, at the end, that the instrument requirements of DIN 45669 were not
+implemented. They are now, which closes the loop: the quantity a guideline
+value is compared against is defined by the meter, and the meter is defined by
+its band limitation, its KB weighting and the running r.m.s. it averages them
+with.
+
+The section also carries the piece of DIN 45669-1 that reaches furthest into
+practice. Annex E turns the frequency-dependent guideline curve of DIN 4150-3
+into three filters, one per building class, and with them a short-term event is
+judged against a single number instead of against a curve read at a frequency
+two methods disagree about.
+
+## Pages in this section
+
+- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+  the band limitation and KB weighting of Formulae (3) and (4), the weighted
+  vibration severity and the clock maximum r.m.s. of Formulae (1) and (2), the
+  tolerance bands of Tables 2 and 3, the printed check values of Tables 8 and
+  9, and the assessment velocity of Annex E (DIN 45669-1:2010-09 with
+  Corrigendum 1:2012-12).
+
+## See also
+
+- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+  the guideline values this chain produces the numbers for.
+- [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+  the same idea for the meter that measures vibration on people, with its own
+  weightings and its own tolerance tables.
+- [Building response and fundamental frequency (ISO 4866)](https://jmrplens.github.io/phonometry/vibration/structural/building-response/):
+  the frequency a building answers at, which is a different question from the
+  frequency of the event.
+
+## What this section does not cover
+
+**No measurement procedure.** DIN 45669-2 fixes the measurement positions, the
+coupling of a transducer to a floor or to the ground, the measurement duration
+and the disturbances that have to be kept out. None of it is arithmetic and
+none of it is here.
+
+**No assessment of people in buildings.** DIN 4150-2 judges what the weighted
+vibration severity means for the people who feel it, with its own tables of
+reference values by time of day and use of the room. The quantity is computed
+here; the judgement it feeds is not implemented.
+
+**Nothing about railways yet.** DIN 45672 measures and evaluates vibration
+next to railway lines, which is what the 4 Hz to 315 Hz working range of the
+meter is for. Its evaluation method is not implemented.
+
+---
+
+
+<!-- source: docs/vibration/immission/vibration-meter.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/ -->
+Source: https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/
+
+# Measuring vibration immission (DIN 45669-1)
+
+German immission control judges vibration in buildings with two standards that
+print thresholds and say almost nothing about how the number reaching them was
+formed. DIN 4150-2 sets what people in buildings may be exposed to and
+[DIN 4150-3](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/) sets what
+the buildings themselves may take. Both are tables of values for a quantity
+that has to come from somewhere, and DIN 45669-1 is where it comes from: the
+specification of the **vibration meter**, which is also the definition of the
+quantities those tables compare against.
+
+That makes this page the other half of a pair. The damage page reads a
+guideline value off a table; this one builds the number you read it with, from
+a velocity record, and then grades an instrument that claims to produce it.
+The two standards meet twice: once because the meter is what a DIN 4150
+measurement is made with, and once in Annex E, where the guideline curve of
+DIN 4150-3 comes back as a filter.
+
+## 1. The chain, in the order the standard builds it
+
+A velocity signal enters and four numbers come out. Between them are three
+stages, each printed as an exact transfer function or an exact average.
+
+**Band limitation** (5.2.3.2, Formula (3)) is two Butterworth pairs: a
+two-pole high pass at `0,8 f_u` and a two-pole low pass at `f_o / 0,8`. The
+working range is 1 Hz to 80 Hz for buildings, so those corners are 0,8 Hz and
+100 Hz. Next to a railway the range is 4 Hz to 315 Hz, which is where
+DIN 45672-1 works, and blasting and structure-borne sound need it too.
+
+**Frequency weighting** (Formula (4)) divides that by
+`1 − j 5,6 Hz / f`, one more pole and one more zero. Normalising the result by
+1 mm/s turns it into the **KB signal**, which is dimensionless and is what
+everything downstream is built on.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/kb_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/kb_weighting.svg" alt="A logarithmic frequency axis from 0.2 to 800 hertz carrying three curves in decibels. A grey dashed curve is the band limitation of the 1 to 80 hertz working range on its own, flat from about 2 to 60 hertz and rolling off two poles either side. A blue curve is the KB weighting of that same range, which is the grey curve with a further first-order fall below its corner, reaching about minus 17 decibels at 1 hertz. A green curve is the KB weighting of the 4 to 315 hertz railway range, identical to the blue one in the middle and extending its flat top out to about 250 hertz. A vertical red line marks 5.6 hertz, with a dot on the weighted curve three decibels below its flat top and a label reading 5.6 hertz, the corner of Formula (4)" width="94%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+freqs = np.geomspace(0.2, 800.0, 600)
+building = np.abs(vibration.kb_weighting_response(freqs))
+railway = np.abs(vibration.kb_weighting_response(freqs, working_range="railway"))
+band = np.abs(vibration.band_limitation_response(freqs))
+
+fig, ax = plt.subplots(figsize=(10, 6.2))
+ax.semilogx(freqs, 20 * np.log10(band), "--", label="band limitation alone")
+ax.semilogx(freqs, 20 * np.log10(building), label="KB weighting, 1 Hz to 80 Hz")
+ax.semilogx(freqs, 20 * np.log10(railway), label="KB weighting, 4 Hz to 315 Hz")
+ax.axvline(vibration.KB_CORNER_HZ)
+ax.set_xlabel("Frequency [Hz]")
+ax.set_ylabel("Weighting factor [dB]")
+ax.set_ylim(-40, 3)
+ax.legend()
+```
+
+</details>
+
+The magnitudes of both are printed as Formulae (5) and (6), and the library
+returns the complex responses so a phase check has something to read:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+kb = np.abs(vibration.kb_weighting_response([16.0]))
+print(f"KB weighting at the reference frequency: {kb[0]:.4f}")  # 0.9435
+
+corners = np.abs(vibration.band_limitation_response([0.8, 100.0]))
+print(f"the two band-limit corners: {corners.round(4)}")  # [0.7071 0.7071]
+```
+
+## 2. What a meter displays, and the two rules inside Formula (2)
+
+The KB signal is averaged, and the averaging is the one a sound level meter
+calls Fast: a running r.m.s. with `τ = 0,125 s` (Formula (1)). Its value at any
+instant is the **weighted vibration severity** `KB_F(t)`, and 3.10.1.2 says
+why that time constant: DIN 4150-2 judges the effect on people with it, and
+the fluctuating indication it gives below 5 Hz was taken into account when
+those judging criteria were written.
+
+From that signal come the three numbers a measurement is reported as. The
+maximum `KB_Fmax` over the averaging time. The maximum inside each **clock
+interval** (*Takt*) of 30 s, which DIN 4150-2 fixes. And the r.m.s. of those
+clock maxima, `KB_FTm`, from Formula (2), which carries two rules that are
+easy to read past:
+
+- a clock maximum at or below **0,1** enters the sum as zero, and the interval
+  it came from **still counts in N**, so a quiet stretch pulls the average
+  down rather than being dropped from it;
+- a clock interval the measurement did not fill is not a clock interval
+  (5.1.6.4), so the averaging time always spans a whole number of them.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/kb_time_response_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/kb_time_response.svg" alt="Two stacked panels sharing a ninety-second time axis. The upper panel is the velocity record in millimetres per second: a faint continuous background and two bursts, a large one of about 1.8 millimetres per second peak around 22 to 25 seconds and a smaller one of about 0.9 around 68 to 71 seconds. The lower panel is the weighted vibration severity of the same record, two peaks reaching 1.21 and 0.62 with the background sitting near 0.013. A red dashed line marks KB F max at 1.210, a green dotted line marks KB FTm at 0.785, thin vertical rules cut the axis at 30 and 60 seconds, and three green squares sit at the middle of each clock interval at 1.21, 0.013 and 0.62, the middle one below the 0.1 that Formula (2) enters as zero" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(90.0 * fs_hz)) / fs_hz
+record = 0.02 * np.sin(2 * np.pi * 11.0 * t)
+for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
+    window = (t >= start) & (t < start + 3.0)
+    record[window] += (
+        amplitude
+        * np.hanning(int(window.sum()))
+        * np.sin(2 * np.pi * frequency * t[window])
+    )
+
+reading = vibration.measure_vibration_immission(record, fs_hz)
+reading.plot()
+```
+
+</details>
+
+The record above is one that a real measurement looks like: a machine running
+somewhere nearby, and two events. Running it through the chain gives the four
+numbers, and the third clock interval is where Formula (2) shows its teeth.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(90.0 * fs_hz)) / fs_hz
+record = 0.02 * np.sin(2 * np.pi * 11.0 * t)
+for start, amplitude, frequency in ((22.0, 1.8, 17.0), (68.0, 0.9, 26.0)):
+    window = (t >= start) & (t < start + 3.0)
+    record[window] += (
+        amplitude
+        * np.hanning(int(window.sum()))
+        * np.sin(2 * np.pi * frequency * t[window])
+    )
+
+reading = vibration.measure_vibration_immission(record, fs_hz)
+print(f"|v|max      = {reading.peak_velocity_mm_s:.3f} mm/s")  # 1.816 mm/s
+print(f"KB_Fmax     = {reading.kbf_max:.3f}")                  # 1.210
+print(f"clock maxima= {reading.takt_maxima.round(3)}")         # [1.21 0.013 0.62]
+print(f"KB_FTm      = {reading.kbf_takt_rms:.3f}")             # 0.785
+
+quiet = reading.takt_maxima[1]
+counted = np.array([reading.takt_maxima[0], 0.0, reading.takt_maxima[2]])
+print(f"the quiet interval reads {quiet:.3f}, enters as 0, and still counts:")
+print(f"  sqrt(mean of squares over 3) = {np.sqrt(np.mean(counted**2)):.3f}")
+```
+
+**Start the record before the event.** Every filter here begins at rest, so a
+record that begins with the signal already at full amplitude carries the
+filter's own switch-on transient, and the peak is a max-hold that keeps it. A
+1 mm/s sine started at a zero crossing reads 1,06 mm/s rather than the
+1,00 mm/s of 6.2.3.12. That is a property of the record, not of the chain, and
+a second of quiet in front of the event removes it.
+
+## 3. The numbers the standard prints for a meter to reproduce
+
+Two tables make the chain checkable rather than merely specified. Table 9 (on
+printed folio 35) says what a 1 mm/s sine has to show at five frequencies, and
+Table 8, in the redraft [Corrigendum
+1](https://jmrplens.github.io/phonometry/reference/errata/) gives it, says the same for a burst train.
+They are published here as data, and the conformance report runs them:
+
+```python
+from phonometry import vibration
+
+for frequency_hz, (kbf, kbf_max, kbf_takt) in vibration.KB_TEST_INDICATIONS.items():
+    print(f"{frequency_hz:6.1f} Hz -> KB_F {kbf:.3f}, KB_Fmax {kbf_max:.3f}")
+
+print(vibration.KB_REFERENCE_INDICATIONS)
+# {'peak_velocity_mm_s': 1.0, 'kbf': 0.667, 'kbf_max': 0.68, 'kbf_takt_rms': 0.68}
+```
+
+`KB_Fmax` above `KB_F` in every row is not a gain: it is the **ripple** of a
+running r.m.s. of a sine, which Annex B is about, and it is why these values
+are worth having as an oracle. No closed form for the pair is printed
+anywhere, so a check that reproduces them checks the whole chain, filter,
+squaring, averaging and maximum together.
+
+## 4. Grading a meter: Tables 2 and 3
+
+The tolerance is not on the response but on its **shape**. Formula (7) divides
+the measured response by the design response, each normalised at the reference
+frequency of 16 Hz, so a flat gain error is a calibration matter and not a
+conformity one. What is left is graded band by band: 10 % from `1,25 f_u` to
+`0,8 f_o`, 20 % out to `0,5 f_u` and `2 f_o`, and below that Table 2 stops
+constraining the response from below altogether.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+frequencies_hz = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
+measured = np.abs(vibration.kb_weighting_response(frequencies_hz))
+measured[5] *= 1.15  # a meter 15 % high at 31,5 Hz
+
+result = vibration.verify_vibration_meter(frequencies_hz, measured)
+print(f"passes: {result.passes}")                       # False
+print(f"worst frequency: {result.worst_frequency_hz} Hz")  # 31.5 Hz
+```
+
+The reference frequency itself carries no requirement, the standard writing
+every limit "for all f not equal to f_r", so it is dropped from the verdict
+rather than passed for free. And a verdict here is one clause: Clause 6 also
+asks for linearity, overload, crest-factor handling, temperature, humidity and
+electromagnetic tests, all of them measurements on hardware.
+
+## 5. Annex E: judging a building without a dominant frequency
+
+DIN 4150-3 compares a peak velocity with a guideline value that **depends on
+frequency**, which means a short-term event has to be given one. Annex D gives
+two ways of finding it, the zero crossings around the largest amplitude and
+the Fourier transform of the whole event, and says plainly that they can
+disagree. They do:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(3.0 * fs_hz)) / fs_hz
+event = np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
+
+print(vibration.dominant_frequency(event, fs_hz).frequency_hz)  # 17.07 Hz
+print(vibration.dominant_frequency(event, fs_hz, method="fourier").frequency_hz)
+```
+
+The disagreement matters because the frequency picks the guideline value, so
+it can change the verdict. Annex E removes the question instead of refining
+it. Each building class of DIN 4150-3 Table 1 gets a **weighting filter**
+whose target magnitude is that class's guideline curve inverted and normalised
+to the value it holds from 1 Hz to 10 Hz. Filter the velocity with it and the
+peak of what comes out, the **assessment velocity** `v_Bn`, is compared with a
+single number that no longer depends on frequency: 20, 5 or 3 mm/s (Table E.2).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/assessment_weighting_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/assessment_weighting.svg" alt="Two panels side by side on logarithmic frequency axes from 1 to 315 hertz. The left panel is what DIN 4150-3 Table 1 asks for: three guideline curves in millimetres per second, flat to 10 hertz at 20, 5 and 3, rising along two straight segments to 50 and 100 hertz and flat above at 50, 20 and 10. The right panel is the weighting that removes the frequency: the same three curves inverted and normalised to their low-frequency value, flat at 1 to 10 hertz and falling to 0.4, 0.25 and 0.3, with a pale green band of plus or minus five per cent drawn around the dwellings curve, which is the tolerance Table E.1 allows a realised filter" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+freqs = np.geomspace(1.0, 315.0, 500)
+fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.4))
+for cls in vibration.ASSESSMENT_GUIDE_VALUES_MM_S:
+    axes[0].plot(freqs, vibration.guideline_velocity(cls, freqs), label=cls)
+    axes[1].plot(
+        freqs,
+        vibration.assessment_weighting_response(freqs, building_class=cls),
+        label=cls,
+    )
+for ax in axes:
+    ax.set_xscale("log")
+    ax.set_xlabel("Frequency [Hz]")
+    ax.legend()
+```
+
+</details>
+
+The filter is specified as a target magnitude with a ±5 % band and a **linear
+phase**, and the annex says why the phase: a weighting that delays different
+frequencies differently changes the peak it is there to measure. A symmetric
+FIR is the type it names, and the library designs one.
+
+The two routes agree, which is the point of the annex:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048.0
+t = np.arange(int(3.0 * fs_hz)) / fs_hz
+event = 1.8 * np.sin(2 * np.pi * 17.0 * t) * np.hanning(t.size)
+
+# The DIN 4150-3 route: find the frequency, read the guideline value there.
+peak_mm_s = float(np.max(np.abs(event)))
+guideline = float(vibration.guideline_velocity("residential", 17.0))
+print(f"peak {peak_mm_s:.3f} mm/s against {guideline:.2f} mm/s at 17 Hz")
+print(f"  ratio {peak_mm_s / guideline:.3f}")  # 0.269
+
+# The Annex E route: no frequency anywhere.
+assessment = vibration.assess_short_term_vibration(
+    event, fs_hz, building_class="residential"
+)
+print(f"|v_B2|max {assessment.assessment_velocity_mm_s:.3f} mm/s against 5 mm/s")
+print(f"  ratio {assessment.ratio:.3f}")  # 0.271
+print(f"  within the guideline: {assessment.within_guideline}")
+```
+
+The verdict reads the way DIN 4150-3 reads: keeping to the value is what the
+standard has evidence about, and exceeding it does not mean damage has
+occurred, only that the cheap check has run out and Clauses 4.2 to 4.4 have to
+be done instead.
+
+## 6. What this page is not
+
+DIN 45669 has a second part, and it is the one a measurement is actually
+planned with: DIN 45669-2 fixes where the transducers go, how they are coupled
+to a floor or to the ground, how long a measurement runs and which
+disturbances have to be kept out of it. None of that is arithmetic and none of
+it is here. What is here is the instrument the two parts describe between
+them, and the quantities it is required to produce.
+
+## What this guide covers
+
+The **band limitation** of Formula (3) and the **KB weighting** of Formula
+(4), complex, over both working ranges of 5.2.3.1, with the magnitudes of
+Formulae (5) and (6) as their absolute values.
+
+The **weighted vibration severity** `KB_F(t)` of Formula (1), its maximum, the
+**clock maxima** of the 30 s intervals of 5.1.6.4 and the **clock maximum
+r.m.s.** of Formula (2), including its two counting rules, and the detection
+limits of 5.2.2.
+
+The **amplitude response tolerances** of Tables 2 and 3 with the deviation of
+Formula (7), as a verdict on a measured response; and the printed check values
+of Table 9, of 6.2.3.12 and of Table 8 in the redraft of Corrigendum 1,
+reproduced by running the chain.
+
+**Annex E** in full: the three assessment weightings of Table E.1 as a target
+magnitude and as a linear-phase FIR, the assessment velocity they produce and
+the frequency-independent guideline values of Table E.2. And **Annex D**, both
+methods of finding a dominant frequency.
+
+**No bench.** Clause 6 also grades linearity, overload, crest-factor handling,
+the digital interfaces, temperature, humidity and electromagnetic
+susceptibility. Those are measurements on hardware and a pass on the response
+is not a conformity certificate for an instrument.
+
+**No measurement procedure.** Transducer coupling, measurement positions,
+measurement duration and the treatment of disturbances are DIN 45669-2, and
+the assessment of what was measured is DIN 4150-2 and DIN 4150-3.
+
+## See also
+
+- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+  the guideline values the Annex E weightings invert, and the assessment this
+  chain feeds.
+- [Verifying a human-vibration meter (ISO 8041-1)](https://jmrplens.github.io/phonometry/vibration/human/meter-verification/):
+  the same kind of instrument standard, for the other kind of meter, with its
+  own tolerance tables.
+- [Human vibration exposure](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/): the
+  people side of the same measurement, weighted differently and judged by
+  other documents.
+- API reference:
+  [`vibration.immission.vibration_meter`](https://jmrplens.github.io/phonometry/reference/api/vibration/vibration-meter/).
+
+## References
+
+- Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
+  Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
+  The working ranges of 5.2.3.1, the band limitation and frequency weighting of
+  Formulae (3) to (6), the running r.m.s. of Formula (1) and the clock maximum
+  r.m.s. of Formula (2), the display quantities of 5.1.6, the detection limits
+  of 5.2.2, the amplitude response tolerances of Tables 2 and 3 with the
+  deviation of Formula (7), the reference conditions of 5.2.10 and the reference
+  indications of 6.2.3.12 with Table 9, the dominant frequency methods of Annex
+  D and the assessment weightings and guideline values of Annex E with Tables
+  E.1 and E.2. The design and type-test clauses that need a bench are not
+  implemented.
+- Deutsches Institut für Normung. (2012). *Messung von Schwingungsimmissionen —
+  Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1*
+  (DIN 45669-1 Ber 1:2012-12).
+  The redraft of Table 8, the eight burst durations of an 80 Hz signal and the
+  KB_Fmax each must show as a percentage of the continuous indication.
+- Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil 3:
+  Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
+  Table 1, whose guideline curve the Annex E weightings invert, and the three
+  building classes they are written for.
+
+---
+
+
 <!-- source: docs/vibration/index.md | canonical: https://jmrplens.github.io/phonometry/vibration/ -->
 Source: https://jmrplens.github.io/phonometry/vibration/
 
@@ -61155,6 +61637,16 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
   the characteristic bearing, gear and shaft frequencies, and the envelope
   analysis that finds them under the broadband noise of a running machine.
 
+## [Vibration immission](https://jmrplens.github.io/phonometry/vibration/immission/)
+
+The instrument the German immission-control standards presuppose, and the
+assessment it makes possible.
+
+- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+  the KB weighting and the weighted vibration severity a DIN 4150 measurement
+  is reported in, the tolerance bands a meter is graded by, and the Annex E
+  assessment velocity that judges a building without a dominant frequency.
+
 ## What this section does not cover
 
 **An instrument is graded on the clauses that can be computed.** Every
@@ -61198,8 +61690,9 @@ are described but not computed for you.
 
 ## Before and after these pages
 
-Every quantity here starts from an acceleration record and a spectral estimate,
-so the filtering, the weighting curves and the spectral estimators behind them
+Every quantity here starts from a record of acceleration or of velocity, which
+the signature of each function names, and most of them from a spectral estimate
+as well, so the filtering, the weighting curves and the spectral estimators behind them
 are in [Signal analysis](https://jmrplens.github.io/phonometry/signals/), and [Spectral
 analysis](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/) is the page the
 machinery diagnostics build on. The derivations are in [Vibration

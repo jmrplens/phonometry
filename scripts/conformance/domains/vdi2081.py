@@ -123,7 +123,7 @@ def _register_fan_spectrum() -> None:
     for index, band in enumerate(_PRINTED_BANDS):
         register(
             _VDI2081,
-            "VDI 2081 Blatt 2:2005 Table 1, element 1",
+            "VDI 2081 Blatt 2:2005-05 Table 1, element 1",
             f"Supply fan sound power at {band:g} Hz, dB",
         )(functools.partial(_band_outcome, index))
 
@@ -133,7 +133,7 @@ _register_fan_spectrum()
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Eq. (13)",
+    "VDI 2081 Blatt 1:2001-07 Eq. (13)",
     "Fan sound power level L_W4 from the duty, dB",
 )
 def _chk_overall_level() -> Outcome:
@@ -151,7 +151,7 @@ def _chk_overall_level() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 1",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 1",
     "Supply fan total sound power level, dB",
 )
 def _chk_total() -> Outcome:
@@ -162,7 +162,7 @@ def _chk_total() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 1",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 1",
     "Supply fan A-weighted sound power level, dB",
 )
 def _chk_total_a_weighted() -> Outcome:
@@ -194,7 +194,7 @@ _PRINTED_BEND = (0.0, 0.0, 0.0, 1.0, 2.0, 3.0, 3.0, 3.0)
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 5",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 5",
     "Rectangular duct 500 x 400 mm over 4 m, worst octave deviation, dB",
 )
 def _chk_rectangular_run() -> Outcome:
@@ -208,7 +208,7 @@ def _chk_rectangular_run() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 13",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 13",
     "Round duct 160 mm over 1 m, worst octave deviation, dB",
 )
 def _chk_round_run() -> Outcome:
@@ -221,7 +221,7 @@ def _chk_round_run() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Eq. (34)",
+    "VDI 2081 Blatt 1:2001-07 Eq. (34)",
     "Limit frequency of a 160 mm round duct, Hz",
 )
 def _chk_limit_frequency() -> Outcome:
@@ -245,7 +245,7 @@ def _chk_limit_frequency() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 14",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 14",
     "Round bend 160 mm, Table 7 shifted onto its limit frequency, worst octave deviation, dB",
 )
 def _chk_bend() -> Outcome:
@@ -281,7 +281,7 @@ def _register_junctions() -> None:
     for element, fed, branches, printed in junctions:
         register(
             _VDI2081,
-            f"VDI 2081 Blatt 2:2005 Table 1, element {element}",
+            f"VDI 2081 Blatt 2:2005-05 Table 1, element {element}",
             f"Junction into {fed:g} m2 of {sum(branches):g} m2 total, dB",
         )(functools.partial(_junction_outcome, fed, branches, printed))
 
@@ -310,7 +310,7 @@ _PRINTED_BEND_NOISE = (26.9, 23.0, 18.1, 12.5, 6.5, -0.1, -7.0, -14.4)
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Eq. (16)",
+    "VDI 2081 Blatt 1:2001-07 Eq. (16)",
     "Flow noise of a straight duct, overall sound power level, dB",
 )
 def _chk_straight_flow_noise() -> Outcome:
@@ -323,7 +323,7 @@ def _chk_straight_flow_noise() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Eq. (17)",
+    "VDI 2081 Blatt 1:2001-07 Eq. (17)",
     "Flow noise of a straight duct, A-weighted sound power level, dB",
 )
 def _chk_straight_flow_noise_a() -> Outcome:
@@ -360,7 +360,7 @@ def _register_junction_flow_noise() -> None:
     for index, band in enumerate(_PRINTED_BANDS):
         register(
             _VDI2081,
-            "VDI 2081 Blatt 2:2005 Table 1, element 3",
+            "VDI 2081 Blatt 2:2005-05 Table 1, element 3",
             f"Junction flow noise at {band:g} Hz, dB",
         )(functools.partial(_flow_noise_outcome, index))
 
@@ -370,7 +370,7 @@ _register_junction_flow_noise()
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 14",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 14",
     "Bend flow noise, worst octave deviation, dB",
 )
 def _chk_bend_flow_noise() -> Outcome:
@@ -404,7 +404,7 @@ _PRINTED_NOZZLE = (15.8, 10.2, 5.3, 2.1, 0.7, 0.2, 0.1, 0.1)
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Eq. (49)",
+    "VDI 2081 Blatt 1:2001-07 Eq. (49)",
     "Splitter silencer self-noise, A-weighted sound power level, dB",
 )
 def _chk_silencer_a_weighted() -> Outcome:
@@ -456,7 +456,7 @@ def _register_silencer_noise() -> None:
     for index, band in enumerate(_PRINTED_BANDS):
         register(
             _VDI2081,
-            "VDI 2081 Blatt 2:2005 Table 1, element 2",
+            "VDI 2081 Blatt 2:2005-05 Table 1, element 2",
             f"Splitter silencer self-noise at {band:g} Hz, dB",
         )(functools.partial(_silencer_outcome, index))
 
@@ -466,7 +466,7 @@ _register_silencer_noise()
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 2, element 18",
+    "VDI 2081 Blatt 2:2005-05 Table 2, element 18",
     "End reflection of a 200 mm nozzle in a ceiling, worst octave deviation, dB",
 )
 def _chk_end_reflection() -> Outcome:
@@ -495,7 +495,7 @@ _SILENCER_ATTENUATION = (6.0, 17.0, 42.0, 41.0, 47.0, 33.0, 20.0, 18.0)
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Section 1.1",
+    "VDI 2081 Blatt 2:2005-05 Section 1.1",
     "Spectral assessment correction K_A, worst octave deviation, dB",
 )
 def _chk_assessment_curve() -> Outcome:
@@ -505,7 +505,7 @@ def _chk_assessment_curve() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, elements 1 to 3",
+    "VDI 2081 Blatt 2:2005-05 Table 1, elements 1 to 3",
     "Chained level after fan, silencer and junction, worst octave deviation, dB",
 )
 def _chk_chain() -> Outcome:
@@ -600,7 +600,7 @@ def _room_levels() -> np.ndarray:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 20",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 20",
     "Room attenuation of a ceiling diffuser, worst octave deviation, dB",
 )
 def _chk_room_attenuation() -> Outcome:
@@ -612,7 +612,7 @@ def _chk_room_attenuation() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Eq. (36)",
+    "VDI 2081 Blatt 1:2001-07 Eq. (36)",
     "Room attenuation of a hemispherical outlet, dB",
 )
 def _chk_room_attenuation_hemispherical() -> Outcome:
@@ -636,7 +636,7 @@ def _chk_room_attenuation_hemispherical() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 20",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 20",
     "Sound pressure level in room 102, worst octave deviation, dB",
 )
 def _chk_room_levels() -> Outcome:
@@ -646,7 +646,7 @@ def _chk_room_levels() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 20",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 20",
     "Total sound pressure level in room 102, dB",
 )
 def _chk_room_total() -> Outcome:
@@ -658,7 +658,7 @@ def _chk_room_total() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 2:2005 Table 1, element 20",
+    "VDI 2081 Blatt 2:2005-05 Table 1, element 20",
     "A-weighted sound pressure level in room 102, dB",
 )
 def _chk_room_total_a_weighted() -> Outcome:
@@ -705,7 +705,7 @@ def _register_section_change() -> None:
     for ratio in _PRINTED_SECTION_RATIOS:
         register(
             _VDI2081,
-            "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26",
+            "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26",
             f"Reflection at a section change of ratio {ratio:g}, dB",
         )(functools.partial(_chk_section_change_ratio, ratio))
 
@@ -715,7 +715,7 @@ _register_section_change()
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26",
+    "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26",
     "Bands a sudden increase still reflects in, of eight",
 )
 def _chk_section_change_increase_band_count() -> Outcome:
@@ -736,7 +736,7 @@ def _chk_section_change_increase_band_count() -> Outcome:
 
 @register(
     _VDI2081,
-    "VDI 2081 Blatt 1:2001 Section 6.3",
+    "VDI 2081 Blatt 1:2001-07 Section 6.3",
     "Ceiling VDI 3733 recommends for a section change, dB",
 )
 def _chk_section_change_cap() -> Outcome:

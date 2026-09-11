@@ -534,3 +534,48 @@ def _in_situ_power() -> ph.emission.InSituSoundPowerResult:
     return ph.emission.sound_power_in_situ(
         st, rss, np.array([90.5, 92.5, 93.8, 94.0]), freqs, background_levels=background
     )
+
+
+def _immission_record(fs_hz: float = 2048.0) -> np.ndarray:
+    """A two-second burst of ground vibration inside a quiet 70 s record.
+
+    Long enough for two whole 30 s clock intervals, so the clock maxima and
+    their r.m.s. are real rather than empty, and shaped so the meter has
+    something to hold a maximum of.
+    """
+    t = np.arange(int(70.0 * fs_hz)) / fs_hz
+    record = np.zeros_like(t)
+    burst = (t > 20.0) & (t < 22.0)
+    record[burst] = (
+        4.0 * np.sin(2.0 * np.pi * 24.0 * t[burst]) * np.hanning(int(burst.sum()))
+    )
+    return record
+
+
+def _vibration_meter_reading() -> object:
+    """DIN 45669-1 5.1.6: what a meter displays for that record."""
+    from phonometry.vibration.immission import measure_vibration_immission
+
+    return measure_vibration_immission(_immission_record(), 2048.0)
+
+
+def _vibration_meter_verification() -> object:
+    """DIN 45669-1 Tables 2 and 3: a meter 2 % high everywhere but one point."""
+    from phonometry.vibration.immission import (
+        kb_weighting_response,
+        verify_vibration_meter,
+    )
+
+    freqs = np.array([1.0, 2.0, 4.0, 8.0, 16.0, 31.5, 63.0, 80.0])
+    measured = np.abs(kb_weighting_response(freqs)) * 1.02
+    measured[5] *= 1.15  # 31,5 Hz, outside the 10 % of the central band
+    return verify_vibration_meter(freqs, measured)
+
+
+def _assessment_velocity() -> object:
+    """DIN 45669-1 Annex E: the same record judged for a dwelling."""
+    from phonometry.vibration.immission import assess_short_term_vibration
+
+    return assess_short_term_vibration(
+        _immission_record(), 2048.0, building_class="residential"
+    )

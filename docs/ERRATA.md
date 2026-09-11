@@ -4926,6 +4926,48 @@ in the same order.
   reference-conditions row of Table 1 is about.
 - **Status:** unreported.
 
+## DIN 45669-1:2010-09, Table 9 (a peak-velocity row that contradicts Formula (5), and the KB_F row beside it)
+
+- **Location:** Table 9, printed folio 35 (PDF page 35 of the copy read here,
+  which prints its folio numbers without an offset), rows "|v|max in mm/s bei
+  f_u = 1 Hz und f_o = 80 Hz" and "KB_F(t) ± 2 % Schwankung".
+- **The print:** for a sinusoidal input at the test frequencies, the peak row
+  reads 0,852 at 1 Hz, 1,000 at 5,6 Hz, 1,000 at 31,5 Hz, 0,843 at 80 Hz and
+  0,249 at 315 Hz; the $KB_F$ row of the same five columns reads 0,103, 0,500,
+  0,693, 0,594 and 0,071.
+- **The problem:** the two rows are computed on different band limitations, and
+  the peak row does not follow the standard's own Formula (5). With
+  $f_u = 1$ Hz and $f_o = 80$ Hz that formula gives $|H_{u\mathrm{Soll}}|$ =
+  0,995 at 31,5 Hz and 0,100 at 315 Hz, against the 1,000 and 0,249 printed. The
+  $KB_F$ row settles which of the two is the intended reading: $KB_F$ is
+  $|H_{B\mathrm{Soll}}|/\sqrt{2}$ for a 1 mm/s sine, and at 31,5 Hz that is
+  0,6928 from 0,995 and 0,6962 from 1,000, so the printed 0,693 is the first;
+  at 315 Hz it is 0,0709 from 0,100 and 0,176 from 0,249, so the printed 0,071
+  is again the first, by a factor of two and a half. The 0,852 at 1 Hz is the
+  same kind of departure at the other end, against the 0,842 of Formula (5).
+- **Evidence:** the printed table against Formulae (5) and (6) on printed folio
+  18 and the note under Formula (3) that puts the two corners at 0,8 Hz and
+  100 Hz. Verified on PDF page 35 (printed p. 35) of DIN 45669-1:2010-09; the
+  two rows are adjacent cells of one column, so no
+  offset or transcription question arises. What the two anomalous cells do
+  match is the maximum a max-hold display shows when the switch-on transient of
+  the band limitation is included: a 1 mm/s sine started at a zero crossing
+  gives 0,852 at 1 Hz and 0,248 at 315 Hz through the same filter. That
+  reading, though, is not what the other three cells of the row show, so the
+  row is not consistently one convention or the other.
+- **Consequence for the standard's own tables:** confined to that row.
+  Berichtigung 1:2012-12 rewrites Table 8 and does not touch Table 9, and the
+  reference indications of 6.2.3.12, which are the values the same test signal
+  produces at 16 Hz, are reproduced exactly by the formulas.
+- **Library behaviour:**
+  [`KB_TEST_INDICATIONS`](../src/phonometry/vibration/immission/vibration_meter.py)
+  publishes the three rows of Table 9 that follow the formulas, and the
+  conformance report runs a 1 mm/s sine through the whole chain and reproduces
+  all fifteen of those values to the three decimals they are printed with. The
+  peak row is not published and not checked; the module docstring says why, and
+  the peak a record shows is computed from the record rather than from a table.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

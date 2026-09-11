@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 995,
-    "passing": 995,
+    "checks": 1030,
+    "passing": 1030,
     "failing": 0,
-    "domains": 77,
-    "standards": 408,
-    "citations": 689,
-    "designations": 146,
+    "domains": 78,
+    "standards": 410,
+    "citations": 697,
+    "designations": 149,
     "sources": 83
   },
   "units": [
@@ -227,6 +227,12 @@
       "title": "Building response prediction (ISO 4866)",
       "checks": 15,
       "passing": 15
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669",
+      "title": "Vibration immission measurement (DIN 45669)",
+      "checks": 35,
+      "passing": 35
     },
     {
       "id": "speech-intelligibility-ansi-s3-5-1997",
@@ -2153,14 +2159,14 @@
       "verdict": "pass"
     },
     {
-      "id": "psychoacoustics/din-45692-2009-clause-6/sharpness-of-the-standard-1-khz-reference-signal",
+      "id": "psychoacoustics/din-45692-2009-08-clause-6/sharpness-of-the-standard-1-khz-reference-signal",
       "domain": "psychoacoustics",
       "reference": {
         "kind": "standard",
         "designation": "DIN 45692",
-        "edition": "2009",
+        "edition": "2009-08",
         "clause": "Clause 6",
-        "cite": "DIN 45692:2009 Clause 6"
+        "cite": "DIN 45692:2009-08 Clause 6"
       },
       "quantity": "Sharpness of the standard 1 kHz reference signal",
       "kind": "scalar",
@@ -2182,14 +2188,14 @@
       "verdict": "pass"
     },
     {
-      "id": "psychoacoustics/din-45692-2009-table-a-2/sharpness-of-critical-band-noise-at-2-5-khz-2320-2700-hz-4-sone",
+      "id": "psychoacoustics/din-45692-2009-08-table-a-2/sharpness-of-critical-band-noise-at-2-5-khz-2320-2700-hz-4-sone",
       "domain": "psychoacoustics",
       "reference": {
         "kind": "standard",
         "designation": "DIN 45692",
-        "edition": "2009",
+        "edition": "2009-08",
         "clause": "Table A.2",
-        "cite": "DIN 45692:2009 Table A.2"
+        "cite": "DIN 45692:2009-08 Table A.2"
       },
       "quantity": "Sharpness of critical-band noise at 2.5 kHz (2320-2700 Hz, 4 sone)",
       "kind": "scalar",
@@ -14181,14 +14187,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-1-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-1-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 1 Hz",
       "kind": "scalar",
@@ -14210,14 +14216,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-10-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-10-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 10 Hz",
       "kind": "scalar",
@@ -14239,14 +14245,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-50-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-50-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 50 Hz",
       "kind": "scalar",
@@ -14268,14 +14274,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-100-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-commercial-and-industrial-buildings-100-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, commercial and industrial buildings, 100 Hz",
       "kind": "scalar",
@@ -14297,14 +14303,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-1-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-dwellings-1-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, dwellings, 1 Hz",
       "kind": "scalar",
@@ -14326,14 +14332,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-10-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-dwellings-10-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, dwellings, 10 Hz",
       "kind": "scalar",
@@ -14355,14 +14361,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-50-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-dwellings-50-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, dwellings, 50 Hz",
       "kind": "scalar",
@@ -14384,14 +14390,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-dwellings-100-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-dwellings-100-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, dwellings, 100 Hz",
       "kind": "scalar",
@@ -14413,14 +14419,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-1-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-1-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 1 Hz",
       "kind": "scalar",
@@ -14442,14 +14448,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-10-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-10-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 10 Hz",
       "kind": "scalar",
@@ -14471,14 +14477,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-50-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-50-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 50 Hz",
       "kind": "scalar",
@@ -14500,14 +14506,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-100-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-at-the-foundation-especially-sensitive-buildings-100-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi at the foundation, especially sensitive buildings, 100 Hz",
       "kind": "scalar",
@@ -14529,14 +14535,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-commercial-and-industrial-buildings",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-commercial-and-industrial-buildings",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi in the topmost floor plane, commercial and industrial buildings",
       "kind": "scalar",
@@ -14558,14 +14564,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-dwellings",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-dwellings",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi in the topmost floor plane, dwellings",
       "kind": "scalar",
@@ -14587,14 +14593,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-especially-sensitive-buildings",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-1/short-term-guideline-vi-in-the-topmost-floor-plane-especially-sensitive-buildings",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 1",
-        "cite": "DIN 4150-3:1999 Table 1"
+        "cite": "DIN 4150-3:1999-02 Table 1"
       },
       "quantity": "Short-term guideline vi in the topmost floor plane, especially sensitive buildings",
       "kind": "scalar",
@@ -14616,14 +14622,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-commercial-and-industrial-buildings",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-commercial-and-industrial-buildings",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 3",
-        "cite": "DIN 4150-3:1999 Table 3"
+        "cite": "DIN 4150-3:1999-02 Table 3"
       },
       "quantity": "Long-term guideline vi in the topmost floor plane, commercial and industrial buildings",
       "kind": "scalar",
@@ -14645,14 +14651,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-dwellings",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-dwellings",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 3",
-        "cite": "DIN 4150-3:1999 Table 3"
+        "cite": "DIN 4150-3:1999-02 Table 3"
       },
       "quantity": "Long-term guideline vi in the topmost floor plane, dwellings",
       "kind": "scalar",
@@ -14674,14 +14680,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-especially-sensitive-buildings",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-3/long-term-guideline-vi-in-the-topmost-floor-plane-especially-sensitive-buildings",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 3",
-        "cite": "DIN 4150-3:1999 Table 3"
+        "cite": "DIN 4150-3:1999-02 Table 3"
       },
       "quantity": "Long-term guideline vi in the topmost floor plane, especially sensitive buildings",
       "kind": "scalar",
@@ -14703,14 +14709,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-2/short-term-guideline-vi-on-a-buried-pipeline-welded-steel",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-2/short-term-guideline-vi-on-a-buried-pipeline-welded-steel",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 2",
-        "cite": "DIN 4150-3:1999 Table 2"
+        "cite": "DIN 4150-3:1999-02 Table 2"
       },
       "quantity": "Short-term guideline vi on a buried pipeline, welded steel",
       "kind": "scalar",
@@ -14732,14 +14738,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-2/short-term-guideline-vi-on-a-buried-pipeline-concrete-and-flanged-metal",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-2/short-term-guideline-vi-on-a-buried-pipeline-concrete-and-flanged-metal",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 2",
-        "cite": "DIN 4150-3:1999 Table 2"
+        "cite": "DIN 4150-3:1999-02 Table 2"
       },
       "quantity": "Short-term guideline vi on a buried pipeline, concrete and flanged metal",
       "kind": "scalar",
@@ -14761,14 +14767,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-table-2/short-term-guideline-vi-on-a-buried-pipeline-masonry-and-plastic",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-table-2/short-term-guideline-vi-on-a-buried-pipeline-masonry-and-plastic",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Table 2",
-        "cite": "DIN 4150-3:1999 Table 2"
+        "cite": "DIN 4150-3:1999-02 Table 2"
       },
       "quantity": "Short-term guideline vi on a buried pipeline, masonry and plastic",
       "kind": "scalar",
@@ -14790,14 +14796,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-6-3/long-term-reduction-of-the-pipeline-guideline-values",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-clause-6-3/long-term-reduction-of-the-pipeline-guideline-values",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Clause 6.3",
-        "cite": "DIN 4150-3:1999 Clause 6.3"
+        "cite": "DIN 4150-3:1999-02 Clause 6.3"
       },
       "quantity": "Long-term reduction of the pipeline guideline values",
       "kind": "scalar",
@@ -14818,14 +14824,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-5-1/massive-engineering-structures-factor-on-the-row-1-values",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-clause-5-1/massive-engineering-structures-factor-on-the-row-1-values",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Clause 5.1",
-        "cite": "DIN 4150-3:1999 Clause 5.1"
+        "cite": "DIN 4150-3:1999-02 Clause 5.1"
       },
       "quantity": "Massive engineering structures, factor on the row 1 values",
       "kind": "scalar",
@@ -14846,14 +14852,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-5-2/vertical-guideline-vz-for-a-ceiling-or-floor-mm-s",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-clause-5-2/vertical-guideline-vz-for-a-ceiling-or-floor-mm-s",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Clause 5.2",
-        "cite": "DIN 4150-3:1999 Clause 5.2"
+        "cite": "DIN 4150-3:1999-02 Clause 5.2"
       },
       "quantity": "Vertical guideline vz for a ceiling or floor, mm/s",
       "kind": "scalar",
@@ -14875,14 +14881,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-bild-1/guideline-vi-inside-a-band-dwellings-30-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-bild-1/guideline-vi-inside-a-band-dwellings-30-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Bild 1",
-        "cite": "DIN 4150-3:1999 Bild 1"
+        "cite": "DIN 4150-3:1999-02 Bild 1"
       },
       "quantity": "Guideline vi inside a band, dwellings, 30 Hz",
       "kind": "scalar",
@@ -14904,14 +14910,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-bild-1/guideline-vi-inside-a-band-commercial-and-industrial-buildings-75-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-bild-1/guideline-vi-inside-a-band-commercial-and-industrial-buildings-75-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Bild 1",
-        "cite": "DIN 4150-3:1999 Bild 1"
+        "cite": "DIN 4150-3:1999-02 Bild 1"
       },
       "quantity": "Guideline vi inside a band, commercial and industrial buildings, 75 Hz",
       "kind": "scalar",
@@ -14933,14 +14939,14 @@
       "verdict": "pass"
     },
     {
-      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-clause-6-4/lowest-horizontal-natural-frequency-of-a-ten-storey-building-hz",
+      "id": "vibration-effects-on-structures-din-4150-3/din-4150-3-1999-02-clause-6-4/lowest-horizontal-natural-frequency-of-a-ten-storey-building-hz",
       "domain": "vibration-effects-on-structures-din-4150-3",
       "reference": {
         "kind": "standard",
         "designation": "DIN 4150-3",
-        "edition": "1999",
+        "edition": "1999-02",
         "clause": "Clause 6.4",
-        "cite": "DIN 4150-3:1999 Clause 6.4"
+        "cite": "DIN 4150-3:1999-02 Clause 6.4"
       },
       "quantity": "Lowest horizontal natural frequency of a ten-storey building, Hz",
       "kind": "scalar",
@@ -15386,6 +15392,1000 @@
         "value": 2.1
       },
       "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-5-2-3-2/band-limitation-at-the-lower-corner-0-8-f-u-magnitude",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "5.2.3.2",
+        "cite": "DIN 45669-1:2010-09 5.2.3.2"
+      },
+      "quantity": "Band limitation at the lower corner 0,8 f_u, magnitude",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7071067811865475
+      },
+      "computed": {
+        "value": 0.70711
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": -1.45e-09
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-5-2-3-2/band-limitation-at-the-upper-corner-f-o-0-8-magnitude",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "5.2.3.2",
+        "cite": "DIN 45669-1:2010-09 5.2.3.2"
+      },
+      "quantity": "Band limitation at the upper corner f_o / 0,8, magnitude",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7071067811865475
+      },
+      "computed": {
+        "value": 0.70711
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": -1.45e-09
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-5-2-3-2/kb-weighting-at-its-own-corner-5-6-hz-relative-to-the-band-limitation",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "5.2.3.2",
+        "cite": "DIN 45669-1:2010-09 5.2.3.2"
+      },
+      "quantity": "KB weighting at its own corner 5,6 Hz, relative to the band limitation",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7071067811865475
+      },
+      "computed": {
+        "value": 0.70711
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-2/lower-limit-of-f-f-inside-the-band",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 2",
+        "cite": "DIN 45669-1:2010-09 Table 2"
+      },
+      "quantity": "Lower limit of F(f) inside the band, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.0
+      },
+      "computed": {
+        "value": 10.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-2/lower-limit-of-f-f-in-the-skirt",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 2",
+        "cite": "DIN 45669-1:2010-09 Table 2"
+      },
+      "quantity": "Lower limit of F(f) in the skirt, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-3/upper-limit-of-f-f-outside-the-band",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 3",
+        "cite": "DIN 45669-1:2010-09 Table 3"
+      },
+      "quantity": "Upper limit of F(f) outside the band, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-1-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 1 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.103
+      },
+      "computed": {
+        "value": 0.1027
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0003
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-1-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 1 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.13
+      },
+      "computed": {
+        "value": 0.1298
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-5-6-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 5.6 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5
+      },
+      "computed": {
+        "value": 0.4994
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0006
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-5-6-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 5.6 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.528
+      },
+      "computed": {
+        "value": 0.5274
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0006
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-31-5-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 31.5 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.693
+      },
+      "computed": {
+        "value": 0.6928
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-31-5-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 31.5 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.7
+      },
+      "computed": {
+        "value": 0.6998
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-80-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 80 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.594
+      },
+      "computed": {
+        "value": 0.5941
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-80-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 80 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.597
+      },
+      "computed": {
+        "value": 0.5965
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0005
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-f-of-a-1-mm-s-sine-at-315-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_F of a 1 mm/s sine at 315 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.071
+      },
+      "computed": {
+        "value": 0.0708
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0002
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-table-9/kb-fmax-of-a-1-mm-s-sine-at-315-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Table 9",
+        "cite": "DIN 45669-1:2010-09 Table 9"
+      },
+      "quantity": "KB_Fmax of a 1 mm/s sine at 315 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.071
+      },
+      "computed": {
+        "value": 0.0709
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": -0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-6-2-3-12/kb-f-under-the-reference-conditions-1-mm-s-16-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "6.2.3.12",
+        "cite": "DIN 45669-1:2010-09 6.2.3.12"
+      },
+      "quantity": "KB_F under the reference conditions (1 mm/s, 16 Hz)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.667
+      },
+      "computed": {
+        "value": 0.6671
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-6-2-3-12/kb-fmax-under-the-reference-conditions-1-mm-s-16-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "6.2.3.12",
+        "cite": "DIN 45669-1:2010-09 6.2.3.12"
+      },
+      "quantity": "KB_Fmax under the reference conditions (1 mm/s, 16 Hz)",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.68
+      },
+      "computed": {
+        "value": 0.6803
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.001
+      },
+      "deviation": {
+        "value": 0.0003
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-continuous-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, continuous, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 100.4
+      },
+      "computed": {
+        "value": 100.397
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.003
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-800-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 800 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 100.3
+      },
+      "computed": {
+        "value": 100.335
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.035
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-400-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 400 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 98.3
+      },
+      "computed": {
+        "value": 98.337
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.037
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-200-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 200 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 89.7
+      },
+      "computed": {
+        "value": 89.648
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.052
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-100-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 100 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 74.5
+      },
+      "computed": {
+        "value": 74.405
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.095
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-50-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 50 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 57.6
+      },
+      "computed": {
+        "value": 57.59
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": -0.01
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-25-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 25 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 42.7
+      },
+      "computed": {
+        "value": 42.886
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.186
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-ber-1-2012-12-table-8/kb-fmax-of-an-80-hz-burst-train-12-5-ms-of-continuous",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1 Ber 1",
+        "edition": "2012-12",
+        "clause": "Table 8",
+        "cite": "DIN 45669-1 Ber 1:2012-12 Table 8"
+      },
+      "quantity": "KB_Fmax of an 80 Hz burst train, 12.5 ms, % of continuous",
+      "kind": "scalar",
+      "expected": {
+        "value": 30.9
+      },
+      "computed": {
+        "value": 31.427
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.7
+      },
+      "deviation": {
+        "value": 0.527
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-1/assessment-weighting-h-vb-commercial-at-50-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.1",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, commercial, at 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.5
+      },
+      "computed": {
+        "value": 0.5
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-1/assessment-weighting-h-vb-commercial-at-100-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.1",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, commercial, at 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.4
+      },
+      "computed": {
+        "value": 0.4
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-1/assessment-weighting-h-vb-residential-at-50-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.1",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, residential, at 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3333333333333333
+      },
+      "computed": {
+        "value": 0.33333
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-1/assessment-weighting-h-vb-residential-at-100-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.1",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, residential, at 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.25
+      },
+      "computed": {
+        "value": 0.25
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-1/assessment-weighting-h-vb-sensitive-at-50-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.1",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, sensitive, at 50 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.375
+      },
+      "computed": {
+        "value": 0.375
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-1/assessment-weighting-h-vb-sensitive-at-100-hz",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.1",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.1"
+      },
+      "quantity": "Assessment weighting H_vB, sensitive, at 100 Hz",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3
+      },
+      "computed": {
+        "value": 0.3
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-2/guideline-assessment-velocity-commercial-mm-s",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.2",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.2"
+      },
+      "quantity": "Guideline assessment velocity, commercial, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-2/guideline-assessment-velocity-residential-mm-s",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.2",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.2"
+      },
+      "quantity": "Guideline assessment velocity, residential, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0
+      },
+      "computed": {
+        "value": 5.0
+      },
+      "unit": "mm/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "vibration-immission-measurement-din-45669/din-45669-1-2010-09-annex-e-table-e-2/guideline-assessment-velocity-sensitive-mm-s",
+      "domain": "vibration-immission-measurement-din-45669",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45669-1",
+        "edition": "2010-09",
+        "clause": "Annex E, Table E.2",
+        "cite": "DIN 45669-1:2010-09 Annex E, Table E.2"
+      },
+      "quantity": "Guideline assessment velocity, sensitive, mm/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0
+      },
+      "computed": {
+        "value": 3.0
+      },
+      "unit": "mm/s",
       "tolerance": {
         "mode": "absolute",
         "value": 0.0005
@@ -27395,13 +28395,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-63-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-63-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 63 Hz, dB",
       "kind": "scalar",
@@ -27423,13 +28424,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-125-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-125-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 125 Hz, dB",
       "kind": "scalar",
@@ -27451,13 +28453,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-250-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-250-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 250 Hz, dB",
       "kind": "scalar",
@@ -27479,13 +28482,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-500-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-500-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 500 Hz, dB",
       "kind": "scalar",
@@ -27507,13 +28511,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-1000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-1000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 1000 Hz, dB",
       "kind": "scalar",
@@ -27535,13 +28540,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-2000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-2000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 2000 Hz, dB",
       "kind": "scalar",
@@ -27563,13 +28569,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-4000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-4000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 4000 Hz, dB",
       "kind": "scalar",
@@ -27591,13 +28598,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-sound-power-at-8000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-sound-power-at-8000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan sound power at 8000 Hz, dB",
       "kind": "scalar",
@@ -27619,13 +28627,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-eq-13/fan-sound-power-level-l-w4-from-the-duty-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-eq-13/fan-sound-power-level-l-w4-from-the-duty-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Eq. (13)",
-        "cite": "VDI 2081 Blatt 1:2001 Eq. (13)"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Eq. (13)",
+        "cite": "VDI 2081 Blatt 1:2001-07 Eq. (13)"
       },
       "quantity": "Fan sound power level L_W4 from the duty, dB",
       "kind": "scalar",
@@ -27647,13 +28656,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-total-sound-power-level-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-total-sound-power-level-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan total sound power level, dB",
       "kind": "scalar",
@@ -27675,13 +28685,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-1/supply-fan-a-weighted-sound-power-level-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-1/supply-fan-a-weighted-sound-power-level-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 1",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 1"
       },
       "quantity": "Supply fan A-weighted sound power level, dB",
       "kind": "scalar",
@@ -27703,13 +28714,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-5/rectangular-duct-500-x-400-mm-over-4-m-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-5/rectangular-duct-500-x-400-mm-over-4-m-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 5",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 5"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 5",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 5"
       },
       "quantity": "Rectangular duct 500 x 400 mm over 4 m, worst octave deviation, dB",
       "kind": "scalar",
@@ -27731,13 +28743,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-13/round-duct-160-mm-over-1-m-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-13/round-duct-160-mm-over-1-m-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 13",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 13"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 13",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 13"
       },
       "quantity": "Round duct 160 mm over 1 m, worst octave deviation, dB",
       "kind": "scalar",
@@ -27759,13 +28772,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-eq-34/limit-frequency-of-a-160-mm-round-duct-hz",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-eq-34/limit-frequency-of-a-160-mm-round-duct-hz",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Eq. (34)",
-        "cite": "VDI 2081 Blatt 1:2001 Eq. (34)"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Eq. (34)",
+        "cite": "VDI 2081 Blatt 1:2001-07 Eq. (34)"
       },
       "quantity": "Limit frequency of a 160 mm round duct, Hz",
       "kind": "scalar",
@@ -27787,13 +28801,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-14/round-bend-160-mm-table-7-shifted-onto-its-limit-frequency-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-14/round-bend-160-mm-table-7-shifted-onto-its-limit-frequency-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 14",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 14"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 14",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 14"
       },
       "quantity": "Round bend 160 mm, Table 7 shifted onto its limit frequency, worst octave deviation, dB",
       "kind": "scalar",
@@ -27815,13 +28830,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-into-0-3-m2-of-1-08-m2-total-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-into-0-3-m2-of-1-08-m2-total-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction into 0.3 m2 of 1.08 m2 total, dB",
       "kind": "scalar",
@@ -27843,13 +28859,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-7/junction-into-0-049-m2-of-0-147-m2-total-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-7/junction-into-0-049-m2-of-0-147-m2-total-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 7",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 7"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 7",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 7"
       },
       "quantity": "Junction into 0.049 m2 of 0.147 m2 total, dB",
       "kind": "scalar",
@@ -27871,13 +28888,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-16/junction-into-0-02-m2-of-0-04-m2-total-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-16/junction-into-0-02-m2-of-0-04-m2-total-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 16",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 16"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 16",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 16"
       },
       "quantity": "Junction into 0.02 m2 of 0.04 m2 total, dB",
       "kind": "scalar",
@@ -27899,13 +28917,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-eq-16/flow-noise-of-a-straight-duct-overall-sound-power-level-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-eq-16/flow-noise-of-a-straight-duct-overall-sound-power-level-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Eq. (16)",
-        "cite": "VDI 2081 Blatt 1:2001 Eq. (16)"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Eq. (16)",
+        "cite": "VDI 2081 Blatt 1:2001-07 Eq. (16)"
       },
       "quantity": "Flow noise of a straight duct, overall sound power level, dB",
       "kind": "scalar",
@@ -27927,13 +28946,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-eq-17/flow-noise-of-a-straight-duct-a-weighted-sound-power-level-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-eq-17/flow-noise-of-a-straight-duct-a-weighted-sound-power-level-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Eq. (17)",
-        "cite": "VDI 2081 Blatt 1:2001 Eq. (17)"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Eq. (17)",
+        "cite": "VDI 2081 Blatt 1:2001-07 Eq. (17)"
       },
       "quantity": "Flow noise of a straight duct, A-weighted sound power level, dB",
       "kind": "scalar",
@@ -27955,13 +28975,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-63-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-63-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 63 Hz, dB",
       "kind": "scalar",
@@ -27983,13 +29004,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-125-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-125-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 125 Hz, dB",
       "kind": "scalar",
@@ -28011,13 +29033,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-250-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-250-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 250 Hz, dB",
       "kind": "scalar",
@@ -28039,13 +29062,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-500-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-500-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 500 Hz, dB",
       "kind": "scalar",
@@ -28067,13 +29091,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-1000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-1000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 1000 Hz, dB",
       "kind": "scalar",
@@ -28095,13 +29120,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-2000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-2000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 2000 Hz, dB",
       "kind": "scalar",
@@ -28123,13 +29149,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-4000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-4000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 4000 Hz, dB",
       "kind": "scalar",
@@ -28151,13 +29178,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-3/junction-flow-noise-at-8000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-3/junction-flow-noise-at-8000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 3"
       },
       "quantity": "Junction flow noise at 8000 Hz, dB",
       "kind": "scalar",
@@ -28179,13 +29207,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-14/bend-flow-noise-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-14/bend-flow-noise-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 14",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 14"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 14",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 14"
       },
       "quantity": "Bend flow noise, worst octave deviation, dB",
       "kind": "scalar",
@@ -28207,13 +29236,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-eq-49/splitter-silencer-self-noise-a-weighted-sound-power-level-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-eq-49/splitter-silencer-self-noise-a-weighted-sound-power-level-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Eq. (49)",
-        "cite": "VDI 2081 Blatt 1:2001 Eq. (49)"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Eq. (49)",
+        "cite": "VDI 2081 Blatt 1:2001-07 Eq. (49)"
       },
       "quantity": "Splitter silencer self-noise, A-weighted sound power level, dB",
       "kind": "scalar",
@@ -28235,13 +29265,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-63-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-63-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 63 Hz, dB",
       "kind": "scalar",
@@ -28263,13 +29294,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-125-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-125-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 125 Hz, dB",
       "kind": "scalar",
@@ -28291,13 +29323,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-250-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-250-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 250 Hz, dB",
       "kind": "scalar",
@@ -28319,13 +29352,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-500-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-500-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 500 Hz, dB",
       "kind": "scalar",
@@ -28347,13 +29381,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-1000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-1000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 1000 Hz, dB",
       "kind": "scalar",
@@ -28375,13 +29410,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-2000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-2000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 2000 Hz, dB",
       "kind": "scalar",
@@ -28403,13 +29439,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-4000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-4000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 4000 Hz, dB",
       "kind": "scalar",
@@ -28431,13 +29468,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-2/splitter-silencer-self-noise-at-8000-hz-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-2/splitter-silencer-self-noise-at-8000-hz-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 2",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 2"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 2",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 2"
       },
       "quantity": "Splitter silencer self-noise at 8000 Hz, dB",
       "kind": "scalar",
@@ -28459,13 +29497,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-2-element-18/end-reflection-of-a-200-mm-nozzle-in-a-ceiling-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-2-element-18/end-reflection-of-a-200-mm-nozzle-in-a-ceiling-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 2, element 18",
-        "cite": "VDI 2081 Blatt 2:2005 Table 2, element 18"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 2, element 18",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 2, element 18"
       },
       "quantity": "End reflection of a 200 mm nozzle in a ceiling, worst octave deviation, dB",
       "kind": "scalar",
@@ -28487,13 +29526,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-section-1-1/spectral-assessment-correction-k-a-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-section-1-1/spectral-assessment-correction-k-a-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Section 1.1",
-        "cite": "VDI 2081 Blatt 2:2005 Section 1.1"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Section 1.1",
+        "cite": "VDI 2081 Blatt 2:2005-05 Section 1.1"
       },
       "quantity": "Spectral assessment correction K_A, worst octave deviation, dB",
       "kind": "scalar",
@@ -28515,13 +29555,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-elements-1-to-3/chained-level-after-fan-silencer-and-junction-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-elements-1-to-3/chained-level-after-fan-silencer-and-junction-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, elements 1 to 3",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, elements 1 to 3"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, elements 1 to 3",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, elements 1 to 3"
       },
       "quantity": "Chained level after fan, silencer and junction, worst octave deviation, dB",
       "kind": "scalar",
@@ -28543,13 +29584,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-20/room-attenuation-of-a-ceiling-diffuser-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-20/room-attenuation-of-a-ceiling-diffuser-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 20",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 20"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 20",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 20"
       },
       "quantity": "Room attenuation of a ceiling diffuser, worst octave deviation, dB",
       "kind": "scalar",
@@ -28571,13 +29613,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-eq-36/room-attenuation-of-a-hemispherical-outlet-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-eq-36/room-attenuation-of-a-hemispherical-outlet-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Eq. (36)",
-        "cite": "VDI 2081 Blatt 1:2001 Eq. (36)"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Eq. (36)",
+        "cite": "VDI 2081 Blatt 1:2001-07 Eq. (36)"
       },
       "quantity": "Room attenuation of a hemispherical outlet, dB",
       "kind": "scalar",
@@ -28599,13 +29642,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-20/sound-pressure-level-in-room-102-worst-octave-deviation-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-20/sound-pressure-level-in-room-102-worst-octave-deviation-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 20",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 20"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 20",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 20"
       },
       "quantity": "Sound pressure level in room 102, worst octave deviation, dB",
       "kind": "scalar",
@@ -28627,13 +29671,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-20/total-sound-pressure-level-in-room-102-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-20/total-sound-pressure-level-in-room-102-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 20",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 20"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 20",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 20"
       },
       "quantity": "Total sound pressure level in room 102, dB",
       "kind": "scalar",
@@ -28655,13 +29700,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-table-1-element-20/a-weighted-sound-pressure-level-in-room-102-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-2-2005-05-table-1-element-20/a-weighted-sound-pressure-level-in-room-102-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 2:2005 Table 1, element 20",
-        "cite": "VDI 2081 Blatt 2:2005 Table 1, element 20"
+        "designation": "VDI 2081 Blatt 2",
+        "edition": "2005-05",
+        "clause": "Table 1, element 20",
+        "cite": "VDI 2081 Blatt 2:2005-05 Table 1, element 20"
       },
       "quantity": "A-weighted sound pressure level in room 102, dB",
       "kind": "scalar",
@@ -28683,13 +29729,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-05-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-05-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 0.05, dB",
       "kind": "scalar",
@@ -28711,13 +29758,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-1-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-1-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 0.1, dB",
       "kind": "scalar",
@@ -28739,13 +29787,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-2-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-2-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 0.2, dB",
       "kind": "scalar",
@@ -28767,13 +29816,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-5-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-0-5-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 0.5, dB",
       "kind": "scalar",
@@ -28795,13 +29845,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-1-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-1-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 1, dB",
       "kind": "scalar",
@@ -28823,13 +29874,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-2-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-2-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 2, dB",
       "kind": "scalar",
@@ -28851,13 +29903,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-5-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-5-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 5, dB",
       "kind": "scalar",
@@ -28879,13 +29932,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-7-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-7-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 7, dB",
       "kind": "scalar",
@@ -28907,13 +29961,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-10-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/reflection-at-a-section-change-of-ratio-10-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Reflection at a section change of ratio 10, dB",
       "kind": "scalar",
@@ -28935,13 +29990,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3-figure-26/bands-a-sudden-increase-still-reflects-in-of-eight",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3-figure-26/bands-a-sudden-increase-still-reflects-in-of-eight",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3, Figure 26",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3, Figure 26"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3, Figure 26",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3, Figure 26"
       },
       "quantity": "Bands a sudden increase still reflects in, of eight",
       "kind": "scalar",
@@ -28962,13 +30018,14 @@
       "verdict": "pass"
     },
     {
-      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-section-6-3/ceiling-vdi-3733-recommends-for-a-section-change-db",
+      "id": "hvac-noise-vdi-2081/vdi-2081-blatt-1-2001-07-section-6-3/ceiling-vdi-3733-recommends-for-a-section-change-db",
       "domain": "hvac-noise-vdi-2081",
       "reference": {
         "kind": "standard",
-        "designation": "VDI 2081",
-        "clause": "Blatt 1:2001 Section 6.3",
-        "cite": "VDI 2081 Blatt 1:2001 Section 6.3"
+        "designation": "VDI 2081 Blatt 1",
+        "edition": "2001-07",
+        "clause": "Section 6.3",
+        "cite": "VDI 2081 Blatt 1:2001-07 Section 6.3"
       },
       "quantity": "Ceiling VDI 3733 recommends for a section change, dB",
       "kind": "scalar",

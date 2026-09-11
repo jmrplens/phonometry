@@ -34,7 +34,8 @@ def test_table_1_as_printed() -> None:
     for area, (day, night) in expected.items():
         for period, cells in (("day", day), ("night", night)):
             guide = im.guide_values(area, time_of_day=period)
-            assert (guide.a_u, guide.a_o, guide.a_r) == cells, (area, period)
+            values = (guide.a_u, guide.a_o, guide.a_r)
+            assert values == cells, (area, period)
 
 
 def test_example_1_meets_the_lower_value() -> None:
@@ -326,7 +327,8 @@ def test_table_2_as_printed() -> None:
     }.items():
         for days, (a_u, a_r) in zip((1, 26, 78), cells, strict=True):
             guide = im.construction_guide_values(days, stage=stage)
-            assert (guide.a_u, guide.a_o, guide.a_r) == (a_u, 5.0, a_r), (stage, days)
+            values = (guide.a_u, guide.a_o, guide.a_r)
+            assert values == (a_u, 5.0, a_r), (stage, days)
     assert im.construction_guide_values(7, stage="I").a_u == 0.4
     assert im.construction_guide_values(27, stage="I").a_u == 0.3
 

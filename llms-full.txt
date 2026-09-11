@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1030 numerical conformance checks against 410 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1034 numerical conformance checks against 411 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1030 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 78 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1034 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 79 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -238,6 +238,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/vibration/immission/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-vibration-immission.txt)
 - [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/)
+- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/)
 
 ## Environment and transport
 
@@ -600,12 +601,14 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [vibration/evaluation](https://jmrplens.github.io/phonometry/reference/api/vibration/evaluation/)
 - [vibration/experimental-sea](https://jmrplens.github.io/phonometry/reference/api/vibration/experimental-sea/)
 - [vibration/exposure](https://jmrplens.github.io/phonometry/reference/api/vibration/exposure/)
+- [vibration/ground](https://jmrplens.github.io/phonometry/reference/api/vibration/ground/)
 - [vibration/instrumentation](https://jmrplens.github.io/phonometry/reference/api/vibration/instrumentation/)
 - [vibration/junction-transmission](https://jmrplens.github.io/phonometry/reference/api/vibration/junction-transmission/)
 - [vibration/mechanical-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/mechanical-mobility/)
 - [vibration/multiple-shock](https://jmrplens.github.io/phonometry/reference/api/vibration/multiple-shock/)
 - [vibration/point-mobility](https://jmrplens.github.io/phonometry/reference/api/vibration/point-mobility/)
 - [vibration/radiation-efficiency](https://jmrplens.github.io/phonometry/reference/api/vibration/radiation-efficiency/)
+- [vibration/railway](https://jmrplens.github.io/phonometry/reference/api/vibration/railway/)
 - [vibration/seat-vibration](https://jmrplens.github.io/phonometry/reference/api/vibration/seat-vibration/)
 - [vibration/signal-burst](https://jmrplens.github.io/phonometry/reference/api/vibration/signal-burst/)
 - [vibration/transfer-stiffness](https://jmrplens.github.io/phonometry/reference/api/vibration/transfer-stiffness/)
@@ -41169,6 +41172,19 @@ documents, one page per module.
 | `KB_REFERENCE_FREQUENCY_HZ` / `KB_REFERENCE_INDICATIONS` / `KB_INDICATION_TOLERANCE_PERCENT` | `constant` | **The reference conditions of 5.2.10 and what they must show (6.2.3.12).**<br>• a 1 mm/s sine at 16 Hz, and the four values it produces: 1,00 mm/s, 0,667, 0,680 and 0,680<br>• 4 % is how far the display may sit from them | `vibration.KB_REFERENCE_INDICATIONS['kbf_max']  # 0.68` |
 | `KB_TEST_INDICATIONS` / `KB_PULSE_RESPONSE_PERCENT` | `constant` | **Table 9 and Table 8, as data.**<br>• the `KB_F`, `KB_Fmax` and `KB_FTm` a 1 mm/s sine shows at 1, 5,6, 31,5, 80 and 315 Hz<br>• Corrigendum 1's redraft of the burst table: eight burst durations of an 80 Hz sine and the `KB_Fmax` each shows as a percentage of the continuous display<br>• the `\|v\|max` row of Table 9 is not here; it contradicts Formula (5), see `docs/ERRATA.md` | `vibration.KB_TEST_INDICATIONS[31.5]`<br><br>• (0.693, 0.7, 0.7) |
 | `ASSESSMENT_GUIDE_VALUES_MM_S` / `ASSESSMENT_WEIGHTING_TOLERANCE` | `constant` | **Table E.2 and the band Table E.1 allows a realised filter.**<br>• 20, 5 and 3 mm/s, one per building class, independent of frequency<br>• 5 % either side of the target magnitude | `vibration.ASSESSMENT_GUIDE_VALUES_MM_S['sensitive']  # 3.0` |
+| `evaluate_train_passage` / `TrainPassage` | `function` / `dataclass` | **One train passage reduced the way DIN 45672-2 reduces it (Clauses 5 to 7).**<br>• `velocity_mm_s` [mm/s] as the transducer gives it, `fs_hz` [Hz], an integer<br>• keyword-only: `t2_s` (the passage, read off the record), `t1_s` (Default: 4 s centred on the peak, never longer than `T₂`), `t3_s` (Default: the whole record), `upper_band_hz` (Default: 315; down to 80)<br>• `.intervals_s`, `.interval_rms_mm_s`, `.peak_velocity_mm_s`, `.running_rms_max_mm_s`, `.kbf_max`, `.event_velocity_mm_s`, `.event_level_db`, `.band_centres_hz`, `.band_interval_levels_db` (one row per stretch), `.band_max_levels_db`, `.plot()`, `.plot_spectrum()`<br>• the record goes through the railway band limitation of DIN 45669-1 before anything is read | `p = vibration.evaluate_train_passage(v, 2048, t2_s=(6.75, 23.25))`<br><br>• `p.event_velocity_mm_s`, `p.band_max_levels_db` |
+| `running_velocity_rms` / `running_velocity_level` / `running_acceleration_level` | `function` | **Formulae (1) to (3): the running r.m.s. with τ = 125 ms, and its levels.**<br>• levels re `v₀ = 5·10⁻⁸ m/s` and `a₀ = 10⁻⁶ m/s²`<br>• started from rest: the mean square is 14 % short after 2τ and 2 % after 4τ, the r.m.s. about half that | `vibration.running_velocity_level(v, 2048)[-1]` |
+| `interval_rms` / `centred_interval` | `function` | **Formulae (4) and (5), and the stretch `T₁` of Clause 5 a).**<br>• `interval_rms(values, fs_hz, interval_s=(start, end))`: handed the velocity it is Formula (4), handed the running r.m.s. it is Formula (5)<br>• `centred_interval(v, fs_hz, duration_s=4)`: the largest amplitude in the middle, moved rather than cut where the record ends | `vibration.interval_rms(v, 2048, interval_s=(8.0, 20.0))` |
+| `event_velocity` / `event_velocity_level` / `combined_event_velocity` | `function` | **Formulae (8) to (10): the event value referred to an hour, its level, and an hour of passages.**<br>• `v_E = ṽ₃ √(T₃ / 3600 s)`, from `interval_rms_mm_s` and `duration_s`<br>• the passages of an hour add in square | `vibration.event_velocity(0.1, 36.0)  # 0.01` |
+| `passage_average_velocity` / `passage_average_level` | `function` | **Clause 9: the energy average over repeated passages.**<br>• r.m.s. values as the root of the mean square, levels as the level of the mean energy<br>• keyword-only `axis`: `passage_average_level(spectra, axis=0)` averages third-octave spectra band by band | `vibration.passage_average_level([60, 70])  # 67.40` |
+| `amplitude_distribution` / `AmplitudeDistribution` | `function` / `dataclass` | **Formula (11): the amplitude distribution density and its cumulative function (Clause 6.3).**<br>• keyword-only `bins` (Default: 101, equal bins across the range of the stretch)<br>• `.edges_mm_s`, `.density_per_mm_s`, `.cumulative` | `vibration.amplitude_distribution(v).cumulative[-1]  # 1.0` |
+| `narrowband_psd` / `passage_energy_spectral_density` / `spectral_density_level` | `function` | **Formulae (12) to (14), and the level Figure 7 draws.**<br>• `narrowband_psd(v, fs_hz, resolution_hz=1.25)`: Welch with a Hanning window and half a block of overlap, as a `SpectralDensityResult`<br>• `passage_energy_spectral_density(psd, duration_s)`: Formula (13) as printed, `G₂ T₂ / 2`, a two-sided density<br>• `spectral_density_level(psd)`: `10 lg(G / G₀)` with `G₀ = (5·10⁻⁸ m/s)²/Hz` | `vibration.narrowband_psd(v, 2048).nperseg / 2048  # 0.8` |
+| `third_octaves_from_narrowband` / `THIRD_OCTAVE_LINES` / `NARROWBAND_RESOLUTION_HZ` | `function` / `constant` | **Formula (23) with Table 1: a narrow-band spectrum back into third octaves.**<br>• each band takes its Table 1 count of lines, the ones nearest its nominal centre on a logarithmic axis: the lines inside the nominal edges wherever the count is what they hold<br>• six lines fall between bands and five are in two, as nominal edges leave them; a band the spectrum does not hold whole is left out<br>• refuses a spectrum not spaced 1,25 Hz, the spacing the counts are written for | `c, rms = vibration.third_octaves_from_narrowband(f, psd)` |
+| `velocity_psd_from_voltage` / `elastic_insertion_loss` / `band_sum_level` | `function` | **Annex A and Annex B.**<br>• Annex A: a density in V²/Hz divided by `κ_A² κ_V²`, keyword-only `sensitivity_v_per_mm_s` and `gain`<br>• (B.1) the insertion loss of an elastic element, `L₁ − L₂` per band, which is also the difference spectrum of (B.2)<br>• (B.3) the energy sum of the bands | `vibration.band_sum_level([60, 60])  # 63.01` |
+| `VELOCITY_LEVEL_REFERENCE_MM_S` / `EVENT_REFERENCE_DURATION_S` / `T1_DURATION_S` / `PASSAGE_BANDS_HZ` | `constant` | **The numbers DIN 45672-2 is built from.**<br>• `v₀ = 5·10⁻⁸ m/s`, here 5e-5 mm/s (ISO 1683:1983; the 1 nm/s of the 2015 edition is 34 dB apart)<br>• 3600 s, the hour of Formula (8), and 4 s, the recommended `T₁`<br>• 4 Hz to 315 Hz, the third-octave range of 7.2 | `vibration.VELOCITY_LEVEL_REFERENCE_MM_S  # 5e-05` |
+| `poisson_ratio_from_wave_speeds` / `shear_modulus_from_wave_speed` / `youngs_modulus_from_wave_speeds` | `function` | **DIN 45672-1 Clause 4.5: the ground's constants from its two wave speeds.**<br>• Formula (3) `ν = (v_p² − 2v_s²) / (2(v_p² − v_s²))` and Formula (5) `G = v_s² ρ`<br>• `E = 2G(1 + ν)`, not the printed `E = v_p² ρ`, which is the P-wave modulus; see `docs/ERRATA.md`<br>• speeds in m/s, keyword-only `density_kg_m3` | `vibration.poisson_ratio_from_wave_speeds(400.0, 180.0)  # 0.373` |
+| `compression_wave_speed` / `shear_strain_amplitude` | `function` | **Formula (1) corrected, and Formula (4).**<br>• `v_p = √(2G(1 − ν) / (ρ(1 − 2ν)))`, the continuum; the print is short of the factor 2<br>• `γ̂ = v̂ / v_s`, with the velocity amplitude in m/s | `vibration.shear_strain_amplitude(2e-4, shear_wave_speed_m_s=180.0)` |
+| `GROUND_WAVE_SPEED_RANGES_M_S` / `SHEAR_STRAIN_LINEAR_LIMIT` | `constant` | **What Clause 4.5 gives for natural ground.**<br>• compression waves 200-2000 m/s and shear waves 10-1000 m/s<br>• `10⁻⁴`: the shear strain up to which Figure 1 has the modulus about constant | `vibration.SHEAR_STRAIN_LINEAR_LIMIT  # 0.0001` |
 | `fdtd_simulation` | `function` | **2D acoustic FDTD wave simulation (staggered grid, leapfrog).**<br>• `c`: sound-speed map [m/s], `(ny, nx)` array or scalar with `shape`<br>• `dx`: grid spacing [m]<br>• `duration`: physical time to simulate [s]<br>• `sources`: `GaussianPulse` \| `CWSource` \| `SignalSource` list<br>• `probes`: `(ix, iy)` pressure-probe cells<br>• `boundaries`: `"rigid"` \| `"absorbing"` \| per-side mapping (name or real impedance [Pa·s/m])<br>• `obstacle_mask`: boolean `(ny, nx)` rigid-cell map / `rho` / `cfl` / `damping` / `absorbing_layer_cells` / `snapshot_every` | `res = simulation.fdtd_simulation(343, 0.01, 0.02, shape=(200, 300), sources=[simulation.GaussianPulse(ix=60, iy=100, half_width_s=3e-4)], probes=[(200, 100)])`<br><br>• `FDTDResult` |
 | `FDTDResult` | `dataclass` | **FDTD simulation result.**<br>• `times` [s] / `pressures` [Pa] per probe / `probes` / `probe_positions` [m]<br>• `dx` / `dt` / `shape` / `size` [m] / `sources` / `snapshots` / `snapshot_times` / `obstacle_mask`<br>• `.plot()`: probe histories; `.plot(kind="snapshot")`: pressure field | `res.pressures, res.times`<br>`res.plot()` |
 | `FDTD2D` | `class` | **FDTD stepping engine (frame-by-frame access).**<br>• `c` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping`<br>• `edge_impedance`: per-side real impedance [Pa·s/m] / `obstacle_mask` | `sim = simulation.FDTD2D(343, 0.01, shape=(200, 300))`<br>`sim.add_source(src); sim.step(); sim.run(400, record_every=10)`<br>• `sim.p` / `sim.vx` / `sim.vy` / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.plot_geometry(probes=...)`: draw the configured domain before running<br>• `sim.add_plane_wave(direction, center=..., width=..., wavelength=...)`: one-way plane packet initial condition<br>• `sim.add_contour_probe(ix0, ix1, iy0, iy1, frequencies=...)`: on-the-fly `p`/`v_n` phasor capture on a closed contour |
@@ -55529,7 +55545,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1030 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1034 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -56212,7 +56228,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1030 numerical conformance checks across 78 domains and 410 standards, covering
+1034 numerical conformance checks across 79 domains and 411 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -61101,6 +61117,13 @@ into three filters, one per building class, and with them a short-term event is
 judged against a single number instead of against a curve read at a frequency
 two methods disagree about.
 
+The meter has a second working range, 4 Hz to 315 Hz, and it exists for the
+source that most often brings vibration into a house: a railway. DIN 45672 is
+the pair of standards for it, a method of measuring next to the line and a
+method of reducing what was measured, so that the vibration of one train can be
+compared with the next, one point on the way to the building with another, and
+the track before a mitigation measure with the track after it.
+
 ## Pages in this section
 
 - [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
@@ -61109,6 +61132,11 @@ two methods disagree about.
   tolerance bands of Tables 2 and 3, the printed check values of Tables 8 and
   9, and the assessment velocity of Annex E (DIN 45669-1:2010-09 with
   Corrigendum 1:2012-12).
+- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+  the three stretches of a passage, the running r.m.s. and the event value
+  referred to an hour, the third-octave spectra of Figure 6, the narrow-band
+  density and Table 1 (DIN 45672-2:1995-07), and the ground constants from two
+  wave speeds (DIN 45672-1:2009-12, Clause 4.5).
 
 ## See also
 
@@ -61133,9 +61161,482 @@ vibration severity means for the people who feel it, with its own tables of
 reference values by time of day and use of the room. The quantity is computed
 here; the judgement it feeds is not implemented.
 
-**Nothing about railways yet.** DIN 45672 measures and evaluates vibration
-next to railway lines, which is what the 4 Hz to 315 Hz working range of the
-meter is for. Its evaluation method is not implemented.
+**No railway measuring procedure.** DIN 45672-1 fixes the measurement points
+on the way from the track to the building, the directions, the trains to
+record and the report to write. Only its Clause 4.5, the ground constants, is
+arithmetic, and only that is here.
+
+---
+
+
+<!-- source: docs/vibration/immission/railway-vibration.md | canonical: https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/ -->
+Source: https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/
+
+# Vibration next to a railway (DIN 45672)
+
+A train passing a house puts vibration into the ground for twenty seconds and
+then leaves, and the question is rarely what those twenty seconds were. It is
+whether the vibration at the building is more than at the track wall, whether
+the mat under the ballast changed anything, or whether the freight trains of
+the night are worse than the passenger trains of the day. Every one of those
+compares two numbers, and two numbers can only be compared if they were formed
+the same way.
+
+That is what DIN 45672 is for. Part 1 says how to measure next to a railway:
+where the transducers go, which directions, which trains, what the report has
+to contain. Part 2 says how to **reduce** the record once it exists, and it is
+the part this page implements, with the meter of
+[DIN 45669-1](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/) in its 4 Hz to
+315 Hz railway working range. Neither part says what the result may be: the
+assessment is DIN 4150-2 for people and DIN 4150-3 for buildings.
+
+## 1. Three stretches of one record
+
+The first thing Part 2 does is cut the record into three stretches, and every
+quantity after that carries the index of the one it was read over (Clause 5).
+
+- **`T₁`**, about four seconds with the largest vibration in its middle. It is
+  where the characteristic values of the passage are read. A short or fast
+  train often needs less, and then `T₁` may be as long as `T₂` and no longer.
+- **`T₂`**, the passage itself: the time a train takes to cross an imaginary
+  measuring section. Experience, the standard says, puts its start where the
+  amplitude reaches about a quarter of the most frequent maxima of the passage
+  and its end where it falls back to the same value. That is a judgement about
+  the record, so the library asks for it rather than guessing it.
+- **`T₃`**, the whole event, quiet approach and departure included. It is the
+  one the energy of the passage is formed over.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_passage_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_passage.svg" alt="A thirty-second time axis carrying the velocity of one train passage in millimetres per second. A faint grey trace is the velocity itself, quiet for six seconds, rising over three seconds to a pulsing envelope of about 0.3 to 0.45 millimetres per second peak that holds until 21 seconds and falls away by 24. A blue curve over it is the running r.m.s. of Formula (1), rising with the envelope to about 0.2 and pulsing with the bogies. A red dashed line marks its maximum at 0.218 millimetres per second. Above the record, three double-headed arrows mark the stretches: T1 over four seconds around 15.5 seconds, T2 from 6.75 to 23.25 seconds, and T3 over the whole thirty" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+passage.plot()
+```
+
+</details>
+
+The record above is synthetic and shaped like a real one: the envelope of a
+train arriving and leaving, a pulse per bogie, a sleeper-passing tone at 40 Hz,
+a floor resonance at 63 Hz and some broadband noise. Its `T₂` starts where the
+envelope reaches a quarter, 6,75 s, and ends where it falls back, 23,25 s:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+for name, (start, end), rms in zip(
+    ("T1", "T2", "T3"), passage.intervals_s, passage.interval_rms_mm_s
+):
+    print(f"{name}: {start:5.2f} s to {end:5.2f} s, r.m.s. {rms:.4f} mm/s")
+# T1: 13.47 s to 17.47 s, r.m.s. 0.1945 mm/s
+# T2:  6.75 s to 23.25 s, r.m.s. 0.1783 mm/s
+# T3:  0.00 s to 30.00 s, r.m.s. 0.1324 mm/s
+print(f"v_max {passage.peak_velocity_mm_s:.3f} mm/s")        # 0.481 mm/s
+print(f"v_Fmax {passage.running_rms_max_mm_s:.3f} mm/s")     # 0.218 mm/s
+print(f"KB_Fmax {passage.kbf_max:.3f}")                      # 0.216
+```
+
+Before anything is read, the record goes through the band limitation of the
+DIN 45669-1 railway range, as it does inside the meter. That is why a record
+has to be the velocity the transducer gives, and why `KB_Fmax`, the number
+DIN 4150-2 judges people by, comes out of the same call as the rest.
+
+## 2. The running r.m.s., and the fourteen per cent that is seven
+
+The running r.m.s. of Formula (1) is the exponential average a sound level
+meter calls Fast, `τ = 125 ms`, and its level against `v₀ = 5·10⁻⁸ m/s` is the
+velocity level of Formula (2). Beware the reference: it is the one of
+ISO 1683:1983, which the standard cites through DIN EN 21683, and ISO 1683:2015
+moved it to 1 nm/s, so the same vibration is 34 dB apart under the two.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(3 * fs_hz) / fs_hz
+one_mm_s_rms = np.sqrt(2) * np.sin(2 * np.pi * 40 * t)
+level = vibration.running_velocity_level(one_mm_s_rms, fs_hz)
+print(f"{level[-fs_hz:].mean():.2f} dB")  # 86.02 dB
+```
+
+The average starts from rest, so the first stretch of any record reads low,
+and Clause 4 says why that matters: the averaging has to be running before the
+train arrives. It quotes the cost as 14 % after `2τ` and 2 % after `4τ`, and
+those are the shortfalls of the **mean square**, `e⁻²` and `e⁻⁴`. The running
+r.m.s. the sentence is about, and the one its own Figure 3 draws, is short by
+7 % and 0,9 %. The advice stands; the size of the error is overstated by a
+factor of two, and the [errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the
+detail.
+
+## 3. The event value, and an hour of trains
+
+The quantity a passage is summarised by is its **event value** (Formula (8)):
+the interval r.m.s. of the whole event referred to one hour,
+
+```text
+v_E = ṽ₃ · √(T₃ / 3600 s)
+```
+
+which is the constant velocity that, held for an hour, carries the energy the
+passage carried. Its level (Formula (9)) is the same thing in decibels, and
+because each event value is already the energy of a passage spread over the
+same hour, the passages of an hour add in square (Formula (10)):
+
+```python
+from phonometry import vibration
+
+one = vibration.event_velocity(0.1324, 30.0)
+print(f"one passage: v_E = {one:.5f} mm/s")  # 0.01209 mm/s
+print(f"L_vE = {vibration.event_velocity_level(0.1324, 30.0):.2f} dB")  # 47.67 dB
+
+six = vibration.combined_event_velocity([one] * 6)
+print(f"six in an hour: {six:.5f} mm/s")  # 0.02961 mm/s, sqrt(6) times one
+```
+
+That is the number to compare between two hours of traffic, and it is why
+`T₃` includes the quiet ends: they carry no energy, and the hour does not care
+how long the record ran.
+
+## 4. Third octaves: the spectra of Figure 6
+
+Clause 7.2 analyses the passage in third octaves from 4 Hz to at least 315 Hz,
+and prints two spectra as the result: the **interval level** over `T₂`
+(Formula (6)), the running r.m.s. of each band averaged over the passage, and
+the **maximum level** over `T₃` (Formula (7)), the largest value the running
+r.m.s. of each band reaches. The gap between them is the crest of the band:
+wide where the vibration comes in bursts, narrow where it is steady.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_spectra_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_spectra.svg" alt="Third-octave bands from 4 to 315 hertz on an evenly spaced axis, velocity level in decibels re 5 times ten to the minus eight metres per second. A blue line with round markers is the maximum level over T3 and a green dashed line with square markers is the interval level over T2, both low and flat around 35 to 45 decibels except for two peaks: about 72 and 70 decibels at 40 hertz, and about 64 and 62 at 63 hertz. Red crosses at every band from 4 to 315 hertz are the same T2 spectrum obtained from the narrow-band density through Table 1; they sit on the green curve almost everywhere and fall about 5 decibels below it at 50 hertz, between the two tones" width="96%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+ax = passage.plot_spectrum()
+
+t2 = slice(round(6.75 * fs_hz), round(23.25 * fs_hz))
+spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
+centres, rms = vibration.third_octaves_from_narrowband(
+    spectrum.frequencies, spectrum.psd
+)
+narrow = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
+positions = [list(centres).index(band) for band in passage.band_centres_hz]
+ax.plot(range(len(positions)), narrow[positions], "x", label="T2 from the narrow band")
+ax.legend()
+```
+
+</details>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+bands = list(passage.band_centres_hz)
+for band in (40.0, 63.0):
+    i = bands.index(band)
+    print(
+        f"{band:g} Hz: L_vF2 {passage.band_interval_levels_db[1, i]:.1f} dB,"
+        f" L_vFmax {passage.band_max_levels_db[i]:.1f} dB"
+    )
+# 40 Hz: L_vF2 70.4 dB, L_vFmax 72.0 dB
+# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.3 dB
+print(f"sum level {vibration.band_sum_level(passage.band_interval_levels_db[1]):.1f} dB")
+# 71.1 dB, Formula (B.3)
+```
+
+## 5. Narrow band, and what Table 1 is
+
+Third octaves are coarse where a floor resonates, so Clause 7.3 also asks for
+the one-sided **power spectral density** of Formula (12), blockwise with a
+Hanning window, at least half a block of overlap and a linear average of the
+blocks. The resolution it recommends is 1,25 Hz, fine enough for the
+resonance of an ordinary floor, which at the 500 Hz and 400 lines of a common
+analyser is a block of 0,8 s. The lines add back to the mean square of the
+stretch, which is Formula (14).
+
+To compare a narrow-band result with a third-octave one, Formula (23) adds the
+lines of each band back together, and Table 1 says how many lines each band
+takes: 1 at 4 Hz, 6 at 31,5 Hz, 58 at 315 Hz. The standard gives the counts
+"for comparability" and does not derive them. They are what a sixth of an
+octave either side of the nominal centre holds, everywhere but at 10 Hz and
+12,5 Hz, where those edges would give one line and three and the table gives
+two and two. The table says how many lines and not which, so the library
+states its choice: the `Kₙ` lines nearest the nominal centre on a logarithmic
+axis, which are exactly the lines inside the nominal edges wherever the count
+is what the edges hold, and 10 and 11,25 Hz, then 12,5 and 13,75 Hz, where it
+is not. It is a rule of nominal bands and behaves like one: nominal edges do
+not meet, so six lines fall between two bands (71,25 Hz, 141,25 Hz and
+142,5 Hz, and 353,75 Hz to 356,25 Hz) and five are counted in two (178,75 Hz,
+223,75 Hz, and 446,25 Hz to 448,75 Hz). A tone in one of the gaps is in no
+band at all, which is worth knowing before a spectrum is converted.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+
+t2 = slice(round(6.75 * fs_hz), round(23.25 * fs_hz))
+spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
+print(f"block {spectrum.nperseg / fs_hz:.2f} s")  # 0.80 s
+centres, rms = vibration.third_octaves_from_narrowband(
+    spectrum.frequencies, spectrum.psd
+)
+levels = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
+for band in (40.0, 50.0, 63.0):
+    print(f"{band:g} Hz from narrow band: {levels[list(centres).index(band)]:.1f} dB")
+# 40 Hz from narrow band: 70.5 dB   (70.4 dB from the band filter)
+# 50 Hz from narrow band: 39.2 dB   (44.7 dB from the band filter)
+# 63 Hz from narrow band: 62.5 dB   (62.4 dB from the band filter)
+```
+
+The two routes agree where the energy is and part where there is little of it,
+at 50 Hz between two tones: a band filter's skirts let in some of the
+neighbouring 40 Hz and 63 Hz and a Hanning line does not. The standard says as
+much, and says that the comparison is only fair at the resolution Table 1 is
+written for, which is why the library refuses a spectrum spaced otherwise.
+The level of a density against `(5·10⁻⁸ m/s)²/Hz`, as its Figure 7 draws it, is
+`spectral_density_level`, and a density read off an analyser in V²/Hz is
+turned into (mm/s)²/Hz by dividing by the square of the transducer
+coefficient and of the gain, which is all Annex A says.
+
+## 6. Before, after, and across passages
+
+Part 2 exists to compare, and its last clauses are the comparisons. The
+**insertion loss** of an elastic element (Annex B, Formula (B.1)) is the drop
+in each third-octave level at one point when the element is built in, and the
+annex adds a warning worth repeating: it belongs to the point it was measured
+at. And the results of a class of trains are **averaged energetically**
+(Clause 9): r.m.s. values as the root of the mean square, levels as the level
+of the mean energy.
+
+```python
+from phonometry import vibration
+
+before = [70.4, 62.4]  # 40 Hz and 63 Hz, without the mat
+after = [61.0, 50.9]
+print(vibration.elastic_insertion_loss(before, after))  # [ 9.4 11.5]
+
+average = vibration.passage_average_level([70.4, 72.1, 69.0])
+print(f"{average:.1f} dB")  # 70.7 dB
+rms = vibration.passage_average_velocity([0.18, 0.21, 0.16])
+print(f"{rms:.4f} mm/s")  # 0.1845 mm/s
+```
+
+## 7. The ground the vibration travels through
+
+Part 1 is procedure, with one exception. Clause 4.5 describes the ground by
+the speeds of its compression and shear waves, and derives from them the
+constants a prediction needs. An unbounded elastic continuum carries two
+kinds of wave, and their speeds are fixed by two elastic constants and the
+density, so measuring both speeds fixes everything: the shear modulus from
+the shear wave, Poisson's ratio from their ratio (Formula (3)), and the
+elastic modulus from the two together.
+
+Two of the clause's formulas are printed wrong, and the
+[errata page](https://jmrplens.github.io/phonometry/reference/errata/) has the reading. Formula (1)
+writes the compression speed first as `√(E/ρ)`, the speed of a wave in a thin
+rod, and then as `√(G(1−ν)/(ρ(1−2ν)))`, which is short of a factor 2. Formula
+(5) builds on the first and writes `E = v_p² ρ`, which from a measured `v_p`
+returns the P-wave modulus instead of `E`. Formula (3), printed between them,
+is right, and the library uses the relations it is derived from:
+
+```python
+from phonometry import vibration
+
+v_p, v_s, rho = 400.0, 180.0, 1900.0  # a medium-dense sand, m/s and kg/m3
+
+nu = vibration.poisson_ratio_from_wave_speeds(v_p, v_s)
+g = vibration.shear_modulus_from_wave_speed(v_s, density_kg_m3=rho)
+e = vibration.youngs_modulus_from_wave_speeds(v_p, v_s, density_kg_m3=rho)
+print(f"nu = {nu:.3f}, G = {g / 1e6:.1f} MPa, E = {e / 1e6:.0f} MPa")
+# nu = 0.373, G = 61.6 MPa, E = 169 MPa
+print(f"E as Formula (5) prints it: {v_p**2 * rho / 1e6:.0f} MPa")  # 304 MPa
+
+strain = vibration.shear_strain_amplitude(0.2e-3, shear_wave_speed_m_s=v_s)
+print(f"shear strain of 0.2 mm/s: {strain:.1e}")  # 1.1e-06
+print(strain < vibration.SHEAR_STRAIN_LINEAR_LIMIT)  # True
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_wave_speeds_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_wave_speeds.svg" alt="Poisson's ratio from 0 to 0.49 on the horizontal axis and the ratio of compression to shear wave speed on the vertical, from 1 to 8. A blue curve, the unbounded continuum that Formula (3) inverts, starts at the square root of 2 and climbs steeply towards the incompressible limit, passing 2.2 at 0.37. A grey dashed curve is the second radical of Formula (1) as printed, the same shape a factor square root of two lower. A red dotted line is the thin-rod speed of the first radical, rising gently from 1.41 to 1.73. The two printed expressions cross at a Poisson's ratio of 0.39, marked with a dot and a label below it, the only place where Formula (1) agrees with itself" width="94%"></picture>
+
+<details>
+<summary>Figure code</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+nu = np.linspace(0.0, 0.49, 300)
+continuum = [
+    vibration.compression_wave_speed(1.0, poisson_ratio=n, density_kg_m3=1.0)
+    for n in nu
+]
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(nu, continuum, label="continuum, the inverse of Formula (3)")
+ax.plot(nu, np.sqrt((1 - nu) / (1 - 2 * nu)), "--", label="Formula (1), second radical")
+ax.plot(nu, np.sqrt(2 * (1 + nu)), ":", label="Formula (1), sqrt(E / rho)")
+ax.set_xlabel("Poisson's ratio")
+ax.set_ylabel("v_p / v_s")
+ax.legend()
+```
+
+</details>
+
+The strain matters because a soil's shear modulus falls as the strain grows:
+Figure 1 of the clause has it constant up to a shear strain of about `10⁻⁴`
+and dropping below 20 % of that value further on. Rail traffic, and the
+measurements that read the speeds, strain the ground around `10⁻⁶`, so the
+modulus measured is the one that applies.
+
+## 8. What this page is not
+
+DIN 45672-1 is a measuring method: measurement points on the way from the
+track to the building, directions, coupling, the trains to record and the
+report to write. None of that is arithmetic and none of it is here, and the
+coupling it points to is DIN 45669-2. Nor is any assessment: the numbers this
+page produces are compared with something only in DIN 4150-2 and DIN 4150-3.
+
+## What this guide covers
+
+The **three stretches** of Clause 5, the **running r.m.s.** and the velocity
+and acceleration levels of Formulae (1) to (3), the **interval r.m.s.** of
+Formulae (4) and (5), and the **event value**, its level and its sum over the
+passages of an hour, Formulae (8) to (10).
+
+The **third-octave levels** of Formulae (6) and (7) from 4 Hz to 315 Hz, or to
+80 Hz as DIN 45672-1 allows, and the **amplitude distribution** of Formula
+(11).
+
+The **narrow-band densities** of Formulae (12) to (14) at the resolution of
+7.3.2, the conversion to third octaves of Formula (23) with every count of
+**Table 1**, the density level of Figure 7, the dimension conversion of
+**Annex A**, the quantities of **Annex B** and the energy averaging of
+**Clause 9**.
+
+The **ground constants** of DIN 45672-1 Clause 4.5 from two wave speeds and a
+density, with Formulae (1) and (5) in the form the continuum gives and the
+printed forms registered as errata.
+
+**No analyser.** The calibration checks of 7.3.3 test the amplitude display of
+a narrow-band analyser, with and without a Hanning window; the library's
+density is correct by construction and has nothing to calibrate.
+
+**No measuring procedure and no verdict.** Measurement points, directions,
+coupling and the choice of trains are DIN 45672-1 and DIN 45669-2; what the
+numbers mean for people and buildings is DIN 4150-2 and DIN 4150-3.
+
+## See also
+
+- [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
+  the meter every quantity here is read with, and the `KB_F` it produces.
+- [Vibration damage to structures (DIN 4150-3)](https://jmrplens.github.io/phonometry/vibration/structural/structural-damage/):
+  the guideline values a peak velocity from a railway is compared with.
+- [Spectral analysis](https://jmrplens.github.io/phonometry/signals/spectra/spectral-analysis/): the
+  Welch estimate behind the narrow-band density and the confidence it carries.
+- API reference:
+  [`vibration.immission.railway`](https://jmrplens.github.io/phonometry/reference/api/vibration/railway/)
+  and [`vibration.immission.ground`](https://jmrplens.github.io/phonometry/reference/api/vibration/ground/).
+
+## References
+
+- Deutsches Institut für Normung. (1995). *Schwingungsmessungen in der Umgebung
+  von Schienenverkehrswegen — Teil 2: Auswerteverfahren* (DIN 45672-2:1995-07).
+  The three stretches of Clause 5, the running r.m.s. and levels of Formulae (1)
+  to (3), the interval r.m.s. of Formulae (4) and (5), the third-octave levels
+  of Formulae (6) and (7), the event value and level of Formulae (8) to (10),
+  the amplitude distribution of Formula (11), the power and energy spectral
+  densities of Formulae (12) to (14) with the parameters of 7.3.2, the
+  narrow-band to third-octave conversion of Formula (23) with Table 1, the
+  dimension conversion of Annex A, the quantities of Annex B and the averaging
+  over passages of Clause 9. The analyser calibration checks of 7.3.3 are not
+  implemented.
+- Deutsches Institut für Normung. (2009). *Schwingungsmessungen in der Umgebung
+  von Schienenverkehrswegen — Teil 1: Messverfahren* (DIN 45672-1:2009-12).
+  Clause 4.5: the wave speeds of Formulae (1) and (2), Poisson's ratio of
+  Formula (3), the shear strain of Formula (4) and the moduli of Formula (5),
+  with Formulae (1) and (5) in the corrected form registered in the errata. The
+  measuring procedure of the rest of the standard is not arithmetic and is not
+  implemented.
+- Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
+  Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
+  The meter a railway measurement is made with, in its 4 Hz to 315 Hz working
+  range, whose band limitation every quantity here is read after.
 
 ---
 
@@ -61170,7 +61671,8 @@ stages, each printed as an exact transfer function or an exact average.
 two-pole high pass at `0,8 f_u` and a two-pole low pass at `f_o / 0,8`. The
 working range is 1 Hz to 80 Hz for buildings, so those corners are 0,8 Hz and
 100 Hz. Next to a railway the range is 4 Hz to 315 Hz, which is where
-DIN 45672-1 works, and blasting and structure-borne sound need it too.
+[DIN 45672](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/) works, and
+blasting and structure-borne sound need it too.
 
 **Frequency weighting** (Formula (4)) divides that by
 `1 − j 5,6 Hz / f`, one more pole and one more zero. Normalising the result by
@@ -61639,13 +62141,17 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
 
 ## [Vibration immission](https://jmrplens.github.io/phonometry/vibration/immission/)
 
-The instrument the German immission-control standards presuppose, and the
-assessment it makes possible.
+The instrument the German immission-control standards presuppose, the
+assessment it makes possible, and the railway measurements it is used for.
 
 - [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
   the KB weighting and the weighted vibration severity a DIN 4150 measurement
   is reported in, the tolerance bands a meter is graded by, and the Annex E
   assessment velocity that judges a building without a dominant frequency.
+- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+  one train passage reduced to the numbers that can be compared, from the event
+  value of an hour of traffic to the third-octave spectra and the narrow-band
+  density behind them, and the ground constants from two wave speeds.
 
 ## What this section does not cover
 

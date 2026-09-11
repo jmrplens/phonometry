@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 128 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 129 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento veintiocho guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento veintinueve guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -591,6 +591,11 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
   máximos por intervalo en que se expresa una medida, las bandas de tolerancia
   con que se juzga un vibrómetro y la velocidad de valoración del anexo E, que
   juzga un edificio sin frecuencia dominante.
+- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
+  un paso de tren reducido como lo reduce la DIN 45672-2, del valor de suceso de
+  una hora de tráfico a los espectros en tercios de octava y la densidad en
+  banda estrecha que hay detrás, y las constantes del terreno de la DIN 45672-1
+  a partir de dos velocidades de onda.
 
 ## [Medio ambiente y transporte](/phonometry/es/environment/)
 

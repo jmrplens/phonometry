@@ -112,6 +112,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   five frequencies, and the `KB_F` row of the same two columns follows the
   formula, so the table disagrees with itself rather than with the library.
 
+- Vibration next to a railway: the evaluation method of **DIN 45672-2:1995-07**
+  and the ground constants of **DIN 45672-1:2009-12**, beside the meter they
+  are measured with.
+
+  `vibration.evaluate_train_passage` reduces one passage the way Part 2 does.
+  The record goes through the railway band limitation of DIN 45669-1 first, is
+  cut into the three stretches of Clause 5, and comes back as the running
+  r.m.s. and its maximum, the peak, the interval r.m.s. of each stretch, the
+  event value referred to an hour, the `KB_Fmax` DIN 4150-2 reads, and the
+  interval and maximum third-octave spectra of Figure 6. `T₂`, the passage
+  itself, is asked for rather than guessed, because the standard reads it off
+  the record as a judgement. The event values of an hour add in square, and a
+  class of trains averages in energy, both as functions.
+
+  The narrow band is here too: the density of Formula (12) at the 1,25 Hz the
+  standard recommends, and Formula (23), which adds its lines back into third
+  octaves. Table 1 says how many lines each band takes and not which, so the
+  choice is stated: the lines nearest the nominal centre on a logarithmic axis,
+  which are the lines inside the nominal edges wherever the count is what the
+  edges hold. Nominal edges do not meet, and the docstring and the guide say
+  what that leaves: six lines in no band and five in two. The conformance
+  report runs the Clause 4 start-up figures, the 0,8 s block and the 23 %
+  bandwidth; Table 1 is the library's input, so it is held by the tests rather
+  than by a row that would compare it with itself.
+
+  Clause 4.5 of Part 1 reads the elastic constants of the ground from the
+  speeds of its compression and shear waves, and two of its five formulas are
+  printed wrong: Formula (1) gives the compression speed of a thin rod and a
+  radicand short of a factor 2, and Formula (5) returns the P-wave modulus as
+  `E`. Formula (3), between them, is right, and the library uses the continuum
+  it is derived from. Both are in `docs/ERRATA.md`, with a smaller one from
+  Part 2: its 14 % and 2 % for the start-up of the running r.m.s. are the
+  shortfalls of the mean square, twice what the r.m.s. it names is short by.
+
 - A vibration meter can be given the verdict a sound level meter already gets:
   the frequency-weighting tolerances of **ISO 8041-1:2017**, in
   `vibration.verify_weighting`.

@@ -27,7 +27,8 @@ stages, each printed as an exact transfer function or an exact average.
 two-pole high pass at `0,8 f_u` and a two-pole low pass at `f_o / 0,8`. The
 working range is 1 Hz to 80 Hz for buildings, so those corners are 0,8 Hz and
 100 Hz. Next to a railway the range is 4 Hz to 315 Hz, which is where
-DIN 45672-1 works, and blasting and structure-borne sound need it too.
+[DIN 45672](railway-vibration.md) works, and
+blasting and structure-borne sound need it too.
 
 **Frequency weighting** (Formula (4)) divides that by
 `1 − j 5,6 Hz / f`, one more pole and one more zero. Normalising the result by

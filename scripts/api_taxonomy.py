@@ -247,6 +247,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.vibration.human.instrumentation",
             "phonometry.vibration.human.signal_burst",
             "phonometry.vibration.immission.vibration_meter",
+            "phonometry.vibration.immission.railway",
+            "phonometry.vibration.immission.ground",
         ),
     ),
     Section(
@@ -440,6 +442,10 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "AIR_SOUND_SPEED_M_S": "phonometry.noise_control.valves",
     "PIPE_SOUND_SPEED_M_S": "phonometry.noise_control.valves",
     "jet_diameter_m": "phonometry.noise_control.valves",
+    # The running r.m.s. time constant is owned by the DIN 45669-1 meter and
+    # imported by the DIN 45672-2 evaluation, whose Formula (1) is the same
+    # integral with the same "Fast", so a plain scan sees it in both.
+    "KB_TIME_CONSTANT_S": "phonometry.vibration.immission.vibration_meter",
     # The ERB_N / Cam constants are owned by erb_scale and imported by the
     # ISO 532-2 loudness model, so a plain scan sees them in both modules.
     "ERB_C1": "phonometry.psychoacoustics.erb_scale",

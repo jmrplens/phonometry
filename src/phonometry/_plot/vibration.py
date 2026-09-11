@@ -62,6 +62,7 @@ if TYPE_CHECKING:
     from ..vibration.human.multiple_shock import MultipleShockResult
     from ..vibration.human.seat_vibration import SeatTransmissionResult
     from ..vibration.human.signal_burst import SignalBurstVerification
+    from ..vibration.immission.railway import TrainPassage
     from ..vibration.immission.vibration_meter import (
         AssessmentVelocity,
         VibrationMeterReading,
@@ -117,6 +118,15 @@ _TIME_LABEL = "Time [s]"
 _KBF_LABEL = "Weighted vibration severity $KB_F$"
 _KBF_MAX_LABEL = r"$KB_{{F\mathrm{{max}}}}$ = {value}"
 _KBFTM_LABEL = r"$KB_{{FTm}}$ = {value}"
+#: The DIN 45672-2 passage figures: the running r.m.s. of Formula (1), its
+#: maximum, and the two third-octave spectra of Figure 6.
+_RUNNING_RMS_LABEL = r"running r.m.s. $\tilde v_F(t)$"
+_RUNNING_MAX_LABEL = r"$\tilde v_{{F\mathrm{{max}}}}$ = {value} mm/s"
+_BAND_LEVEL_LABEL = "Velocity level [dB re 5·10⁻⁸ m/s]"
+_INTERVAL_LEVEL_LABEL = r"interval level $L_{vF2}$"
+_MAX_LEVEL_LABEL = r"maximum level $L_{vF\mathrm{max}}$"
+#: Where the brackets of T_1, T_2 and T_3 sit, as fractions of the axes height.
+_BRACKET_ROWS = (0.93, 0.855, 0.78)
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
@@ -266,12 +276,57 @@ _STRINGS: dict[str, str] = {
     "guideline {value} mm/s": "valor de referencia {value} mm/s",
     "peak {value} mm/s": "pico {value} mm/s",
     "Short-term vibration by DIN 45669-1 Annex E ({cls}): {verdict}": "Vibración de corta duración según DIN 45669-1, anexo E ({cls}): {verdict}",
+    # Railway vibration evaluation (DIN 45672-2 Figures 2, 4 and 6).
+    "velocity $v(t)$": "velocidad $v(t)$",
+    _RUNNING_RMS_LABEL: r"valor eficaz móvil $\tilde v_F(t)$",
+    _RUNNING_MAX_LABEL: _RUNNING_MAX_LABEL,
+    "Velocity [mm/s]": "Velocidad [mm/s]",
+    "Train passage by DIN 45672-2: $v_E$ = {value} mm/s": "Paso de tren según DIN 45672-2: $v_E$ = {value} mm/s",
+    _BAND_LEVEL_LABEL: "Nivel de velocidad [dB re 5·10⁻⁸ m/s]",
+    _INTERVAL_LEVEL_LABEL: r"nivel de intervalo $L_{vF2}$",
+    _MAX_LEVEL_LABEL: r"nivel máximo $L_{vF\mathrm{max}}$",
+    "Third-octave spectra of one passage (DIN 45672-2)": "Espectros en tercios de octava de un paso (DIN 45672-2)",
 }
 
 
 def _t(text: str, language: str = "en") -> str:
     """Localise a fixed string; English is returned verbatim (byte-identical)."""
     return _STRINGS.get(text, text) if language == "es" else text
+
+
+def _plot_verdict_points(
+    ax: Axes,
+    freqs: NDArray[np.float64],
+    values: NDArray[np.float64],
+    inside: NDArray[np.bool_],
+    kwargs: dict[str, Any],
+    language: str,
+) -> None:
+    """The measured points of a verifier, green inside the band and red outside.
+
+    The pair ``plot_db_hr_assessment`` already uses for a complies/fails
+    verdict. The measured series cannot take _C_PRIMARY, which the design goal
+    and its band carry in every verifier, and it must not take _C_REFERENCE,
+    which would paint a conforming point in the colour of a refusal. The
+    caller's kwargs reach the conforming points, so a colour or a label the
+    caller names wins over these defaults.
+    """
+    style_default(kwargs, "color", _C_TERTIARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 5)
+    style_default(kwargs, "ls", "none")
+    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
+    ax.plot(freqs[inside], values[inside], **kwargs)
+    if not inside.all():
+        ax.plot(
+            freqs[~inside],
+            values[~inside],
+            color=_C_REFERENCE,
+            marker="X",
+            markersize=9,
+            ls="none",
+            label=_t(_OUTSIDE_LABEL, language),
+        )
 
 
 def plot_vibration_weighting(
@@ -888,28 +943,7 @@ def plot_weighting_verification(
         )
     ax.plot(freqs, design, color=_C_PRIMARY, lw=2.0, label=_t("design goal", language))
 
-    # Green for the bands that conform and red for the ones that do not, the
-    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
-    # verdict. The measured series cannot take _C_PRIMARY here, which the
-    # design goal and its band already carry, and it must not take
-    # _C_REFERENCE, which would paint a conforming band in the colour of a
-    # refusal.
-    style_default(kwargs, "color", _C_TERTIARY)
-    kwargs.setdefault("marker", "o")
-    style_default(kwargs, "markersize", 5)
-    style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
-    ax.plot(freqs[inside], measured[inside], **kwargs)
-    if not inside.all():
-        ax.plot(
-            freqs[~inside],
-            measured[~inside],
-            color=_C_REFERENCE,
-            marker="X",
-            markersize=9,
-            ls="none",
-            label=_t(_OUTSIDE_LABEL, language),
-        )
+    _plot_verdict_points(ax, freqs, measured, inside, kwargs, language)
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -979,28 +1013,7 @@ def plot_phase_verification(
         label=_t(_ISO8041_BAND_LABEL, language),
     )
 
-    # Green for the bands that conform and red for the ones that do not, the
-    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
-    # verdict. The measured series cannot take _C_PRIMARY here, which the
-    # design goal and its band already carry, and it must not take
-    # _C_REFERENCE, which would paint a conforming band in the colour of a
-    # refusal.
-    style_default(kwargs, "color", _C_TERTIARY)
-    kwargs.setdefault("marker", "o")
-    style_default(kwargs, "markersize", 5)
-    style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
-    ax.plot(freqs[inside], deviation[inside], **kwargs)
-    if not inside.all():
-        ax.plot(
-            freqs[~inside],
-            deviation[~inside],
-            color=_C_REFERENCE,
-            marker="X",
-            markersize=9,
-            ls="none",
-            label=_t(_OUTSIDE_LABEL, language),
-        )
+    _plot_verdict_points(ax, freqs, deviation, inside, kwargs, language)
 
     # A plain logarithmic axis rather than the octave-centre ticks of
     # format_frequency_axis, and for the same reason the magnitude verdict
@@ -2068,22 +2081,7 @@ def plot_vibration_meter_verification(
     )
     ax.axhline(0.0, color=_C_PRIMARY, lw=1.5)
 
-    style_default(kwargs, "color", _C_TERTIARY)
-    kwargs.setdefault("marker", "o")
-    style_default(kwargs, "markersize", 5)
-    style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
-    ax.plot(freqs[inside], deviation[inside], **kwargs)
-    if not inside.all():
-        ax.plot(
-            freqs[~inside],
-            deviation[~inside],
-            color=_C_REFERENCE,
-            marker="X",
-            markersize=9,
-            ls="none",
-            label=_t(_OUTSIDE_LABEL, language),
-        )
+    _plot_verdict_points(ax, freqs, deviation, inside, kwargs, language)
 
     ax.set_xscale("log")
     ax.set_xlabel(_t(_FREQ_LABEL, language))
@@ -2238,6 +2236,147 @@ def plot_assessment_velocity(
             verdict=_t("PASS" if result.within_guideline else "FAIL", language),
         )
     )
+    ax.grid(visible=True, alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_train_passage(
+    result: TrainPassage,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """One passage against time, with the three stretches it is read over.
+
+    The velocity the meter's band limitation leaves, drawn light, its running
+    r.m.s. of Formula (1) over it, and the maximum of that; above the record,
+    the brackets of Figure 2 mark :math:`T_1`, :math:`T_2` and :math:`T_3`, so
+    the reader sees at once that the event value is formed over more than the
+    train and the characteristic values over less.
+
+    :param result: A
+        :class:`~phonometry.vibration.immission.railway.TrainPassage`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the running r.m.s. ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    times = np.arange(result.velocity_mm_s.size) / result.fs_hz
+    ax.plot(
+        times,
+        result.velocity_mm_s,
+        color=_C_MUTED,
+        lw=0.6,
+        alpha=0.6,
+        label=_t("velocity $v(t)$", language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    kwargs.setdefault("label", _t(_RUNNING_RMS_LABEL, language))
+    ax.plot(times, result.running_rms_mm_s, **kwargs)
+    ax.axhline(
+        result.running_rms_max_mm_s,
+        color=_C_REFERENCE,
+        ls="--",
+        lw=1.2,
+        label=_t(_RUNNING_MAX_LABEL, language).format(
+            value=format_number(
+                result.running_rms_max_mm_s, language, decimals=3, trim=True
+            )
+        ),
+    )
+    # The brackets of Figure 2 sit above the record in axes coordinates, one
+    # row per stretch with T_1 on top, and the record is scaled into the band
+    # between them and the one-row legend underneath, so neither covers it.
+    top = float(np.max(np.abs(result.velocity_mm_s)))
+    if top <= 0.0:
+        top = 1.0
+    bracket_axes = ax.get_xaxis_transform()
+    for index, ((start, end), row) in enumerate(
+        zip(result.intervals_s, _BRACKET_ROWS, strict=True)
+    ):
+        ax.annotate(
+            "",
+            xy=(end, row),
+            xytext=(start, row),
+            xycoords=bracket_axes,
+            textcoords=bracket_axes,
+            arrowprops={"arrowstyle": "<->", "color": _C_EDGE, "lw": 1.0},
+        )
+        ax.text(
+            0.5 * (start + end),
+            row + 0.01,
+            f"$T_{index + 1}$",
+            transform=bracket_axes,
+            ha="center",
+            va="bottom",
+            color=_C_EDGE,
+        )
+    ax.set_ylim(-1.5 * top, 1.9 * top)
+    ax.set_xlabel(_t(_TIME_LABEL, language))
+    ax.set_ylabel(_t("Velocity [mm/s]", language))
+    ax.set_title(
+        _t("Train passage by DIN 45672-2: $v_E$ = {value} mm/s", language).format(
+            value=format_number(
+                result.event_velocity_mm_s, language, decimals=4, trim=True
+            )
+        )
+    )
+    ax.grid(visible=True, alpha=0.3)
+    ax.legend(loc="lower center", ncol=3, fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_train_passage_spectrum(
+    result: TrainPassage,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The interval and maximum third-octave levels of one passage (Figure 6).
+
+    The interval level over :math:`T_2` of Formula (6) and the maximum level
+    over :math:`T_3` of Formula (7), band by band. The gap between them is the
+    crest of the running r.m.s. in each band: wide where the vibration comes
+    in bursts, narrow where it is steady for the whole passage.
+
+    :param result: A
+        :class:`~phonometry.vibration.immission.railway.TrainPassage`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the maximum-level ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = _band_axis(ax, result.band_centres_hz, language=language)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 4)
+    kwargs.setdefault("label", _t(_MAX_LEVEL_LABEL, language))
+    ax.plot(positions, result.band_max_levels_db, **kwargs)
+    ax.plot(
+        positions,
+        result.band_interval_levels_db[1],
+        color=_C_TERTIARY,
+        ls="--",
+        lw=1.4,
+        marker="s",
+        markersize=4,
+        label=_t(_INTERVAL_LEVEL_LABEL, language),
+    )
+    ax.set_ylabel(_t(_BAND_LEVEL_LABEL, language))
+    ax.set_title(_t("Third-octave spectra of one passage (DIN 45672-2)", language))
     ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)

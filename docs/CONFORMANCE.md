@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1030/1030 conformance checks pass** across 78 domains and 410 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1034/1034 conformance checks pass** across 79 domains and 411 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -825,6 +825,18 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | DIN 45669-1:2010-09 Annex E, Table E.2 | Guideline assessment velocity, commercial, mm/s | 20 mm/s (+/-0.0005 mm/s) | 20 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
 | DIN 45669-1:2010-09 Annex E, Table E.2 | Guideline assessment velocity, residential, mm/s | 5 mm/s (+/-0.0005 mm/s) | 5 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
 | DIN 45669-1:2010-09 Annex E, Table E.2 | Guideline assessment velocity, sensitive, mm/s | 3 mm/s (+/-0.0005 mm/s) | 3 mm/s | 0 mm/s | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Railway vibration evaluation (DIN 45672)</b>: 100% (4/4)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| DIN 45672-2:1995-07 7.3.2 | Block length at 1,25 Hz resolution, s | 0.8 s (+/-0 s) | 0.8 s | 0 s | 0 % | ![Pass][cv-pass] Pass |
+| DIN 45672-2:1995-07 7.1 | Relative bandwidth of a third octave, % | 23 % (+/-0.5 %) | 23.0768 % | 0.0768 % | 15 % | ![Pass][cv-pass] Pass |
+| DIN 45672-2:1995-07 Clause 4 | Shortfall of the running mean square after 2 tau, % | 14 % (+/-0.5 %) | 13.53 % | -0.466 % | 93 % | ![Pass][cv-pass] Pass |
+| DIN 45672-2:1995-07 Clause 4 | Shortfall of the running mean square after 4 tau, % | 2 % (+/-0.5 %) | 1.83 % | -0.168 % | 34 % | ![Pass][cv-pass] Pass |
 
 </details>
 

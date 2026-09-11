@@ -434,6 +434,26 @@ _ES_EXACT = {
     "$KB_{F\\mathrm{max}}$ = 1.210": "$KB_{F\\mathrm{max}}$ = 1,210",
     "$KB_{FTm}$ = 0.785": "$KB_{FTm}$ = 0,785",
     "clock maxima, one per 30 s": "máximos por intervalo, uno cada 30 s",
+    # railway_passage, railway_spectra and ground_wave_speeds (DIN 45672): one
+    # passage with its three stretches, the spectra of Figure 6 with Table 1
+    # behind them, and the compression-wave speed against its printed forms.
+    # The maximum carries its own digits, as the readings above do.
+    "One train passage and the three stretches of DIN 45672-2": "Un paso de tren y los tres tramos de la DIN 45672-2",
+    "velocity $v(t)$": "velocidad $v(t)$",
+    "running r.m.s. $\\tilde v_F(t)$, $\\tau$ = 0.125 s": "valor eficaz móvil $\\tilde v_F(t)$, $\\tau$ = 0,125 s",
+    "$\\tilde v_{F\\mathrm{max}}$ = 0.218 mm/s": "$\\tilde v_{F\\mathrm{max}}$ = 0,218 mm/s",
+    "Velocity [mm/s]": "Velocidad [mm/s]",
+    "The third-octave spectra of one passage (DIN 45672-2 Figure 6)": "Los espectros en tercios de octava de un paso (DIN 45672-2, figura 6)",
+    "maximum level $L_{vF\\mathrm{max}}$ over $T_3$, Formula (7)": "nivel máximo $L_{vF\\mathrm{max}}$ en $T_3$, fórmula (7)",
+    "interval level $L_{vF2}$ over $T_2$, Formula (6)": "nivel de intervalo $L_{vF2}$ en $T_2$, fórmula (6)",
+    "$T_2$ from the narrow band, Formula (23) and Table 1": "$T_2$ desde la banda estrecha, fórmula (23) y tabla 1",
+    "Velocity level [dB re 5·10⁻⁸ m/s]": "Nivel de velocidad [dB re 5·10⁻⁸ m/s]",
+    "Compression-wave speed over shear-wave speed (DIN 45672-1)": "Velocidad de la onda de compresión sobre la de cizalla (DIN 45672-1)",
+    "unbounded continuum, the inverse of Formula (3)": "continuo ilimitado, la inversa de la fórmula (3)",
+    "Formula (1) as printed, second radical": "fórmula (1) impresa, segundo radical",
+    "Formula (1) as printed, $\\sqrt{E/\\rho}$ of a thin rod": "fórmula (1) impresa, $\\sqrt{E/\\rho}$ de una barra delgada",
+    "the two printed forms\nagree only at $\\nu$ = 0.39": "las dos formas impresas\nsolo coinciden en $\\nu$ = 0,39",
+    "Poisson's ratio $\\nu$": "Coeficiente de Poisson $\\nu$",
     "What DIN 4150-3 Table 1 asks for": "Lo que pide la tabla 1 de la DIN 4150-3",
     "The weighting that removes the frequency": "La ponderación que quita la frecuencia",
     "Guideline peak velocity [mm/s]": "Velocidad de pico de referencia [mm/s]",

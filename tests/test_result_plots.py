@@ -77,6 +77,7 @@ from result_factories import (
     _sound_power,
     _static_airflow,
     _sti,
+    _train_passage,
     _vibration_meter_reading,
     _vibration_meter_verification,
     _zwicker_stationary,
@@ -200,6 +201,7 @@ _KWARG_PLOT_CASES = [
     ("vibration_meter_reading", _vibration_meter_reading, "line"),
     ("vibration_meter_verification", _vibration_meter_verification, "line"),
     ("assessment_velocity", _assessment_velocity, "line"),
+    ("train_passage", _train_passage, "line"),
     (
         "assumed_protection",
         lambda: ph.hearing.assumed_protection_value(_PROTECTOR_ATTENUATION),

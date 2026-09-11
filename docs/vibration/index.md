@@ -102,13 +102,17 @@ Turning a vibration spectrum into a diagnosis of the machine that made it.
 
 ## [Vibration immission](immission/index.md)
 
-The instrument the German immission-control standards presuppose, and the
-assessment it makes possible.
+The instrument the German immission-control standards presuppose, the
+assessment it makes possible, and the railway measurements it is used for.
 
 - [Measuring vibration immission (DIN 45669-1)](immission/vibration-meter.md):
   the KB weighting and the weighted vibration severity a DIN 4150 measurement
   is reported in, the tolerance bands a meter is graded by, and the Annex E
   assessment velocity that judges a building without a dominant frequency.
+- [Vibration next to a railway (DIN 45672)](immission/railway-vibration.md):
+  one train passage reduced to the numbers that can be compared, from the event
+  value of an hour of traffic to the third-octave spectra and the narrow-band
+  density behind them, and the ground constants from two wave speeds.
 
 ## What this section does not cover
 

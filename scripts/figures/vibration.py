@@ -6019,3 +6019,241 @@ def generate_assessment_weighting(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "assessment_weighting.svg")
     plt.close()
+
+
+def _railway_record(fs_hz: int) -> np.ndarray:
+    """Thirty seconds of one train passage, in mm/s, as the railway guide builds it."""
+    t = np.arange(30 * fs_hz) / fs_hz
+    rng = np.random.default_rng(7)
+    envelope = np.clip((t - 6.0) / 3.0, 0.0, 1.0) * np.clip((24.0 - t) / 3.0, 0.0, 1.0)
+    bogies = 1.0 + 0.5 * np.sin(2.0 * np.pi * 1.6 * t) ** 2
+    return (
+        envelope
+        * bogies
+        * (
+            0.20 * np.sin(2.0 * np.pi * 40.0 * t)
+            + 0.08 * np.sin(2.0 * np.pi * 63.0 * t + 1.0)
+            + 0.03 * rng.standard_normal(t.size)
+        )
+    )
+
+
+#: T_2 of the guide's passage: where its envelope reaches a quarter, and where
+#: it falls back to it (DIN 45672-2 Clause 5 b)).
+_RAILWAY_T2_S = (6.75, 23.25)
+
+
+def generate_railway_passage(output_dir: str) -> None:
+    """DIN 45672-2: one passage, its running r.m.s. and the three stretches."""
+    print("Generating railway_passage...")
+    from phonometry import vibration
+
+    fs_hz = 2048
+    passage = vibration.evaluate_train_passage(
+        _railway_record(fs_hz), fs_hz, t2_s=_RAILWAY_T2_S
+    )
+    times = np.arange(passage.velocity_mm_s.size) / fs_hz
+
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(
+        times,
+        passage.velocity_mm_s,
+        color=COLOR_MUTED,
+        linewidth=0.5,
+        alpha=0.7,
+        label="velocity $v(t)$",
+    )
+    ax.plot(
+        times,
+        passage.running_rms_mm_s,
+        color=COLOR_PRIMARY,
+        linewidth=1.8,
+        label="running r.m.s. $\\tilde v_F(t)$, $\\tau$ = 0.125 s",
+    )
+    ax.axhline(
+        passage.running_rms_max_mm_s,
+        color=COLOR_SECONDARY,
+        linestyle="--",
+        linewidth=1.4,
+        label=f"$\\tilde v_{{F\\mathrm{{max}}}}$ = {passage.running_rms_max_mm_s:.3f} mm/s",
+    )
+    bracket_axes = ax.get_xaxis_transform()
+    for index, ((start, end), row) in enumerate(
+        zip(passage.intervals_s, (0.93, 0.855, 0.78), strict=True)
+    ):
+        ax.annotate(
+            "",
+            xy=(end, row),
+            xytext=(start, row),
+            xycoords=bracket_axes,
+            textcoords=bracket_axes,
+            arrowprops={"arrowstyle": "<->", "color": COLOR_FG, "lw": 1.1},
+        )
+        ax.text(
+            0.5 * (start + end),
+            row + 0.012,
+            f"$T_{index + 1}$",
+            transform=bracket_axes,
+            ha="center",
+            va="bottom",
+            fontsize=11,
+            color=COLOR_FG,
+        )
+    top = float(np.max(np.abs(passage.velocity_mm_s)))
+    ax.set_ylim(-1.5 * top, 1.9 * top)
+    ax.set_xlim(0.0, 30.0)
+    ax.set_title("One train passage and the three stretches of DIN 45672-2", pad=12)
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Velocity [mm/s]")
+    ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower center", ncol=3, fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "railway_passage.svg")
+    plt.close()
+
+
+def generate_railway_spectra(output_dir: str) -> None:
+    """DIN 45672-2 Figure 6, with the T_2 spectrum rebuilt from narrow band."""
+    print("Generating railway_spectra...")
+    from phonometry import vibration
+
+    fs_hz = 2048
+    passage = vibration.evaluate_train_passage(
+        _railway_record(fs_hz), fs_hz, t2_s=_RAILWAY_T2_S
+    )
+    t2 = slice(round(_RAILWAY_T2_S[0] * fs_hz), round(_RAILWAY_T2_S[1] * fs_hz))
+    spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
+    centres, rms = vibration.third_octaves_from_narrowband(
+        spectrum.frequencies, spectrum.psd
+    )
+    narrow = dict(
+        zip(
+            centres,
+            20.0 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S),
+            strict=True,
+        )
+    )
+    bands = passage.band_centres_hz
+    positions = np.arange(bands.size)
+
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(
+        positions,
+        passage.band_max_levels_db,
+        color=COLOR_PRIMARY,
+        linewidth=1.8,
+        marker="o",
+        markersize=5,
+        label="maximum level $L_{vF\\mathrm{max}}$ over $T_3$, Formula (7)",
+    )
+    ax.plot(
+        positions,
+        passage.band_interval_levels_db[1],
+        color=COLOR_TERTIARY,
+        linewidth=1.6,
+        linestyle="--",
+        marker="s",
+        markersize=5,
+        label="interval level $L_{vF2}$ over $T_2$, Formula (6)",
+    )
+    ax.plot(
+        positions,
+        [narrow[float(band)] for band in bands],
+        color=COLOR_SECONDARY,
+        marker="x",
+        markersize=8,
+        markeredgewidth=1.8,
+        linestyle="none",
+        label="$T_2$ from the narrow band, Formula (23) and Table 1",
+    )
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{band:g}" for band in bands], rotation=45, ha="right")
+    ax.set_title(
+        "The third-octave spectra of one passage (DIN 45672-2 Figure 6)", pad=12
+    )
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Velocity level [dB re 5·10⁻⁸ m/s]")
+    ax.set_ylim(20.0, 80.0)
+    ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "railway_spectra.svg")
+    plt.close()
+
+
+def generate_ground_wave_speeds(output_dir: str) -> None:
+    """DIN 45672-1 Clause 4.5: the continuum against the two printed radicals."""
+    print("Generating ground_wave_speeds...")
+    from phonometry import vibration
+
+    nu = np.linspace(0.0, 0.49, 400)
+    continuum = np.array(
+        [
+            vibration.compression_wave_speed(1.0, poisson_ratio=n, density_kg_m3=1.0)
+            for n in nu
+        ]
+    )
+    second = np.sqrt((1.0 - nu) / (1.0 - 2.0 * nu))
+    rod = np.sqrt(2.0 * (1.0 + nu))
+    crossing = (math.sqrt(17.0) - 1.0) / 8.0
+
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(
+        nu,
+        continuum,
+        color=COLOR_PRIMARY,
+        linewidth=2.2,
+        label="unbounded continuum, the inverse of Formula (3)",
+    )
+    ax.plot(
+        nu,
+        second,
+        color=COLOR_MUTED,
+        linewidth=1.8,
+        linestyle="--",
+        label="Formula (1) as printed, second radical",
+    )
+    ax.plot(
+        nu,
+        rod,
+        color=COLOR_SECONDARY,
+        linewidth=1.8,
+        linestyle=":",
+        label="Formula (1) as printed, $\\sqrt{E/\\rho}$ of a thin rod",
+    )
+    ax.plot(
+        [crossing],
+        [math.sqrt(2.0 * (1.0 + crossing))],
+        color=COLOR_FG,
+        marker="o",
+        markersize=6,
+        linestyle="none",
+    )
+    ax.annotate(
+        "the two printed forms\nagree only at $\\nu$ = 0.39",
+        xy=(crossing, math.sqrt(2.0 * (1.0 + crossing))),
+        xytext=(0.486, 1.22),
+        ha="right",
+        va="center",
+        fontsize=10,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 1.0},
+        bbox={
+            "boxstyle": "round,pad=0.4",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.set_title("Compression-wave speed over shear-wave speed (DIN 45672-1)", pad=12)
+    ax.set_xlabel("Poisson's ratio $\\nu$")
+    ax.set_ylabel("$v_p / v_s$")
+    ax.set_xlim(0.0, 0.49)
+    ax.set_ylim(0.8, 8.0)
+    ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=10)
+    plt.tight_layout()
+    save_figure(output_dir, "ground_wave_speeds.svg")
+    plt.close()

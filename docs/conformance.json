@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1030,
-    "passing": 1030,
+    "checks": 1034,
+    "passing": 1034,
     "failing": 0,
-    "domains": 78,
-    "standards": 410,
-    "citations": 697,
-    "designations": 149,
+    "domains": 79,
+    "standards": 411,
+    "citations": 700,
+    "designations": 150,
     "sources": 83
   },
   "units": [
@@ -233,6 +233,12 @@
       "title": "Vibration immission measurement (DIN 45669)",
       "checks": 35,
       "passing": 35
+    },
+    {
+      "id": "railway-vibration-evaluation-din-45672",
+      "title": "Railway vibration evaluation (DIN 45672)",
+      "checks": 4,
+      "passing": 4
     },
     {
       "id": "speech-intelligibility-ansi-s3-5-1997",
@@ -16394,6 +16400,122 @@
         "value": 0.0
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-evaluation-din-45672/din-45672-2-1995-07-7-3-2/block-length-at-1-25-hz-resolution-s",
+      "domain": "railway-vibration-evaluation-din-45672",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45672-2",
+        "edition": "1995-07",
+        "clause": "7.3.2",
+        "cite": "DIN 45672-2:1995-07 7.3.2"
+      },
+      "quantity": "Block length at 1,25 Hz resolution, s",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.8
+      },
+      "computed": {
+        "value": 0.8
+      },
+      "unit": "s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-evaluation-din-45672/din-45672-2-1995-07-7-1/relative-bandwidth-of-a-third-octave",
+      "domain": "railway-vibration-evaluation-din-45672",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45672-2",
+        "edition": "1995-07",
+        "clause": "7.1",
+        "cite": "DIN 45672-2:1995-07 7.1"
+      },
+      "quantity": "Relative bandwidth of a third octave, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 23.0
+      },
+      "computed": {
+        "value": 23.0768
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.0768
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-evaluation-din-45672/din-45672-2-1995-07-clause-4/shortfall-of-the-running-mean-square-after-2-tau",
+      "domain": "railway-vibration-evaluation-din-45672",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45672-2",
+        "edition": "1995-07",
+        "clause": "Clause 4",
+        "cite": "DIN 45672-2:1995-07 Clause 4"
+      },
+      "quantity": "Shortfall of the running mean square after 2 tau, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 14.0
+      },
+      "computed": {
+        "value": 13.53
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": -0.466
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "railway-vibration-evaluation-din-45672/din-45672-2-1995-07-clause-4/shortfall-of-the-running-mean-square-after-4-tau",
+      "domain": "railway-vibration-evaluation-din-45672",
+      "reference": {
+        "kind": "standard",
+        "designation": "DIN 45672-2",
+        "edition": "1995-07",
+        "clause": "Clause 4",
+        "cite": "DIN 45672-2:1995-07 Clause 4"
+      },
+      "quantity": "Shortfall of the running mean square after 4 tau, %",
+      "kind": "scalar",
+      "expected": {
+        "value": 2.0
+      },
+      "computed": {
+        "value": 1.83
+      },
+      "unit": "%",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": -0.168
+      },
+      "precision": 2,
       "verdict": "pass"
     },
     {

@@ -1,0 +1,498 @@
+---
+title: "Vibración junto a una vía férrea (DIN 45672)"
+description: "Un paso de tren reducido como lo reduce la DIN 45672-2: los tres tramos del apartado 5, el valor eficaz móvil y su nivel, el valor de suceso referido a una hora y sumado sobre los pasos que caben en ella, los niveles en tercios de octava de la figura 6, la densidad en banda estrecha y la tabla 1, y las constantes del terreno de la DIN 45672-1 a partir de dos velocidades de onda."
+references:
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 1995
+    title: "Schwingungsmessungen in der Umgebung von Schienenverkehrswegen — Teil 2: Auswerteverfahren"
+    designation: "DIN 45672-2:1995-07"
+    primary: true
+    note: "Los tres tramos del apartado 5, el valor eficaz móvil y los niveles de las fórmulas (1) a (3), el eficaz de intervalo de las fórmulas (4) y (5), los niveles en tercios de octava de las fórmulas (6) y (7), el valor y el nivel de suceso de las fórmulas (8) a (10), la distribución de amplitudes de la fórmula (11), las densidades espectrales de potencia y de energía de las fórmulas (12) a (14) con los parámetros del 7.3.2, el paso de banda estrecha a tercios de octava de la fórmula (23) con la tabla 1, el cambio de dimensión del anexo A, las magnitudes del anexo B y el promediado sobre pasos del apartado 9. Las comprobaciones de calibración del analizador del 7.3.3 no están implementadas."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2009
+    title: "Schwingungsmessungen in der Umgebung von Schienenverkehrswegen — Teil 1: Messverfahren"
+    designation: "DIN 45672-1:2009-12"
+    note: "Apartado 4.5: las velocidades de onda de las fórmulas (1) y (2), el coeficiente de Poisson de la fórmula (3), la deformación de cizalla de la fórmula (4) y los módulos de la fórmula (5), con las fórmulas (1) y (5) en la forma corregida que recoge el registro de erratas. El procedimiento de medida del resto de la norma no es aritmética y no está implementado."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2010
+    title: "Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen"
+    designation: "DIN 45669-1:2010-09"
+    note: "El vibrómetro con el que se hace una medida junto a la vía, en su rango de trabajo de 4 Hz a 315 Hz, tras cuya limitación de banda se lee cada magnitud de esta página."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un tren que pasa junto a una casa mete vibración en el terreno durante veinte
+segundos y se va, y la pregunta rara vez es qué fueron esos veinte segundos. Es
+si la vibración en el edificio es mayor que junto al muro de la vía, si la manta
+bajo el balasto cambió algo, o si los mercancías de la noche son peores que los
+de viajeros del día. Todas comparan dos números, y dos números solo se pueden
+comparar si se formaron del mismo modo.
+
+Para eso está la DIN 45672. La parte 1 dice cómo medir junto a una vía: dónde van
+los captadores, qué direcciones, qué trenes, qué tiene que llevar el informe. La
+parte 2 dice cómo **reducir** el registro una vez que existe, y es la parte que
+implementa esta página, con el vibrómetro de la
+[DIN 45669-1](/phonometry/es/vibration/immission/vibration-meter/) en su rango de
+trabajo ferroviario de 4 Hz a 315 Hz. Ninguna de las dos dice qué puede valer el
+resultado: la valoración es la DIN 4150-2 para las personas y la DIN 4150-3 para
+los edificios.
+
+## 1. Tres tramos de un mismo registro
+
+Lo primero que hace la parte 2 es cortar el registro en tres tramos, y toda
+magnitud que viene después lleva el índice del tramo sobre el que se leyó
+(apartado 5).
+
+- **`T₁`**, unos cuatro segundos con la vibración más grande en el centro. Es
+  donde se leen los valores característicos del paso. Un tren corto o rápido
+  pide a menudo menos, y entonces `T₁` puede ser tan largo como `T₂` y no más.
+- **`T₂`**, el paso en sí: el tiempo que tarda un tren en cruzar una sección de
+  medida imaginaria. La experiencia, dice la norma, pone su comienzo donde la
+  amplitud llega a más o menos un cuarto de los máximos más frecuentes del paso,
+  y su final donde vuelve a ese mismo valor. Eso es un juicio sobre el registro,
+  así que la biblioteca lo pide en lugar de adivinarlo.
+- **`T₃`**, el suceso entero, con la llegada y la salida en silencio incluidas.
+  Es el tramo sobre el que se forma la energía del paso.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_passage.svg" alt="Un eje de tiempo de treinta segundos con la velocidad de un paso de tren en milímetros por segundo. Una traza gris tenue es la propia velocidad, en silencio durante seis segundos, subiendo en tres segundos hasta una envolvente pulsante de unos 0,3 a 0,45 milímetros por segundo de pico que se mantiene hasta los 21 segundos y se apaga hacia los 24. Una curva azul encima es el valor eficaz móvil de la fórmula (1), que sube con la envolvente hasta unos 0,2 y late con los bogies. Una línea discontinua roja marca su máximo en 0,218 milímetros por segundo. Por encima del registro, tres flechas de doble punta marcan los tramos: T1 sobre cuatro segundos alrededor de los 15,5 segundos, T2 de 6,75 a 23,25 segundos, y T3 sobre los treinta enteros" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+passage.plot(language="es")
+```
+
+</details>
+
+El registro de arriba es sintético y tiene la forma de uno real: la envolvente de
+un tren que llega y se va, un pulso por bogie, un tono de paso de traviesas a
+40 Hz, una resonancia de forjado a 63 Hz y algo de ruido de banda ancha. Su `T₂`
+empieza donde la envolvente llega a un cuarto, 6,75 s, y acaba donde vuelve a
+él, 23,25 s:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+for name, (start, end), rms in zip(
+    ("T1", "T2", "T3"), passage.intervals_s, passage.interval_rms_mm_s
+):
+    print(f"{name}: de {start:5.2f} s a {end:5.2f} s, eficaz {rms:.4f} mm/s")
+# T1: de 13.47 s a 17.47 s, eficaz 0.1945 mm/s
+# T2: de  6.75 s a 23.25 s, eficaz 0.1783 mm/s
+# T3: de  0.00 s a 30.00 s, eficaz 0.1324 mm/s
+print(f"v_max {passage.peak_velocity_mm_s:.3f} mm/s")        # 0.481 mm/s
+print(f"v_Fmax {passage.running_rms_max_mm_s:.3f} mm/s")     # 0.218 mm/s
+print(f"KB_Fmax {passage.kbf_max:.3f}")                      # 0.216
+```
+
+Antes de leer nada, el registro pasa por la limitación de banda del rango
+ferroviario de la DIN 45669-1, como pasa dentro del vibrómetro. Por eso un
+registro tiene que ser la velocidad que da el captador, y por eso `KB_Fmax`, el
+número con el que la DIN 4150-2 juzga a las personas, sale de la misma llamada
+que lo demás.
+
+## 2. El valor eficaz móvil, y el catorce por ciento que es un siete
+
+El valor eficaz móvil de la fórmula (1) es el promedio exponencial que un
+sonómetro llama Fast, `τ = 125 ms`, y su nivel respecto a `v₀ = 5·10⁻⁸ m/s` es el
+nivel de velocidad de la fórmula (2). Ojo con la referencia: es la de la
+ISO 1683:1983, que la norma cita a través de la DIN EN 21683, y la ISO 1683:2015
+la movió a 1 nm/s, así que la misma vibración queda a 34 dB de distancia con una
+y con otra.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(3 * fs_hz) / fs_hz
+one_mm_s_rms = np.sqrt(2) * np.sin(2 * np.pi * 40 * t)
+level = vibration.running_velocity_level(one_mm_s_rms, fs_hz)
+print(f"{level[-fs_hz:].mean():.2f} dB")  # 86.02 dB
+```
+
+El promedio arranca en reposo, así que el primer trozo de cualquier registro
+lee bajo, y el apartado 4 dice por qué importa: el promediado tiene que estar en
+marcha antes de que llegue el tren. Cifra el coste en un 14 % tras `2τ` y un 2 %
+tras `4τ`, y eso es lo que le falta al **cuadrado medio**, `e⁻²` y `e⁻⁴`. Al
+valor eficaz móvil del que habla la frase, y el que dibuja su propia figura 3,
+le falta un 7 % y un 0,9 %. El consejo vale; el tamaño del error está exagerado
+al doble, y la [página de erratas](/phonometry/es/reference/errata/) tiene el
+detalle.
+
+## 3. El valor de suceso, y una hora de trenes
+
+La magnitud con la que se resume un paso es su **valor de suceso** (fórmula
+(8)): el eficaz de intervalo del suceso entero referido a una hora,
+
+```text
+v_E = ṽ₃ · √(T₃ / 3600 s)
+```
+
+que es la velocidad constante que, mantenida una hora, lleva la energía que llevó
+el paso. Su nivel (fórmula (9)) es lo mismo en decibelios, y como cada valor de
+suceso ya es la energía de un paso repartida sobre la misma hora, los pasos de una
+hora se suman en cuadrado (fórmula (10)):
+
+```python
+from phonometry import vibration
+
+one = vibration.event_velocity(0.1324, 30.0)
+print(f"un paso: v_E = {one:.5f} mm/s")  # 0.01209 mm/s
+print(f"L_vE = {vibration.event_velocity_level(0.1324, 30.0):.2f} dB")  # 47.67 dB
+
+six = vibration.combined_event_velocity([one] * 6)
+print(f"seis en una hora: {six:.5f} mm/s")  # 0.02961 mm/s, raíz de 6 veces uno
+```
+
+Ese es el número que comparar entre dos horas de tráfico, y es la razón de que
+`T₃` incluya los extremos en silencio: no llevan energía, y a la hora le da igual
+cuánto duró el registro.
+
+## 4. Tercios de octava: los espectros de la figura 6
+
+El apartado 7.2 analiza el paso en tercios de octava desde 4 Hz hasta 315 Hz como
+mínimo, e imprime dos espectros como resultado: el **nivel de intervalo** sobre
+`T₂` (fórmula (6)), el valor eficaz móvil de cada banda promediado sobre el paso,
+y el **nivel máximo** sobre `T₃` (fórmula (7)), el mayor valor que alcanza el
+eficaz móvil de cada banda. La distancia entre los dos es la cresta de la banda:
+ancha donde la vibración llega a golpes, estrecha donde es constante.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_spectra.svg" alt="Bandas de tercio de octava de 4 a 315 hercios en un eje de espaciado uniforme, nivel de velocidad en decibelios respecto a 5 por diez a la menos ocho metros por segundo. Una línea azul con marcadores redondos es el nivel máximo sobre T3 y una línea verde discontinua con marcadores cuadrados es el nivel de intervalo sobre T2, las dos bajas y planas entre unos 35 y 45 decibelios salvo dos picos: unos 72 y 70 decibelios a 40 hercios, y unos 64 y 62 a 63 hercios. Unas cruces rojas en todas las bandas de 4 a 315 hercios son el mismo espectro de T2 obtenido de la densidad en banda estrecha a través de la tabla 1; caen sobre la curva verde casi en todas partes y quedan unos 5 decibelios por debajo a 50 hercios, entre los dos tonos" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+ax = passage.plot_spectrum(language="es")
+
+t2 = slice(round(6.75 * fs_hz), round(23.25 * fs_hz))
+spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
+centres, rms = vibration.third_octaves_from_narrowband(
+    spectrum.frequencies, spectrum.psd
+)
+narrow = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
+positions = [list(centres).index(band) for band in passage.band_centres_hz]
+ax.plot(range(len(positions)), narrow[positions], "x", label="T2 desde la banda estrecha")
+ax.legend()
+```
+
+</details>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+bands = list(passage.band_centres_hz)
+for band in (40.0, 63.0):
+    i = bands.index(band)
+    print(
+        f"{band:g} Hz: L_vF2 {passage.band_interval_levels_db[1, i]:.1f} dB,"
+        f" L_vFmax {passage.band_max_levels_db[i]:.1f} dB"
+    )
+# 40 Hz: L_vF2 70.4 dB, L_vFmax 72.0 dB
+# 63 Hz: L_vF2 62.4 dB, L_vFmax 64.3 dB
+print(f"nivel suma {vibration.band_sum_level(passage.band_interval_levels_db[1]):.1f} dB")
+# 71.1 dB, fórmula (B.3)
+```
+
+## 5. Banda estrecha, y qué es la tabla 1
+
+Los tercios de octava son gruesos donde resuena un forjado, así que el apartado
+7.3 pide además la **densidad espectral de potencia** unilateral de la fórmula
+(12), por bloques con ventana de Hanning, al menos medio bloque de solape y un
+promedio lineal de los bloques. La resolución que recomienda es 1,25 Hz, lo
+bastante fina para la resonancia de un forjado corriente, que con los 500 Hz y
+las 400 líneas de un analizador habitual es un bloque de 0,8 s. Las líneas vuelven
+a sumar el cuadrado medio del tramo, que es la fórmula (14).
+
+Para comparar un resultado en banda estrecha con uno en tercios de octava, la
+fórmula (23) vuelve a sumar las líneas de cada banda, y la tabla 1 dice cuántas
+líneas lleva cada banda: 1 a 4 Hz, 6 a 31,5 Hz, 58 a 315 Hz. La norma da los
+recuentos «por comparabilidad» y no los deduce. Son lo que cabe en un sexto de
+octava a cada lado del centro nominal, en todas partes salvo a 10 Hz y 12,5 Hz,
+donde esos bordes darían una línea y tres y la tabla da dos y dos. La tabla dice
+cuántas líneas y no cuáles, así que la biblioteca declara su elección: las `Kₙ`
+líneas más cercanas al centro nominal en un eje logarítmico, que son justo las
+que caen dentro de los bordes nominales allí donde el recuento es el que dan los
+bordes, y 10 y 11,25 Hz, luego 12,5 y 13,75 Hz, donde no lo es. Es una regla de
+bandas nominales y se comporta como tal: los bordes nominales no se tocan, así
+que seis líneas caen entre dos bandas (71,25 Hz, 141,25 Hz y 142,5 Hz, y de
+353,75 Hz a 356,25 Hz) y cinco cuentan en dos (178,75 Hz, 223,75 Hz, y de
+446,25 Hz a 448,75 Hz). Un tono en uno de esos huecos no está en ninguna banda,
+y conviene saberlo antes de convertir un espectro.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+fs_hz = 2048
+t = np.arange(30 * fs_hz) / fs_hz
+rng = np.random.default_rng(7)
+envelope = np.clip((t - 6) / 3, 0, 1) * np.clip((24 - t) / 3, 0, 1)
+bogies = 1 + 0.5 * np.sin(2 * np.pi * 1.6 * t) ** 2
+record = envelope * bogies * (
+    0.20 * np.sin(2 * np.pi * 40 * t)
+    + 0.08 * np.sin(2 * np.pi * 63 * t + 1.0)
+    + 0.03 * rng.standard_normal(t.size)
+)
+passage = vibration.evaluate_train_passage(record, fs_hz, t2_s=(6.75, 23.25))
+
+t2 = slice(round(6.75 * fs_hz), round(23.25 * fs_hz))
+spectrum = vibration.narrowband_psd(passage.velocity_mm_s[t2], fs_hz)
+print(f"bloque {spectrum.nperseg / fs_hz:.2f} s")  # 0.80 s
+centres, rms = vibration.third_octaves_from_narrowband(
+    spectrum.frequencies, spectrum.psd
+)
+levels = 20 * np.log10(rms / vibration.VELOCITY_LEVEL_REFERENCE_MM_S)
+for band in (40.0, 50.0, 63.0):
+    print(f"{band:g} Hz desde banda estrecha: {levels[list(centres).index(band)]:.1f} dB")
+# 40 Hz desde banda estrecha: 70.5 dB   (70.4 dB con el filtro de banda)
+# 50 Hz desde banda estrecha: 39.2 dB   (44.7 dB con el filtro de banda)
+# 63 Hz desde banda estrecha: 62.5 dB   (62.4 dB con el filtro de banda)
+```
+
+Los dos caminos coinciden donde está la energía y se separan donde hay poca, a
+50 Hz entre los dos tonos: los faldones de un filtro de banda dejan pasar algo de
+los 40 Hz y los 63 Hz vecinos y una línea de Hanning no. La norma lo dice, y dice
+que la comparación solo es justa a la resolución para la que está escrita la
+tabla 1, que es por lo que la biblioteca rechaza un espectro con otro espaciado.
+El nivel de una densidad respecto a `(5·10⁻⁸ m/s)²/Hz`, como lo dibuja su
+figura 7, es `spectral_density_level`, y una densidad leída de un analizador en
+V²/Hz se pasa a (mm/s)²/Hz dividiendo por el cuadrado del coeficiente del
+captador y del de la ganancia, que es todo lo que dice el anexo A.
+
+## 6. Antes, después, y a lo largo de varios pasos
+
+La parte 2 existe para comparar, y sus últimos apartados son las comparaciones.
+La **pérdida por inserción** de un elemento elástico (anexo B, fórmula (B.1)) es
+la caída de cada nivel en tercio de octava en un punto al montar el elemento, y el
+anexo añade un aviso que vale la pena repetir: pertenece al punto donde se midió.
+Y los resultados de una clase de trenes se **promedian energéticamente**
+(apartado 9): los valores eficaces como la raíz del cuadrado medio, los niveles
+como el nivel de la energía media.
+
+```python
+from phonometry import vibration
+
+before = [70.4, 62.4]  # 40 Hz y 63 Hz, sin la manta
+after = [61.0, 50.9]
+print(vibration.elastic_insertion_loss(before, after))  # [ 9.4 11.5]
+
+average = vibration.passage_average_level([70.4, 72.1, 69.0])
+print(f"{average:.1f} dB")  # 70.7 dB
+rms = vibration.passage_average_velocity([0.18, 0.21, 0.16])
+print(f"{rms:.4f} mm/s")  # 0.1845 mm/s
+```
+
+## 7. El terreno por el que viaja la vibración
+
+La parte 1 es procedimiento, con una excepción. Su apartado 4.5 describe el
+terreno por las velocidades de sus ondas de compresión y de cizalla, y deduce de
+ellas las constantes que necesita una predicción. Un continuo elástico ilimitado
+transporta dos clases de onda, y sus velocidades quedan fijadas por dos
+constantes elásticas y la densidad, así que medir las dos velocidades lo fija
+todo: el módulo de cizalla a partir de la onda de cizalla, el coeficiente de
+Poisson a partir de su cociente (fórmula (3)) y el módulo de elasticidad a partir
+de las dos juntas.
+
+Dos de las fórmulas del apartado están mal impresas, y la [página de
+erratas](/phonometry/es/reference/errata/) tiene la lectura. La fórmula (1)
+escribe la velocidad de compresión primero como `√(E/ρ)`, la velocidad de una
+onda en una barra delgada, y luego como `√(G(1−ν)/(ρ(1−2ν)))`, a la que le falta
+un factor 2. La fórmula (5) se apoya en la primera y escribe `E = v_p² ρ`, que a
+partir de un `v_p` medido devuelve el módulo de onda P en lugar de `E`. La
+fórmula (3), impresa entre las dos, es correcta, y la biblioteca usa las
+relaciones de las que se deduce:
+
+```python
+from phonometry import vibration
+
+v_p, v_s, rho = 400.0, 180.0, 1900.0  # una arena de compacidad media, m/s y kg/m3
+
+nu = vibration.poisson_ratio_from_wave_speeds(v_p, v_s)
+g = vibration.shear_modulus_from_wave_speed(v_s, density_kg_m3=rho)
+e = vibration.youngs_modulus_from_wave_speeds(v_p, v_s, density_kg_m3=rho)
+print(f"nu = {nu:.3f}, G = {g / 1e6:.1f} MPa, E = {e / 1e6:.0f} MPa")
+# nu = 0.373, G = 61.6 MPa, E = 169 MPa
+print(f"E como la imprime la fórmula (5): {v_p**2 * rho / 1e6:.0f} MPa")  # 304 MPa
+
+strain = vibration.shear_strain_amplitude(0.2e-3, shear_wave_speed_m_s=v_s)
+print(f"deformación de cizalla de 0,2 mm/s: {strain:.1e}")  # 1.1e-06
+print(strain < vibration.SHEAR_STRAIN_LINEAR_LIMIT)  # True
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ground_wave_speeds.svg" alt="El coeficiente de Poisson de 0 a 0,49 en el eje horizontal y el cociente entre la velocidad de la onda de compresión y la de cizalla en el vertical, de 1 a 8. Una curva azul, el continuo ilimitado que invierte la fórmula (3), empieza en la raíz de 2 y sube con fuerza hacia el límite incompresible, pasando por 2,2 en 0,37. Una curva gris discontinua es el segundo radical de la fórmula (1) tal como está impreso, la misma forma una raíz de dos más abajo. Una línea roja de puntos es la velocidad en barra delgada del primer radical, que sube suave de 1,41 a 1,73. Las dos expresiones impresas se cruzan en un coeficiente de Poisson de 0,39, marcado con un punto y una etiqueta debajo, el único sitio donde la fórmula (1) está de acuerdo consigo misma" width="94%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+nu = np.linspace(0.0, 0.49, 300)
+continuum = [
+    vibration.compression_wave_speed(1.0, poisson_ratio=n, density_kg_m3=1.0)
+    for n in nu
+]
+fig, ax = plt.subplots(figsize=(10, 6))
+ax.plot(nu, continuum, label="continuo, la inversa de la fórmula (3)")
+ax.plot(nu, np.sqrt((1 - nu) / (1 - 2 * nu)), "--", label="fórmula (1), segundo radical")
+ax.plot(nu, np.sqrt(2 * (1 + nu)), ":", label="fórmula (1), sqrt(E / rho)")
+ax.set_xlabel("Coeficiente de Poisson")
+ax.set_ylabel("v_p / v_s")
+ax.legend()
+```
+
+</details>
+
+La deformación importa porque el módulo de cizalla de un suelo baja cuando crece
+la deformación: la figura 1 del apartado lo tiene constante hasta una deformación
+de cizalla de unos `10⁻⁴` y cayendo por debajo del 20 % de ese valor más allá. El
+tráfico ferroviario, y las medidas que leen las velocidades, deforman el terreno
+en torno a `10⁻⁶`, así que el módulo que se mide es el que se aplica.
+
+## 8. Lo que esta página no es
+
+La DIN 45672-1 es un método de medida: puntos de medida en el camino de la vía al
+edificio, direcciones, acoplamiento, los trenes que registrar y el informe que
+redactar. Nada de eso es aritmética y nada de eso está aquí, y el acoplamiento
+al que remite es la DIN 45669-2. Tampoco hay valoración ninguna: los números que
+produce esta página solo se comparan con algo en la DIN 4150-2 y la DIN 4150-3.
+
+<Scope>
+
+## Qué cubre esta guía
+
+<ScopeClaim status="covered">
+Los **tres tramos** del apartado 5, el **valor eficaz móvil** y los niveles de
+velocidad y de aceleración de las fórmulas (1) a (3), el **eficaz de intervalo**
+de las fórmulas (4) y (5), y el **valor de suceso**, su nivel y su suma sobre los
+pasos de una hora, fórmulas (8) a (10).
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+Los **niveles en tercios de octava** de las fórmulas (6) y (7) de 4 Hz a 315 Hz,
+o hasta 80 Hz como permite la DIN 45672-1, y la **distribución de amplitudes** de
+la fórmula (11).
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+Las **densidades en banda estrecha** de las fórmulas (12) a (14) a la resolución
+del 7.3.2, el paso a tercios de octava de la fórmula (23) con todos los recuentos
+de la **tabla 1**, el nivel de densidad de la figura 7, el cambio de dimensión
+del **anexo A**, las magnitudes del **anexo B** y el promediado energético del
+**apartado 9**.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+Las **constantes del terreno** del apartado 4.5 de la DIN 45672-1 a partir de dos
+velocidades de onda y una densidad, con las fórmulas (1) y (5) en la forma que da
+el continuo y las formas impresas recogidas como erratas.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+**Ningún analizador.** Las comprobaciones de calibración del 7.3.3 prueban la
+indicación de amplitud de un analizador de banda estrecha, con y sin ventana de
+Hanning; la densidad de la biblioteca es correcta por construcción y no tiene nada
+que calibrar.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún procedimiento de medida y ningún veredicto.** Los puntos de medida, las
+direcciones, el acoplamiento y la elección de trenes son la DIN 45672-1 y la
+DIN 45669-2; lo que significan los números para las personas y los edificios es
+la DIN 4150-2 y la DIN 4150-3.
+</ScopeClaim>
+
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
+  el vibrómetro con el que se lee cada magnitud de aquí, y la `KB_F` que produce.
+- [Daños por vibración en estructuras (DIN 4150-3)](/phonometry/es/vibration/structural/structural-damage/):
+  los valores de referencia con los que se compara una velocidad de pico que
+  viene de una vía.
+- [Análisis espectral](/phonometry/es/signals/spectra/spectral-analysis/): la
+  estimación de Welch que hay detrás de la densidad en banda estrecha y la
+  confianza que lleva.
+- Referencia de la API:
+  [`vibration.immission.railway`](/phonometry/es/reference/api/vibration/railway/)
+  y [`vibration.immission.ground`](/phonometry/es/reference/api/vibration/ground/).
+
+</SeeAlso>

@@ -5461,6 +5461,36 @@ dos ediciones con las mismas entradas y en el mismo orden.
   imprime.
 - **Estado:** sin comunicar.
 
+## DIN 4150-2:1999-06, anexo A, fórmula (A.1b) (un eficaz de máximos por intervalo igualado a una media de cuadrados)
+
+- **Localización:** anexo A, fórmulas (A.1a) y (A.1b) en la página impresa 11
+  (página 11 del PDF de la copia leída aquí, que imprime sus folios sin
+  desplazamiento).
+- **Lo impreso:** la fórmula (A.1a) dice $KB_{FTm,j} = \sqrt{\frac{1}{M_j}
+  \sum_{i=1}^{M_j} KB^2_{FTi,j}}$ y, «oder», la fórmula (A.1b) dice
+  $KB_{FTm,j} = \frac{1}{Z_j} \sum_{i=1}^{Z_j} KB^2_{FTi,j}$, para el caso en
+  que de la clase $j$ solo se midieron $Z_j$ intervalos ocupados.
+- **El problema:** la segunda fórmula no lleva raíz sobre la suma, así que su
+  lado izquierdo es un eficaz de máximos por intervalo y el derecho una media
+  de cuadrados. Las dos están impresas como alternativas para la misma
+  magnitud y solo difieren en el número sobre el que promedian, así que o
+  llevan raíz las dos o ninguna; la fórmula (A.2) de debajo toma
+  $KB^2_{FTm,j}$ como la media de los cuadrados, que es lo que es el lado
+  derecho de (A.1b), y el ejemplo 8 resuelto en la página impresa 17 aplica
+  (A.1b) con la raíz: $KB_{FTm,1} = \sqrt{\tfrac{1}{3}(0{,}92^2 + 0{,}6^2 +
+  0{,}9^2)} = 0{,}82$ «aus Gleichung (A.1b)». O a (A.1b) se le perdió la raíz
+  o su lado izquierdo debería decir $KB^2_{FTm,j}$.
+- **Evidencia:** las dos fórmulas de la página impresa 11 y el ejemplo de la
+  página impresa 17. Verificado en la página 11 del PDF (p. impresa 11) y en la
+  página 17 del PDF (p. impresa 17) de la DIN 4150-2:1999-06: el radical de
+  (A.1a) está dibujado y el de (A.1b) no aparece en la página.
+- **Consecuencia para las tablas de la propia norma:** ninguna; el ejemplo que
+  usa la fórmula usa la correcta.
+- **Comportamiento de la biblioteca:**
+  [`railway_takt_maximum_rms`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/vibration/immission/people.py)
+  toma la raíz, y los tests lo fijan a los 0,82 y 0,22 del ejemplo 8.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

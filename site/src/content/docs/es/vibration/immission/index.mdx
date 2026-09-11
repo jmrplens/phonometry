@@ -1,6 +1,6 @@
 ---
 title: "Inmisión de vibración"
-description: "La cadena alemana de protección frente a inmisiones: el vibrómetro de la DIN 45669-1 que dan por supuesto la DIN 4150-2 y la DIN 4150-3, la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante, y la reducción de la DIN 45672 de un paso de tren, con las constantes del terreno que atraviesa a partir de dos velocidades de onda."
+description: "La cadena alemana de protección frente a inmisiones: el vibrómetro de la DIN 45669-1 que dan por supuesto la DIN 4150-2 y la DIN 4150-3, la velocidad de valoración del anexo E, que juzga un edificio sin frecuencia dominante, la reducción de la DIN 45672 de un paso de tren, con las constantes del terreno que atraviesa a partir de dos velocidades de onda, y la valoración de la DIN 4150-2 de a qué pueden estar expuestas las personas dentro de un edificio."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -17,14 +17,17 @@ las dos dan por supuesto, y la DIN 45669-2, el procedimiento con el que se usa,
 del que son números los límites de montaje y la parte del error que es del
 instrumento.
 
-Esta sección es la mitad del instrumento. La otra mitad ya tenía página: los
-valores de referencia de la DIN 4150-3 están en [Daños por vibración en
+Esta sección es el instrumento de ese conjunto y la valoración para las
+personas que lo lee. Los edificios ya tenían página: los valores de referencia
+de la DIN 4150-3 están en [Daños por vibración en
 estructuras](/phonometry/es/vibration/structural/structural-damage/), y decían
 al final que los requisitos de instrumento de la DIN 45669 no estaban
 implementados. Ya lo están, y eso cierra el círculo: la magnitud con la que se
 compara un valor de referencia la define el vibrómetro, y al vibrómetro lo
 definen su limitación de banda, su ponderación KB y el valor eficaz móvil con el
-que las promedia.
+que las promedia. Y las personas tienen la suya: los valores de referencia de
+la DIN 4150-2 por zona y franja horaria, el orden en que los lee la norma, y la
+intensidad de valoración que resume un día de exposición en un número.
 
 La sección lleva además la parte de la DIN 45669-1 que más lejos llega en la
 práctica. El anexo E convierte la curva de valores de referencia de la
@@ -56,6 +59,13 @@ la vía antes de una medida correctora con la vía después.
   densidad en banda estrecha y la tabla 1 (DIN 45672-2:1995-07), y las
   constantes del terreno a partir de dos velocidades de onda
   (DIN 45672-1:2009-12, apartado 4.5).
+- [Vibración y personas en edificios (DIN 4150-2)](/phonometry/es/vibration/immission/people-in-buildings/):
+  los valores de referencia de la tabla 1 por zona, franja horaria y fuente, el
+  procedimiento del 6.2 como veredicto, la intensidad de valoración de las
+  fórmulas (4) y (5) con el peso de las horas de descanso, las reglas del 6.5
+  para voladuras, carreteras, ferrocarriles y obras con la tabla 2, las clases
+  de tren del anexo A y la estimación del apartado 7 desde una velocidad de pico
+  (DIN 4150-2:1999-06).
 
 <SeeAlso>
 
@@ -85,10 +95,12 @@ vibrómetro. El resto es texto y no está aquí.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**Ninguna valoración de las personas en edificios.** La DIN 4150-2 juzga qué
-significa la intensidad de vibración ponderada para quien la siente, con sus
-propias tablas de valores de referencia por franja horaria y por uso del local.
-La magnitud se calcula aquí; el juicio al que alimenta no está implementado.
+**Ninguna decisión sobre los casos que la DIN 4150-2 deja abiertos.** Una línea
+ferroviaria existente, una obra de más de 78 días laborables y lo que el 6.2
+remite a una valoración individual se juzgan caso a caso en la norma, y aquí
+no se juzgan. Los
+valores de referencia, el procedimiento y la intensidad de valoración están en
+la página de las personas; hasta donde no llegan, tampoco llega la biblioteca.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">

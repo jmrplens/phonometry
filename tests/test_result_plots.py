@@ -66,6 +66,7 @@ from result_factories import (
     _monte_carlo,
     _open_plan,
     _outdoor,
+    _people_assessment,
     _porous_medium,
     _radiation_efficiency,
     _reverb_energy,
@@ -202,6 +203,7 @@ _KWARG_PLOT_CASES = [
     ("vibration_meter_verification", _vibration_meter_verification, "line"),
     ("assessment_velocity", _assessment_velocity, "line"),
     ("train_passage", _train_passage, "line"),
+    ("people_assessment", _people_assessment, "bar"),
     (
         "assumed_protection",
         lambda: ph.hearing.assumed_protection_value(_PROTECTOR_ATTENUATION),

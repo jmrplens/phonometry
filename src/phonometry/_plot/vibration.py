@@ -62,6 +62,7 @@ if TYPE_CHECKING:
     from ..vibration.human.multiple_shock import MultipleShockResult
     from ..vibration.human.seat_vibration import SeatTransmissionResult
     from ..vibration.human.signal_burst import SignalBurstVerification
+    from ..vibration.immission.people import PeopleAssessment
     from ..vibration.immission.railway import TrainPassage
     from ..vibration.immission.vibration_meter import (
         AssessmentVelocity,
@@ -127,6 +128,11 @@ _INTERVAL_LEVEL_LABEL = r"interval level $L_{vF2}$"
 _MAX_LEVEL_LABEL = r"maximum level $L_{vF\mathrm{max}}$"
 #: Where the brackets of T_1, T_2 and T_3 sit, as fractions of the axes height.
 _BRACKET_ROWS = (0.93, 0.855, 0.78)
+#: The DIN 4150-2 verdict figure: the two assessment quantities and the three
+#: guide values they are read against.
+_KB_FMAX_LABEL = r"$KB_{F\mathrm{max}}$"
+_KB_FTR_LABEL = r"$KB_{FTr}$"
+_GUIDE_LABELS = {"a_u": "$A_u$", "a_o": "$A_o$", "a_r": "$A_r$"}
 #: Legend entry of the assessed ISO 2631-5 point (stress variable and
 #: injury probability), formatted with ``r`` and ``p``.
 _RISK_LABEL = r"$R$ = {r},  $\Pi$ = {p} %"
@@ -286,6 +292,14 @@ _STRINGS: dict[str, str] = {
     _INTERVAL_LEVEL_LABEL: r"nivel de intervalo $L_{vF2}$",
     _MAX_LEVEL_LABEL: r"nivel máximo $L_{vF\mathrm{max}}$",
     "Third-octave spectra of one passage (DIN 45672-2)": "Espectros en tercios de octava de un paso (DIN 45672-2)",
+    # People in buildings (DIN 4150-2 Clause 6.2).
+    "Weighted vibration severity": "Intensidad de vibración ponderada",
+    "guide value": "valor de referencia",
+    "not needed": "no necesario",
+    "People in buildings by DIN 4150-2 ({source}): {verdict}": "Personas en edificios según DIN 4150-2 ({source}): {verdict}",
+    "general": "general",
+    "road": "carretera",
+    "urban railway": "ferrocarril urbano",
 }
 
 
@@ -2378,6 +2392,77 @@ def plot_train_passage_spectrum(
     ax.set_ylabel(_t(_BAND_LEVEL_LABEL, language))
     ax.set_title(_t("Third-octave spectra of one passage (DIN 45672-2)", language))
     ax.grid(visible=True, alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_people_assessment(
+    result: PeopleAssessment,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The two assessment quantities of DIN 4150-2 against the three guide values.
+
+    ``KB_Fmax`` beside ``A_u`` and ``A_o``, and ``KB_FTr`` beside ``A_r``, as
+    bars on a logarithmic axis, because the three guide values of one row
+    span more than a decade and the order they are read in is what Clause
+    6.2 is about. A ``KB_FTr`` the verdict did not need is drawn as an empty
+    slot rather than as zero.
+
+    :param result: A
+        :class:`~phonometry.vibration.immission.people.PeopleAssessment`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the ``bar`` call of the measured quantities.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    guide = result.guide
+    labels = [_KB_FMAX_LABEL, _GUIDE_LABELS["a_u"], _GUIDE_LABELS["a_o"]]
+    values = [result.kb_fmax, guide.a_u, guide.a_o]
+    colours = [_C_PRIMARY, _C_TERTIARY, _C_TERTIARY]
+    labels += [_KB_FTR_LABEL, _GUIDE_LABELS["a_r"]]
+    values += [result.kb_ftr if result.kb_ftr is not None else 0.0, guide.a_r]
+    colours += [_C_PRIMARY, _C_TERTIARY]
+    positions = np.array([0.0, 1.0, 2.0, 3.5, 4.5])
+    measured = np.array([0, 3])
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "width", 0.8)
+    kwargs.setdefault("label", _t("Weighted vibration severity", language))
+    ax.bar(positions[measured], np.asarray(values)[measured], **kwargs)
+    ax.bar(
+        positions[[1, 2, 4]],
+        np.asarray(values)[[1, 2, 4]],
+        width=kwargs.get("width", 0.8),
+        color=_C_TERTIARY,
+        label=_t("guide value", language),
+    )
+    if result.kb_ftr is None:
+        ax.text(
+            positions[3],
+            guide.a_r,
+            _t("not needed", language),
+            ha="center",
+            va="bottom",
+            fontsize="small",
+            color=_C_MUTED,
+        )
+    ax.set_xticks(positions)
+    ax.set_xticklabels(labels)
+    ax.set_yscale("log")
+    ax.set_ylabel(_t("Weighted vibration severity", language))
+    ax.set_title(
+        _t("People in buildings by DIN 4150-2 ({source}): {verdict}", language).format(
+            source=_t(result.source.replace("_", " "), language),
+            verdict=_t("PASS" if result.complies else "FAIL", language),
+        )
+    )
+    ax.grid(visible=True, axis="y", which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

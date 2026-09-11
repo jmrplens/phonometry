@@ -75,7 +75,7 @@ one read off a curve, cell for cell what the interpolation gives.
 from __future__ import annotations
 
 import math
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from typing import TYPE_CHECKING, Any
 
@@ -265,14 +265,18 @@ GUIDE_VALUES: dict[str, dict[str, GuideValues]] = {
 #: area, down from 0,15 to 0,1; the row now names urban areas too.
 GUIDE_VALUES_2023: dict[str, dict[str, GuideValues]] = {
     area: {
-        "day": replace(values["day"], edition="2023"),
-        "night": replace(
-            GuideValues(0.1, 0.3, 0.07) if area == "mixed" else values["night"],
-            time_of_day="night",
-            edition="2023",
+        "day": GuideValues(
+            row["day"].a_u, row["day"].a_o, row["day"].a_r, "day", "2023"
+        ),
+        "night": GuideValues(
+            0.1 if area == "mixed" else row["night"].a_u,
+            row["night"].a_o,
+            row["night"].a_r,
+            "night",
+            "2023",
         ),
     }
-    for area, values in GUIDE_VALUES.items()
+    for area, row in GUIDE_VALUES.items()
 }
 
 #: The three stages of 6.5.4.2 a construction site may be held to: below
@@ -322,6 +326,12 @@ _AREAS = tuple(GUIDE_VALUES)
 _SOURCES = ("general", "road", "railway", "urban_railway", "quarry_blasting")
 _RAILWAYS = ("railway", "urban_railway")
 _ROADS = ("road", "road_existing")
+#: The sources whose A_u and A_r are read raised by a factor: the urban
+#: railway of 1999 (6.5.3.3) and the existing road of the draft (6.5.2).
+_RAISED_SOURCES = {
+    "urban_railway": URBAN_RAILWAY_FACTOR,
+    "road_existing": ROAD_EXISTING_TOLERANCE_FACTOR,
+}
 #: The sources the draft of 2023 adds (6.5.2 and 6.5.1.3), and the one it
 #: drops: the factor 1,5 on the guide values of an urban railway gives way
 #: to the weighting factor of its Table 2.
@@ -425,25 +435,23 @@ def guide_values(
     kind = require_choice(
         str(source), "source", _SOURCES if year == "1999" else _SOURCES_2023
     )
-    if kind == "urban_railway":
+    if kind in _RAISED_SOURCES:
         # Rounded to the decimals of the table, so 0,05 times 1,5 is 0,075
         # and not a float with a tail the verdict would then round anyway.
-        return replace(
-            values,
-            a_u=round(values.a_u * URBAN_RAILWAY_FACTOR, _RAISED_DECIMALS),
-            a_r=round(values.a_r * URBAN_RAILWAY_FACTOR, _RAISED_DECIMALS),
+        factor = _RAISED_SOURCES[kind]
+        return GuideValues(
+            round(values.a_u * factor, _RAISED_DECIMALS),
+            values.a_o,
+            round(values.a_r * factor, _RAISED_DECIMALS),
+            values.time_of_day,
+            values.edition,
         )
-    if kind == "road_existing":
-        return replace(
-            values,
-            a_u=round(values.a_u * ROAD_EXISTING_TOLERANCE_FACTOR, _RAISED_DECIMALS),
-            a_r=round(values.a_r * ROAD_EXISTING_TOLERANCE_FACTOR, _RAISED_DECIMALS),
-        )
+    a_o = values.a_o
     if kind == "induced_seismic" and which == "night":
-        return replace(values, a_o=row["day"].a_o)
+        a_o = row["day"].a_o
     if kind == "quarry_blasting" and which == "day" and area in _QUARRY_BLASTING_AREAS:
-        return replace(values, a_o=table[_ROW_1][which].a_o)
-    return values
+        a_o = table[_ROW_1][which].a_o
+    return GuideValues(values.a_u, a_o, values.a_r, values.time_of_day, values.edition)
 
 
 def induced_seismic_kb_fmax(peak_velocity_mm_s: float) -> float:
@@ -874,6 +882,34 @@ class PeopleAssessment:
         return plot_people_assessment(self, ax=ax, language=language, **kwargs)
 
 
+def _edition_of(guide: GuideValues, edition: str | None) -> str:
+    """The edition a verdict is read under: the guide values' own, or the one asked for if it is the same."""
+    year = require_choice(
+        str(guide.edition if edition is None else edition), "edition", _EDITIONS
+    )
+    if year != guide.edition:
+        msg = (
+            f"the guide values are of the {guide.edition} edition and the verdict "
+            f"was asked for under the {year} one; read them with edition={year!r}."
+        )
+        raise ValueError(msg)
+    return year
+
+
+def _skips_upper_value(year: str, kind: str, guide: GuideValues) -> bool:
+    """Whether the source is judged without the upper value.
+
+    Under the 1999 edition a railway is: 6.5.3.1 judges it on A_u and A_r,
+    and 6.5.3.5 has its own night-time thresholds for looking into the cause
+    of single clock maxima, which are not a verdict either. The draft
+    compares its Formula (8) KB_Fmax with A_o and moves that reading to the
+    road by night (6.5.2).
+    """
+    if year == "1999":
+        return kind in _RAILWAYS
+    return kind in _ROADS and guide.time_of_day == "night"
+
+
 def assess_people_in_buildings(
     kb_fmax: float,
     guide: GuideValues,
@@ -943,15 +979,7 @@ def assess_people_in_buildings(
         that needs :math:`KB_{FTr}` without one given.
     """
     peak = require_non_negative(kb_fmax, "kb_fmax")
-    year = require_choice(
-        str(guide.edition if edition is None else edition), "edition", _EDITIONS
-    )
-    if year != guide.edition:
-        msg = (
-            f"the guide values are of the {guide.edition} edition and the verdict "
-            f"was asked for under the {year} one; read them with edition={year!r}."
-        )
-        raise ValueError(msg)
+    year = _edition_of(guide, edition)
     kind = require_choice(
         str(source), "source", _SOURCES if year == "1999" else _SOURCES_2023
     )
@@ -974,15 +1002,7 @@ def assess_people_in_buildings(
         return verdict(complies=True, criterion="A_u", kb_ftr=None)
     if year == "1999" and peak <= guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0):
         return verdict(complies=True, criterion="A_u", kb_ftr=None, uncertain=True)
-    # Under the 1999 edition a railway skips the upper value: 6.5.3.1 judges
-    # it on A_u and A_r, and 6.5.3.5 has its own night-time thresholds for
-    # looking into the cause of single clock maxima, which are not a verdict
-    # either. The draft compares its Formula (8) KB_Fmax with A_o, and moves
-    # that reading to the road by night (6.5.2).
-    skips_a_o = (year == "1999" and kind in _RAILWAYS) or (
-        year == "2023" and kind in _ROADS and guide.time_of_day == "night"
-    )
-    if not skips_a_o:
+    if not _skips_upper_value(year, kind, guide):
         if not _keeps_to(peak, guide.a_o):
             return verdict(complies=False, criterion="A_o", kb_ftr=None)
         if rare:

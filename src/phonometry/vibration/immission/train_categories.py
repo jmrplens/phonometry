@@ -54,7 +54,7 @@ and the rows run the standard's own 960 and its own inputs.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -300,7 +300,13 @@ def railway_guide_values(
     values = GUIDE_VALUES_2023[kind][which]
     if which == "day" or (where == "underground" and kind in _UNDERGROUND_TABLE_AREAS):
         return values
-    return replace(values, a_o=RAILWAY_NEW_LINE_NIGHT_A_O[where])
+    return GuideValues(
+        values.a_u,
+        RAILWAY_NEW_LINE_NIGHT_A_O[where],
+        values.a_r,
+        values.time_of_day,
+        values.edition,
+    )
 
 
 @dataclass(frozen=True)

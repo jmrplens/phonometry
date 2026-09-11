@@ -207,13 +207,14 @@ def test_formula_6_suppresses_a_category_and_refuses_bad_inputs() -> None:
         im.train_assessment_severity([0.3, 0.4, 0.5], [1, 1, 1], alpha=[1.0, 1.1])
     with pytest.raises(ValueError, match="never is"):
         im.train_category_rms([0.3, -0.1])
+    guide = im.railway_guide_values("mixed")
     with pytest.raises(ValueError, match="kb_fmax_after"):
         im.assess_railway_change(
             kb_fmax_before=0.5,
             kb_fmax_after=-0.5,
             kb_ftr_before=0.05,
             kb_ftr_after=0.05,
-            guide=im.railway_guide_values("mixed"),
+            guide=guide,
         )
 
 
@@ -264,13 +265,14 @@ def test_a_planned_case_within_a_u_is_met_before_any_change_is_looked_at() -> No
     assert change.kb_fmax_met
     assert change.kb_ftr_met
     assert change.kb_ftr_increase_percent == pytest.approx(80.0)
+    old = im.guide_values("mixed", time_of_day="night")
     with pytest.raises(ValueError, match="2023 edition"):
         im.assess_railway_change(
             kb_fmax_before=0.66,
             kb_fmax_after=0.66,
             kb_ftr_before=0.065,
             kb_ftr_after=0.094,
-            guide=im.guide_values("mixed", time_of_day="night"),
+            guide=old,
             time_of_day="night",
         )
     with pytest.raises(ValueError, match="of the day"):

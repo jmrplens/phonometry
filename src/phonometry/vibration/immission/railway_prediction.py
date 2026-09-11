@@ -88,6 +88,7 @@ from ..._internal.validation import (
     require_finite_array,
     require_non_negative,
     require_positive,
+    require_positive_array,
 )
 from .railway import VELOCITY_LEVEL_REFERENCE_MM_S, band_sum_level
 from .train_categories import TRAIN_KB_FMAX_FACTOR
@@ -417,10 +418,7 @@ def _levels(values: ArrayLike, name: str) -> NDArray[np.float64]:
 
 def _nominal(frequencies_hz: ArrayLike, table: tuple[float, ...]) -> NDArray[np.intp]:
     """The index of each frequency in a nominal table, or an error."""
-    freqs = require_finite_array(frequencies_hz, "frequencies_hz")
-    if np.any(freqs <= 0.0):
-        msg = "'frequencies_hz' must be positive."
-        raise ValueError(msg)
+    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
     grid = np.asarray(table, dtype=np.float64)
     ratio = freqs[:, None] / grid[None, :]
     hit = (ratio < _BAND_TOLERANCE) & (ratio > 1.0 / _BAND_TOLERANCE)
@@ -537,10 +535,7 @@ def ground_attenuation_coefficient_per_m(
     :raises ValueError: For a negative damping ratio, a non-positive speed
         or a non-positive frequency.
     """
-    freqs = require_finite_array(frequencies_hz, "frequencies_hz")
-    if np.any(freqs <= 0.0):
-        msg = "'frequencies_hz' must be positive."
-        raise ValueError(msg)
+    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
     damping = require_non_negative(damping_ratio, "damping_ratio")
     speed = require_positive(shear_wave_speed_m_s, "shear_wave_speed_m_s")
     return 2.0 * math.pi * freqs * damping / speed
@@ -681,10 +676,7 @@ def foundation_to_floor_transfer_db(
     :raises ValueError: For an unknown floor or statistic, a non-positive
         frequency, or a non-finite input.
     """
-    freqs = require_finite_array(frequencies_hz, "frequencies_hz")
-    if np.any(freqs <= 0.0):
-        msg = "'frequencies_hz' must be positive."
-        raise ValueError(msg)
+    freqs = require_positive_array(frequencies_hz, "frequencies_hz")
     natural = require_positive(floor_natural_frequency_hz, "floor_natural_frequency_hz")
     table = FOUNDATION_TO_FLOOR_DB[require_choice(str(floor), "floor", _FLOORS)]
     values = np.asarray(table[require_choice(str(statistic), "statistic", _STATISTICS)])

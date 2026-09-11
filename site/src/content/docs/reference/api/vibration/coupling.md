@@ -80,7 +80,7 @@ names.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a non-positive acceleration or frequency, or an unknown direction or surface. |
+| ValueError | For a negative acceleration, a non-positive frequency, or an unknown direction or surface. |
 
 ## CLEARANCE_TO_DISTURBING_BODY_FACTOR
 

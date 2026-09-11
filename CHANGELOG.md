@@ -201,6 +201,122 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is in `docs/ERRATA.md`: (A.1b) gives `KB_FTm,j` as a mean of squares with no
   root over it, while (A.1a) beside it has the root and Example 8 takes it.
 
+- The draft that is to replace DIN 4150-2, **E DIN 4150-2:2023-08**, in
+  `vibration.immission.train_categories` and behind `edition="2023"` in the
+  people module.
+
+  The draft rewrites the railway. Every passage counts as one clock interval,
+  so `train_category_rms` is the r.m.s. of one maximum per passage with
+  nothing zeroed below 0,1; `train_kb_fmax` is 1,5 times it and
+  `railway_kb_fmax` the largest over the categories, which is what the draft
+  compares with `A_u` and `A_o` instead of the largest maximum anyone
+  observed; and `train_assessment_severity` is Formula (6), each category by
+  its trains out of the 1920 or 960 intervals of the period and by the
+  weighting factor of Table 2, 0,7 for a tram on the surface to 1,3 for a
+  freight train over 600 m, with a category at or below 0,1 counting as
+  zero. `railway_guide_values` carries the night-time upper value of a line
+  to be built new, 0,6 on the surface and 0,3 underground outside an
+  industrial or commercial area, and `assess_railway_change` the 25 % rule of
+  an altered or extended line: the planned case is first held to the guide
+  values as any immission is, and where `A_o` or `A_r` is exceeded the
+  requirement still counts as met if the quantity grows by less than a
+  quarter against the case without the project, every condition that applies
+  holding, as the draft's own Example 9 has it.
+
+  The rest of the draft is an argument: `edition="2023"` on `guide_values`
+  reads Table 1 with the night `A_u` of a mixed area at 0,1, and
+  `assess_people_in_buildings` under it drops the shortcut inside the 15 %
+  above `A_u`, which the draft's Example 3 no longer takes, compares a
+  railway with `A_o` and a road by night not, and knows
+  `source="road_existing"`, whose neighbours must put up with `A_u` and `A_r`
+  exceeded by half, and `source="induced_seismic"`, held by night to the
+  daytime `A_o`, with `induced_seismic_kb_fmax` as 0,44 times the peak
+  velocity. `GuideValues` now carries the period and the edition it was read
+  for, the verdict takes its edition from there, and asking for the values of
+  one edition under the rules of the other is refused. The draft's Table 3
+  prints the days two to six of a construction site that the 1999 Figure 3
+  made one read off a curve, and they are what the interpolation gives, cell
+  for cell.
+
+  Examples 8 and 9 of Annex B are conformance rows, the 47 passages of Table
+  B.1 and the four assessment severities of a line extended by a second
+  track. Nine things in the draft are in `docs/ERRATA.md`: Example 9 divides
+  its night by 920 intervals where the clause fixes 960; Example 8 prints a
+  result its own four-decimal inputs do not give; the clock maxima printed
+  on Figure B.2 give 0,37 and not the 0,39 the text uses; a decision of the
+  construction flowchart is drawn with its answer the wrong way round; an
+  extension is assessed by the clause for a new line; 6.5.3.6 says the
+  requirements are met when one of its conditions holds and its example
+  needs them all; an example attributes the clock maximum r.m.s. to the
+  wrong formula and another cites a note under the clause it was moved out
+  of; and a rare event is met below `A_o` in one sentence and at it in the
+  next clause and the flowchart.
+
+- The prediction that draft feeds, **E DIN 45672-3:2023-02**, the only text
+  Part 3 of DIN 45672 has ever had, in `vibration.immission.railway_prediction`.
+
+  `predict_floor_spectrum` is Formula (1), the spectrum on a floor as an
+  emission spectrum plus what the ground, the foundation, the floor and a
+  mitigation add, every term as printed, so the mitigation term, which is
+  called `mitigation_db` and not an insertion loss for that reason, goes in
+  negative.
+  `rescale_emission_for_speed` carries an emission to another speed by 20 lg
+  of the ratio, for a change of up to 30 %; `ground_transmission_db` is
+  spreading with an exponent and damping with `alpha_R` = 2π f D / c_s,
+  Formulae (4) to (6). The six tables of Annex A are read off their pages
+  cell by cell: `ground_to_floor_transfer_db` by natural frequency of a
+  concrete or timber floor, `ground_to_foundation_transfer_db` for a basement
+  or a ground floor with both deviations, `foundation_to_floor_transfer_db`
+  against the ratio to the natural frequency, interpolated in decibels over
+  the logarithm of the ratio. Clause 7 is `predict_train_category`: Table 2,
+  the KB weighting rounded to a tenth of a decibel, added to the bands from
+  4 Hz to 80 Hz, their sum as the clock maximum r.m.s. of the category, 1,5
+  times it and 3 times that as the peak velocity; Formula (11) is the sum of
+  the draft of DIN 4150-2's Formula (6), which the chain ends in with that
+  formula's rule on a category at or below 0,1. Annex B, a train as a line
+  of point sources up to `L²/lambda`, is `train_decay_exponent`, with the
+  negative result the annex prints no floor against, and
+  `train_velocity_ratio`.
+
+  The worked example of Annex C is held where it can be: Formula (1) band by
+  band, the printed sum level, and the chain from it. Where it cannot, the
+  entry is in `docs/ERRATA.md`: the example sums its bands without the
+  weighting Clause 7.1 prescribes, its two assessment severities weight by
+  the factor once where Formula (11) squares it and the daytime verdict
+  turns on the difference, and its floor transfer comes from no table of
+  Annex A. The timber table prints a lower deviation above its mean, three
+  figure legends name the wrong table or quantity, Formula (11) prints the
+  sum without the rule on 0,1 of the formula it stands for, and Annex A is
+  called normative on one page and informative on its own.
+
+- The shapes of every prediction, **DIN 4150-1:2001-06**, in
+  `vibration.immission.prediction`.
+
+  `far_field_velocity_mm_s` is Formula (2), the decay beyond the far-field
+  boundary of Formula (1) with the exponent of Figure 1, which
+  `geometric_exponent` gives by whether the source is a point or a line,
+  harmonic or impulsive, and the wave a surface or a body wave, and the
+  damping of the ground as `attenuation_coefficient_per_m`;
+  `material_damping_factor` is the damping alone, as Figure 2 draws it. The
+  building on its ground is `soil_building_natural_frequency_hz` with its
+  guide values by storeys, two storeys taking the union of the two ranges the
+  clause prints it in, `foundation_transfer_max` and `floor_transfer_max`
+  as 1 over twice the damping, and `storey_frequency_hz`. A blast and a
+  falling mass are Formulae (5) and (6) with the user's constants; a hall of
+  machines is Formula (7) with the nomogram of Figure 3 read off the page at a
+  five-hundredth as `machine_count_correction`; a track excites at its speed
+  over the spacing of what repeats. The bands, ranges and constants Clauses
+  4 and 5 give the ground, the building and each source are published.
+
+  The two figures the standard draws from its own formulas with every
+  parameter printed, A.19 for the decay and A.18 for the machine hall, are
+  conformance rows, with the damping curves of Figure 2. Five things are in
+  `docs/ERRATA.md`: two symbol lists print a distance in millimetres against
+  a reference of a metre, a low working frequency is written as one above
+  30 Hz, a legend swaps two line styles, an eccentric moment is printed in
+  newtons, and a measured point labelled all groups of a machine hall sits at
+  the count of one of its two halls.
+
 - A vibration meter can be given the verdict a sound level meter already gets:
   the frequency-weighting tolerances of **ISO 8041-1:2017**, in
   `vibration.verify_weighting`.

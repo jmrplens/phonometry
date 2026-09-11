@@ -64,6 +64,7 @@ if TYPE_CHECKING:
     from ..vibration.human.signal_burst import SignalBurstVerification
     from ..vibration.immission.people import PeopleAssessment
     from ..vibration.immission.railway import TrainPassage
+    from ..vibration.immission.railway_prediction import TrainCategoryPrediction
     from ..vibration.immission.vibration_meter import (
         AssessmentVelocity,
         VibrationMeterReading,
@@ -127,6 +128,9 @@ _RUNNING_MAX_LABEL = r"$\tilde v_{{F\mathrm{{max}}}}$ = {value} mm/s"
 _BAND_LEVEL_LABEL = "Velocity level [dB re 5·10⁻⁸ m/s]"
 _INTERVAL_LEVEL_LABEL = r"interval level $L_{vF2}$"
 _MAX_LEVEL_LABEL = r"maximum level $L_{vF\mathrm{max}}$"
+_EMISSION_LABEL = r"emission $L_{v,E}$"
+_FLOOR_LABEL = r"floor $L_v$"
+_WEIGHTED_LABEL = r"KB-weighted $L_{v,KB}$"
 #: Where the brackets of T_1, T_2 and T_3 sit, as fractions of the axes height.
 _BRACKET_ROWS = (0.93, 0.855, 0.78)
 #: The DIN 4150-2 verdict figure: the two assessment quantities and the three
@@ -301,6 +305,14 @@ _STRINGS: dict[str, str] = {
     "general": "general",
     "road": "carretera",
     "urban railway": "ferrocarril urbano",
+    "quarry blasting": "voladura de cantera",
+    "road existing": "carretera existente",
+    "induced seismic": "sismicidad inducida",
+    # Railway prediction from third-octave spectra (E DIN 45672-3 Clauses 5 and 7).
+    _EMISSION_LABEL: r"emisión $L_{v,E}$",
+    _FLOOR_LABEL: r"forjado $L_v$",
+    _WEIGHTED_LABEL: r"ponderado KB $L_{v,KB}$",
+    "Predicted spectrum on the floor (E DIN 45672-3): $KB_{{FTm}}$ = {kb}": "Espectro previsto en el forjado (E DIN 45672-3): $KB_{{FTm}}$ = {kb}",
 }
 
 
@@ -2462,6 +2474,70 @@ def plot_people_assessment(
         )
     )
     ax.grid(visible=True, axis="y", which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small")
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_train_category_prediction(
+    result: TrainCategoryPrediction,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The emission spectrum, the predicted floor spectrum and the KB-weighted bands.
+
+    Formula (1) band by band, from the emission the prediction started
+    from to the level on the floor, and the bands from 4 Hz to 80 Hz after
+    the Table 2 weighting that Formula (9) sums into :math:`KB_{FTm,Zug}`.
+
+    :param result: A
+        :class:`~phonometry.vibration.immission.railway_prediction.TrainCategoryPrediction`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the floor-spectrum ``plot`` call.
+    :return: The axes.
+    """
+    from .._i18n import format_number, localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    positions = _band_axis(ax, result.frequencies_hz, language=language)
+    ax.plot(
+        positions,
+        result.emission_db,
+        color=_C_TERTIARY,
+        ls="--",
+        lw=1.4,
+        marker="s",
+        markersize=4,
+        label=_t(_EMISSION_LABEL, language),
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 4)
+    kwargs.setdefault("label", _t(_FLOOR_LABEL, language))
+    ax.plot(positions, result.floor_db, **kwargs)
+    weighted = np.isin(result.frequencies_hz, result.weighted_frequencies_hz)
+    ax.plot(
+        positions[weighted],
+        result.weighted_db,
+        color=_C_SECONDARY,
+        ls=":",
+        lw=1.4,
+        marker="^",
+        markersize=4,
+        label=_t(_WEIGHTED_LABEL, language),
+    )
+    ax.set_ylabel(_t(_BAND_LEVEL_LABEL, language))
+    ax.set_title(
+        _t(
+            "Predicted spectrum on the floor (E DIN 45672-3): $KB_{{FTm}}$ = {kb}",
+            language,
+        ).format(kb=format_number(result.kb_ftm, language, decimals=2))
+    )
+    ax.grid(visible=True, alpha=0.3)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax

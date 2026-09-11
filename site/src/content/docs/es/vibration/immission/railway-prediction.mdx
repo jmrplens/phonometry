@@ -1,0 +1,373 @@
+---
+title: "Predecir la vibración ferroviaria (E DIN 45672-3)"
+description: "Lo que sentirá un edificio junto a una vía férrea antes de que exista ninguno de los dos: la cadena aditiva de la E DIN 45672-3 desde un espectro de emisión, a través del terreno y del edificio, hasta un espectro en tercios de octava sobre un forjado, las seis tablas de transferencia del anexo A, los valores KB de la DIN 4150-2 formados a partir del espectro, y el ejemplo del anexo C con lo que su impresión tiene mal."
+references:
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2023
+    title: "Schwingungsmessung an Schienenverkehrswegen — Teil 3: Prognoseverfahren auf Basis von Terzspektren"
+    designation: "E DIN 45672-3:2023-02"
+    primary: true
+    note: "Un borrador: la parte 3 no tiene edición publicada. La fórmula (1) del apartado 5.1, el reescalado por velocidad de la fórmula (3), la transmisión por el terreno de las fórmulas (4) a (6), las seis tablas de diferencias de nivel del anexo A, la tabla 2 y la cadena del apartado 7 de la fórmula (8) a la (13), las distancias recomendadas de la tabla 1, y las fórmulas (B.1) y (B.2) del anexo B. El apartado 6, las fases de una predicción, y el anexo D son planes de trabajo y no están implementados. El anexo C es el oráculo de las filas de conformidad."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2023
+    title: "Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden"
+    designation: "E DIN 4150-2:2023-08"
+    note: "La valoración que alimenta la predicción: la fórmula (6) y la tabla 2, que la parte 3 toma como su fórmula (11) y su tabla E.1."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+La [DIN 45672-1](/phonometry/es/vibration/immission/railway-vibration/) mide
+junto a una línea y la parte 2 reduce lo medido. La parte 3, que solo ha
+existido como el borrador de febrero de 2023, contesta la pregunta que viene
+antes de las dos: se proyecta una línea, o un edificio junto a una, y alguien
+tiene que decir cuánto se moverán los forjados antes de que haya nada que
+medir. La respuesta es un espectro de velocidad en tercios de octava sobre un
+forjado, construido sumando lo que se sabe de la fuente, del terreno y del
+edificio, y a partir de él los dos números que juzga la
+[DIN 4150-2](/phonometry/es/vibration/immission/people-in-buildings/).
+
+## 1. Un espectro es una suma de lo que se sabe
+
+La fórmula (1) es el método entero en una línea. El nivel de cada banda sobre
+el forjado es la emisión de la línea en algún punto conocido, más lo que hace
+el terreno entre ese punto y el edificio, más lo que hace la cimentación a la
+entrada, más lo que hace el forjado encima, más lo que quita la mitigación que
+haya:
+
+```text
+L_v(f) = L_v,E(f) + ΔL_v,BB(f) + ΔL_v,FB(f) + ΔL_v,DF(f) + D_e(f)
+```
+
+Cada término se suma tal como está impreso, así que una mitigación entra con
+signo menos. El ejemplo del anexo C predice un tranvía a 50 km/h para un
+edificio a 7 m de la vía, sobre un forjado de hormigón con una frecuencia
+propia de 20 Hz; su espectro de emisión ya se tomó en una cimentación, así que
+el término de la cimentación es cero.
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+# Anexo C, tabla C.1: la emisión en la cimentación, el terreno por la
+# diferencia de distancia, y el forjado a 20 Hz, de 4 Hz a 250 Hz.
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+
+on_floor = vibration.predict_floor_spectrum(emission, ground_db=ground, floor_db=floor)
+print(np.round(on_floor[:4], 1))  # [28.8 30.2 41.  58.6]
+print(f"{vibration.band_sum_level(on_floor):.1f} dB")  # 78.1 dB
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/railway_prediction_chain.svg" alt="Tres espectros en tercios de octava de 4 a 250 hercios sobre un eje de nivel de velocidad de 15 a 85 decibelios. Una línea verde discontinua con cuadrados es la emisión en la cimentación, plana en torno a 55 decibelios de 8 a 80 hercios. Una línea azul continua con círculos es el nivel predicho sobre el forjado, que sube por encima de la emisión hasta un pico de 75,6 decibelios a 20 hercios, la resonancia del forjado, y cae por debajo de ella por encima de 100 hercios. Una línea roja de puntos con triángulos es el espectro ponderado KB, solo de 4 a 80 hercios, unos pocos decibelios por debajo de la línea del forjado en las bandas más bajas. Un recuadro da KB F T m 0,38, KB F max 0,58 y v max 1,73 milímetros por segundo" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+ax = prediction.plot(language="es")
+```
+
+</details>
+
+## 2. De dónde sale cada término
+
+**La emisión** (apartado 5.2) es un espectro Max Hold del tipo de tren, medido
+bajo tráfico a una distancia conocida, de 4 Hz a 250 Hz. Un espectro tomado a
+una velocidad se lleva a otra del mismo tipo de tren con 20 lg del cociente
+(fórmula (3)), para un cambio de hasta el 30 %; más allá, las frecuencias
+ligadas a una longitud, la del paso de traviesas la primera, se mueven con la
+velocidad mientras las resonancias no, y el desplazamiento se rechaza.
+
+```python
+from phonometry import vibration
+
+shifted = vibration.rescale_emission_for_speed([50.0], speed_from_km_h=50.0, speed_to_km_h=60.0)
+print(f"{shifted[0]:.2f} dB")  # 51.58 dB
+```
+
+**El terreno** (apartado 5.3) es divergencia por amortiguamiento del material.
+El cociente entre la velocidad en el edificio y la de la distancia de
+referencia es `(r / r₀)^-n · exp(-α_R (r - r₀))` (fórmula (5)) con
+`α_R = 2π f D / c_s`, la relación de amortiguamiento del terreno sobre la
+longitud de onda, o una ley de potencia sola con un exponente medido por banda
+(fórmula (6)); la diferencia de nivel es 20 lg de ese cociente (fórmula (4)).
+En superficie el exponente suele estar entre 0,2 y 0,4.
+
+```python
+from phonometry import vibration
+
+delta = vibration.ground_transmission_db(
+    [8.0, 31.5, 125.0],
+    distance_m=25.0,
+    reference_distance_m=8.0,
+    exponent=0.3,
+    damping_ratio=0.03,
+    shear_wave_speed_m_s=200.0,
+)
+print(delta.round(1))  # [ -4.1  -7.4 -20.4]
+```
+
+**El edificio** (apartado 5.4, anexo A) son seis tablas salidas de una campaña
+extensa de medidas en edificios, que son el contenido real de la norma. Del
+terreno a la cimentación para un sótano o una planta baja (tablas A.3 y A.4),
+como media con la desviación a cada lado; de la cimentación al forjado para
+forjados de hormigón o de madera frente al cociente entre la banda y la
+frecuencia propia del forjado (tablas A.5 y A.6); y, para quien prefiera no
+partirlo, del terreno directamente al forjado por esa frecuencia propia
+(tablas A.1 y A.2), para cualquier planta. La predicción se corre una vez por
+cada frecuencia propia que pueda tener el edificio, y nunca con la envolvente
+de todas ellas, que según la norma sobreestima considerablemente.
+
+```python
+from phonometry import vibration
+
+print(vibration.ground_to_foundation_transfer_db("basement")[:5])  # [-4.  -3.5 -3.6 -4.2 -4.2]
+print(vibration.foundation_to_floor_transfer_db(
+    [8.0, 16.0, 20.0, 40.0], floor="concrete", floor_natural_frequency_hz=20.0
+))  # [ 3.26  9.94 17.26  3.27]
+print(vibration.ground_to_floor_transfer_db("timber", floor_natural_frequency_hz=16.0)[4:8])
+# [ 6.03 10.07 16.    8.51]
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_transfer_spectra.svg" alt="Dos paneles de diferencia de nivel del terreno a un forjado frente a la frecuencia de 4 a 250 hercios, sobre un eje de menos 8 a 24 decibelios. A la izquierda, forjados de hormigón de la tabla A.1: tres curvas para frecuencias propias de 8, 16 y 63 hercios, cada una un pico agudo en su propia frecuencia, 15 decibelios para 8 y 16 hercios y 9,5 para 63; las dos primeras caen a menos 5 decibelios muy por encima de su pico y la curva de 63 hercios a menos 2,3 en 250 hercios. A la derecha, forjados de madera de la tabla A.2: las mismas tres frecuencias con picos de 20, 16 y 10 decibelios, más anchos y más altos por debajo de la resonancia, la curva de 8 hercios ya en 5 decibelios a 4 hercios" width="96%" />
+
+<details>
+<summary>Código de la figura</summary>
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+
+from phonometry import vibration
+
+bands = np.asarray(vibration.PREDICTION_BAND_CENTRES_HZ)
+positions = np.arange(bands.size)
+fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
+for ax, floor in zip(axes, ("concrete", "timber"), strict=True):
+    for natural in (8.0, 16.0, 63.0):
+        ax.plot(
+            positions,
+            vibration.ground_to_floor_transfer_db(floor, floor_natural_frequency_hz=natural),
+            marker="o",
+            label=f"$f_e$ = {natural:g} Hz",
+        )
+    ax.set_xticks(positions[::2], [f"{b:g}" for b in bands[::2]])
+    ax.set_title({"concrete": "hormigón", "timber": "madera"}[floor])
+axes[1].legend()
+```
+
+</details>
+
+**La mitigación** (apartado 5.5) es la pérdida por inserción espectral de una
+medida en la vía según la DIN SPEC 45673-2 o -3, o de cualquier otra medida
+determinada de forma adecuada, y entra en la fórmula (1) tal como está
+impresa, sumada, así que como un número negativo: el argumento es
+`mitigation_db` y no una pérdida por inserción, porque una pérdida por
+inserción en el sentido del anexo B de la DIN 45672-2 es positiva para una
+reducción y entra con el signo cambiado.
+
+## 3. Del espectro a los números que juzga la DIN 4150-2
+
+El apartado 7 convierte el espectro en las magnitudes de valoración. La
+ponderación KB de la [DIN 45669-1](/phonometry/es/vibration/immission/vibration-meter/)
+está impresa como una tabla de correcciones por tercio de octava, la tabla 2,
+de 4 Hz a 80 Hz, y se suma a cada banda (fórmula (8)); las bandas ponderadas se
+suman; y el nivel suma da el eficaz de los máximos por intervalo del tipo de
+tren (fórmula (9)), `KB_FTm,Zug = c_T1 · v₀ · 10^(L/20)` con `c_T1` = 1 para
+espectros Max Hold y `v₀` = 5·10⁻⁵ mm/s, la referencia del nivel. El valor es
+la propia magnitud KB, porque KB es la velocidad en milímetros por segundo.
+Luego 1,5 veces eso es `KB_Fmax,Zug` (fórmula (10)) y 3 veces eso la velocidad
+de pico que quiere una comparación con la
+[DIN 4150-3](/phonometry/es/vibration/structural/structural-damage/)
+(fórmula (12)).
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+print(f"{prediction.sum_level_db:.1f} dB")  # 77.7 dB
+print(f"KB_FTm = {prediction.kb_ftm:.3f}")  # 0.385
+print(f"KB_Fmax = {prediction.kb_fmax:.3f}")  # 0.577
+print(f"v_max = {prediction.peak_velocity_mm_s:.2f} mm/s")  # 1.73 mm/s
+```
+
+La intensidad de valoración sobre el horario de un día es la fórmula (11), la
+suma de la fórmula (6) del [borrador de la DIN 4150-2](/phonometry/es/vibration/immission/railway-categories/)
+con los mismos factores de ponderación, 0,7 para un tranvía en superficie,
+impresa sin la frase de esa fórmula que cuenta como cero una categoría igual
+o inferior a 0,1; la biblioteca aplica la frase, ya que la valoración es la
+que el borrador dice realizar. Con
+los 200 pasos de día y 20 de noche del ejemplo, y los valores de referencia de
+una zona de centro urbano, la línea cumple el requisito de día y de noche:
+
+```python
+import numpy as np
+
+from phonometry import vibration
+
+emission = np.array([26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0,
+                     52.0, 52.0, 60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0])
+ground = np.array([0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6,
+                   1.7, 2.0, 2.2, 2.6, 3.0, 3.5, 3.1, 2.8, 2.4])
+floor = np.array([1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4,
+                  1.9, 1.5, -0.8, -2.3, -3.8, -5.4, -6.5, -8.1, -9.6])
+prediction = vibration.predict_train_category(emission, ground_db=ground, floor_db=floor)
+
+alpha = vibration.train_weighting_factor("tram_metro", alignment="surface")
+day = vibration.train_assessment_severity([prediction.kb_ftm], [200], alpha=alpha)
+night = vibration.train_assessment_severity([prediction.kb_ftm], [20], alpha=alpha, time_of_day="night")
+print(f"KB_FTr de día {day:.3f}, de noche {night:.3f}")  # 0.087, 0.039
+
+guide = vibration.railway_guide_values("mixed", time_of_day="night")
+print(guide)  # GuideValues(a_u=0.1, a_o=0.6, a_r=0.07, time_of_day='night', edition='2023')
+verdict = vibration.assess_people_in_buildings(
+    prediction.kb_fmax, guide, kb_ftr=night, source="railway", edition="2023"
+)
+print(verdict.complies, verdict.criterion)  # True A_r
+```
+
+La fórmula (13) va en sentido contrario, de un espectro de niveles a un
+espectro de velocidad en micrómetros por segundo, la forma en que están
+dibujadas las curvas VC de la VDI 2038 Blatt 2:
+
+```python
+from phonometry import vibration
+
+print(vibration.velocity_spectrum_um_s([60.0, 75.6]).round(1))  # [ 50.  301.3]
+```
+
+## 4. Un tren es una fila de puntos, hasta que deja de serlo
+
+El anexo B es para el caso en que el decaimiento del terreno se midió con una
+excitación puntual, una masa de caída o un excitador, y lo que se quiere es un
+tren. Más cerca de `R₀ ≈ L² / λ` (fórmula (B.1)) un tren de longitud `L` es
+una fila de fuentes puntuales y sus ondas superficiales divergen menos que las
+de un punto; más lejos es un punto. Así que el exponente medido con el punto se
+suaviza en 0,3 hasta `R₀`, o en 0,5 si el ajuste del punto metió divergencia y
+amortiguamiento en una sola ley de potencia, y se deja como está más allá
+(fórmula (B.2) y figura B.1). Dentro de las distancias de la tabla 1, de 25 m
+para un tranvía en superficie a 200 m para mercancías sobre terreno blando, el
+comportamiento de línea es la regla.
+
+```python
+from phonometry import vibration
+
+print(vibration.point_to_line_transition_distance_m(75.0, wavelength_m=12.5))  # 450.0
+print(vibration.train_decay_exponent(1.0))  # 0.7
+print(f"{vibration.line_source_correction_db(50.0, reference_distance_m=8.0, exponent_correction=0.3):.2f} dB")  # 4.78 dB
+print(vibration.RECOMMENDED_DISTANCES_M["urban"])  # {'tunnel': 20.0, 'surface': 25.0}
+```
+
+## 5. Lo que el ejemplo tiene mal
+
+El anexo C es el único caso resuelto, y tres cosas en él no se siguen del
+propio texto de la norma. Su nivel suma de 78,1 dB es la suma energética de las
+19 bandas sin la ponderación que prescribe el 7.1; la suma ponderada de 4 Hz a
+80 Hz es 77,7 dB, y los 1,81 mm/s impresos solo se alcanzan desde la suma sin
+ponderar. Sus intensidades de valoración, 0,11 de día y 0,05 de noche, son lo
+que dan los datos impresos con el factor 0,7 bajo la raíz una vez en lugar de
+al cuadrado, donde la fórmula (11) da 0,090 y 0,040, y el veredicto de día se
+decide en esa diferencia: el ejemplo encuentra
+superado el `A_r` de 0,1, la fórmula lo encuentra cumplido. Y su columna de
+transferencia del forjado no sale de ninguna tabla del anexo A, y cita para
+ella la figura 3 cuando el forjado de hormigón es la figura 4. Las filas de
+conformidad sujetan la cadena desde los 78,1 dB impresos y la fórmula para los
+datos impresos, y la [página de erratas](/phonometry/es/reference/errata/)
+tiene las lecturas, junto con una tabla de forjados de madera cuya desviación
+inferior está impresa por encima de su media, tres leyendas de figura que
+nombran la tabla o la magnitud equivocada, la frase sobre una categoría igual
+o inferior a 0,1 que la fórmula (11) omite, y un anexo A llamado normativo en
+una página e informativo en la suya.
+
+<Scope>
+
+## Qué cubre esta guía
+
+<ScopeClaim status="covered">
+**La cadena** de la fórmula (1), cada término sumado tal como está impreso; el
+**reescalado por velocidad** de la fórmula (3) con su límite del 30 %; la
+**transmisión por el terreno** de las fórmulas (4) a (6), divergencia y
+amortiguamiento con `α_R`; y la **mitigación** como el término de la
+fórmula (1), sumado tal como está impreso.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+Las **seis tablas del anexo A** leídas celda a celda de sus páginas: del
+terreno al forjado para hormigón y madera por frecuencia propia, del terreno a
+la cimentación para un sótano y una planta baja con las dos desviaciones, de la
+cimentación al forjado frente al cociente con la frecuencia propia,
+interpoladas en decibelios sobre el logaritmo del cociente y `nan` donde la
+impresión no tiene nada.
+</ScopeClaim>
+
+<ScopeClaim status="covered">
+**El apartado 7 entero**: la tabla 2 como la ponderación KB redondeada a la
+décima de decibelio, las fórmulas (8) a (13), y la fórmula (11) con la regla
+del borrador de la DIN 4150-2 sobre una categoría igual o inferior a 0,1, que
+imprime sin ella. **El anexo B**: la distancia de transición, la
+corrección del exponente y el decaimiento a tramos de la figura B.1. **La
+tabla 1**, las distancias recomendadas.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+**Ningún plan de trabajo.** El apartado 6, las fases de una predicción desde la
+visita al emplazamiento hasta la elección de una medida, y el anexo D, su
+tabla, son procedimiento. El segundo método del anexo B, una admitancia sumada
+sobre los bogies de un tren, se describe sin fórmula y no está implementado.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Ningún dato de emisión.** La norma dice de dónde sale un espectro de emisión
+y de qué depende; imprime uno, en una cimentación, y la biblioteca no lleva
+ninguno. El espectro lo pone el usuario.
+</ScopeClaim>
+
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Vibración ferroviaria por categorías (E DIN 4150-2)](/phonometry/es/vibration/immission/railway-categories/):
+  la valoración que alimenta esta predicción, con la misma fórmula (11) y los
+  mismos factores.
+- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
+  la medida de la que salen los espectros de emisión y el decaimiento del
+  terreno.
+- [Predecir la vibración antes de medir (DIN 4150-1)](/phonometry/es/vibration/immission/vibration-prediction/):
+  la ley general de decaimiento de la que la fórmula (5) de este método es un
+  caso.
+- Referencia de API:
+  [`vibration.immission.railway_prediction`](/phonometry/es/reference/api/vibration/railway-prediction/).
+
+</SeeAlso>

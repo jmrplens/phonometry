@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 130 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 133 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and thirty guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and thirty-three guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -574,6 +574,19 @@ ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 and DIN 4150-3.
   exposure into one number, the rules for blasting, roads, railways and
   construction sites, and the estimate from a peak velocity where nothing
   weighted was recorded.
+- [Railway vibration by category of train (E DIN 4150-2)](/phonometry/vibration/immission/railway-categories/):
+  the draft that is to replace DIN 4150-2, one clock interval per passage, a
+  weighting factor per kind of train, the night-time upper value of a new
+  line and the 25 % rule of an altered one, with the rest of its changes
+  behind an edition switch.
+- [Predicting railway vibration (E DIN 45672-3)](/phonometry/vibration/immission/railway-prediction/):
+  the additive chain from an emission spectrum through the ground and the
+  building to a third-octave spectrum on a floor, the six transfer tables of
+  Annex A, and the KB values formed from the spectrum.
+- [Predicting vibration before measuring (DIN 4150-1)](/phonometry/vibration/immission/vibration-prediction/):
+  the decay with distance beyond the far field with an exponent by kind of
+  source and wave, what a foundation and a floor do, a blast, a falling mass
+  and a hall of machines, and what a track excites at.
 
 ## [Environment and transport](/phonometry/environment/)
 

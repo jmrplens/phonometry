@@ -56,6 +56,20 @@ it is one.
 **A formula printed wrong.** Formula (A.1b) equates :math:`KB_{FTm,j}` to a
 mean of squares with no root over it; Formula (A.1a) beside it, Formula (A.2)
 and the worked Example 8 all take the root. Registered in ``docs/ERRATA.md``.
+
+**The draft of 2023.** E DIN 4150-2:2023-08 is to replace the 1999 edition,
+and ``edition="2023"`` reads it: Table 1 with one cell changed, the night
+:math:`A_u` of a mixed area down from 0,15 to 0,1; no shortcut for a
+:math:`KB_{F\mathrm{max}}` within the 15 % above :math:`A_u`, which its
+Example 3 sends on to :math:`A_r` and fails; a railway compared with
+:math:`A_o` like any other source, its :math:`KB_{F\mathrm{max}}` and
+:math:`KB_{FTr}` formed by category of train in
+:mod:`phonometry.vibration.immission.train_categories`; an existing road
+whose neighbours must put up with :math:`A_u` and :math:`A_r` exceeded by up
+to 50 % (6.5.2); and an induced seismic event, held by day and by night to
+the daytime :math:`A_o` (6.5.1.3). The rest of the numbers are the same, and
+the draft's Table 3 prints the days two to six that the 1999 Figure 3 made
+one read off a curve, cell for cell what the interpolation gives.
 """
 
 from __future__ import annotations
@@ -88,16 +102,21 @@ __all__ = [
     "ASSESSMENT_PERIOD_S",
     "ASSESSMENT_TAKT_COUNT",
     "BLASTING_EXCEPTION_KB_FMAX",
+    "BLASTING_MAX_PER_WEEK",
     "CONSTRUCTION_BLASTING_A_O",
     "CONSTRUCTION_GUIDE_VALUES",
     "CONSTRUCTION_STAGES",
     "DAY_REST_TIME_S",
     "GUIDE_VALUES",
+    "GUIDE_VALUES_2023",
+    "INDUCED_SEISMIC_PEAK_FACTOR",
     "KB_UNCERTAINTY_PERCENT",
     "PEAK_TO_KB_FACTORS",
     "RAILWAY_NIGHT_INVESTIGATION_KB",
+    "ROAD_NIGHT_INVESTIGATION_KB",
     "RARE_EVENTS_PER_DAY",
     "REST_TIME_WEIGHT",
+    "ROAD_EXISTING_TOLERANCE_FACTOR",
     "URBAN_RAILWAY_FACTOR",
     "GuideValues",
     "PeopleAssessment",
@@ -108,6 +127,7 @@ __all__ = [
     "assessment_vibration_severity",
     "construction_guide_values",
     "guide_values",
+    "induced_seismic_kb_fmax",
     "kb_fmax_from_peak_velocity",
     "kb_from_peak_velocity",
     "railway_assessment_severity",
@@ -147,6 +167,10 @@ RARE_EVENTS_PER_DAY: int = 3
 #: and 4.
 BLASTING_EXCEPTION_KB_FMAX: float = 8.0
 
+#: The most blasts a week where several fired in immediate succession are
+#: counted as one event (6.5.1): 15.
+BLASTING_MAX_PER_WEEK: int = 15
+
 #: The :math:`A_o` a construction site's blasting is held to (6.5.4.2): 8,
 #: with lower values to be aimed for.
 CONSTRUCTION_BLASTING_A_O: float = 8.0
@@ -165,6 +189,22 @@ RAILWAY_NIGHT_INVESTIGATION_KB: dict[str, float] = {
     "underground": 0.3,
 }
 
+#: E DIN 4150-2:2023-08, 6.5.2: by night a road is not judged on :math:`A_o`,
+#: whose rare exceedance does not fail the requirement; a single clock
+#: maximum :math:`KB_{FTi}` above 0,6, in any area, is a reason to look into
+#: the cause and put it right. The value still counts in :math:`KB_{FTr}`.
+ROAD_NIGHT_INVESTIGATION_KB: float = 0.6
+
+#: E DIN 4150-2:2023-08, 6.5.2: what the neighbours of an existing road in an
+#: existing building must put up with, :math:`A_u` and :math:`A_r` exceeded
+#: by up to 50 %, by day and by night, that is 1,5 times the guide value.
+ROAD_EXISTING_TOLERANCE_FACTOR: float = 1.5
+
+#: E DIN 4150-2:2023-08, 6.5.1.3: the simplified estimate of the
+#: :math:`KB_{F\mathrm{max}}` of an induced seismic event from the peak
+#: velocity, 0,44 times it.
+INDUCED_SEISMIC_PEAK_FACTOR: float = 0.44
+
 
 @dataclass(frozen=True)
 class GuideValues:
@@ -176,11 +216,18 @@ class GuideValues:
         not met however short the exposure.
     :ivar a_r: :math:`A_r`, the value the assessment vibration severity
         :math:`KB_{FTr}` is compared with.
+    :ivar time_of_day: The period the row is for, ``"day"`` or ``"night"``;
+        Table 2 is daytime only.
+    :ivar edition: The edition the values are read from, ``"1999"`` or
+        ``"2023"``, which is the edition :func:`assess_people_in_buildings`
+        judges them under unless told otherwise.
     """
 
     a_u: float
     a_o: float
     a_r: float
+    time_of_day: str = "day"
+    edition: str = "1999"
 
 
 #: Table 1 (printed page 6): the guide values by kind of area, keyed by the
@@ -193,24 +240,43 @@ class GuideValues:
 GUIDE_VALUES: dict[str, dict[str, GuideValues]] = {
     "industrial": {
         "day": GuideValues(0.4, 6.0, 0.2),
-        "night": GuideValues(0.3, 0.6, 0.15),
+        "night": GuideValues(0.3, 0.6, 0.15, time_of_day="night"),
     },
     "commercial": {
         "day": GuideValues(0.3, 6.0, 0.15),
-        "night": GuideValues(0.2, 0.4, 0.1),
+        "night": GuideValues(0.2, 0.4, 0.1, time_of_day="night"),
     },
     "mixed": {
         "day": GuideValues(0.2, 5.0, 0.1),
-        "night": GuideValues(0.15, 0.3, 0.07),
+        "night": GuideValues(0.15, 0.3, 0.07, time_of_day="night"),
     },
     "residential": {
         "day": GuideValues(0.15, 3.0, 0.07),
-        "night": GuideValues(0.1, 0.2, 0.05),
+        "night": GuideValues(0.1, 0.2, 0.05, time_of_day="night"),
     },
     "sensitive": {
         "day": GuideValues(0.1, 3.0, 0.05),
-        "night": GuideValues(0.1, 0.15, 0.05),
+        "night": GuideValues(0.1, 0.15, 0.05, time_of_day="night"),
     },
+}
+
+#: Table 1 of E DIN 4150-2:2023-08 (printed page 14): the same thirty cells
+#: as :data:`GUIDE_VALUES` but one, the night :math:`A_u` of row 3, the mixed
+#: area, down from 0,15 to 0,1; the row now names urban areas too.
+GUIDE_VALUES_2023: dict[str, dict[str, GuideValues]] = {
+    area: {
+        "day": GuideValues(
+            row["day"].a_u, row["day"].a_o, row["day"].a_r, "day", "2023"
+        ),
+        "night": GuideValues(
+            0.1 if area == "mixed" else row["night"].a_u,
+            row["night"].a_o,
+            row["night"].a_r,
+            "night",
+            "2023",
+        ),
+    }
+    for area, row in GUIDE_VALUES.items()
 }
 
 #: The three stages of 6.5.4.2 a construction site may be held to: below
@@ -259,6 +325,25 @@ _PERIODS = tuple(ASSESSMENT_PERIOD_S)
 _AREAS = tuple(GUIDE_VALUES)
 _SOURCES = ("general", "road", "railway", "urban_railway", "quarry_blasting")
 _RAILWAYS = ("railway", "urban_railway")
+_ROADS = ("road", "road_existing")
+#: The sources whose A_u and A_r are read raised by a factor: the urban
+#: railway of 1999 (6.5.3.3) and the existing road of the draft (6.5.2).
+_RAISED_SOURCES = {
+    "urban_railway": URBAN_RAILWAY_FACTOR,
+    "road_existing": ROAD_EXISTING_TOLERANCE_FACTOR,
+}
+#: The sources the draft of 2023 adds (6.5.2 and 6.5.1.3), and the one it
+#: drops: the factor 1,5 on the guide values of an urban railway gives way
+#: to the weighting factor of its Table 2.
+_SOURCES_2023 = (
+    "general",
+    "road",
+    "road_existing",
+    "railway",
+    "quarry_blasting",
+    "induced_seismic",
+)
+_EDITIONS = ("1999", "2023")
 #: The areas of Table 1 rows 3 and 4, where quarry blasting under the
 #: conditions of 6.5.1 is held to the :math:`A_o` of row 1.
 _QUARRY_BLASTING_AREAS = ("mixed", "residential")
@@ -312,7 +397,11 @@ def _keeps_to(value: float, guide: float) -> bool:
 
 
 def guide_values(
-    area: str, *, time_of_day: str = "day", source: str = "general"
+    area: str,
+    *,
+    time_of_day: str = "day",
+    source: str = "general",
+    edition: str = "1999",
 ) -> GuideValues:
     """The guide values of Table 1 for one area, time of day and kind of source.
 
@@ -325,25 +414,61 @@ def guide_values(
         ``"quarry_blasting"``, blasts on working days with the neighbours
         warned, between 7:00 and 13:00 or 15:00 and 19:00, one event a day,
         for which 6.5.1 lets a mixed or residential area take the daytime
-        :math:`A_o` of row 1, which is 6.
+        :math:`A_o` of row 1, which is 6. The draft of 2023 has no
+        ``"urban_railway"`` and adds ``"road_existing"``, an existing road by
+        an existing building, whose :math:`A_u` and :math:`A_r` its
+        neighbours must put up with exceeded by up to 50 % (6.5.2), and
+        ``"induced_seismic"``, which the daytime :math:`A_o` bounds by night
+        as well (6.5.1.3).
+    :param edition: ``"1999"`` (default), DIN 4150-2:1999-06, or ``"2023"``,
+        E DIN 4150-2:2023-08, whose Table 1 has the night :math:`A_u` of a
+        mixed area at 0,1.
     :return: The three values, as a :class:`GuideValues`.
-    :raises ValueError: For an unknown area, time of day or source.
+    :raises ValueError: For an unknown area, time of day, source or edition,
+        or a source the edition does not have.
     """
-    row = GUIDE_VALUES[require_choice(str(area), "area", _AREAS)]
+    year = require_choice(str(edition), "edition", _EDITIONS)
+    table = GUIDE_VALUES if year == "1999" else GUIDE_VALUES_2023
+    row = table[require_choice(str(area), "area", _AREAS)]
     which = require_choice(str(time_of_day), "time_of_day", _PERIODS)
     values = row[which]
-    kind = require_choice(str(source), "source", _SOURCES)
-    if kind == "urban_railway":
+    kind = require_choice(
+        str(source), "source", _SOURCES if year == "1999" else _SOURCES_2023
+    )
+    if kind in _RAISED_SOURCES:
         # Rounded to the decimals of the table, so 0,05 times 1,5 is 0,075
         # and not a float with a tail the verdict would then round anyway.
+        factor = _RAISED_SOURCES[kind]
         return GuideValues(
-            round(values.a_u * URBAN_RAILWAY_FACTOR, _RAISED_DECIMALS),
+            round(values.a_u * factor, _RAISED_DECIMALS),
             values.a_o,
-            round(values.a_r * URBAN_RAILWAY_FACTOR, _RAISED_DECIMALS),
+            round(values.a_r * factor, _RAISED_DECIMALS),
+            values.time_of_day,
+            values.edition,
         )
+    a_o = values.a_o
+    if kind == "induced_seismic" and which == "night":
+        a_o = row["day"].a_o
     if kind == "quarry_blasting" and which == "day" and area in _QUARRY_BLASTING_AREAS:
-        return GuideValues(values.a_u, GUIDE_VALUES[_ROW_1][which].a_o, values.a_r)
-    return values
+        a_o = table[_ROW_1][which].a_o
+    return GuideValues(values.a_u, a_o, values.a_r, values.time_of_day, values.edition)
+
+
+def induced_seismic_kb_fmax(peak_velocity_mm_s: float) -> float:
+    r"""The :math:`KB_{F\mathrm{max}}` of an induced seismic event, E DIN 4150-2:2023-08 6.5.1.3.
+
+    :math:`KB_{F\mathrm{max}} = 0{,}44 \, v_{\max}`, the simplified estimate
+    the draft gives for an event of a few seconds with its energy below
+    15 Hz, which is held by day and by night to the daytime :math:`A_o`
+    alone; :math:`KB_{FTr}` is not formed for it.
+
+    :param peak_velocity_mm_s: :math:`v_{\max}`, in millimetres per second.
+    :return: :math:`KB_{F\mathrm{max}}`.
+    :raises ValueError: For a negative velocity.
+    """
+    return INDUCED_SEISMIC_PEAK_FACTOR * require_non_negative(
+        peak_velocity_mm_s, "peak_velocity_mm_s"
+    )
 
 
 def _interpolated(low: float, high: float, days: int) -> float:
@@ -757,6 +882,34 @@ class PeopleAssessment:
         return plot_people_assessment(self, ax=ax, language=language, **kwargs)
 
 
+def _edition_of(guide: GuideValues, edition: str | None) -> str:
+    """The edition a verdict is read under: the guide values' own, or the one asked for if it is the same."""
+    year = require_choice(
+        str(guide.edition if edition is None else edition), "edition", _EDITIONS
+    )
+    if year != guide.edition:
+        msg = (
+            f"the guide values are of the {guide.edition} edition and the verdict "
+            f"was asked for under the {year} one; read them with edition={year!r}."
+        )
+        raise ValueError(msg)
+    return year
+
+
+def _skips_upper_value(year: str, kind: str, guide: GuideValues) -> bool:
+    """Whether the source is judged without the upper value.
+
+    Under the 1999 edition a railway is: 6.5.3.1 judges it on A_u and A_r,
+    and 6.5.3.5 has its own night-time thresholds for looking into the cause
+    of single clock maxima, which are not a verdict either. The draft
+    compares its Formula (8) KB_Fmax with A_o and moves that reading to the
+    road by night (6.5.2).
+    """
+    if year == "1999":
+        return kind in _RAILWAYS
+    return kind in _ROADS and guide.time_of_day == "night"
+
+
 def assess_people_in_buildings(
     kb_fmax: float,
     guide: GuideValues,
@@ -764,6 +917,7 @@ def assess_people_in_buildings(
     kb_ftr: float | None = None,
     source: str = "general",
     rare_short_events: bool = False,
+    edition: str | None = None,
 ) -> PeopleAssessment:
     r"""Read the guide values in the order of Clause 6.2 (Figure 2).
 
@@ -787,25 +941,49 @@ def assess_people_in_buildings(
     :math:`A_r` of 0,15; and the standard says the values are not to be
     applied mechanically in any case.
 
+    The draft of 2023 reads the same order (its 6.3 and Figure 2) with three
+    differences: a :math:`KB_{F\mathrm{max}}` within the 15 % above
+    :math:`A_u` goes on to :math:`A_r` like any other, which is how its
+    Example 3 fails 0,114 against 0,10; a railway is compared with
+    :math:`A_o` as well, its :math:`KB_{F\mathrm{max}}` being the 1,5 times
+    :math:`KB_{FTm,Zug}` of :func:`~phonometry.vibration.railway_kb_fmax` and
+    its :math:`KB_{FTr}` that of
+    :func:`~phonometry.vibration.train_assessment_severity`; and a road is
+    not, by night, its 6.5.2 saying that a rare exceedance of the night-time
+    :math:`A_o` does not fail the requirement, with
+    :data:`ROAD_NIGHT_INVESTIGATION_KB` in its place as a reason to look
+    into the cause. An induced seismic event is a rare short event by
+    definition (6.5.1.3). The edition is the one the guide values were read
+    from, and asking for the other is refused: the values of one edition
+    under the rules of the other is not an assessment of either.
+
     :param kb_fmax: :math:`KB_{F\mathrm{max}}`, the largest of the three
         directions.
-    :param guide: The guide values, from :func:`guide_values` or
-        :func:`construction_guide_values`.
+    :param guide: The guide values, from :func:`guide_values`,
+        :func:`construction_guide_values` or, for a railway under the draft,
+        :func:`~phonometry.vibration.railway_guide_values`.
     :param kb_ftr: :math:`KB_{FTr}`, needed only when the verdict comes down
         to it.
     :param source: ``"general"`` (default), ``"road"``, ``"railway"``,
         ``"urban_railway"`` or ``"quarry_blasting"``, which is a rare short
-        event by definition.
+        event by definition; under the draft, ``"road_existing"`` and
+        ``"induced_seismic"`` in place of ``"urban_railway"``.
     :param rare_short_events: Whether the immission is at most three short
         events a day, such as blasting, which 6.5.1 judges on :math:`A_o`
         alone.
+    :param edition: ``"1999"`` or ``"2023"``, the draft; ``None`` (default)
+        takes the edition of the guide values.
     :return: The verdict, as a :class:`PeopleAssessment`.
-    :raises ValueError: For a negative severity, an unknown source, or a
-        verdict that needs :math:`KB_{FTr}` without one given.
+    :raises ValueError: For a negative severity, an unknown source or
+        edition, an edition other than the guide values are of, or a verdict
+        that needs :math:`KB_{FTr}` without one given.
     """
     peak = require_non_negative(kb_fmax, "kb_fmax")
-    kind = require_choice(str(source), "source", _SOURCES)
-    rare = rare_short_events or kind == "quarry_blasting"
+    year = _edition_of(guide, edition)
+    kind = require_choice(
+        str(source), "source", _SOURCES if year == "1999" else _SOURCES_2023
+    )
+    rare = rare_short_events or kind in ("quarry_blasting", "induced_seismic")
 
     def verdict(
         *, complies: bool, criterion: str, kb_ftr: float | None, uncertain: bool = False
@@ -822,12 +1000,9 @@ def assess_people_in_buildings(
 
     if _keeps_to(peak, guide.a_u):
         return verdict(complies=True, criterion="A_u", kb_ftr=None)
-    if peak <= guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0):
+    if year == "1999" and peak <= guide.a_u * (1.0 + KB_UNCERTAINTY_PERCENT / 100.0):
         return verdict(complies=True, criterion="A_u", kb_ftr=None, uncertain=True)
-    # A railway skips the upper value: 6.5.3.1 judges it on A_u and A_r, and
-    # 6.5.3.5 has its own night-time thresholds for looking into the cause of
-    # single clock maxima, which are not a verdict either.
-    if kind not in _RAILWAYS:
+    if not _skips_upper_value(year, kind, guide):
         if not _keeps_to(peak, guide.a_o):
             return verdict(complies=False, criterion="A_o", kb_ftr=None)
         if rare:

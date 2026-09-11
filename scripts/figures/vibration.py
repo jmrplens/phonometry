@@ -6377,3 +6377,380 @@ def generate_people_trains_per_hour(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "people_trains_per_hour.svg")
     plt.close()
+
+
+def generate_railway_prediction_chain(output_dir: str) -> None:
+    """E DIN 45672-3 Annex C: the emission, the floor and the KB-weighted bands."""
+    print("Generating railway_prediction_chain...")
+    from phonometry import vibration
+
+    # Table C.1 (printed page 34): a tram at 7 m, a concrete floor at 20 Hz.
+    emission = np.array(
+        [26.0, 27.0, 37.0, 54.0, 56.0, 57.0, 56.0, 57.0, 58.0, 58.0, 52.0, 52.0,
+         60.0, 58.0, 49.0, 45.0, 45.0, 33.0, 28.0]
+    )  # fmt: skip
+    ground = np.array(
+        [0.9, 0.9, 0.9, 1.1, 1.1, 1.2, 1.3, 1.3, 1.4, 1.6, 1.7, 2.0, 2.2, 2.6, 3.0,
+         3.5, 3.1, 2.8, 2.4]
+    )  # fmt: skip
+    floor = np.array(
+        [1.9, 2.3, 3.1, 3.5, 5.0, 6.9, 11.5, 17.3, 10.0, 5.4, 1.9, 1.5, -0.8, -2.3,
+         -3.8, -5.4, -6.5, -8.1, -9.6]
+    )  # fmt: skip
+    prediction = vibration.predict_train_category(
+        emission, ground_db=ground, floor_db=floor
+    )
+    bands = prediction.frequencies_hz
+    positions = np.arange(bands.size)
+    weighted = np.isin(bands, prediction.weighted_frequencies_hz)
+
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    ax.plot(
+        positions,
+        prediction.emission_db,
+        color=COLOR_TERTIARY,
+        linewidth=1.6,
+        linestyle="--",
+        marker="s",
+        markersize=5,
+        label="emission $L_{v,E}$ at the foundation",
+    )
+    ax.plot(
+        positions,
+        prediction.floor_db,
+        color=COLOR_PRIMARY,
+        linewidth=1.8,
+        marker="o",
+        markersize=5,
+        label="on the floor $L_v$, Formula (1)",
+    )
+    ax.plot(
+        positions[weighted],
+        prediction.weighted_db,
+        color=COLOR_SECONDARY,
+        linewidth=1.6,
+        linestyle=":",
+        marker="^",
+        markersize=5,
+        label="KB-weighted $L_{v,KB}$, Formula (8), 4 Hz to 80 Hz",
+    )
+    peak = int(np.argmax(prediction.floor_db))
+    ax.annotate(
+        "the floor's 20 Hz resonance,\n+17.3 dB from Annex A",
+        xy=(positions[peak], prediction.floor_db[peak]),
+        xytext=(positions[peak] - 6.8, prediction.floor_db[peak] + 3.0),
+        fontsize=9,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.text(
+        0.02,
+        0.04,
+        f"$KB_{{FTm}}$ = {prediction.kb_ftm:.2f}, $KB_{{F\\mathrm{{max}}}}$ = "
+        f"{prediction.kb_fmax:.2f}, $v_{{\\max}}$ = {prediction.peak_velocity_mm_s:.2f} mm/s",
+        transform=ax.transAxes,
+        fontsize=9,
+        color=COLOR_FG,
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.set_xticks(positions)
+    ax.set_xticklabels([f"{band:g}" for band in bands], rotation=45, ha="right")
+    ax.set_title("A tram predicted on a concrete floor (E DIN 45672-3 Annex C)", pad=12)
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Velocity level [dB re 5·10⁻⁸ m/s]")
+    ax.set_ylim(15.0, 85.0)
+    ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "railway_prediction_chain.svg")
+    plt.close()
+
+
+def generate_building_transfer_spectra(output_dir: str) -> None:
+    """E DIN 45672-3 Figures 6 and 7: ground to floor by natural frequency."""
+    print("Generating building_transfer_spectra...")
+    from phonometry import vibration
+
+    bands = np.asarray(vibration.PREDICTION_BAND_CENTRES_HZ)
+    positions = np.arange(bands.size)
+    _fig, axes = plt.subplots(1, 2, figsize=(11.5, 5.6), sharey=True)
+    styles = {
+        8.0: (COLOR_PRIMARY, "-"),
+        16.0: (COLOR_SECONDARY, "--"),
+        63.0: (COLOR_TERTIARY, ":"),
+    }
+    titles = {
+        "concrete": "concrete floors, Table A.1",
+        "timber": "timber floors, Table A.2",
+    }
+    for ax, (floor, title) in zip(axes, titles.items(), strict=True):
+        for natural, (colour, style) in styles.items():
+            ax.plot(
+                positions,
+                vibration.ground_to_floor_transfer_db(
+                    floor, floor_natural_frequency_hz=natural
+                ),
+                color=colour,
+                linestyle=style,
+                linewidth=1.8,
+                marker="o",
+                markersize=4,
+                label=f"$f_e$ = {natural:g} Hz",
+            )
+        ax.set_title(title, pad=10)
+        ax.set_xticks(positions[::2])
+        ax.set_xticklabels([f"{band:g}" for band in bands[::2]])
+        ax.set_xlabel(LABEL_FREQ_HZ)
+        ax.axhline(0.0, color=COLOR_MUTED, linewidth=0.9)
+        ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+        ax.set_axisbelow(True)
+    axes[0].set_ylabel("Level difference ground to floor $\\Delta L_{v,DB}$ [dB]")
+    axes[0].set_ylim(-8.0, 24.0)
+    axes[1].legend(loc="upper right", fontsize=9)
+    axes[0].annotate(
+        "15 dB at the natural frequency,\nwhatever the storey",
+        xy=(positions[3], 15.0),
+        xytext=(positions[7], 20.0),
+        fontsize=9,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    plt.suptitle(
+        "What a floor adds to the ground's vibration (E DIN 45672-3 Figures 6 and 7)",
+        y=0.995,
+    )
+    plt.tight_layout()
+    save_figure(output_dir, "building_transfer_spectra.svg")
+    plt.close()
+
+
+def generate_railway_change_example(output_dir: str) -> None:
+    """E DIN 4150-2:2023-08 Example 9: KB_FTr before and after the second track."""
+    print("Generating railway_change_example...")
+    from phonometry import vibration
+
+    nullfall = {
+        "day": vibration.train_assessment_severity(
+            [0.24, 0.44], [28, 8], alpha=[0.9, 1.0]
+        ),
+        "night": vibration.train_assessment_severity(
+            [0.24, 0.44], [12, 18], alpha=[0.9, 1.0], time_of_day="night"
+        ),
+    }
+    kb = [0.24, 0.22, 0.44, 0.40, 0.44, 0.40]
+    alpha = [0.9, 0.9, 1.0, 1.0, 1.3, 1.3]
+    planfall = {
+        "day": vibration.train_assessment_severity(
+            kb, [17, 17, 4, 4, 2, 2], alpha=alpha
+        ),
+        "night": vibration.train_assessment_severity(
+            kb, [7, 7, 12, 12, 6, 6], alpha=alpha, time_of_day="night"
+        ),
+    }
+    guides = {
+        which: vibration.railway_guide_values("mixed", time_of_day=which)
+        for which in ("day", "night")
+    }
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    x = np.array([0.0, 1.0])
+    labels = ["by day, 16 h", "by night, 8 h"]
+    before = [nullfall["day"], nullfall["night"]]
+    after = [planfall["day"], planfall["night"]]
+    ax.bar(x - 0.19, before, 0.38, color=COLOR_TERTIARY, label="without the project")
+    ax.bar(x + 0.19, after, 0.38, color=COLOR_PRIMARY, label="with the second track")
+    for i, which in enumerate(("day", "night")):
+        a_r = guides[which].a_r
+        ax.hlines(a_r, x[i] - 0.45, x[i] + 0.45, color=COLOR_SECONDARY, linewidth=1.8)
+        ax.text(
+            x[i] + 0.46,
+            a_r,
+            f"$A_r$ = {a_r:g}",
+            va="center",
+            fontsize=9,
+            color=COLOR_SECONDARY,
+        )
+        tolerated = before[i] * (
+            1.0 + vibration.RAILWAY_CHANGE_TOLERANCE_PERCENT / 100.0
+        )
+        ax.hlines(
+            tolerated,
+            x[i] - 0.45,
+            x[i] + 0.45,
+            color=COLOR_MUTED,
+            linewidth=1.4,
+            linestyle="--",
+        )
+    ax.annotate(
+        "25 % above the existing exposure,\nthe least increase people notice",
+        xy=(x[1] - 0.45, before[1] * 1.25),
+        xytext=(x[0] + 0.35, 0.117),
+        fontsize=9,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.annotate(
+        "0.094 against 0.065: over 25 %,\nand above $A_r$, so mitigation",
+        xy=(x[1] + 0.19, after[1]),
+        xytext=(x[1] + 0.02, 0.106),
+        fontsize=9,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels)
+    ax.set_ylabel("Assessment vibration severity $KB_{FTr}$")
+    ax.set_ylim(0.0, 0.13)
+    ax.set_xlim(-0.7, 1.7)
+    ax.set_title(
+        "A line extended by a second track (E DIN 4150-2:2023-08 Example 9)", pad=12
+    )
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "railway_change_example.svg")
+    plt.close()
+
+
+def generate_ground_propagation_decay(output_dir: str) -> None:
+    """DIN 4150-1 Figure A.19: Formula (2) for three exponents and the measured points."""
+    print("Generating ground_propagation_decay...")
+    from phonometry import vibration
+
+    distances = np.linspace(13.0, 80.0, 200)
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    styles = {
+        0.0: (COLOR_TERTIARY, "-"),
+        0.5: (COLOR_PRIMARY, "--"),
+        1.0: (COLOR_SECONDARY, ":"),
+    }
+    for exponent, (colour, style) in styles.items():
+        ax.plot(
+            distances,
+            vibration.far_field_velocity_mm_s(
+                0.44,
+                distances,
+                reference_distance_m=13.0,
+                exponent=exponent,
+                attenuation_per_m=0.005,
+            ),
+            color=colour,
+            linestyle=style,
+            linewidth=1.8,
+            label=f"$n$ = {exponent:g}",
+        )
+    measured = ([13.0, 23.0, 43.0, 73.0], [0.44, 0.27, 0.09, 0.015])
+    ax.plot(
+        measured[0],
+        measured[1],
+        color=COLOR_FG,
+        marker="+",
+        markersize=11,
+        markeredgewidth=1.8,
+        linestyle="none",
+        label="measured with group Gd running",
+    )
+    ax.annotate(
+        "$\\alpha$ = 0.005 1/m from $D$ = 0.01 and $\\lambda$ = 12.5 m,\n"
+        "the same damping on every curve",
+        xy=(60.0, 0.348),
+        xytext=(40.0, 0.44),
+        fontsize=9,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.set_xlabel("Distance from the source $R$ [m]")
+    ax.set_ylabel("Vertical velocity $v_z$ [mm/s]")
+    ax.set_xlim(0.0, 80.0)
+    ax.set_ylim(0.0, 0.5)
+    ax.set_title(
+        "The decay of Formula (2) against a machine hall's measurements (DIN 4150-1 Figure A.19)",
+        pad=12,
+    )
+    ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="lower left", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "ground_propagation_decay.svg")
+    plt.close()
+
+
+def generate_machine_count_correction(output_dir: str) -> None:
+    """DIN 4150-1 Figure 3: the correction chi of Formula (7), read off the page."""
+    print("Generating machine_count_correction...")
+    from phonometry import vibration
+
+    counts = np.asarray(vibration.MACHINE_COUNT_AXIS, dtype=np.float64)
+    _fig, ax = plt.subplots(figsize=(10, 6.2))
+    colours = [
+        COLOR_PRIMARY, COLOR_SECONDARY, COLOR_TERTIARY, COLOR_QUATERNARY, COLOR_MUTED, COLOR_FG,
+    ]  # fmt: skip
+    for (reference, chi), colour in zip(
+        vibration.MACHINE_COUNT_CORRECTION.items(), colours, strict=True
+    ):
+        ax.plot(
+            counts,
+            chi,
+            color=colour,
+            linewidth=1.8,
+            marker="o",
+            markersize=3.5,
+            label=f"$N_B$ = {reference}",
+        )
+    ax.annotate(
+        "read off the printed nomogram\nat a five-hundredth, the stroke's width",
+        xy=(50.0, 0.30),
+        xytext=(55.0, 0.44),
+        fontsize=9,
+        color=COLOR_FG,
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 0.9},
+        bbox={
+            "boxstyle": "round,pad=0.35",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    ax.set_xlabel("Machines running $N$")
+    ax.set_ylabel("Correction $\\chi$ of Formula (7)")
+    ax.set_xlim(0.0, 100.0)
+    ax.set_ylim(0.0, 0.6)
+    ax.set_title(
+        "A hall of similar machines, measured with $N_B$ of them (DIN 4150-1 Figure 3)",
+        pad=12,
+    )
+    ax.grid(color=COLOR_GRID, linestyle="-", alpha=0.5)
+    ax.set_axisbelow(True)
+    ax.legend(loc="upper right", fontsize=9, ncol=2)
+    plt.tight_layout()
+    save_figure(output_dir, "machine_count_correction.svg")
+    plt.close()

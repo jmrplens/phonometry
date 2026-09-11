@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 130 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 133 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento treinta guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento treinta y tres guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -602,6 +602,19 @@ EN 12354-5, ISO 2631-1/-2/-4/-5, ISO 5349-1/-2, ISO 8041-1 y DIN 4150-3.
   exposición en un número, las reglas para voladuras, carreteras, ferrocarriles
   y obras, y la estimación desde una velocidad de pico donde no se registró
   nada ponderado.
+- [Vibración ferroviaria por categoría de tren (E DIN 4150-2)](/phonometry/es/vibration/immission/railway-categories/):
+  el borrador que va a sustituir a la DIN 4150-2, un intervalo por paso, un
+  factor de ponderación por tipo de tren, el valor superior nocturno de una
+  línea nueva y la regla del 25 % de una ampliada, con el resto de sus cambios
+  tras un conmutador de edición.
+- [Previsión de la vibración ferroviaria (E DIN 45672-3)](/phonometry/es/vibration/immission/railway-prediction/):
+  la cadena aditiva desde un espectro de emisión por el terreno y el edificio
+  hasta un espectro en tercios de octava sobre un forjado, las seis tablas de
+  transmisión del anexo A y los valores KB formados desde el espectro.
+- [Previsión de la vibración antes de medir (DIN 4150-1)](/phonometry/es/vibration/immission/vibration-prediction/):
+  el decaimiento con la distancia más allá del campo cercano con un exponente
+  por tipo de fuente y de onda, lo que hacen una cimentación y un forjado, una
+  voladura, una masa que cae y una nave de máquinas, y a qué excita una vía.
 
 ## [Medio ambiente y transporte](/phonometry/es/environment/)
 

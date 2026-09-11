@@ -59,7 +59,7 @@ Figure 2 draws as a flowchart:
 from phonometry import vibration
 
 guide = vibration.guide_values("commercial")
-print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15)
+print(guide)  # GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', edition='1999')
 
 # Annex C, Example 1: a sawmill's stationary 5 Hz vibration at KB_Fmax = 0.25.
 verdict = vibration.assess_people_in_buildings(0.25, guide)
@@ -202,7 +202,7 @@ for days in (1, 3, 6, 7, 30):
 # 30 working days: A_u 0.30, A_r 0.20
 
 urban = vibration.guide_values("residential", time_of_day="night", source="urban_railway")
-print(urban)  # GuideValues(a_u=0.15, a_o=0.2, a_r=0.075)
+print(urban)  # GuideValues(a_u=0.15, a_o=0.2, a_r=0.075, time_of_day='night', edition='1999')
 ```
 
 ## 4. A railway, class by class
@@ -302,6 +302,27 @@ it, while Formula (A.1a) beside it takes the root, Formula (A.2) beneath them
 uses `KB²_FTm,j` for the mean square, and Example 8 applies (A.1b) with the
 root. The library takes the root, the tests hold it to the example, and the
 [errata page](/phonometry/reference/errata/) has the reading.
+
+## 7. The draft of 2023
+
+E DIN 4150-2:2023-08 is to replace this edition, and the library reads it
+with `edition="2023"` on `guide_values` and `assess_people_in_buildings`.
+It changes one cell of Table 1, the night `A_u` of a mixed area down to 0,1;
+no longer excuses a `KB_Fmax` within the 15 % above `A_u`; compares a
+railway with `A_o` and forms its numbers by category of train, with a
+weighting factor per kind of train, and a road by night not; and adds an
+existing road whose neighbours must put up with 50 % more, and an induced
+seismic event held to the daytime `A_o`. The guide values carry the edition
+they were read for and the verdict follows it. The railway and the rest of
+the changes have
+[their own page](/phonometry/vibration/immission/railway-categories/).
+
+```python
+from phonometry import vibration
+
+print(vibration.guide_values("mixed", time_of_day="night", edition="2023"))
+# GuideValues(a_u=0.1, a_o=0.3, a_r=0.07, time_of_day='night', edition='2023')
+```
 
 <Scope>
 

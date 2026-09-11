@@ -107,6 +107,13 @@ _MOBILITY_LABEL = "Mobility $|Y|$ [m/(N·s)]"
 _DEVIATION_LABEL = "Deviation [%]"
 #: The three legend entries every ISO 8041-1 verifier panel carries: the band
 #: Table 5 allows, and the two verdicts a measured point can take in it.
+#: The DIN 45669-1 reading figure: its time axis, its ordinate and the two
+#: numbers a meter displays, named once so the label a line carries and the
+#: key its translation is filed under cannot drift apart.
+_TIME_LABEL = "Time [s]"
+_KBF_LABEL = "Weighted vibration severity $KB_F$"
+_KBF_MAX_LABEL = r"$KB_{{F\mathrm{{max}}}}$ = {value}"
+_KBFTM_LABEL = r"$KB_{{FTm}}$ = {value}"
 _ISO8041_BAND_LABEL = "ISO 8041-1 tolerance"
 _WITHIN_LABEL = "within tolerance"
 _OUTSIDE_LABEL = "outside tolerance"
@@ -242,15 +249,15 @@ _STRINGS: dict[str, str] = {
     "band limiting": "limitación de banda",
     "Signal-burst response (ISO 8041-1)\n{name}, {application}": "Respuesta a ráfaga de señal (ISO 8041-1)\n{name}, {application}",
     # Vibration immission meter (DIN 45669-1 Tables 2 and 3, 5.1.6, Annex E).
-    "Time [s]": "Tiempo [s]",
+    _TIME_LABEL: "Tiempo [s]",
     "DIN 45669-1 tolerance": "tolerancia de DIN 45669-1",
     "Response deviation $F(f)$ [%]": "Desviación de la respuesta $F(f)$ [%]",
     "{weighting} response against DIN 45669-1: {verdict}": "Respuesta {weighting} frente a DIN 45669-1: {verdict}",
     "KB": "KB",
     "unweighted": "sin ponderar",
-    "Weighted vibration severity $KB_F$": "Intensidad de vibración ponderada $KB_F$",
-    r"$KB_{{F\mathrm{{max}}}}$ = {value}": r"$KB_{{F\mathrm{{max}}}}$ = {value}",
-    r"$KB_{{FTm}}$ = {value}": r"$KB_{{FTm}}$ = {value}",
+    _KBF_LABEL: "Intensidad de vibración ponderada $KB_F$",
+    _KBF_MAX_LABEL: _KBF_MAX_LABEL,
+    _KBFTM_LABEL: _KBFTM_LABEL,
     "clock maximum": "máximo por intervalo",
     "Vibration immission over {duration} s ({range} range)": "Inmisión de vibración en {duration} s (rango {range})",
     "building": "edificios",
@@ -2122,14 +2129,14 @@ def plot_vibration_meter_reading(
     times = np.arange(result.kbf.size) / result.fs_hz
     style_default(kwargs, "color", _C_PRIMARY)
     style_default(kwargs, "lw", 1.2)
-    kwargs.setdefault("label", _t("Weighted vibration severity $KB_F$", language))
+    kwargs.setdefault("label", _t(_KBF_LABEL, language))
     ax.plot(times, result.kbf, **kwargs)
     ax.axhline(
         result.kbf_max,
         color=_C_REFERENCE,
         ls="--",
         lw=1.5,
-        label=_t(r"$KB_{{F\mathrm{{max}}}}$ = {value}", language).format(
+        label=_t(_KBF_MAX_LABEL, language).format(
             value=format_number(result.kbf_max, language, decimals=3, trim=True)
         ),
     )
@@ -2150,14 +2157,14 @@ def plot_vibration_meter_reading(
             color=_C_TERTIARY,
             ls=":",
             lw=1.5,
-            label=_t(r"$KB_{{FTm}}$ = {value}", language).format(
+            label=_t(_KBFTM_LABEL, language).format(
                 value=format_number(
                     result.kbf_takt_rms, language, decimals=3, trim=True
                 )
             ),
         )
-    ax.set_xlabel(_t("Time [s]", language))
-    ax.set_ylabel(_t("Weighted vibration severity $KB_F$", language))
+    ax.set_xlabel(_t(_TIME_LABEL, language))
+    ax.set_ylabel(_t(_KBF_LABEL, language))
     ax.set_title(
         _t("Vibration immission over {duration} s ({range} range)", language).format(
             duration=format_number(
@@ -2220,7 +2227,7 @@ def plot_assessment_velocity(
         ),
     )
     ax.axhline(-guide, color=_C_REFERENCE, ls="--", lw=1.5)
-    ax.set_xlabel(_t("Time [s]", language))
+    ax.set_xlabel(_t(_TIME_LABEL, language))
     ax.set_ylabel(_t("Assessment velocity $v_B$ [mm/s]", language))
     ax.set_title(
         _t(

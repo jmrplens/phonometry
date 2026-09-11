@@ -335,8 +335,9 @@ def test_table_1_refuses_a_spectrum_of_another_resolution() -> None:
     uneven = np.array([0.0, 1.25, 2.0, 3.75])
     with pytest.raises(ValueError, match="evenly spaced"):
         im.third_octaves_from_narrowband(uneven, np.ones(4))
+    f = _lines()
     with pytest.raises(ValueError, match="negative"):
-        im.third_octaves_from_narrowband(_lines(), -np.ones(_lines().size))
+        im.third_octaves_from_narrowband(f, -np.ones(f.size))
 
 
 # -- Annex B -----------------------------------------------------------------------
@@ -424,10 +425,11 @@ def test_the_bands_can_stop_at_80_hz() -> None:
     )
     assert passage.band_centres_hz[-1] == 80.0
     assert passage.band_interval_levels_db.shape == (3, passage.band_centres_hz.size)
+    record = _passage()
     for upper in (500.0, 100.5):
         with pytest.raises(ValueError, match="upper_band_hz"):
             im.evaluate_train_passage(
-                _passage(), FS_HZ, t2_s=(8.0, 20.0), upper_band_hz=upper
+                record, FS_HZ, t2_s=(8.0, 20.0), upper_band_hz=upper
             )
 
 
@@ -453,8 +455,9 @@ def test_the_stretches_nest_and_stay_inside_the_record() -> None:
 
 
 def test_the_bank_needs_an_integer_rate() -> None:
+    record = _passage()
     with pytest.raises(ValueError, match="integer sampling frequency"):
-        im.evaluate_train_passage(_passage(), 2048.5, t2_s=(8.0, 20.0))
+        im.evaluate_train_passage(record, 2048.5, t2_s=(8.0, 20.0))
 
 
 def test_a_silent_record_has_no_event_level() -> None:

@@ -294,6 +294,41 @@ def _t(text: str, language: str = "en") -> str:
     return _STRINGS.get(text, text) if language == "es" else text
 
 
+def _plot_verdict_points(
+    ax: Axes,
+    freqs: NDArray[np.float64],
+    values: NDArray[np.float64],
+    inside: NDArray[np.bool_],
+    kwargs: dict[str, Any],
+    language: str,
+) -> None:
+    """The measured points of a verifier, green inside the band and red outside.
+
+    The pair ``plot_db_hr_assessment`` already uses for a complies/fails
+    verdict. The measured series cannot take _C_PRIMARY, which the design goal
+    and its band carry in every verifier, and it must not take _C_REFERENCE,
+    which would paint a conforming point in the colour of a refusal. The
+    caller's kwargs reach the conforming points, so a colour or a label the
+    caller names wins over these defaults.
+    """
+    style_default(kwargs, "color", _C_TERTIARY)
+    kwargs.setdefault("marker", "o")
+    style_default(kwargs, "markersize", 5)
+    style_default(kwargs, "ls", "none")
+    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
+    ax.plot(freqs[inside], values[inside], **kwargs)
+    if not inside.all():
+        ax.plot(
+            freqs[~inside],
+            values[~inside],
+            color=_C_REFERENCE,
+            marker="X",
+            markersize=9,
+            ls="none",
+            label=_t(_OUTSIDE_LABEL, language),
+        )
+
+
 def plot_vibration_weighting(
     result: WeightingResponse,
     ax: Axes | None = None,
@@ -908,28 +943,7 @@ def plot_weighting_verification(
         )
     ax.plot(freqs, design, color=_C_PRIMARY, lw=2.0, label=_t("design goal", language))
 
-    # Green for the bands that conform and red for the ones that do not, the
-    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
-    # verdict. The measured series cannot take _C_PRIMARY here, which the
-    # design goal and its band already carry, and it must not take
-    # _C_REFERENCE, which would paint a conforming band in the colour of a
-    # refusal.
-    style_default(kwargs, "color", _C_TERTIARY)
-    kwargs.setdefault("marker", "o")
-    style_default(kwargs, "markersize", 5)
-    style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
-    ax.plot(freqs[inside], measured[inside], **kwargs)
-    if not inside.all():
-        ax.plot(
-            freqs[~inside],
-            measured[~inside],
-            color=_C_REFERENCE,
-            marker="X",
-            markersize=9,
-            ls="none",
-            label=_t(_OUTSIDE_LABEL, language),
-        )
+    _plot_verdict_points(ax, freqs, measured, inside, kwargs, language)
 
     ax.set_xscale("log")
     ax.set_yscale("log")
@@ -999,28 +1013,7 @@ def plot_phase_verification(
         label=_t(_ISO8041_BAND_LABEL, language),
     )
 
-    # Green for the bands that conform and red for the ones that do not, the
-    # pair ``plot_db_hr_assessment`` already uses for a complies/fails
-    # verdict. The measured series cannot take _C_PRIMARY here, which the
-    # design goal and its band already carry, and it must not take
-    # _C_REFERENCE, which would paint a conforming band in the colour of a
-    # refusal.
-    style_default(kwargs, "color", _C_TERTIARY)
-    kwargs.setdefault("marker", "o")
-    style_default(kwargs, "markersize", 5)
-    style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
-    ax.plot(freqs[inside], deviation[inside], **kwargs)
-    if not inside.all():
-        ax.plot(
-            freqs[~inside],
-            deviation[~inside],
-            color=_C_REFERENCE,
-            marker="X",
-            markersize=9,
-            ls="none",
-            label=_t(_OUTSIDE_LABEL, language),
-        )
+    _plot_verdict_points(ax, freqs, deviation, inside, kwargs, language)
 
     # A plain logarithmic axis rather than the octave-centre ticks of
     # format_frequency_axis, and for the same reason the magnitude verdict
@@ -2088,22 +2081,7 @@ def plot_vibration_meter_verification(
     )
     ax.axhline(0.0, color=_C_PRIMARY, lw=1.5)
 
-    style_default(kwargs, "color", _C_TERTIARY)
-    kwargs.setdefault("marker", "o")
-    style_default(kwargs, "markersize", 5)
-    style_default(kwargs, "ls", "none")
-    kwargs.setdefault("label", _t(_WITHIN_LABEL, language))
-    ax.plot(freqs[inside], deviation[inside], **kwargs)
-    if not inside.all():
-        ax.plot(
-            freqs[~inside],
-            deviation[~inside],
-            color=_C_REFERENCE,
-            marker="X",
-            markersize=9,
-            ls="none",
-            label=_t(_OUTSIDE_LABEL, language),
-        )
+    _plot_verdict_points(ax, freqs, deviation, inside, kwargs, language)
 
     ax.set_xscale("log")
     ax.set_xlabel(_t(_FREQ_LABEL, language))

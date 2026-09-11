@@ -633,7 +633,10 @@ def _exponential_running_rms(
     x = _record(values, name)
     fs = require_positive(fs_hz, "fs_hz")
     tau = require_positive(time_constant_s, "time_constant_s")
-    alpha = 1.0 - math.exp(-1.0 / (tau * fs))
+    # expm1 keeps the coefficient exact where 1 - exp(-x) would cancel: at a
+    # high rate x is small, and the difference of two numbers near one loses
+    # the digits the recursion runs on.
+    alpha = -math.expm1(-1.0 / (tau * fs))
     mean_square = np.asarray(
         sig.lfilter([alpha], [1.0, -(1.0 - alpha)], x**2), dtype=np.float64
     )

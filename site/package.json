@@ -17,8 +17,6 @@
     "dev": "astro dev",
     "html-validate": "html-validate 'dist/**/*.html'",
     "icons:sheet": "node scripts/icon-sheet.mjs",
-    "identity:check": "node scripts/sync-identity.mjs --check",
-    "identity:sync": "node scripts/sync-identity.mjs",
     "lighthouse": "node scripts/lighthouse-audit.mjs",
     "pa11y": "node scripts/with-preview.mjs -- ./node_modules/.bin/pa11y-ci",
     "postbuild": "node scripts/add-sitemap-lastmod.mjs && node scripts/fix-redirect-stubs.mjs && node scripts/optimize-images.mjs && node scripts/emit-page-markdown.mjs",

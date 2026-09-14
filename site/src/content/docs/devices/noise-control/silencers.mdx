@@ -204,7 +204,7 @@ plt.show()
 Three quantities are in circulation and they are not interchangeable.
 **Transmission loss** compares the incident power entering the element with the
 power leaving it into a reflection-free termination, so it is a property of the
-element alone — which is exactly why it can be computed from geometry, and why
+element alone, which is exactly why it can be computed from geometry, and why
 the formula above sets $Z_1 = \rho c/S_\text{in}$ and $Z_n = \rho c/S_\text{out}$
 without asking what the silencer is connected to. **Insertion loss** compares
 the level at a fixed point with and without the element in place, so it depends
@@ -219,13 +219,13 @@ acoustic, in Pa·s/m³ (pressure per volume velocity), and they have a scale:
 $\rho c/S$ for the 0.01 m² inlet pipe is $4.14 \times 10^{4}$, so a source far
 above that approximates a constant-volume-velocity machine such as a
 reciprocating engine and one far below it a constant-pressure source. The
-termination is not a free choice at all — for a duct discharging into a room it
+termination is not a free choice at all; for a duct discharging into a room it
 is the radiation impedance of the open end,
 $Z_\mathrm{r} = (\rho c/S)(R_1 + jX_1)$, whose normalised $R_1$ and $X_1$ the
 [radiating piston](/phonometry/devices/electroacoustics/loudspeakers/#2-radiating-piston-radiation-impedance-and-directivity)
 of the electroacoustics domain returns as `radiating_piston(...).resistance` and
 `.reactance` (its `radiation_resistance` and `radiation_reactance` are the
-*mechanical* impedance $\rho c S(R_1 + jX_1)$ in N·s/m — a factor $S^2$ away,
+*mechanical* impedance $\rho c S(R_1 + jX_1)$ in N·s/m, a factor $S^2$ away,
 and an easy thing to feed in by mistake). The source impedance of a fan or an
 engine, by contrast, is rarely known and strongly frequency dependent, which is
 precisely why insertion loss is a *measured* quantity in practice.
@@ -321,7 +321,7 @@ Helmholtz neck and at the open (duct) end only of a quarter-wave stub. The
 resonator drawn below is the case in point: its neck is 11.3 mm across
 ($a = 5.64$ mm) and 20 mm long, so $l_e \approx 20 + 2 \times 4.8 =
 29.6$ mm and the tuning falls from the 122.1 Hz the drilled length returns to
-100.3 Hz — a 22 % error on a notch the figure below shows to be only a few
+100.3 Hz, a 22 % error on a notch the figure below shows to be only a few
 hertz wide. The shorter and wider the neck, the larger the correction in
 relative terms, which is exactly the regime a compact resonator lives in, so
 the practical procedure is to compute a nominal length, build it long, and
@@ -446,7 +446,7 @@ grid happened to land, which is why the by-hand code below has to clamp the axis
 at 50 dB. What limits the peak in metal is the viscous loss in the neck, the
 radiation from the cavity walls and any damping deliberately added. A well-made
 resonator delivers something like 15 to 25 dB at its tuning frequency, over a
-relative bandwidth set by its $Q$ and typically a few per cent — a fraction of
+relative bandwidth set by its $Q$ and typically a few per cent, a fraction of
 an octave. `resistance=` is where a measured or estimated acoustic resistance
 goes, and adding it lowers and broadens the peak, which is the trade between
 depth and tolerance to a tuning error. Read that beside the end-correction
@@ -492,7 +492,7 @@ frequency, the pressure at the stub's closed end ratchets up over about six
 periods to 8.2 times the incident wave (the lossless branch at exact
 resonance would reach ten, twice the duct-to-branch area ratio); driven at
 150 Hz the same stub settles at 1.5 times within a couple of periods and
-never charges, which is the whole notch mechanism seen once — the charge
+never charges, which is the whole notch mechanism seen once; the charge
 has the percent-wide bandwidth $f/Q$, while the lossless TL spike is
 hertz-wide. The clip also
 runs the trim procedure of the end-correction warning above on screen:
@@ -559,7 +559,7 @@ chamber, $c/4l_\mathrm{e}$ for the stub, and the $c$ in front of the Helmholtz s
 root. For air, $c(T) = 343\sqrt{T/293}$ with $T$ in kelvin, so an exhaust at
 500 °C (773 K) runs at about 557 m/s, a factor 1.62, and the 0.3 m stub cut for
 285.8 Hz on cold-air values sings at 464 Hz once the pipe is hot. Pass the
-working values — `speed_of_sound=` and `density=`, since the density scales
+working values: `speed_of_sound=` and `density=`, since the density scales
 every characteristic impedance and therefore the insertion loss. The
 `speed_of_sound=557.0` call in the section 1 snippet above is that retune, and
 it prints 464.2 Hz for the same 0.3 m stub.
@@ -612,7 +612,7 @@ sound leaves through the shell and the device delivers the shell's number, which
 is the field version of the limiting insertion loss of section 3. The two
 **area discontinuities carry end corrections**, exactly as a resonator neck
 does, so the acoustic length exceeds the geometric one and the measured troughs
-sit a little below the $c/2L$ printed here — cut-and-try tuning has to be
+sit a little below the $c/2L$ printed here; cut-and-try tuning has to be
 verified rather than trusted. And the expansion **regenerates flow noise at its
 own outlet**, which puts a floor under the delivered spectrum that the
 transmission loss says nothing about; that quantity is
@@ -859,7 +859,7 @@ spectrum, and the insertion loss is $D_\mathrm{i} = L_{pII} - L_{pI}$ third octa
 third octave (6.2.1). In a test duct the spatial average takes **at least three
 equally spaced positions** on a line inclined to the duct axis at about half its
 length, spanning at least a quarter wavelength of the lowest band, going to five
-when the spread between the three exceeds the Table 6 limits — 10 dB at 50 and
+when the spread between the three exceeds the Table 6 limits: 10 dB at 50 and
 63 Hz, 8 dB at 80 and 100 Hz, 7 dB at 125 Hz and 6 dB above 160 Hz. The chain is
 class 1 with IEC 61260 third-octave filters (5.2.4.6) and is verified with a
 class 1 calibrator to $\pm 0.3$ dB before and after each series (6.1).
@@ -867,7 +867,7 @@ class 1 calibrator to $\pm 0.3$ dB before and after each series (6.1).
 Two consequences travel with the number. First, what is reported is an
 **insertion loss against a substitution duct**, not a transmission loss, so it
 is not the quantity this page computes and the two must not be compared
-directly. Second, every facility has a **limiting insertion loss** — the ceiling
+directly. Second, every facility has a **limiting insertion loss**, the ceiling
 set by flanking along its own duct walls, measured with the substitution duct
 acoustically blocked, and recorded as a function of frequency (7.4). A very
 large catalogue figure is a claim about the test arrangement as much as about
@@ -927,7 +927,7 @@ silencers are discussed for selection but not modelled from the liner
 properties, and in the [HVAC
 methods](/phonometry/devices/noise-control/noise-control/) the lined-elbow
 figure is a table lookup (Bies Table 8.11) and the plenum attenuation is
-Wells' closed form driven by a declared mean absorption — neither is a liner model.
+Wells' closed form driven by a declared mean absorption; neither is a liner model.
 Mean-flow effects (convection,
 temperature gradients, flow-dependent impedance of perforates) are outside the
 no-flow element matrices used here. Nothing on this page is a measurement: the

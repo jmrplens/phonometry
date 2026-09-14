@@ -475,7 +475,7 @@ own numeric anchors (see [CONFORMANCE.md](../../CONFORMANCE.md)):
 **Covered.** Kuttruff's image-source construction (§4.1), the Eyring formula
 used for the near-cubic check and the Schroeder frequency of §3.6; Vorländer's
 mirror-source model with its reflection-factor and delay expressions
-(Chapter 11); and the Allen & Berkley reflection-order decomposition — all in
+(Chapter 11); and the Allen & Berkley reflection-order decomposition: all in
 `image_source_rir`. The Bies §6.4 steady-state field (room constant,
 directivity $Q$, critical distance) in `steady_state_field`, `room_constant`,
 `critical_distance`, `steady_state_spl` and `schroeder_frequency`. Long's
@@ -486,14 +486,14 @@ modal density (Eqs. 8.45, 8.46) in `room_modes`, `room_mode_frequency`,
 
 **Not covered.** Specular reflection only: no diffraction, no diffuse
 scattering. An elongated room therefore decays more slowly than the Eyring
-estimate the model is checked against — the anisotropy the Fitzroy and
+estimate the model is checked against: the anisotropy the Fitzroy and
 Arau-Puchades models of
 [reverberation-time prediction](reverberation-prediction.md) exist to correct.
 Kuttruff's reverberation distance, which uses the Sabine absorption area rather
 than the room constant, is quoted for comparison and not implemented:
 `steady_state_field` and `critical_distance` are always the Bies room-constant
 form. The mode calculator assumes rigid walls and a rectangular plan and
-returns eigen*frequencies* only — no amplitude at a listening position, no
+returns eigen*frequencies* only: no amplitude at a listening position, no
 damping, no mode shape, no other geometry; for those, mesh the room and run the
 [2D FDTD solver](../../simulation/fdtd-simulation.md). Bolt's preferred
 dimension ratios are discussed, not tabulated.

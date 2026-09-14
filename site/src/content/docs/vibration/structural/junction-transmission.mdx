@@ -61,7 +61,7 @@ relative to the bending wavelength, and enough modes in the band for the
 diffuse-field angular average of section 3 to mean anything, so it degrades at
 low frequency and on small elements. The in-plane conversion it discards grows
 with frequency and with junction complexity, so the closed form flatters heavy,
-stiff, complicated joints — the clip in section 2 shows exactly the precursor
+stiff, complicated joints; the clip in section 2 shows exactly the precursor
 being neglected. And a massless pinned beam is a poor model of a junction that
 in reality carries mass and rotational stiffness. Section 5 hands one
 frequency-independent number straight to the EN 12354 model in place of a
@@ -162,7 +162,7 @@ A T-junction has three plates, and **which of them carries the incident wave**
 is the whole distinction between its two cases. In **T-junction (1)** the wave
 arrives on one of the two collinear members, so it can go straight on into the
 collinear plate *and* round the corner into the branch. In **T-junction (2)**
-it arrives on the branch — the stem of the T — so both available paths are
+it arrives on the branch, the stem of the T, so both available paths are
 corners and there is no straight section at all. The opening figure of this
 page is a T2 for exactly that reason: the 140 mm floor is the branch, and the
 200 mm wall runs through.
@@ -190,7 +190,7 @@ building: a floor that differs above and below a junction, or a wall that
 continues in a different thickness, has no closed form here. Bound it with the
 two symmetric cases, or go to the EN 12354-1 Annex E empirical $K_{ij}$, or
 measure it. The L-junction needs no such caveat because it genuinely has two
-plates — and so, for a different reason, does the in-line junction.
+plates, and so, for a different reason, does the in-line junction.
 
 ### The in-line junction: a change of section
 
@@ -210,8 +210,8 @@ module notes that the value is within 1 dB of the angular average whenever
 $\chi \ge 1$.
 
 `inline_transmission_coefficient(chi, psi)` evaluates it. For the same
-100 mm / 200 mm concrete pair as the figure above — $\chi = 0.707$,
-$\psi = 4.0$ from `junction_wave_parameters` — it returns **0.936**, against
+100 mm / 200 mm concrete pair as the figure above: $\chi = 0.707$,
+$\psi = 4.0$ from `junction_wave_parameters`. It returns **0.936**, against
 exactly 1 for identical plates. Doubling the thickness of a continuing slab
 still passes 94 % of the incident power. That is the quantitative form of "a
 continuous plate transmits fully", and it is why a change of section is a poor
@@ -390,8 +390,8 @@ the wave approach.
 ## 6. Experimental SEA: coupling loss factors from measured energies
 
 Everything above is the **predictive** route: a coupling loss factor derived
-from a wave model of the junction. Real joints — welds, bolt rows, spot welds,
-adhesives — are not tractable that way, and the **experimental** route inverts
+from a wave model of the junction. Real joints (welds, bolt rows, spot welds,
+adhesives) are not tractable that way, and the **experimental** route inverts
 the steady-state SEA power balance from *measured* subsystem energies instead
 (Norton & Karczub 2003, Sections 6.3.3 and 6.3.4). For two subsystems,
 
@@ -419,7 +419,7 @@ $$
 
 The input power collapses to the total dissipated power, as it must in the
 steady state: substituting Eq. (6.11) into Eq. (6.10) cancels the two coupling
-terms exactly, which is a free check on any measurement — and one to run on
+terms exactly, which is a free check on any measurement, and one to run on
 real data, not only on paper.
 
 ### The measurement those symbols stand for
@@ -548,7 +548,7 @@ not interchangeable across the spectrum.
 When no independent value of the internal loss factors is available, the
 single-drive inversion is underdetermined, and the classical **power-injection
 method** drives each subsystem in turn while measuring both energies each time
-— the two states the rig diagram above draws. That gives four equations for
+(the two states the rig diagram above draws). That gives four equations for
 $\eta_1$, $\eta_2$, $\eta_{12}$ and $\eta_{21}$
 with no prior assumption at all, which `power_injection_matrix` solves band by
 band, taking the two energy pairs and the two injected powers and needing no
@@ -557,7 +557,7 @@ usually hardest to get (the decoupled decay), which is why it is the classical
 form. Run on the platform-and-cylinder example of the figure above it returns a
 `modal_density_ratio` of 0.919, against a geometric
 `flat_plate_modal_density / cylindrical_shell_modal_density` of 0.919 for the
-same structures — the two agreeing is the check.
+same structures; the two agreeing is the check.
 
 Reciprocity then becomes a *check* on the measurement rather than an
 input: `PowerInjectionResult.modal_density_ratio` is a property, not a

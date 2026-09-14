@@ -34,8 +34,8 @@ pip install phonometry[full]    # all of the above (recommended)
 
 I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled. The base install computes every metric on NumPy and SciPy alone — and
-that includes reading every linear measurement WAV (24-bit, multichannel
+enabled. The base install computes every metric on NumPy and SciPy alone,
+including reading every linear measurement WAV (24-bit, multichannel
 EXTENSIBLE, RF64) through `phonometry.io`; the only things it leaves
 unavailable are the figures (`.plot()` and the filter response plots), the
 normative PDF fiches (`.report()`), the compiled kernel that speeds up the
@@ -83,7 +83,7 @@ along can detect it. **Frequency weighting** is defined by IEC 61672-1 as one
 filter applied to the broadband signal; applying band-by-band weighting
 corrections after the bank instead is a shortcut that only holds for a
 stationary signal. **The bank** decides the frequency resolution, and **the
-ballistics and the metrics** decide the time behaviour — both acting on the
+ballistics and the metrics** decide the time behaviour, both acting on the
 weighted signal, in that order, because exponential time weighting squares the
 signal and so does not commute with anything before it.
 
@@ -92,7 +92,7 @@ calibration, so its levels are pascals by assumption rather than by measurement;
 no weighting, so they are Z (unweighted); no ballistics, so each band is one
 r.m.s. value over the whole record. "Give the samples physical meaning" below
 puts the first stage back, and each stage is an independent function or class
-you can use on its own — the guides cover them left to right
+you can use on its own; the guides cover them left to right
 ([Calibration](/phonometry/signals/metrology/calibration/) →
 [Frequency Weighting](/phonometry/signals/levels/weighting/) → [Filter Banks](/phonometry/signals/filters/filter-banks/) →
 [Time Weighting](/phonometry/signals/levels/time-weighting/) → [Levels](/phonometry/signals/levels/levels/)).
@@ -128,7 +128,7 @@ same bands: pass `nominal=True` and `freq` comes back as `['12.5', '16', …,
 '20k']`, which is what you want on an axis or in a report, while the exact
 values are what you want when computing with them. There are 33 bands because
 the default range is 12 Hz to 20 kHz; `limits=[f_min, f_max]` narrows it, and
-narrowing it is usually worth doing — see [Filter
+narrowing it is usually worth doing; see [Filter
 Banks](/phonometry/signals/filters/filter-banks/) for the grid.
 
 **Read the spectrum before trusting it.** Two of the 33 bands hold the signal:
@@ -151,12 +151,12 @@ fixes how far down those skirts must be.
 $20\log_{10}(p_\mathrm{rms} / 20\,\mu\mathrm{Pa})$, and with the default
 calibration it takes the numeric value of each sample *to be* the pressure in
 pascals. A unit-amplitude sine is therefore read as 0.7071 Pa rms, which is
-90.97 dB — exactly right for a synthetic signal defined in pascals, and exactly
+90.97 dB, exactly right for a synthetic signal defined in pascals, and exactly
 wrong for a recording, whose sample values are whatever the converter and the
 gain staging happened to produce. There are two honest ways to get a level you
 can defend. Pass the pascals-per-digital-unit factor obtained from a calibrator
-tone, `calibration=filters.LevelCalibration(factor=S)` — see
-[Calibration and dBFS](/phonometry/signals/metrology/calibration/) — or, when
+tone via `calibration=filters.LevelCalibration(factor=S)` (see
+[Calibration and dBFS](/phonometry/signals/metrology/calibration/)), or, when
 the signal never had a physical scale, ask for `LevelCalibration(dbfs=True)` and
 read levels relative to digital full scale, which come out negative and cannot
 be mistaken for an SPL.
@@ -236,7 +236,7 @@ the array to a pressure. That connection is a single factor $S$, the
 calibrator of known level through the same microphone, preamplifier, interface
 and gain setting you are about to measure with. A class 1 acoustic calibrator
 produces 94 dB re 20 µPa at 1 kHz, which is $2\times10^{-5}\cdot10^{94/20} =
-1.0024$ Pa r.m.s. — not 1 Pa, a 0.02 dB difference that is worth getting right
+1.0024$ Pa r.m.s., not 1 Pa, a 0.02 dB difference that is worth getting right
 because it propagates into every level afterwards.
 
 ```python
@@ -271,7 +271,7 @@ print(f"{bands[9]} Hz: {spl[9]:.2f} dB SPL, {bands[19]}: {spl[19]:.2f} dB SPL")
 Two things are worth noticing. The calibrated levels are **the same numbers as
 in the first analysis**, because the synthetic signal there was defined in
 pascals and this recording is that same field seen through a chain the
-calibrator has now undone — but this time they are decibels re 20 µPa because a
+calibrator has now undone; but this time they are decibels re 20 µPa because a
 measurement put them there, not because we assumed it. And the same recording
 read without the factor gives 44.93 dB in the 1 kHz band, 46.0 dB low: an
 uncalibrated level is not approximately right, it is off by whatever the gain
@@ -303,7 +303,7 @@ The unweighted level of the same second is 93.98 dB: A weighting takes almost
 3 dB off, essentially all of it from the 100 Hz tone, which the curve attenuates
 by about 19 dB. `signals.laeq(recording, fs, calibration_factor=cal)` is the
 one-line form of the two lines above and applies the weighting internally, so
-never A-weight the signal first and then pass it to a level function — that
+never A-weight the signal first and then pass it to a level function; that
 weights it twice. The Fast and Slow envelopes, $L_{\mathrm{A}E}$, $L_\mathrm{Cpeak}$ and the
 percentile levels are the same kind of call: [Time
 Weighting](/phonometry/signals/levels/time-weighting/) and [Integrated and
@@ -314,7 +314,7 @@ from a calibrator tone to all of them on one page.
 ## Read a sound level meter WAV
 
 The synthetic signal above stood in for a file. With a real meter you have
-two WAVs — the calibrator take and the measurement — and `phonometry.io`
+two WAVs (the calibrator take and the measurement), and `phonometry.io`
 reads both as measurements: native rate kept, integer PCM scaled exactly to
 full scale, channels first, nothing normalized. The `Signal` it returns
 carries the sample rate and, once you attach it, the calibration, so the
@@ -333,8 +333,8 @@ sig = io.read("measurement.wav", calibration_factor=cal)
 print(f"Leq = {float(signals.leq(sig)):.1f} dB")   # no fs, no factor to repeat
 ```
 
-The base install reads everything a meter writes — 24-bit PCM, multichannel
-EXTENSIBLE, overnight RF64 — and warns if the file is a compressed listening
+The base install reads everything a meter writes: 24-bit PCM, multichannel
+EXTENSIBLE, overnight RF64. It warns if the file is a compressed listening
 copy rather than a linear recording. Write the factor into the sidecar once
 (`io.write_sidecar("measurement.wav", cal)`) and from then on
 `io.read("measurement.wav")` comes back calibrated with no arguments at
@@ -396,15 +396,15 @@ spl, freq = filters.octave_filter(
 )
 ```
 
-The two mechanical pitfalls below belong to this raw-scipy route — `io.read`
+The two mechanical pitfalls below belong to this raw-scipy route. `io.read`
 in the previous section removes both, scaling integer samples to full scale
-and returning channels first — but they are worth knowing whenever a bare
+and returning channels first, but they are worth knowing whenever a bare
 array enters the library:
 
 **Reduce a multichannel file to the channel you measured with, or transpose it.**
 The guard above is not decoration: `wavfile.read` returns a `(samples,
 channels)` array, and the bank reads a 2D array as `(channels, samples)`. Pass a
-stereo file as it comes and nothing raises — a 2400-sample stereo array returns
+stereo file as it comes and nothing raises. A 2400-sample stereo array returns
 an `spl` of shape `(2400, 33)`, one spectrum per *pair of samples*, and a
 one-second file takes minutes to produce meaningless numbers. See
 [Multichannel and Performance](/phonometry/signals/filters/multichannel/) for
@@ -414,13 +414,13 @@ at once, each with its own sensitivity.
 **Integer audio is cast, not rescaled.** `wavfile.read` output runs without an
 error because integers are converted to float64 internally, but an int16 sample
 of +32767 enters the bank as 32767.0 rather than 1.0. Every level therefore
-comes out $20\log_{10}(32768) = 90.3$ dB above the same signal read as float —
-measured, a unit-amplitude 1 kHz sine peaks at 90.95 dB and the same sine
+comes out $20\log_{10}(32768) = 90.3$ dB above the same signal read as float.
+For example, a unit-amplitude 1 kHz sine peaks at 90.95 dB and the same sine
 written to int16 peaks at 181.26 dB. Divide by the full-scale value
 (`signal / 32768.0` for int16) before analysing, or let the calibration step
 absorb it: a sensitivity determined from a calibrator recording *in the same
-integer format* already carries the factor. Mixing the two — a float-read
-calibrator and an integer-read measurement, or the reverse — is wrong by 90 dB
+integer format* already carries the factor. Mixing the two (a float-read
+calibrator and an integer-read measurement, or the reverse) is wrong by 90 dB
 with no symptom. The rules are in
 [Calibration and dBFS](/phonometry/signals/metrology/calibration/).
 

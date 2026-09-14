@@ -143,7 +143,7 @@ the `Combined` row and never touches the attenuation. Watch the silencer's
 triple above: at 63 Hz the running level is 83 dB and the self-noise 49 dB,
 so the combination is still 83 dB and the silencer's own noise is invisible;
 at 2 kHz the attenuation has done its work, the sum is down to 37 dB against
-a self-noise of 45 dB, and the combination comes out at 46 dB — the element
+a self-noise of 45 dB, and the combination comes out at 46 dB: the element
 bought to remove the fan is now the loudest thing in that band.
 
 **There is a self-noise floor.** Long's sheet uses a 0 dB sound power level
@@ -210,7 +210,7 @@ it produces is dropped whole into the single octave band containing the result.
 A fan whose blade tone lands in the band that already governs the design is
 worth reselecting rather than silencing. And because that increment represents a
 *pure tone* inside an octave band, a sheet that passes on band levels can still
-be judged intrusive — one of the limits listed at the end of this guide.
+be judged intrusive; that is one of the limits listed at the end of this guide.
 
 Two habits keep this honest. The law assumes ideal inlet and outlet flow
 conditions, so a fan boxed into a plant room with a bad inlet is louder
@@ -407,8 +407,8 @@ in the design direction to
 is what belongs in the sheet; the model is for sizing the airway before there is
 a manufacturer.
 
-Element selection is a decision about *shape* — which band does this element buy
-me? — so the whole of section 3 belongs on one sheet of paper rather than in six
+Element selection is a decision about *shape* (which band does this element buy
+me?), so the whole of section 3 belongs on one sheet of paper rather than in six
 printed arrays.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_attenuation_elements.svg" alt="Four octave-band panels from 63 Hz to 8 kHz. Panel a, a 36 by 24 inch run over 5 feet: bare duct falling from 1.1 dB to 0.2, an externally wrapped one starting higher at 2.2 dB and vanishing above 500 Hz, and the same run with 25 mm of lining reaching 12.8 dB at 1 kHz, drawn with and without the side-wall contribution. Panel b, one 24 inch bend in four constructions, the lined square bend reaching 11 dB and the round bend flat at 3, with the W over lambda equals one abscissa marked near 563 Hz. Panel c, the open end of a 300 mm duct by the Bies table and by Long's closed form, agreeing within a decibel from 12 dB at 63 Hz down to zero at 1 kHz. Panel d, the five-airway splitter model rising to 34 dB at 1 kHz, with the two low-frequency values of the unit Long's sheet specifies marked as open diamonds 10 and 12 dB above the model" width="92%" />
@@ -616,7 +616,7 @@ radiated power within a few decibels of what is still inside the duct.
 The exposure is worst exactly where the sheet still has all its level: at low
 frequency, and in the first metres after the fan, before any silencer. A reader
 can complete this sheet, pass NC 30, and still fail the room on rumble radiated
-by the trunk crossing the ceiling void — the sheet cannot see it, because
+by the trunk crossing the ceiling void. The sheet cannot see it, because
 breakout leaves the path the sheet is walking. The design rules that follow are
 short: get the attenuation in **before** the duct crosses the space, prefer
 round or dual-wall duct and a radiused discharge take-off over a
@@ -677,14 +677,14 @@ curve" are different questions; `meets_target` answers the second.
 That distinction has to be settled before the job is built, because the design
 verdict and the commissioning verdict must be the **same quantity**. An
 acceptance test specifies: every terminal device serving the space running at
-the design flow with the balancing dampers in their final positions — which is
+the design flow with the balancing dampers in their final positions (which is
 where the 15 dB neck penalty of `air_terminal_damper_correction` actually shows
-up, and it is not in any design sheet; microphone positions in the occupied
+up, and it is not in any design sheet); microphone positions in the occupied
 zone rather than under a diffuser; the system switched off to establish the
 background level, with the correction rule agreed in advance; and the rating
 procedure applied to the measured octave-band spectrum rather than read off by
 tangency. Write into the specification whichever verdict is going to be
-measured — band-by-band against the curve, or the S12.2 rating — and not one for
+measured (band-by-band against the curve, or the S12.2 rating), and not one for
 the design and the other for the test.
 [Room-noise criteria](/phonometry/buildings/rooms/room-noise/) has the rating
 procedure itself.
@@ -740,7 +740,7 @@ silencers and the terminal devices, which is what a real sheet uses.
 Thirteen rows of a table are hard to hold in the head; the same thirteen rows
 as a building are not.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_duct_path.svg" alt="Sectional schematic of Long's installation. On the left a plant room with the fan, drawn radiating the same sound power into two runs. Above the office ceiling, the supply run left to right as six boxes stamped with the sheet codes 2 to 7 — elbow 36 by 24 inches, 3 foot silencer, 5 foot lined duct, 25 per cent branch, 18 by 12 inch lined duct and 6 feet of 12 inch flexible duct — ending in the ceiling diffuser stamped 8. Above it the return run as four boxes stamped 2 to 5, elbow, silencer, lined elbow and plenum, running back to the plant room from the grille stamped 6. On the right the 20 by 20 by 8 foot office with a seated occupant 1.83 metres below the diffuser, marked Q = 2 and NC 30. A legend distinguishes rows that only attenuate, rows that attenuate and regenerate, and rows that are self-noise only" width="92%" loading="eager" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_duct_path.svg" alt="Sectional schematic of Long's installation. On the left a plant room with the fan, drawn radiating the same sound power into two runs. Above the office ceiling, the supply run left to right as six boxes stamped with the sheet codes 2 to 7: elbow 36 by 24 inches, 3 foot silencer, 5 foot lined duct, 25 per cent branch, 18 by 12 inch lined duct and 6 feet of 12 inch flexible duct, ending in the ceiling diffuser stamped 8. Above it the return run as four boxes stamped 2 to 5, elbow, silencer, lined elbow and plenum, running back to the plant room from the grille stamped 6. On the right the 20 by 20 by 8 foot office with a seated occupant 1.83 metres below the diffuser, marked Q = 2 and NC 30. A legend distinguishes rows that only attenuate, rows that attenuate and regenerate, and rows that are self-noise only" width="92%" loading="eager" />
 
 *The sheet as a place. The two runs start from the same fan row because a fan
 radiates the same power from its intake and its discharge; the codes on the
@@ -1004,17 +1004,17 @@ story only up to the 250 Hz octave, and a 36 x 24 in supply trunk gives up at
 What a number cannot say is that cut-on is a **switch**, not a slope. The clip
 below simulates the 0.65 m dimension of that same duct as a 2D slice, rigid
 walls, and drives it twice with one off-axis source that excites the plane
-mode and the first transverse mode together — once at 180 Hz, below the
+mode and the first transverse mode together: once at 180 Hz, below the
 263.8 Hz the snippet just printed, and once at 400 Hz above it. Nothing else
 differs. Below cut-on the transverse mode is *evanescent*: it decays as
 $e^{-\alpha x}$ with $1/\alpha = 0.28$ m, which puts it 20 dB down 0.65 m from
-the source — one duct width — so the lumpy near field dies there and every
+the source (one duct width), so the lumpy near field dies there and every
 wavefront after it crosses the section flat. Above cut-on it propagates, the two modes run at different
 axial wavenumbers ($k_x = 5.51$ against $k = 7.33$ rad/m at 400 Hz) and beat
 along the duct every 3.45 m, and the profile across the section never settles.
 The panel beside each strip draws that profile at a fixed station 5 m
-downstream against its own section average — which is the single pressure the
-one-dimensional models above carry — so "a single sound pressure describes the
+downstream against its own section average, which is the single pressure the
+one-dimensional models above carry, so "a single sound pressure describes the
 whole cross section" is either true on screen or visibly false.
 
 <Video

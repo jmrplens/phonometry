@@ -6,8 +6,8 @@ A floating floor is a mass-spring system: the screed is the mass, the resilient
 layer is the spring, and the impact improvement the pair buys begins above the
 resonance they set. That resonance is fixed by the mass per unit area m' of the
 slab, in kg/m², and by the **dynamic stiffness per unit area** s' of the layer,
-in MN/m³ — the dynamic force per unit area divided by the change in thickness it
-produces. A 120 kg/m² screed on a 10 MN/m³ layer resonates near 46 Hz; halving
+in MN/m³ (the dynamic force per unit area divided by the change in thickness it
+produces). A 120 kg/m² screed on a 10 MN/m³ layer resonates near 46 Hz; halving
 the stiffness moves that down by a factor of the square root of two, and
 everything the floor achieves in the rated bands follows from where the
 resonance sits. This is why s' is the one number a resilient-layer datasheet
@@ -16,8 +16,8 @@ describes neither the audio frequency range nor the working preload.
 
 [Dynamic stiffness of resilient materials (EN 29052-1)](dynamic-stiffness.md)
 is the measurement that produces it. A 200 mm × 200 mm specimen carries an 8 kg
-load plate — 200 kg/m² in total, which reproduces the roughly 2 kPa static
-preload of a real floating floor — and a vertical exciter with an accelerometer
+load plate (200 kg/m² in total, which reproduces the roughly 2 kPa static
+preload of a real floating floor), and a vertical exciter with an accelerometer
 gives the fundamental resonance of the plate-on-specimen system, from which the
 apparent stiffness follows directly. For an air-permeable material the pore air
 is a second spring in parallel with the frame, and the standard adds it back
@@ -29,8 +29,8 @@ chains all of it and renders the clause 9 test-report fiche.
 Two inputs come from outside this subsection. The resonant frequency has to be
 extrapolated to zero force amplitude by the clause 7 procedure, and the airflow
 resistivity is measured by ISO 9053 in
-[Airflow Resistance](../absorbers/airflow-resistance.md) — note
-that ISO 9053 reports it in Pa·s/m² while this page's argument is in kPa·s/m².
+[Airflow Resistance](../absorbers/airflow-resistance.md) (note
+that ISO 9053 reports it in Pa·s/m² while this page's argument is in kPa·s/m²).
 What the design side does with s' is
 [Predicting resilient-layer performance](../../buildings/design/resilient-layers.md),
 which turns it into the floating-floor improvement and the ISO 12354-1 Annex D
@@ -55,12 +55,12 @@ Pages elsewhere on the site that this section leans on:
 ## What this section does not cover
 
 The measurement starts one step after the signal. Clause 7's extraction of the
-resonant frequency from the raw excitation-response record — by sinusoidal,
-white-noise or pulse excitation — and its extrapolation to zero force
+resonant frequency from the raw excitation-response record (by sinusoidal,
+white-noise or pulse excitation) and its extrapolation to zero force
 amplitude are **not implemented**: pass a resonant frequency that has already
 been extrapolated. The lateral airflow resistivity is an input, not a
 measurement. Clause 6's specimen-selection requirement of at least three 200
 mm × 200 mm specimens is not enforced, so nothing here objects if you
-characterise a material from one. And the layer's other properties — creep
-under long-term load, compressive strength, thermal performance — are outside
+characterise a material from one. And the layer's other properties (creep
+under long-term load, compressive strength, thermal performance) are outside
 the standard and outside the library.

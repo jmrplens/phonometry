@@ -112,14 +112,14 @@ res.plot()                # |Hn| magnitudes + THD(f)
 ### 1.1 Playing and recording it
 
 A THD(f) curve is a property of the device **at one drive level**, so it has
-to be published with that level — and, for an acoustic measurement, with the
+to be published with that level and, for an acoustic measurement, with the
 sound pressure level it produced at the microphone. The same loudspeaker
 measured 6 dB louder returns a curve several decibels higher *and differently
 shaped*, because the mechanisms that dominate change with excursion. Choose
 the level between two walls: high enough that the harmonics stand clear of the
 background, because the deconvolution's processing gain helps the linear
 response far more than it helps the pre-arrivals, and low enough that neither
-the device nor any converter in the chain clips — a clipped record manufactures
+the device nor any converter in the chain clips: a clipped record manufactures
 exactly the odd-order harmonics being measured, in every window. Note also that
 a sweep has a much lower crest factor than a tone burst, so at equal peak
 amplitude it delivers more energy and pushes a device harder than a tone test
@@ -158,14 +158,14 @@ Two failure modes are silent rather than obvious. The method assumes the system
 does not change during the sweep, so a running fan, a person moving, a warming
 voice coil or a drifting room temperature decorrelates the later part of the
 sweep from the earlier part and shows up as a raised noise floor around the
-harmonic arrivals rather than as an evident failure — which is why long
+harmonic arrivals rather than as an evident failure, which is why long
 measurements are averaged rather than lengthened indefinitely. And any impulsive
 event in the recording is spread by the deconvolution across the whole time
 axis, landing inside the harmonic windows where it is read as distortion: one
 loud click can invent several percent of THD, so repeat the measurement rather
 than trying to gate it out. Finally, the residual noise floor of the
-deconvolution is the floor of the THD(f) curve — a 60 dB signal-to-noise
-capture cannot show a 0.05 % harmonic however the windows are placed — so
+deconvolution is the floor of the THD(f) curve: a 60 dB signal-to-noise
+capture cannot show a 0.05 % harmonic however the windows are placed, so
 report the measured noise floor beside the curve.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sweep_bench.svg" alt="Two benches for a sweep measurement: panel (a) an audio interface driving an electrical device under test with a second interface channel wired straight back from the output as a loopback reference that fixes t equal to zero; panel (b) a loudspeaker and a measurement microphone both 1.20 m over a hard floor and 1.00 m apart, with the reflected path of 2.60 m dashed and the resulting reflection-free time of 4.7 ms stated; below both, the sweep's own time axis with the linear arrival at t equal to zero, the second and third harmonic pre-arrivals at minus 0.49 and minus 0.77 seconds, the per-order window of 8192 samples and the closest arrival spacing L ln(3/2) equal to 0.28 s" width="92%" />
@@ -220,8 +220,8 @@ identities, $|H_1| = 1 + 3a_3/4$, $|H_2| = a_2/2$ (phase $-\pi/2$), $|H_3| = a_3
 conformance suites pin all four, and the same THD measured tone by tone
 with `phonometry.thd` agrees to 0.1 %.
 
-What the method exists to produce, though, is not the scalar ratios — a stepped
-tone sweep gives those too — but the **set of harmonic transfer functions**.
+What the method exists to produce, though, is not the scalar ratios (a stepped
+tone sweep gives those too), but the **set of harmonic transfer functions**.
 Each $H_n$ is a full frequency response over its own band $[n f_1, n f_2]$:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/swept_sine_harmonic_responses.svg" alt="The magnitudes of the three separated harmonic responses of a cubic polynomial followed by a 3 kHz low-pass, each drawn over its own band: H1 from 20 Hz to 6 kHz, H2 from 40 Hz to 12 kHz and H3 from 60 Hz to 18 kHz, each sitting on its dotted Chebyshev level at low frequency and rolling off at the same 3 kHz post-filter corner" width="82%" />
@@ -261,8 +261,8 @@ recognising: distortion rising steeply below the fundamental resonance, where
 excursion grows as the response falls; a local peak wherever a resonance is
 being driven hard; and a floor of a fraction of a percent through the mid band
 at moderate drive. Separating the orders is what makes the curve diagnostic: a
-dominant **second** harmonic is asymmetry — a voice coil not centred in the gap,
-a suspension stiffer in one direction than the other — while a dominant
+dominant **second** harmonic is asymmetry: a voice coil not centred in the gap,
+a suspension stiffer in one direction than the other. A dominant
 **third** is symmetric limiting, the suspension or the magnetic gap running out
 at both extremes, and the two call for different fixes. For scale, below about
 1 % through the mid band is unremarkable for a direct radiator at conversational
@@ -434,8 +434,8 @@ excess group delay reads the latency directly as a flat 2.5 ms line.*
 The time of flight from loudspeaker to microphone is about 2.9 ms per metre, so
 a response measured at 1 m carries a 2.9 ms excess group delay that has nothing
 to do with the electronics, and a reader who reads it as processing latency
-will try to compensate a delay that does not exist. Remove it first — trim the
-impulse response to its arrival, or subtract the known distance — because
+will try to compensate a delay that does not exist. Remove it first: trim the
+impulse response to its arrival, or subtract the known distance, because
 nothing else in the excess phase can be interpreted until it is gone. What
 remains after the removal is the part that matters: an all-pass residue no
 equalizer can invert, produced by genuinely non-minimum-phase behaviour such as

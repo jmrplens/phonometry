@@ -112,8 +112,8 @@ f_1 = f_\mathrm{m} \cdot G^{-1/(2b)}, \quad f_2 = f_\mathrm{m} \cdot G^{1/(2b)}
 $$
 
 **Exact centre against printed label.** The $f_\mathrm{m}$ above is the exact midband
-frequency; what an instrument prints — and what `nominal_frequencies` returns as
-its fourth item, or `octave_filter(..., nominal=True)` — is the ISO 266 preferred
+frequency; what an instrument prints (and what `nominal_frequencies` returns as
+its fourth item, or `octave_filter(..., nominal=True)`) is the ISO 266 preferred
 number nearest to it. The one-third-octave band whose exact centre is 1258.9 Hz
 is labelled 1250 Hz, and the sixth-octave band centred on 1059.3 Hz is labelled
 1.06k. Compare band levels between tools by index or by exact centre, never by
@@ -219,7 +219,7 @@ does not recover FFT bins from the scalar band levels.
 ## Magnitude Responses
 
 The magnitude response of a filter is $|H(j\omega)|$, the modulus of its
-transfer function evaluated on the imaginary axis — what the filter does to the
+transfer function evaluated on the imaginary axis: what the filter does to the
 amplitude of a steady sinusoid at each frequency, before any band is filtered.
 The library implements standard classical filter prototypes:
 
@@ -277,8 +277,8 @@ stopband makes leakage from a loud neighbouring band predictable. An equiripple
 design reaches the same mask at a lower order but biases a narrowband source by
 up to the ripple value depending on where in the band it falls, and smears
 impulsive signals through group-delay distortion near the edges. Bessel does the
-opposite — it preserves the shape of a decay or a burst envelope, which matters
-when the band signal feeds a reverberation-time fit — but will not meet class 1
+opposite: it preserves the shape of a decay or a burst envelope, which matters
+when the band signal feeds a reverberation-time fit, but will not meet class 1
 at any reasonable order. Raising the order tightens the mask fit and lengthens
 the filter transient, which the settling rule below quantifies.
 `verify_filter_class` checks a designed bank against the masks; see
@@ -324,7 +324,7 @@ away from that regime:
 2. **Multi-rate Decimation:** whenever half the sample rate still clears the
    band's upper edge by a factor of 1.25, the signal is
    downsampled (decimated) by
-   $M = \lfloor (f_\mathrm{s}/2) / (1.25\,f_\text{upper}) \rfloor$ before filtering —
+   $M = \lfloor (f_\mathrm{s}/2) / (1.25\,f_\text{upper}) \rfloor$ before filtering,
    which applies to most bands rather than only the low ones (29 of the 33
    one-third-octave bands at 48 kHz), so each band is filtered near its own
    natural rate and its poles sit well inside the unit circle. The band
@@ -336,8 +336,8 @@ away from that regime:
    the 16 Hz band's response and reads several tenths of a decibel low while the
    same record is ample above 500 Hz; the analysed record must exceed both
    $5/f_\text{low}$ and, for a decay measurement, the reverberation time of the
-   band. `mode='peak'` reads the filter's own onset overshoot — up to about 1 dB
-   for an abruptly starting tone — so a peak band level of a gated signal should
+   band. `mode='peak'` reads the filter's own onset overshoot (up to about 1 dB
+   for an abruptly starting tone), so a peak band level of a gated signal should
    discard the first $5/f_\text{low}$ seconds. And `zero_phase=True` runs the
    cascade forwards and backwards: group delay disappears, which is what
    ISO 3382-2 clause 7.3 wants for a decay, but the effective passband narrows
@@ -356,8 +356,8 @@ checking a designed bank against the IEC 61260-1 masks.
 A frequency weighting is a fixed approximation to the ear's frequency response
 *at one loudness*, obtained by inverting an equal-loudness contour. **A** follows
 the inverse of the 40 phon contour, **C** the inverse of a contour near 100 phon
-— hence nearly flat through the mid band, with only the band-limiting roll-offs
-left — and **Z** is a defined flat response between stated band limits, not the
+(hence nearly flat through the mid band, with only the band-limiting roll-offs
+left), and **Z** is a defined flat response between stated band limits, not the
 absence of a filter. That origin is also the domain of validity: because A is
 anchored at 40 phon it progressively under-reads the low-frequency content of
 loud sources, which is exactly why loudness models, C-weighted peaks and the G
@@ -406,7 +406,7 @@ $$
 This is the digital image of the analogue RC detector of the classical sound
 level meter: the squared pressure charges a capacitor through a resistor, so the
 displayed mean square is a one-pole low pass on $p^2$ with time constant $\tau$,
-and $\alpha = 1 - e^{-1/(f_\mathrm{s} \tau)}$ is its impulse-invariant discretisation —
+and $\alpha = 1 - e^{-1/(f_\mathrm{s} \tau)}$ is its impulse-invariant discretisation,
 exact at any $f_\mathrm{s}$, unlike the $1/(f_\mathrm{s} \tau)$ approximation often seen. The two
 standard constants are $\tau = 125$ ms (**Fast**) and $\tau = 1$ s (**Slow**).
 A step input reaches within 1 dB of its final value after about $1.6\tau$ and is
@@ -416,8 +416,8 @@ constants of a record are biased low.
 **Impulse is not this filter.** It cannot be: a single $\alpha$ cannot hold a
 peak, and the figure below shows Impulse holding one. IEC 61672-1 defines the I
 weighting as a fast 35 ms detector followed by a 1.5 s decay, implemented here as
-an *asymmetric* detector — it charges with $\tau = 35$ ms whenever the input
-exceeds the current state and discharges with $\tau = 1.5$ s otherwise — so a
+an *asymmetric* detector: it charges with $\tau = 35$ ms whenever the input
+exceeds the current state and discharges with $\tau = 1.5$ s otherwise, so a
 transient is captured quickly and then held for over a second. That makes I
 neither an r.m.s. nor an energy average, which is why it is reserved for the
 specific regulations that name it and must never be energy-summed across
@@ -529,13 +529,13 @@ it.** Halving the spacer doubles the top of the band and simultaneously *halves*
 the true pressure difference between the two microphones, because that difference
 shrinks as $k \Delta r$. Any residual inter-channel phase mismatch is therefore
 amplified in the same proportion, and at low frequency it eventually swamps the
-true intensity — which is why a probe ships with a set of spacers rather than
+true intensity, which is why a probe ships with a set of spacers rather than
 one. As orders of magnitude, a 50 mm spacer covers roughly the 50 Hz to 1.25 kHz
 thirds and a 12 mm spacer roughly 200 Hz to 5 kHz, so a full-range survey is two
 passes stitched at the overlap. The consequence for validity is that a band fails
 not because it lies above `max_valid_frequency` alone, but whenever the field
 reactivity climbs to within the bias-error factor of the instrument's residual
-index — which happens first at the *low*-frequency end.
+index, which happens first at the *low*-frequency end.
 
 That residual index is measured, not looked up. A residual intensity testing
 device presents the same sound pressure to both microphones at once, both ports

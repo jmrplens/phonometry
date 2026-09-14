@@ -137,8 +137,8 @@ sensors carrying independent noises of power $M$ and $N_2$, so the correlation
 coefficient at the delay is $\rho = S/\sqrt{(S+M)(S+N_2)}$; with both noises
 ten times the signal that is $1/11$, and for $B = 100$ Hz over $T = 5$ s the
 formula returns $\varepsilon \approx 0.35$, one of the pinned conformance
-anchors — `correlation_random_error(1/11, 100.0, 5.0)` prints **0.349**, which
-is the whole of Example 8.5 in one call.
+anchors: `correlation_random_error(1/11, 100.0, 5.0)` prints
+**0.349**, which is the whole of Example 8.5 in one call.
 
 ($N$ above is the record length in samples, as the normalization bullets use
 it; the second sensor's noise power is written $N_2$ here to keep the two
@@ -182,7 +182,7 @@ $$
 \sin\theta = \frac{c\,\tau_0}{d},
 $$
 
-so the diagram's 2.44 ms at 343 m/s is 0.84 m of extra path — a number that only
+so the diagram's 2.44 ms at 343 m/s is 0.84 m of extra path, a number that only
 makes sense for a pair spaced at least that far apart. Three limits come with
 it, and all three are checkable:
 
@@ -233,12 +233,12 @@ The failure signature is worth memorising, because no returned number reports
 it: a correlogram whose main peak is not much taller than its neighbours, or a
 delay that jumps between segments of the same record, means the direct path is
 not dominant and the delay you have is a reflection's. `delay_std` will not warn
-you — Eq. 8.129 models the scatter of a single peak, not the choice between two.
+you; Eq. 8.129 models the scatter of a single peak, not the choice between two.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/gcc_phat_delay.svg" alt="Normalized cross-correlation of a colored two-sensor signal pair against lag in milliseconds: the direct correlator shows a broad peak around the true 20-sample delay while the GCC-PHAT curve collapses to a sharp spike exactly on the dashed true-delay line" width="82%" loading="eager" />
 
-*Both estimators land on the 2.441 ms delay — 2.4413 ms direct, 2.4418 ms
-PHAT — so the argument is not about accuracy on a clean pair but about how much
+*Both estimators land on the 2.441 ms delay (2.4413 ms direct, 2.4418 ms
+PHAT), so the argument is not about accuracy on a clean pair but about how much
 the peak can be trusted. Prewhitening narrows the main lobe from 0.73 ms at
 half height to 0.24 ms, two samples at 8192 Hz, because the direct correlator
 convolves the delta with the autocorrelation of a signal that is band-limited
@@ -416,13 +416,13 @@ These three are physically meaningful **only if the record really is one
 carrier with a slow modulation**: the modulation bandwidth has to stay below the
 carrier frequency, so that the two spectra do not overlap. That is the
 narrowband (Bedrosian) condition, and it is exactly why the exact AM identity
-below holds. Nothing in the call enforces it — `envelope` returns numbers for
+below holds. Nothing in the call enforces it: `envelope` returns numbers for
 any array you hand it.
 
 A violation is easy to recognise once you know what to look for. The envelope
 stops being smooth and starts tracking individual half-cycles of the waveform,
 and the instantaneous frequency spikes, leaves the signal's band entirely and
-goes negative — which happens every time the analytic signal passes near the
+goes negative, which happens every time the analytic signal passes near the
 origin of the complex plane, and is a geometric artefact rather than a physical
 frequency. Applied to speech, to a room impulse response or to broadband noise,
 all three quantities do this. The fix is to make the record narrowband first:
@@ -430,7 +430,7 @@ band-pass around the component of interest, exactly as the
 [envelope spectrum](/phonometry/signals/spectra/cepstrum-echoes/) does with its
 `band=` front end, or read the ridge of a
 [spectrogram](/phonometry/signals/spectra/time-frequency/) when several
-components coexist — the Hilbert construction has no way to represent more than
+components coexist: the Hilbert construction has no way to represent more than
 one at a time.
 
 For an amplitude-modulated carrier $u(t)\cos(2\pi f_0 t)$ the envelope

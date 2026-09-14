@@ -112,7 +112,7 @@ and from the physics of the element itself.
 
 **The library starts after the microphone and stops before the geometry.** On
 the measurement side, position averaging happens once positions are supplied
-— the insulation functions energy-average per-position spectra for you — but
+(the insulation functions energy-average per-position spectra for you), but
 nothing verifies how the measurement was made: the position counts and
 placements, the corner positions the ISO 16283 low-frequency procedure is fed
 from and the test-facility qualifications of ISO 16283, ISO 10140 and ISO 3382
@@ -132,8 +132,8 @@ simulation](../simulation/index.md).
 
 **And a prediction is not a verdict.** The single-number ratings and the
 national indices are computed here, but the limit values they are judged
-against are national — the Spanish code is implemented as a worked example of
-one such framework, not as the rule everywhere — and the requirement always
+against are national (the Spanish code is implemented as a worked example of
+one such framework, not as the rule everywhere), and the requirement always
 comes from your regulation.
 
 ## Before and after these pages

@@ -106,7 +106,7 @@ print(round(broadcast.integrated_loudness(np.vstack([mono, mono]), fs), 2))  # 0
 
 Formula 2 sums $G_i z_i$ over the channels, so the channel count is part of the
 measurement: the same waveform carried on two channels is exactly
-$10\log_{10} 2 = 3.01$ LU louder than on one. The anchor above shows it — that
+$10\log_{10} 2 = 3.01$ LU louder than on one. The anchor above shows it: that
 full-scale 997 Hz sine reads −3.01 LKFS on a single channel and 0.00 LKFS as
 dual mono, which is what the last two lines of the snippet above print.
 
@@ -116,8 +116,8 @@ metering makes it read −20 LUFS and invites a 3 dB correction in the wrong
 direction. The same arithmetic is why the LFE is excluded (Table 3, $G = 0$)
 and why the surround weights are 1.41: the sum is a loudness sum over the
 reproduction layout, so changing the layout changes the number legitimately.
-The `np.vstack` in the snippets below is exactly this — dual mono, the stereo
-delivery of a mono source — and it is why they read 3.01 LU above the
+The `np.vstack` in the snippets below is exactly this (dual mono, the stereo
+delivery of a mono source), and it is why they read 3.01 LU above the
 single-channel value of the same waveform.
 
 The biquad coefficients are tabulated at 48 kHz (Tables 1-2) and returned
@@ -170,13 +170,13 @@ plt.show()
 That is the whole model: two biquads and a mean square. It is worth being
 explicit about what such a measure cannot do, because the question a reader
 arrives with is usually "is this *the* loudness?". The chain is linear and
-level-independent by construction — doubling a programme's gain adds exactly
+level-independent by construction; doubling a programme's gain adds exactly
 6 dB to $L_\mathrm{K}$, which is precisely what makes normalisation a single
 multiplication, and precisely what a real ear does not do. There is no masking,
 no critical-band summation, no equal-loudness contour and no binaural
 summation anywhere in it. So BS.1770 ranks *similar* material reliably, which is
 what broadcast delivery needs, and is known to be less reliable across very
-different spectra — heavily low-frequency music against dialogue being the
+different spectra: heavily low-frequency music against dialogue being the
 standard example, and the reason the RLB high-pass exists at all. When the
 question really is perceived magnitude rather than delivery level, the
 psychoacoustic models are in
@@ -219,8 +219,8 @@ error.
 
 The gate also sets a floor on what can be measured at all. The integrated
 loudness needs **at least one 400 ms gating block above the −70 LUFS absolute
-gate**; below that — an item shorter than a block, or digital silence
-throughout — `integrated_loudness` returns `-inf`, which is a *no measurement*
+gate**; below that (an item shorter than a block, or digital silence
+throughout), `integrated_loudness` returns `-inf`, which is a *no measurement*
 answer and not a very quiet programme. Just above that floor the answer is
 weak rather than absent: an item of a few seconds leaves only a handful of
 surviving blocks, so the integrated value inherits their scatter, which is why
@@ -446,7 +446,7 @@ generally falls *between* samples, and a sample-peak meter under-reads a
 badly phased tone at $f_\mathrm{s}/4$ by 3 dB. The worst case is bounded by
 $20\log_{10}\cos(\pi f_{\mathrm{norm}}/n)$, where $n$ is the oversampling ratio
 and $f_{\mathrm{norm}} = f/f_\mathrm{s}$ is the tone frequency normalised to the sampling
-rate — which is exactly why $f_\mathrm{s}/4$ is the worst case, since
+rate, which is exactly why $f_\mathrm{s}/4$ is the worst case, since
 $f_{\mathrm{norm}} = 1/4$ maximises the bound over the audio band.
 BS.1770-5 Annex 2 therefore meters the **true peak** on a signal oversampled
 to at least 192 kHz (4× at 48 kHz), in **dBTP** (dB relative to 100 % full
@@ -534,7 +534,7 @@ weights = broadcast.channel_weight([0, 30, -30, 90, -90], [0, 0, 0, 0, 0])
 ```
 
 Those are two inequalities describing a picture, and the picture answers the
-question a rigger actually asks — which loudspeakers of *this* layout fall
+question a rigger actually asks: which loudspeakers of *this* layout fall
 inside the zone:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/channel_weight_map.svg" alt="A map of the BS.1770 Annex 3 channel weight over azimuth from minus 180 to 180 degrees and elevation from minus 90 to 90 degrees. Two shaded rectangles between 60 and 120 degrees of azimuth on either side and within plus or minus 30 degrees of elevation carry the weight 1.41, plus 1.5 decibels; everything else is 1.0. The 5.1 loudspeakers L, R and C sit at weight 1.00, Ls and Rs at 110 degrees fall inside the shaded zones at 1.41, and the upper-layer U plus 110 at 45 degrees of elevation falls outside at 1.00" width="92%" />
@@ -583,7 +583,7 @@ full-scale units, where 1.0 is 0 dBFS. A `soundfile.read` returns
 `(samples, channels)`, so it has to be transposed, and integer PCM has to be
 scaled to ±1 first. Second, *what* is metered: the programme **as delivered**.
 Line-up tone, slate, countdown and black are part of the file and not part of
-the programme, so they are trimmed before metering — a 1 kHz line-up tone at
+the programme, so they are trimmed before metering: a 1 kHz line-up tone at
 −18 dBFS sails through the absolute gate and drags the integrated value with it.
 And the whole programme is measured, not an excerpt, because the relative gate
 is computed from the programme's own survivors.
@@ -618,14 +618,14 @@ print(after.true_peak <= -1.0)                        # the R 128 ceiling: True
 ```
 
 Because the gain is linear and applies everywhere, it shifts M, S and I by
-exactly that many decibels and leaves **LRA unchanged** — the loudness range is
+exactly that many decibels and leaves **LRA unchanged**: the loudness range is
 a difference of percentiles, and a constant offset cancels out of it. Which
 blocks survive the gate is unchanged too, for the same reason.
 
 The true peak, however, moves with the gain, and that is the one conflict R 128
 leaves you to resolve. A quiet, wide-range programme needing +8 LU whose maximum
 true peak already sits at −6 dBTP lands at +2 dBTP: normalised correctly and
-over the ceiling. The order is *normalise, then check* — never reduce the gain
+over the ceiling. The order is *normalise, then check*: never reduce the gain
 to fit the peak, because that breaks the delivery level everything else depends
 on. The two legitimate resolutions are a true-peak limiter applied to the
 loudest moments (which lowers LRA slightly, and should be declared) or a
@@ -665,7 +665,7 @@ delivery passes. It follows the `tolerance` keyword: the default `"qc"` applies
 the **±0.2 LU** measurement-error allowance of R 128 item i), for loudness
 workflows such as Quality Control, and `"live"` applies the **±1.0 LU**
 tolerance of item h), which is permitted only where the Target Level is not
-practically achievable — a live programme, typically. The applied rule and its
+practically achievable (a live programme, typically). The applied rule and its
 R 128 item are printed on the fiche, so a reader can always see which was used.
 The verdict is then evaluated on the loudness *rounded to the displayed 0.1 LU*,
 so the printed numbers can never contradict the verdict beside them.
@@ -742,7 +742,7 @@ implements no spatial-audio renderer for that step. EBU Tech 3343 is cited
 only as production practice around these numbers: guidance, not an algorithm,
 and nothing here runs it. There is no normalisation *helper* either: section 7
 shows the single gain, and applying it is one multiplication. And nothing on
-this page is a loudness **model** — K-weighting is a fixed linear filter, so
+this page is a loudness **model**: K-weighting is a fixed linear filter, so
 masking, level dependence, critical bands and binaural summation are all
 outside it by construction; those live in [Loudness (ISO
 532)](/phonometry/perception/psychoacoustics/loudness/).

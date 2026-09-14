@@ -220,7 +220,7 @@ def _d_methods(s: SVG, th: Theme) -> None:
             (
                 _Method(
                     "ISO 9614-1",
-                    "In situ — any environment",
+                    "In situ, any environment",
                     "Grade 1 / 2 per band, 3 on $L_{WA}$",
                     "Sound intensity · discrete points",
                     "$L_W = 10 log_{10}(Σ I_i·S_i / P_0)$",
@@ -230,7 +230,7 @@ def _d_methods(s: SVG, th: Theme) -> None:
                 ),
                 _Method(
                     "ISO 9614-2",
-                    "In situ — any environment",
+                    "In situ, any environment",
                     "Grade 2 / 3 (engineering / survey)",
                     "Sound intensity · scanning",
                     "$L_W = 10 log_{10}(|Σ I_i·S_i| / P_0)$",
@@ -240,7 +240,7 @@ def _d_methods(s: SVG, th: Theme) -> None:
                 ),
                 _Method(
                     "ISO 9614-3",
-                    "In situ — any environment",
+                    "In situ, any environment",
                     "Grade 1 (precision)",
                     "Sound intensity · scanning, tighter",
                     "$L_W = 10 log_{10}(|Σ I_i·S_i| / P_0)$",
@@ -255,7 +255,7 @@ def _d_methods(s: SVG, th: Theme) -> None:
             (
                 _Method(
                     "ISO/TS 7849-1 / -2",
-                    "Any — no acoustic measurement",
+                    "Any, no acoustic measurement",
                     "Upper limit ($ε = 1$) / engineering",
                     "Surface velocity · accelerometers",
                     "$L_{WA} = L_{vA} + 10 lg(S/S_0) + 10 lg ε$",
@@ -1184,7 +1184,7 @@ def _d_residual_intensity_check(s: SVG, th: Theme) -> None:
             ),
             (
                 "$δ_{pI0}$ belongs to the probe, its spacer and the analyser "
-                "together — not to the microphones"
+                "together, not to the microphones"
             ),
         )
     ):
@@ -1529,7 +1529,7 @@ def _d_program_loudness(s: SVG, th: Theme) -> None:
 
     step(
         52,
-        "Programme $x$ — channel weights $G_i$: 1.0 front, 1.41 surround",
+        "Programme $x$, channel weights $G_i$: 1.0 front, 1.41 surround",
         "anchor: a 0 dB FS 997 Hz sine on one front channel reads −3.01 LKFS",
         th.fg,
     )
@@ -1826,7 +1826,7 @@ def _d_duct_path(s: SVG, th: Theme) -> None:
     s.text(
         60,
         520,
-        "blue: the supply path — red: the return path — each box "
+        "blue: the supply path; red: the return path; each box "
         "is one row of the sheet, stamped with its code",
         13,
         th.fg,
@@ -1835,8 +1835,8 @@ def _d_duct_path(s: SVG, th: Theme) -> None:
     s.text(
         60,
         546,
-        "attenuates only: 4, 5, 6 (supply) and 4, 5 (return) — "
-        "attenuates and regenerates: 2, 3 — self-noise only: "
+        "attenuates only: 4, 5, 6 (supply) and 4, 5 (return); "
+        "attenuates and regenerates: 2, 3; self-noise only: "
         "8 and the grille",
         12,
         th.muted,
@@ -1875,8 +1875,8 @@ def _d_silencer_iso7235(s: SVG, th: Theme) -> None:
 
     for row, (y, title, obj, colour) in enumerate(
         (
-            (150.0, "Series I — test object installed", "test object", th.primary),
-            (330.0, "Series II — substitution duct", "substitution duct", th.secondary),
+            (150.0, "Series I: test object installed", "test object", th.primary),
+            (330.0, "Series II: substitution duct", "substitution duct", th.secondary),
         )
     ):
         ax = y + duct_h / 2
@@ -2010,8 +2010,8 @@ def _d_silencer_iso7235(s: SVG, th: Theme) -> None:
     s.text(
         60,
         692,
-        "and the facility's own limiting insertion loss — flanking "
-        "along the duct walls — caps what it can report at all",
+        "and the facility's own limiting insertion loss (flanking "
+        "along the duct walls) caps what it can report at all",
         13,
         th.muted,
         anchor="start",
@@ -2103,7 +2103,7 @@ def _d_room_to_room(s: SVG, th: Theme) -> None:
     s.text(
         50,
         480,
-        "source side — blower on the floor at a wall mid-point: "
+        "source side, blower on the floor at a wall mid-point: "
         "$L_W$ = 105 dB at 125 Hz, $Q = 4$ adds 6.0 dB, "
         "$L_{p1}$ = 107.0 dB",
         12,
@@ -2113,7 +2113,7 @@ def _d_room_to_room(s: SVG, th: Theme) -> None:
     s.text(
         50,
         502,
-        "partition — 5 m × 3 m = 15 m², TL = 39 dB at 125 Hz; "
+        "partition, 5 m × 3 m = 15 m², TL = 39 dB at 125 Hz; "
         "the $τ S_w$ returned to the source room is off by default",
         12,
         th.fg,
@@ -2122,7 +2122,7 @@ def _d_room_to_room(s: SVG, th: Theme) -> None:
     s.text(
         50,
         524,
-        "receiving side — $S_{2}α_{2}$ = 5.5 m² at 125 Hz rising to "
+        "receiving side, $S_{2}α_{2}$ = 5.5 m² at 125 Hz rising to "
         "39.2 m² at 4 kHz; $L_{p2}$ = 72.4 dB against 60 dB for "
         "NC 45",
         12,
@@ -2178,7 +2178,7 @@ def _d_machine_enclosure(s: SVG, th: Theme) -> None:
     s.text(
         455,
         92,
-        "$S_E$ = 24 m² of exposed shell — a 3.0 × 2.0 × 1.8 m box, five faces",
+        "$S_E$ = 24 m² of exposed shell: a 3.0 × 2.0 × 1.8 m box, five faces",
         14,
         th.primary,
         bold=True,
@@ -2284,7 +2284,7 @@ def _d_machine_enclosure(s: SVG, th: Theme) -> None:
     s.text(
         40,
         610,
-        "with the door: 21.4 dB — with the 1 % gap as well: "
+        "with the door: 21.4 dB; with the 1 % gap as well: "
         "15.1 dB, against the $10 log_{10}(S_E/S_a)$ = 20 dB cap",
         13,
         th.secondary,
@@ -2390,7 +2390,7 @@ def _d_distortion_bench(s: SVG, th: Theme) -> None:
         ),
         (
             "highest significant harmonic inside the band: $f_1 ≤ f_{limit} / n$ "
-            "(14.12.4.1 — 30 kHz and $n = 5$ give 6 kHz)"
+            "(14.12.4.1, 30 kHz and $n = 5$ give 6 kHz)"
         ),
     )
     for k, txt in enumerate(checks):
@@ -2429,12 +2429,12 @@ def _d_sweep_bench(s: SVG, th: Theme) -> None:
     s.arrow(400, 156, 400, 200, th.fg, 1.8)
     s.line(400, 200, 123, 200, th.fg, 1.8)
     s.arrow(160, 200, 123, 200, th.fg, 1.8)
-    s.text(262, 194, "in — channel 1", 11, th.muted)
+    s.text(262, 194, "in: channel 1", 11, th.muted)
     s.line(182, 148, 216, 148, th.accent, 1.8, dash="7,4")
     s.line(216, 148, 216, 232, th.accent, 1.8, dash="7,4")
     s.line(216, 232, 123, 232, th.accent, 1.8, dash="7,4")
     s.arrow(160, 232, 123, 232, th.accent, 1.8)
-    s.text(233, 252, "loopback — channel 2 fixes $t = 0$", 12, th.accent)
+    s.text(233, 252, "loopback: channel 2 fixes $t = 0$", 12, th.accent)
 
     # ---- panel (b): acoustic, with the first reflection --------------------
     s.rect(444, 56, 416, 214, th.panel, th.muted, rx=12, sw=1.6)

@@ -227,7 +227,7 @@ one meaning across them:
 | $A$ | Equivalent absorption area, m² ($A_0 = 10$ m² reference, $A_\mathrm{T}$ specimen, $A_\mathrm{obj}$, $A_\mathrm{air}$) | throughout |
 | $m$ | Power attenuation coefficient of air, 1/m | ISO 354 and EN 12354-6 |
 | $m$ | Number of repeated measurements | ISO 12999-1 uncertainty only |
-| $m'$ / $m''$ | Mass per unit area, kg/m² — EN 12354 writes $m'$, the panel-prediction literature $m''$ | flanking and panel prediction |
+| $m'$ / $m''$ | Mass per unit area, kg/m² (EN 12354 writes $m'$, the panel-prediction literature $m''$) | flanking and panel prediction |
 | $C$ | Clarity, dB (subscripted 50 or 80) | ISO 3382-1 parameters |
 | $C$ | Decay curvature, % | ISO 3382-2 validity |
 | $C$, $C_\mathrm{tr}$ | Spectrum adaptation terms, dB | ISO 717 ratings |
@@ -241,7 +241,7 @@ ANSI/ASA S12.2-2019 rates steady background noise in rooms against families of o
 | :--- | :--- | :--- |
 | Curve family | Table 1 curves NC-15 to NC-70, 16 Hz – 8 kHz | A pure −5 dB/octave line keyed to its 1 kHz value, floored at $\max(\mathrm{RC}+25,\ 55)$ dB at 16 and 31.5 Hz (Annex D) |
 | How the rating is picked | Tangency (clause 5.2.3): each band interpolated against the tabulated curves, the highest per-band index wins | Arithmetic mean of the 500/1000/2000 Hz levels, rounded to an integer (D.4) |
-| What is reported | A continuous value plus the band that set it — NC-42.5 at 250 Hz, not snapped to a curve | An integer with a spectral-quality tag, e.g. RC-35(N) |
+| What is reported | A continuous value plus the band that set it (e.g. NC-42.5 at 250 Hz, not snapped to a curve) | An integer with a spectral-quality tag, e.g. RC-35(N) |
 | Quality tag | none | Rumble "R" when any band ≤ 500 Hz exceeds the contour by more than 5 dB, hiss "H" when any band ≥ 1 kHz exceeds it by more than 3 dB, "RH" for both, else "N" (D.3) |
 | Outside the family | Flagged: &gt;NC-70 with the band of maximum exceedance, or &lt;NC-15, rather than a fabricated number | — |
 
@@ -251,13 +251,13 @@ The generated RC contours reproduce Table D.1 digit for digit, and feeding any T
 from the use of the room, and Annex C (informative) is where the standard puts
 it. Its Table C.2 recommends, for example, NC 25-30 for a classroom or a small
 auditorium, 30-35 for a small private office, 40-45 for an open-plan area and
-40-50 for public circulation — so a rating in the low forties is unremarkable in
+40-50 for public circulation. A rating in the low forties is unremarkable in
 an open office and a clear failure in a lecture room. The RC tag is a diagnosis
 rather than a grade: the reference contour is a straight −5 dB/octave line
 because that is the slope occupants describe as bland, so **R** means the
 spectrum carries more low-frequency energy than that slope allows and points at
 fan and duct-borne noise or a structure-borne path, while **H** points at the
-terminal device — diffuser velocity, turbulence at the outlet. Different tags,
+terminal device: diffuser velocity, turbulence at the outlet. Different tags,
 different remedies. And a rating computed from a spectrum whose lowest bands were
 never actually measured is not comparable with one where they were, because those
 bands set both the tag and, often, the tangency point.
@@ -303,7 +303,7 @@ direction.
 The assumption that breaks first is time invariance, and clause 6.1 is explicit
 about it: moving the source or a microphone during the measurement is not
 acceptable, and neither air movement nor a change in the speed of sound through
-temperature is — the path length changes by a fraction of a wavelength between
+temperature is. The path length changes by a fraction of a wavelength between
 the start and the end of the excitation, and the deconvolution charges the
 mismatch to the noise floor. This is also what separates the two methods in
 practice: MLS rests on the exactness of the circular autocorrelation and
@@ -341,7 +341,7 @@ with two decays each, and is the grade the sound-insulation standards call for
 source positions and **twelve** combinations with three decays each (2.5 % and
 5 %). Independence is the operative word: microphone positions should be about
 half a wavelength apart, in practice a minimum of some 2 m, at least about a
-quarter wavelength — roughly 1 m — from any reflecting surface including the
+quarter wavelength (roughly 1 m) from any reflecting surface including the
 floor, never symmetric, and no closer to a source than
 $d_{\min} = 2\sqrt{V/(c\,T)}$, so that direct sound does not dominate the early
 decay. Positions packed closer than that are not the independent positions
@@ -411,7 +411,7 @@ The single-number rating (ISO 717-1, Clause 4.4) shifts the Table 3 **reference 
 one fixed reference curve, so it answers for the reference source and no other.
 The adaptation terms put the source dependence back by re-rating the same
 measured curve against two standard spectra: No. 1 for sources whose spectrum is
-flat-ish and mid-and-high dominated — speech, television, everyday activity —
+flat-ish and mid-and-high dominated (speech, television, everyday activity)
 and No. 2 for sources dominated by low frequencies, such as urban road traffic,
 distant aircraft and bass-heavy music. Both terms are almost always negative, and
 the value is the number of decibels to *add* to $R_\mathrm{w}$ to get the level difference
@@ -419,8 +419,8 @@ that source will actually experience, which is why regulations state
 requirements as $R_\mathrm{w} + C$ or $R_\mathrm{w} + C_\mathrm{tr}$ and not as $R_\mathrm{w}$ alone. That makes
 $C_\mathrm{tr}$ a diagnostic: near $-2$ is ordinary for a homogeneous heavy wall, while
 values approaching $-8$ or worse mark a construction whose insulation collapses
-in the lowest bands — typically a lightweight double leaf near its
-mass-spring-mass resonance, or a window — so two partitions with the same $R_\mathrm{w}$
+in the lowest bands (typically a lightweight double leaf near its
+mass-spring-mass resonance, or a window). Two partitions with the same $R_\mathrm{w}$
 can differ by many decibels under traffic. The terms are computed over the same
 band range as the rating they accompany, so an adaptation term quoted over
 100–3150 Hz and one extended to 50 Hz are not comparable quantities.
@@ -474,7 +474,7 @@ tightly specified arrangement, and $\alpha_\mathrm{s}$ means nothing without it.
 holds at least 150 m³ (200 m³ strongly recommended for a new one), its longest
 dimension stays below $1.9\,V^{1/3}$, and it carries enough fixed or rotating
 diffusion for the decays to be exponential (clause 6.1). The plane specimen
-covers 10 to 12 m² — the upper limit scaled by $(V/200)^{2/3}$ above 200 m³ — is
+covers 10 to 12 m² (the upper limit scaled by $(V/200)^{2/3}$ above 200 m³) and is
 rectangular with a width-to-length ratio between 0.7 and 1, sits at least 0.75 m
 from any room boundary and preferably has its edges non-parallel to the nearest
 room edge (6.2.1). Its **mounting is part of the result** (Annex B): rigid
@@ -493,7 +493,7 @@ empty and the loaded measurement lands in it: a shift in temperature or humidity
 moves both $c$ and the air term $4Vm$, which is why the two decays belong in the
 same session with the climate recorded. And an $\alpha_\mathrm{s}$ above 1 is not an
 error but the signature of edge diffraction intercepting more energy than the
-flat projected area — largest for small specimens and at low frequency — so the
+flat projected area (largest for small specimens and at low frequency). The
 value belongs to a specimen of *that* size, aspect ratio and mounting and cannot
 be transplanted to a surface of another shape without judgement.
 
@@ -519,7 +519,7 @@ ISO 10140-5 suite is two *structurally decoupled* reverberation rooms of roughly
 50 to 60 m³ sharing a test opening of about 10 m², built so that transmission
 around the specimen sits far below transmission through it. The facility
 measures its own flanking limit, and a specimen may be reported only up to that
-limit — which is why a laboratory $R$ carries no prime, and why the same
+limit, which is why a laboratory $R$ carries no prime, and why the same
 construction built into a building reads several decibels lower. The practical
 consequence is a diagnosis: when a field $R'$ refuses to rise after the element
 is improved, the measurement has hit a flanking path, not the element. The impact pair is the normalized laboratory level
@@ -592,7 +592,7 @@ transmission is governed by their mass per unit area, joined rigidly, so that th
 junction attenuation can depend on the mass ratio alone; the Annex E regressions
 are empirical fits to exactly that family. They return no meaningful answer for
 framed lightweight constructions, for elastically decoupled junctions, or for
-elements with a strong internal loss mechanism — those need the detailed
+elements with a strong internal loss mechanism. Those need the detailed
 band-by-band model or measured $K_{ij}$ values. The $K_{ij,\min}$ floor exists
 to stop the regressions producing implausibly high junction attenuations for
 small elements, so a path that lands on the floor is a signal that the mass-ratio

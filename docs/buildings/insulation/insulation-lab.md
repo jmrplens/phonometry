@@ -277,7 +277,7 @@ procedures behind them.
 and implemented nowhere: nothing checks the position counts, the separations,
 the averaging times, the band range, the test-opening geometry or the
 loss-factor requirement. The mounting condition survives only as free text in
-the report metadata — which is what ISO 10140-1 asks for, since it requires a
+the report metadata: this is what ISO 10140-1 asks for, since it requires a
 mounting to be *described* rather than picked from a list. Nothing estimates
 the suite's $R'_\text{max}$ either, so a result approaching the facility's
 ceiling is produced without complaint; that qualification comes from the

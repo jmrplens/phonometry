@@ -187,7 +187,7 @@ def generate_excitation_signals(output_dir: str) -> None:
 
     # Exponential sine sweep: time-domain waveform.
     ax_sw.plot(t, sweep, color=COLOR_PRIMARY, linewidth=0.5)
-    ax_sw.set_title("Exponential sine sweep — waveform")
+    ax_sw.set_title("Exponential sine sweep: waveform")
     ax_sw.set_xlabel("Time [s]")
     ax_sw.set_ylabel("Amplitude")
     ax_sw.set_xlim(0.0, secs)
@@ -206,7 +206,7 @@ def generate_excitation_signals(output_dir: str) -> None:
     ax_ml.step(
         np.arange(show), mls[:show], where="mid", color=COLOR_PRIMARY, linewidth=1.2
     )
-    ax_ml.set_title(f"MLS — first {show} of {mls.size} samples")
+    ax_ml.set_title(f"MLS: first {show} of {mls.size} samples")
     ax_ml.set_xlabel("Sample")
     ax_ml.set_ylabel("Amplitude")
     ax_ml.set_ylim(-1.4, 1.4)
@@ -384,9 +384,7 @@ def generate_deconvolution_snr_gain(output_dir: str) -> None:
     for label, color, h in cases:
         trace, snr = envelope(h)
         snrs.append(snr)
-        ax.plot(
-            time, trace, color=color, linewidth=1.1, label=f"{label} — {snr:.0f} dB"
-        )
+        ax.plot(time, trace, color=color, linewidth=1.1, label=f"{label}: {snr:.0f} dB")
     # A hairline bracket rather than a filled band: a light wash over 30 % of
     # the canvas cannot clear the contrast gate against either background.
     ax.axvline(time[win.start], color=COLOR_FG, linestyle=":", linewidth=1.2)
@@ -1515,7 +1513,7 @@ def generate_room_noise_criteria(output_dir: str) -> None:
         zorder=4,
         label=f"Tangent @ {nc.governing_frequency:g} Hz",
     )
-    ax_nc.set_title(f"Noise Criteria — tangency method   NC-{nc.rating:g}", pad=10)
+    ax_nc.set_title(f"Noise Criteria: tangency method   NC-{nc.rating:g}", pad=10)
     _room_criteria_axis(ax_nc, OCTAVE_BANDS)
 
     # --- Right: RC Mark II family, reference + rumble/hiss tolerances. ---
@@ -1633,7 +1631,7 @@ def generate_nc_blind_spot(output_dir: str) -> None:
             style,
             color=color,
             zorder=3,
-            label=f"{label} — tangent at {nc.governing_frequency:g} Hz",
+            label=f"{label} (tangent at {nc.governing_frequency:g} Hz)",
         )
         gov = spectrum[OCTAVE_BANDS == nc.governing_frequency][0]
         ax_nc.plot(
@@ -1679,7 +1677,7 @@ def generate_nc_blind_spot(output_dir: str) -> None:
             style,
             color=color,
             zorder=3,
-            label=f"{label} — {rc.label}",
+            label=f"{label}: {rc.label}",
         )
     ax_rc.set_ylim(-17.0, 17.0)
     ax_rc.set_title("Two ratings: the RC Mark II tag reads the character", pad=10)

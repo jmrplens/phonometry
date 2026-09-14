@@ -75,9 +75,9 @@ Pages elsewhere on the site that this section leans on:
 ## What this section does not cover
 
 These pages implement the signal processing of a sound level meter, not the
-meter. The rest of IEC 61672-1 — level ranges, overload indication, the
+meter. The rest of IEC 61672-1 (level ranges, overload indication, the
 self-generated noise floor, the directional response and the IEC 61672-3
-periodic tests — is not implemented anywhere in the library, so nothing here
+periodic tests) is not implemented anywhere in the library, so nothing here
 assigns a class to a physical instrument; [Build a sound level
 meter](../sound-level-meter.md) states exactly what a class
 verdict from the library does and does not mean. Two curves come without a

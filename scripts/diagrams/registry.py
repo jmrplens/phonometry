@@ -193,7 +193,7 @@ from .vibration import (
 DIAGRAMS = {
     "diagram_calibration_setup": (
         _d_calibration_chain,
-        "Calibration chain — from calibrator to physical units",
+        "Calibration chain: from calibrator to physical units",
         560,
     ),
     "diagram_calibration_coupling": (
@@ -302,12 +302,12 @@ DIAGRAMS = {
     ),
     "diagram_insitu_subtraction": (
         _d_insitu_subtraction,
-        "In-situ road absorption — subtraction technique (ISO 13472-1)",
+        "In-situ road absorption: subtraction technique (ISO 13472-1)",
         560,
     ),
     "diagram_spot_tube": (
         _d_spot_tube,
-        "In-situ road absorption — spot method (ISO 13472-2)",
+        "In-situ road absorption: spot method (ISO 13472-2)",
         540,
     ),
     "diagram_precision_anechoic": (

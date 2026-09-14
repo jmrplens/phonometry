@@ -152,7 +152,7 @@ call for more positions or a redistribution.
 
 What is implemented is the calculation, not the laboratory practice: the
 measurement clauses of both parts (instrumentation, source installation,
-environmental conditions — clauses 5 to 7), their measurement-uncertainty
+environmental conditions: clauses 5 to 7), their measurement-uncertainty
 clauses and the informative annexes are not code, so the position counts and
 the Table 2 ladder are rules the reader keeps, not checks the functions run.
 Part 2's clause 8 also defines the radiation factor of a machine batch or
@@ -191,10 +191,10 @@ to violate in the field:
 "Adjacent zones move in antiphase and their radiation largely cancels" is a
 statement about a phase relationship between a travelling structural wave and
 the air on top of it, which no spectrum can draw. The clip below drives a
-10 mm steel plate in air along its whole length — a force on the plate, not a
-wave arriving at it, and over the whole plate rather than a patch, because a
+10 mm steel plate in air along its whole length (a force on the plate, not a
+wave arriving at it, and over the whole plate rather than a patch), because a
 patch radiates from the patch and below coincidence that would be the only
-thing in the air — and runs the same scene twice, at $f_\mathrm{c}/2$ and at
+thing in the air, and runs the same scene twice, at $f_\mathrm{c}/2$ and at
 $2f_\mathrm{c}$, with nothing differing between the panels but the drive frequency.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_radiation_efficiency_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_radiation_efficiency.gif" alt="Animation: a bending wave running along a steel plate in air, with alternating pressure lobes that cling to the plate and fade out within centimetres in the lower-frequency panel, and a plane beam departing at forty-five degrees in the higher-frequency panel" width="640" height="360" loading="lazy"></picture>
@@ -206,7 +206,7 @@ one. Adjacent half-waves push and pull the same air in antiphase, and what
 the air shows is a skin of alternating lobes that clings to the plate and
 dies within a fraction of a wavelength: the pressure at the surface is of the
 same order as in the other panel, but a quarter-cycle out of step with the
-velocity, so it carries no power away — which is what $\varepsilon \ll 1$
+velocity, so it carries no power away: that is what $\varepsilon \ll 1$
 *means*. Above coincidence the bending wave outruns sound, the trace match is
 satisfied, and a plane beam leaves at $\arcsin(c_0/c_\mathrm{B}) = 45°$. Each panel
 is annotated with the closed forms its regime obeys, from the plate's own

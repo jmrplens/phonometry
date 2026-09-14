@@ -347,7 +347,7 @@ def _d_sweep_budget(s: SVG, th: Theme) -> None:
     s.text(
         x1,
         y3 - 44,
-        "the linear deconvolution's own decaying noise tail — not the room",
+        "the linear deconvolution's own decaying noise tail, not the room",
         12,
         th.muted,
         "end",
@@ -576,10 +576,10 @@ def _d_flanking(s: SVG, th: Theme) -> None:
 
     # --- legend + master formula (Formula 26) -------------------------------
     rows = [
-        (c_dd, "Dd — direct path: separating element both sides"),
-        (c_ff, "Ff — flanking–flanking: flanking element both sides"),
-        (c_fd, "Fd — flanking (source) → separating (receiving)"),
-        (c_df, "Df — separating (source) → flanking (receiving)"),
+        (c_dd, "Dd: direct path, separating element both sides"),
+        (c_ff, "Ff: flanking–flanking, flanking element both sides"),
+        (c_fd, "Fd: flanking (source) → separating (receiving)"),
+        (c_df, "Df: separating (source) → flanking (receiving)"),
     ]
     ly = 452.0
     for col, txt in rows:
@@ -612,7 +612,7 @@ def _d_room_measurement(s: SVG, th: Theme) -> None:
     s.text(
         rx + 10,
         ry - 12,
-        "Room plan (top view) — 10.0 × 6.0 m, 3.5 m high",
+        "Room plan (top view): 10.0 × 6.0 m, 3.5 m high",
         17,
         th.fg,
         "start",
@@ -712,7 +712,7 @@ def _d_room_measurement(s: SVG, th: Theme) -> None:
     s.text(
         60,
         ty - 14,
-        "ISO 3382-2 — reverberation-time measurement grades",
+        "ISO 3382-2: reverberation-time measurement grades",
         17,
         th.fg,
         "start",
@@ -760,7 +760,7 @@ def _d_open_plan_setup(s: SVG, th: Theme) -> None:
     s.text(
         x0,
         y0 - 14,
-        "(a) Plan — 30 × 12 m floor, two ceiling zones",
+        "(a) Plan: 30 × 12 m floor, two ceiling zones",
         15,
         th.fg,
         "start",
@@ -875,7 +875,7 @@ def _d_open_plan_setup(s: SVG, th: Theme) -> None:
     s.text(
         x0,
         sy0 - 12,
-        "(b) Section — both heights are 1.2 m (5.2.2)",
+        "(b) Section: both heights are 1.2 m (5.2.2)",
         15,
         th.fg,
         "start",
@@ -1075,7 +1075,7 @@ def _d_room_measurement_section(s: SVG, th: Theme) -> None:
     s.text(
         70,
         ty - 12,
-        "ISO 3382-1 Table 1 — omnidirectionality over gliding 30° arcs",
+        "ISO 3382-1 Table 1: omnidirectionality over gliding 30° arcs",
         15,
         th.fg,
         "start",
@@ -1093,7 +1093,7 @@ def _d_room_measurement_section(s: SVG, th: Theme) -> None:
     s.text(
         70,
         ty + row_h * 2 + 24,
-        "Hz / dB, measured at ≥ 1.5 m — in practice a dodecahedron, not a monitor",
+        "Hz / dB, measured at ≥ 1.5 m (in practice a dodecahedron, not a monitor)",
         13,
         th.muted,
         "start",
@@ -1156,7 +1156,7 @@ def _d_room_noise(s: SVG, th: Theme) -> None:
             s.text(cxx, y + 48, l2, 12, th.muted, "middle")
 
     # --- Left lane: NC tangency method (Table 1) ----------------------------
-    _step(lxc, 158, "NC — tangency method", "Table 1 curves", th.primary)
+    _step(lxc, 158, "NC: tangency method", "Table 1 curves", th.primary)
     _step(lxc, 256, "NC value in each band", "curve level = $L(f)$ at that $f$", th.fg)
     _step(lxc, 354, "NC = highest curve touched", "note the governing band", th.fg)
     s.arrow(lxc, 220, lxc, 256, th.fg, 1.8)
@@ -1301,7 +1301,7 @@ def _d_room_noise_setup(s: SVG, th: Theme) -> None:
     s.text(
         x0 - 74,
         462,
-        "$L_{EQ}$ at the named position — or scan the whole "
+        "$L_{EQ}$ at the named position, or scan the whole "
         "space at ≤ 0.5 m/s for ≥ 20 s",
         13,
         th.primary,
@@ -1379,7 +1379,7 @@ def _d_room_noise_setup(s: SVG, th: Theme) -> None:
     s.text(
         64,
         560,
-        "against Table 3 — a field that fails belongs to RNC "
+        "against Table 3: a field that fails belongs to RNC "
         "(clause 5.3), not to NC or RC",
         13,
         th.fg,
@@ -1541,7 +1541,7 @@ def _d_iso12999(s: SVG, th: Theme) -> None:
     s.text(
         cx,
         72,
-        "Standard uncertainty  $u$  — reproducibility read from the tables",
+        "Standard uncertainty  $u$: reproducibility read from the tables",
         15,
         th.fg,
         "middle",
@@ -1867,7 +1867,7 @@ def _d_reverberation_prediction(s: SVG, th: Theme) -> None:
     s.text(
         450,
         77,
-        "Room 10 × 7 × 3.5 m — $V$ = 245 m³, $S$ = 259 m²",
+        "Room 10 × 7 × 3.5 m: $V$ = 245 m³, $S$ = 259 m²",
         14,
         th.fg,
         bold=True,
@@ -2917,7 +2917,7 @@ def _d_decay_range(s: SVG, th: Theme) -> None:
         450,
         442,
         "hatched: the 15 dB margin ISO 3382-1 asks for beyond each window "
-        "— EDT needs 25 dB, $T_{20}$ 35 dB, $T_{30}$ 45 dB",
+        "(EDT needs 25 dB, $T_{20}$ 35 dB, $T_{30}$ 45 dB)",
         12,
         th.fg,
     )

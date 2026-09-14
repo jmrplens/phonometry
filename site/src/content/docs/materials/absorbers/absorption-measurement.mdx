@@ -89,15 +89,15 @@ temperature and relative humidity, inside $30\ \% \le \text{RH} \le 90\ \%$
 and $t \ge 15$ °C throughout the test. The term itself is anything but small:
 for the 200 m³ room of the example below at 21.4 °C and 54 % RH, the
 ISO 9613-1 attenuation makes $4Vm$ about 0.9 m² at 1 kHz, 4.9 m² at 4 kHz and
-7.2 m² at 5 kHz — against an empty-room absorption area of about 7.7 m² in
+7.2 m² at 5 kHz; against an empty-room absorption area of about 7.7 m² in
 that top band. A few percent of humidity drift between the two runs therefore
 moves $\alpha_\mathrm{s}$ by more than most of the effect being measured. When the
 climate did drift, drop to `absorption_coefficient` and supply a separate
 value per measurement as `m1`/`m2` (with `temperature1_c`/`temperature2_c`);
 `measure_sound_absorption` assumes one climate. The per-band $m$ comes from
-an ISO 9613-1 attenuation $\alpha$ in dB/m —
+an ISO 9613-1 attenuation $\alpha$ in dB/m:
 `environment.air_attenuation(freqs, temperature_c=21.4,
-relative_humidity_percent=54.0, atmospheric_pressure_kpa=101.325)` — converted
+relative_humidity_percent=54.0, atmospheric_pressure_kpa=101.325)`, converted
 with `materials.attenuation_from_alpha(alpha)`,
 which is ISO 354's own $m = \alpha/(10 \lg e)$.
 
@@ -170,9 +170,9 @@ plt.show()
 
 ### 1.1 How $T_1$ and $T_2$ are actually measured (Clause 7)
 
-The two reverberation times are ordinary decay measurements — the machinery is
+The two reverberation times are ordinary decay measurements (the machinery is
 the one described under
-[room acoustics](/phonometry/buildings/rooms/room-acoustics/) — but ISO 354
+[room acoustics](/phonometry/buildings/rooms/room-acoustics/)), but ISO 354
 constrains the geometry and the averaging much harder than a general room
 survey does, because the whole result is the *difference* of two numbers that
 are almost equal at low frequency.
@@ -181,7 +181,7 @@ are almost equal at low frequency.
 source are omnidirectional. Microphone positions are at least 1.5 m apart,
 2 m from any sound source and 1 m from any room surface *and from the test
 specimen*; source positions are at least 3 m apart. Decay curves measured at
-different microphone positions shall not be combined in any way — they are
+different microphone positions shall not be combined in any way: they are
 separate decays, averaged only as reverberation times.
 
 **How many decays (Clause 7.1.4).** At least twelve spatially independent
@@ -197,7 +197,7 @@ noise of continuous spectrum: with broadband noise and a real-time analyser
 the resulting sound pressure levels must differ by less than 6 dB between
 adjacent one-third-octave bands, and band-limited noise must be at least one
 one-third octave wide. The excitation must run long enough to reach the steady
-state — at least half the expected reverberation time — and start high enough
+state (at least half the expected reverberation time) and start high enough
 that the bottom of the evaluation range still clears the background by 10 dB.
 Because a single interrupted decay is a statistical sample, averaging at one
 microphone/source position is mandatory: **at least three** decays, and at
@@ -208,7 +208,7 @@ which is why it is the method to prefer when the instrumentation allows it.
 
 **How each decay is read (Clause 7.4.1).** Per band: start 5 dB below the
 initial level, evaluate over a 20 dB range, and keep the bottom of that range
-at least 10 dB above the overall background noise — a $T_{20}$, extrapolated
+at least 10 dB above the overall background noise: a $T_{20}$, extrapolated
 to 60 dB. $T_1$ and $T_2$ are then the arithmetic mean over all the
 measurements in that band, carried to at least two decimal places
 (Clause 8.1.1).
@@ -225,8 +225,8 @@ room volume of 200 m³ the *upper* limit is multiplied by $(V/200)^{2/3}$, and a
 weakly absorbing specimen should use the upper limit. The specimen is
 rectangular with a width-to-length ratio between 0.7 and 1, placed so that no
 part is closer than 1 m to a room boundary and never closer than 0.75 m, with
-its edges preferably *not* parallel to the nearest room edge — both rules
-exist to keep the specimen out of the pressure maxima at the room boundaries.
+its edges preferably *not* parallel to the nearest room edge (both rules
+exist to keep the specimen out of the pressure maxima at the room boundaries).
 A heavy specimen may instead stand vertically against a wall resting on the
 floor, and then the 0.75 m clearance does not apply.
 
@@ -240,24 +240,24 @@ mounting catalogue a datasheet quotes:
 | E-*xxx* | Mounted over a sealed air space in a fixture of at least 20 kg/m²; the suffix is the distance in millimetres from the **exposed face** of the specimen to the room surface behind it, tested at E-200, E-300 or E-400 |
 | G-*xxx* | Hung parallel to a room surface (curtains, drapes, blinds); the suffix is again the face-to-surface distance, tested at G-100, other spacings in multiples of 50 mm |
 | I | Sprayed or trowelled materials, applied to a substrate and then tested as a Type A with a frame |
-| J | Unit absorbers — pads and baffles — in two or three parallel rows over 10 m² to 15 m² of floor, surrounded by a non-absorptive barrier |
+| J | Unit absorbers (pads and baffles) in two or three parallel rows over 10 m² to 15 m² of floor, surrounded by a non-absorptive barrier |
 
 The suffix is a cavity depth, and cavity depth moves the answer more than most
 material choices do. Predicting the same 50 mm blanket
 ($\sigma = 20$ kPa·s/m²) with the
 [multilayer models](/phonometry/materials/absorbers/porous-absorbers/) gives
 $\alpha_\mathrm{w} = 0.70(\text{H})$, class C, laid flat as a Type A, and
-$\alpha_\mathrm{w} = 0.90$, class A, on a Type E-400 mounting — two classes from one
-product, because the 350 mm of air behind it moves the layer into the
+$\alpha_\mathrm{w} = 0.90$, class A, on a Type E-400 mounting. Two classes come from one
+product because the 350 mm of air behind it moves the layer into the
 particle-velocity maximum at 250 Hz (where the predicted coefficient goes from
 0.37 to 0.86). A quoted $\alpha_\mathrm{s}$ or $\alpha_\mathrm{w}$ without its mounting is
 therefore not a material property but an installation result, which is why the
 `mounting` field of the fiche below is not decoration.
 
 **The perimeter edge (Annex B.2).** The specimen edges shall be sealed or
-covered so that they do not absorb — *unless* the product is normally
+covered so that they do not absorb (unless the product is normally
 installed with exposed edges, in which case they stay open and the area of the
-edges is added into $S$. Either way the treatment goes in the report. Where a
+edges is added into $S$). Either way the treatment goes in the report. Where a
 reflective frame is used it must be solid rather than hollow, with no air
 space between frame, specimen and room surface, at least 1.0 mm steel or
 12.5 mm gypsum board or wood, tightly butted and sealed, its exposed face
@@ -270,7 +270,7 @@ $A_2 - A_1$.
 ### 1.3 Is the room fit to measure in? (Clause 6.1 and Annex A)
 
 Three checks decide whether a room may be used at all, and none of them is
-performed by this library — `measure_sound_absorption` only raises an advisory
+performed by this library: `measure_sound_absorption` only raises an advisory
 `AbsorptionWarning` on the volume and the specimen area.
 
 1. **Volume and shape (Clauses 6.1.1, 6.1.2).** $V \ge 150$ m³, and at least
@@ -279,8 +279,8 @@ performed by this library — `measure_sound_absorption` only raises an advisory
    decay. The shape must satisfy $l_\text{max} < 1.9\,V^{1/3}$, with
    $l_\text{max}$ the longest straight line inside the room (the major
    diagonal of a rectangular room), and no two room dimensions may stand in
-   the ratio of small whole numbers — both conditions spread the low-frequency
-   modes.
+   the ratio of small whole numbers (both conditions spread the low-frequency
+   modes).
 2. **Empty-room absorption (Clause 6.1.4).** $A_1$ shall not exceed the
    Table 1 ceiling, which is 6.5 m² from 100 Hz to 800 Hz for a 200 m³ room
    and rises through 7.0 m² at 1 kHz to 14.0 m² at 5 kHz; for another volume
@@ -305,7 +305,7 @@ performed by this library — `measure_sound_absorption` only raises an advisory
 
 **What the report must carry (Clause 9).** The fiche below holds the specimen
 description, $S$, the mounting, $V$, $c$, the temperature and humidity and the
-$T_1$/$T_2$ and $A_1$/$A_2$ tables (with `verbose=True`) — that is items (c),
+$T_1$/$T_2$ and $A_1$/$A_2$ tables (with `verbose=True`), that is items (c),
 (e) in part, (f) and (g). Four Clause 9 items have no `ReportMetadata` field
 and must be appended by the laboratory: the shape of the room and its **total
 surface area** $S_\mathrm{t}$, the number and size of the diffusers, the number of
@@ -367,9 +367,9 @@ meas.report(
 
 Section 1 returns a whole `SoundAbsorptionMeasurement`: it carries the room and
 specimen metadata, plots itself and renders the ISO 354 fiche. When all that is
-wanted is the arithmetic — inside a loop, a fit, a spreadsheet import, or when
+wanted is the arithmetic (inside a loop, a fit, a spreadsheet import, or when
 the quantity of interest is the room's own equivalent absorption area rather
-than a specimen coefficient — the same Eqs. (5) to (9) are exposed as two plain
+than a specimen coefficient), the same Eqs. (5) to (9) are exposed as two plain
 array functions. The equivalent absorption area $A$ is also what drives $R'$,
 $L'_n$, the ISO 3744 $K_2$ environmental correction and the ISO 3741 absorption
 term, and `absorption_area` is the entry point those calculations use.
@@ -395,9 +395,9 @@ $T_1$ and $T_2$ are exactly the reverberation times [`room_parameters`](/phonome
 an ISO 3382-2 decay measurement of the empty and treated room flows straight
 into `absorption_coefficient`.
 
-The result object of section 1 keeps every intermediate of that inversion —
+The result object of section 1 keeps every intermediate of that inversion:
 `t_empty`, `t_specimen`, `absorption_area_empty` and
-`absorption_area_with_specimen` — and they are worth looking at, because they
+`absorption_area_with_specimen`. They are worth looking at, because they
 show where the method is strong and where it is running out of signal:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_absorption_inversion.svg" alt="Two stacked panels over the one-third-octave axis from 100 Hz to 5 kHz. The upper panel plots the empty-room reverberation time T1 and the with-specimen time T2, which nearly coincide at 100 Hz and separate widely above 500 Hz. The lower panel plots the equivalent absorption areas A1 and A2 with the difference A2 minus A1 filled between them, and a right-hand axis reading the resulting alpha_s" width="86%" />
@@ -447,9 +447,9 @@ Each of those two numbers is read off a decay, and the clip below shows how
 one is read: the squared impulse response is integrated backwards from the
 tail, the Schroeder curve emerges, and the T20 and T30 regressions are fitted
 to a straight portion of it. That is the operation behind $T_1$, and again
-behind $T_2$ — the clip shows a *single* room, not the pair, so it answers
+behind $T_2$ (the clip shows a *single* room, not the pair, so it answers
 "where does one $T$ come from" and not "what does subtracting two of them
-cost". The second question is the one that governs this measurement, and
+cost"). The second question is the one that governs this measurement, and
 section 4 puts a number on it: because $\alpha_\mathrm{s}$ is a difference of two
 reciprocal decay times, its uncertainty is worst exactly where the two decays
 are most alike, at the low-frequency end.
@@ -526,7 +526,7 @@ at 100 Hz to 200 Hz is outside the rating by construction and the standard
 says the rating "is not appropriate below this frequency"; a bass treatment
 and a mid-frequency panel can share an $\alpha_\mathrm{w}$ while differing by half a
 coefficient at 125 Hz. The rating is likewise "not applicable unless the
-applications cover the whole frequency range of the reference curve" — if only
+applications cover the whole frequency range of the reference curve". If only
 part of the range matters, the standard sends the reader back to the spectrum,
 and points at the shape indicators as the hint that a modest $\alpha_\mathrm{w}$ with
 an `(L)` may be the better product for a low-frequency problem. It is scoped
@@ -534,8 +534,8 @@ to *routine* applications (normal offices, corridors, classrooms, hospitals)
 and declares itself inappropriate for "qualified environments requiring
 careful acoustical design by expertise", where only the full spectrum will do.
 And it is "often not suitable for application to single items, such as chairs,
-baffles, etc." — whose absorption is an equivalent area per object, not a
-coefficient — "nor is it applicable to road barriers and road surfaces", which
+baffles, etc." (whose absorption is an equivalent area per object, not a
+coefficient), nor is it applicable to road barriers and road surfaces, which
 have [EN 1793-1](#4-sound-absorption-measurement-uncertainty-iso-12999-2) and
 [ISO 13472](/phonometry/materials/surfaces/road-absorption/) of their own.
 This is why the fiche always prints the whole spectrum beside the single
@@ -610,7 +610,7 @@ material ($\sigma = 20$ kPa·s/m²) hard against a wall with the
 random-incidence coefficient at 500 Hz of about 0.32 for a 25 mm blanket, 0.68
 for 50 mm and 0.89 for 100 mm; at 250 Hz the same three give 0.14, 0.37 and
 0.74. Spacing the 50 mm layer off the wall on a 100 mm cavity lifts its 250 Hz
-value from 0.37 to 0.68 — the cavity buys roughly the octave that doubling the
+value from 0.37 to 0.68: the cavity buys roughly the octave that doubling the
 material would have bought. A painted or sealed hard surface sits at a few
 hundredths across the whole range. The practical reading: class A is nearly
 always a thick or a spaced construction rather than a clever surface, and a
@@ -690,13 +690,13 @@ reproducibility standard deviation is $\sigma_\mathrm{R} = m_\mathrm{R}\,\alpha_
 (Formula (1)), and for the equivalent absorption area
 $\sigma_\mathrm{R} = m_\mathrm{R}\,A_\mathrm{T} + n_\mathrm{R}\,S$ with $S = 10\ \text{m}^2$ (Formula (2)), where
 $m_\mathrm{R}$ and $n_\mathrm{R}$ are the frequency-dependent regression constants of Table 1
-(63–5000 Hz) — nothing to do with the air power attenuation coefficient $m$ of
+(63–5000 Hz): nothing to do with the air power attenuation coefficient $m$ of
 section 1, which shares the standards' letter and not its meaning. The
 repeatability value is $\sigma_\mathrm{r} = 0.6\,\sigma_\mathrm{R}$ (Formula (3)). Note that the
 $n_\mathrm{R}$ term of Formula (2) is multiplied by a *fixed* reference area of 10 m²
 rather than by the specimen's own area, so a small specimen's $A_\mathrm{T}$ is
-proportionally far less certain than a large one's — which is one more reason
-ISO 354 pins the test area between 10 m² and 12 m².
+proportionally far less certain than a large one's (which is one more reason
+ISO 354 pins the test area between 10 m² and 12 m²).
 
 **Practical coefficient (Clause 6).** For the ISO 11654 practical coefficient
 $\sigma_\mathrm{R} = m_\mathrm{R}\,\alpha_\mathrm{p} + n_\mathrm{R}$ in octave bands with the constants of Table 2
@@ -780,8 +780,8 @@ the same product, both correctly, they may legitimately report 0.64 and 0.72,
 so a specification written to two decimals is not testable and a datasheet
 value that misses your own measurement by less than the combined $U$ is
 agreement, not a discrepancy. Within one laboratory the repeatability figure
-applies instead — 0.6 of the reproducibility value, a spread about 40 %
-narrower — so a repeat on your own bench that falls outside the narrower band
+applies instead: 0.6 of the reproducibility value, a spread about 40 %
+narrower. So a repeat on your own bench that falls outside the narrower band
 points at the specimen, the mounting or the room, not at the method. The
 single numbers are worse than they look: $U(\alpha_\mathrm{w}) = 0.07$ exceeds the 0.05
 step $\alpha_\mathrm{w}$ is quoted on, so a product measured at 0.85 (class B) cannot be
@@ -814,8 +814,8 @@ $$
 $$
 
 an integral that weights the oblique angles most heavily. It needs the
-angle-dependent $\alpha(\theta)$, not the normal-incidence coefficient itself
-— but for a **locally reacting** surface $\alpha(\theta)$ follows from the
+angle-dependent $\alpha(\theta)$, not the normal-incidence coefficient itself.
+But for a **locally reacting** surface $\alpha(\theta)$ follows from the
 normalised surface impedance alone, so the integral has a closed form and a
 tube result converts in one line:
 `materials.statistical_absorption(result.normalized_impedance)`, documented
@@ -823,7 +823,7 @@ with the
 [multilayer models](/phonometry/materials/absorbers/porous-absorbers/#4-oblique-and-random-incidence).
 What that cannot do is cover a **bulk-reacting** layer, where the oblique
 behaviour depends on refraction inside the material and the integral has to be
-evaluated angle by angle from a model — `diffuse_field_absorption`, on the same
+evaluated angle by angle from a model: `diffuse_field_absorption`, on the same
 page.
 
 The size of the gap is worth seeing, because "usually higher" is not a useful
@@ -835,9 +835,9 @@ design statement:
 porous layer ($\sigma = 20$ kPa·s/m², Miki): the tube measures
 $\alpha(0°)$, the dashed curve, while the room measures the Paris average over
 all angles, the solid one. The gap is widest where the layer is thin against
-the wavelength — precisely the low-frequency region where a normal-incidence
+the wavelength: precisely the low-frequency region where a normal-incidence
 number substituted into a Sabine or EN 12354-6 budget would underpredict the
-installed absorption — and closes as the layer becomes electrically thick. It
+installed absorption, and closes as the layer becomes electrically thick. It
 is a model comparison on an infinite layer, so it is a lower bound on the real
 difference: a finite ISO 354 specimen adds the edge effect on top.*
 
@@ -931,7 +931,7 @@ the shape rule, the Table 1 ceiling on $A_1$, the diffusivity qualification or
 the microphone and source counts, and `absorption_area` /
 `absorption_coefficient` only convert an already-measured $T_1$/$T_2$ pair and
 raise an advisory warning when the room volume or sample area falls outside
-the Clause 6 limits. Neither is the decay measurement itself in scope — the
+the Clause 6 limits. Neither is the decay measurement itself in scope; the
 interrupted-noise and integrated-impulse-response methods of Clause 7 belong
 to [room acoustics](/phonometry/buildings/rooms/room-acoustics/). ISO
 12999-2's uncertainty formula for the EN 1793-1 single-number rating

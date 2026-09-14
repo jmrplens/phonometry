@@ -190,8 +190,8 @@ for recording in batch:
 
 The curves of §1 are analog: poles and zeros in the $s$ plane. Turning them
 into a digital filter with the bilinear transform is exact in magnitude and
-wrong in frequency — it puts the prototype's response at
-$2 f_\mathrm{s} \tan(\pi f / f_\mathrm{s})$ instead of at $2 \pi f$ — and the
+wrong in frequency: it puts the prototype's response at
+$2 f_\mathrm{s} \tan(\pi f / f_\mathrm{s})$ instead of at $2 \pi f$, and the
 error grows quadratically toward Nyquist. At $f_\mathrm{s} = 48$ kHz that plain
 design reads 15.7 dB below the A design goal at the 19 952.6 Hz row, and at
 $f_\mathrm{s} = 32$ kHz it reads 61.4 dB below it at 15 848.9 Hz.
@@ -215,13 +215,13 @@ at every Table 3 row their deviation stays inside the 0.05 dB the table itself
 is rounded to.
 
 The band the fit controls is the curve's own standardised range, clipped at
-the top to 99.5 % of the Nyquist frequency — enough to contain every frequency
+the top to 99.5 % of the Nyquist frequency, enough to contain every frequency
 these standards state a requirement at, the closest approach being Table 3's
 15 848.9 Hz row at 0.9906 of Nyquist when $f_\mathrm{s} = 32$ kHz. Above that
 last half percent the response is not claimed: no digital filter can track an
 analog curve past Nyquist, and the magnitude of a real-coefficient filter has
-zero slope there. That is where the 468 row of the table above comes from —
-its skirt is still falling at about $-30$ dB/octave where the band ends — and
+zero slope there. That is where the 468 row of the table above comes from;
+its skirt is still falling at about $-30$ dB/octave where the band ends, and
 it is 3 % of that curve's $\pm 2$ dB tolerance, not an accuracy shortfall.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf.svg" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus the design fitted at the sample rate, with error subplot" width="80%"></picture>

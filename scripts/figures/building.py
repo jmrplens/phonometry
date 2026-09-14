@@ -414,7 +414,7 @@ def generate_facade_prediction(output_dir: str) -> None:
             linewidth=1.1,
             marker=".",
             markersize=6,
-            label=rf"$R_\mathrm{{p}}$ — {name}",
+            label=rf"$R_\mathrm{{p}}$: {name}",
         )
     # Façade apparent reduction R' and standardized level difference D2m,nT.
     ax.plot(

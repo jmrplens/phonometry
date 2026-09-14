@@ -70,9 +70,9 @@ case. The **approach** point, 2 000 m before the threshold and 120 m below the
 3° path, catches an airframe- and fan-dominated condition at low power. All
 three are scored with the EPNL of this page, but the limits differ and are not
 single numbers: Chapter 3 §3.4 sets them as lines rising with maximum
-certificated take-off mass — 101 EPNdB at flyover for a twin at 385 000 kg and
+certificated take-off mass: 101 EPNdB at flyover for a twin at 385 000 kg and
 above, 104 for a trijet and 106 for four engines or more, against 103 lateral
-and 105 on approach at the top of their own mass ranges — so the same EPNL can
+and 105 on approach at the top of their own mass ranges. The same EPNL can
 pass at one point and fail at another. The microphone is 1.2 m above the ground
 at every point, which is why the measurement section below cares so much about
 grazing incidence.
@@ -88,7 +88,7 @@ A noy is a linear scale of perceived noisiness: two noys are meant to be twice
 as noisy as one, which is what lets the bands be combined arithmetically instead
 of energetically. The per-band conversion is piecewise-linear in level with
 slopes that differ from band to band, so the same 70 dB is worth far more noys
-at 3 kHz than at 63 Hz — the law carries the ear's sensitivity in the same way
+at 3 kHz than at 63 Hz. The law carries the ear's sensitivity in the same way
 an equal-loudness contour does, but calibrated on judgements of *noisiness*
 rather than loudness. The combination rule is a masking statement, not an energy
 sum: the loudest band alone accounts for 85 % of the total, and everything else
@@ -132,9 +132,9 @@ reproduces the ICAO Doc 9501 ETM Vol. I Table 3-7 turbofan example exactly
 Two traps come with the method. A rippled but tone-free spectrum can produce a
 correction, which the standard itself allows you to reject after a narrow-band
 re-analysis (§4.3.1 Step 10). And a tone falling between two bands splits its
-excess, so the raw correction comes out too small; the **bandsharing
-adjustment** $\Delta_\mathrm{B}$ — the shortfall of $C$ at the $\mathrm{PNLTM}$ record
-against the mean of the records within one second of it — adds it back before
+excess, so the raw correction comes out too small. The **bandsharing
+adjustment** $\Delta_\mathrm{B}$, the shortfall of $C$ at the $\mathrm{PNLTM}$ record
+against the mean of the records within one second of it, adds it back before
 the 10 dB-down window is located.
 
 ```python
@@ -162,16 +162,16 @@ The station that produces those spectra is fixed clause by clause.
 
 - **The microphone.** The sensing element sits 1.2 m above the local ground and
   is oriented for grazing incidence, with the element substantially in the plane
-  defined by the predicted reference flight path and the station (§3.5.2) — in
+  defined by the predicted reference flight path and the station (§3.5.2). In
   practice the capsule axis points across the track, so sound arrives at 90° to
   it throughout the flyover. Its free-field sensitivity level must stay within
   ±1.0 dB of the calibration-check frequency from 50 Hz to 5 kHz and within
   ±2.0 dB at 6.3, 8 and 10 kHz (§3.5.3), and its directional response must meet
   Table A2-1 (§3.5.4). The windscreen's insertion loss must stay inside ±1.5 dB
   over the same range at grazing incidence (§3.4) and is corrected for.
-- **The site.** Relatively flat terrain with no excessive sound absorption —
-  no thick, matted or tall grass, shrubs or wooded areas — and no obstruction
-  that significantly influences the sound field inside a cone of 80° half-angle
+- **The site.** Relatively flat terrain with no excessive sound absorption (no
+  thick, matted or tall grass, shrubs or wooded areas), and no obstruction that
+  significantly influences the sound field inside a cone of 80° half-angle
   about the vertical through the microphone (§2.2.1). The people taking the
   measurement count as obstructions.
 - **The window.** For aeroplanes: no precipitation; −10 °C to 35 °C and 20 % to
@@ -186,7 +186,7 @@ The station that produces those spectra is fixed clause by clause.
 - **The tracking.** Aircraft position is determined by a method independent of
   the cockpit flight instrumentation and time-synchronised with the acoustic
   record over at least the interval in which the noise is within 10 dB of
-  $\mathrm{PNLTM}$ (§2.3.1-2.3.2) — the window the metric integrates over.
+  $\mathrm{PNLTM}$ (§2.3.1-2.3.2), the window the metric integrates over.
 - **The repetition.** At least six valid runs per measurement point, and the
   sample must be large enough that the 90 % confidence limit on the average does
   not exceed ±1.5 EPNdB (§5.4.2).
@@ -212,7 +212,7 @@ flyover that lingers near its peak for much longer than 10 s scores above
 $\mathrm{PNLTM}$, and one that sweeps past scores below it. In the ETM Vol. I
 Table 4-4 example the peak is $\mathrm{PNLTM} = 97.40$ PNdB, the 10 dB-down
 window runs from record 4 to record 28 of 31 and spans 10.2 s of increments, and
-the result is $D = -4.78$ dB and $\mathrm{EPNL} = 92.62$ EPNdB — a hair below
+the result is $D = -4.78$ dB and $\mathrm{EPNL} = 92.62$ EPNdB, just below
 $\mathrm{PNLTM}$ because the window is barely longer than the reference
 duration.
 
@@ -266,10 +266,10 @@ res.plot()   # PNL/PNLT time history (needs matplotlib)
 the `duration_correction`, the `epnl` and the 10 dB-down `band_limits`. Its
 `procedure=` argument starts the analysis at 80 Hz for an aeroplane (the
 default) and at 50 Hz for a helicopter, and `dt` may be a per-record array
-rather than a scalar — which is how the variable increments of the integrated
+rather than a scalar, which is how the variable increments of the integrated
 method enter. The reference-condition integrated-method example of ETM Vol. I
-Table 4-4 — a different, real certification time history, with increments
-between 0.395 s and 0.431 s — is reproduced as
+Table 4-4 (a different, real certification time history, with increments
+between 0.395 s and 0.431 s) is reproduced as
 $\mathrm{EPNL} = 92.6\ \text{EPNdB}$.
 
 <details>
@@ -341,9 +341,9 @@ FAIL against the same 101 EPNdB limit, which is the verdict row doing its job.
 
 What the section above computed is the EPNL of the flight *as flown, on the day
 it was flown*. A certification level is the same quantity transported to a fixed
-reference day — sea-level pressure of 1 013.25 hPa, 25 °C at sea level with the
-ICAO Standard Atmosphere lapse rate, 70 % relative humidity, zero wind
-(Chapter 3 §3.6.1.5) — and to a fixed reference flight path. Appendix 2 §8 is
+reference day (sea-level pressure of 1 013.25 hPa, 25 °C at sea level with the
+ICAO Standard Atmosphere lapse rate, 70 % relative humidity, zero wind, per
+Chapter 3 §3.6.1.5) and to a fixed reference flight path. Appendix 2 §8 is
 that transport, and it is the missing half of the chain.
 
 In the simplified method (§8.3) each band of the $\mathrm{PNLTM}$ spectrum is
@@ -416,7 +416,7 @@ report the periodic test in a controlled environment (19-25 °C, 100-102 kPa,
 40-70 % relative humidity) with a calibrator traceable to national standards.
 Read `report.passed` as a verdict on data you supplied: a failed check
 invalidates the certification data, it is not a correction to apply. Band-filter
-conformance is a separate matter — Annex 16 §3.7.3 requires IEC 61260 class 1,
+conformance is a separate matter: Annex 16 §3.7.3 requires IEC 61260 class 1,
 with class 2 admissible only if the certificating authority allows it, and the
 library's own filter verification is the place that is checked.
 
@@ -455,8 +455,9 @@ frequency, and as the path lengthens the surviving band energy is carried almost
 entirely by that lower half. The band attenuation therefore falls progressively
 behind the pure-tone value, which is what the two curves show: at 1 km they are
 indistinguishable below a few kilohertz and separate only at the top of the
-range, while at 7620 m the gap at high frequency is large — exactly the regime
-the older 50 dB-limited Approximate Method of ARP 866B could not follow. The
+range, while at 7620 m the gap at high frequency is large. This is exactly the
+regime the older 50 dB-limited Approximate Method of ARP 866B could not
+follow. The
 consequence for §8 is direct: correcting a flyover to reference conditions with
 the pure-tone coefficient overstates the high-frequency correction, and with it
 the reference-day EPNL.
@@ -499,9 +500,9 @@ att = aircraft.sae_band_attenuation(freqs, path_length=7620.0,
 att.plot()   # band vs pure-tone mid-band (needs matplotlib)
 ```
 
-The regression was fitted for roughly 6-32 °C and 20-95 % relative humidity —
-the 14 CFR Part 36 test window — and for path lengths up to 7620 m
-(25 000 ft); the function's defaults, 25 °C and 70 % RH, are the ARP 5534
+The regression was fitted for roughly 6-32 °C and 20-95 % relative humidity
+(the 14 CFR Part 36 test window) and for path lengths up to 7620 m
+(25 000 ft). The function's defaults (25 °C and 70 % RH) are the ARP 5534
 reference point and the Annex 16 reference day. The mapping is reciprocal, so
 the same call serves both directions of the reference-condition adjustment:
 removing the test-day absorption from a measured record, and re-applying the

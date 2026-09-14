@@ -137,7 +137,7 @@ and the quasi-peak dynamic tests of IEC 60268-1 itself (5 kHz bursts of
 
 **What gating does in frequency, and what the duty cycle costs in level.**
 Multiplying a tone by a rectangle convolves its line with the gate's transform,
-a sinc whose first nulls sit $1/T_\text{burst}$ either side of the carrier —
+a sinc whose first nulls sit $1/T_\text{burst}$ either side of the carrier:
 ±200 Hz for a 5 ms burst, ±100 Hz for a 10 ms one. So it is the burst
 *duration*, not the carrier, that decides whether the stimulus fits inside a
 band filter, and why a short burst through a fractional-octave filter shows the
@@ -241,7 +241,7 @@ Nyquist band, so a 44.1 → 48 kHz conversion is flat only to about 21 kHz; a
 record whose content reaches Nyquist needs a narrower `transition_width` (and
 the extra taps that come with it) rather than a silent truncation. **Order
 matters:** resampling is a filtering operation, so RMS-based levels survive it
-while peak-based ones do not — band-limited interpolation can place a
+while peak-based ones do not: band-limited interpolation can place a
 reconstructed sample *above* the original peak (the intersample-peak effect), so
 `lc_peak` and any crest factor belong at the original rate, or behind an
 explicit true-peak oversampling. **And often the answer is not to resample:**

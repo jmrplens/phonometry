@@ -57,7 +57,7 @@ take the same default `high_accuracy` design: the analog prototype is fitted
 at the sample rate rather than transformed blind, so the bilinear frequency
 warping never reaches the response. For G that keeps its 0.25 Hz to 315 Hz
 range within 0.0001 dB whatever the input rate, which matters exactly where G
-is used — infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits
+is used: infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits
 close to Nyquist and the warping grows quadratically. `high_accuracy=False`
 gives the plain bilinear design instead, about a decibel low at 315 Hz at
 fs = 2000 and exactly on the 0 dB reference at 10 Hz. Unlike before, the flag
@@ -76,7 +76,7 @@ response falls at 24 dB/octave, which keeps audible-range energy out of an
 infrasound reading; between about 1 Hz and 20 Hz it *rises* at 12 dB/octave,
 following the steep growth of infrasound perception; and below about 1 Hz it
 rolls off again at 24 dB/octave, rejecting the near-static pressure
-fluctuations — wind loading, barometric drift, building sway — that a
+fluctuations (wind loading, barometric drift, building sway) that a
 microphone records and nobody hears. Use it for sources with significant
 energy below 20 Hz (wind turbines, HVAC, blasting):
 
@@ -126,7 +126,7 @@ plt.show()
 The implementation follows the ISO 7196 Table 1 pole/zero values exactly and is
 verified in CI against every Table 2 nominal response value (0.25 Hz to 315 Hz).
 `WeightingFilter(fs, "G")` supports the same multichannel and stateful block
-processing as A/C — but stateful mode runs the plain design at the input rate,
+processing as A/C, but stateful mode runs the plain design at the input rate,
 so if you stream G-weighting at a low sample rate, verify the response before
 trusting the level. Levels measured with the G curve are reported as
 $L_{p\mathrm{G}}$ (or $L_\mathrm{Geq}$ for the equivalent level over time).
@@ -142,8 +142,8 @@ a G-weighted level of the order of 120 dB, only 20 dB above; and G-weighted
 levels below about 90 dB are not normally significant for human perception.
 
 Two consequences follow. First, the useful range spans some 30 dB, not the
-100 dB a reader is used to in dB(A), so **a few decibels matter far more here**
-— an $L_{p\mathrm{G}}$ of 85 dB and one of 105 dB are not "similar", they are inaudible
+100 dB a reader is used to in dB(A), so **a few decibels matter far more here**:
+an $L_{p\mathrm{G}}$ of 85 dB and one of 105 dB are not "similar", they are inaudible
 and very loud. Second, because the growth of sensation with level is much more
 rapid than in the audible range while the threshold itself varies between
 individuals, a level near 100 dB(G) can be imperceptible to one person and
@@ -162,7 +162,7 @@ preferably to 315 Hz. A general-purpose measurement capsule cannot deliver
 that: its static-pressure equalisation vent behaves as a first-order high-pass,
 and a corner as high as 2 Hz already costs 7.0 dB at 1 Hz and 12.3 dB at
 0.5 Hz. Any low-cut switch on the recorder removes the band being measured.
-The one thing that does *not* matter is capsule size — Annex A notes there is
+The one thing that does *not* matter is capsule size: Annex A notes there is
 no practical limit on the microphone's dimensions, because directional effects
 are negligible at infrasonic wavelengths.
 
@@ -325,13 +325,13 @@ and the arithmetic above holds only if the capsule and the interface really
 delivered the 25 kHz component with a known response. IEC 61012's Introduction
 puts the problem plainly: a meter whose response happens to extend to the
 operating frequency of the ultrasonic equipment gives *inflated* readings of
-the audible part, which is what U exists to prevent — and where the ultrasonic
+the audible part, which is what U exists to prevent, and where the ultrasonic
 component itself has to be quantified, the same Introduction calls for a
 microphone system known to have a frequency response extending at least to that
 operating frequency. In practice that means a 1/4 inch or 1/8 inch capsule
 rather than the 1/2 inch capsule used for audible work: a 1/2 inch capsule is
 already rolling off and strongly directional above 20 kHz, so it, and not the U
-filter, would decide the reading. Check the converter too — an interface that
+filter, would decide the reading. Check the converter too: an interface that
 runs at 96 kHz but anti-alias filters at 20 kHz measures nothing to reject. And
 because the near field of a cleaner or a welder changes by several decibels
 over a few centimetres, take the reading at the operator's head position and
@@ -347,14 +347,14 @@ only two have published tolerance tables. The `verify_weighting_class` verifier,
 of this guide that have published tolerance tables. For `B` it uses
 ANSI S1.4-1983 (Table IV design goals, Table V
 limits) and the "class" verdicts read as the standard's instrument **Types**
-1 and 2 — or, with `edition="1979"`, the IEC 651:1979 Table V limits, whose
+1 and 2, or with `edition="1979"`, the IEC 651:1979 Table V limits, whose
 footnote makes one mask govern every weighting characteristic and which add
 the laboratory-grade Type 0 (the two Type 0 columns are *not* the same mask:
 ANSI is two-sided and stricter at 10/12.5/16 Hz where IEC 651 is upper-only).
 For `AU` it uses IEC 61012:1990 Table 1 (nominal A + nominal U with
 the separate-unit tolerances, zero at the 1 kHz reference); IEC 61012
 publishes a single tolerance set, so both margin slots agree and the verdict
-is simply complies (1) or not (`None`) — note that checking the rows above
+is simply complies (1) or not (`None`); note that checking the rows above
 20 kHz needs `fs` ≥ 96 kHz (below that they are dropped and the verdict is
 `range_limited`). `G` and `D` are rejected: ISO 7196 defines one ±1 dB
 tolerance with no class structure, and the withdrawn IEC 537 left no

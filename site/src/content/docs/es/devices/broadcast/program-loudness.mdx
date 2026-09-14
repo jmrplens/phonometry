@@ -109,7 +109,7 @@ print(round(broadcast.integrated_loudness(np.vstack([mono, mono]), fs), 2))  # 0
 La Fórmula 2 suma $G_i z_i$ sobre los canales, así que el número de canales
 forma parte de la medida: la misma forma de onda llevada en dos canales es
 exactamente $10\log_{10} 2 = 3,01$ LU más sonora que en uno. El anclaje de
-arriba lo enseña — esa sinusoide de 997 Hz a plena escala marca −3,01 LKFS en un
+arriba lo enseña: esa sinusoide de 997 Hz a plena escala marca −3,01 LKFS en un
 solo canal y 0,00 LKFS como mono dual, que es lo que imprimen las dos últimas
 líneas del fragmento anterior.
 
@@ -120,8 +120,8 @@ equivocado. La misma aritmética explica por qué se excluye el LFE (Tabla 3,
 $G = 0$) y por qué las ponderaciones de los envolventes son 1,41: la suma es
 una suma de sonoridad sobre la disposición de reproducción, de modo que
 cambiar la disposición cambia el número legítimamente. El `np.vstack` de los
-fragmentos siguientes es exactamente esto — mono dual, la entrega estéreo de
-una fuente mono — y es la razón de que marquen 3,01 LU por encima del valor
+fragmentos siguientes es exactamente esto (mono dual, la entrega estéreo de
+una fuente mono), y es la razón de que marquen 3,01 LU por encima del valor
 de un solo canal de la misma forma de onda.
 
 Los coeficientes de los biquads están tabulados a 48 kHz (Tablas 1-2) y a esa
@@ -176,13 +176,13 @@ plt.show()
 Ese es todo el modelo: dos biquads y un valor cuadrático medio. Conviene decir con
 claridad qué no puede hacer una medida así, porque la pregunta con la que llega
 el lector suele ser «¿es esta *la* sonoridad?». La cadena es lineal e
-independiente del nivel por construcción — duplicar la ganancia de un programa
+independiente del nivel por construcción; duplicar la ganancia de un programa
 suma exactamente 6 dB a $L_\mathrm{K}$, que es justo lo que convierte la normalización en
 una sola multiplicación, y justo lo que un oído real no hace. No hay
 enmascaramiento, ni suma por bandas críticas, ni curvas isofónicas, ni suma
 binaural en ninguna parte. Así que BS.1770 ordena con fiabilidad material
 *parecido*, que es lo que necesita la entrega en radiodifusión, y se sabe que es
-menos fiable entre espectros muy distintos — música con mucho grave frente a
+menos fiable entre espectros muy distintos: música con mucho grave frente a
 diálogo es el ejemplo de manual, y la razón de que exista el paso alto RLB.
 Cuando la pregunta es de verdad la magnitud percibida y no el nivel de entrega,
 los modelos psicoacústicos están en
@@ -225,8 +225,8 @@ calidad admiten ±0,2 LU por error de medida.
 
 Las puertas fijan además un suelo por debajo del cual no hay nada que medir. La
 sonoridad integrada necesita **al menos un bloque de puerta de 400 ms por encima
-de la puerta absoluta de −70 LUFS**; por debajo de eso — un elemento más corto
-que un bloque, o silencio digital de principio a fin — `integrated_loudness`
+de la puerta absoluta de −70 LUFS**; por debajo de eso (un elemento más corto
+que un bloque, o silencio digital de principio a fin), `integrated_loudness`
 devuelve `-inf`, que es una respuesta de *medida inexistente* y no un programa
 muy silencioso. Justo por encima de ese suelo la respuesta es débil, no
 inexistente: un elemento de unos pocos segundos deja apenas un puñado de bloques
@@ -458,7 +458,7 @@ reconstruida cae en general *entre* muestras, y un medidor de pico por
 muestra infravalora 3 dB un tono a $f_\mathrm{s}/4$ con la fase desafortunada. El peor
 caso está acotado por $20\log_{10}\cos(\pi f_{\mathrm{norm}}/n)$, donde $n$ es
 la razón de sobremuestreo y $f_{\mathrm{norm}} = f/f_\mathrm{s}$ es la frecuencia del tono
-normalizada a la de muestreo — que es exactamente por lo que $f_\mathrm{s}/4$ es el peor
+normalizada a la de muestreo, que es exactamente por lo que $f_\mathrm{s}/4$ es el peor
 caso, ya que $f_{\mathrm{norm}} = 1/4$ maximiza la cota en la banda de audio.
 Por eso el Anexo 2 de BS.1770-5 mide el **pico
 verdadero** sobre la señal sobremuestreada hasta al menos 192 kHz (4× a
@@ -598,7 +598,7 @@ unidades de escala completa, donde 1,0 es 0 dBFS. Un `soundfile.read` devuelve
 `(muestras, canales)`, así que hay que transponerlo, y el PCM entero hay que
 escalarlo antes a ±1. Lo segundo, *qué* se mide: el programa **tal como se
 entrega**. El tono de ajuste, la claqueta, la cuenta atrás y el negro forman
-parte del fichero y no del programa, así que se recortan antes de medir — un tono
+parte del fichero y no del programa, así que se recortan antes de medir: un tono
 de ajuste de 1 kHz a −18 dBFS atraviesa la puerta absoluta sin problema y arrastra
 consigo el valor integrado. Y se mide el programa entero, no un extracto, porque
 la puerta relativa se calcula a partir de los propios supervivientes del programa.
@@ -633,7 +633,7 @@ print(despues.true_peak <= -1.0)                      # el techo de R 128: True
 ```
 
 Como la ganancia es lineal y se aplica a todo, desplaza M, S e I exactamente esos
-decibelios y deja el **LRA intacto** — el rango de sonoridad es una diferencia de
+decibelios y deja el **LRA intacto**: el rango de sonoridad es una diferencia de
 percentiles, y un desplazamiento constante se cancela en ella. Qué bloques
 sobreviven a las puertas tampoco cambia, por la misma razón.
 
@@ -641,7 +641,7 @@ El pico verdadero, en cambio, se mueve con la ganancia, y ese es el único
 conflicto que R 128 deja sin resolver. Un programa silencioso y de gran rango que
 necesite +8 LU y cuyo pico verdadero máximo ya esté en −6 dBTP acaba en +2 dBTP:
 bien normalizado y por encima del techo. El orden es *normalizar y después
-comprobar* — nunca reducir la ganancia para que quepa el pico, porque eso rompe
+comprobar*: nunca reducir la ganancia para que quepa el pico, porque eso rompe
 el nivel de entrega del que depende todo lo demás. Las dos soluciones legítimas
 son un limitador de pico verdadero aplicado a los momentos más sonoros (que baja
 algo el LRA, y hay que declararlo) o renegociar el objetivo de esa entrega.
@@ -683,7 +683,7 @@ cumple o no. Sigue el argumento `tolerance`: el valor por defecto `"qc"` aplica
 el margen de **±0,2 LU** por errores de medida del punto i) de R 128, para flujos
 de trabajo de sonoridad como el control de calidad, y `"live"` aplica la
 tolerancia de **±1,0 LU** del punto h), permitida solo cuando el nivel objetivo
-no es alcanzable en la práctica — un programa en directo, típicamente. La regla
+no es alcanzable en la práctica (un programa en directo, típicamente). La regla
 aplicada y su punto de R 128 se imprimen en la ficha, de modo que el lector
 siempre puede ver cuál se usó. El veredicto se evalúa después sobre la sonoridad
 *redondeada a los 0,1 LU mostrados*, de modo que los números impresos nunca
@@ -764,7 +764,7 @@ ese paso. EBU Tech 3343 se cita solo como práctica de producción alrededor de
 estos números: es orientación, no un algoritmo, y nada aquí lo ejecuta.
 Tampoco hay una *función auxiliar* de normalización: la sección 7 enseña la
 ganancia única, y aplicarla es una multiplicación. Y nada de esta página es un
-**modelo** de sonoridad — la ponderación K es un filtro lineal fijo, así que
+**modelo** de sonoridad: la ponderación K es un filtro lineal fijo, así que
 el enmascaramiento, la dependencia con el nivel, las bandas críticas y la suma
 binaural quedan fuera por construcción; eso vive en [Sonoridad (ISO
 532)](/phonometry/es/perception/psychoacoustics/loudness/).

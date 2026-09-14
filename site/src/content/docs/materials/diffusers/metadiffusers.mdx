@@ -128,7 +128,7 @@ The published design packs a whole $N = 5$ quadratic-residue diffuser into a
 35 cm x 2 cm panel: five slits, each loaded by two resonators, on a 7 cm
 pitch. This is a *quadratic-residue* design, so all five slits are meant to
 reflect with $|R_n|$ near one and to differ only in phase. Two of them, slits 1
-and 4, do come close to critical coupling — their absorption peaks at 0.99 —
+and 4, do come close to critical coupling (their absorption peaks at 0.99)
 but at 2305 Hz and 2260 Hz, above the 2 kHz the phase profile is tuned for,
 where they still reflect 0.97 of the incident pressure. The critically coupled
 slit that a
@@ -190,7 +190,7 @@ print(round(polar.coefficient, 2))                             # 0.32
 pitch inside a 350 mm × 20 mm panel, each loaded by two Helmholtz resonators
 shelved sideways into the septum that separates it from its neighbour. The
 whole panel is 20 mm deep against the 686 mm wavelength of its 500 Hz
-reference design — one part in 34.*
+reference design, one part in 34.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -372,8 +372,8 @@ plt.show()
 
 **Step two, worked.** The paragraph above says "tune each slit until the chain
 reproduces that phase", which is a search, not a formula, and the page owes
-the reader one. The parameter space of a slit is four numbers — its height,
-and the neck length, neck side and cavity length of its resonators — and
+the reader one. The parameter space of a slit is four numbers: its height,
+and the neck length, neck side and cavity length of its resonators, and
 `metadiffuser_reflection` on one panel is cheap, so the search is a loop. The
 panel depth $L$ is fixed by the application before anything else is chosen;
 after that the cavity length is the coarse control on the resonance and hence
@@ -502,14 +502,14 @@ machine in a stiff material and keep the septa between slits thick enough not
 to flex at the working frequency; a septum that moves adds a compliance the
 model does not have. Expect printed necks to come out undersized and rougher
 than drawn, both of which raise the visco-thermal loss inside the resonator
-and shave $|R_n|$ — the quantity this design keeps between 0.97 and 1.00, so
+and shave $|R_n|$, the quantity this design keeps between 0.97 and 1.00, so
 there is not much of it to give away.
 
 **Tolerance.** State it in degrees rather than adjectives, using the loop of
 section 3 backwards: rebuild the panel with one neck side perturbed and read
 the phase that comes back. On the published slit 1 a $\pm 0.1$ mm error on the
 6.2 mm neck moves its reflection phase by a few degrees at 2 kHz, which the
-figure above puts in context — it is small against the dispersion the design
+figure above puts in context: it is small against the dispersion the design
 already carries across a third of an octave, and large against the 3° the
 five slits currently sit within.
 
@@ -517,7 +517,7 @@ five slits currently sit within.
 returns exactly what a two-microphone measurement of that cell in a
 rectangular impedance tube one period wide would give, including
 `well_absorption`, so a single slit can be checked before the panel is
-committed — that is the
+committed. That is the
 [impedance tube](/phonometry/materials/absorbers/impedance-tube/) method
 unchanged. The whole panel is graded on an ISO 17497-2 goniometer, which needs
 the six-period 2.1 m array and a flat reference panel of the same footprint

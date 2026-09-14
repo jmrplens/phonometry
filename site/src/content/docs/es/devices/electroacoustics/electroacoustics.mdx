@@ -73,8 +73,8 @@ bajo un mismo conjunto de condiciones y sin él los valores no significan nada.
 **El banco.** El apartado 3.1.2 pone el amplificador en *condiciones
 nominales*: la alimentación nominal; la f.e.m. de la fuente aplicada a través de
 la **impedancia de fuente nominal**; los terminales de salida cargados con la
-**impedancia de carga nominal** — una resistencia de potencia no inductiva, no
-un altavoz, para que la carga sea conocida y la medición repetible —; la fuente,
+**impedancia de carga nominal** (una resistencia de potencia no inductiva, no
+un altavoz, para que la carga sea conocida y la medición repetible); la fuente,
 una sinusoide a la frecuencia de referencia normalizada de 1 kHz de la
 IEC 60268-1; el control de volumen ajustado para que aparezca la tensión de
 salida nominal limitada por distorsión; los controles de tono planos y el de
@@ -96,7 +96,7 @@ nivel no se puede comparar con ninguna de las dos.
 **Dos condiciones que se saltan con facilidad.** Una salida en clase D tiene que
 pasar por el filtro paso bajo analógico de la IEC 61606-1 entre la carga y el
 analizador (apartado 3.1.2, NOTA 2, Figura 2), o el residuo de conmutación se
-cuenta como ruido — y la limitación digital de banda a 20 kHz de AES17 de la
+cuenta como ruido, y la limitación digital de banda a 20 kHz de AES17 de la
 sección 2 no puede quitar un residuo que ya ha entrado por aliasing dentro del
 conversor. Y el apartado 9 exige que el amplificador funcione aproximadamente en
 condiciones normalizadas de medición durante 1 h antes de la primera lectura,
@@ -132,8 +132,8 @@ tonos deben caer en los bins de la FFT: usa muestreo coherente (un número
 entero de periodos) o una ventana de baja fuga para leer las amplitudes sin
 fuga espectral.
 
-Solo se suman los armónicos que caen **por debajo de Nyquist** — la
-implementación detiene la suma en el primer orden que alcanza $f_\mathrm{s}/2$ —, así que
+Solo se suman los armónicos que caen **por debajo de Nyquist** (la
+implementación detiene la suma en el primer orden que alcanza $f_\mathrm{s}/2$), así que
 el recuento efectivo de órdenes se encoge a medida que sube la frecuencia de
 ensayo: a 48 kHz un ensayo de 1 kHz suma diez órdenes y uno de 7 kHz suma dos, y
 un barrido de THD con `n_harmonics` fijo no mide la misma magnitud en los dos
@@ -149,10 +149,10 @@ IEC 60268-3 cita cada cifra con su frecuencia y con su nivel de entrada o de
 salida, y por eso una curva de THD frente al nivel dice más que cualquier número
 aislado: un amplificador está más limpio a unos pocos vatios y se dispara cerca
 del recorte, mientras que la THD de un altavoz crece de forma monótona con la
-excursión. Conviene llevar encima los órdenes de magnitud — por debajo del
+excursión. Conviene llevar encima los órdenes de magnitud (por debajo del
 0,01 % para un amplificador de potencia competente a la salida nominal, del 0,1
 al 1 % para una cadena de conversión, del 1 al 3 % para un radiador directo en
-su banda media y en torno al 10 % donde alcanza su límite de excursión —, porque
+su banda media y en torno al 10 % donde alcanza su límite de excursión), porque
 significan que una lectura del «2 %» condena a un amplificador y no tiene nada
 de particular en un woofer.
 
@@ -165,11 +165,11 @@ una compresión simétrica (recorte, una suspensión que llega a su límite). Ca
 marcador se lee directamente como porcentaje, ya que $-34$ dB respecto al
 fundamental son un 2 %. Los cuatro números anotados son una misma captura leída
 de cuatro maneras: la $\mathrm{THD}_F$ cuenta los armónicos contra el
-fundamental y la $\mathrm{THD}_R$ contra el total — se diferencian en el factor
-$1/\sqrt{1 + \mathrm{THD}_F^2}$ y son indistinguibles por debajo de un 10 %
-aproximadamente, que es la razón de que aquí las dos anotaciones queden una
-encima de otra —, mientras que la THD+N añade el ruido de fondo que hay entre
-los armónicos y el SINAD es su recíproco en dB.*
+fundamental y la $\mathrm{THD}_R$ contra el total (se diferencian en el
+factor $1/\sqrt{1 + \mathrm{THD}_F^2}$ y son indistinguibles por debajo de
+un 10 % aproximadamente, que es la razón de que aquí las dos anotaciones
+queden una encima de otra), mientras que la THD+N añade el ruido de fondo
+que hay entre los armónicos y el SINAD es su recíproco en dB.*
 
 ```python
 from phonometry import electroacoustics
@@ -232,9 +232,9 @@ plt.show()
 - *Techo de banda* (14.12.4.1). Si los armónicos que importan caen por encima
   del límite superior del amplificador o del analizador, la THD medida resulta
   engañosamente baja. El fundamental válido más alto es $f_\text{límite}/n$ para
-  el orden significativo más alto $n$ — el caso del propio apartado es un límite
+  el orden significativo más alto $n$ (el caso del propio apartado es un límite
   de 30 kHz con un quinto armónico significativo, que da 6 kHz, o 10 kHz si el
-  tercero es el más alto que importa. Un barrido de THD llevado hasta 10 kHz con
+  tercero es el más alto que importa). Un barrido de THD llevado hasta 10 kHz con
   muestreo a 48 kHz cae por ese motivo, y no porque el dispositivo haya
   mejorado.
 
@@ -397,8 +397,8 @@ tonos, cada uno con su definición por órdenes; el último es una variante del
 segundo con los tonos fijados, y los puntos van en orden de apartado:
 
 - **Distorsión de modulación** (14.12.7): un tono grave de gran amplitud $f_1$ y
-  un tono agudo de pequeña amplitud $f_2$, cuya relación de *amplitudes* — no
-  una relación de frecuencias — es preferiblemente 4:1, algo que el apartado
+  un tono agudo de pequeña amplitud $f_2$, cuya relación de *amplitudes* (no
+  una relación de frecuencias) es preferiblemente 4:1, algo que el apartado
   materializa poniendo la salida en $f_1$ 12 dB y la salida en $f_2$ 24 dB por
   debajo de la tensión de salida nominal. Las frecuencias se eligen muy
   separadas (60 Hz y 7 kHz aquí) para que las bandas laterales sean resolubles
@@ -434,9 +434,9 @@ del todo fuera de ella, y la DIM para cualquier cosa con realimentación y un
 límite de slew rate. La razón para ejecutar alguna de ellas cuando ya se tiene
 una THD es que los productos de intermodulación son *inarmónicos*: el oído los
 lee como aspereza y no como timbre, y los oye a niveles a los que una THD
-equivalente pasaría inadvertida; y un dispositivo con memoria — un amplificador
+equivalente pasaría inadvertida; y un dispositivo con memoria (un amplificador
 modulado térmicamente, un woofer que desplaza por efecto Doppler la salida de un
-tweeter — puede dar una THD baja y una distorsión de modulación mala.
+tweeter) puede dar una THD baja y una distorsión de modulación mala.
 
 Una advertencia sobre la referencia. La IEC 60268-3 admite dos presentaciones de
 las mismas bandas laterales: contra la salida en $f_2$, que es la $d_\mathrm{m}$ que
@@ -493,7 +493,7 @@ plt.show()
 </details>
 
 Los otros tres ensayos devuelven escalares, así que la única forma de ver *qué*
-productos cuenta cada uno — que es toda la diferencia entre ellos — es marcarlos
+productos cuenta cada uno (que es toda la diferencia entre ellos) es marcarlos
 sobre el espectro de un mismo dispositivo:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intermodulation_tests.svg" alt="Tres espectros apilados del mismo dispositivo débilmente no lineal: el ensayo de diferencia de frecuencias a 13 y 14 kHz con el producto de segundo orden en 1 kHz y los dos productos de tercer orden en 12 y 15 kHz etiquetados; el ensayo de distorsión total por diferencia de frecuencias a 8 y 11,95 kHz con solo los dos productos en banda cerca de 3,95 y 4,05 kHz sombreados; y la señal de intermodulación dinámica, cuyo peine de onda cuadrada de 3,15 kHz filtrada en paso bajo se mezcla con la sinusoide de 15 kHz y deja un conjunto de productos por debajo de 15 kHz, cada uno con su tallo y etiquetado con su índice armónico k" width="92%" />
@@ -504,7 +504,7 @@ dos productos de tercer orden que flanquean el par; el de distorsión total por
 diferencia de frecuencias se queda solo con los dos productos que el par de
 tonos fijo deja cerca de $f_0$; la DIM cuenta todo
 $|k f_\text{square} \pm f_\text{sine}|$ que aterrice por debajo de la sinusoide.
-El denominador también cambia — $a_{f_1} + a_{f_2}$ para los dos primeros, y
+El denominador también cambia: $a_{f_1} + a_{f_2}$ para los dos primeros, y
 solo la amplitud de la sinusoide para la DIM, que es la magnitud de la que trata
 la entrada del [registro de erratas](/phonometry/es/reference/errata/).*
 
@@ -574,8 +574,8 @@ después del generador, en vez de reutilizar el array ideal que generaste, para
 que lo que haga el propio generador aparezca en los dos canales y se cancele.
 Excita con ruido de banda ancha o con un barrido a un nivel que mantenga el
 dispositivo en el punto de funcionamiento de la sección 0. Elimina el retardo
-entre los dos canales — o haz el segmento de Welch varias veces más largo que
-él —, porque un retardo sin compensar inclina la fase de $H_1$ y hunde
+entre los dos canales (o haz el segmento de Welch varias veces más largo que
+él), porque un retardo sin compensar inclina la fase de $H_1$ y hunde
 $\gamma^2$ banda a banda. `transfer_function` elige `nperseg` para una
 resolución de unos 4 Hz cuando no se lo das; la disposición física es la que
 está dibujada en

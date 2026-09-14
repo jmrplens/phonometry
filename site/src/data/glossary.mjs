@@ -455,7 +455,7 @@ export const glossary = [
         },
         guide: "environment/propagation/outdoor-propagation",
         definition: {
-          en: "Atmospheric absorption: the attenuation coefficient of the air times the path length. It is the term that removes the high bands over long distances, and it depends strongly on frequency, temperature and humidity — which is why a long-range prediction has to state the weather it assumed.",
+          en: "Atmospheric absorption: the attenuation coefficient of the air times the path length. It is the term that removes the high bands over long distances, and it depends strongly on frequency, temperature and humidity (which is why a long-range prediction has to state the weather it assumed).",
           es: "Absorción atmosférica: el coeficiente de atenuación del aire por la longitud del camino. Es el término que elimina las bandas altas a grandes distancias y depende mucho de la frecuencia, la temperatura y la humedad, y por eso una predicción a larga distancia debe indicar las condiciones meteorológicas supuestas.",
         },
       },
@@ -492,8 +492,8 @@ export const glossary = [
         },
         guide: "environment/propagation/outdoor-propagation",
         definition: {
-          en: "Ground effect: the interference between the direct path and the path reflected off the ground, split into a source region, a receiver region and the middle between them. Over hard ground it comes out negative — a net gain, not a loss — which is why it cannot be treated as an attenuation that is merely optional.",
-          es: "Efecto del terreno: la interferencia entre el camino directo y el reflejado en el suelo, dividida en una región de fuente, una de receptor y la zona intermedia. Sobre terreno duro resulta negativa —una ganancia neta, no una pérdida—, y por eso no puede tratarse como una atenuación simplemente opcional.",
+          en: "Ground effect: the interference between the direct path and the path reflected off the ground, split into a source region, a receiver region and the middle between them. Over hard ground it comes out negative (a net gain, not a loss), which is why it cannot be treated as an attenuation that is merely optional.",
+          es: "Efecto del terreno: la interferencia entre el camino directo y el reflejado en el suelo, dividida en una región de fuente, una de receptor y la zona intermedia. Sobre terreno duro resulta negativa (una ganancia neta, no una pérdida), y por eso no puede tratarse como una atenuación simplemente opcional.",
         },
       },
       {
@@ -815,7 +815,7 @@ export const glossary = [
         },
         guide: "signals/spectra/miso-coherence",
         definition: {
-          en: "Ordinary coherence: the fraction of the output autospectrum, at each frequency, that a linear time-invariant path from one input accounts for, $|G_{xy}|^2/(G_{xx}G_{yy})$. It is one where the pair is noiselessly linearly related, and with additive output noise it settles at $\\mathrm{SNR}/(1+\\mathrm{SNR})$ — so it reads as a quality figure, not as a cause.",
+          en: "Ordinary coherence: the fraction of the output autospectrum, at each frequency, that a linear time-invariant path from one input accounts for, $|G_{xy}|^2/(G_{xx}G_{yy})$. It is one where the pair is noiselessly linearly related, and with additive output noise it settles at $\\mathrm{SNR}/(1+\\mathrm{SNR})$ (so it reads as a quality figure, not as a cause).",
           es: "Coherencia ordinaria: la fracción del autoespectro de salida que, a cada frecuencia, explica un camino lineal e invariante desde una entrada, $|G_{xy}|^2/(G_{xx}G_{yy})$. Vale uno cuando el par está relacionado linealmente y sin ruido, y con ruido aditivo en la salida se estabiliza en $\\mathrm{SNR}/(1+\\mathrm{SNR})$: se lee como una cifra de calidad, no como una causa.",
         },
       },
@@ -911,7 +911,7 @@ export const glossary = [
         },
         guide: "signals/spectra/spectral-analysis",
         definition: {
-          en: "Equivalent noise bandwidth of an analysis window: the width of the ideal rectangular filter that would pass the same broadband noise power. It is exactly 1 bin for a rectangular window and 1,5 for a Hann, and it is the factor that turns a windowed line spectrum into a density — a broadband level read off the lines sits $10\\log_{10}(\\mathrm{ENBW})$ dB high without it.",
+          en: "Equivalent noise bandwidth of an analysis window: the width of the ideal rectangular filter that would pass the same broadband noise power. It is exactly 1 bin for a rectangular window and 1,5 for a Hann, and it is the factor that turns a windowed line spectrum into a density (a broadband level read off the lines sits $10\\log_{10}(\\mathrm{ENBW})$ dB high without it).",
           es: "Ancho de banda equivalente de ruido de una ventana de análisis: el ancho del filtro rectangular ideal que dejaría pasar la misma potencia de ruido de banda ancha. Vale exactamente 1 línea para la ventana rectangular y 1,5 para la de Hann, y es el factor que convierte un espectro de líneas enventanado en una densidad: sin él, un nivel de banda ancha leído sobre las líneas queda $10\\log_{10}(\\mathrm{ENBW})$ dB alto.",
         },
       },
@@ -935,7 +935,7 @@ export const glossary = [
         },
         guide: "signals/spectra/cepstrum-echoes",
         definition: {
-          en: "Cepstrum: the inverse transform of the logarithmic spectrum, in which the periodic ripple an echo or a harmonic family leaves across the spectrum collapses onto a single peak. Quefrency is its independent variable, a time in seconds, at which that peak stands at the echo's own delay — which is why a bearing report quotes a quefrency and not a frequency.",
+          en: "Cepstrum: the inverse transform of the logarithmic spectrum, in which the periodic ripple an echo or a harmonic family leaves across the spectrum collapses onto a single peak. Quefrency is its independent variable, a time in seconds, at which that peak stands at the echo's own delay (which is why a bearing report quotes a quefrency and not a frequency).",
           es: "Cepstrum: la transformada inversa del espectro logarítmico, en la que el rizado periódico que un eco o una familia de armónicos deja en el espectro se concentra en un único pico. La quefrencia es su variable independiente, un tiempo en segundos, en la que ese pico aparece al retardo propio del eco, y por eso un informe de rodamientos cita una quefrencia y no una frecuencia.",
         },
       },
@@ -953,8 +953,8 @@ export const glossary = [
         clause: "6.2.1",
         guide: "vibration/human/human-vibration",
         definition: {
-          en: "Crest factor: the modulus of the ratio of the peak to the r.m.s. value over the measurement period. It decides whether an r.m.s. description is honest — above 9 the standard says the basic evaluation method is not sufficient and dose measures have to be reported beside it — and for a test signal it decides whether a device clips before the signal has delivered its energy.",
-          es: "Factor de cresta: el módulo del cociente entre el valor de pico y el valor eficaz en el periodo de medida. Decide si una descripción en valor eficaz es honesta —por encima de 9 la norma considera insuficiente el método básico de evaluación y obliga a informar además de medidas de dosis— y, en una señal de ensayo, decide si un equipo recorta antes de que la señal entregue su energía.",
+          en: "Crest factor: the modulus of the ratio of the peak to the r.m.s. value over the measurement period. It decides whether an r.m.s. description is honest (above 9 the standard says the basic evaluation method is not sufficient and dose measures have to be reported beside it), and for a test signal it decides whether a device clips before the signal has delivered its energy.",
+          es: "Factor de cresta: el módulo del cociente entre el valor de pico y el valor eficaz en el periodo de medida. Decide si una descripción en valor eficaz es honesta (por encima de 9 la norma considera insuficiente el método básico de evaluación y obliga a informar además de medidas de dosis), y en una señal de ensayo, decide si un equipo recorta antes de que la señal entregue su energía.",
         },
       },
     ],
@@ -1177,7 +1177,7 @@ export const glossary = [
         clause: "3.2",
         guide: "buildings/rooms/open-plan-acoustics",
         definition: {
-          en: "Spatial decay rate of speech: the drop in A-weighted speech level per doubling of distance along a line of workstations, taken from the regression of level against the logarithm of distance over positions between 2 m and 16 m. It is a slope only — it says how fast speech dies away, not how loud it starts.",
+          en: "Spatial decay rate of speech: the drop in A-weighted speech level per doubling of distance along a line of workstations, taken from the regression of level against the logarithm of distance over positions between 2 m and 16 m. It is a slope only (it says how fast speech dies away, not how loud it starts).",
           es: "Tasa de decaimiento espacial del habla: la caída del nivel de habla ponderado A por cada duplicación de la distancia a lo largo de una fila de puestos de trabajo, obtenida por regresión del nivel frente al logaritmo de la distancia con posiciones entre 2 m y 16 m. Es solo una pendiente: indica con qué rapidez se extingue el habla, no con qué intensidad empieza.",
         },
       },
@@ -1689,7 +1689,7 @@ export const glossary = [
         clause: "3.15",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "Standardized facade level difference: the level 2 m in front of the facade minus the indoor level, standardized to a reference reverberation time of 0,5 s for dwellings. The 2 m position sits in the field the facade itself reflects, so it is not a free-field level, and the notation records the source — $D_{\\mathrm{tr},2\\mathrm{m,nT}}$ for road traffic, $D_{\\mathrm{ls},2\\mathrm{m,nT}}$ for a loudspeaker.",
+          en: "Standardized facade level difference: the level 2 m in front of the facade minus the indoor level, standardized to a reference reverberation time of 0,5 s for dwellings. The 2 m position sits in the field the facade itself reflects, so it is not a free-field level, and the notation records the source ($D_{\\mathrm{tr},2\\mathrm{m,nT}}$ for road traffic, $D_{\\mathrm{ls},2\\mathrm{m,nT}}$ for a loudspeaker).",
           es: "Diferencia de niveles estandarizada en fachada: el nivel a 2 m por delante de la fachada menos el nivel interior, estandarizado a un tiempo de reverberación de referencia de 0,5 s en viviendas. La posición a 2 m está en el campo que la propia fachada refleja, así que no es un nivel de campo libre, y la notación indica la fuente: $D_{\\mathrm{tr},2\\mathrm{m,nT}}$ para tráfico rodado y $D_{\\mathrm{ls},2\\mathrm{m,nT}}$ para altavoz.",
         },
       },
@@ -1700,7 +1700,7 @@ export const glossary = [
         standard: "ISO 717-1:2020",
         guide: "buildings/insulation/facade-insulation",
         definition: {
-          en: "The weighted facade rating: $D_{2\\mathrm{m,nT}}$ measured with a loudspeaker put through the ISO 717-1 reference-curve procedure. The `ls` subscript is not decoration — it records that the source was a loudspeaker at 45 degrees rather than real road traffic, and a facade rated with one source is not interchangeable with the same facade rated with the other.",
+          en: "The weighted facade rating: $D_{2\\mathrm{m,nT}}$ measured with a loudspeaker put through the ISO 717-1 reference-curve procedure. The `ls` subscript is not decoration (it records that the source was a loudspeaker at 45 degrees rather than real road traffic), and a facade rated with one source is not interchangeable with the same facade rated with the other.",
           es: "El índice global de fachada: el $D_{2\\mathrm{m,nT}}$ medido con altavoz pasado por el procedimiento de curva de referencia de la ISO 717-1. El subíndice `ls` no es decorativo: indica que la fuente fue un altavoz a 45 grados y no tráfico rodado real, y una fachada calificada con una fuente no es intercambiable con esa misma fachada calificada con la otra.",
         },
       },
@@ -1730,8 +1730,8 @@ export const glossary = [
         },
         guide: "buildings/insulation/spanish-building-code",
         definition: {
-          en: "Global airborne index: the A-weighted level a partition transmits when it is excited by a normalised spectrum — pink noise for $R_\\mathrm{A}$, road traffic for $R_\\mathrm{A,tr}$ — summed energetically over eighteen one-third-octave bands from 100 Hz to 5 kHz. It is a close relative of $R_\\mathrm{w} + C$ and $R_\\mathrm{w} + C_\\mathrm{tr}$ but is computed directly, not by shifting a reference curve, and it uses two bands the ISO 717-1 range does not.",
-          es: "Índice global de reducción acústica: el nivel ponderado A que transmite un elemento cuando se excita con un espectro normalizado —ruido rosa para $R_\\mathrm{A}$ y tráfico rodado para $R_\\mathrm{A,tr}$— sumado energéticamente en dieciocho bandas de tercio de octava de 100 Hz a 5 kHz. Es pariente cercano de $R_\\mathrm{w} + C$ y $R_\\mathrm{w} + C_\\mathrm{tr}$, pero se calcula directamente y no desplazando una curva de referencia, y utiliza dos bandas que el intervalo de la ISO 717-1 no incluye.",
+          en: "Global airborne index: the A-weighted level a partition transmits when it is excited by a normalised spectrum (pink noise for $R_\\mathrm{A}$, road traffic for $R_\\mathrm{A,tr}$), summed energetically over eighteen one-third-octave bands from 100 Hz to 5 kHz. It is a close relative of $R_\\mathrm{w} + C$ and $R_\\mathrm{w} + C_\\mathrm{tr}$ but is computed directly, not by shifting a reference curve, and it uses two bands the ISO 717-1 range does not.",
+          es: "Índice global de reducción acústica: el nivel ponderado A que transmite un elemento cuando se excita con un espectro normalizado (ruido rosa para $R_\\mathrm{A}$ y tráfico rodado para $R_\\mathrm{A,tr}$) sumado energéticamente en dieciocho bandas de tercio de octava de 100 Hz a 5 kHz. Es pariente cercano de $R_\\mathrm{w} + C$ y $R_\\mathrm{w} + C_\\mathrm{tr}$, pero se calcula directamente y no desplazando una curva de referencia, y utiliza dos bandas que el intervalo de la ISO 717-1 no incluye.",
         },
       },
       {
@@ -2041,7 +2041,7 @@ export const glossary = [
         },
         guide: "materials/absorbers/porous-absorbers",
         definition: {
-          en: "Tortuosity: how much longer the winding path through the pores is than the straight line, squared — exactly $1/\\cos^2\\varphi$ for pores inclined at an angle $\\varphi$, and one for straight cylindrical pores. It sets the high-frequency limit of the effective density, and despite the $\\alpha$ it is not an absorption coefficient of any kind.",
+          en: "Tortuosity: how much longer the winding path through the pores is than the straight line, squared (exactly $1/\\cos^2\\varphi$ for pores inclined at an angle $\\varphi$, and one for straight cylindrical pores). It sets the high-frequency limit of the effective density, and despite the $\\alpha$ it is not an absorption coefficient of any kind.",
           es: "Tortuosidad: cuánto más largo es el camino sinuoso a través de los poros que la línea recta, al cuadrado; exactamente $1/\\cos^2\\varphi$ para poros inclinados un ángulo $\\varphi$, y uno para poros cilíndricos rectos. Fija el límite en alta frecuencia de la densidad efectiva y, pese a la $\\alpha$, no es un coeficiente de absorción de ninguna clase.",
         },
       },
@@ -2080,7 +2080,7 @@ export const glossary = [
         },
         guide: "materials/absorbers/porous-absorbers",
         definition: {
-          en: "Characteristic impedance and complex wavenumber: the pair that describes a porous medium as an equivalent fluid — the ratio of pressure to particle velocity in a travelling wave inside it, and the wavenumber whose imaginary part is the attenuation per metre. Every empirical or semi-phenomenological model produces this pair, and it is what the transfer-matrix method stacks layer by layer.",
+          en: "Characteristic impedance and complex wavenumber: the pair that describes a porous medium as an equivalent fluid (the ratio of pressure to particle velocity in a travelling wave inside it, and the wavenumber whose imaginary part is the attenuation per metre). Every empirical or semi-phenomenological model produces this pair, and it is what the transfer-matrix method stacks layer by layer.",
           es: "Impedancia característica y número de onda complejo: el par que describe un medio poroso como fluido equivalente, es decir, la relación entre presión y velocidad de partícula en una onda progresiva dentro de él y el número de onda cuya parte imaginaria es la atenuación por metro. Todo modelo empírico o semifenomenológico produce este par, y es lo que el método de matrices de transferencia apila capa a capa.",
         },
       },
@@ -2243,7 +2243,7 @@ export const glossary = [
         },
         guide: "buildings/design/detailed-prediction",
         definition: {
-          en: "Total loss factor of an element as built in: the internal loss factor plus the losses radiated into the air and absorbed at the perimeter junctions. It is what damps the resonant transmission above the critical frequency, and it fixes the structural reverberation time through $T_\\mathrm{s} = 2{,}2/(f\\,\\eta_\\mathrm{tot})$ — so a laboratory value measured in a heavy test frame does not transfer to the building unchanged.",
+          en: "Total loss factor of an element as built in: the internal loss factor plus the losses radiated into the air and absorbed at the perimeter junctions. It is what damps the resonant transmission above the critical frequency, and it fixes the structural reverberation time through $T_\\mathrm{s} = 2{,}2/(f\\,\\eta_\\mathrm{tot})$ (so a laboratory value measured in a heavy test frame does not transfer to the building unchanged).",
           es: "Factor de pérdidas total de un elemento ya construido: el factor de pérdidas interno más las pérdidas radiadas al aire y absorbidas en las uniones del perímetro. Es lo que amortigua la transmisión resonante por encima de la frecuencia crítica y fija el tiempo de reverberación estructural mediante $T_\\mathrm{s} = 2{,}2/(f\\,\\eta_\\mathrm{tot})$, de modo que un valor de laboratorio medido en un marco de ensayo pesado no se traslada al edificio sin más.",
         },
       },
@@ -2706,8 +2706,8 @@ export const glossary = [
         },
         guide: "perception/psychoacoustics/advanced-loudness",
         definition: {
-          en: "The two smoothed loudness time series of the Moore-Glasberg-Schlittenlacher model: short-term loudness is the loudness of a brief segment — a syllable, a single note, typically up to 500 ms — and long-term loudness that of a longer one, a whole sentence or musical phrase, typically up to 5 s. The loudness of a sound lasting two or three seconds is predicted by the maximum of the long-term series, not by its average.",
-          es: "Las dos series temporales suavizadas de sonoridad del modelo de Moore-Glasberg-Schlittenlacher: la sonoridad a corto plazo es la de un segmento breve —una sílaba, una nota, típicamente hasta 500 ms— y la de largo plazo la de uno más extenso, una frase completa o un fraseo musical, típicamente hasta 5 s. La sonoridad de un sonido de dos o tres segundos se predice con el máximo de la serie a largo plazo, no con su promedio.",
+          en: "The two smoothed loudness time series of the Moore-Glasberg-Schlittenlacher model: short-term loudness is the loudness of a brief segment (a syllable, a single note, typically up to 500 ms), and long-term loudness that of a longer one, a whole sentence or musical phrase, typically up to 5 s. The loudness of a sound lasting two or three seconds is predicted by the maximum of the long-term series, not by its average.",
+          es: "Las dos series temporales suavizadas de sonoridad del modelo de Moore-Glasberg-Schlittenlacher: la sonoridad a corto plazo es la de un segmento breve (una sílaba, una nota, típicamente hasta 500 ms), y la de largo plazo la de uno más extenso, una frase completa o un fraseo musical, típicamente hasta 5 s. La sonoridad de un sonido de dos o tres segundos se predice con el máximo de la serie a largo plazo, no con su promedio.",
         },
       },
     ],
@@ -2986,8 +2986,8 @@ export const glossary = [
         },
         guide: "aircraft/airport-noise",
         definition: {
-          en: "Noise-power-distance table: the event level of one aircraft — $L_\\mathrm{Amax}$ or SEL — tabulated against distance for a handful of engine power settings, measured in steady flight along a notionally infinite straight path at a reference speed. A calculation interpolates it linearly in power and logarithmically in distance, then corrects that baseline segment by segment.",
-          es: "Tabla ruido-potencia-distancia: el nivel del suceso de una aeronave — $L_\\mathrm{Amax}$ o SEL — tabulado frente a la distancia para unos pocos regímenes de motor, medido en vuelo estacionario a lo largo de una trayectoria recta nominalmente infinita y a una velocidad de referencia. El cálculo interpola linealmente en potencia y logarítmicamente en distancia, y después corrige esa base segmento a segmento.",
+          en: "Noise-power-distance table: the event level of one aircraft ($L_\\mathrm{Amax}$ or SEL) tabulated against distance for a handful of engine power settings, measured in steady flight along a notionally infinite straight path at a reference speed. A calculation interpolates it linearly in power and logarithmically in distance, then corrects that baseline segment by segment.",
+          es: "Tabla ruido-potencia-distancia: el nivel del suceso de una aeronave ($L_\\mathrm{Amax}$ o SEL) tabulado frente a la distancia para unos pocos regímenes de motor, medido en vuelo estacionario a lo largo de una trayectoria recta nominalmente infinita y a una velocidad de referencia. El cálculo interpola linealmente en potencia y logarítmicamente en distancia, y después corrige esa base segmento a segmento.",
         },
       },
       {
@@ -3181,8 +3181,8 @@ export const glossary = [
         clause: "3.6.2.1",
         guide: "underwater/underwater-propagation",
         definition: {
-          en: "Detection threshold: ten times the base-10 logarithm of the signal-to-noise ratio at which a signal counts as just detectable, for a stated probability of detection — often 0,5 — and probability of false alarm. It is where the processing gain and the operator's tolerance for false alarms enter the sonar equation.",
-          es: "Umbral de detección: diez veces el logaritmo decimal de la relación señal-ruido a la que una señal se considera apenas detectable, para una probabilidad de detección indicada —a menudo 0,5— y una probabilidad de falsa alarma. Es el punto por el que entran en la ecuación del sonar la ganancia de proceso y la tolerancia del operador a las falsas alarmas.",
+          en: "Detection threshold: ten times the base-10 logarithm of the signal-to-noise ratio at which a signal counts as just detectable, for a stated probability of detection (often 0,5) and probability of false alarm. It is where the processing gain and the operator's tolerance for false alarms enter the sonar equation.",
+          es: "Umbral de detección: diez veces el logaritmo decimal de la relación señal-ruido a la que una señal se considera apenas detectable, para una probabilidad de detección indicada (a menudo 0,5) y una probabilidad de falsa alarma. Es el punto por el que entran en la ecuación del sonar la ganancia de proceso y la tolerancia del operador a las falsas alarmas.",
         },
       },
       {
@@ -3304,8 +3304,8 @@ export const glossary = [
         },
         guide: "underwater/marine-mammal-exposure",
         definition: {
-          en: "Cumulative sound exposure level: the weighted sound exposure of every event of an activity — every strike of a piling campaign, say — summed over its whole duration. The onset criteria are written against this accumulated quantity, not against a single event, so halving the strike energy and doubling the strike count changes nothing.",
-          es: "Nivel de exposición sonora acumulada: la exposición sonora ponderada de todos los sucesos de una actividad —por ejemplo, cada golpe de una campaña de hincado— sumada a lo largo de toda su duración. Los criterios de umbral se escriben frente a esta magnitud acumulada y no frente a un suceso aislado, de modo que reducir a la mitad la energía por golpe y duplicar el número de golpes no cambia nada.",
+          en: "Cumulative sound exposure level: the weighted sound exposure of every event of an activity (every strike of a piling campaign, say), summed over its whole duration. The onset criteria are written against this accumulated quantity, not against a single event, so halving the strike energy and doubling the strike count changes nothing.",
+          es: "Nivel de exposición sonora acumulada: la exposición sonora ponderada de todos los sucesos de una actividad (por ejemplo, cada golpe de una campaña de hincado) sumada a lo largo de toda su duración. Los criterios de umbral se escriben frente a esta magnitud acumulada y no frente a un suceso aislado, de modo que reducir a la mitad la energía por golpe y duplicar el número de golpes no cambia nada.",
         },
       },
     ],
@@ -3362,7 +3362,7 @@ export const glossary = [
         },
         guide: "simulation/fdtd-simulation",
         definition: {
-          en: "Numerical dispersion: the error the discrete scheme makes in the propagation speed, which grows with frequency and depends on the direction of travel — largest along a coordinate axis, and zero along the diagonal of square cells at a Courant number of one. It is why ten cells per shortest wavelength is the working rule, and why an FDTD arrival time drifts if the grid is too coarse.",
+          en: "Numerical dispersion: the error the discrete scheme makes in the propagation speed, which grows with frequency and depends on the direction of travel (largest along a coordinate axis, and zero along the diagonal of square cells at a Courant number of one). It is why ten cells per shortest wavelength is the working rule, and why an FDTD arrival time drifts if the grid is too coarse.",
           es: "Dispersión numérica: el error que comete el esquema discreto en la velocidad de propagación, que crece con la frecuencia y depende de la dirección de avance: máximo a lo largo de un eje coordenado y nulo en la diagonal de celdas cuadradas con número de Courant igual a uno. Por eso la regla práctica es de diez celdas por longitud de onda más corta, y por eso el tiempo de llegada de una simulación FDTD se desvía si la malla es demasiado gruesa.",
         },
       },
@@ -3442,8 +3442,8 @@ export const glossary = [
         },
         guide: "buildings/insulation/insulation-field",
         definition: {
-          en: "Reproducibility standard deviation of a sound-insulation quantity: the standard uncertainty ISO 12999-1 assigns to situation A, the widest of the three. The same clause assigns $\\sigma_\\mathrm{situ}$ to situation B and the repeatability $\\sigma_\\mathrm{r}$ to situation C — for $R'_\\mathrm{w}$, 1,2 dB against 0,9 and 0,4 — so the situation has to be stated with the number.",
-          es: "Desviación típica de reproducibilidad de una magnitud de aislamiento acústico: la incertidumbre típica que la ISO 12999-1 asigna a la situación A, la más amplia de las tres. El mismo apartado asigna $\\sigma_\\mathrm{situ}$ a la situación B y la repetibilidad $\\sigma_\\mathrm{r}$ a la situación C —para $R'_\\mathrm{w}$, 1,2 dB frente a 0,9 y 0,4—, así que hay que indicar la situación junto con el número.",
+          en: "Reproducibility standard deviation of a sound-insulation quantity: the standard uncertainty ISO 12999-1 assigns to situation A, the widest of the three. The same clause assigns $\\sigma_\\mathrm{situ}$ to situation B and the repeatability $\\sigma_\\mathrm{r}$ to situation C (for $R'_\\mathrm{w}$, 1,2 dB against 0,9 and 0,4), so the situation has to be stated with the number.",
+          es: "Desviación típica de reproducibilidad de una magnitud de aislamiento acústico: la incertidumbre típica que la ISO 12999-1 asigna a la situación A, la más amplia de las tres. El mismo apartado asigna $\\sigma_\\mathrm{situ}$ a la situación B y la repetibilidad $\\sigma_\\mathrm{r}$ a la situación C (para $R'_\\mathrm{w}$, 1,2 dB frente a 0,9 y 0,4), así que hay que indicar la situación junto con el número.",
         },
       },
     ],

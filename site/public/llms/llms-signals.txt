@@ -59,9 +59,9 @@ to anchor them to pascals.
 ## [Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/)
 
 - [Build a sound level meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/): the whole
-  chain assembled on one runnable page — calibration, frequency and time
+  chain assembled on one runnable page (calibration, frequency and time
   weighting, the integrated and statistical levels, the band decomposition and
-  the class verdict of each stage — as the worked introduction to the four
+  the class verdict of each stage) as the worked introduction to the four
   subsections below.
 
 ## [Octave filtering](https://jmrplens.github.io/phonometry/signals/filters/)
@@ -311,7 +311,7 @@ number, the time constant, which is why Fast catches an event that Slow
 smooths away. You rarely write this chain yourself: every level function of
 the next step applies the frequency weighting internally, and the percentile
 levels rebuild this Fast envelope for you. The energy metrics ($L_\mathrm{eq}$, SEL)
-integrate the squared weighted signal directly, with no ballistics at all —
+integrate the squared weighted signal directly, with no ballistics at all,
 which is why they show no needle movement to follow. The chain is shown here
 because it *is* the meter's display.
 
@@ -421,8 +421,8 @@ states its coverage in detail.
 **Not covered.** `verify_weighting_class` and `verify_filter_class` check the
 frequency-response *design* of the digital filters against the standards'
 tables. They do not run the IEC 61672-2:2013 pattern-evaluation tests a
-physical instrument needs for type approval — self-generated noise, linearity
-range, overload indication, directional response — nor the IEC 61672-3:2013
+physical instrument needs for type approval (self-generated noise, linearity
+range, overload indication, directional response) nor the IEC 61672-3:2013
 periodic tests a working instrument receives. A class verdict from this page
 describes an algorithm, not a built device, and the screening checks of the
 last section screen the *recording*, not the instrument. The IEC 60942:2017

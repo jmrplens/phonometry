@@ -108,8 +108,8 @@ $K_{ij}$ es una propiedad de la unión sola, y ese es todo su sentido. Es el
 promedio de las dos diferencias de nivel de velocidad medidas a través de la
 unión, corregido por la longitud de acoplamiento y por las longitudes de
 absorción equivalentes de los dos elementos, así que la misma unión lleva el
-mismo $K_{ij}$ se construya en el edificio que se construya — que es lo que
-permite que exista un catálogo de tipos de unión. Cuanto mayor, mejor: $K_{ij}$
+mismo $K_{ij}$ se construya en el edificio que se construya (que es lo que
+permite que exista un catálogo de tipos de unión). Cuanto mayor, mejor: $K_{ij}$
 entra en la Fórmula (28a) con signo más, así que un valor alto es una unión que
 no deja pasar la vibración. Los órdenes de magnitud conviene llevarlos en la
 cabeza. Una unión rígida en cruz de masas parecidas anda por 8–13 dB y una unión
@@ -117,7 +117,7 @@ rígida en T unos 3 dB por debajo (el Anexo E.3.2/E.3.3 da
 $K_{13} = 8{,}7 + 17{,}1M + 5{,}7M^2$ y $5{,}7 + 14{,}1M + 5{,}7M^2$); las
 uniones en esquina y de cambio de espesor del Anexo E.3.6 bajan a $15M - 3$ dB
 (con suelo en $-2$ dB) y $5M^2 - 5$ dB, así que con la relación de masas del
-ejemplo resuelto devuelven 0,1 dB y $-4{,}8$ dB — una unión que no esconde nada;
+ejemplo resuelto devuelven 0,1 dB y $-4{,}8$ dB, una unión que no esconde nada;
 y una unión con capa elástica intermedia o de doble hoja ligera puede pasar de
 20 dB (la misma relación de masas por un `flexible_t` da 20,9 dB). Ese extremo
 superior es lo que hace casi invisible a la pared interior del ejemplo resuelto
@@ -129,7 +129,7 @@ valores del Anexo E se leen una sola vez, a 500 Hz, y hacen las veces de una
 magnitud que solo es aproximadamente independiente de la frecuencia.
 
 El argumento de masas es donde encallan los lectores. Los ajustes del Anexo E son
-cuadráticos en $M = \lg(m'_{\perp,i}/m'_i)$ — el **logaritmo** decimal de la
+cuadráticos en $M = \lg(m'_{\perp,i}/m'_i)$: el **logaritmo** decimal de la
 relación de masas, con $m'_i$ el elemento que lleva la trayectoria y
 $m'_{\perp,i}$ el elemento perpendicular de la unión (Fórmula E.3). La biblioteca
 toma la **relación de masas en sí** y forma $M$ internamente, así que
@@ -139,7 +139,7 @@ ya logaritmado devuelve una respuesta verosímil pero equivocada:
 `junction_vibration_reduction("rigid_cross", "through", 0.2068)` devuelve
 $-0{,}3$ dB donde la respuesta es 12,5 dB. Y como $m'_i$ es el elemento *de la
 trayectoria de transmisión*, la misma unión tiene una relación de masas distinta
-para $K_{13}$ y para $K_{12}$ — la relación es por trayectoria, no por unión.
+para $K_{13}$ y para $K_{12}$: la relación es por trayectoria, no por unión.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_junction_catalogue.svg" alt="El catálogo de uniones del Anexo E: cruz rígida, T rígida, T con capa elástica intermedia, esquina, cambio de espesor y una pared ligera de doble hoja encontrándose con un forjado homogéneo, cada una con sus elementos numerados, sus ramas de trayectoria coloreadas, la longitud de acoplamiento marcada y la relación de masas resuelta en uno de los paneles" width="92%" />
 
@@ -240,8 +240,8 @@ trayectoria, de modo que la trayectoria dominante queda visible.
 **Lee el reparto como un presupuesto, porque ese es el rendimiento práctico de
 todo el modelo.** La trayectoria directa es aquí el mayor contribuyente
 individual y aun así solo lleva el 33 % de la energía transmitida: dos tercios de
-lo que llega ha rodeado la pared. Así que perfeccionar el elemento separador —
-hacerlo infinitamente bueno, no solo mejor — elimina como mucho un tercio del
+lo que llega ha rodeado la pared. Así que perfeccionar el elemento separador
+(hacerlo infinitamente bueno, no solo mejor) elimina como mucho un tercio del
 total, que son $-10\lg(1 - 0{,}33) = 1{,}8$ dB. Especificar una partición más
 pesada en esta construcción sería dinero tirado; el forjado, el techo y la
 fachada llevan el resto, y un detalle de unión o un trasdosado sobre *ellos* es
@@ -310,8 +310,8 @@ parte por la mitad, y es la parte en la que sigue equivocándose un lector atent
 
 La física que hay detrás de esa mitad es que dos trasdosados en serie sobre la
 misma trayectoria vibratoria no son independientes: el segundo actúa sobre un
-campo que el primero ya ha reducido, así que su magnitud global completa — medida
-sobre un elemento desnudo — no está disponible por segunda vez. El apartado 4.3.3
+campo que el primero ya ha reducido, así que su magnitud global completa (medida
+sobre un elemento desnudo) no está disponible por segunda vez. El apartado 4.3.3
 de ISO 12354-2 lleva la misma regla allí donde coexisten un revestimiento de
 suelo y un trasdosado del lado receptor. La trayectoria directa toma su propio
 $\Delta R_\mathrm{Dd,w}$ combinado a través de `delta_r_direct`.
@@ -326,11 +326,12 @@ Tabla 1.
 EN 12354-2:2000, que condensa toda la transmisión por flancos en la única
 corrección tabulada $K$ que se lee a partir de la masa del elemento separador y
 de la masa media de los flancos. ISO 12354-2:2017 reorganizó ese mismo modelo
-simplificado en fórmulas explícitas trayectoria a trayectoria
-— $L_\mathrm{n,d,w} = L_\mathrm{n,eq,0,w} - \Delta L_\mathrm{w} - \Delta L_\mathrm{d,w}$ (15) para la trayectoria
-directa y, para cada trayectoria por flancos,
-$L_{\mathrm{n},ij,\mathrm{w}} = L_\mathrm{n,eq,0,w} - \Delta L_\mathrm{w} + (R_{i,\mathrm{w}} - R_{j,\mathrm{w}})/2 - \Delta R_{j,\mathrm{w}} -
-K_{ij} - 10\log_{10}(S_i/l_0 l_{ij})$ (16) —, de modo que **la corrección de
+simplificado en fórmulas explícitas trayectoria a trayectoria:
+la fórmula (15) para la trayectoria directa
+($L_\mathrm{n,d,w} = L_\mathrm{n,eq,0,w} - \Delta L_\mathrm{w} - \Delta L_\mathrm{d,w}$) y, para cada trayectoria por flancos,
+la fórmula (16)
+($L_{\mathrm{n},ij,\mathrm{w}} = L_\mathrm{n,eq,0,w} - \Delta L_\mathrm{w} + (R_{i,\mathrm{w}} - R_{j,\mathrm{w}})/2 - \Delta R_{j,\mathrm{w}} -
+K_{ij} - 10\log_{10}(S_i/l_0 l_{ij})$), de modo que **la corrección de
 la Tabla 1 no está en el texto vigente en absoluto**, aunque la física de fondo
 y la declaración de exactitud no hayan cambiado. La edición de 2017 declara
 además un campo de aplicación que el texto de 2000 dejaba implícito
@@ -347,7 +348,7 @@ forjados **pesados homogéneos** medidos entre **100 y 600 kg/m²**, y
 franja. Dentro funciona porque el nivel de impactos de una losa masiva desnuda lo
 fijan su masa y el factor de pérdidas aproximadamente constante de la
 construcción de fábrica. Fuera falla porque un forjado ligero o nervado radia a
-través de sus propias resonancias y no como una placa homogénea amortiguada — así
+través de sus propias resonancias y no como una placa homogénea amortiguada, así
 que la forma cerrada no significa nada para un forjado de placa alveolar, de
 viguetas y bovedillas o de entramado de madera, tenga la masa que tenga, y es una
 extrapolación para una bóveda de 900 kg/m². La $m'$ que pide es la masa del
@@ -489,7 +490,7 @@ aritmética.
   exactitud puede ser menor.
 - **Geometría a escala de vivienda.** Se aplica sobre todo a viviendas cuyas
   dimensiones de elemento se parezcan a las de una instalación de ensayo.
-  Aléjate de eso — una nave, una sala de máquinas, una unión muy larga — y la
+  Aléjate de eso (una nave, una sala de máquinas, una unión muy larga) y la
   desviación crece.
 - **Solo recintos adyacentes.** El apartado 4.2.4 restringe toda la familia a la
   transmisión entre recintos que comparten el elemento separador, y las
@@ -511,7 +512,7 @@ página no muestra. Solo hay datos para uniones en las que los elementos de un
 lado y de otro **en el mismo plano tienen la misma masa**. Los puntos medidos se
 dispersan típicamente **±3 dB** alrededor de las líneas impresas, y «en algunos
 casos la desviación puede ser mucho mayor debido a variaciones en los detalles de
-la unión y en la ejecución» — que es más que los ~2 dB del modelo entero, así que
+la unión y en la ejecución», que es más que los ~2 dB del modelo entero, así que
 en la mayoría de las predicciones reales el dato de unión, y no la suma, domina
 el error. Los valores de $K_{ij}$ se dedujeron de modo que la diferencia de nivel
 de velocidad estimada de la unión sea correcta *en promedio*, lo que los deja en
@@ -520,8 +521,8 @@ promediada en las dos direcciones, así que un $D_{v,ij}$ medido no se puede
 sustituir por un $K_{ij}$ sin ese paso. Y la independencia con la frecuencia vale
 «al menos en el rango de frecuencias de 125 Hz a 2000 Hz»; fuera de él el efecto
 de la frecuencia puede ser mayor. La salida son los datos medidos: ISO 10848-4
-para uniones pesadas — que el propio Anexo E.3.1 recomienda recopilar a escala
-nacional — y el
+para uniones pesadas (que el propio Anexo E.3.1 recomienda recopilar a escala
+nacional) y el
 [laboratorio de flancos](/phonometry/es/buildings/insulation/flanking-lab/)
 cuando la unión es ligera, no homogénea o simplemente no está en el catálogo.
 

@@ -337,9 +337,9 @@ split into point sources is declared out of scope by the method itself.
 ## Standards
 
 Directive 2002/49/EC, Annex II, section 2.2 with the coefficient database of
-Appendix F, in the consolidated text — which is three instruments read
+Appendix F, in the consolidated text (which is three instruments read
 together, and reading only one of them is the easiest way to ship a wrong
-table:
+table):
 
 - Commission Directive (EU) 2015/996
   ([eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2015/996/oj)),

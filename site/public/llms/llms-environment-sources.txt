@@ -26,7 +26,7 @@ text: Directive (EU) 2015/996 as corrected by the OJ L 5 corrigendum of 2018,
 which restores the 63 Hz to 8 kHz octave range the original clause contradicted,
 and amended by Delegated Directive (EU) 2021/1226, which replaces Tables F-1 and
 F-4 outright and makes the current source some 2,5 to 3,5 dB(A) louder than the
-2015 one — so any comparison with pre-2021 literature carries that offset. Each
+2015 one: any comparison with pre-2021 literature carries that offset. Each
 vehicle is a point source 0,05 m above the pavement, with the first pavement
 reflection already inside its power. Per category (light, medium heavy, heavy,
 mopeds, motorcycles) a rolling and a propulsion term are energy-summed,
@@ -84,7 +84,7 @@ Pages elsewhere on the site that this section leans on:
 
 Two of the four CNOSSOS sources are missing, by omission rather than
 oversight: the **industrial source** of section 2.4 and Appendix H is not
-implemented, and neither is the **aircraft source** of sections 2.6 and 2.7 —
+implemented, and neither is the **aircraft source** of sections 2.6 and 2.7:
 aircraft noise is covered by the ICAO and ECAC methods in [Aircraft
 noise](https://jmrplens.github.io/phonometry/aircraft/), which is a different family of models entirely.
 Neither is the **CNOSSOS propagation method** of section 2.5: it differs from
@@ -442,9 +442,9 @@ split into point sources is declared out of scope by the method itself.
 ## Standards
 
 Directive 2002/49/EC, Annex II, section 2.2 with the coefficient database of
-Appendix F, in the consolidated text — which is three instruments read
+Appendix F, in the consolidated text (which is three instruments read
 together, and reading only one of them is the easiest way to ship a wrong
-table:
+table):
 
 - Commission Directive (EU) 2015/996
   ([eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2015/996/oj)),
@@ -914,7 +914,7 @@ such as depots, stations and loudspeakers, are treated by the industrial method.
 ## Standards
 
 Directive 2002/49/EC, Annex II, section 2.3 with the coefficient database of
-Appendix G, in the consolidated text — three instruments read together:
+Appendix G, in the consolidated text. Three instruments read together:
 
 - Commission Directive (EU) 2015/996
   ([eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2015/996/oj)),
@@ -1023,9 +1023,9 @@ and stays out of scope. So does the IEC TS 61400-14 declaration route, which
 turns a batch of measured machines into the declared value a planning authority
 receives. And two things a wind-turbine reader often arrives looking for sit
 outside IEC 61400-11 altogether: **amplitude modulation** (the swish, folded
-into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** — optional
+into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** (optional
 measurements under 7.2.1 with no rating method attached, so their assessment
-falls to national guidance.
+falls to national guidance).
 
 ## 2. Tonal audibility
 
@@ -1055,7 +1055,7 @@ $\Delta L_\mathrm{a} > 0$.
 For a candidate between 20 and 70 Hz the Zwicker band above is not what the
 standard uses: subclause 9.5.3 substitutes the fixed absolute 20–120 Hz band,
 so `critical_bandwidth` comes back as 100 Hz for every such candidate and the
-band is *not centred on the tone* — a low-frequency result cannot be reconciled
+band is *not centred on the tone*. A low-frequency result cannot be reconciled
 with the CBW formula printed above. Blade-passing harmonics and low-speed
 gearbox tones live exactly there, so for a wind turbine this is no corner case.
 
@@ -1121,9 +1121,9 @@ document handed to a regulator, so the result renders one.
 `WindTurbineTonalityResult.report(path)` writes a one-page fiche following
 IEC 61400-11:2012+A1:2018 subclauses 9.5.2 to 9.5.8: a standard-basis line, an
 optional metadata header (source/situation, client, measurement position,
-instrumentation, date), the critical-band analysis table — tone frequency,
+instrumentation, date), the critical-band analysis table (tone frequency,
 critical bandwidth, tone level $L_{p\mathrm{t}}$, masking-noise level $L_{p\mathrm{n}}$, tonality
-$\Delta L_\mathrm{tn}$, audibility criterion $L_\mathrm{a}$ and tonal audibility $\Delta L_\mathrm{a}$ —
+$\Delta L_\mathrm{tn}$, audibility criterion $L_\mathrm{a}$ and tonal audibility $\Delta L_\mathrm{a}$)
 beside the narrowband spectrum with the critical band, the masking level and
 the tone marked, then the boxed $\Delta L_\mathrm{a}$ with the tone frequency and the
 audibility decision, an optional PASS/FAIL row, a note on how $\Delta L_\mathrm{a}$ is

@@ -22,7 +22,7 @@ pure-tone coefficient of **ISO 9613-1**), the ground effect and barrier
 screening, with a meteorological correction for long-term averages. The page
 keeps the per-term breakdown visible, so a prediction is never a black box: you
 can see exactly which mechanism buys how many decibels at which frequency.
-Start here — the other two pages exist to say when its terms can be trusted.
+Start here. The other two pages exist to say when its terms can be trusted.
 
 [Spherical ground effect and advanced barriers](https://jmrplens.github.io/phonometry/environment/propagation/ground-barriers/)
 goes underneath two of those terms to the wave acoustics they fit: the
@@ -44,8 +44,8 @@ on a radius of about 3.4 km, so over the first hundred metres the homogeneous
 models are accurate, and beyond a few hundred the geometry takes over. Downwind
 or under a nocturnal inversion the rays close over the ground and hold the
 level up; upwind the same profile opens an acoustic shadow into which the level
-collapses by 20 dB or more. That asymmetry — the same machine at the same
-distance, tens of decibels apart depending on which side you stand — is what
+collapses by 20 dB or more. That asymmetry (the same machine at the same
+distance, tens of decibels apart depending on which side you stand) is what
 ISO 9613-2 fixes by decree in its favourable-propagation convention and
 compresses into the scalar meteorological correction. This page computes it,
 with curved rays and closed-form shadow-zone distances, and with the Green's
@@ -105,8 +105,8 @@ not a boundary-element solution, and no model here computes turbulent
 scattering: ISO 9613-2 absorbs it into the fixed caps on its screening term,
 and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
 outright. Nothing on these pages produces a rating: no Lden, no limit value
-and no verdict — those are [Assessment and
-regulation](https://jmrplens.github.io/phonometry/environment/assessment/).
+and no verdict (those are [Assessment and
+regulation](https://jmrplens.github.io/phonometry/environment/assessment/)).
 
 ---
 
@@ -1033,16 +1033,16 @@ The clip below is that formula as a field. It is the
 once at 100 Hz and once at 500 Hz, each with a barrier-free reference run over
 the same ground so the annotated insertion loss is a true one. The geometry
 fixes the path difference at 1.06 m for the receiver it marks, so the Fresnel
-number is $N = 0.62$ at 100 Hz and $N = 3.1$ at 500 Hz — the same screen, a
-factor of five apart in $N$ purely because $\lambda$ changed — and the field
+number is $N = 0.62$ at 100 Hz and $N = 3.1$ at 500 Hz (the same screen, a
+factor of five apart in $N$ purely because $\lambda$ changed), and the field
 shows what that buys: about 8 dB against about 17 dB. Two things are worth
 watching for. The edge of the lit region running down from the top of the
 screen is the shadow boundary, the $N \to 0$ locus where the formula bottoms
 out at 5 dB; and inside the shadow the field is a cylindrical wave centred on
 the top of the screen, which is what "the edge acts as a secondary source"
 looks like. One caveat: the ground in the clip is perfectly rigid, so it shows
-diffraction alone and none of the finite-impedance ground effect of section 1
-— the coherent four-path model below adds that, and its curve swings tens of
+diffraction alone and none of the finite-impedance ground effect of section 1;
+the coherent four-path model below adds that, and its curve swings tens of
 decibels where this one is smooth.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.gif" alt="Animation: a point source behind a thin 2.5 metre rigid barrier on reflecting ground, simulated at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone, the short wavelength is cast into a deep clean shadow" width="640" height="360" loading="lazy"></picture>
@@ -1284,7 +1284,7 @@ infrastructure for the meteorological schemes of Nord2000 and CNOSSOS.
 (`ground_effect`; Attenborough Eq. 2.40a/c, Salomons Eq. 3.2/D.58, with the
 Faddeeva-function boundary-loss factor), its hard-ground +6 dB,
 grazing-incidence and reciprocity limits pinned as tests; and wave-theoretic
-barrier diffraction in `barrier_insertion_loss` — the Kurze-Anderson closed form
+barrier diffraction in `barrier_insertion_loss`: the Kurze-Anderson closed form
 (`kurze_anderson_attenuation`, Bies Eq. 5.138), the exact rigid half-plane
 (MacDonald / Hadden & Pierce, Attenborough Eqs. 9.19-9.20), thick barriers
 through the double-edge Fresnel number (Bies Eq. 5.157) and the coherent
@@ -1295,7 +1295,7 @@ non-turbulent atmosphere; a vertical sound-speed gradient is the subject of
 [atmospheric refraction](https://jmrplens.github.io/phonometry/environment/propagation/atmospheric-refraction/) instead. The coherent
 barrier-on-ground model weights all four diffracted paths with a single
 reflection coefficient $Q$ computed over the overall source-receiver geometry,
-not with a separate coefficient per image path — so it is coherent and
+not with a separate coefficient per image path, so it is coherent and
 reciprocal, but it is not a boundary-element solution.
 
 ## See also
@@ -1661,8 +1661,8 @@ These checks are pinned numerically in the
 
 ## What this guide covers
 
-**Covered.** The ray model — Runge-Kutta integration of Snell's law in
-`atmospheric_ray_paths` — with the closed-form linear-profile geometry
+**Covered.** The ray model (Runge-Kutta integration of Snell's law in
+`atmospheric_ray_paths`) with the closed-form linear-profile geometry
 (`ray_curvature_radius`, `shadow_zone_distance`, Salomons Sec. 4.4), and the
 Green's Function parabolic equation (`atmospheric_parabolic_equation`, Salomons
 Appendices G and H): the Gaussian starter, the finite-impedance ground
@@ -1673,8 +1673,8 @@ geometry to machine precision, and reciprocity and the shadow-zone collapse as
 tests.
 
 **Not covered.** Both models take one effective sound-speed profile that varies
-with height alone. A horizontally inhomogeneous atmosphere — a gradient that
-changes along the path — is outside their range-independent formulation, which
+with height alone. A horizontally inhomogeneous atmosphere (a gradient that
+changes along the path) is outside their range-independent formulation, which
 is the airborne counterpart of the range-independent ocean solvers. Both also
 assume flat ground at $z = 0$; neither accepts a terrain elevation profile.
 

@@ -38,7 +38,7 @@ is what the whole chain looks like once a state has legislated it: the
 corrected level LKeq with its tonal, low-frequency and impulsive corrections
 Kt, Kf and Ki, evaluation periods split into noise phases, and the limit tables
 an activity is judged against by land use. Read it as the worked example of a
-national layer even if you do not work in Spain — it shows which parts of
+national layer even if you do not work in Spain: it shows which parts of
 ISO 1996 a regulation typically restates, and which it replaces. Kf, the
 correction driven by the difference between the C-weighted and the A-weighted
 level, has no counterpart in ISO 1996 at all.
@@ -78,7 +78,7 @@ Pages elsewhere on the site that this section leans on:
 The library starts where the sound level meter stops. ISO 1996-2 fixes the
 receiver positions and the façade corrections that turn a raw measurement into
 the level these functions expect, and those position and correction procedures
-are **not implemented** — only the arithmetic that follows once you have
+are **not implemented**: only the arithmetic that follows once you have
 applied them. The same is true nationally: the Annex IV measurement procedures
 of RD 1367/2007 (microphone positions, series duration, number of
 measurements) are not implemented either, and the acoustic zoning, noise maps

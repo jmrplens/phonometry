@@ -61,8 +61,8 @@ and
 Every formula below is chosen by a construction detail, so it is worth having the
 three build-ups in view: a continuous resilient layer under a screed, discrete
 mounts under a walking surface, and a lining fixed to a wall either by bonding or
-on studs over a cavity. Which of them you have built decides which law applies —
-and, as the last section of this page shows, whether the prediction means
+on studs over a cavity. Which of them you have built decides which law applies,
+and as the last section of this page shows, whether the prediction means
 anything at all.
 
 ## The excitation: the tapping machine as a mass-spring-dashpot
@@ -279,8 +279,8 @@ applies is a question about damping, not about the layer:
 All three laws are written for $f > f_0$, and the library clamps them to zero
 at and below the resonance. That clamp is a convention, not a physical result:
 in the band containing $f_0$ the mass-spring system amplifies, and measured
-floors fall between about $-5$ dB and $0$ dB there — the "worse than bare at
-$f_0$" of the introduction, which no model on this page reproduces. As long as
+floors fall between about $-5$ dB and $0$ dB there (the "worse than bare at
+$f_0$" of the introduction), which no model on this page reproduces. As long as
 $f_0$ sits below the rated range the difference is harmless, but a stiff layer
 or a light screed that puts $f_0$ near 100 Hz produces a $\Delta L_\mathrm{w}$ that is
 optimistic in precisely the band that decides the rating. Check where $f_0$
@@ -422,7 +422,7 @@ round(building.lining_improvement_in_situ(10.0, 100.0, 60.0), 1)  # 4.4 dB on a 
 
 Every model on this page assumes the resilient layer is the *only* mechanical
 connection between the two masses. None of them can see a rigid bridge, so all of
-them are upper bounds on a correctly built construction — and in the field the
+them are upper bounds on a correctly built construction, and in the field the
 gap between a prediction and a measurement is far more often a bridge than a
 wrong $s'$.
 
@@ -448,7 +448,7 @@ order of how often:
 
 - screed in contact with the wall, because the edge strip was cut short, folded
   down before the pour, or trimmed flush and then grouted over by the skirting;
-- screed touching a service penetration — a pipe, a conduit, a floor box — that
+- screed touching a service penetration (a pipe, a conduit, a floor box) that
   was not sleeved;
 - debris and mortar droppings left on the resilient layer before the pour, each
   one a point bridge;
@@ -462,7 +462,7 @@ The scale is brutal and the signature is recognisable. A handful of point bridge
 can cost 10 dB or more; a continuous edge contact can remove the improvement
 almost entirely. And because a bridge short-circuits the spring rather than
 detuning it, a bridged floating floor loses across the *whole* range above $f_0$
-rather than in one band — which is how it is told apart from a wrong $s'$ or a
+rather than in one band, which is how it is told apart from a wrong $s'$ or a
 misplaced resonance in a
 [field measurement](/phonometry/buildings/insulation/insulation-field/).
 

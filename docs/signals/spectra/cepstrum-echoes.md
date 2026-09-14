@@ -411,7 +411,7 @@ lines.
 band it is given, so a response carrying several overlapping echoes needs
 manual peak-picking or repeated calls on narrowed bands: it is not a multi-echo
 separator. There is no mel-warped or MFCC-style cepstrum for perceptual audio
-features either — `cepstrum` and `lifter` work on the plain linear-frequency
+features either: `cepstrum` and `lifter` work on the plain linear-frequency
 log spectrum only.
 
 ## See also

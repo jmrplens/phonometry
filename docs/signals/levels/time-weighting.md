@@ -114,7 +114,7 @@ $$
 
 The asymmetry has a consequence worth stating: unlike F and S, Impulse is not a
 filter. Its coefficient depends on the signal, so an I-weighted level is not
-additive — the I-weighted level of two sources running together cannot be
+additive; the I-weighted level of two sources running together cannot be
 derived from the two measured separately, while their $L_\mathrm{eq}$ values can.
 
 ### Choosing F, S or I
@@ -201,7 +201,7 @@ plt.show()
 By default, the exponential integrator starts from rest (`y[-1] = 0`);
 `initial_state=None` and `initial_state='zero'` are the same thing. Passing
 `'first'` seeds the integrator with the square of the very first sample,
-$x[0]^2$ — an unbiased but extremely noisy estimate of the mean square (one
+$x[0]^2$: an unbiased but extremely noisy estimate of the mean square (one
 degree of freedom), and for a tone it depends entirely on the phase at the
 cut: a sine starting at a zero crossing makes `'first'` bit-identical to
 `'zero'`. A float resumes a state you saved yourself (which is what block
@@ -209,7 +209,7 @@ processing does in section 6), and an array broadcastable to the input shape
 without the time axis does the same per channel.
 
 If the recorded segment is a continuation of a signal already running, seed
-the integrator with something robust — the mean square of the first half
+the integrator with something robust: the mean square of the first half
 second is a far better estimate than a single sample. If the record is the
 *start* of the event, do not seed at all: let it start from rest and discard
 the first $5\tau$ (0.6 s Fast, 5 s Slow), which is exactly what `ln_levels`

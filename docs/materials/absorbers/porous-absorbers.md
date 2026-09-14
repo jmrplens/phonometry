@@ -780,7 +780,7 @@ found in the sources during this work are recorded in the
   slow-sound slit panels and the critical-coupling condition that push
   perfect absorption into the deep-subwavelength regime.
 - [Diffusers and Their Coefficients](../diffusers/diffusers.md): the diffuser
-  half of Cox & D'Antonio, implemented separately — this guide covers only
+  half of Cox & D'Antonio, implemented separately; this guide covers only
   the absorber half of the book.
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the characterisation quantities the empirical and phenomenological models take as input.
 

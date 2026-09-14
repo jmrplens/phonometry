@@ -61,12 +61,12 @@ derives from an A-weighted level, the regulation expresses it in dB.
 
 ### The background correction every input assumes
 
-$L_{\mathrm{Aeq},T}$ above is the level of *the activity alone*. Everything on this page —
-the three corrections, the phase levels, the verdict — is defined on a
+$L_{\mathrm{Aeq},T}$ above is the level of *the activity alone*. Everything on
+this page (the three corrections, the phase levels, the verdict) is defined on a
 background-corrected level, and the regulation says so before it says anything
-else. The procedure is the ordinary energy subtraction: measure the residual with
-the activity stopped, over the same evaluation period, and subtract it from the
-total,
+else. The procedure is the ordinary energy subtraction: measure the residual
+with the activity stopped, over the same evaluation period, and subtract it from
+the total,
 $L = 10\log_{10}(10^{L'/10} - 10^{L_\text{res}/10})$.
 
 It stops being meaningful as the two converge. With the activity 10 dB above the
@@ -78,8 +78,8 @@ a margin below 3 dB no correction is allowed and the honest statement is the
 percentile-based `gaussian_residual_level()` on
 [Environmental noise levels](/phonometry/environment/assessment/environmental-levels/)
 do the arithmetic and carry that rule (`reportable_upper_bound`,
-`reliable=False`); the RD's own Annex IV procedure for the measurement series —
-how many measurements, how long, what invalidates them — is not implemented here.
+`reliable=False`); the RD's own Annex IV procedure for the measurement series
+(how many measurements, how long, what invalidates them) is not implemented here.
 
 Two field consequences. The residual has to be captured **in the same evaluation
 period**, because a night residual is not a day residual. And a phase whose

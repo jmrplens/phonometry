@@ -351,7 +351,7 @@ resistivities $12\eta/h^2$ and $28.454\eta/w^2$ as $\omega \to 0$, and the
 effective parameters tend to $\rho_0$, $\kappa_0$ as the boundary layers
 vanish. A built panel would be measured in the
 [impedance tube](impedance-tube.md) (ISO 10534-2) or the
-[reverberation room](absorption-measurement.md) (ISO 354) — nothing here
+[reverberation room](absorption-measurement.md) (ISO 354): nothing here
 performs any of that verification, and the roughness of a printed slit, the
 frame, the mounting and the finite panel size are all outside the model.
 Misprints found in

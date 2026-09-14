@@ -408,8 +408,8 @@ imp.report("impact-prediction.pdf")     # L'n,w, five paths
 
 The example fiches, regenerated with `make reports`, are kept rendered in the
 repository; click a preview to open the PDF. Both show the Annex L building of
-this page — the same elements, junctions and floating floor the tables above
-are built from — so the share-of-energy table is the answer to the question
+this page (the same elements, junctions and floating floor the tables above
+are built from), so the share-of-energy table is the answer to the question
 this whole page exists for: which path carries the sound.
 
 [![ISO 12354-1 detailed airborne prediction example report: an identification header with the 20 m2 separating floor and the two 50 m3 dwellings, the share-of-energy table of all thirteen paths (the 2d flanking path largest at 18.0 %, the direct Dd path 6.3 %), the per-band figure stacking each path's contribution under the apparent sound reduction index curve from 50 Hz to 5 kHz, the boxed predicted R'w = 57 dB, the detailed model's 1.5 dB to 2.5 dB standard deviation, and a PASS against a requirement of 52 dB](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_detailed_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_detailed_airborne_example.pdf)

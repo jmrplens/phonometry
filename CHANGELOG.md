@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- The documentation, the figures and the docstrings are written without the em
+  dash. Every clause that hung off one is now a parenthesis where it explains,
+  a colon where it announces, a comma where it qualifies, or a sentence of its
+  own; a figure title of the shape "quantity - value" is written with a colon.
+  A standard's title reproduced as printed keeps the dash it is printed with,
+  and so does a quotation and a bibliographic entry.
+
+  `scripts/check_em_dashes.py` is the guard, and it reads what a reader sees:
+  the pages of the site and their Spanish twins, the mirrors under `docs/`,
+  this file, the READMEs, the glossary cards, the docstrings the API reference
+  is generated from, and the text the figure and diagram generators draw. It
+  was written against the tree it had to clean, where it found 3110 dashes in
+  404 files.
+
 ### Fixed
 
 - Two verifier figures painted the verdict backwards. The frequency-weighting
@@ -2337,7 +2353,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - The fan's pressure rise says what it is: `fan_sound_power`'s second argument
   is `fan_static_pressure_pa`, keyword-only. It is a **gauge** pressure rise in
   **pascals**, and it shared its name with the `static_pressure` the ISO 3740
-  family takes in **kilopascals absolute** — a different quantity, a different
+  family takes in **kilopascals absolute**: a different quantity, a different
   unit and a different datum under one word.
 
   No guard can separate those two, which is why the fix is the name. A fan
@@ -5434,8 +5450,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Non-redistributable reference material moves out of `plan/` into the
   gitignored `tests/data-local/`, and every suite that uses it resolves the same
   way through the new `tests/oracle_data.py`: environment override, then
-  `tests/data-local/`, then the committed data under `tests/data/` — the path CI
-  takes, whose assertions never skip. `pytest` now prints which copy each dataset resolved
+  `tests/data-local/`, then the committed data under `tests/data/` (the path CI takes,
+  whose assertions never skip). `pytest` now prints which copy each dataset resolved
   to in its run header, so a green run says which oracle produced it. The
   convention, and what each committed oracle can and cannot assert, is written
   down in `tests/data/README.md`.
@@ -6162,7 +6178,7 @@ the whole of the migration.
   other branch (validity `m2/m1 > 3` reads `mass_ratio < 1/3`), evaluating
   `3,0 + 14,1 M + 5,7 M²` as ISO 12354-1:2017 E.3.5 prints it; the 2000
   edition's `−14,1 M` line is the same relation recast in its figure's
-  x-axis variable (the K24 errata entry is rewritten accordingly — the
+  x-axis variable (the K24 errata entry is rewritten accordingly; the
   earlier reading of the 2017 print as a sign misprint was wrong).
 - `installed_source_prediction()` (EN 12354-5): a single-number
   characteristic power level with per-band path data now broadcasts across
@@ -8887,7 +8903,7 @@ the whole of the migration.
 ### Added
 
 - `air_attenuation()` and `air_attenuation_m()` (with the
-  `AtmosphericAbsorptionWarning`) — pure-tone atmospheric absorption coefficient
+  `AtmosphericAbsorptionWarning`): pure-tone atmospheric absorption coefficient
   α per ISO 9613-1:1993 (Eq. 3–5) from frequency, temperature, humidity and
   pressure; reproduces Table 1 to under 0,4 % and exposes the ISO 354 power
   attenuation coefficient m = α/(10 lg e). `exact_midband=True` snaps onto the
@@ -8901,7 +8917,7 @@ the whole of the migration.
   `meteorological_correction()`. `DEFAULT_FREQUENCIES` gives the nominal octave
   bands.
 - `task_based_exposure()`, `job_based_exposure()` and `full_day_exposure()`
-  (with `Task`, `ExposureResult` and `OccupationalExposureWarning`) — ISO 9612:2009 daily
+  (with `Task`, `ExposureResult` and `OccupationalExposureWarning`): ISO 9612:2009 daily
   noise exposure LEX,8h by the three measurement strategies and the normative
   Annex C uncertainty budget (k = 1,65 one-sided 95 %, the C.6 I(I−1) vs
   C.12 N−1 sampling asymmetry, Table C.4 and the LEX,8h + U upper limit); the
@@ -8915,31 +8931,31 @@ the whole of the migration.
 
 - `loudness_moore_glasberg()`, `loudness_moore_glasberg_from_spectrum()` and
   `loudness_moore_glasberg_from_third_octave()` with the `MooreGlasbergLoudness`
-  result and its `.plot()` — stationary Moore-Glasberg loudness per
+  result and its `.plot()`: stationary Moore-Glasberg loudness per
   ISO 532-2:2017 (level-dependent roex excitation pattern on the ERB-number/Cam
   scale, compressive specific loudness and binaural inhibition), anchored so a
   1 kHz / 40 dB SPL tone is 1.000 sone.
 - `loudness_moore_glasberg_time()` and `MooreGlasbergTimeVaryingLoudness` (with
-  `.plot()`) — time-varying Moore-Glasberg-Schlittenlacher loudness per
+  `.plot()`): time-varying Moore-Glasberg-Schlittenlacher loudness per
   ISO 532-3:2023: the short-term S′(t) and long-term S″(t) loudness traces, the
   peak long-term loudness N_max and percentile long-term loudness.
-- `loudness_ecma()` and `EcmaLoudness` (with `.plot()`) — Sottek Hearing Model
+- `loudness_ecma()` and `EcmaLoudness` (with `.plot()`): Sottek Hearing Model
   loudness per ECMA-418-2:2025 (sone_HMS) on the 53-band Bark_HMS auditory
   front-end; a 1 kHz / 40 dB SPL tone calibrates to ≈ 1 sone_HMS.
-- `tonality_ecma()` and `EcmaTonality` (with `.plot()`) — ECMA-418-2:2025
+- `tonality_ecma()` and `EcmaTonality` (with `.plot()`): ECMA-418-2:2025
   tonality (tu_HMS) from the autocorrelation of the band signal, with the
   time-dependent tonality T(l), the average specific tonality T′(z) and the
   per-band tonal frequency; a 1 kHz / 40 dB tone calibrates to ≈ 1 tu_HMS.
-- `roughness_ecma()` and `EcmaRoughness` (with `.plot()`) — ECMA-418-2:2025
+- `roughness_ecma()` and `EcmaRoughness` (with `.plot()`): ECMA-418-2:2025
   roughness (asper), a new capability, from the band-envelope modulation
   analysis; the reference 1 kHz carrier 100 %-AM at 70 Hz, 60 dB SPL calibrates
   to ≈ 1 asper.
 
-- One-line canonical `.plot()` method on every public result object —
-  `ZwickerLoudness`, `STIResult`, `RoomAcousticsResult`, `DecayCurve`,
+- One-line canonical `.plot()` method on every public result object
+  (`ZwickerLoudness`, `STIResult`, `RoomAcousticsResult`, `DecayCurve`,
   `WeightedRatingResult`, `ImpactRatingResult`, `SoundPowerResult`,
   `ReverberationSoundPowerResult`, `SoundPowerIntensityResult` and
-  `IntensityResult` — reproducing each result's documentation figure in a
+  `IntensityResult`), reproducing each result's documentation figure in a
   single call (`res.plot()`). matplotlib stays a soft dependency: importing
   and computing work without it, and `.plot()` raises a clear `ImportError`
   with `pip install phonometry[plot]` guidance when it is missing. The
@@ -8950,32 +8966,32 @@ the whole of the migration.
   `band_centers`, `measured` and `shifted_reference`, exposing the ISO 717
   measured curve and shifted reference behind each single-number rating.
 - `sweep_signal()`, `inverse_filter()`, `impulse_response()`, `mls_signal()`
-  and `mls_impulse_response()` — deterministic-excitation impulse-response
+  and `mls_impulse_response()`: deterministic-excitation impulse-response
   acquisition per ISO 18233:2006 (exponential sine sweep with spectral and
   Farina deconvolution, maximum-length sequences), verified by recovering
   known impulse responses at the correct sample lags.
-- `decay_curve()`, `room_parameters()` and `RoomAcousticsResult` — room
+- `decay_curve()`, `room_parameters()` and `RoomAcousticsResult`: room
   acoustic parameters per ISO 3382-1:2009 / 3382-2:2008 (Schroeder backward
   integration with noise truncation and tail compensation; EDT/T20/T30,
   C50/C80, D50, Ts with dynamic-range validity flags and curvature),
   verified against the exponential-decay closed forms within their JNDs.
-- `open_plan_metrics()` and `OpenPlanResult` — open-plan-office spatial
+- `open_plan_metrics()` and `OpenPlanResult`: open-plan-office spatial
   speech metrics per ISO 3382-3:2012 (spatial decay rate D2,S and Lp,A,S,4m
   from the log-distance regression, distraction distance rD and privacy
   distance rP from the STI-vs-distance line).
 - `airborne_insulation()`, `weighted_rating()`, `energy_average_level()`
-  and the `AirborneInsulationResult` / `WeightedRatingResult` dataclasses —
+  and the `AirborneInsulationResult` / `WeightedRatingResult` dataclasses:
   field airborne sound insulation per ISO 16283-1:2014 (D, DnT, R') and
   single-number weighted ratings with C/Ctr per ISO 717-1 (reference-curve
   method), verified against the ISO 717-1 Annex C worked example.
 - `impact_insulation()`, `weighted_impact_rating()` and the
-  `ImpactInsulationResult` / `ImpactRatingResult` dataclasses — field impact
+  `ImpactInsulationResult` / `ImpactRatingResult` dataclasses: field impact
   sound insulation per ISO 16283-2 (standardized L'nT and normalized L'n from
   the tapping-machine impact level) and single-number weighted impact ratings
   with the CI adaptation term per ISO 717-2 (reference-curve method, octave
   −5 dB rule), verified against the ISO 717-2 Annex C examples (Ln,w = 79,
   CI = −11; octave 54, CI = 0).
-- `facade_insulation()` and `FacadeInsulationResult` (with `.plot()`) — field
+- `facade_insulation()` and `FacadeInsulationResult` (with `.plot()`): field
   façade sound insulation per ISO 16283-3:2016: the level difference D2m from
   the level 2 m in front of the façade, its standardized D2m,nT and normalized
   D2m,n forms, and the apparent element-method sound reduction index R′45°
@@ -8984,7 +9000,7 @@ the whole of the migration.
 - `lab_airborne_insulation()`, `lab_impact_insulation()`,
   `background_correction()` and the `LabAirborneInsulationResult` /
   `LabImpactInsulationResult` dataclasses (with `.plot()`) plus the
-  `LabInsulationWarning` — laboratory sound insulation per ISO 10140: the direct
+  `LabInsulationWarning`: laboratory sound insulation per ISO 10140: the direct
   sound reduction index R (Part 2) and normalized impact level Ln (Part 3) with
   the Sabine absorption area A = 0,16 V/T (Part 4), background-noise correction
   with the 6/15 dB limit-of-measurement rule, and single-number ratings via the
@@ -8994,7 +9010,7 @@ the whole of the migration.
   `flanking_path()`, `flanking_element()`, `combine_linings()`,
   `equivalent_impact_level()`, `impact_flanking_correction()`,
   `standardized_impact_level()` and the `AirbornePredictionResult` /
-  `ImpactPredictionResult` / `FlankingPath` / `PathContribution` dataclasses —
+  `ImpactPredictionResult` / `FlankingPath` / `PathContribution` dataclasses:
   building acoustic performance prediction per EN 12354-1/-2:2000 (simplified
   single-number model): the apparent R′w from the direct path and the twelve
   flanking paths of four elements (Ff/Df/Fd each) with the Annex E junction
@@ -9010,71 +9026,71 @@ the whole of the migration.
   `prediction_input_uncertainty()`, `reduce_by_independent_measurements()`,
   `satisfies_lower_requirement()`, `satisfies_upper_requirement()`, the
   `BandUncertainty` / `UncertainValue` dataclasses and the `COVERAGE_FACTORS`
-  mapping — measurement uncertainty in building acoustics per ISO 12999-1:2020:
+  mapping: measurement uncertainty in building acoustics per ISO 12999-1:2020:
   the tabulated standard uncertainties for the three measurement situations
   (A/B/C, Tables 1–7 and Annex D), the expanded uncertainty U = k·u with the
   Table 8 coverage factors, and the combination, reduction and conformity rules
   (Annexes A/B/C, one-sided and two-sided).
 - `absorption_area()`, `absorption_coefficient()`, `attenuation_from_alpha()`
-  and `AbsorptionWarning` — sound absorption in a reverberation room per
+  and `AbsorptionWarning`: sound absorption in a reverberation room per
   ISO 354:2003 (equivalent absorption area from the empty and with-specimen
   reverberation times via Sabine's equation with the air-attenuation term, and
   the plane-absorber coefficient αs, left unclamped per Clause 3.7), with
   room-volume and sample-area qualification advisories.
 - `sound_power_pressure()`, `measurement_positions()`,
   `background_noise_correction()`, `environmental_correction()` and
-  `SoundPowerResult` / `SoundPowerWarning` — sound power level from surface
+  `SoundPowerResult` / `SoundPowerWarning`: sound power level from surface
   sound pressure per ISO 3744:2010 (engineering) and ISO 3746:2010 (survey):
   hemisphere and box measurement surfaces, background (K1) and environmental
   (K2) corrections, A-weighted total, directivity index and expanded
   uncertainty.
 - `sound_power_reverberation()`, `sound_power_comparison()` and
-  `ReverberationSoundPowerResult` — precision-grade sound power in a
+  `ReverberationSoundPowerResult`: precision-grade sound power in a
   reverberation room per ISO 3741:2010 (direct method with Sabine absorption
   area, Waterhouse boundary correction and C1/C2 meteorological corrections;
   comparison method against a reference sound source), with room-qualification
   advisories.
-- `sound_power_intensity()` and `SoundPowerIntensityResult` — sound power by
+- `sound_power_intensity()` and `SoundPowerIntensityResult`: sound power by
   sound-intensity scanning per ISO 9614-2:1996 (partial powers over the
   measurement surface, FpI and F+/− field indicators, per-segment
   repeatability and the per-band achieved engineering/survey grade).
-- `loudness_zwicker()` / `loudness_zwicker_from_spectrum()` — Zwicker
+- `loudness_zwicker()` / `loudness_zwicker_from_spectrum()`: Zwicker
   loudness per ISO 532-1:2017 (stationary and time-varying), a clean-room
   port of the normative reference program with the full Annex B validation
   set in CI (25 test cases, per-sample tolerance bands).
-- `sharpness_din()` — sharpness in acum per DIN 45692:2009 with the Aures
+- `sharpness_din()`: sharpness in acum per DIN 45692:2009 with the Aures
   and von Bismarck variants, verified against the Table A.2 targets.
-- `sti_from_impulse_response()`, `stipa()` and `stipa_signal()` — Speech
+- `sti_from_impulse_response()`, `stipa()` and `stipa_signal()`: Speech
   Transmission Index per IEC 60268-16 Ed. 5 (indirect and direct STIPA
   methods, Ed. 5 male spectrum, Annex F ratings), verified against the
   standard's weighting-pair and m-mapping vectors and the Schroeder
   closed form.
-- `sound_intensity()`, `field_indicators()`, `dynamic_capability_index()` —
+- `sound_intensity()`, `field_indicators()`, `dynamic_capability_index()`:
   two-microphone p-p sound intensity per IEC 61043 (cross-spectral
   estimator, finite-difference bias correction validated against Table 3)
   with the ISO 9614-1 Annex A field indicators.
-- `weighting_filter(..., curve="G")` — G frequency weighting for infrasound
+- `weighting_filter(..., curve="G")`: G frequency weighting for infrasound
   (ISO 7196:1995), verified against every Table 2 nominal response value.
-- `equal_loudness_contour()`, `loudness_level()`, `hearing_threshold()` —
+- `equal_loudness_contour()`, `loudness_level()`, `hearing_threshold()`:
   ISO 226:2023 normal equal-loudness-level contours (Formulae 1-2, Table 1),
   verified against the Annex B tables.
-- `tone_to_noise_ratio()` and `prominence_ratio()` — prominent discrete tone
+- `tone_to_noise_ratio()` and `prominence_ratio()`: prominent discrete tone
   assessment per ECMA-418-1:2024 (clauses 10-12), including proximate-tone
   combination and the low-frequency truncated band.
-- `lden()`, `ldn()`, `composite_rating_level()` — environmental noise
+- `lden()`, `ldn()`, `composite_rating_level()`: environmental noise
   descriptors per ISO 1996-1:2016 (3.6.4/3.6.5 and clause 6.5).
-- `calculate_sensitivity(..., narrowband=True)` — opt-in coherent
+- `calculate_sensitivity(..., narrowband=True)`: opt-in coherent
   single-frequency (Goertzel) tone estimator that locks to the calibrator
   tone near `frequency` and rejects broadband hum/noise in the reference
   take, which otherwise inflates the RMS and biases the sensitivity by
   `-10*lg(1 + 1/SNR)` (about -0.42 dB at 10 dB SNR). The default keeps the
   legacy broadband-RMS behaviour.
-- `decay_curve(..., zero_phase=...)` and `room_parameters(..., zero_phase=...)`
-  — optional forward-backward (time-reversed) octave filtering permitted by
+- `decay_curve(..., zero_phase=...)` and `room_parameters(..., zero_phase=...)`:
+  optional forward-backward (time-reversed) octave filtering permitted by
   ISO 3382-2:2008 Clause 7.3 NOTE (relaxing B*T > 16 to B*T > 4). It removes
   the octave filter's group delay before the backward integration, roughly
   halving the 125 Hz short-decay T30 bias. Default off (causal).
-- `sound_intensity(..., bias_correct=True)` — optional per-bin
+- `sound_intensity(..., bias_correct=True)`: optional per-bin
   finite-difference correction `(k*dr)/sin(k*dr)` (IEC 61043:1994, 7.3)
   applied to the band and broadband intensity totals so they no longer
   under-read toward `max_valid_frequency`. Default off (legacy totals).
@@ -9090,18 +9106,18 @@ the whole of the migration.
   an impulse response longer than one period aliasing circularly (choose a
   higher MLS order).
 - `practical_absorption_coefficient()`, `weighted_absorption()` and
-  `absorption_class()` — practical sound-absorption coefficient and the weighted
+  `absorption_class()`: practical sound-absorption coefficient and the weighted
   rating αw with shape indicators (L/M/H) and class A–E per ISO 11654:1997.
 - Impedance-tube absorption, surface impedance and transmission loss
   (`impedance_tube` module) per ISO 10534-1/-2:1998 (standing-wave and
   transfer-function methods) and the four-microphone transmission-loss method of
   ASTM E2611, with the ISO/ASTM speed-of-sound and air-density models.
 - `airflow_resistance()`, `specific_airflow_resistance()`, `airflow_resistivity()`
-  and `static_airflow_resistance()` — airflow resistance of porous materials by
+  and `static_airflow_resistance()`: airflow resistance of porous materials by
   the steady (ISO 9053-1:2018) and alternating (ISO 9053-2:2020) methods.
 - `random_incidence_absorption()`, `specular_absorption_coefficient()`,
   `directional_diffusion()` and the ISO 17497-1/-2 scattering/diffusion
-  coefficients — scattering and diffusion of surfaces (ISO 17497-1:2004 random-
+  coefficients: scattering and diffusion of surfaces (ISO 17497-1:2004 random-
   incidence scattering, ISO 17497-2:2012 directional diffusion).
 - In-situ road-surface absorption (`road_absorption` module) per
   ISO 13472-1/-2 (extended surface and Adrienne temporal-windowing methods) with
@@ -9114,30 +9130,30 @@ the whole of the migration.
   daily exposure A(8), HAV daily exposure and lifetime VWF, and the
   Directive 2002/44/EC action/limit-value assessment.
 - `spinal_response()`, `acceleration_dose()`, `daily_dose()` and `daily_dose_multi()`
-  (`multiple_shock_vibration` module) — adverse health effect of multiple shocks
+  (`multiple_shock_vibration` module): adverse health effect of multiple shocks
   on the lumbar spine per ISO 2631-5:2018 (seat-to-spine models, the Se dose and
   daily equivalent static compressive stress Sed).
-- `verify_weighting_class()` — frequency-weighting (A/C/Z) conformance to the
+- `verify_weighting_class()`: frequency-weighting (A/C/Z) conformance to the
   IEC 61672-1:2013 Table 3 class-1/2 acceptance limits.
-- `verify_filter_class()` — one-third-octave and octave band-filter conformance
+- `verify_filter_class()`: one-third-octave and octave band-filter conformance
   to IEC 61260-1:2014 / ANSI S1.11-2004, including class 0.
-- `speech_intelligibility_index()` and `standard_speech_spectrum()` — the Speech
+- `speech_intelligibility_index()` and `standard_speech_spectrum()`: the Speech
   Intelligibility Index per ANSI S3.5-1997 (critical-band, one-third-octave and
   octave procedures) with the standard normal/raised/loud/shout vocal-effort
   speech spectra.
-- `noise_criterion()` / `room_criterion()` — NC and RC Mark II room-noise ratings
+- `noise_criterion()` / `room_criterion()`: NC and RC Mark II room-noise ratings
   per ANSI/ASA S12.2-2019.
-- `age_threshold()` and `reference_threshold()` — age-associated hearing threshold
+- `age_threshold()` and `reference_threshold()`: age-associated hearing threshold
   (median and percentiles) per ISO 7029:2017 with the ISO 389-7:2019 free/diffuse-
   field reference threshold of hearing.
-- `nipts()` and `htlan()` — noise-induced permanent threshold shift and the
+- `nipts()` and `htlan()`: noise-induced permanent threshold shift and the
   hearing threshold level associated with age and noise per ISO 1999:2013.
 - Measurement uncertainty (`uncertainty` module): `rectangular()`, `triangular()`,
   `u_shaped()`, `combine_uncertainty()`, `coverage_factor()`,
-  `expanded_uncertainty()` and `monte_carlo()` — the GUM framework (ISO/IEC
+  `expanded_uncertainty()` and `monte_carlo()`: the GUM framework (ISO/IEC
   Guide 98-3:2008) law-of-propagation-of-uncertainty and the Supplement 1 Monte
   Carlo method.
-- `impulse_prominence()`, `impulse_adjustment()` and `rating_level()` — impulsive-
+- `impulse_prominence()`, `impulse_adjustment()` and `rating_level()`: impulsive-
   sound prominence and the LAeq adjustment/rating level per Nordtest NT ACOU 112.
 - Environmental-noise determination per ISO 1996-2:2017: the tonal-audibility
   adjustment (engineering method) and the associated measurement uncertainty.
@@ -9145,7 +9161,7 @@ the whole of the migration.
   Sabine, Eyring, Millington-Sette, Fitzroy and Arau-Puchades models.
 - Façade sound insulation and indoor→outdoor radiation prediction per
   EN 12354-3:2000 and EN 12354-4:2000.
-- Sound absorption in enclosed spaces (`enclosed_space_absorption` module) —
+- Sound absorption in enclosed spaces (`enclosed_space_absorption` module):
   `equivalent_absorption_area()` and `enclosed_space_reverberation()` per
   EN 12354-6:2003 (surface and object absorption, air absorption, reverberation
   time).
@@ -9160,33 +9176,33 @@ the whole of the migration.
 - Laboratory flanking transmission per ISO 10848 (the vibration reduction index
   Kij from velocity-level differences).
 - `apparent_dynamic_stiffness()`, `installed_dynamic_stiffness()`,
-  `natural_frequency()` and `floating_floor_resonance()` — dynamic stiffness of
+  `natural_frequency()` and `floating_floor_resonance()`: dynamic stiffness of
   resilient materials per EN 29052-1:1992.
 - `sdof_mobility()`, `sdof_accelerance()`, `sdof_receptance()`, `convert_frf()`
-  and `resonance_frequency()` — mechanical mobility and the frequency-response-
+  and `resonance_frequency()`: mechanical mobility and the frequency-response-
   function family per ISO 7626-1:2011.
 - `transfer_stiffness_direct()`, `transfer_stiffness_indirect()`,
-  `transfer_stiffness_level()`, `loss_factor()` and `base_transmissibility()` —
+  `transfer_stiffness_level()`, `loss_factor()` and `base_transmissibility()`:
   dynamic transfer stiffness of resilient elements per ISO 10846 (direct and
   indirect/transmissibility methods).
 - `radiated_sound_power_level()`, `radiation_factor()`, `mean_velocity_level()`
-  and `velocity_level_from_acceleration()` — sound power radiated from a vibrating
+  and `velocity_level_from_acceleration()`: sound power radiated from a vibrating
   surface per ISO/TS 7849-1/-2:2009.
 - `structure_borne_power_level()`, `reception_plate_power()` and
-  `spatial_mean_velocity_level()` — structure-borne sound power of building
+  `spatial_mean_velocity_level()`: structure-borne sound power of building
   equipment by the reception-plate method per EN 15657:2017.
 - `installed_structure_borne_power_level()`, `installed_source_prediction()` and
-  the coupling-term functions — installed structure-borne sound from building
+  the coupling-term functions: installed structure-borne sound from building
   equipment per EN 12354-5:2009.
-- `tonal_audibility()` (`tone_audibility` module) — objective audibility of tones
+- `tonal_audibility()` (`tone_audibility` module): objective audibility of tones
   in noise by the Aures method per ISO/PAS 20065:2016 (tonal audibility ΔL and
   the tonal adjustment K).
-- `psychoacoustic_annoyance()` and `psychoacoustic_annoyance_from_signal()` —
+- `psychoacoustic_annoyance()` and `psychoacoustic_annoyance_from_signal()`:
   Fastl & Zwicker psychoacoustic annoyance from loudness, sharpness, roughness
   and fluctuation strength.
 - `thd()`, `thd_plus_noise()`, `sinad()`, `weighted_thd()` and
-  `modulation_distortion()` — harmonic and intermodulation distortion per
-  IEC 60268-3 / AES17, and `transfer_function()` / `coherence()` — H1/H2 frequency-
+  `modulation_distortion()`: harmonic and intermodulation distortion per
+  IEC 60268-3 / AES17, and `transfer_function()` / `coherence()`: H1/H2 frequency-
   response and coherence estimators (Bendat & Piersol).
 - Underwater acoustics reference levels and metrics (`underwater_acoustics`):
   `sound_pressure_level()`, `sound_exposure_level()`, `peak_sound_pressure_level()`
@@ -9205,12 +9221,12 @@ the whole of the migration.
   `normal_modes()`, `ray_trace()` and `parabolic_equation()`.
 - Aircraft noise (`aircraft_noise`): `perceived_noisiness()`,
   `perceived_noise_level()`, `tone_correction()`, `epnl_from_pnlt()` and
-  `effective_perceived_noise_level()` — the Effective Perceived Noise Level per
-  ICAO Annex 16 Vol. I Appendix 2 — plus `verify_aircraft_noise_system()`
+  `effective_perceived_noise_level()` (the Effective Perceived Noise Level per
+  ICAO Annex 16 Vol. I Appendix 2) plus `verify_aircraft_noise_system()`
   (IEC 61265 measurement-system tolerances).
 - Wind-turbine noise (`wind_turbine_noise`): `apparent_sound_power_level()`,
   `slant_distance()` and `wind_turbine_tonality()` per IEC 61400-11.
-- `sae_band_attenuation()` — one-third-octave-band atmospheric absorption by the
+- `sae_band_attenuation()`: one-third-octave-band atmospheric absorption by the
   SAE Method of SAE ARP 5534:2021 (pure-tone coefficient from ISO 9613-1).
 - Airport noise (`airport_noise`, ECAC Doc 29): `npd_level()` / `npd_curve()`
   noise-power-distance interpolation; the single-event `event_level()` and
@@ -9249,16 +9265,16 @@ the whole of the migration.
   `attenuation`, so the former 60 dB default sat 10 dB inside the IEC
   61260-1:2014 class 1 deep-stopband limit; 72 dB makes the default cheby2
   bank class 1 (same +0.400 dB passband margin as `butter`). Numerical
-  outputs change for cheby2 users — and for elliptic (`ellip`) banks, which
-  consume `attenuation` as their stopband attenuation `rs` — who relied on
+  outputs change for cheby2 users, and for elliptic (`ellip`) banks, which
+  consume `attenuation` as their stopband attenuation `rs`, who relied on
   the previous default.
 - Weighting-filter `high_accuracy` internal oversample target raised from
   96 to 144 kHz, so fs = 48 kHz now oversamples x3 (was x2). This halves the
   high-frequency residual vs the analytic A/C curves (48 kHz: -1.11 -> -0.44
   dB @16k, -2.10 -> -0.85 dB @20k) and removes the 48k-worse-than-44.1k
   asymmetry. High-accuracy weighting outputs shift for all rates below
-  144 kHz (48/96/128 kHz included) — e.g. 96 kHz by +0.86 dB @16k / +1.63 dB
-  @20k — always toward the analytic curve.
+  144 kHz (48/96/128 kHz included), e.g. 96 kHz by +0.86 dB @16k / +1.63 dB
+  @20k, always toward the analytic curve.
 - Calibrator stability validation updated from IEC 60942:2003 to
   IEC 60942:2017 (Ed. 4): the deviations |max − mean| and |min − mean| are
   each compared against the limit, using the
@@ -9295,7 +9311,7 @@ the whole of the migration.
 ### ⚠️ Breaking changes
 
 - **The library is now `phonometry`** (formerly `PyOctaveBand`). Install with
-  `pip install phonometry` and `import phonometry`. The API is unchanged — a
+  `pip install phonometry` and `import phonometry`. The API is unchanged: a
   plain rename of the import is a complete migration. The `PyOctaveBand 2.1.0`
   release on PyPI is a transition stub that depends on
   `phonometry` and re-exports it under the old `pyoctaveband` module name with
@@ -9307,13 +9323,13 @@ the whole of the migration.
 
 ### Added
 
-- `lc_peak()` — C-weighted peak level (IEC 61672-1 §5.13), verified against
+- `lc_peak()`: C-weighted peak level (IEC 61672-1 §5.13), verified against
   the Table 5 one-cycle/half-cycle tone-burst responses.
-- `sel()` — sound exposure level (SEL/LAE), with class 1 conformance tests for
+- `sel()`: sound exposure level (SEL/LAE), with class 1 conformance tests for
   the Table 4 LAE tone-burst column.
-- `sound_exposure()` and `lex_8h()` — occupational noise dose (Pa²·h and
+- `sound_exposure()` and `lex_8h()`: occupational noise dose (Pa²·h and
   normalized 8 h exposure level, IEC 61252).
-- `calculate_sensitivity(..., validate=True)` — calibration-tone stability
+- `calculate_sensitivity(..., validate=True)`: calibration-tone stability
   validation per IEC 60942 (short-term level fluctuation, class 1 limit),
   emitting `CalibrationWarning` on unstable or too-short recordings.
 
@@ -9321,8 +9337,8 @@ the whole of the migration.
 
 ### ⚠️ Numerical behavior changes
 
-Results differ from 1.2.x for the following cases — all of them bring the
-output in line with the governing standards:
+Results differ from 1.2.x for the following cases (all of them bring the
+output in line with the governing standards):
 
 - **Chebyshev II banks** now place their −3 dB points on the ANSI S1.11 band
   edges. Previously the band edges received the full stopband `attenuation`

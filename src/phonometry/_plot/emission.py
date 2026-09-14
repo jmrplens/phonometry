@@ -106,7 +106,7 @@ _STRINGS: dict[str, str] = {
     r"Measured $\delta_{pI0}$": r"$\delta_{pI0}$ medido",
     "Below the class {cls} minimum": "Bajo el mínimo de clase {cls}",
     _LABEL_RESIDUAL_INDEX: _LABEL_RESIDUAL_INDEX,
-    "IEC 61043 Table 2 — {device}, {spacing} mm separation": "Tabla 2 de IEC 61043 — {device}, separación de {spacing} mm",
+    "IEC 61043 Table 2: {device}, {spacing} mm separation": "Tabla 2 de IEC 61043: {device}, separación de {spacing} mm",
     "probe": "sonda",
     "processor": "procesador",
     "complete instrument": "instrumento completo",
@@ -808,7 +808,7 @@ def plot_intensity_class(
     ax.set_ylabel(_t(_LABEL_RESIDUAL_INDEX, language))
     ax.set_title(
         _t(
-            "IEC 61043 Table 2 — {device}, {spacing} mm separation",
+            "IEC 61043 Table 2: {device}, {spacing} mm separation",
             language,
             device=_t(_DEVICE_LABELS[result.device], language),
             # ``:g`` prints the separation exactly as the chain was verified

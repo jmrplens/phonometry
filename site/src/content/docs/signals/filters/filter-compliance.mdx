@@ -88,8 +88,8 @@ print(result.bands[0])
 highest normalized frequency $\Omega = f/f_\mathrm{m}$ at which that band was evaluated,
 and on a multirate bank it is the band's own decimated Nyquist rather than the
 end of the Table 1 mask. On the bank above it runs from 3.81 down to 1.20, so
-the far-stopband requirement — at least 70 dB for class 1 beyond roughly
-$\Omega = 4$ — is not demonstrated *on the band filter* at all. It is taken as
+the far-stopband requirement (at least 70 dB for class 1 beyond roughly
+$\Omega = 4$) is not demonstrated *on the band filter* at all. It is taken as
 satisfied by the anti-alias low-pass that precedes the decimation, which
 removed that energy before the band ever saw it. `range_limited` is the flag
 that this argument was used, and it is `True` here.
@@ -99,7 +99,7 @@ Say that plainly in a report: the verdict attests the mask up to
 When a document requires the full mask on the band filter itself, design the
 same bank with `design=filters.FilterDesign(resample=False)`; its low bands are
 then evaluated to $\Omega$ of order $10^3$ instead of 4. `range_limited` stays
-`True` even then, because the *top* band's upper edge still approaches Nyquist —
+`True` even then, because the *top* band's upper edge still approaches Nyquist;
 that band is the one the flag is warning about once decimation is out of the
 picture.
 
@@ -117,7 +117,7 @@ fails outright (class `None`, worst class 1 margin −27.03 dB) and orders 4, 6,
 and 10 all report class 1 with exactly +0.400 dB. Raising the order therefore
 helps only while the margin is negative for a stopband reason; once a design
 passes, the margin is capped by the passband half-corridor and no order will
-move it. A margin of +0.400 dB is not a mediocre result to be improved — it is
+move it. A margin of +0.400 dB is not a mediocre result to be improved; it is
 the best a compliant design can report against this mask.
 
 The Table 1 acceptance mask itself is public too: `class_limits(fraction,
@@ -277,7 +277,7 @@ grades:
 
 **Which architecture reaches which class?** Under the 2014 edition, whose only
 classes are 1 and 2, the library's default Butterworth order-6 bank **meets
-class 1** with a +0.400 dB binding margin — that is the ceiling, and section 1
+class 1** with a +0.400 dB binding margin: that is the ceiling, and section 1
 explains why. Against the stricter 1995 / ANSI S1.11-2004 mask
 (`edition="1995"`) the same default reaches **class 0**; the configuration the
 conformance suite verifies at that class is the *octave-band* bank at 48 kHz,
@@ -297,8 +297,9 @@ because they trade the IEC mask for a different property *by construction*:
 | `ellip` | — | Pass- and stop-band ripple |
 | `bessel` | — | Flat group delay bought with a slow roll-off |
 
-Under the 2014 edition the same ranking reads 1 / 1 / — / — / —: `cheby2` joins
-Butterworth at the top because class 0 no longer exists to separate them.
+Under the 2014 edition the same column reads 1, 1 and no class for the other
+three: `cheby2` joins Butterworth at the top because class 0 no longer exists
+to separate them.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_architectures.svg" alt="Four panels, each the 1 kHz octave band of an order-6 bank drawn against the IEC 61260-1 acceptance corridor with its out-of-tolerance samples marked in red. Butterworth threads the class 1 corridor cleanly and reports overall_class 1. Chebyshev I leaves the corridor in two short bursts just inside each band edge, where its passband ripple sits, and reports None. Elliptic does the same at both edges, and reports None. Bessel drifts out of the corridor along the whole lower skirt because it rolls off too slowly, and reports None" width="94%" />
 
@@ -351,16 +352,16 @@ purpose: the relative attenuation is measured at the exact midband frequency of
 every filter in the set, through the electrical input on the reference level
 range, together with the effective-bandwidth deviation from a swept-frequency
 test, the linear operating range with its level-range control and overload
-behaviour, and the lower limit of that range — all under stated environmental
-conditions and with traceable test equipment. That is why a certificate carries
+behaviour, and the lower limit of that range (all under stated environmental
+conditions and with traceable test equipment). That is why a certificate carries
 a date, a temperature and a set of serial numbers, and why it says nothing
 about the parts of the mask it did not walk.
 
 What carries over is worth stating in a report: a class verdict from this page
 is inherited by every measurement made with the library's filters, and a
 hardware chain adds a verdict of its own. Name both. The equivalent regime for
-sound level *meters* — IEC 61672-3 periodic tests, and IEC 60942 for the
-calibrator — is in
+sound level *meters* (IEC 61672-3 periodic tests, and IEC 60942 for the
+calibrator) is in
 [Calibration and dBFS](/phonometry/signals/metrology/calibration/).
 
 ## 4. The compliance fiche (`.report()`)

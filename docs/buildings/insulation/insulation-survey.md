@@ -122,7 +122,7 @@ What the functions do not do is police the survey. They consume band levels
 wherever they came from: nothing verifies the sweep, the source corner, the
 tapping-machine positions or the one-corner-plus-two-central
 service-equipment recipe, and nothing checks the 6 dB signal-to-background
-floor of Clause 6.2.1 — nor applies a correction when it was not met, which
+floor of Clause 6.2.1 nor applies a correction when it was not met, which
 is the method's own rule (record the level, and note that the result was
 affected by an unknown amount). The ± 2 dB agreement with the engineering
 method is the standard's own estimate (Clause 6.6 NOTE), not something the

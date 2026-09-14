@@ -218,8 +218,8 @@ mal: el resultado sencillamente se queda corto.
 análisis más baja y termínalo por encima de la más alta. El apartado B.3.1 llama
 práctica segura con ruido de fondo moderado a una longitud de **dos a cuatro veces
 el $T$ más largo esperado**, seguida de un **hueco de silencio de aproximadamente
-un $T$**; el apartado 6.2.2.3 hace normativo el hueco — la excitación «debe ir
-seguida de un periodo de silencio» — y el decaimiento debe registrarse a lo largo
+un $T$**; el apartado 6.2.2.3 hace normativo el hueco (la excitación «debe ir
+seguida de un periodo de silencio») y el decaimiento debe registrarse a lo largo
 de al menos la mitad de $T$. Mantén la grabación en marcha hasta que todas las
 bandas de interés estén al menos 30 dB por debajo. Después, según el B.6, cada
 duplicación del barrido compra unos 3 dB de relación señal-ruido efectiva, y es
@@ -345,9 +345,9 @@ un `ImpulseResponseResult`, un sustituto directo del array de la RI
 `room_parameters(ir, fs)` no cambia) que además guarda la frecuencia de
 muestreo y el método y añade un `.plot()`.
 Dos excitaciones más de la literatura de medición de funciones de
-transferencia — los pares complementarios de Golay, cuya deconvolución es exacta
+transferencia (los pares complementarios de Golay, cuya deconvolución es exacta
 y libre de ruido, y los barridos conformados a un espectro objetivo
-arbitrario — viven en la
+arbitrario) viven en la
 [guía de medición de sistemas](/phonometry/es/signals/spectra/system-measurement/) y
 devuelven los mismos tipos de resultado.
 
@@ -438,7 +438,7 @@ plt.xlabel("Tiempo [s]"); plt.ylabel("Nivel re pico [dB]")
 
 Una cosa que esta respuesta *no* es: la respuesta al impulso de la sala. Lo que
 devuelve la deconvolución es la respuesta de **altavoz, sala y micrófono en
-serie** — el apartado A.1 de la ISO 18233 lo dice para la cadena de MLS, y el
+serie**: el apartado A.1 de la ISO 18233 lo dice para la cadena de MLS, y el
 barrido no es distinto. Para el tiempo de reverberación eso es inofensivo, porque
 un filtro lineal fijo cambia la forma de la parte temprana pero no la pendiente
 del decaimiento de la banda, que es la razón de que los tiempos de reverberación
@@ -526,8 +526,8 @@ de incidencia aleatoria.
 **Las alturas (4.3).** El **centro acústico de la fuente debería estar a 1,5 m**
 sobre el suelo, en posiciones donde estarían las fuentes naturales de la sala, y
 con **al menos dos** posiciones de fuente. Los micrófonos se sitúan a **1,2 m**, la
-altura de oído sentado, al menos a un cuarto de longitud de onda — «normalmente en
-torno a 1 m» — de la superficie reflectante más cercana, **incluido el suelo**.
+altura de oído sentado, al menos a un cuarto de longitud de onda («normalmente en
+torno a 1 m») de la superficie reflectante más cercana, **incluido el suelo**.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_section.svg" alt="Sección de una sala de 10 por 6 por 3,5 metros: un dodecaedro sobre un soporte con su centro acústico acotado a 1,5 metros sobre el suelo y su círculo de exclusión d_min de 2,0 metros recortado por la sala, dos micrófonos sobre soportes a 1,2 metros con la separación mínima de 2 metros y las holguras de 1 metro al techo, al suelo y a la pared del fondo, y bajo la sección las tolerancias de omnidireccionalidad de la Tabla 1 de ISO 3382-1 de más menos 1, 1, 1, 3, 5 y 6 decibelios de 125 Hz a 4 kHz junto con los requisitos de nivel y de cadena de recepción" width="94%" />
 
@@ -700,8 +700,8 @@ término de corrección.
 la ISO 3382-2; lo suficiente para identificar la sala de forma unívoca; una
 **planta acotada**; el volumen; el estado de la sala (mobiliario, personas
 presentes); para el método de precisión, la temperatura y la humedad relativa; el
-tipo de fuente y una descripción de la señal; el **grado de exactitud** — control,
-ingeniería o precisión — con las posiciones de fuente y de micrófono,
+tipo de fuente y una descripción de la señal; el **grado de exactitud** (control,
+ingeniería o precisión) con las posiciones de fuente y de micrófono,
 preferiblemente representadas sobre esa planta junto con sus alturas; los aparatos
 de medida y los micrófonos; el método de evaluación de las curvas de decaimiento;
 cómo se promedió el resultado en cada posición y entre posiciones; la tabla de

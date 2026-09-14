@@ -106,8 +106,8 @@ And two conclusions follow from the flatness. A flat fractional-octave spectrum
 corresponds to a $1/f$ power spectral density, so *white* noise does not look
 flat in this display: it rises at 3 dB per octave, because each band is 26 %
 wider than the one below. And two signals with completely different time
-structure — a stationary noise and a sweep that is at 50 Hz at one moment and
-10 kHz five seconds later — map to the same spectrum, which is why the band
+structure (a stationary noise and a sweep that is at 50 Hz at one moment and
+10 kHz five seconds later) map to the same spectrum, which is why the band
 levels of this page answer "how much energy per band" and never "when". The
 octave spectrogram of
 [Integrated and Statistical Levels](/phonometry/signals/levels/levels/) is the
@@ -162,9 +162,9 @@ spelling out:
   energies yourself: `10 * np.log10(np.mean(10 ** (spl / 10), axis=0))`,
   never the arithmetic mean of the dB values (see
   [Levels](/phonometry/signals/levels/levels/) for why).
-- **One calibration factor means one sensitivity.** The scalar factor —
-  `calibration=LevelCalibration(factor=...)` on a filter bank,
-  `calibration_factor=` on `leq`, `laeq`, `ln_levels`, `lc_peak` and `sel` —
+- **One calibration factor means one sensitivity.** The scalar factor
+  (`calibration=LevelCalibration(factor=...)` on a filter bank,
+  `calibration_factor=` on `leq`, `laeq`, `ln_levels`, `lc_peak` and `sel`)
   multiplies every channel, which is correct only if all channels share the
   same sensitivity. For an array of microphones with individual calibrations,
   scale the rows first, `x * factors[:, None]`, and leave the factor at its
@@ -251,14 +251,14 @@ on 5 s per channel through one reused one-third-octave bank:
 
 The ratio hovers around one, which is the honest answer: what batching removes
 is per-call Python overhead and the temptation to redesign the bank, and it is
-the redesign that actually costs — building a fresh one-third-octave bank takes
+the redesign that actually costs: building a fresh one-third-octave bank takes
 about 33 ms, an order of magnitude more than a single band-filtering pass over
 a short frame.
 
 So the cost model is simple. One SOS filtering pass per band per channel
 dominates, which means the time scales with the number of bands (a
 one-third-octave bank is three times a one-octave one), with the record length
-and with the channel count — and with nothing else. The actionable rules that
+and with the channel count, and nothing else. The actionable rules that
 follow: **build one `OctaveFilterBank` and reuse it**; pass all channels in one
 array for clarity rather than for speed; and when a run is too slow, reach for
 `fraction`, `limits` and record length, because those are the three terms in

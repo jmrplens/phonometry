@@ -101,9 +101,9 @@ The classic failure is to read one as the other: a set of battens that merely
 sends the reflection off in a different direction scores a high scattering
 coefficient and a low normalised diffusion coefficient, because redirection is
 not dispersion (Cox & D'Antonio 3rd ed., §5.1 and Fig. 5.2). The measurement
-conditions differ too — Part 1 is a random-incidence reverberation-room method
+conditions differ too: Part 1 is a random-incidence reverberation-room method
 restricted to shallow samples that absorb little ($\alpha_\mathrm{s} \le 0.50$,
-clause 6.3.4), Part 2 a free-field method with neither restriction — so a
+clause 6.3.4), Part 2 a free-field method with neither restriction, so a
 surface can legitimately have only one of the two coefficients published.
 
 Both run from 0 to 1, and neither reaches 1 in practice. Scattering rises with
@@ -157,7 +157,7 @@ times is the arithmetic mean over at least two source and three microphone
 positions, six combinations in all (clause 7.3). The rotating decays are built
 from $n$ phase-locked averages at equal steps of $360^\circ/n$ with
 $60 \le n \le 120$, $n = 72$ (5°) preferred, and the excitation must be
-identical from step to step (clause 7.3) — it is precisely the angle-to-angle
+identical from step to step (clause 7.3): it is precisely the angle-to-angle
 decorrelation that registers as the extra "absorption" the coefficient is built
 from, so a drifting signal fakes scattering. For the same reason the room must
 be time-invariant across the whole set: diffusers fixed, no rotating vanes, no
@@ -176,7 +176,7 @@ semicircle around the sample's reference point (a two-dimensional goniometer,
 in an anechoic room or a reflection-free zone) for a single-plane surface, or a
 hemisphere (three-dimensional goniometer) for one that scatters in both planes
 (clause 4), at an angular resolution of 5° or finer in both azimuth and
-elevation — which is where an arc of 37 receivers over 180° comes from.
+elevation, which is where an arc of 37 receivers over 180° comes from.
 Far-field conditions are taken as met when at least 80 % of the receivers lie
 outside the specular zone, for which the standard's working geometry is a 10 m
 source distance and a 5 m receiver radius (clause 6.2.2); nearer arrangements
@@ -222,7 +222,7 @@ on a semicircular plot with a decibel radial axis. This is the six-period
 $N = 7$ quadratic-residue diffuser of the anchor below, at 1 kHz. Its energy
 sits in a fan of discrete grating lobes rather than in one specular lobe, which
 is why $d_\theta$ is 0.11 where the flat reference of the same size scores
-0.005 — and why it is still nowhere near 1: the numerator rewards an even
+0.005, and why it is still nowhere near 1: the numerator rewards an even
 response, and a comb of lobes is not even.*
 
 Reference values: the model-predicted 37-receiver arc of
@@ -330,7 +330,7 @@ $u = 0.5$ mm/s.
 
 *The fit, and the single abscissa it is read at. The curve is slightly
 super-linear because the $b\,u^2$ term is real, but the reported quantity is the
-linear coefficient $a$ — the fit extrapolated back to zero velocity — evaluated
+linear coefficient $a$ (the fit extrapolated back to zero velocity), evaluated
 at the 0.5 mm/s reference velocity, which is why the reference velocity has to
 be stated with any resistivity that is quoted.*
 
@@ -364,7 +364,7 @@ $f > c_0/(20 s)$, where $s$ is the microphone spacing throughout this
 subsection and not the scattering coefficient of the first section;
 clauses 4.2–4.5) carries only plane waves, so the surface
 reflection factor of a sample is fully observable. ISO 10534-2:1998
-(transfer-function method — the clause and equation numbers here are that
+(transfer-function method: the clause and equation numbers here are that
 edition's, and ISO 10534-2:2023 renumbers them) compares the measured
 two-microphone transfer
 function $H_{12}$ with the analytic incident and reflected ones
@@ -380,13 +380,13 @@ with the complex wavenumber's attenuation lower bound
 $k_0'' = 1.94 \times 10^{-2} \sqrt{f}/(c_0 d)$ (Eq. A.18).
 
 **$H_{12}$ as measured is not the $H_{12}$ this formula wants.** It carries the
-amplitude and, far more damagingly, the phase mismatch of the two channels —
-microphone, preamplifier and analyser channel together — and clause 7.5 requires
+amplitude and, far more damagingly, the phase mismatch of the two channels
+(microphone, preamplifier and analyser channel together) and clause 7.5 requires
 one of two corrections before anything above is evaluated: interchange the two
 microphones for every specimen measurement and combine the two transfer
 functions (7.5.1, Eq. 8), or measure a calibration factor $H_\mathrm{c}$ once, as the
 geometric mean of the interchanged pair on an absorptive specimen, and divide it
-out of every subsequent measurement (7.5.2, Eqs. 10 and 13) — which is the route
+out of every subsequent measurement (7.5.2, Eqs. 10 and 13), which is the route
 `mic_calibration_factor` and `apply_mic_calibration` implement. It matters more
 than it looks: the method infers a complex reflection factor from the small phase
 difference between two positions a few centimetres apart, so at the
@@ -398,7 +398,7 @@ zero or above unity and does not repeat between mountings.
 The specimen mounting is part of the same contract (clause 6). The sample fits
 snugly in the holder but is neither compressed nor squeezed until it bulges, its
 edge is sealed against leaks, and its front face sits normal to the tube axis at
-a position known to ±0.5 mm — the same tolerance the standard puts on the
+a position known to ±0.5 mm: the same tolerance the standard puts on the
 reference plane's distance to the nearest microphone (7.1), because that
 distance is $x_1$ in the formula above. An uneven back face is levelled with a
 putty layer against the backing plate, since an unintended air gap turns a
@@ -412,8 +412,8 @@ what force a wide-band measurement into two spacer positions.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/impedance_tube_result.svg" alt="ISO 10534-2 two-microphone tube result for a 50 mm porous absorber: the normal-incidence absorption coefficient rising from about 0.2 at 200 Hz towards 0.97 above 1 kHz, with the reflection-factor magnitude falling as its mirror image" width="80%" />
 
 *What the formula returns: $\alpha$ and $|r|$ for a 50 mm porous absorber over
-the working band of a 100 mm tube. The two curves are the same information —
-$\alpha = 1 - |r|^2$ — so the figure is really one measurement drawn twice, and
+the working band of a 100 mm tube. The two curves are the same information
+($\alpha = 1 - |r|^2$), so the figure is really one measurement drawn twice, and
 the rise with frequency is the layer thickness growing against the wavelength.*
 
 ISO 10534-1:1996

@@ -120,14 +120,14 @@ sweep has little energy.
 The deconvolution *divides* by the reference spectrum, so wherever the sweep
 put no energy there is nothing to divide by, and the Tikhonov term is all
 that stops the quotient exploding. That is why the sweep starts **below** the
-lowest band to be analysed and ends **above** the highest — typically 20 Hz to
-20 kHz for a room analysed from 125 Hz to 4 kHz, since the analysis filters
+lowest band to be analysed and ends **above** the highest (typically 20 Hz to
+20 kHz for a room analysed from 125 Hz to 4 kHz), since the analysis filters
 need energy across their skirts as well as at their centres. The symptom of
 getting it wrong is recognisable: a slow rumble *before* the direct sound, or
 a ringing high-frequency tail, either of which lifts the apparent noise floor
 of the edge bands and shortens their fitted decay times. The rule is to widen
 the sweep first and raise `regularization` only when the loudspeaker genuinely
-cannot reproduce the band — and to record the value used, because it changes
+cannot reproduce the band, and to record the value used, because it changes
 the result.
 
 Because a low-to-high sweep places harmonic distortion at *negative* arrival
@@ -204,15 +204,15 @@ hardware favours a two-level signal.
 ### Dimensioning the excitation
 
 Both excitations are sized against one number the reader already has: the
-room's reverberation time $T$. Get the sizing wrong and nothing looks broken —
+room's reverberation time $T$. Get the sizing wrong and nothing looks broken;
 the result is simply short.
 
 **The sweep and its silence.** Start the sweep below the lowest analysis band
 and end it above the highest. Clause B.3.1 calls a length of **two to four
 times the longest expected $T$**, followed by a **silent gap of about one
 $T$**, safe practice under moderate background noise; clause 6.2.2.3 makes
-the gap normative — the excitation "shall be succeeded by a period of
-silence", and the decay shall be recorded over at least half of $T$. Keep the
+the gap normative (the excitation "shall be succeeded by a period of
+silence"), and the decay shall be recorded over at least half of $T$. Keep the
 record running until every band of interest is at least 30 dB down. Then, per
 B.6, each doubling of the sweep buys about 3 dB of effective SNR, and a longer
 sweep is preferred over more averages: averaging responses raises the
@@ -333,9 +333,9 @@ and play. `impulse_response`/`mls_impulse_response` return an
 `ImpulseResponseResult`, a drop-in for the raw IR array (`np.asarray(ir)`,
 indexing and `ir.size` all keep working, so `room_parameters(ir, fs)` is
 unchanged) that also carries the sample rate and method and adds a `.plot()`.
-Two more excitations from the transfer-function literature — complementary
+Two more excitations from the transfer-function literature (complementary
 Golay pairs, whose deconvolution is exact and noise-free, and sweeps shaped to
-an arbitrary target spectrum — live in the
+an arbitrary target spectrum) live in the
 [system-measurement guide](/phonometry/signals/spectra/system-measurement/) and
 return the same result types.
 
@@ -424,7 +424,7 @@ plt.xlabel("Time [s]"); plt.ylabel("Level re peak [dB]")
 
 One thing this response is *not*: the impulse response of the room. What the
 deconvolution returns is the response of **loudspeaker, room and microphone in
-series** — clause A.1 of ISO 18233 says as much for the MLS chain, and the
+series**: clause A.1 of ISO 18233 says as much for the MLS chain, and the
 sweep is no different. For reverberation time that is harmless, because a
 fixed linear filter changes the shape of the early part but not the slope of
 the band decay, which is why reverberation times transfer between measurement
@@ -453,7 +453,7 @@ the same arguments as `sweep_signal`, because the filter is derived from the
 sweep it has to invert: it is the time-reversed sweep with a +6 dB/octave
 envelope, which whitens the ESS's −3 dB/octave spectrum so that convolving
 sweep with filter yields an impulse (ISO 18233 B.5). You only call it yourself
-to inspect the filter or to convolve a recording by hand —
+to inspect the filter or to convolve a recording by hand:
 `impulse_response(..., method="farina")` builds it internally from `f_range`.
 
 ### `impulse_response()` parameters
@@ -510,7 +510,7 @@ corrector.
 **The heights (4.3).** The **acoustic centre of the source should be 1.5 m**
 above the floor, at positions where the room's natural sources would stand,
 and with **at least two** source positions. Microphones sit at **1.2 m**,
-seated-ear height, at least a quarter wavelength — "normally around 1 m" —
+seated-ear height, at least a quarter wavelength ("normally around 1 m")
 from the nearest reflecting surface **including the floor**.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_measurement_section.svg" alt="Section through a 10 by 6 by 3.5 metre room: a dodecahedron on a stand with its acoustic centre dimensioned 1.5 metres above the floor and its 2.0 metre d_min exclusion circle clipped to the room, two microphones on stands at 1.2 metres with the 2 metre minimum spacing and the 1 metre clearances to the ceiling, the floor and the end wall, and beneath the section the ISO 3382-1 Table 1 omnidirectionality tolerances of plus or minus 1, 1, 1, 3, 5 and 6 decibels from 125 Hz to 4 kHz together with the level and receiving-chain requirements" width="94%" />
@@ -662,7 +662,7 @@ two persons** may be present and still represent the unoccupied state unless
 the specification says otherwise. If the result will be used to correct a
 level measurement, freeze the occupancy: the same number of people must be
 present for both. For **precision** measurements the temperature and relative
-humidity in the room shall normally be measured — both because the standard
+humidity in the room shall normally be measured: both because the standard
 requires it and because they set the air-absorption term the prediction guides
 consume. The exception is stated too: air absorption is negligible when $T$ is
 shorter than 1.5 s at 2 kHz and 0.8 s at 4 kHz, and then the climate need not
@@ -672,15 +672,15 @@ be recorded.
 discrete positions, with three constraints: a sweep radius of at least
 **0.7 m**, a traverse plane **at least 10° off every plane of the room** (wall,
 floor, ceiling), and a traverse period of **at least 15 s**. It substitutes
-for multiple microphone positions only where the Table 1 grade allows it — for
+for multiple microphone positions only where the Table 1 grade allows it: for
 the interrupted-noise method, and where the result is a correction term.
 
 **What the report must carry (clause 9.2).** A statement of conformity with
 ISO 3382-2; enough to identify the room uniquely; a **scaled sketch plan**;
 the volume; the condition of the room (furniture, people present); for the
 precision method, the temperature and relative humidity; the type of source
-and a description of the signal; the **degree of precision** — survey,
-engineering or precision — with the source and microphone positions,
+and a description of the signal; the **degree of precision** (survey,
+engineering or precision) with the source and microphone positions,
 preferably shown on that plan together with their heights; the measuring
 apparatus and microphones; the evaluation method for the decay curves; how the
 result was averaged in each position and over positions; the results table;

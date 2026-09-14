@@ -299,7 +299,7 @@ in the same order.
   $M = \lg(m'_{\perp,i}/m'_i)$ (perpendicular element over the element
   carrying the path). The $K_{24}$ path 2→4 is carried by the homogeneous
   element ($m_2 = m_4$) with the leaf ($m_1$) perpendicular, so the per-path
-  $M$ is $\log_{10}(m_1/m_2)$ — but the printed $K_{24}$ line only matches its
+  $M$ is $\log_{10}(m_1/m_2)$, but the printed $K_{24}$ line only matches its
   own figure's curve when $M$ is read as the x-axis variable
   $\log_{10}(m_2/m_1)$ (e.g. −2,4 dB at $m_2/m_1 = 3$, −5,4 dB at 10). Read
   with the annex's declared $M$, the line contradicts the figure by
@@ -310,7 +310,7 @@ in the same order.
   consistently in the per-path convention of its Formula (E.3),
   $K_{24} = 3{,}0 + 14{,}1 M + 5{,}7 M^{2}$; the two editions agree
   numerically (an earlier revision of this entry read the 2017 print as a sign
-  misprint — re-derivation against both editions' figures shows it is a
+  misprint; re-derivation against both editions' figures shows it is a
   convention recast, not a defect of the 2017 text).
 - **Evidence:** numerical evaluation of both forms against the Figure E.9
   curve. Verified on PDF page 44 (printed p. 42), PDF page 48 (printed p. 46)
@@ -867,7 +867,7 @@ in the same order.
 - **Library behaviour:** implements the $\pi$-free form
   (`phonometry.building.measurement.flanking_transmission.critical_frequency`),
   with a misprint note in the docstring.
-- **Status:** corrected upstream — ISO 10848-1:2017 (second edition) prints
+- **Status:** corrected upstream: ISO 10848-1:2017 (second edition) prints
   the $\pi$-free form in its Formula (5), $f_c = c_0^2/(1{,}8 h c_L)$,
   confirming the 2006 print as a misprint. No report is needed. The entry is
   retained because the library cites the 2006 edition, whose print carries the

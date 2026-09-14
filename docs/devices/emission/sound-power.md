@@ -143,9 +143,9 @@ order; the first match names the standard.
    an environment that destroys a capsule, an enclosure with no room for a
    surface: when no acoustic measurement is possible, the surface-velocity route
    estimates the same quantity from accelerometers on the casing
-   (ISO/TS 7849-1 and -2). It answers a subtly different question — it
+   (ISO/TS 7849-1 and -2). It answers a subtly different question: it
    characterises what the *structure* radiates, and stays blind to sound
-   escaping through openings, intakes and gaps — and it costs a radiation factor
+   escaping through openings, intakes and gaps, and it costs a radiation factor
    you must either assume (Part 1, an upper limit) or measure once (Part 2).
 
 ### What the accuracy grades mean

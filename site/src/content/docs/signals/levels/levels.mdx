@@ -139,8 +139,8 @@ everywhere else, energy.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/energy_vs_arithmetic_mean.svg" alt="Left panel: two bars, a half period at 60 dB and a half period at 80 dB, with the arithmetic mean of the decibel values marked at 70 dB and the true energy mean Leq at 77 dB, the seven-decibel gap between them annotated. Right panel: the difference between Leq and the arithmetic mean of the level values against the standard deviation of those levels from zero to twelve decibels, one curve for a Gaussian spread following 0.115 sigma squared and one for a two-level spread, both rising monotonically from zero, with the five-decibel standard deviation that corresponds to a ten-decibel spread marked at about two and a half decibels" width="88%" />
 
 *The arithmetic mean of decibels always under-reads. The error is the gap on
-the left, it grows with the spread of the levels being combined — about
-2.5 dB once they range over 10 dB — and it never changes sign, so it does not
+the left, it grows with the spread of the levels being combined: about
+2.5 dB once they range over 10 dB, and it never changes sign, so it does not
 average out over many measurements.*
 
 <details>
@@ -253,8 +253,8 @@ plt.show()
 Options: `mode` selects the envelope ballistics (`'fast'`, `'slow'`,
 `'impulse'`), `weighting` applies the chosen weighting curve first, and
 `calibration_factor`/`dbfs` behave as in `leq`. `ln_levels` discards the first
-$5\tau$ of the envelope before taking percentiles — 0.625 s on Fast, 5 s on
-Slow — because at $5\tau$ the integrator is 99.3 % settled and the leading ramp
+$5\tau$ of the envelope before taking percentiles (0.625 s on Fast, 5 s on
+Slow) because at $5\tau$ the integrator is 99.3 % settled and the leading ramp
 would otherwise drag the low percentiles down. On a recording shorter than
 $10\tau$ that discard is capped at half the samples, so check that the segment
 is long enough for the ballistics chosen: a 0.3 s segment analysed on Slow
@@ -274,8 +274,8 @@ impulsive noise, so regulations always name the time weighting.
 
 *The same $L_\mathrm{Aeq}$, two opposite noises. The steady one has the wide
 percentile spread and an $L_\mathrm{eq}$ that sits just above its median; the one
-carried by three brief events has almost no percentile spread at all — the
-events occupy 4 % of the record, so no percentile below $L_{10}$ can see them —
+carried by three brief events has almost no percentile spread at all: the
+events occupy 4 % of the record, so no percentile below $L_{10}$ can see them,
 and an $L_\mathrm{eq}$ 7.6 dB above the median. Percentiles read the shape of the
 distribution; $L_\mathrm{eq}$ reads only its energy.*
 
@@ -384,8 +384,8 @@ A maximum is a rank-free extreme, so it is decided by one envelope sample and
 by the ballistics rather than by the bulk of the record. On this signal it
 lands within a tenth of a decibel of $L_{10}$, because the loud level is held
 for half of every second; on an impulsive record the maximum runs far above
-every percentile. Screen it before reporting it — wind gusts, a knocked cable
-and a closing door all produce a perfectly valid maximum of the wrong thing —
+every percentile. Screen it before reporting it: wind gusts, a knocked cable
+and a closing door all produce a perfectly valid maximum of the wrong thing,
 and remember that a logger storing the track more coarsely than about $\tau/2$
 (60 ms on Fast, 500 ms on Slow) clips the very maximum it was deployed to
 capture.
@@ -434,7 +434,7 @@ The three roles are deliberately different signals. The 4 s event has an
 $L_{\mathrm{A}E}$ 6.0 dB above its own $L_\mathrm{Aeq}$, because $10\log_{10}4 = 6.0$. The
 shift sample is *extrapolated*, not repeated: `duration_hours=8` says these
 10 s represent the whole eight hours, so $L_\mathrm{EX,8h}$ comes back equal to the
-sample's $L_\mathrm{Aeq}$ and only the exposure $E$ carries the duration — 8 h at
+sample's $L_\mathrm{Aeq}$ and only the exposure $E$ carries the duration: 8 h at
 85 dB(A) is $8 \times (0.3557\ \text{Pa})^2 = 1.01\ \text{Pa}^2\text{h}$.
 
 `lc_peak` is verified against the one-cycle/half-cycle reference responses of
@@ -564,7 +564,7 @@ plt.show()
 SEL is an integral, so the answer depends entirely on where the integration
 starts and stops: every sample handed to `sel` is counted as event energy,
 background included. A record padded with background inflates the result by
-$10\log_{10}(1 + E_\mathrm{b}/E_\mathrm{e})$ — 0.4 dB when the background carries a tenth of the
+$10\log_{10}(1 + E_\mathrm{b}/E_\mathrm{e})$: 0.4 dB when the background carries a tenth of the
 event energy, 1.8 dB when it carries half, both larger than the repeatability
 most pass-by procedures ask for. The convention that makes two pass-bys
 comparable is the window between the two instants at which the time-weighted
@@ -594,8 +594,8 @@ specific sound stands only 3 to 10 dB above the residual, the level must be
 corrected energetically before it is reported;
 `environment.residual_sound_correction(measured_level, residual_level)` returns
 that correction with a `reliable` flag and a `reportable_upper_bound`. Below
-3 dB no correction may be reported at all — only the uncorrected level, as an
-upper bound — because an event less than 3 dB above the background is not a
+3 dB no correction may be reported at all: only the uncorrected level, as an
+upper bound, because an event less than 3 dB above the background is not a
 measured event. The usual estimator of the residual is the $L_{90}$ of the same
 record, which is why the percentile section above comes first.
 
@@ -617,7 +617,7 @@ L_\mathrm{EX,8h} = 10\log_{10}\frac{E}{T_0\,p_0^2}, \quad T_0 = 8\ \text{h}
 $$
 
 The unit annotation only holds if $t$ is in hours: integrate in seconds and you
-get Pa²s, which is the same exposure expressed 3600 times larger — 35.6 dB out
+get Pa²s, which is the same exposure expressed 3600 times larger: 35.6 dB out
 if you then feed it to the $L_\mathrm{EX,8h}$ formula. In practice you integrate in
 seconds and divide by 3600, which is what `sound_exposure` does internally
 (mean square × duration in hours).
@@ -629,8 +629,8 @@ $8\ \text{h} \times (0.6325\ \text{Pa})^2 = 3.2\ \text{Pa}^2\text{h}$. Half the
 dose is −3 dB; double duration at the same level is +3 dB.
 
 That last sentence is a modelling choice, not arithmetic, and it deserves its
-name: IEC 61252 and ISO 1999 rate exposure by total A-weighted **energy** — the
-equal-energy hypothesis — which is why the implementation is a plain integral of
+name: IEC 61252 and ISO 1999 rate exposure by total A-weighted **energy**: the
+equal-energy hypothesis, which is why the implementation is a plain integral of
 the squared pressure with no threshold and no exchange-rate parameter. Under it,
 85 dB(A) for 8 h, 88 dB(A) for 4 h and 91 dB(A) for 2 h are the same exposure.
 National schemes that use a 5 dB exchange rate instead, or that ignore
@@ -640,7 +640,7 @@ must not be reported as, or converted into, a dose percentage from one of those
 schemes. The API carries a second assumption in the same place: with
 `duration_hours` the recording is treated as *representative* of the whole
 period, so a sample taken during an unrepresentative few minutes biases the
-whole day directly — which is precisely what the ISO 9612 sampling strategies
+whole day directly, which is precisely what the ISO 9612 sampling strategies
 exist to control.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dose_exchange.svg" alt="A-weighted level from 80 to 110 decibels against exposure duration from one minute to eight hours on a logarithmic axis, with three straight iso-exposure contours for LEX,8h of 80, 85 and 87 decibels, each labelled with its sound exposure in pascal-squared-hours, all sloping upward by three decibels per halving of duration, and the anchor point of 90 decibels for eight hours marked at 3.2 pascal-squared-hours" width="88%" />

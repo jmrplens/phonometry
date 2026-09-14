@@ -291,7 +291,7 @@ and the phase-coherent synchronized swept sine of Novak, Lotton & Simon (2015):
 the harmonic separation, the closed-form inverse-filter spectrum and the
 fractional-sample de-skewing, through `swept_sine_distortion` and
 `synchronized_sweep_signal`. With them, the acquisition conditions the answer
-depends on — the drive level and its `amplitude` reference, the `fade` that has
+depends on: the drive level and its `amplitude` reference, the `fade` that has
 to reach both calls, the clipping and tail requirements, the time-variance and
 impulsive-noise failure modes, and the sizing rules relating $T$, $N$ and
 $f_2$. The phase utilities `minimum_phase`, `group_delay`, `excess_phase` and
@@ -302,7 +302,7 @@ Section 13.1.4 through the real cepstrum.
 (IEC 60268-3 clauses 14.12.7-10) come from steady tones on the
 [electroacoustics](electroacoustics.md) page, not from a sweep; this page
 separates harmonic orders and nothing else. Müller & Massarani is cited for
-practice — fades, inverse-filter technique — not for an implemented formula.
+practice (fades, inverse-filter technique), not for an implemented formula.
 Under `method="farina"` the harmonic phases of $H_2 \dots H_N$ are returned but
 should be ignored: the plain exponential sweep breaks the time-shift/harmonic
 equivalence the synchronized method depends on. And nothing here polices the

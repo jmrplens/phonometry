@@ -33,7 +33,7 @@ import ThemeImage from '../../../../components/ThemeImage.astro';
 Choosing a filter architecture is a trade-off: selectivity, passband ripple
 and phase behaviour cannot all be optimal at once, and each of the five
 architectures phonometry offers resolves the trade-off differently. Three of
-them — Butterworth, Chebyshev II and Bessel — place their **−3 dB points on the
+them (Butterworth, Chebyshev II and Bessel) place their **−3 dB points on the
 ANSI S1.11 band edges**, so for those three the choice changes how a band
 rejects its neighbours and how it treats transients, not where the band sits.
 The two equiripple designs are the exception, and section 3 gives the size of
@@ -125,7 +125,7 @@ may actually use for a standards-compliant band measurement.*
 | `bessel` | 0.21 dB | −16.4 dB | −60.2 dB | 1.22 ms | none |
 
 Read the last column first: **three of the five cannot be used for a
-standards-compliant band measurement at all** with the default parameters — the
+standards-compliant band measurement at all with the default parameters: the
 equiripple pair because their band edges are not their −3 dB points (see
 [Filter Banks](/phonometry/signals/filters/filter-banks/)), Bessel because it
 rolls off too slowly for the mask. That is a hard constraint, not a preference,
@@ -294,7 +294,7 @@ $> 3.01\ \text{dB}$ for a −3 dB point to exist at all; below that the design
 raises `ValueError`). Note that the default of 72 dB is set by conformance and
 not by realizability: SciPy pins the equiripple floor at exactly `attenuation`,
 and IEC 61260-1 class 1 demands 70 dB far from the band, so an `attenuation`
-of, say, 6 dB is arithmetically legal and silently loses the class — see
+of, say, 6 dB is arithmetically legal and silently loses the class: see
 [Filter Class Verification](/phonometry/signals/filters/filter-compliance/).
 
 ```python
@@ -406,7 +406,7 @@ filters.OctaveFilterBank(fs=48000, fraction=3, order=6, limits=[12, 20000],
 
 Linkwitz-Riley is not a sixth architecture: it does not build an IEC band, and
 it is not a `FilterDesign(filter_type=…)` value. It is called directly, and it
-does the opposite job — it splits one signal into two branches that recombine
+does the opposite job: it splits one signal into two branches that recombine
 into a flat magnitude response, which is what a loudspeaker **crossover** needs
 and what a measurement band must never do. Each branch is a Butterworth of order
 `order/2` applied twice, so each is exactly **−6 dB at the crossover frequency**
@@ -495,7 +495,7 @@ Chebyshev I/II, Elliptic, Bessel): their magnitude responses compared at the
 −3 dB crossover and in the full 1/1 and 1/3 octave gallery, the band-edge
 convention (exact for Butterworth, Chebyshev II and Bessel; the ripple edge
 for the two equiripple families), and a usage example per architecture, plus
-the Linkwitz-Riley crossover, whose two branches recombine flat — by sum or by
+the Linkwitz-Riley crossover, whose two branches recombine flat: by sum or by
 difference, depending on the parity of `order/2`.
 </ScopeClaim>
 

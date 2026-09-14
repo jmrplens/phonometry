@@ -79,7 +79,7 @@ The tables may be used as tabulated while the aerodrome's average conditions
 stay inside the Doc 29 §2.5 envelope: air temperature below 30 °C, the product
 of temperature (°C) and relative humidity (%) above 500, and wind below 8 m/s.
 Outside it the *tables themselves* have to be converted by the Appendix D
-procedure, which this chain does not implement — `impedance_adjustment` takes
+procedure, which this chain does not implement: `impedance_adjustment` takes
 only temperature and pressure, and no humidity argument enters the chain
 anywhere. One restriction runs under all of it: the SAE AIR 5662 lateral
 attenuation, and with it the whole single-event chain that uses it, is derived

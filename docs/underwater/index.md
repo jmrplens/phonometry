@@ -91,7 +91,7 @@ fluid-fluid Rayleigh reflection, so sediment attenuation is out of scope, and
 all four solvers assume a **range-independent** water column with no
 elastic bottom; the beam solver can bounce off that same
 Rayleigh seabed instead of a perfect reflector, and the two ray-based
-solvers can slope the bottom over a piecewise-linear depth profile — the
+solvers can slope the bottom over a piecewise-linear depth profile: the
 only range dependence there is, kept because that boundary has an exact
 oracle (the ideal wedge's closed fan of images) where a range-dependent
 water column has none. The ray solver still returns paths and
@@ -119,8 +119,8 @@ cetaceans, because the source publication does not print one of its
 parameters.
 
 Two smaller boundaries: the ambient-noise spectrum leaves out the
-low-frequency turbulence band and has no built-in distant-shipping model —
-supply a shipping spectrum yourself — and the active sonar equation is
+low-frequency turbulence band and has no built-in distant-shipping model
+(supply a shipping spectrum yourself) and the active sonar equation is
 monostatic only.
 
 ## Before and after these pages

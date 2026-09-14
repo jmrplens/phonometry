@@ -78,8 +78,8 @@ budgets that are specialisations of the GUM machinery described here.
 ## What this section does not cover
 
 Nothing here checks an instrument or a calibrator. The IEC 60942 conformance
-tests of the calibrator itself — generated level, frequency, distortion, and
-the corrections for static pressure and temperature — are not implemented, so
+tests of the calibrator itself (generated level, frequency, distortion, and
+the corrections for static pressure and temperature) are not implemented, so
 pass an already corrected `target_spl` when the manual asks for one, and the
 IEC 61672-3 periodic tests are cited as laboratory practice rather than run;
 [Compliance and
@@ -87,7 +87,7 @@ verification](compliance-verification.md) draws
 that boundary precisely, part by part. The dBFS half of the calibration page
 sits outside any standard and makes no physical claim: it is a reference
 frame, not a measurement. Data qualification implements the quantitative core
-of Bendat & Piersol's section 10.3 only — classifying a record's type,
+of Bendat & Piersol's section 10.3 only: classifying a record's type,
 validating it against physical limits and editing out glitches remain manual
 steps, as the book describes them. And an uncertainty budget is a model of
 *your* measurement: the library propagates whatever you declare, and never

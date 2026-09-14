@@ -156,7 +156,7 @@ $$
 
 A time constant and a decay rate are the same statement. An exponentially
 decaying mean square falls at a constant $10/(\tau \ln 10)$ decibels per
-second, which is why IEC 61672-1 clause 5.8.1 can specify F and S twice over —
+second, which is why IEC 61672-1 clause 5.8.1 can specify F and S twice over:
 as design-goal constants of 0.125 s and 1 s, and as design-goal decay rates of
 34.7 dB/s and 4.3 dB/s. The same arithmetic turns the 1.5 s decreasing-portion
 constant of the analog IMPULSE characteristic into 2.9 dB/s, the fall an
@@ -164,7 +164,7 @@ operator was meant to be able to read off a moving needle.
 
 The asymmetry has a consequence worth stating: unlike F and S, Impulse is not a
 filter. Its coefficient depends on the signal, so an I-weighted level is not
-additive — the I-weighted level of two sources running together cannot be
+additive; the I-weighted level of two sources running together cannot be
 derived from the two measured separately, while their $L_\mathrm{eq}$ values can.
 
 ### Choosing F, S or I
@@ -263,7 +263,7 @@ $$
 
 Read it out loud and the whole table follows. On Fast ($\tau = 125$ ms) a
 200 ms burst gives $-0.98$ dB, a 50 ms burst $-4.82$ dB and a 10 ms burst
-$-11.14$ dB — the three panels below. A 100 ms burst gives $-2.59$ dB on Fast
+$-11.14$ dB (the three panels below). A 100 ms burst gives $-2.59$ dB on Fast
 and $-10.21$ dB on Slow, and that 7.6 dB is the number quoted in the
 [choosing guidance](#choosing-f-s-or-i) above. The physics is one sentence: a
 detector with memory $\tau$ cannot reach its steady value on an event shorter
@@ -325,8 +325,8 @@ give it.
 - **`None` (the default) and `'zero'` are the same thing**, a start from rest, so
   the level climbs through the settling ramp of section 1.
 - **`'first'` seeds it with the square of the very first sample**, $x[0]^2$. That
-  is an unbiased but extremely noisy estimate of the mean square — one degree of
-  freedom — and for a tone it depends entirely on the phase at the cut. In the
+  is an unbiased but extremely noisy estimate of the mean square (one degree of
+  freedom) and for a tone it depends entirely on the phase at the cut. In the
   snippet below it is *exactly zero*, because a sine starting at $t = 0$ starts
   at a zero crossing, so `'first'` there is bit-identical to `'zero'`.
 - **A float** resumes a state you saved yourself, which is what block processing
@@ -335,7 +335,7 @@ give it.
   same per channel.
 
 If the record is a continuation of a signal already running, seed the integrator
-with something robust — the mean square of the first half second,
+with something robust: the mean square of the first half second,
 `initial_state=float(np.mean(recording[:fs // 2] ** 2))`, is a far better
 estimate than a single sample. If the record is the *start* of the event, do not
 seed at all: let it start from rest and discard the first $5\tau$ (0.6 s Fast,

@@ -5,7 +5,7 @@
 Choosing a filter architecture is a trade-off: selectivity, passband ripple
 and phase behaviour cannot all be optimal at once, and each of the five
 architectures phonometry offers resolves the trade-off differently. Three of
-them — Butterworth, Chebyshev II and Bessel — place their **−3 dB points on
+them (Butterworth, Chebyshev II and Bessel) place their **−3 dB points on
 the ANSI S1.11 band edges**, so for those three the choice changes how a band
 rejects its neighbours and how it treats transients, not where the band sits.
 The two equiripple designs are the exception: `cheby1` and `ellip` treat the
@@ -70,7 +70,7 @@ plt.show()
 One constraint comes before any preference in that table: with the default
 parameters (order 6, 48 kHz), **three of the five cannot be used for a
 standards-compliant band measurement at all**. Only Butterworth and
-Chebyshev II reach IEC 61260-1 class 1 — the equiripple pair fails because
+Chebyshev II reach IEC 61260-1 class 1. The equiripple pair fails because
 its band edges are not its −3 dB points, and Bessel because it rolls off too
 slowly for the mask. See
 [Filter class verification](filter-compliance.md) for the per-band margins.
@@ -189,7 +189,7 @@ $> 3.01\ \text{dB}$ for a −3 dB point to exist at all; below that the design
 raises `ValueError`). Note that the default of 72 dB is set by conformance and
 not by realizability: SciPy pins the equiripple floor at exactly `attenuation`,
 and IEC 61260-1 class 1 demands 70 dB far from the band, so an `attenuation`
-of, say, 6 dB is arithmetically legal and silently loses the class — see
+of, say, 6 dB is arithmetically legal and silently loses the class: see
 [Filter class verification](filter-compliance.md).
 
 ```python
@@ -298,7 +298,7 @@ it splits one signal into two branches that recombine flat. Each branch is a
 Butterworth of order `order/2` applied twice, so each is exactly **−6 dB at
 the crossover frequency** (not −3 dB as in the bands above): the branches add
 to unity in *amplitude*, not in power. Which recombination is flat depends on
-the parity of `order/2` — `low + high` when it is even (orders 4, 8), but at
+the parity of `order/2`: `low + high` when it is even (orders 4, 8), but at
 orders 2 and 6 the branches are in antiphase at the crossover and the naive
 sum collapses into a deep notch there; the flat recombination is then
 `low - high`. Even in the flat cases the sum is **all-pass**, not phase-free:

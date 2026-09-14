@@ -78,8 +78,8 @@ resamples internally.
 Both measures are defined for **running speech**, and the front end is where
 that assumption bites: the 40 dB rule keys off the *clean* signal's dynamic
 range, so it exists to stop the pauses between words from dominating the
-correlation. A signal with no pauses — steady noise, a held tone, gapless
-music — loses nothing to it and the index loses its meaning; a recording that
+correlation. A signal with no pauses (steady noise, a held tone, gapless
+music) loses nothing to it and the index loses its meaning; a recording that
 is mostly silence loses almost everything and the call raises rather than
 returning a number. At least about **0.4 s of active speech** has to survive.
 
@@ -117,8 +117,8 @@ the flat-masker example.
 ### Getting a valid pair
 
 The two arguments are not just "two signals". They must be the **same
-utterance**, the **same length**, and **sample-accurate in alignment** — and
-that last one is the failure that costs most scores in practice, because
+utterance**, the **same length**, and **sample-accurate in alignment**. That
+last one is the failure that costs most scores in practice, because
 nothing in the result distinguishes it from genuine degradation. Both measures
 correlate short-time envelopes inside 384 ms segments, so a constant delay
 decorrelates them directly. On the pair above, rolling the degraded signal by
@@ -130,7 +130,7 @@ The library enforces equal length and nothing else: it does no alignment, so
 the caller compensates any algorithmic latency first. Cross-correlate the
 broadband envelopes (or prepend a short marker chirp), shift, then trim both to
 the common span. If the two signals passed through separate playback and
-capture clocks, watch for *drift* as well — a fixed shift cannot correct a
+capture clocks, watch for *drift* as well: a fixed shift cannot correct a
 sample-rate offset, so resample to the reference clock or record through one
 device. The check worth running once on any new pipeline is the pair of lines
 above: `stoi(x, x, fs).value` is 1.0, and `stoi(x, np.roll(x, k), fs)` collapses
@@ -142,14 +142,14 @@ thing to get right; gain is not.
 
 Three conditions raise instead of returning a value, and they are worth
 recognising: unequal length, non-finite samples, and fewer than 30 short-time
-frames surviving the silent-frame removal — which is the ~0.4 s of active
+frames surviving the silent-frame removal, which is the ~0.4 s of active
 speech mentioned above.
 
 ### Capturing the degraded signal through a real device
 
 Everything above assumes the degraded signal was produced numerically. Once it
-is captured acoustically — a hearing aid on an artificial ear in a test box, a
-headset, a loudspeaker-and-microphone loop — four things become the caller's
+is captured acoustically (a hearing aid on an artificial ear in a test box, a
+headset, a loudspeaker-and-microphone loop), four things become the caller's
 responsibility:
 
 - **The clean reference stays the original file.** Re-recording it through the
@@ -160,7 +160,7 @@ responsibility:
   measured index, so measure the loop once with the device bypassed and report
   that number as the floor of the comparison.
 - **Play at the device's operating level.** The *index* is invariant to level;
-  the *device* is not — a compressor or a noise reducer behaves differently at
+  the *device* is not. A compressor or a noise reducer behaves differently at
   a different input level.
 - **Repeat.** A single capture carries the run-to-run variability of the
   acoustic path; quote the spread over several captures, not one number.
@@ -192,7 +192,7 @@ $\lVert\cdot\rVert$ is the Euclidean norm over the same 30 frames. So
 $d_{j,m}$ is an ordinary Pearson correlation in $[-1, 1]$.
 
 The index is the average of those intermediate correlations over all bands $j$
-and segments $m$ (Eq. 6) — the two marginals of that average are what
+and segments $m$ (Eq. 6). The two marginals of that average are what
 `band_scores` and `segment_scores` expose. Because the normalisation divides out a per-segment
 gain, STOI is **invariant to the overall playback level** of the degraded
 signal, and higher SNR gives a monotonically higher score.
@@ -389,8 +389,8 @@ removal.
 
 The raw index has no absolute interpretation, and it is not meant to have one.
 The mapping from $d$ to a percentage of words understood is a logistic fitted
-to one corpus and one listener group — which the library deliberately does not
-implement — so the same $d$ predicts different scores for different material,
+to one corpus and one listener group (which the library deliberately does not
+implement). So the same $d$ predicts different scores for different material,
 and quoting "STOI = 0.73" as an intelligibility is a category error.
 
 The working practice follows from that. Hold the material, the talkers, the
@@ -399,7 +399,7 @@ conditions (the ΔSTOI between a processor and its unprocessed input) together
 with the number of utterances it was averaged over, because single-utterance
 values scatter. Mind the shape as well: the index saturates near 1 for mild
 degradations and flattens at the low end, so an improvement from 0.85 to 0.90
-is worth far more in intelligibility than one from 0.35 to 0.40 — monotonic
+is worth far more in intelligibility than one from 0.35 to 0.40: monotonic
 does not mean linear. And when two conditions score alike, the per-band and
 per-segment views are the diagnostics that say whether they got there the same
 way.

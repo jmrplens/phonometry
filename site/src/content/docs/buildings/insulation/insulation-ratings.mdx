@@ -77,7 +77,7 @@ The reference curve itself (ISO 717-1:2020, Table 3) is not arbitrary either.
 It rises 9 dB per octave from 100 Hz to 500 Hz, then only 4 dB over the next
 octave, and is flat from 1250 Hz up. A rating engine carrying that shape is
 deliberately lenient at low frequency and unforgiving above 1 kHz, which is
-why a construction with a low-frequency dip can still rate well — and why
+why a construction with a low-frequency dip can still rate well, and why
 $C_\mathrm{tr}$ exists to put the penalty back. The result object hands you the curve
 in its shifted position, so the unshifted one is a subtraction away:
 
@@ -117,7 +117,7 @@ $C_\mathrm{tr}$. So the rating plus the term ($R_\mathrm{w} + C$ for a laborator
 $R'_\mathrm{w} + C$ or $D_\mathrm{nT,w} + C$ for the quantities of the
 [field guide](/phonometry/buildings/insulation/insulation-field/), and likewise
 with $C_\mathrm{tr}$) is the A-weighted level difference the construction achieves
-against that source — which is what makes the sum, and not the rating alone,
+against that source, which is what makes the sum, and not the rating alone,
 the thing worth specifying. Reading them:
 
 * $C$ stays small for most constructions (0 to −2 dB is typical): the pink
@@ -135,8 +135,8 @@ the thing worth specifying. Reading them:
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/insulation_adaptation_terms.svg" alt="Left: the sound reduction index of a 150 mm dense concrete wall and of a 12 kg per square metre metal-stud double leaf with a 90 mm cavity, both against the same shifted ISO 717-1 reference curve at Rw = 49 dB. Right: a grouped bar chart of Rw, Rw + C and Rw + Ctr for the two constructions, identical at Rw and 6 dB apart at Rw + Ctr" width="92%" />
 
 *Two constructions, one rating. Both spectra come from the library's own panel
-models — Sharp's method for the concrete leaf, the mass-air-mass double-wall
-model for the lightweight one — and both rate to $R_\mathrm{w} = 49$ dB, so a
+models (Sharp's method for the concrete leaf, the mass-air-mass double-wall
+model for the lightweight one), and both rate to $R_\mathrm{w} = 49$ dB, so a
 specification written on $R_\mathrm{w}$ alone treats them as interchangeable. They are
 not: the double leaf enters the rated range still climbing out of its 82 Hz
 mass-air-mass resonance, and against traffic it gives up 6 dB more than the
@@ -291,7 +291,7 @@ slightly positive for a timber joist floor whose low-frequency peaks dominate,
 and down to $-15$ dB for a bare or poorly covered concrete floor (Annex A.1).
 Read that way, the $C_\mathrm{I} = -11$ dB of the example below says the measured
 spectrum is far flatter and more high-frequency-weighted than the reference
-contour — a bare slab, not a floor with a covering — so the floor is better at
+contour (a bare slab, not a floor with a covering), so the floor is better at
 the low frequencies footsteps excite than $L'_\mathrm{nT,w} = 79$ dB alone suggests.
 The corollary is a design trap: a soft covering acts where the reference curve
 is most demanding, so it improves the single number more than it improves what
@@ -608,7 +608,7 @@ single number of ISO 16283-3 Annex F and the flanking $D_\mathrm{n,f,w}$ reuse t
 engines from their own guides rather than duplicating them. One member of the
 ISO 717 family is deliberately absent: the A-weighted maximum impact level of
 **ISO 717-2:2020 Annex D**, which rates the rubber ball and the bang machine.
-It shifts no curve at all — it is an energy sum of A-weighted band levels — so
+It shifts no curve at all (it is an energy sum of A-weighted band levels), so
 it is not produced by either engine on this page and lives with the sources it
 rates, in [Heavy and Soft Impact
 Sources](/phonometry/buildings/insulation/heavy-impact-sources/).

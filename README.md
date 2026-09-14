@@ -55,8 +55,8 @@ above).
 
 I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled. The base install computes every metric on NumPy and SciPy alone — and
-that includes reading every linear measurement WAV (24-bit, multichannel
+enabled. The base install computes every metric on NumPy and SciPy alone:
+it includes reading every linear measurement WAV (24-bit, multichannel
 EXTENSIBLE, RF64) through `phonometry.io`; the only things it leaves
 unavailable are the figures (`.plot()` and the filter response plots), the
 normative PDF fiches (`.report()`), the compiled kernel that speeds up the

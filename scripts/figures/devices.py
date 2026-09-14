@@ -302,8 +302,8 @@ def generate_frequency_response(output_dir: str) -> None:
     )
 
     cases = (
-        ("Noise on the output — $H_1$ is unbiased", clean_x, y_out),
-        ("Noise on the input — $H_2$ is unbiased", x_in, clean_y),
+        ("Noise on the output: $H_1$ is unbiased", clean_x, y_out),
+        ("Noise on the input: $H_2$ is unbiased", x_in, clean_y),
     )
 
     _fig, axes = plt.subplots(
@@ -4855,7 +4855,7 @@ def generate_intermodulation_tests(output_dir: str) -> None:
         (
             y_dfd,
             (0.0, 16000.0),
-            (f"(a) Difference frequency, 13 / 14 kHz — $d(d,2)$ = {dfd2 * 100:.2f} %"),
+            (f"(a) Difference frequency, 13 / 14 kHz: $d(d,2)$ = {dfd2 * 100:.2f} %"),
             (
                 (1000.0, "$f_2 - f_1$", (0.0, 10.0), "center"),
                 (12000.0, "$2f_1 - f_2$", (0.0, 22.0), "center"),
@@ -4867,7 +4867,7 @@ def generate_intermodulation_tests(output_dir: str) -> None:
             y_tdfd,
             (0.0, 16000.0),
             (
-                f"(b) Total difference frequency, 8 / 11.95 kHz — "
+                f"(b) Total difference frequency, 8 / 11.95 kHz: "
                 f"$d(\\mathrm{{TDFD}})$ = {tdfd * 100:.2f} %"
             ),
             # The two sidebands are 100 Hz apart and 17 dB apart, so the lower
@@ -4882,7 +4882,7 @@ def generate_intermodulation_tests(output_dir: str) -> None:
             y_dim,
             (0.0, 16000.0),
             (
-                f"(c) Dynamic intermodulation, 15 kHz + 3.15 kHz square — "
+                f"(c) Dynamic intermodulation, 15 kHz + 3.15 kHz square: "
                 f"DIM = {dim * 100:.2f} %"
             ),
             tuple(
@@ -4965,8 +4965,8 @@ def generate_feedback_stability(output_dir: str) -> None:
 
     _fig, axes = plt.subplots(2, 1, figsize=(10, 9.2), sharey=True)
     titles = (
-        f"One open microphone — headroom {_fmt_minus(one.headroom, '+.1f')} dB",
-        (f"Four open microphones — headroom {_fmt_minus(four.headroom, '+.1f')} dB"),
+        f"One open microphone, headroom {_fmt_minus(one.headroom, '+.1f')} dB",
+        (f"Four open microphones, headroom {_fmt_minus(four.headroom, '+.1f')} dB"),
     )
     for ax, res, title in zip(axes, (one, four), titles, strict=True):
         res.plot(ax=ax, language=_LANG)
@@ -5277,7 +5277,7 @@ def generate_swept_sine_methods(output_dir: str) -> None:
             color=col,
             linewidth=1.8,
             linestyle=style,
-            label=f'$|H_2|$ — method="{label}"',
+            label=f'$|H_2|$: method="{label}"',
         )
         ax_ph.semilogx(
             res.frequencies[band],
@@ -5285,7 +5285,7 @@ def generate_swept_sine_methods(output_dir: str) -> None:
             color=col,
             linewidth=1.6,
             linestyle=style,
-            label=f'$\\arg H_2$ — method="{label}"',
+            label=f'$\\arg H_2$: method="{label}"',
         )
 
     ax_mag.axhline(

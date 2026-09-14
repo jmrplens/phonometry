@@ -54,7 +54,7 @@ def _d_env_positions(s: SVG, th: Theme) -> None:
     a_cap = gy - 230.0
     s.mic(ax, a_cap, gy, 1.15)
     s.dim(ax, gy, ax, a_cap, "4.0 ± 0.2 m", offset=-60, size=17)
-    s.text(ax - 20, a_cap - 58, "A — free field", 19, th.fg, bold=True)
+    s.text(ax - 20, a_cap - 58, "A: free field", 19, th.fg, bold=True)
     s.text(ax - 20, a_cap - 30, "0 dB", 19, th.accent, bold=True, mono=True)
 
     # Position B: 2 m in front of the facade, dimension at capsule height
@@ -62,7 +62,7 @@ def _d_env_positions(s: SVG, th: Theme) -> None:
     b_cap = gy - 230.0
     s.mic(bx, b_cap, gy, 1.15)
     s.dim(bx, b_cap + 6, fx, b_cap + 6, "2 m", offset=-14, size=17)
-    s.text(bx - 30, b_cap - 58, "B — 2 m from façade", 19, th.fg, bold=True)
+    s.text(bx - 30, b_cap - 58, "B: 2 m from façade", 19, th.fg, bold=True)
     s.text(bx - 30, b_cap - 30, "−3 dB", 19, th.secondary, bold=True, mono=True)
 
     # Position C: flush-mounted on the facade, below B's dimension zone
@@ -71,7 +71,7 @@ def _d_env_positions(s: SVG, th: Theme) -> None:
     # The leader crosses mic B's mast (plain line crossing, standard
     # drafting); the label itself sits in the clear zone between masts.
     s.line(fx - 2, cy + 5, 470, cy + 60, th.muted, 1.4)
-    s.text(462, cy + 84, "C — flush-mounted", 19, th.fg, bold=True)
+    s.text(462, cy + 84, "C: flush-mounted", 19, th.fg, bold=True)
     s.text(462, cy + 110, "−6 dB", 19, th.secondary, bold=True, mono=True)
 
 
@@ -943,7 +943,7 @@ def _d_cnossos_road(s: SVG, th: Theme) -> None:
     s.text(
         rx0,
         56.0,
-        "Plan — two-lane urban arterial",
+        "Plan: two-lane urban arterial",
         17,
         th.fg,
         anchor="start",
@@ -1090,9 +1090,9 @@ def _d_cnossos_rail(s: SVG, th: Theme) -> None:
     s.circle(cx, by, 9, th.accent)
     s.dim(cx, datum, cx, ay, "0,5 m", 60, 15, label_side="right")
     s.dim(cx, datum, cx, by, "4,0 m", 120, 15, label_side="right")
-    s.text(cx - 26, ay - 6, "A — rolling, impact, squeal,", 14, th.fg, anchor="end")
+    s.text(cx - 26, ay - 6, "A: rolling, impact, squeal,", 14, th.fg, anchor="end")
     s.text(cx - 26, ay + 16, "bridge, low traction", 14, th.fg, anchor="end")
-    s.text(cx - 26, by + 16, "B — exhausts, roof apparatus,", 14, th.fg, anchor="end")
+    s.text(cx - 26, by + 16, "B: exhausts, roof apparatus,", 14, th.fg, anchor="end")
     s.text(cx - 26, by + 38, "pantograph recess", 14, th.fg, anchor="end")
 
     # The receiver, with the line of sight to each source and psi.
@@ -1191,7 +1191,7 @@ def _d_wind_turbine_board(s: SVG, th: Theme) -> None:
         sw=1.8,
         dash="8,6",
     )
-    s.text(mcx, gy - 186, "secondary: high wind only —", 14, th.muted)
+    s.text(mcx, gy - 186, "secondary, for high wind only:", 14, th.muted)
     s.text(mcx, gy - 166, "document and correct its insertion loss", 14, th.muted)
     s.text(bx0 - 20, 330.0, "Section", 17, th.fg, anchor="start", bold=True)
 
@@ -1224,7 +1224,7 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
     s.text(
         x0,
         y0 - 12,
-        "1 — the day, split into evaluation periods (Annex I A.1)",
+        "1: the day, split into evaluation periods (Annex I A.1)",
         16,
         th.fg,
         anchor="start",
@@ -1267,7 +1267,7 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
     s.text(
         x0 + 14,
         y1 + 28,
-        "2 — each phase, corrected",
+        "2: each phase, corrected",
         16,
         th.fg,
         anchor="start",
@@ -1299,7 +1299,7 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
     s.arrow(x0 + 372, y1 + 54, x0 + 424, y1 + 54, th.muted, 1.8)
     s.rect(x0 + 436, y1, 324, 124, th.panel, th.muted, rx=8, sw=1.2)
     s.text(
-        x0 + 450, y1 + 28, "3 — the period level", 16, th.fg, anchor="start", bold=True
+        x0 + 450, y1 + 28, "3: the period level", 16, th.fg, anchor="start", bold=True
     )
     s.text(
         x0 + 450,
@@ -1333,7 +1333,7 @@ def _d_rd1367_chain(s: SVG, th: Theme) -> None:
     y2 = 400.0
     s.rect(x0, y2, 360, 96, th.panel, th.muted, rx=8, sw=1.2)
     s.text(
-        x0 + 14, y2 + 28, "4 — the annual value", 16, th.fg, anchor="start", bold=True
+        x0 + 14, y2 + 28, "4: the annual value", 16, th.fg, anchor="start", bold=True
     )
     s.text(
         x0 + 14, y2 + 56, "$L_{K,x}$ over the operating days", 15, th.fg, anchor="start"

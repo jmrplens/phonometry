@@ -1292,7 +1292,7 @@ approximation and its errors are derived rather than asserted. The last six
 entries are the broadcast-loudness chain, which is a normative stack of its own:
 ITU-R BS.1770 defines the algorithms, EBU R 128 fixes the target level and the
 ceiling, and the three EBU Tech documents supply the meter behaviour, the
-loudness range and the production practice — together with the test signals the
+loudness range and the production practice, together with the test signals the
 implementation is validated against.
 
 - Fahy, F. J. (1995). *Sound intensity* (2nd ed.). E&FN Spon.

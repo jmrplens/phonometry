@@ -195,8 +195,8 @@ cumulative SEL and on the peak level at a stated range, which is why
 `pile_strike_metrics` reports them together and `cumulative_sel` follows the
 strike-by-strike energy sum of Formulae 8–9.
 
-The survey discipline itself — deployment, instrumentation, calibration and
-reporting — is described here and enforced nowhere in code: nothing checks
+The survey discipline itself (deployment, instrumentation, calibration and
+reporting) is described here and enforced nowhere in code: nothing checks
 that a strike handed to `pile_strike_metrics` came from a record that meets
 it. And because vibro- and sheet-piling sit outside the ISO 18406 scope,
 continuous pile-driving noise has no closed form here or anywhere else in
@@ -205,7 +205,7 @@ phonometry.
 ## See also
 
 - [Marine-mammal noise exposure](marine-mammal-exposure.md):
-  the assessment the criteria named in section 3 are applied through — auditory
+  the assessment the criteria named in section 3 are applied through: auditory
   weighting, accumulation over the strikes and the margin against the published
   onset criteria.
 - [Underwater sound propagation](underwater-propagation.md):

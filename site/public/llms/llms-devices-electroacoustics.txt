@@ -103,7 +103,7 @@ is level bookkeeping, not an acoustic model: it consumes two direct-field levels
 you supply, does not compute them from a coverage pattern, and predicts
 neither the ring frequency nor the effect of an equaliser or frequency
 shifter. And IEC 60268-16, the speech transmission index, is not part of this
-section at all — it is in [Speech](https://jmrplens.github.io/phonometry/perception/speech/).
+section at all: it is in [Speech](https://jmrplens.github.io/phonometry/perception/speech/).
 
 ---
 
@@ -1069,8 +1069,8 @@ weights THD. The quasi-peak detector is implemented too, as
 ([Quasi-peak programme meter](https://jmrplens.github.io/phonometry/devices/broadcast/quasi-peak/)), but it reads a
 *recording*, and `itu_r_468_weighting` is the network alone: an
 inherent-noise level computed from the network and an r.m.s. sum is still
-not a dBqps figure. Clause 17 has no waveform to hand it either — it takes
-the stated voltage or level from the data sheet — so
+not a dBqps figure. Clause 17 has no waveform to hand it either (it takes
+the stated voltage or level from the data sheet), so
 `MicrophoneNoise(weighting="CCIR")` stays what it always was, metadata
 recording how the supplier measured their figure rather than a measurement
 this library made.
@@ -1153,7 +1153,7 @@ is the laboratory behind the numbers: the anechoic room and its
 qualification, the reference microphone and its calibration certificate, the
 high-level source that produces a 140 dB field and the turntable are what
 the reported numbers mean, and the acquisition itself is not implemented
-here — the functions reduce the curves they are handed.
+here: the functions reduce the curves they are handed.
 
 The rated characteristics are also available interactively through `.plot()`,
 which draws **one concept per figure** with the same panel code the report
@@ -1621,7 +1621,7 @@ and the phase-coherent synchronized swept sine of Novak, Lotton & Simon (2015):
 the harmonic separation, the closed-form inverse-filter spectrum and the
 fractional-sample de-skewing, through `swept_sine_distortion` and
 `synchronized_sweep_signal`. With them, the acquisition conditions the answer
-depends on — the drive level and its `amplitude` reference, the `fade` that has
+depends on: the drive level and its `amplitude` reference, the `fade` that has
 to reach both calls, the clipping and tail requirements, the time-variance and
 impulsive-noise failure modes, and the sizing rules relating $T$, $N$ and
 $f_2$. The phase utilities `minimum_phase`, `group_delay`, `excess_phase` and
@@ -1632,7 +1632,7 @@ Section 13.1.4 through the real cepstrum.
 (IEC 60268-3 clauses 14.12.7-10) come from steady tones on the
 [electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/) page, not from a sweep; this page
 separates harmonic orders and nothing else. Müller & Massarani is cited for
-practice — fades, inverse-filter technique — not for an implemented formula.
+practice (fades, inverse-filter technique), not for an implemented formula.
 Under `method="farina"` the harmonic phases of $H_2 \dots H_N$ are returned but
 should be ignored: the plain exponential sweep breaks the time-shift/harmonic
 equivalence the synchronized method depends on. And nothing here polices the

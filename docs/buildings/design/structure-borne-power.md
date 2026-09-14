@@ -159,8 +159,8 @@ print(float(building.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| in 
 ```
 
 Two pieces of the standard stay on the operator's side of the line. Formula 16
-— the equivalent point mobility of the plate as the arithmetic mean of
-$\mathrm{Re}\{Y\}$ over its contact points — is not implemented: the functions
+(the equivalent point mobility of the plate as the arithmetic mean of
+$\mathrm{Re}\{Y\}$ over its contact points) is not implemented: the functions
 above take an already-known plate mobility rather than deriving it from
 per-point measurements. The Annex C power-substitution method is not
 implemented either; the library takes an already-averaged $L_v$, so a

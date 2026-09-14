@@ -443,7 +443,7 @@ from a direction-averaged velocity level difference is ISO 10848's
 The straight-section coefficient $\tau_{13}$ is undefined for the T-junction
 (2) and L-junction geometries, which have no collinear third plate, so only the
 corner path applies there. The tabulated coefficients assume a *symmetric*
-junction — opposite plates identical — and there is no closed form here for one
+junction (opposite plates identical) and there is no closed form here for one
 that is not. On the experimental side the inversion is written for **two**
 subsystems only, and `PowerInjectionResult.modal_density_ratio` is a
 consistency check the reader makes, not one the library automates.

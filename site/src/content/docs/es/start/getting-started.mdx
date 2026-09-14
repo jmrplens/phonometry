@@ -36,7 +36,7 @@ pip install phonometry[full]    # todos los anteriores (recomendado)
 Recomiendo `pip install phonometry[full]`: instala de una vez matplotlib,
 numba, reportlab, svglib y soundfile, con lo que quedan habilitadas todas las
 funcionalidades de la biblioteca. La instalación base calcula todas las
-métricas solo con NumPy y SciPy — y eso incluye leer con `phonometry.io` todo
+métricas solo con NumPy y SciPy. Esto incluye leer con `phonometry.io` todo
 WAV lineal de medición (24 bits, multicanal EXTENSIBLE, RF64); lo único que no
 queda disponible son las figuras (`.plot()` y las gráficas de respuesta de los
 filtros), las fichas PDF normativas (`.report()`), el núcleo compilado que
@@ -325,7 +325,7 @@ del tono de calibrador a todas ellas, en una sola página.
 ## Leer un WAV de sonómetro
 
 La señal sintética de arriba hacía de archivo. Con un sonómetro real tienes
-dos WAV — la toma del calibrador y la medición — y `phonometry.io` lee los
+dos WAV: la toma del calibrador y la medición. `phonometry.io` lee los
 dos como mediciones: frecuencia nativa conservada, PCM entero escalado
 exactamente al fondo de escala, canales primero, nada normalizado. El
 `Signal` que devuelve lleva la frecuencia de muestreo y, en cuanto se lo
@@ -345,8 +345,8 @@ sig = io.read("measurement.wav", calibration_factor=cal)
 print(f"Leq = {float(signals.leq(sig)):.1f} dB")   # sin fs ni factor que repetir
 ```
 
-La instalación base lee todo lo que escribe un sonómetro — PCM de 24 bits,
-multicanal EXTENSIBLE, RF64 nocturno — y avisa si el archivo es una copia
+La instalación base lee todo lo que escribe un sonómetro: PCM de 24 bits,
+multicanal EXTENSIBLE, RF64 nocturno. Avisa si el archivo es una copia
 comprimida de escucha en vez de una grabación lineal. Escribe el factor en el
 sidecar una vez (`io.write_sidecar("measurement.wav", cal)`) y desde entonces
 `io.read("measurement.wav")` vuelve calibrado sin argumento alguno.
@@ -410,9 +410,9 @@ spl, freq = filters.octave_filter(
 )
 ```
 
-Las dos trampas mecánicas de abajo pertenecen a esta ruta directa con scipy —
-`io.read`, en la sección anterior, elimina las dos, escalando las muestras
-enteras al fondo de escala y devolviendo los canales primero — pero conviene
+Las dos trampas mecánicas de abajo pertenecen a esta ruta directa con scipy.
+`io.read` en la sección anterior elimina las dos, escalando las muestras
+enteras al fondo de escala y devolviendo los canales primero, pero conviene
 conocerlas siempre que un array desnudo entre en la biblioteca:
 
 **Reduce un archivo multicanal al canal con el que mediste, o traspónlo.** La

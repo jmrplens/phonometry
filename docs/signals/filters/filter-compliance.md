@@ -334,8 +334,8 @@ verified in §2.
 
 **Not covered.** `verify_filter_class` checks a *designed digital response*
 against Table 1, not an instrument. IEC 61260-1's conformance tests for the
-physical filter — overload recovery, filter linearity, environmental influences
-— apply to hardware and are not run here; they belong to **IEC 61260-2:2016**
+physical filter (overload recovery, filter linearity, environmental influences)
+apply to hardware and are not run here; they belong to **IEC 61260-2:2016**
 (pattern evaluation) and **IEC 61260-3:2016** (periodic tests), which this page
 only summarises. Near Nyquist the bilinear transform warps the frequency axis
 and the bank carries no correction for it, so the stopband mask beyond the

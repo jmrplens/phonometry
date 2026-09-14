@@ -6,7 +6,7 @@ Where the [Absorbers](../absorbers/index.md) subsection asks
 how much energy a material removes from the field, this one asks what a
 *surface* does with the sound it returns: how much it throws off the specular
 direction and how evenly it spreads it. Two guides walk that ground, and a
-third family of surface measurements — pavements characterised where they lie —
+third family of surface measurements (pavements characterised where they lie)
 has its own subsection nested inside this group.
 
 [Diffusers and Their Coefficients](diffusers.md) is the
@@ -62,7 +62,7 @@ at low frequency, at grazing angles and over strongly absorbing surfaces, and
 it ignores edge diffraction, so it grades a well-depth sequence before it is
 built and does not replace an ISO 17497-2 measurement; the metadiffuser model
 is locally reacting on top of that, with no coupling between wells. Only the
-quadratic-residue depth sequence has a dedicated helper — primitive-root and
+quadratic-residue depth sequence has a dedicated helper: primitive-root and
 modulated arrangements are discussed as design guidance and enter through the
 explicit depth or reflection arguments. The inverse problem, solving resonator
 geometries for a target phase profile, is not automated: the workflow matches

@@ -68,8 +68,8 @@ rest of this page builds. Nothing in it is drawn: the colonnade is a boolean
 plane-wave packet with a Gaussian envelope one wavelength wide, launched at
 $x = 0.30$ m into a 4 m × 1 m rigid-walled hall whose two ends absorb through
 sponges hidden outside the frame. The carrier is 800 Hz, so the wavelength is
-42.9 cm and the 10 to 17 cm columns are roughly a quarter to two fifths of it
-— the regime in which a rigid cylinder both casts a readable shadow and
+42.9 cm and the 10 to 17 cm columns are roughly a quarter to two fifths of it:
+the regime in which a rigid cylinder both casts a readable shadow and
 re-radiates strongly, which is why the coda that fills the hall is structured
 rather than noise. That coda is deterministic multiple scattering: it is what
 a diffuse field looks like *before* any statistical assumption is made about
@@ -149,8 +149,8 @@ res.plot()                       # probe pressure histories (figure in section 5
 ```
 
 The time step is not an input. It follows from `cfl` and the largest sound
-speed in the map, and `res.dt` reports the value that was used — which is
-why the duration is given in seconds of simulated time and never in steps.
+speed in the map, and `res.dt` reports the value that was used. That is why
+the duration is given in seconds of simulated time and never in steps.
 
 The grid is index-based: cell ``(ix, iy)`` has its centre at
 ``((ix + 0.5) * dx, (iy + 0.5) * dx)`` metres, with rows plotted downward
@@ -202,7 +202,7 @@ precision" is literal: after the fill transient every column of the settled
 field carries the *same* float64 value, so the largest difference across a
 row is 0.0 and not merely small. "One-way" is not: the injection line leaks
 a little backwards, and what is left behind it is only small because the
-sponge is there to eat it — 1.4 × 10⁻⁴ of the field energy, that is
+sponge is there to eat it: 1.4 × 10⁻⁴ of the field energy, that is
 −38.4 dB, sits in the 20 sponge rows behind the line, but immediately behind
 the line itself the pressure is only about 26 dB down on the forward wave.
 Move the line away from its sponge, or forget the sponge, and that 26 dB is
@@ -252,15 +252,15 @@ and scatterers of any shape are just boolean arrays. A face is either open
 or closed, with nothing in between, so a surface that runs along a grid axis
 is represented exactly and every other surface becomes a **staircase** whose
 steps are one cell tall. Those steps scatter energy the real surface does
-not, they displace the effective surface by up to half a cell, and — because
-the error is a fixed fraction of a cell rather than of a wavelength — it does
-not shrink as the wave gets longer. It is worst at grazing incidence and at
+not, they displace the effective surface by up to half a cell. Because the
+error is a fixed fraction of a cell rather than of a wavelength, it does not
+shrink as the wave gets longer. It is worst at grazing incidence and at
 the top of the resolved band. The working rule is that a tilted or curved
 reflector needs a finer grid than the ten-cell dispersion rule alone would
 ask for, with the same diagnostic as for dispersion: halve $\Delta x$ and
 confirm that the scattered field converges rather than merely changing. That
 is why the meshed panel of section 4 runs at half a millimetre, far finer
-than its 17 cm wavelength requires — there the geometry, not the wavelength,
+than its 17 cm wavelength requires: there the geometry, not the wavelength,
 sets the resolution.
 
 Each domain side can carry its own boundary condition:
@@ -284,7 +284,7 @@ an interior surface an absorption coefficient. Two routes soften a surface:
 put it on a domain edge and give that edge an impedance, or back it with a
 lossy region through the `damping` map below. When an edge will do, the
 conversion from a target normal-incidence absorption coefficient is two
-steps — the reflection magnitude is $|R| = \sqrt{1-\alpha}$, and for a real
+steps: the reflection magnitude is $|R| = \sqrt{1-\alpha}$, and for a real
 impedance $Z = \rho c\,(1+R)/(1-R)$, so $\alpha = 0.5$ needs
 $Z \approx 5.83\,\rho c$ and $\alpha = 0.9$ about $1.92\,\rho c$. The caveat
 comes with it: $R$ is exact only at normal incidence, so a locally reacting
@@ -297,9 +297,9 @@ components at once. Because both fields decay together, a plane wave inside
 a uniform lossy region follows $k = (\omega - j\sigma)/c$: the amplitude
 falls exponentially in space at $\sigma/c$ nepers per metre while the
 characteristic impedance stays real at $\rho c$. That is an *equivalent
-fluid* — same sound speed, same density, frequency-independent loss — and it
-is the only volumetric loss the solver has, hence also the only way to make
-an *interior* surface absorb. Two routes to a value. As a stand-in for room
+fluid*: same sound speed, same density, frequency-independent loss. It is the
+only volumetric loss the solver has, hence also the only way to make an
+*interior* surface absorb. Two routes to a value. As a stand-in for room
 absorption, $\sigma = 6.91/T_{60}$ produces a $T_{60}$-second reverberant
 decay, so a 0.5 s decay is $\sigma = 13.8$ s⁻¹. As a sample, the loss per
 metre is $\sigma/c$ nepers ($8.69\,\sigma/c$ dB/m), and the value is tuned
@@ -417,19 +417,19 @@ run that was *computed* wrongly, and every one of them is a line or two:
 3. **No probe inside a sponge, an obstacle or a source cell.** All three
    read something that is not the field: an obstacle cell holds exactly
    0.0 for the whole run, a sponge cell reads the attenuated field on its
-   way out, and a soft-source cell reads mostly the injection — on the
+   way out, and a soft-source cell reads mostly the injection. On the
    barrier scene of section 5, a probe on the source cell peaks 6.7 times
    higher than probe A, 0.4 m away, and a probe inside the barrier reads
    exactly 0.0 for the whole run.
 4. **Apply the ten-cell rule with the *smallest* sound speed in the map**,
-   at the highest frequency the analysis will actually use — not with the
-   air value, and not with the highest frequency the source happens to
+   at the highest frequency the analysis will actually use, not with the
+   air value and not with the highest frequency the source happens to
    excite (section 3 sizes both).
 5. **Rerun at half the cell size and confirm the answer moves by less than
    the tolerance your claim needs.** The scheme is second order, so a
    dispersion-limited quantity should move about four times less at half the
    spacing; a quantity that moves by the same amount again is limited by
-   something else — the staircasing above, or the length of the record.
+   something else: the staircasing above or the length of the record.
 6. **For a scene meant to be anechoic, run it once with the scatterer
    removed** and check that the residual sits below the level you intend to
    report. That subtraction is exactly what `ContourPhasors.subtract()`
@@ -447,8 +447,8 @@ loss of the modelled sample through the library's own reduction chains (the
 
 ## 3. Sizing a run
 
-Section 6 derives the one rule most FDTD texts give — ten cells per shortest
-wavelength — and it decides only $\Delta x$. Four more numbers decide whether
+Section 6 derives the one rule most FDTD texts give: ten cells per shortest
+wavelength. It decides only $\Delta x$. Four more numbers decide whether
 a run says anything at all: the **source bandwidth**, the **run duration**,
 the **sponge thickness**, and, for a steady-state measurement, the
 **transient** you throw away before the **DFT window** you keep. Each of them
@@ -457,12 +457,12 @@ has a rule, and each of them fails quietly when it is wrong.
 **Source bandwidth.** A `GaussianPulse` of half-width `width` is
 $s(t) = A\,e^{-((t-t_0)/\text{width})^2}$, whose magnitude spectrum is
 $e^{-(\pi f\,\text{width})^2}$: it is 20 dB down at $f = 0.483/\text{width}$
-and 40 dB down at $0.683/\text{width}$. Work in the reader's direction —
+and 40 dB down at $0.683/\text{width}$. Work in the reader's direction:
 choose $f_\text{max}$, take $\Delta x$ from it, then take
 $\text{width} \ge 0.5/f_\text{max}$ and the pulse is at least 20 dB down
 where the grid stops resolving. Equivalently, in terms of the grid,
 $\text{width} \ge 4.83\,\Delta x/c_\text{min}$, which at $\Delta x = 1$ cm in
-air is $1.4 \times 10^{-4}$ s — and is why the examples here use
+air is $1.4 \times 10^{-4}$ s, which is why the examples here use
 $3 \times 10^{-4}$ s, exciting to about 1.6 kHz inside the 3.4 kHz the grid
 resolves. Energy above $f_\text{max}$ is not an error in itself; it simply
 travels at the wrong speed and comes back as a ripple tail behind the pulse.
@@ -476,7 +476,7 @@ minimum the domain crossing time $\sqrt{L_x^2 + L_y^2}/c$, plus one round
 trip to the reflector for every echo that matters. *Decay*: long enough for
 the feature to be visible above what is still ringing. *Spectrum*: a probe
 FFT resolves $1/T$, so separating two modes 3 Hz apart takes a third of a
-second of record however fine the grid — which is exactly why the room-mode
+second of record however fine the grid. This is exactly why the room-mode
 run below is 0.35 s long and the barrier run is 9 ms.
 
 **Sponge thickness.** The layer ramps an absorption rate $\sigma$
@@ -512,7 +512,7 @@ addition is −30 dB relative to the direct arrival at 27° from the normal,
 layer gives at normal incidence. A long shallow domain lined with sponges is
 therefore a duct, not a free field. The honest test is the one just
 described: move the boundary further out and confirm the probe trace does
-not change. Second, the sponge is not a place to stand — probes, sources and
+not change. Second, the sponge is not a place to stand: probes, sources and
 obstacles all belong clear of the layer (check 3 above).
 
 **Transient and window.** A steady-state measurement runs in two parts: fill
@@ -520,10 +520,9 @@ the domain, call `probe.reset()`, then integrate over an exact number of
 source periods. The transient to discard is the domain fill time
 $\sqrt{L_x^2+L_y^2}/c$, plus one traverse for each reflection that still
 matters, plus the source onset (`ramp_cycles / frequency`, three periods by
-default), plus the ring-up of any resonant geometry — roughly $Q$ periods,
-which is the whole reason the metadiffuser run below waits 8 ms where the
-bare monopole waits 4.5 ms: its necks and cavities are resonators and they
-have to fill. The window that follows should span an integer number of
+default), plus the ring-up of any resonant geometry (roughly $Q$ periods).
+That is why the metadiffuser run below waits 8 ms where the bare monopole
+waits 4.5 ms: its necks and cavities are resonators and they have to fill. The window that follows should span an integer number of
 source periods so the on-the-fly DFT sees no truncation; ten periods is
 plenty.
 
@@ -543,7 +542,7 @@ pressure and outward normal velocity on a closed rectangle of cell faces
 into complex accumulators (an on-the-fly DFT per point and frequency, so a
 continuous-wave run stores no time histories), and the integral propagates
 those phasors to infinity with the free-space Green function
-$-(j/4)\,H_0^{(2)}(kR)$ — the same construction full-wave FEM solvers use to
+$-(j/4)\,H_0^{(2)}(kR)$: the same construction full-wave FEM solvers use to
 report scattering patterns from near-field data. Two properties carry the
 scheme: the staggered grid already holds $v_n$ exactly on the contour
 faces, and any field whose sources lie *outside* the contour integrates to
@@ -591,9 +590,9 @@ whose NTFF polar response tracks the Fraunhofer prediction of
 subwavelength metadiffuser below.
 
 The far-field chain is what finally closes the metadiffuser loop end to
-end: the Table-1 panel of the paper — every slit, neck and cavity meshed
-at 0.5 mm — driven to steady state by a plane wave, captured on a contour
-and transformed, against the
+end: the Table-1 panel of the paper (every slit, neck and cavity meshed
+at 0.5 mm) is driven to steady state by a plane wave, captured on a contour,
+and transformed against the
 [`metadiffuser_polar_response`](/phonometry/reference/api/materials/metadiffuser/)
 model (TMM + Fraunhofer) of the materials module. That is the library-side
 counterpart of the TMM-vs-FEM comparison the metadiffuser paper itself
@@ -783,7 +782,7 @@ cross-check reproducing the analytic room modes.
 **What a run costs.** The work is cells × steps, and the single-threaded
 float64 stepping does of the order of $10^8$ cell-updates per second
 (measured: $8 \times 10^7$ on the machine that renders these figures). The
-barrier scene above is 200 × 300 cells for 728 steps —
+barrier scene above is 200 × 300 cells for 728 steps:
 $4.4 \times 10^7$ updates, half a second. The metadiffuser scene of
 section 4 meshes at 0.5 mm into 346 × 980 cells and runs about 14 000 steps:
 $4.8 \times 10^9$ updates, about a minute. The scaling between those two is
@@ -794,8 +793,8 @@ ten-cell rule is therefore a floor to sit on, not a target to beat.
 
 Memory follows the same arithmetic. The solver holds twelve `float64` maps
 (pressure, the two velocity components, the sound speed, the density, the
-bulk modulus, the face densities and the decay factors) — about 96 bytes per
-cell, 113 with an obstacle mask, so the metadiffuser scene lives in about
+bulk modulus, the face densities and the decay factors): about 96 bytes per
+cell, 113 with an obstacle mask. The metadiffuser scene thus lives in about
 39 MB. Stored snapshots are the knob nobody names: each one is another 8
 bytes per cell, so `snapshot_every=1` on that scene would ask for roughly
 38 GB. Choose the cadence from the number of frames you actually want; the
@@ -832,9 +831,9 @@ with a leading-order relative frequency error of magnitude
 $(1 - S^2)\,(k\,\Delta x)^2 / 24$ along the grid axes (the modelled frequency
 under-reads, so the signed error is negative), where
 $S = c\,\Delta t / \Delta x$ is the **per-axis** Courant number, which for
-square cells is the `cfl` value divided by $\sqrt{2}$ — the default
-`cfl = 0.6` gives $S = 0.424$ and $1 - S^2 = 0.82$;
-the error is largest exactly on-axis and vanishes along the cell diagonal
+square cells is the `cfl` value divided by $\sqrt{2}$. The default
+`cfl = 0.6` gives $S = 0.424$ and $1 - S^2 = 0.82$.
+The error is largest exactly on-axis and vanishes along the cell diagonal
 at the Courant limit $\mathrm{CN} = 1$. The practical rule is to resolve **at
 least 10 cells per shortest wavelength**, $\Delta x \le c_\text{min} / (10 f_\text{max})$
 with the smallest sound speed of the domain: at exactly 10 cells the
@@ -854,7 +853,7 @@ travels at the **group** speed, and differentiating the same dispersion
 relation gives
 $v_\mathrm{g}/c = \cos\theta / \sqrt{1 - S^2\sin^2\theta}$ with
 $\theta = k\,\Delta x / 2$, whose expansion is
-$1 - (1 - S^2)(k\,\Delta x)^2/8$ — the same law with 8 in place of 24, so a
+$1 - (1 - S^2)(k\,\Delta x)^2/8$: the same law with 8 in place of 24. Thus a
 wavepacket arrives three times later than the phase rule suggests. At 10
 cells per wavelength and the default `cfl` that is 4.1 %, not 1.4 %. And
 because it is a speed error, it is paid **per metre travelled**: the same
@@ -863,8 +862,8 @@ twenty-five.
 
 The clip below measures both statements. One 500 Hz tone burst is launched
 down three plane tubes that are identical in every respect except
-$\Delta x$ — 137.2, 68.6 and 34.3 mm, which is 5, 10 and 20 cells per
-wavelength — and the exact continuous answer travels behind each trace in
+$\Delta x$ (137.2, 68.6 and 34.3 mm, which is 5, 10 and 20 cells per
+wavelength). The exact continuous answer travels behind each trace in
 grey, so the numerical packet's lag is a gap on screen rather than a number
 in a table.
 
@@ -989,9 +988,9 @@ boundary (Eq. 4.32) and the frequency-independent real-impedance boundary
 (Eqs. 4.33-4.35), exposed through `fdtd_simulation`/ `FDTD2D` with
 `GaussianPulse`, `CWSource` and `SignalSource` sources, pressure probes and a
 rasterised `obstacle_mask`, with `damping` as the only volumetric loss.
-Section 3 derives the four sizing rules the resolution rule does not cover —
+Section 3 derives the four sizing rules the resolution rule does not cover:
 the source bandwidth, the run duration, the sponge thickness in cells, and the
-transient and DFT window of a steady-state measurement — and section 2 lists
+transient and DFT window of a steady-state measurement. Section 2 lists
 the six checks that say whether a run is usable. Validated against closed-form
 oracles: the rigid-room normal modes (Kuttruff §3), free-field arrival times
 and cylindrical 2D decay, the rigid-wall image echo, the impedance reflection
@@ -1051,9 +1050,9 @@ number is then $S = \mathrm{cfl}/\sqrt{2} = 0.424$, so the $1 - S^2$ factor is
 0.82), and halving $\Delta x$
 quarters the error (the scheme is second order). With $\Delta x = 1$ cm the
 10-cell point in air sits at roughly 3.4 kHz. That bound is a *phase* speed
-error; a pulse travels at the group speed and is three times slower still —
-4.1 % at ten cells — and pays it per metre travelled, which
-[section 6 measures on three grids](#6-numerical-dispersion-and-accuracy).
+error; a pulse travels at the group speed and is three times slower still:
+4.1 % at ten cells, and it pays this per metre travelled. See
+[section 6](#6-numerical-dispersion-and-accuracy) for the measurement on three grids.
 
 ### How wide should the source pulse and the sponge be?
 

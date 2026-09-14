@@ -25,7 +25,7 @@ microphone, with two more 150 m to each side.
 
 The library implements the method, not the data: **no hemisphere database
 ships with phonometry, and there is no NORAH file reader**, so the arrays
-below are assembled by the reader — from a flight-test campaign that
+below are assembled by the reader: from a flight-test campaign that
 de-propagates each emission direction back to the 60 m reference sphere, or
 from the NORAH2 reference database, which covers eleven rotorcraft types.
 
@@ -169,18 +169,18 @@ A hovering or idling helicopter is measured differently from a flyover: on a
 **ring of ground microphones** around the stationary aircraft (the CAEP
 in-ground hover practice the guidance points at), one band spectrum per ring
 bearing (0° at the nose, positive to starboard), reduced to the ring's polar
-distance — commonly 70 m rather than the flyover database's 60 m. The
-guidance defines four conditions — in-ground hover (HIGE), out-of-ground
-hover (HOGE), reduced-rpm idle and full-rpm idle — and three approaches in
+distance (commonly 70 m rather than the flyover database's 60 m). The
+guidance defines four conditions: in-ground hover (HIGE), out-of-ground
+hover (HOGE), reduced-rpm idle and full-rpm idle, and three approaches in
 descending priority: measure all four rings (Approach 1), measure the HIGE
 ring and the other three in the 0° direction only (Approach 2), or measure
 the HIGE ring alone and apply fixed offsets (Approach 3).
 
 `hover_ring_hemisphere` extends the ring to a full `RotorcraftHemisphere`
 "assuming constant directivity in φ": each bin $(\varphi, \theta)$ reads the
-ring at the bearing $\pm\theta$ of its own half — port bins from negative
+ring at the bearing $\pm\theta$ of its own half: port bins from negative
 bearings, starboard bins from positive ones, and the $\varphi = 0$ column
-under the aircraft takes the energy mean of the $\pm\theta$ ring values —
+under the aircraft takes the energy mean of the $\pm\theta$ ring values,
 with periodic interpolation in the energy domain. The NORAH2 reference
 implementation reads the same ring by the horizontal bearing of the emission
 direction instead (constant directivity in elevation, `mapping="bearing"`);
@@ -189,7 +189,7 @@ steep emission angles.
 
 `hover_derived_hemisphere` derives HOGE and the idles from the HIGE
 hemisphere by a uniform level offset: a measured 0°-direction difference
-(Approach 2, passed as `offset_db`), or the published Approach 3 constants —
+(Approach 2, passed as `offset_db`), or the published Approach 3 constants:
 +12 dB for HOGE, −12 dB for reduced-rpm idle and −2.5 dB for full-rpm idle,
 all from the HIGE disk. The guidance warns that those constants come from
 measurements with inverted microphones on ground plates and may not hold for

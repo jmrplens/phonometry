@@ -17,7 +17,7 @@ sensation is specified in sones. Reaching for the wrong one is the commonest
 mistake in this area.
 
 The quantities are few. **Loudness** is reported in LUFS by the EBU and in LKFS
-by the ITU — identical units — and **1 LU is 1 dB**, so a loudness difference
+by the ITU (identical units) and **1 LU is 1 dB**, so a loudness difference
 and a level difference are the same size. **EBU R 128** sets the delivery
 target at **−23.0 LUFS** with a true-peak ceiling of **−1 dBTP**. The **loudness
 range**, in LU, says how far the programme moves between its quiet and loud
@@ -26,13 +26,13 @@ normalisation.
 
 Four documents own four different things, and the section is easier to read once
 that is clear. **ITU-R BS.1770** defines the algorithm: the K-weighting
-pre-filter — a roughly +4 dB spherical-head shelf followed by the RLB high-pass
-— the mean square in 400 ms blocks at 75 % overlap, the channel-weighted sum,
+pre-filter (a roughly +4 dB spherical-head shelf followed by the RLB high-pass),
+the mean square in 400 ms blocks at 75 % overlap, the channel-weighted sum,
 and the **two-stage gate** that makes the number usable on real programme (an
 absolute gate at −70 LKFS drops digital silence, then a relative gate 10 LU
 below the mean of the survivors drops the quiet passages that would otherwise
 dilute a dialogue level). **EBU R 128** sets the target and the ceiling.
-**EBU Tech 3341** defines the EBU Mode meter — the momentary, short-term and
+**EBU Tech 3341** defines the EBU Mode meter: the momentary, short-term and
 integrated time scales, and the compliance test set. **EBU Tech 3342** defines
 the loudness range. True peak is measured on an oversampled signal because an
 inter-sample peak can exceed every sample value, so a file that reads −0.2 dBFS
@@ -54,10 +54,10 @@ anywhere in it.
   the ITU-R BS.1770 K-weighting, gated 400 ms blocks and channel-weighted sum,
   the EBU R 128 target and ceiling, the Tech 3341 momentary, short-term and
   integrated meters, the Tech 3342 loudness range, the Annex 2 oversampled true
-  peak and the Annex 3 channel weights for advanced sound systems — validated
+  peak and the Annex 3 channel weights for advanced sound systems, validated
   against the EBU test signals and ending in an EBU R 128 report fiche.
 - [Quasi-peak programme meter (ITU-R BS.468-4)](quasi-peak.md):
-  the psophometric noise meter — the clause 2 quasi-peak detector, its eleven
+  the psophometric noise meter, the clause 2 quasi-peak detector, its eleven
   Table 2 and Table 3 acceptance windows, the clause 2.6 calibration that makes
   a reading dBqps, and the three fitted time scales those windows identify only
   to within a factor of 1.61 to 2.09.
@@ -78,7 +78,7 @@ BS.1770-5 **Annex 4, object-based audio, is out of scope**, and the library
 implements no spatial renderer, so an object-based programme has to be
 rendered to a loudspeaker layout before any of this applies. **EBU Tech 3343**
 is cited as production practice around these numbers, not as an algorithm:
-nothing here runs it. And loudness normalisation itself — the gain change, and
-any limiting that follows it — is a production step this library does not
+nothing here runs it. And loudness normalisation itself (the gain change, and
+any limiting that follows it) is a production step this library does not
 perform: it measures the programme and tells you the offset, and applying it
 is your encoder's job.

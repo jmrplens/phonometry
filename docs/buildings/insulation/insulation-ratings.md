@@ -431,7 +431,7 @@ intensity, survey or flanking guides. The façade single number of
 their own pages rather than duplicating them. One member of the family is
 deliberately absent: the A-weighted maximum impact level of **ISO 717-2:2020
 Annex D**, which rates the rubber ball and the bang machine. It shifts no curve
-at all — it is an energy sum of A-weighted band levels — so it belongs with the
+at all (it is an energy sum of A-weighted band levels), so it belongs with the
 sources it rates, in
 [Heavy and soft impact sources](heavy-impact-sources.md).
 

@@ -21,9 +21,9 @@ hearing-damage model of ISO 1999.
 
 A good entry point is [Loudness](psychoacoustics/loudness.md): it introduces
 the perceptual scale (the sone) and the auditory models that most other
-metrics in this section reuse or extend. The derivations behind these methods —
-the critical-band and excitation-pattern models, the masking formulations and
-the modulation-transfer chain — are gathered on the [perception theory
+metrics in this section reuse or extend. The derivations behind these methods
+(the critical-band and excitation-pattern models, the masking formulations and
+the modulation-transfer chain) are gathered on the [perception theory
 page](../reference/theory/perception.md), which the individual guides
 cite clause by clause.
 
@@ -40,10 +40,10 @@ is its anchor: the sound that reads exactly 1.
 | Roughness | asper | 1 kHz tone at 60 dB, fully modulated at 70 Hz | 0.2 asper (informative) | [Sound Quality Metrics](psychoacoustics/sound-quality.md) |
 | Fluctuation strength | vacil | the same carrier modulated at 4 Hz | 0.2 vacil (informative) | [Sound Quality Metrics](psychoacoustics/sound-quality.md) |
 | Tonality | tu_HMS | 1 kHz tone at 40 dB SPL | 0.4 tu_HMS (informative) | [Sound Quality Metrics](psychoacoustics/sound-quality.md) |
-| Tone audibility | dB | — (a level difference above masking) | ISO 1996-2 adjustment | [Tone audibility](psychoacoustics/tone-audibility.md) |
+| Tone audibility | dB | (a level difference above masking) | ISO 1996-2 adjustment | [Tone audibility](psychoacoustics/tone-audibility.md) |
 | STI | 0 to 1 | — | Annex F letters, U to A+ | [Speech Transmission Index](speech/speech-transmission.md) |
 | SII | 0 to 1 | — | none standardised | [Speech Intelligibility Index](speech/speech-intelligibility.md) |
-| Threshold shift | dB HL | — (a difference of two hearing levels) | ISO 1999 statistics | [Noise-induced hearing loss](hearing/noise-induced-hearing-loss.md) |
+| Threshold shift | dB HL | (a difference of two hearing levels) | ISO 1999 statistics | [Noise-induced hearing loss](hearing/noise-induced-hearing-loss.md) |
 
 Loudness, sharpness, roughness and fluctuation strength are **ratio scales
 with no pass/fail line**: twice the number means twice the sensation, so a
@@ -119,7 +119,7 @@ The hearing threshold, what noise does to it, and how exposure is measured.
 model on these pages predicts what a population, or a standard listener, would
 perceive from a calibrated signal: none of them runs an audiometric session,
 none diagnoses a hearing loss, and ISO 1999 explicitly declines to define a
-hearing handicap or a compensable fence — that line is national regulation,
+hearing handicap or a compensable fence (that line is national regulation),
 and nothing here applies one. Every prominence and audibility verdict is
 likewise the numeric criterion only: ECMA-418-1 also requires aural
 confirmation of a prominent tone, and that stays with you.
@@ -133,7 +133,7 @@ loudness summation.
 and not a percentage of words understood, because that mapping is fitted per
 listening-test corpus; the SII returns an audibility fraction and not a score;
 and no page predicts annoyance in a community, which is a social-survey
-quantity rather than a psychoacoustic one — the community indicators are
+quantity rather than a psychoacoustic one: the community indicators are
 [Environment and transport](../environment/index.md).
 
 Finally, these models start from a **calibrated** signal or spectrum in

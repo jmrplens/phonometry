@@ -142,16 +142,16 @@ The clip below is that formula as a field. It is the
 once at 100 Hz and once at 500 Hz, each with a barrier-free reference run over
 the same ground so the annotated insertion loss is a true one. The geometry
 fixes the path difference at 1.06 m for the receiver it marks, so the Fresnel
-number is $N = 0.62$ at 100 Hz and $N = 3.1$ at 500 Hz — the same screen, a
-factor of five apart in $N$ purely because $\lambda$ changed — and the field
+number is $N = 0.62$ at 100 Hz and $N = 3.1$ at 500 Hz (the same screen, a
+factor of five apart in $N$ purely because $\lambda$ changed), and the field
 shows what that buys: about 8 dB against about 17 dB. Two things are worth
 watching for. The edge of the lit region running down from the top of the
 screen is the shadow boundary, the $N \to 0$ locus where the formula bottoms
 out at 5 dB; and inside the shadow the field is a cylindrical wave centred on
 the top of the screen, which is what "the edge acts as a secondary source"
 looks like. One caveat: the ground in the clip is perfectly rigid, so it shows
-diffraction alone and none of the finite-impedance ground effect of section 1
-— the coherent four-path model below adds that, and its curve swings tens of
+diffraction alone and none of the finite-impedance ground effect of section 1;
+the coherent four-path model below adds that, and its curve swings tens of
 decibels where this one is smooth.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_barrier.gif" alt="Animation: a point source behind a thin 2.5 metre rigid barrier on reflecting ground, simulated at 100 Hz and 500 Hz side by side; the long wavelength diffracts over the edge and fills the shadow zone, the short wavelength is cast into a deep clean shadow" width="640" height="360" loading="lazy"></picture>
@@ -393,7 +393,7 @@ infrastructure for the meteorological schemes of Nord2000 and CNOSSOS.
 (`ground_effect`; Attenborough Eq. 2.40a/c, Salomons Eq. 3.2/D.58, with the
 Faddeeva-function boundary-loss factor), its hard-ground +6 dB,
 grazing-incidence and reciprocity limits pinned as tests; and wave-theoretic
-barrier diffraction in `barrier_insertion_loss` — the Kurze-Anderson closed form
+barrier diffraction in `barrier_insertion_loss`: the Kurze-Anderson closed form
 (`kurze_anderson_attenuation`, Bies Eq. 5.138), the exact rigid half-plane
 (MacDonald / Hadden & Pierce, Attenborough Eqs. 9.19-9.20), thick barriers
 through the double-edge Fresnel number (Bies Eq. 5.157) and the coherent
@@ -404,7 +404,7 @@ non-turbulent atmosphere; a vertical sound-speed gradient is the subject of
 [atmospheric refraction](atmospheric-refraction.md) instead. The coherent
 barrier-on-ground model weights all four diffracted paths with a single
 reflection coefficient $Q$ computed over the overall source-receiver geometry,
-not with a separate coefficient per image path — so it is coherent and
+not with a separate coefficient per image path, so it is coherent and
 reciprocal, but it is not a boundary-element solution.
 
 ## See also

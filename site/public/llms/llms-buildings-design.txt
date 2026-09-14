@@ -33,7 +33,7 @@ every path is formed per band, and the result shows which path dominates each
 band rather than only whether the room passes.
 
 **Which of the two do you run?** Run the simplified model when what you have is
-catalogue weighted ratings — $R_\mathrm{w}$, $\Delta L_\mathrm{w}$, a mass per unit area — and the
+catalogue weighted ratings such as $R_\mathrm{w}$, $\Delta L_\mathrm{w}$, and a mass per unit area, and the
 question is whether the partition meets a limit. Run the detailed one when you
 have per-band element and junction spectra, or the material properties the
 standard can calculate them from, and the question is *which path to fix in
@@ -85,7 +85,7 @@ reissued by ISO as a second edition, ISO 12354-1:2017 and ISO 12354-2:2017,
 which is not word for word the earlier text: where a formula changed between the
 prints, the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/) records both. Parts
 3 to 6 keep their EN designation in the editions used here. Every guide names
-the edition it was read from — EN 12354-1:2000 and EN 12354-2:2000 for the
+the edition it was read from: EN 12354-1:2000 and EN 12354-2:2000 for the
 simplified models on
 [Predicting Sound Insulation](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/),
 including the tabulated flanking correction $K$ that the 2017 impact part
@@ -158,9 +158,9 @@ Pages elsewhere on the site that this section leans on:
 **A prediction is only as good as the element data you feed it, and the
 library takes that data as given.** The element ratings, the junction indices
 and the covering improvements are parameters the entry points consume,
-supplied from measurement or computed with this section's own estimators —
-the Annex E junction catalogue, the floating-floor and lining improvement
-laws, the Annex B homogeneous-element chain and the panel-physics models —
+supplied from measurement or computed with this section's own estimators
+(the Annex E junction catalogue, the floating-floor and lining improvement
+laws, the Annex B homogeneous-element chain and the panel-physics models),
 and nothing checks the numbers you pass. Only the structure-to-airborne
 adjustment terms of EN 12354-5 Annexes D and F have no estimator here at all
 and must come from the standard's own tables. The simplified prediction page
@@ -178,7 +178,7 @@ assumes a frequency-independent driving-point impedance, so a joisted or
 battened lightweight floor is outside it; soft coverings are treated as linear
 springs; there is no per-band prediction of a lining's improvement, because
 Annex D is a single-number method; and heavy impact sources such as the rubber
-ball are not covered by any of these models at all — their rating is [Heavy
+ball are not covered by any of these models at all: their rating is [Heavy
 and Soft Impact
 Sources](https://jmrplens.github.io/phonometry/buildings/insulation/heavy-impact-sources/).
 
@@ -542,7 +542,7 @@ converted to their in-situ values before the paths are formed. Use the
 simplified model here when only the weighted element ratings are known and the
 question is whether the room passes; use the detailed one when the element
 spectra exist and the question is which path sets which band. The element
-inputs themselves — $R_\mathrm{w}$, $\Delta R_\mathrm{w}$, $\Delta L_\mathrm{w}$, mass per unit area —
+inputs themselves ($R_\mathrm{w}$, $\Delta R_\mathrm{w}$, $\Delta L_\mathrm{w}$, mass per unit area)
 are taken as given, from laboratory data or from the mass-law estimates of
 [Predicting panel sound insulation](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/). **EN 12354-5**
 (service equipment) is in
@@ -981,8 +981,8 @@ imp.report("impact-prediction.pdf")     # L'n,w, five paths
 
 The example fiches, regenerated with `make reports`, are kept rendered in the
 repository; click a preview to open the PDF. Both show the Annex L building of
-this page — the same elements, junctions and floating floor the tables above
-are built from — so the share-of-energy table is the answer to the question
+this page (the same elements, junctions and floating floor the tables above
+are built from), so the share-of-energy table is the answer to the question
 this whole page exists for: which path carries the sound.
 
 [![ISO 12354-1 detailed airborne prediction example report: an identification header with the 20 m2 separating floor and the two 50 m3 dwellings, the share-of-energy table of all thirteen paths (the 2d flanking path largest at 18.0 %, the direct Dd path 6.3 %), the per-band figure stacking each path's contribution under the apparent sound reduction index curve from 50 Hz to 5 kHz, the boxed predicted R'w = 57 dB, the detailed model's 1.5 dB to 2.5 dB standard deviation, and a PASS against a requirement of 52 dB](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_detailed_airborne_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/iso12354_detailed_airborne_example.pdf)
@@ -1781,7 +1781,7 @@ range:
 | `gap` | float | m | > 0 | Cavity depth $d$ |
 | `cavity_medium` | `PorousMediumResult` | — | default `None` | Porous fill; lowers $f_0$ |
 | `width` (slit) | float | m | > 0 | Slit width $w$. **Second** positional argument of both `slit_transmission_coefficient` and `slit_resonance_frequencies` |
-| `depth` (slit) | float | m | > 0 | Slit depth $d$ (the wall thickness). **Third** positional argument of `slit_transmission_coefficient`, **first** of `slit_resonance_frequencies` — the two functions take the pair in opposite orders |
+| `depth` (slit) | float | m | > 0 | Slit depth $d$ (the wall thickness). **Third** positional argument of `slit_transmission_coefficient`, **first** of `slit_resonance_frequencies`: the two functions take the pair in opposite orders |
 | `field` / `position` (slit) | str | — | `'diffuse'`/`'normal'`, `'mid'`/`'edge'` | Incident field and slit location |
 | `radius` / `depth` (hole) | float | m | > 0 | Circular-aperture radius $a$ / depth $d$ |
 | `areas` / `reduction_indices` | seq | m² / dB | length $N$ | Composite elements (1-D or (N, bands)) |
@@ -1813,7 +1813,7 @@ cavity boost (Eqs 7.62-7.64); Hopkins' Gomperts slit and the Wilson & Soroka
 circular hole with the area-weighted composite sum (Eq. 4.92); the
 Leppington/Maidanik plate radiation efficiency (Eqs 2.227-2.230); and the
 Cremer Table 5.1 point impedances and mobilities of infinite plates and beams
-with the injected-power relation — through `single_panel_transmission_loss`,
+with the injected-power relation, via `single_panel_transmission_loss`,
 `double_wall_transmission_loss`, `slit_transmission_coefficient`,
 `composite_transmission_loss`, `radiation_efficiency`,
 `infinite_plate_impedance`, `infinite_beam_mobility` and `injected_power`.
@@ -1838,7 +1838,7 @@ neither route predicts. Only the sinusoidal corrugation has equivalent
 stiffnesses here; trapezoidal cladding needs its own, from the literature
 Vigran cites. On the wall-tie side the inputs are printed data but no published
 $R$ of a bridged masonry cavity wall is tabulated, so the per-band penalty the
-ties cause has **no numeric oracle** — only the resonance shift is anchored
+ties cause has **no numeric oracle**: only the resonance shift is anchored
 (Hopkins Fig. 4.35, 26 Hz to 50 Hz). The coupling loss factor is not fed into a
 full statistical energy analysis: combining it with the airborne path would
 need the whole room-plate-cavity-plate-room chain.
@@ -2131,8 +2131,8 @@ whose floating-floor estimate this page reproduces from the EN 29052-1
 dynamic stiffness, with the worked floor of its Annex G (context for design,
 not a measurement).
 
-**Not covered.** The mock-up facility itself — the plate dimensions, the
-resilient supports, the tapping-machine positions of Clause 5 — is not checked:
+**Not covered.** The mock-up facility itself (the plate dimensions, the
+resilient supports, the tapping-machine positions of Clause 5) is not checked:
 the functions consume measured acceleration levels wherever they came from. The
 ISO 12354-2:2017 Annex C floating-floor formulae are quoted here as design aids
 and evaluated inline; the helpers that wrap them, the tapping-machine force
@@ -2751,8 +2751,8 @@ print(float(building.source_mobility_from_levels(lvf, lfb)))      # |Y_S,eq| in 
 ```
 
 Two pieces of the standard stay on the operator's side of the line. Formula 16
-— the equivalent point mobility of the plate as the arithmetic mean of
-$\mathrm{Re}\{Y\}$ over its contact points — is not implemented: the functions
+(the equivalent point mobility of the plate as the arithmetic mean of
+$\mathrm{Re}\{Y\}$ over its contact points) is not implemented: the functions
 above take an already-known plate mobility rather than deriving it from
 per-point measurements. The Annex C power-substitution method is not
 implemented either; the library takes an already-averaged $L_v$, so a
@@ -3000,8 +3000,8 @@ $$
 
 with $S_0 = A_0 = 10\ \text{m}^2$, and the paths combine energetically (Formula 17).
 
-$D_\mathrm{sa}$ is normally **negative** — the standard's own Annex I columns run from
-about $-14$ dB at 63 Hz to $-45$ dB at 2 kHz — and Formula (18a) subtracts it,
+$D_\mathrm{sa}$ is normally **negative** (the standard's own Annex I columns run from
+about $-14$ dB at 63 Hz to $-45$ dB at 2 kHz), and Formula (18a) subtracts it,
 so a negative value *raises* the predicted level. Annex F.2 gives the working
 form $D_{\mathrm{sa},i} = 10\log_{10}(400 f_{\mathrm{c},i}\sigma_i / m_i f^2)$, which is
 `structure_to_airborne_adjustment`; passing a positive number in its place

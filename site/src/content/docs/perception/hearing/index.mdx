@@ -43,31 +43,31 @@ the [Speech section](/phonometry/perception/speech/).
 
 **Three pages, three different decibels**, and keeping them apart is most of the
 work. A **hearing threshold level** is in dB HL, measured relative to the
-audiometric zero, so 0 dB HL is a *different* sound pressure at every frequency
-— exactly what ISO 389-7 tabulates. A **daily exposure level** is in
+audiometric zero, so 0 dB HL is a *different* sound pressure at every frequency,
+exactly what ISO 389-7 tabulates. A **daily exposure level** is in
 A-weighted decibels normalised to eight hours: an energy dose of the sound
 outside the ear, with no listener in it. A **threshold shift** is a difference
 of two dB HL values, so it may be added to a hearing level and never to a sound
 pressure level. The chain between them runs one way only: ISO 9612 delivers a
 single A-weighted LEX,8h into the ISO 1999 formulae, which return dB HL. The
 only bridge back from hearing level to physical sound pressure is the ISO 389-7
-reference threshold on the threshold page — which is also what the SII needs
+reference threshold on the threshold page, which is also what the SII needs
 when a raised threshold is used as an input.
 
 ## Pages in this section
 
 In the order the chain runs.
 
-- **Baseline** — [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
+- **Baseline**: [Hearing threshold (age and reference zero)](/phonometry/perception/hearing/hearing-threshold/):
   the ISO 7029:2017 age-related threshold distribution and the ISO 389-7:2005
   reference threshold of hearing.
-- **Exposure** — [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/):
+- **Exposure**: [Occupational Noise Exposure (ISO 9612)](/phonometry/perception/hearing/occupational-exposure/):
   the three measurement strategies for LEX,8h with the Annex C uncertainty
   budget.
-- **Damage** — [Noise-induced hearing loss (ISO 1999)](/phonometry/perception/hearing/noise-induced-hearing-loss/):
+- **Damage**: [Noise-induced hearing loss (ISO 1999)](/phonometry/perception/hearing/noise-induced-hearing-loss/):
   NIPTS and its population distribution, and the combination with age into
   HTLAN.
-- **Protection** — [Hearing Protectors (ISO 4869-2)](/phonometry/perception/hearing/hearing-protectors/):
+- **Protection**: [Hearing Protectors (ISO 4869-2)](/phonometry/perception/hearing/hearing-protectors/):
   the octave-band, HML and SNR methods that say what a protector actually
   leaves at the ear, and the assumed protection value all three start from.
 
@@ -76,13 +76,13 @@ In the order the chain runs.
 <Scope>
 <ScopeClaim status="not-covered">
 **Nothing here is a verdict about a person.** ISO 1999 does not define a
-hearing handicap or a compensable fence — that line is set by national
+hearing handicap or a compensable fence. That line is set by national
 regulation, and the library applies none of it, so you supply and check the
 criterion yourself. The exposure side stops one step later: the LEX,8h and its
 one-sided 95 % upper limit come out of ISO 9612, and the fiche written by
 `ExposureResult.report()` does compare the LEX,8h against the Directive
 2003/10/EC action and limit values (80, 85 and 87 dB(A)) and issues the
-PASS/FAIL verdict against the limit value — but that is a verdict on an
+PASS/FAIL verdict against the limit value. But that is a verdict on an
 unprotected exposure, not on a person: the effective exposure behind hearing
 protectors, and any stricter national transposition, are still yours to check.
 </ScopeClaim>

@@ -87,7 +87,7 @@ reverberation time, to
 carries the raw level difference `d`, the standardized `dnt` and, when `area`
 and `volume` are given, the apparent `r_prime`. If a single loudspeaker was
 moved between positions, repeat that for each position and combine the
-*results* with Formula (6), not the levels — see
+*results* with Formula (6), not the levels; see
 [Taking the measurement](#taking-the-measurement-iso-16283-1-clauses-7-and-9).
 Impact measurements go through
 `building.impact_insulation(li, t2, volume=V)`, and either spectrum is rated
@@ -131,7 +131,7 @@ by its area, and is what a comparison against a laboratory $R_\mathrm{w}$ or an 
 prediction needs. Measure once, then report the quantity the requirement is
 written in and say which it is: an $R'_\mathrm{A}$ cannot be checked against a
 $D_\mathrm{nT,A}$ limit without converting through the room's $T$ and the partition
-area first — see
+area first; see
 [Spanish Building Code (CTE DB-HR)](/phonometry/buildings/insulation/spanish-building-code/),
 which states its between-rooms requirement in $D_\mathrm{nT,A}$ and its
 partition-wall requirement in $R_\mathrm{A}$.
@@ -199,7 +199,7 @@ the same type, driven at the same level by similar but uncorrelated signals,
 and each must meet the Annex A directivity requirement. The signal is steady
 with a continuous spectrum, and the energy-average source-room level must not
 change by more than 8 dB between adjacent one-third-octave bands, at least
-above 100 Hz — shape the spectrum (a graphic equaliser is usually needed) or
+above 100 Hz: shape the spectrum (a graphic equaliser is usually needed) or
 fall back to serial band-limited measurements. Loudspeakers stand at least
 0.5 m from any boundary, preferably at least 1.0 m from the separating
 partition, measured to the centre of the nearest speaker unit; different
@@ -208,7 +208,7 @@ must be at least 0.7 m apart, and at least two of them at least 1.4 m apart.
 When the floor is the test element and the loudspeaker is in the upper room,
 its base sits at least 1.0 m above the floor.
 
-**The microphones (Clause 7.3).** A minimum of **five** positions per room —
+**The microphones (Clause 7.3).** A minimum of **five** positions per room,
 and, with a single loudspeaker moved between positions, five per room *per
 loudspeaker position*. No two positions may lie in the same plane relative to
 the room boundaries, and the set must not form a regular grid.
@@ -244,7 +244,7 @@ laboratory** rule used on
 [Laboratory Insulation Measurement](/phonometry/buildings/insulation/insulation-lab/),
 whose upper threshold is 15 dB rather than 10 dB. Applied to field data it
 subtracts energy in the 10-15 dB margin band where ISO 16283-1 asks for
-nothing — up to 0.458 dB at a 10 dB margin — and since it acts on the
+nothing (up to 0.458 dB at a 10 dB margin), and since it acts on the
 receiving room that lands as over-reported insulation, band for band, in $D$.
 Use the three-regime expression above for field levels.
 
@@ -287,8 +287,8 @@ print(round(float(naive.dnt[0]), 1), building.weighted_rating(naive.dnt).rating)
 ### Small rooms: the low-frequency procedure (Clause 8)
 
 This one is easy to miss and it is **mandatory**. When the source and/or
-receiving room has a volume smaller than 25 m³ — calculated to the nearest
-cubic metre, so a 25.4 m³ bedroom does not trigger it and a 24.4 m³ one does —
+receiving room has a volume smaller than 25 m³ (calculated to the nearest
+cubic metre, so a 25.4 m³ bedroom does not trigger it and a 24.4 m³ one does),
 the 50 Hz, 63 Hz and 80 Hz one-third-octave bands must additionally be measured
 in the corners of that room (Clause 6 and Clause 8.1). Most European bedrooms
 and every bathroom fall under the threshold, so this is the normal case in
@@ -387,7 +387,7 @@ the receiving-room volume. Note the **minus** sign: more reverberation
 The tapping machine is not the only source ISO 16283-2 specifies. Its hammers
 deliver a hard, quasi-stationary excitation whose energy sits above 100 Hz,
 which says almost nothing about the slow low-frequency thumps occupants
-actually complain about — a child jumping, an adult walking barefoot. For those,
+actually complain about: a child jumping, an adult walking barefoot. For those,
 the same standard specifies a **rubber ball** (Annex A), rated through a
 different engine entirely: a Fast-weighted maximum level and the A-weighted sum
 of ISO 717-2 Annex D, not a shifted reference curve. It has its own guide,
@@ -425,7 +425,7 @@ values (thirds $L'_\mathrm{nT,w} = 79$, $C_\mathrm{I} = -11$; octave 54, $C_\mat
 The sign of the scale reverses here: **lower is better** for an impact
 quantity. National limits for dwellings sit in the 50 to 60 dB range, so
 $L'_\mathrm{nT,w} = 79$ dB is a bare structural floor with no covering and no floating
-layer, failing by roughly 20 dB — the Annex C example is a worst case, not a
+layer, failing by roughly 20 dB. The Annex C example is a worst case, not a
 typical one. What it takes to close a gap of that size is a floating floor on a
 resilient layer or a decoupled ceiling, not a carpet; see
 [Predicting Sound Insulation (EN 12354)](/phonometry/buildings/design/insulation-prediction/)
@@ -621,8 +621,8 @@ print(building.satisfies_lower_requirement(52.0, uc.expanded_uncertainty, 50.0))
 That is the whole content of `satisfies_lower_requirement`: the measured 52.0
 minus the one-sided expanded uncertainty 1.48 is 50.52, which still clears
 50.0, so conformity can be *declared* rather than merely observed. The choice
-of factor is the point. Reporting a value is a two-sided statement — the true
-value lies somewhere in an interval — and takes `k = 1.96`. Declaring
+of factor is the point. Reporting a value is a two-sided statement (the true
+value lies somewhere in an interval) and takes `k = 1.96`. Declaring
 conformity is a one-sided statement: only the lower end matters, because
 nothing is at stake if the wall is better than claimed, so `k = 1.65` gives the
 same 95 % confidence on the side that counts. Using the two-sided factor here
@@ -723,20 +723,20 @@ engines.
 <ScopeClaim status="not-covered" label="Not covered">
 Every field function here takes levels that the caller has already corrected
 for background noise (Clause 9.2 of ISO 16283-1). The *measurement* of the
-background level — source off, same positions, same averaging — is the
+background level (source off, same positions, same averaging) is the
 operator's job, and nothing here verifies that the 6 dB floor was met; the
 correction itself is three lines of NumPy, written out under [Correcting for
 background noise](#correcting-for-background-noise-clause-92) above.
 (`building.background_correction` is the ISO 10140-4 *laboratory* variant and
 does not match the field thresholds.) ISO 16283-1/-2's own position
-requirements — the counts, distances and placements of [Taking the
-measurement](#taking-the-measurement-iso-16283-1-clauses-7-and-9) — are
+requirements (the counts, distances and placements of [Taking the
+measurement](#taking-the-measurement-iso-16283-1-clauses-7-and-9)) are
 documented here and checked nowhere: energy-averaging happens once positions
 are supplied, but nothing verifies how many were taken or where. The
 low-frequency procedure of [Small
-rooms](/phonometry/buildings/insulation/low-frequency-procedure/) *is* implemented —
+rooms](/phonometry/buildings/insulation/low-frequency-procedure/) *is* implemented:
 the 25 m³ trigger, Formula (12), Formula (13) and the 63 Hz octave
-reverberation time of Clause 10.4 — but it too is fed corner levels the
+reverberation time of Clause 10.4, but it too is fed corner levels the
 operator measured, and the only sampling requirement it enforces is a warning
 below the four corners per source position Clause 8.3 asks for. The other members of the family are covered by their own guides: the
 façade part ISO 16283-3 ([Façade Sound

@@ -15,7 +15,7 @@ pure-tone coefficient of **ISO 9613-1**), the ground effect and barrier
 screening, with a meteorological correction for long-term averages. The page
 keeps the per-term breakdown visible, so a prediction is never a black box: you
 can see exactly which mechanism buys how many decibels at which frequency.
-Start here — the other two pages exist to say when its terms can be trusted.
+Start here. The other two pages exist to say when its terms can be trusted.
 
 [Spherical ground effect and advanced barriers](ground-barriers.md)
 goes underneath two of those terms to the wave acoustics they fit: the
@@ -37,8 +37,8 @@ on a radius of about 3.4 km, so over the first hundred metres the homogeneous
 models are accurate, and beyond a few hundred the geometry takes over. Downwind
 or under a nocturnal inversion the rays close over the ground and hold the
 level up; upwind the same profile opens an acoustic shadow into which the level
-collapses by 20 dB or more. That asymmetry — the same machine at the same
-distance, tens of decibels apart depending on which side you stand — is what
+collapses by 20 dB or more. That asymmetry (the same machine at the same
+distance, tens of decibels apart depending on which side you stand) is what
 ISO 9613-2 fixes by decree in its favourable-propagation convention and
 compresses into the scalar meteorological correction. This page computes it,
 with curved rays and closed-form shadow-zone distances, and with the Green's
@@ -98,5 +98,5 @@ not a boundary-element solution, and no model here computes turbulent
 scattering: ISO 9613-2 absorbs it into the fixed caps on its screening term,
 and the wave-acoustic and refraction pages assume a non-turbulent atmosphere
 outright. Nothing on these pages produces a rating: no Lden, no limit value
-and no verdict — those are [Assessment and
-regulation](../assessment/index.md).
+and no verdict (those are [Assessment and
+regulation](../assessment/index.md)).

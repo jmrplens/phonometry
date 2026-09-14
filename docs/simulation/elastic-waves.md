@@ -148,7 +148,7 @@ plt.show()
 
 </details>
 
-One frame is enough for the two body speeds — the dotted arcs are drawn at
+One frame is enough for the two body speeds: the dotted arcs are drawn at
 the exact $c_\mathrm{P} t$ and $c_\mathrm{S} t$ radii, so they measure rather than label. It is
 not enough for the third wave, whose speed differs from the shear front's by
 7 % and whose defining property is that it stays on the surface while the
@@ -164,7 +164,7 @@ two body fronts, no surface train at all in the second.
 
 Both body arcs run out of the frame and keep going. The surface lobes do not
 go anywhere but along the surface, and they are still there when the body
-waves have left — which is the whole of "a Rayleigh wave". The inset traces
+waves have left, which is the whole of "a Rayleigh wave". The inset traces
 two surface probes 0.15 m apart, and the delay between their peaks is the
 measurement: the simulated $c_\mathrm{R}$ against 2921 m/s, the root of the exact
 characteristic equation, which the tests pin to within 2 %.
@@ -172,19 +172,19 @@ characteristic equation, which the tests pin to within 2 %.
 The two field panels carry their own colour scales, and say so: a vertical
 force applied *on* a clamped surface nearly cancels against its own image, so
 that run radiates far less than the free one. The probe traces share a single
-scale, which is where the comparison stays quantitative — the missing surface
+scale, which is where the comparison stays quantitative. The missing surface
 arrival is a missing peak, not a rescaled one.
 
-The other wave a free surface makes possible — the **flexural** wave of a
-thin free-free strip, the one pinned to the Kirchhoff dispersion above — is
+The other wave a free surface makes possible (the **flexural** wave of a
+thin free-free strip, the one pinned to the Kirchhoff dispersion above) is
 worth watching in motion too. The clip below is this same
 solver launching a 4 kHz bending packet along a 10 mm steel plate: on the
 control panel the plate runs straight and the packet simply leaves, and on
 the junction panel a perpendicular plate of the same thickness turns the
 corner into a scatterer. The packet splits there into the reflected and
 transmitted bending waves the closed form prices at $\tau_{12}(0°) = 0.5$,
-plus the fast in-plane precursor that races ahead down the receiving plate —
-the mode conversion the pinned-junction model deliberately leaves out, and
+plus the fast in-plane precursor that races ahead down the receiving plate.
+This mode conversion the pinned-junction model deliberately leaves out is
 the reason this page needs an elastic solver rather than a flexural one. The
 [bending-wave transmission guide](../vibration/structural/junction-transmission.md) takes
 the same run apart against the EN 12354 vibration reduction index.
@@ -263,14 +263,14 @@ because they travel at different speeds: the slower shear wave at 22.1° from
 the normal, the faster compressional wave bent much further out, to 43.8°. At
 20° nothing departs at the compressional angle; a skin clings to the contact
 instead, and the shear beam alone carries what crosses. At 35° both are
-evanescent and nothing propagates *away* into the steel — what fills the solid
-there runs along the contact and dies with depth — while the water above
+evanescent and nothing propagates *away* into the steel. What fills the solid
+there runs along the contact and dies with depth, while the water above
 settles into the interference of the incident
 beam with a reflection that is total in amplitude and shifted in phase. Each
 panel draws its steel half with its own annotated display gain: at 10° the
 transmitted energy leaves in two beams and the amplitude anywhere is small,
 while at 35° nothing leaves and the evanescent field piles up against the
-contact, bright and going nowhere. Brightness in the steel is not power — read
+contact, bright and going nowhere. Brightness in the steel is not power. Read
 the printed $|V|$ and the gain factor for that.
 
 This is exactly the shear physics that the
@@ -373,7 +373,7 @@ over 10 000 steps with the reflected amplitude conserved to 0.5 %.
 At oblique incidence the plate physics gets richer, and the clip below is
 this solver driving the same 10 mm steel plate, now lying in air, with a
 sustained 45° plane wave arriving on it. The two panels differ in **one
-number only** — the drive frequency, $f_\mathrm{c}/2 = 603$ Hz on the left and
+number only**: the drive frequency, $f_\mathrm{c}/2 = 603$ Hz on the left and
 $2 f_\mathrm{c} = 2413$ Hz on the right, either side of the 1206 Hz coincidence
 frequency the library computes from the same $m''$ and $B'$ used above.
 Everything else, the plate, the angle, the mesh and the colour scale, is
@@ -401,7 +401,7 @@ $1/\sqrt{r}$ spreading rather than the $1/r$ of a 3D point source, and
 absolute levels and decay rates are not those of a 3D problem. The solid is
 isotropic and purely elastic: no anisotropy, and no viscoelastic damping
 beyond the bulk `damping` decay rate, so material loss factors are not
-modelled. There is no elastic perfectly matched layer — the sponge absorbs
+modelled. There is no elastic perfectly matched layer: the sponge absorbs
 grazing Rayleigh waves less effectively than body waves. And guided-wave
 dispersion beyond the thin-plate Kirchhoff regime (full Lamb modes) is
 observable in the fields but has no dedicated closed-form oracle here.

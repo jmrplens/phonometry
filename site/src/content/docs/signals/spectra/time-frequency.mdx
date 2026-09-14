@@ -85,7 +85,7 @@ res.plot()                         # dB image over the time-frequency plane
 
 The segment length is the whole design decision: $T_B = \text{nperseg}/f_\mathrm{s}$
 of time resolution against $B_\mathrm{e} = \mathrm{ENBW}/T_B$ of frequency resolution,
-so their product $T_B B_\mathrm{e}$ is fixed by the taper alone — 1 for a rectangular
+so their product $T_B B_\mathrm{e}$ is fixed by the taper alone: 1 for a rectangular
 window, **1.5 for the Hann default used here** (Section 12.6.4.2, and the
 window figures of merit on the
 [spectral-analysis page](/phonometry/signals/spectra/spectral-analysis/#6-choosing-the-window)).
@@ -103,7 +103,7 @@ tool for the stationary background.
 
 Put a number on that. A single periodogram cell of random data is chi-square
 with two degrees of freedom, so its level has a standard deviation of about
-**5.6 dB** and a 90 % spread of roughly **17 dB** — the mottled texture of the
+**5.6 dB** and a 90 % spread of roughly **17 dB**, the mottled texture of the
 noise floor in the figure below, and the reason a single bright cell means
 nothing at all. The reading rule follows: a feature is real when it **persists
 across neighbouring columns or bins**, because the cell-to-cell fluctuation is
@@ -120,15 +120,15 @@ floor should be *quantified* from a PSD and only *displayed* on a spectrogram.
 The trade-off is fixed, so the choice has to come from the thing being measured.
 
 **For a transient**, keep $T_B$ below the decay you want to see. The 12 ms decay
-of the impact in the figure below asks for segments of a few milliseconds —
-about 256 samples at 48 kHz — and the frequency resolution then follows at about
+of the impact in the figure below asks for segments of a few milliseconds,
+about 256 samples at 48 kHz, and the frequency resolution then follows at about
 190 Hz, whether you wanted it or not.
 
 **For a component whose frequency moves** at a rate $r$ in Hz/s, the tone leaves
 its own resolution bandwidth inside a single segment unless $B_\mathrm{e} \ge r\,T_B$.
 With $B_\mathrm{e} = 1.5/T_B$ that gives an optimum $T_B = \sqrt{1.5/r}$. The siren below
 sweeps at up to about 950 Hz/s, so segments shorter than **40 ms** keep the ridge
-sharp — and the 1024-point choice at 16 kHz is 64 ms, already past it, which is
+sharp, and the 1024-point choice at 16 kHz is 64 ms, already past it, which is
 why the ridge thickens at the steepest part of the sweep. A run-up sweeping a
 500 Hz order at 100 Hz/s wants segments of about 0.12 s and nothing longer.
 
@@ -141,7 +141,7 @@ report the pair actually delivered, so the choice can be stated in a report.
 
 One acquisition note, because it is the failure that looks like a result:
 capture transients with a pre-trigger of at least one segment, fix the gain in
-advance and verify that no sample clips — a clipped impact draws a full-height
+advance and verify that no sample clips, as a clipped impact draws a full-height
 stripe that looks exactly like a broadband event.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/calibrated_spectrogram.webp" alt="Calibrated spectrogram in dB SPL of a synthetic four-second outdoor scene: a siren sweeping sinusoidally between 600 and 1200 hertz traces a bright oscillating ridge at 70 decibels, a broadband impact at two and a half seconds draws a vertical stripe, and a pink noise background whose broadband level is 45 decibels fills the image at a much lower per-cell level, with the color bar reading absolute sound pressure level" width="82%" loading="eager" />
@@ -244,7 +244,7 @@ One distinction matters and the result states it: the **grid** can be made
 arbitrarily fine (`n_points`), but the **resolution** - the ability to
 separate two tones - is set by the record length and taper, reported as
 `resolution_bandwidth` ($B_\mathrm{e} = f_\mathrm{s} \sum w^2/(\sum w)^2$, i.e. $1/T_\mathrm{r}$
-untapered and $1.5/T_\mathrm{r}$ for Hann — the same taper factor as section 1, applied
+untapered and $1.5/T_\mathrm{r}$ for Hann, the same taper factor as section 1, applied
 here to the record duration $T_\mathrm{r}$ rather than to a segment, because the zoom FFT
 transforms the whole record). Zooming refines the sampling of the same underlying spectrum;
 only a longer record separates closer tones.
@@ -256,7 +256,7 @@ exactly as it would in an ordinary FFT: the zoom band buys resolution of the
 grid, not rejection. Hann's first sidelobe is −31.5 dB, which is nowhere near
 enough to see a sideband 50 dB below a carrier a few hertz away. The control is
 the `window` argument (default `"hann"`): pass `window="blackman"`, or a Kaiser
-with a high beta, to trade main-lobe width for sidelobe rejection — remembering
+with a high beta, to trade main-lobe width for sidelobe rejection, remembering
 that the wider main lobe raises $B_\mathrm{e}$ and therefore the closest spacing you can
 separate, so the two goals pull against each other. The
 [window figures of merit](/phonometry/signals/spectra/spectral-analysis/#6-choosing-the-window)
@@ -266,14 +266,14 @@ the energy.
 
 **And the machine has to hold still.** Separating two lines 3 Hz apart near
 1 kHz needs about a second of record, and over that second the shaft must hold
-its speed to better than 3 parts in 1000 — 0.3 % — or the rotor line alone smears
+its speed to better than 3 parts in 1000 (0.3 %) or the rotor line alone smears
 wider than the separation you are trying to resolve, and no zoom recovers it. In
 general the speed stability required is the target resolution divided by the
 frequency of the line, which gets harsh fast: 0.5 Hz at 5 kHz is 0.01 %. Check
 it before you trust the zoom: run a spectrogram of the same record and confirm
 the line is horizontal across the analysis window, or read the shaft period from
 a tacho over the record. When the machine does drift, angularly resample against
-the tacho — order tracking — so the lines become stationary in order rather than
+the tacho, order tracking, so the lines become stationary in order rather than
 in frequency.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zoom_fft_resolution.svg" alt="Zoom FFT of a one-second record containing tones at 997 and 1000 hertz: the coarse 1024-point FFT with 8 hertz bins shows a single broad lump, while the zoom FFT over 980 to 1016 hertz draws two separate mainlobes whose peaks sit exactly on the dotted true-tone frequencies" width="82%" loading="lazy" />

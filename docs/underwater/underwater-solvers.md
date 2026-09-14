@@ -233,8 +233,8 @@ diverges is section 4's, on the same rays and through the same marcher.
 ### A sloping bottom: the first range dependence
 
 Passing a `bathymetry` pair of node arrays, `(ranges_m, depths_m)`,
-replaces the level bottom with a **piecewise-linear depth profile** — the faceted boundary of
-Jensen Fig. 3.20 — while the sound-speed profile stays range independent. The
+replaces the level bottom with a **piecewise-linear depth profile** (the faceted boundary of
+Jensen Fig. 3.20, while the sound-speed profile stays range independent. The
 marcher finds each crossing against the interpolated polyline and reflects
 the ray specularly about the local facet (Eq. 3.121), so a bounce off a slope
 of angle $\beta$ turns the ray by $2\beta$: upslope bounces steepen a ray,
@@ -243,7 +243,7 @@ propagation. Snell's invariant is then a constant of each ray only *between*
 bottom bounces, and one consequence is faced rather than papered over: a ray
 steepened past the vertical would run backward in range, which a marcher
 whose independent variable is range cannot carry, so it is terminated at that
-bounce and its samples are `NaN` from there on — a plot simply ends where
+bounce and its samples are `NaN` from there on. A plot simply ends where
 the ray turned. In an isovelocity wedge every ray is straight lines and
 mirrors, so every angle below is exact:
 
@@ -285,15 +285,15 @@ amplitude convention below stops holding.
 
 The fan draws every path the profile supports; a receiver is reached by only
 a few of them. Those are the **eigenrays**, "the rays which pass through that
-point" (Jensen §3.3.5.2), and their list — a delay, a launch and an arrival
-angle, the boundary-touch counts and a complex amplitude per path — is the
+point" (Jensen §3.3.5.2), and their list (a delay, a launch and an arrival
+angle, the boundary-touch counts and a complex amplitude per path) is the
 arrival structure the sonar equation consumes as multipath, the skeleton of a
 channel impulse response, and what communications work equalises against.
 `eigenrays` takes the traced fan and one receiver and finds them as roots: an
 eigenray stands wherever a ray's depth at the receiver range crosses the
 receiver depth, so a pair of adjacent fan rays straddling the receiver
 brackets one, and each bracket is closed by bisection **on fresh traces
-through the same profile**, never by interpolating between the traced rays —
+through the same profile**. Never by interpolating between the traced rays;
 the two rays of a bracket can carry different bounce histories, and a blend
 of them is a path the water does not contain (the interpolation hazard of
 Jensen §3.7.5.1). Every arrival is a real ray, its travel time, angles and
@@ -342,10 +342,10 @@ module, and the search never asks for a frequency at all: the tone a receiver
 hears is $p(\omega) = \sum_j a_j e^{i\omega\tau_j}$, its loss
 $-20\lg|p(\omega)|$ on the same scale as the other three solvers, and a
 band's impulse response is that sum transformed. Each amplitude carries
-$(-1)$ per surface touch and the bottom's coefficient per bottom touch — the
+$(-1)$ per surface touch and the bottom's coefficient per bottom touch (the
 perfect reflectors' $\mp1$, or, with the same `FluidSeabed` the beams
 take, the Rayleigh
-$\mathcal{R}$ of each ray's own grazing angle, magnitude and phase — and the
+$\mathcal{R}$ of each ray's own grazing angle, magnitude and phase), and the
 $(-i)^m$ of Eq. (3.79) for each caustic crossed, the discrete form of the
 $-\pi/2$ the beam solver's square-root branch spends continuously. Validated
 against the one environment whose arrival structure is entirely closed form,
@@ -581,30 +581,30 @@ takes (section 3) puts every beam's central ray on the faceted boundary, and the
 pair crosses each sloping bounce with the reflection impulse of
 Eqs. (3.122)-(3.123) evaluated on the local facet. Two of the flat guide's
 devices generalise with it, each with its cost stated. The receiver-image
-ladder folds each receiver column about its own facet — depth *and* tilt,
+ladder folds each receiver column about its own facet (depth and tilt),
 since a fold plane wrong by the facet's tilt displaces a first-fold image by
-metres against a wavelength — so the vertical stack of mirrors becomes the
+metres against a wavelength. So the vertical stack of mirrors becomes the
 dihedral fan about the local apex, exact for a single facet; at slope zero it
 is the level ladder bit for bit, which a test pins. And the fan's wrapped
 rungs let the beams' analytic tails carry the arrivals no marched axis can: a
 path that went up the slope, steepened past the vertical and came back is a
 wrapped rung, analytic rather than marched. The beam itself, once steepened
-past the vertical, is terminated at that bounce with its weight zeroed —
+past the vertical, is terminated at that bounce with its weight zeroed.
 a range-marching sum keeps only what still travels forward, exactly as the
-one-way parabolic equation keeps no backscatter — and a tail is trusted no
+one-way parabolic equation keeps no backscatter, and a tail is trusted no
 farther than two marched extents from its sample, because beyond that it
 would be pricing wedge geometry the polyline never described (measured: up
 to 11 dB of invented field on a tilted bottom no beam can even reach,
 0.001 dB with the budget in place). Validated against the **ideal wedge**,
-which has an exact solution by images — a fan of $2\pi/\beta$ signed image
+which has an exact solution by images: a fan of $2\pi/\beta$ signed image
 sources on a circle about the apex, built in the test from pure geometry and
 proved against both boundary conditions before it judges: a single facet
 bounce to 0.05 dB, and within 1.85 dB worst / 0.67 dB mean of the *complete*
 field across a thin 2.8° wedge whose every cell is dense multipath, most of
 it arrivals near their own turning point, numbers that move in the fourth
 decimal when the range step is halved. The lossy fluid seabed above cannot
-be combined with a slope — one grazing angle per beam is a level-bottom
-fact, and the solver refuses to pretend otherwise — so a sloping run takes
+be combined with a slope. One grazing angle per beam is a level-bottom
+fact, and the solver refuses to pretend otherwise. So a sloping run takes
 the perfect reflectors of `bottom`.
 
 **Where it stops.** Four limits, in the order they bite.

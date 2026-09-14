@@ -171,6 +171,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.room.steady_field",
             "phonometry.room.modes",
             "phonometry.room.crowd_noise",
+            "phonometry.room.spatial_decay",
+            "phonometry.room.workroom_prediction",
         ),
     ),
     Section(
@@ -219,6 +221,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.materials.absorbers.layered",
             "phonometry.materials.absorbers.biot",
             "phonometry.materials.absorbers.slow_sound",
+            "phonometry.materials.absorbers.suspended_ceilings",
             "phonometry.materials.diffusers.scattering_diffusion",
             "phonometry.materials.diffusers.reverberation_room_scattering",
             "phonometry.materials.diffusers.design",

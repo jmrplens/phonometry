@@ -17,6 +17,12 @@ letter class that absorber datasheets quote, and the ISO 12999-2 measurement
 uncertainty of both. It also answers the recurring question of when a
 reverberation-room number and a tube number can, and cannot, be compared.
 
+[Suspended Ceilings: the EN 16487 Test Code](suspended-ceilings.md)
+is what that product scale needs to be reproducible for one product family: the
+specimen size, the mounting and the plenum depth a ceiling is measured at, the
+air-absorption correction the room has to stay under, and the reproducibility
+between laboratories that following all of it buys.
+
 [Airflow Resistance](airflow-resistance.md) is the material
 scale: the ISO 9053-1 static and ISO 9053-2 alternating determination of the
 airflow resistance, specific resistance and resistivity σ, the parameter that
@@ -49,6 +55,9 @@ meshed cell.
 - [Sound Absorption Measurement and Rating](absorption-measurement.md):
   the ISO 354 reverberation-room measurement, the ISO 11654 weighted rating
   and class, and the ISO 12999-2 measurement uncertainty.
+- [Suspended Ceilings: the EN 16487 Test Code](suspended-ceilings.md):
+  the specimen geometry, the type E mounting depth, the air-absorption cap and
+  Table 1, the reproducibility between European laboratories.
 - [Airflow Resistance](airflow-resistance.md): the ISO 9053
   static and alternating methods for the airflow resistance and resistivity.
 - [Impedance Tube](impedance-tube.md): normal-incidence

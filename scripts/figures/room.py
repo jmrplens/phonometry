@@ -12,6 +12,7 @@ noise the room is left with. Everything here is embedded by a page under
 from typing import TYPE_CHECKING, cast
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
@@ -26,6 +27,7 @@ from .theme import (
     COLOR_MUTED,
     COLOR_PANEL,
     COLOR_PRIMARY,
+    COLOR_QUATERNARY,
     COLOR_SECONDARY,
     COLOR_TERTIARY,
     LABEL_FREQ_HZ,
@@ -583,6 +585,211 @@ def generate_source_distance_bias(output_dir: str) -> None:
     )
     plt.tight_layout()
     save_figure(output_dir, "source_distance_bias.svg")
+    plt.close()
+
+
+def generate_workroom_spatial_decay(output_dir: str) -> None:
+    """ISO 14257 Annex C: the curve, the two descriptors, and the correction."""
+    print("Generating workroom_spatial_decay.svg...")
+    from phonometry import room
+
+    # Annex C of ISO 14257: eleven positions in a shipyard hall, the source
+    # power of Table C.2, the levels of Table C.4 and the free-field curve of
+    # Table C.3. Everything drawn here is printed in the annex.
+    radii = np.array([2, 3, 4, 5, 6, 8, 12, 16, 24, 32, 48], dtype=float)
+    power = {125: 97.6, 1000: 110.8, 4000: 107.4}
+    measured = {
+        125: [85.7, 82.5, 80.8, 78.3, 77.1, 75.4, 73.7, 71.3, 70.4, 67.3, 65.7],
+        1000: [98.9, 95.1, 93.0, 92.0, 91.0, 87.9, 85.8, 83.5, 81.5, 77.0, 75.6],
+        4000: [93.8, 91.2, 88.3, 86.8, 85.7, 84.3, 80.4, 78.1, 74.9, 72.5, 70.5],
+    }
+    free_field = {
+        125: [83.4, 79.8, 76.9, 74.9, 73.2, 70.7, 67.3, 65.1, 61.5, 59.1, 55.6],
+        1000: [98.8, 94.7, 92.3, 90.3, 88.7, 86.1, 82.6, 79.8, 75.7, 73.7, 67.8],
+        4000: [92.8, 90.2, 87.3, 85.0, 83.2, 80.4, 76.8, 75.2, 71.0, 68.0, 57.3],
+    }
+    corrected = {
+        band: room.corrected_distribution_value(
+            room.sound_distribution_value(measured[band], power[band]),
+            room.sound_distribution_value(free_field[band], power[band]),
+            radii,
+            source_height_m=0.0,
+        )
+        for band in power
+    }
+
+    _fig, axes = plt.subplots(1, 3, figsize=(16.4, 5.4))
+
+    # -- Left: the curve itself, against the free field it is judged by.
+    ax = axes[0]
+    reference = room.reference_distribution_value(radii)
+    ax.fill_between(
+        radii,
+        reference,
+        corrected[1000],
+        color=theme_fill(COLOR_PRIMARY, ax),
+        lw=0.0,
+        zorder=1,
+    )
+    ax.semilogx(
+        radii,
+        reference,
+        color=COLOR_FG,
+        lw=1.6,
+        ls="--",
+        label="Free field, 6 dB per doubling",
+        zorder=3,
+    )
+    for band, colour, marker in (
+        (125, COLOR_SECONDARY, "s"),
+        (1000, COLOR_PRIMARY, "o"),
+        (4000, COLOR_TERTIARY, "v"),
+    ):
+        ax.semilogx(
+            radii,
+            corrected[band],
+            color=colour,
+            lw=1.8,
+            marker=marker,
+            ms=4.5,
+            label=f"{band} Hz octave band",
+            zorder=4,
+        )
+    ax.set_xlabel("Distance from the source [m]")
+    ax.set_ylabel("Sound distribution value $D$ [dB]")
+    ax.set_title("A workroom is not a free field")
+    ax.set_xticks([2, 5, 10, 24, 48])
+    ax.set_xticklabels(["2", "5", "10", "24", "48"])
+    ax.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax.set_ylim(-48.0, -8.0)
+    ax.text(
+        2.15,
+        -44.0,
+        "the shaded gap is the excess of sound pressure level:\n"
+        "6.7 dB over the middle range at 1 kHz on this curve,\n"
+        "and it grows with distance because the reverberant\n"
+        "field is what is left once the direct sound has gone",
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        va="bottom",
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax.legend(loc="upper right", fontsize=8, framealpha=1.0)
+    ax.grid(visible=True, which="both", color=COLOR_GRID, alpha=0.45)
+
+    # -- Middle: the two descriptors, region by region, as the annex tabulates
+    # them.
+    ax2 = axes[1]
+    regions = ("near", "middle", "far")
+    ranges = {"near": (2.0, 5.0), "middle": (5.0, 24.0), "far": (24.0, 48.0)}
+    bands = (125, 1000, 4000)
+    width = 0.26
+    positions = np.arange(len(regions), dtype=np.float64)
+    for index, (band, colour) in enumerate(
+        zip(bands, (COLOR_SECONDARY, COLOR_PRIMARY, COLOR_TERTIARY), strict=True)
+    ):
+        values = []
+        for region in regions:
+            low, high = ranges[region]
+            keep = (radii >= low) & (radii <= high)
+            values.append(room.spatial_decay_rate(corrected[band][keep], radii[keep]))
+        ax2.bar(
+            positions + (index - 1) * width,
+            values,
+            width=width,
+            color=colour,
+            label=f"{band} Hz octave band",
+        )
+    ax2.axhspan(2.0, 5.0, color=theme_fill(COLOR_QUATERNARY, ax2), lw=0.0, zorder=0)
+    ax2.axhline(6.0, color=COLOR_FG, lw=1.3, ls=":", zorder=2)
+    ax2.set_xticks(positions)
+    ax2.set_xticklabels(
+        ["Near\n2 m to 5 m", "Middle\n5 m to 24 m", "Far\n24 m to 48 m"]
+    )
+    ax2.set_ylabel("Rate of spatial decay $\\mathrm{DL_2}$ [dB per doubling]")
+    ax2.set_title("What the room does, range by range")
+    ax2.set_ylim(0.0, 8.6)
+    ax2.text(
+        -0.44,
+        6.35,
+        "6 dB is the free field; the shaded band\n"
+        "is the 2 dB to 5 dB ISO 11690-3 says\n"
+        "to expect in the middle range",
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        va="bottom",
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax2.legend(loc="upper right", fontsize=8, framealpha=1.0)
+    ax2.grid(visible=True, axis="y", color=COLOR_GRID, alpha=0.45)
+
+    # -- Right: what Annex B takes out, and why it matters to one descriptor
+    # and not to the other.
+    ax3 = axes[2]
+    raw = room.sound_distribution_value(measured[4000], power[4000])
+    ax3.semilogx(
+        radii,
+        raw - corrected[4000],
+        color=COLOR_TERTIARY,
+        lw=2.0,
+        marker="v",
+        ms=4.5,
+        label="4000 Hz octave band",
+    )
+    raw_1k = room.sound_distribution_value(measured[1000], power[1000])
+    ax3.semilogx(
+        radii,
+        raw_1k - corrected[1000],
+        color=COLOR_PRIMARY,
+        lw=2.0,
+        marker="o",
+        ms=4.5,
+        label="1000 Hz octave band",
+    )
+    ax3.axhline(0.0, color=COLOR_FG, lw=1.2, ls=":")
+    ax3.set_xlabel("Distance from the source [m]")
+    ax3.set_ylabel("Correction of Equation (B.1) [dB]")
+    ax3.set_title("The source's own curve, taken back out")
+    ax3.set_xticks([2, 5, 10, 24, 48])
+    ax3.set_xticklabels(["2", "5", "10", "24", "48"])
+    ax3.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax3.set_ylim(-1.2, 4.0)
+    ax3.text(
+        2.15,
+        2.2,
+        "at 1 kHz it is largest close to the source, where the\n"
+        "source's own directivity and the floor reflection weigh\n"
+        "most, and it dies away with distance; at 4 kHz it hardly\n"
+        "leaves half a decibel until the last position. It moves a\n"
+        "level by 2.0 dB and a slope by 0.3 dB per doubling",
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        va="bottom",
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax3.legend(loc="lower left", fontsize=8, framealpha=1.0)
+    ax3.grid(visible=True, which="both", color=COLOR_GRID, alpha=0.45)
+
+    plt.tight_layout()
+    save_figure(output_dir, "workroom_spatial_decay.svg")
     plt.close()
 
 

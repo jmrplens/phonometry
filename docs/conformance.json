@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1145,
-    "passing": 1145,
+    "checks": 1161,
+    "passing": 1161,
     "failing": 0,
-    "domains": 85,
-    "standards": 421,
-    "citations": 755,
-    "designations": 158,
+    "domains": 86,
+    "standards": 424,
+    "citations": 771,
+    "designations": 161,
     "sources": 85
   },
   "units": [
@@ -559,6 +559,12 @@
       "title": "In-situ measurement of silencers, screens and barriers",
       "checks": 22,
       "passing": 22
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms",
+      "title": "Spatial sound decay and prediction in workrooms",
+      "checks": 16,
+      "passing": 16
     },
     {
       "id": "control-valve-noise-iec-60534-8-3",
@@ -30017,6 +30023,521 @@
       },
       "deviation": {
         "value": 0.0206
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-eq-2/the-free-field-reference-curve-falls-6-db-per-distance-doubling-and-passes-11-db-under-the-source-power-at-1-m",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Eq. (2)",
+        "cite": "ISO 14257:2001 Eq. (2)"
+      },
+      "quantity": "The free-field reference curve falls 6 dB per distance doubling and passes 11 dB under the source power at 1 m",
+      "kind": "record",
+      "expected": {
+        "label": "at 1 m = -11 dB; per doubling = 6.02 dB",
+        "record": {
+          "at 1 m": -11.0,
+          "per doubling": 6.02
+        }
+      },
+      "computed": {
+        "label": "at 1 m = -11 dB; per doubling = 6.02 dB",
+        "record": {
+          "at 1 m": -11.0,
+          "per doubling": 6.02
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-c-table-c-6-example/the-annex-b-correction-reproduces-all-66-printed-values-of-the-corrected-distribution-curve",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Annex C, Table C.6 EXAMPLE",
+        "cite": "ISO 14257:2001 Annex C, Table C.6 EXAMPLE"
+      },
+      "quantity": "The Annex B correction reproduces all 66 printed values of the corrected distribution curve",
+      "kind": "count",
+      "expected": {
+        "value": 66.0,
+        "label": "66/66 (worst departure 0.09 dB)"
+      },
+      "computed": {
+        "value": 66.0,
+        "label": "66/66 printed values within the rounding of the table"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-c-table-c-6-last-column/the-a-weighted-pink-noise-normalisation-of-eq-4-reproduces-the-eleven-printed-values",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Annex C, Table C.6 last column",
+        "cite": "ISO 14257:2001 Annex C, Table C.6 last column"
+      },
+      "quantity": "The A-weighted pink-noise normalisation of Eq. (4) reproduces the eleven printed values",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "every value within the printed rounding"
+      },
+      "computed": {
+        "value": 0.092,
+        "label": "worst departure 0.09 dB over 11 positions"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.1
+      },
+      "deviation": {
+        "value": 0.092
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-eq-5-annex-c-table-c-7-example/the-rate-of-spatial-decay-reproduces-all-18-printed-values-in-three-distance-ranges-and-six-octave-bands",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Eq. (5) / Annex C, Table C.7 EXAMPLE",
+        "cite": "ISO 14257:2001 Eq. (5) / Annex C, Table C.7 EXAMPLE"
+      },
+      "quantity": "The rate of spatial decay reproduces all 18 printed values, in three distance ranges and six octave bands",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 (worst departure 0.05 dB)"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 printed values of DL2 within the rounding of the table"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-eqs-6-and-7-annex-c-table-c-9-example/the-excess-of-sound-pressure-level-reproduces-all-18-printed-values-from-the-uncorrected-curve-of-table-c-5",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Eqs. (6) and (7) / Annex C, Table C.9 EXAMPLE",
+        "cite": "ISO 14257:2001 Eqs. (6) and (7) / Annex C, Table C.9 EXAMPLE"
+      },
+      "quantity": "The excess of sound pressure level reproduces all 18 printed values from the uncorrected curve of Table C.5",
+      "kind": "count",
+      "expected": {
+        "value": 18.0,
+        "label": "18/18 (worst departure 0.06 dB)"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18/18 printed values of DLf within the rounding of the table"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-c-c-1-against-tables-c-7-and-c-9/the-annex-applies-its-own-annex-b-correction-to-dl2-and-not-to-dlf-which-the-two-tables-disagree-about-by-more-than-a-decibel",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Annex C (C.1 against Tables C.7 and C.9)",
+        "cite": "ISO 14257:2001 Annex C (C.1 against Tables C.7 and C.9)"
+      },
+      "quantity": "The annex applies its own Annex B correction to DL2 and not to DLf, which the two tables disagree about by more than a decibel",
+      "kind": "scalar",
+      "expected": {
+        "value": 28.0,
+        "label": "28 of the 36 printed results leave the rounding of their own table when the other table's curve is used"
+      },
+      "computed": {
+        "value": 28.0,
+        "label": "28 of 36, 14 in each table"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-eq-5-against-eq-8/the-factor-eq-5-prints-0-3-is-the-logarithm-of-two-rounded-which-eq-8-prints-in-full-one-page-later",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Eq. (5) against Eq. (8)",
+        "cite": "ISO 14257:2001 Eq. (5) against Eq. (8)"
+      },
+      "quantity": "The factor Eq. (5) prints, 0,3, is the logarithm of two rounded, which Eq. (8) prints in full one page later",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.3010299956639812,
+        "label": "lg 2 = 0,301 03"
+      },
+      "computed": {
+        "value": 0.3,
+        "label": "the printed 0,3, which is 0,34 % smaller"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.002
+      },
+      "deviation": {
+        "value": -0.001
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-table-1/the-a-weighted-pink-noise-spectrum-weights-the-six-octave-bands-the-way-table-1-prints-them",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Table 1",
+        "cite": "ISO 14257:2001 Table 1"
+      },
+      "quantity": "The A-weighted pink-noise spectrum weights the six octave bands the way Table 1 prints them",
+      "kind": "record",
+      "expected": {
+        "label": "125 Hz = -16.1 dB; 250 Hz = -8.6 dB; 500 Hz = -3.2 dB; 1 kHz = 0 dB; 2 kHz = 1.2 dB; 4 kHz = 1 dB",
+        "record": {
+          "125 Hz": -16.1,
+          "250 Hz": -8.6,
+          "500 Hz": -3.2,
+          "1 kHz": 0.0,
+          "2 kHz": 1.2,
+          "4 kHz": 1.0
+        }
+      },
+      "computed": {
+        "label": "125 Hz = -16.1 dB; 250 Hz = -8.6 dB; 500 Hz = -3.2 dB; 1 kHz = 0 dB; 2 kHz = 1.2 dB; 4 kHz = 1 dB",
+        "record": {
+          "125 Hz": -16.1,
+          "250 Hz": -8.6,
+          "500 Hz": -3.2,
+          "1 kHz": 0.0,
+          "2 kHz": 1.2,
+          "4 kHz": 1.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-b-eq-b-4/a-source-with-its-acoustical-centre-on-the-floor-radiates-into-a-half-space-which-is-3-db-over-the-free-field",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Annex B, Eq. (B.4)",
+        "cite": "ISO 14257:2001 Annex B, Eq. (B.4)"
+      },
+      "quantity": "A source with its acoustical centre on the floor radiates into a half space, which is 3 dB over the free field",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0,
+        "label": "the 3 dB Eq. (B.4) prints"
+      },
+      "computed": {
+        "value": 3.0103
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": 0.0103
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-annex-c-table-c-2-example/the-level-increase-at-a-machine-s-own-workstation-is-the-iso-3744-environmental-correction-which-reproduces-seven-of-the-eight-rows",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "Annex C, Table C.2 EXAMPLE",
+        "cite": "ISO 11690-3:1998 Annex C, Table C.2 EXAMPLE"
+      },
+      "quantity": "The level increase at a machine's own workstation is the ISO 3744 environmental correction, which reproduces seven of the eight rows",
+      "kind": "count",
+      "expected": {
+        "value": 7.0,
+        "label": "7/7 (worst departure 0.39 dB)"
+      },
+      "computed": {
+        "value": 7.0,
+        "label": "7/7 rows within the half decibel the diagram is drawn to"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-annex-c-figure-c-1-the-eighth-machine/m8-needs-more-increase-than-the-diagram-can-show-and-the-table-prints-the-edge-of-the-diagram-instead",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "Annex C, Figure C.1 (the eighth machine)",
+        "cite": "ISO 11690-3:1998 Annex C, Figure C.1 (the eighth machine)"
+      },
+      "quantity": "M8 needs more increase than the diagram can show, and the table prints the edge of the diagram instead",
+      "kind": "scalar",
+      "expected": {
+        "value": 12.4,
+        "label": "12,4 dB, against the 10 dB the table prints and the 10 dB the diagram ends at"
+      },
+      "computed": {
+        "value": 12.3789
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.1
+      },
+      "deviation": {
+        "value": -0.0211
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-table-e-1/each-category-of-prediction-method-admits-the-levels-of-detail-table-e-1-lists-and-refuses-the-rest",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "Table E.1",
+        "cite": "ISO 11690-3:1998 Table E.1"
+      },
+      "quantity": "Each category of prediction method admits the levels of detail Table E.1 lists and refuses the rest",
+      "kind": "count",
+      "expected": {
+        "value": 5.0,
+        "label": "5/5 combinations judged as printed"
+      },
+      "computed": {
+        "value": 5.0,
+        "label": "5/5 combinations judged as printed"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-4-3-against-iso-14257-annex-c/the-middle-range-decay-of-the-worked-example-falls-inside-the-2-db-to-5-db-the-guidance-says-to-expect",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "4.3 against ISO 14257 Annex C",
+        "cite": "ISO 11690-3:1998 4.3 against ISO 14257 Annex C"
+      },
+      "quantity": "The middle-range decay of the worked example falls inside the 2 dB to 5 dB the guidance says to expect",
+      "kind": "scalar",
+      "expected": {
+        "value": 5.0,
+        "label": "five of the six octave bands, the 4 kHz one running 0,4 dB over the 5 dB top of the range 4.3 leads one to expect"
+      },
+      "computed": {
+        "value": 5.0,
+        "label": "5 of 6 inside 2 dB to 5 dB"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/en-16487-2014-table-1/the-reproducibility-uncertainty-of-the-absorption-coefficient-is-the-printed-spectrum-and-a-coverage-factor-of-2-8-over-its-standard-deviation",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "Table 1",
+        "cite": "EN 16487:2014 Table 1"
+      },
+      "quantity": "The reproducibility uncertainty of the absorption coefficient is the printed spectrum, and a coverage factor of 2,8 over its standard deviation",
+      "kind": "record",
+      "expected": {
+        "label": "125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13",
+        "record": {
+          "125 Hz": 0.23,
+          "250 Hz": 0.23,
+          "500 Hz": 0.11,
+          "1 kHz": 0.1,
+          "2 kHz": 0.1,
+          "4 kHz": 0.13
+        }
+      },
+      "computed": {
+        "label": "125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13",
+        "record": {
+          "125 Hz": 0.23,
+          "250 Hz": 0.23,
+          "500 Hz": 0.11,
+          "1 kHz": 0.1,
+          "2 kHz": 0.1,
+          "4 kHz": 0.13
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/en-16487-2014-table-1-note/the-printed-uncertainty-is-a-reproducibility-standard-deviation-times-the-coverage-factor-of-2-8-that-iso-5725-6-applies",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "Table 1 NOTE",
+        "cite": "EN 16487:2014 Table 1 NOTE"
+      },
+      "quantity": "The printed uncertainty is a reproducibility standard deviation times the coverage factor of 2,8 that ISO 5725-6 applies",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.1,
+        "label": "0,10 at 1 kHz, which is 2,8 times 0,0357"
+      },
+      "computed": {
+        "value": 0.1
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/en-16487-2014-4-2-1/the-air-absorption-correction-is-four-room-volumes-of-attenuation-difference-spread-over-the-specimen",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "4.2.1",
+        "cite": "EN 16487:2014 4.2.1"
+      },
+      "quantity": "The air-absorption correction is four room volumes of attenuation difference spread over the specimen",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.14814814814814814,
+        "label": "4V(m2 - m1)/S with V = 200 m3, S = 10,80 m2"
+      },
+      "computed": {
+        "value": 0.1481
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"

@@ -4473,6 +4473,52 @@ _ES_EXACT = {
     ),
     "Interaural delay $\\tau$ (ms)": "Retardo interaural $\\tau$ (ms)",
     "$\\mathrm{IACF}(\\tau)$": "$\\mathrm{IACF}(\\tau)$",
+    # ISO 14257 and ISO 11690-3: what the room does to the level as you walk
+    # away from the source.
+    "A workroom is not a free field": "Un local de trabajo no es un campo libre",
+    "Free field, 6 dB per doubling": "Campo libre, 6 dB por duplicación",
+    "125 Hz octave band": "Banda de octava de 125 Hz",
+    "1000 Hz octave band": "Banda de octava de 1000 Hz",
+    "4000 Hz octave band": "Banda de octava de 4000 Hz",
+    "Sound distribution value $D$ [dB]": "Valor de distribución sonora $D$ [dB]",
+    "the shaded gap is the excess of sound pressure level:\n"
+    "6.7 dB over the middle range at 1 kHz on this curve,\n"
+    "and it grows with distance because the reverberant\n"
+    "field is what is left once the direct sound has gone": (
+        "el hueco sombreado es el exceso de nivel de presión sonora:\n"
+        "6,7 dB en el rango medio a 1 kHz sobre esta curva, y crece\n"
+        "con la distancia porque el campo reverberante es lo que\n"
+        "queda cuando el sonido directo ya ha caído"
+    ),
+    "What the room does, range by range": "Lo que hace la sala, rango a rango",
+    "Rate of spatial decay $\\mathrm{DL_2}$ [dB per doubling]": (
+        "Decrecimiento espacial $\\mathrm{DL_2}$ [dB por duplicación]"
+    ),
+    "Near\n2 m to 5 m": "Cercano\nde 2 m a 5 m",
+    "Middle\n5 m to 24 m": "Medio\nde 5 m a 24 m",
+    "Far\n24 m to 48 m": "Lejano\nde 24 m a 48 m",
+    "6 dB is the free field; the shaded band\n"
+    "is the 2 dB to 5 dB ISO 11690-3 says\n"
+    "to expect in the middle range": (
+        "6 dB es el campo libre; la banda sombreada\n"
+        "son los 2 dB a 5 dB que la ISO 11690-3 dice\n"
+        "que cabe esperar en el rango medio"
+    ),
+    "The source's own curve, taken back out": (
+        "La curva propia de la fuente, descontada"
+    ),
+    "Correction of Equation (B.1) [dB]": "Corrección de la ecuación (B.1) [dB]",
+    "at 1 kHz it is largest close to the source, where the\n"
+    "source's own directivity and the floor reflection weigh\n"
+    "most, and it dies away with distance; at 4 kHz it hardly\n"
+    "leaves half a decibel until the last position. It moves a\n"
+    "level by 2.0 dB and a slope by 0.3 dB per doubling": (
+        "a 1 kHz es mayor cerca de la fuente, donde más pesan su\n"
+        "propia directividad y la reflexión en el suelo, y se apaga con\n"
+        "la distancia; a 4 kHz apenas sale de medio decibelio hasta la\n"
+        "última posición. Mueve un nivel 2,0 dB y una pendiente\n"
+        "0,3 dB por duplicación"
+    ),
     "the shaded band is the typical range of Table A.1,\n"
     "$-$2 dB to $+$10 dB in unoccupied halls": (
         "la banda sombreada es el rango habitual de la Tabla A.1,\n"

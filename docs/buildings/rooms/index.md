@@ -34,6 +34,11 @@ mirrored sources, its steady-state level from the room constant, and, below the
 Schroeder frequency where both of those give out, the discrete normal modes of
 the shoebox itself.
 
+[Spatial Sound Decay in Workrooms](workroom-sound-decay.md)
+asks the question a factory hall raises instead: not how long a decay lasts, but
+how far the level falls as you walk away from a machine, and how far above open
+air the room sits while it does.
+
 Before the two prediction pages, one page answers a different question about the
 same room.
 [Room-noise criteria (NC / RC Mark II)](room-noise.md)
@@ -104,6 +109,10 @@ speech intelligibility a room affords is quantified by the
   and Schroeder frequency (Bies), and the rectangular-room normal modes with
   their axial, tangential and oblique families, mode count and modal density
   (Long).
+- [Spatial Sound Decay in Workrooms](workroom-sound-decay.md):
+  the spatial sound distribution curve of a workroom with its two descriptors,
+  the Annex B correction for the source's own curve, and the prediction
+  categories and detail levels that match them at design time.
 - [Room-noise criteria (NC / RC Mark II)](room-noise.md):
   the ANSI/ASA S12.2-2019 NC tangency and RC Mark II ratings.
 - [Reverberation-time prediction (Sabine, Eyring, Arau)](reverberation-prediction.md):

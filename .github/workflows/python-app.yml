@@ -581,6 +581,30 @@ jobs:
     - name: Check that no file sets one subscript both ways
       run: python scripts/check_subscript_slope.py
 
+  # generate_api_docs copies the mathematics of a docstring to the site
+  # verbatim, and KaTeX reads what the docstring actually holds. A doubled
+  # backslash is a line break with a command after it, which KaTeX refuses,
+  # and the page still ships with everything after the bad block swallowed.
+  # The same four characters are correct in one kind of docstring and wrong in
+  # the other, so this reads the value Python builds rather than the file. The
+  # site job catches it too, after a full build; this costs a second and runs
+  # without one.
+  docstring-math:
+    name: Docstring mathematics reaches the page intact
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that no docstring doubles a backslash in its mathematics
+      run: python scripts/check_docstring_math.py
+
   # A private module-level constant is a number lifted out of a standard so the
   # code that uses it can say where it came from, and one nothing reads is
   # either a leftover or the trace of a check the docstring above it still

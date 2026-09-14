@@ -50,6 +50,7 @@ if TYPE_CHECKING:
     from ..room.noise_criteria import NCResult, RCResult
     from ..room.open_plan import OpenPlanResult
     from ..room.reverberation_prediction import ReverberationModelResult
+    from ..room.spatial_decay import SpatialDecayResult
     from ..room.steady_field import SteadyFieldResult
 
 #: Shared x-axis label of the frequency-domain room plots.
@@ -122,6 +123,11 @@ _LATE_LATERAL_TYPICAL_RANGE_DB = (-14.0, 1.0)
 #: 2 kHz octave bands.
 _EARLY_SUPPORT_TYPICAL_RANGE_DB = (-24.0, -8.0)
 _LATE_SUPPORT_TYPICAL_RANGE_DB = (-24.0, -10.0)
+
+#: The annotation that names both descriptors of ISO 14257 on the curve. It
+#: reads the same in both languages, since it is two symbols and two units;
+#: what changes is the decimal separator, which the save-time pass applies.
+_DESCRIPTORS_LABEL = "$\\mathrm{DL_2}$ = %.1f dB, $\\mathrm{DL_f}$ = %.1f dB"
 
 #: Spanish translations of the fixed strings rendered by the room ``.plot()``
 #: renderers, keyed by their verbatim English text.  ``_t`` returns the English
@@ -238,6 +244,18 @@ _STRINGS: dict[str, str] = {
     ),
     r"Interaural delay $\tau$ [ms]": r"Retardo interaural $\tau$ [ms]",
     _IACF_LABEL: _IACF_LABEL,
+    r"Excess over a free field, $\mathrm{DL_f}$": (
+        r"Exceso sobre el campo libre, $\mathrm{DL_f}$"
+    ),
+    "Free field, Equation (2)": "Campo libre, ecuación (2)",
+    r"Fitted slope, $\mathrm{DL_2}$": r"Pendiente ajustada, $\mathrm{DL_2}$",
+    "Measured curve, $D$": "Curva medida, $D$",
+    "Distance from the source [m]": "Distancia a la fuente [m]",
+    "Sound distribution value $D$ [dB]": "Valor de distribución sonora $D$ [dB]",
+    "ISO 14257 spatial sound distribution": (
+        "Distribución espacial del sonido de la ISO 14257"
+    ),
+    _DESCRIPTORS_LABEL: _DESCRIPTORS_LABEL,
 }
 
 
@@ -1704,3 +1722,83 @@ def plot_crowd_noise(
     ax.legend(loc="lower right", fontsize="small")
     localize_axes(ax, language)
     return ax
+
+
+def plot_spatial_decay(
+    result: SpatialDecayResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The measured curve, the free field it is judged against, and the fit.
+
+    The measured sound distribution values are drawn against distance on a
+    logarithmic axis, which is the axis ISO 14257 draws them on and the one
+    that makes a constant decay per doubling a straight line. The free-field
+    reference of Equation (2) is the line every room is compared with, the
+    shaded band between the two is the excess of Equation (6), and the fitted
+    line is the slope Equation (5) returns.
+
+    :param result: A
+        :class:`~phonometry.room.spatial_decay.SpatialDecayResult`.
+    :param ax: Existing axes, or ``None`` for a new figure.
+    :param language: ``"en"`` or ``"es"``.
+    :param kwargs: Forwarded to the measured curve's ``plot`` call.
+    :return: The axes drawn on.
+    """
+    require_choice(language, "language", ("en", "es"))
+    axes = _new_axes() if ax is None else ax
+    radii = np.asarray(result.distances_m, dtype=np.float64)
+    values = np.asarray(result.distribution_values_db, dtype=np.float64)
+    reference = np.asarray(result.reference_values_db, dtype=np.float64)
+
+    axes.fill_between(
+        radii,
+        reference,
+        values,
+        color=_C_PRIMARY_LIGHT,
+        alpha=0.35,
+        label=_t(r"Excess over a free field, $\mathrm{DL_f}$", language),
+    )
+    axes.semilogx(
+        radii,
+        reference,
+        ls="--",
+        color=_C_REFERENCE,
+        lw=1.4,
+        label=_t("Free field, Equation (2)", language),
+    )
+    # The fitted line, drawn from the same slope the result carries so that
+    # what is plotted is what was returned rather than a second regression.
+    logs = np.log10(radii / 1.0)
+    slope_per_decade = -result.decay_rate_db / 0.3
+    intercept = float(np.mean(values)) - slope_per_decade * float(np.mean(logs))
+    axes.semilogx(
+        radii,
+        intercept + slope_per_decade * logs,
+        ls=":",
+        color=_C_SECONDARY,
+        lw=1.6,
+        label=_t(r"Fitted slope, $\mathrm{DL_2}$", language),
+    )
+    kwargs.setdefault("color", _C_PRIMARY)
+    kwargs.setdefault("label", _t("Measured curve, $D$", language))
+    kwargs.setdefault("zorder", 3)
+    axes.semilogx(radii, values, "o-", **kwargs)
+
+    axes.set_xlabel(_t("Distance from the source [m]", language))
+    axes.set_ylabel(_t("Sound distribution value $D$ [dB]", language))
+    axes.set_title(_t("ISO 14257 spatial sound distribution", language))
+    axes.annotate(
+        _t(_DESCRIPTORS_LABEL, language)
+        % (result.decay_rate_db, result.mean_excess_db),
+        xy=(0.03, 0.06),
+        xycoords="axes fraction",
+        fontsize="small",
+    )
+    axes.grid(visible=True, which="both", alpha=0.3)
+    axes.legend(loc="upper right", fontsize="small")
+    from .._i18n import localize_axes
+
+    localize_axes(axes, language)
+    return axes

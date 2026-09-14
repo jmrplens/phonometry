@@ -451,6 +451,7 @@ from .room import (
     generate_steady_state_directivity,
     generate_steady_state_field,
     generate_sweep_distortion_separation,
+    generate_workroom_spatial_decay,
 )
 from .schematics import (
     animate_block_vs_exponential,
@@ -693,6 +694,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_excitation_signals,
     generate_impulse_response,
     generate_schroeder_decay,
+    generate_workroom_spatial_decay,
     # What the ISO 18233 acquisition buys and what it costs: the effective
     # SNR of a deconvolved sweep, the harmonic packets at negative arrival
     # times, the bias of a microphone inside d_min, the modal count an octave

@@ -1,0 +1,442 @@
+---
+title: "Silenciadores, pantallas y barreras in situ"
+description: "Tres normas que miden un dispositivo de control de ruido donde ya está: el silenciador en el conducto al que se soldó, la pantalla que se puede apartar para una de las dos medidas, y la barrera exterior que se construyó hace años. Qué puede determinar cada una todavía, qué rechaza cada una, y por qué sus tres correcciones por ruido de fondo no deben fundirse nunca en una sola."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Measurements of noise from silencers in situ"
+    designation: "ISO 11820:1996"
+    primary: true
+    note: "El silenciador medido en la instalación a la que se montó: las veinte instalaciones de la figura 1, la pérdida por transmisión de la ecuación (19), la pérdida por inserción de la ecuación (21), la tabla escalonada de fondo del apartado 4 y las magnitudes de flujo del apartado 9. Leída de la BS EN ISO 11820:1997, que la adopta sin modificación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Measurement of the in situ sound attenuation of a removable screen"
+    designation: "ISO 11821:1997"
+    note: "La pantalla que se puede apartar para una de las dos medidas: la atenuación de 5.8 y 5.9, la fórmula de fondo enmarcada de 5.7, el ensayo de directividad que tiene que pasar una fuente artificial, y la geometría de micrófonos de 5.5.2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — In-situ determination of insertion loss of outdoor noise barriers of all types"
+    designation: "ISO 10847:1997"
+    note: "La barrera ya construida: el método directo de 8.2.1, el indirecto de 8.2.2 con su emplazamiento equivalente, las clases de viento y de tiempo del apartado 6, y el micrófono de referencia de 7.2.2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics — Measurement procedures for ducted silencers and air-terminal units — Insertion loss, flow noise and total pressure loss"
+    designation: "ISO 7235:2003"
+    note: "El método de laboratorio como alternativa al cual existe la ISO 11820: un conducto de ensayo, una terminación conocida y una medida por sustitución."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation"
+    designation: "ISO 9613-2:1996"
+    note: "El término de atenuación por barrera que calcula una predicción, y que la ISO 10847 mide en su lugar."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Una medida de laboratorio de un dispositivo de control de ruido responde a una
+pregunta: cuánto vale este producto, en unas condiciones elegidas para que dos
+productos se puedan comparar. Es la pregunta correcta cuando hay un catálogo que
+escribir. Es la equivocada cuando el silenciador ya está soldado al conducto, la
+pantalla lleva un año entre la prensa y el banco, y la barrera se construyó antes
+de que a nadie se le ocurriera medirla.
+
+Estas tres normas hacen la otra pregunta. Cada una mide un dispositivo **donde
+ya está**, en la instalación a la que pertenece, con lo que tenga alrededor.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_noise_control.svg" alt="Tres paneles. Izquierda: los decibelios que cada una de tres normas quita de un nivel medido frente al margen sobre el ruido de fondo, dibujados como dos escaleras y una curva; la tabla de la ISO 11820 baja de tres decibelios con un margen de tres a medio decibelio con nueve y diez, la de la ISO 10847 de dos decibelios con cuatro a un decibelio de seis a nueve, y la resta energética de la ISO 11821 va suavemente desde algo más de un decibelio y cuarto con seis hacia cero, con las zonas por debajo del umbral propio de cada tabla sombreadas para marcar los rechazos. Centro: las cuatro distancias de micrófono que usa la medida de una pantalla frente a la altura de la pantalla, cuatro rectas para un cuarto, la mitad, una vez y dos veces la altura, con la del cuarto de altura aplastada contra el suelo de un metro por debajo de cuatro metros y la de media altura por debajo de dos, y la franja en la que alguna de las dos queda retenida sombreada. Derecha: la altura del micrófono de referencia de la medida de una barrera frente a la distancia del extremo cercano de la fuente a la barrera, una curva que baja hasta cinco metros y setenta centímetros cerca de los cinco metros y sube hasta siete a los quince, donde cae de vuelta a la altura fija de metro y medio por encima del borde superior de cuatro metros que rige a cualquier distancia mayor" width="100%" />
+
+*Tres normas, tres respuestas a la misma pregunta sobre el ruido de fondo; las
+posiciones de micrófono que usa la medida de una pantalla; y el único micrófono
+cuyo trabajo entero es oír a la fuente y no al dispositivo.*
+
+## 1. Lo que cuesta medir in situ, y lo que se gana
+
+El laboratorio compra dos cosas: un entorno controlado y una medida por
+**sustitución**. La ISO 7235 mide un silenciador de conducto haciendo sonar una
+fuente hacia un conducto de ensayo con el silenciador puesto, y después con un
+tramo recto de reemplazo de la misma longitud, de modo que las dos medidas se
+diferencien sólo en el silenciador.
+
+In situ no hay ninguna de las dos. El entorno es la sala, el conducto o el
+espacio abierto en el que esté el dispositivo, y no hay tramo de reemplazo que
+poner. Queda el par de niveles que permita la instalación, y la aritmética que
+los convierte en una magnitud: el cociente de las dos superficies de medida y la
+diferencia de las dos correcciones de campo.
+
+$$
+D_{ts} = D_{tps} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
+$$
+
+Esa es la ecuación (19) de la ISO 11820, y es la idea entera de medir in situ.
+La diferencia de niveles es lo que lee un sonómetro. El término de superficies
+convierte el nivel medio de cada lado en la potencia acústica que representa,
+porque el lado fuente puede ser la sección de un conducto mientras que el lado
+receptor es una sala. Las correcciones de campo cargan con lo que los dos lados
+no comparten.
+
+```python
+from phonometry import noise_control
+
+bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+source = [98.0, 99.0, 97.0, 95.0, 92.0, 88.0]     # dB, en el conducto
+receiver = [72.0, 68.0, 60.0, 54.0, 50.0, 49.0]   # dB, en la sala a la que da
+
+res = noise_control.in_situ_transmission_loss(
+    source, receiver,
+    source_area_m2=0.9,      # la sección del conducto
+    receiver_area_m2=10.8,   # un cuarto de la absorción de la sala a 500 Hz
+    frequencies=bands, case=2,
+)
+print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
+print(round(res.area_term_db, 1))  # -10.8 dB
+```
+
+El término de superficies sale negativo, y no es un error. Un conducto de 0,9 m²
+que descarga en una sala cuya cuarta parte de absorción es 10,8 m² reparte la
+misma potencia sobre doce veces más superficie, así que la sala ya es más
+silenciosa que el conducto antes de que el silenciador haga nada. Restar eso es
+lo que impide apuntarle la sala al silenciador.
+
+## 2. Las veinte instalaciones
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_in_situ.svg" alt="Sección de un tramo de conducto: la máquina, el conducto, el silenciador con sus bafles y la sala a la que descarga el conducto. Un plano de trazos aguas arriba del silenciador marca la superficie de medida del lado fuente, la sección del conducto, con tres posiciones de micrófono repartidas por ella; un segundo plano de trazos aguas abajo marca la del lado receptor, un cuarto de la absorción de la sala, con tres posiciones de micrófono en la sala. La distancia aguas arriba es un diámetro equivalente y medio y la de aguas abajo doce veces la raíz de la sección aguas abajo menos diez veces la raíz de la sección libre. Un recuadro al pie lleva la pérdida por transmisión como la diferencia de niveles más el cociente de las dos superficies más la diferencia de las dos correcciones de campo" width="100%" />
+
+Un silenciador está entre dos de cuatro cosas: un conducto, una sala con campo
+difuso, una sala sin él y espacio abierto. Dieciséis parejas de esas son medidas
+de transmisión y otras cuatro son medidas de inserción, y la figura 1 las dibuja
+las veinte. La regla de superficie de cada lado se sigue de lo que sea ese lado,
+y el apartado 9 la enuncia.
+
+```python
+case = noise_control.installation_case(2)
+print(case.source_side, case.receiver_side)   # duct diffuse_room
+print(case.quantity)                          # transmission
+print(case.receiver_area_rule)
+# one-quarter of the absorption of the receiver room
+```
+
+Nombrar el caso no es un adorno. `in_situ_transmission_loss` rechaza un caso del
+conjunto de inserción e `in_situ_insertion_loss` rechaza el contrario, porque las
+ecuaciones (19) y (21) son dos magnitudes y la figura 1 es la que dice cuál puede
+dar una instalación.
+
+La superficie de la sala sale del tiempo de reverberación, por las ecuaciones
+(6), (10) y (12), que son la misma expresión escrita tres veces:
+
+```python
+area = noise_control.reverberant_surface_area_m2(
+    320.0, [1.6, 1.4, 1.2, 1.1, 1.0, 0.9],
+)
+print(area.round(1))   # [ 8.1  9.3 10.8 11.8 13.  14.4] m^2
+```
+
+Es un cuarto del área de absorción equivalente de Sabine, que es el factor que
+convierte un nivel reverberante en una potencia acústica.
+
+## 3. El silenciador que es silencioso y tapona el conducto
+
+Un silenciador no está medido mientras no se haya medido también el flujo. La
+ISO 11820 le dedica el apartado 9 entero, y la biblioteca lleva la cadena
+completa: la pérdida de presión total de la ecuación (13), la diferencia
+estática detrás de un cambio de sección de la ecuación (14), la presión dinámica
+y la velocidad que representa, la densidad del gas de la ecuación (29) y la
+velocidad dentro del silenciador de la ecuación (31), que es a la que responde
+el ruido regenerado.
+
+```python
+print(round(noise_control.gas_density_kg_m3(temperature_c=120.0), 3))   # 0.887
+print(round(noise_control.silencer_flow_velocity_m_s(
+    8.0, upstream_area_m2=0.9, free_area_m2=0.45), 1))                  # 16.0
+```
+
+Las superficies de medida tienen su propia geometría. Aguas arriba, un diámetro
+equivalente y medio de la sección de medida; aguas abajo,
+$12\sqrt{S_d} - 10\sqrt{S_f}$, que para un silenciador cuya sección libre es
+casi todo el
+conducto puede caer a cero o por debajo. La norma tiene su propia salida para
+eso, que es el acuerdo entre las partes, y aquí el caso se avisa en lugar de
+devolverse como una distancia en la que no se puede poner nadie.
+
+### Cómo se hace la medida
+
+Elija la instalación en la figura 1 y lea qué regla de superficie le toca a cada
+lado. Ponga la superficie del lado fuente a un diámetro equivalente y medio
+aguas arriba del silenciador y la del lado receptor a la distancia que dé la
+ecuación (16), o acuerde una cuando esa expresión caiga a cero. Haga funcionar
+la máquina, mida el nivel medio en cada superficie, y mida el sonido ajeno con
+las fuentes que se puedan apagar apagadas, porque la vía energética de las
+ecuaciones (17) y (18) es mejor que la tabla escalonada y las dos rechazan por
+debajo de 3 dB de todas formas. Anote la temperatura de los dos lados: si
+difieren, la corrección de campo de las ecuaciones (20) y (22) no es cero.
+Después mida el flujo, la pérdida de presión total del silenciador y el perfil
+de velocidad en el conducto, que 9.2 pide uniforme dentro del 10 %.
+
+## 4. La pantalla que se puede apartar
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_screen_in_situ.svg" alt="Sección de un taller: la máquina a la izquierda, la pantalla apoyada en el suelo, y cuatro micrófonos detrás de ella a un cuarto, la mitad, una vez y dos veces la altura de la pantalla, con el más cercano retenido en el suelo de un metro. Un operario ocupa la tercera posición, y la altura de micrófono es la altura de operario de un metro cincuenta y cinco más menos siete centímetros y medio. Un recuadro al pie lleva la atenuación como la diferencia entre la medida sin la pantalla y la medida con ella" width="100%" />
+
+La ISO 11821 tiene lo único que les falta a las otras dos: el dispositivo se
+puede quitar para una de las medidas. Una pantalla móvil se aparta, se mide la
+sala, se vuelve a poner, y la diferencia es la atenuación.
+
+```python
+res = noise_control.screen_attenuation(
+    [78.0, 80.0, 81.0, 79.0, 76.0, 72.0],   # dB, sin la pantalla
+    [74.0, 74.0, 72.0, 68.0, 63.0, 58.0],   # dB, con la pantalla
+    frequencies=bands,
+    a_weighted_unscreened_level_db=84.1,
+    a_weighted_screened_level_db=74.6,
+)
+print(res.attenuation_db)                   # [ 4.  6.  9. 11. 13. 14.] dB
+print(res.a_weighted_attenuation_db)        # 9.5 dB
+```
+
+El par ponderado A es el apartado 5.9, y viene con una condición que la
+biblioteca hace cumplir en vez de mencionar: no se puede obtener con una fuente
+artificial. Un número ponderado A pondera un espectro, y con un altavoz haciendo
+de máquina el espectro ponderado es el del altavoz. Pedirlo de todas formas lanza
+`ValueError` en vez de devolver un número que se reportaría como el de la
+máquina.
+
+Una fuente artificial tiene antes un ensayo propio que pasar. La definición 3.10
+lee el índice de directividad en doce posiciones repartidas por igual en un
+círculo horizontal de 1,5 m de radio, como la media logarítmica menos la
+posición, y 5.2.2 acepta la fuente mientras ninguna posición caiga más de 8 dB
+por debajo de la media.
+
+Dónde se colocan los micrófonos es 5.5.2: un cuarto, la mitad, una vez y dos
+veces la altura de la pantalla, nunca a menos de 1 m. Por debajo de 4 m la
+posición del cuarto de altura cae dentro de ese suelo y se empuja hasta él, y
+con 2 m o menos también se empuja la de media altura, así que las dos
+posiciones más cercanas coinciden y la medición se hace a tres distancias. Es
+la regla impresa y no un descuido.
+
+```python
+print(noise_control.microphone_distances_m(3.0))   # [1.  1.5 3.  6. ] m
+```
+
+La NOTA 2 dice qué significa la dispersión de esas cuatro respuestas: la
+atenuación más pequeña se encuentra en la posición más alejada y la mayor en la
+más cercana, que es la razón de que la norma pida las cuatro en vez de un
+promedio.
+
+### Cómo se hace la medida
+
+Ponga los micrófonos en la línea perpendicular a la pantalla, a un cuarto, la
+mitad, una vez y dos veces su altura, y empuje hasta 1 m los que caigan dentro
+de ese metro. Coloque cada uno a la altura del operario donde el puesto no fije
+una. Haga funcionar la máquina con la pantalla puesta, tome los niveles, aparte
+la pantalla sin tocar nada más, y vuelva a tomarlos. Mida el fondo con la
+máquina parada en esas mismas posiciones: por encima de 10 dB de margen no hace
+falta corregir, entre 6 dB y 10 dB se aplica la fórmula enmarcada de 5.7, y por
+debajo de 6 dB las condiciones no son aceptables y lo que toca es volver un día
+más tranquilo. Para una fuente impulsiva, al menos tres repeticiones con la
+ponderación temporal S, y la media aritmética de ellas.
+
+## 5. La barrera que se construyó hace años
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_in_situ.svg" alt="Dos secciones del mismo emplazamiento. La de arriba es la campaña anterior a la barrera, con la zona de fuente a la izquierda, un micrófono de referencia puesto donde estará el borde superior y un micrófono receptor a un metro veinte o más; la de abajo es la campaña posterior, con la barrera construida, el micrófono de referencia a metro y medio por encima de su borde superior, y el camino difractado curvándose por encima hasta el receptor. Un recuadro al pie lleva la pérdida por inserción como el cambio en la referencia menos el cambio en el receptor, y el tiempo que tienen que compartir las dos campañas" width="100%" />
+
+Una barrera exterior no se puede quitar y casi nunca se puede medir antes de que
+exista. La ISO 10847 ofrece dos salidas, y es honesta sobre lo que vale cada una.
+
+El **método directo** necesita el emplazamiento antes de construir la barrera.
+Las dos campañas usan las mismas posiciones de receptor y el mismo micrófono de
+referencia, y el término de referencia normaliza la fuente: lo que funcionara
+distinto el segundo día, el micrófono de referencia también lo oyó.
+
+$$
+D_{IL} = \left(L_{\text{ref},A} - L_{\text{ref},B}\right)
+       - \left(L_{r,A} - L_{r,B}\right)
+$$
+
+```python
+from phonometry import environment
+
+res = environment.measured_insertion_loss_direct(
+    [76.0, 74.0, 71.0, 67.0, 62.0, 56.0],   # referencia, antes
+    [78.0, 76.0, 73.0, 69.0, 64.0, 58.0],   # referencia, después
+    [63.0, 61.0, 58.0, 54.0, 49.0, 43.0],   # receptor, antes
+    [58.0, 53.0, 47.0, 41.0, 35.0, 29.0],   # receptor, después
+    frequencies=bands,
+)
+print(res.insertion_loss_db)   # [ 7. 10. 13. 15. 16. 16.] dB
+```
+
+La fuente sonó 2 dB más fuerte el segundo día en todas las bandas, y la respuesta
+no lleva dentro esos 2 dB. Esa invariancia es la razón de que exista el micrófono
+de referencia.
+
+El **método indirecto** toma prestada la campaña "antes" de un emplazamiento
+sustituto que se juzgue equivalente en perfil del terreno, condiciones del suelo
+y fuente, lo que lo convierte en una estimación, y la norma lo dice. Cada campaña
+lleva una corrección por el tipo de posición de receptor, 0 dB en campo semilibre
+y 6 dB contra una fachada, donde la presión se duplica.
+
+El micrófono de referencia se pone al menos 1,5 m por encima del borde superior
+de la barrera, medidos desde su punto más alto cuando el remate no es un borde
+recto. Cuando el extremo cercano de la zona de fuente está a menos de 15 m, la
+NOTA de 7.2.2 permite subirlo hasta que mire por encima del borde superior 10
+grados:
+
+```python
+print(round(environment.reference_microphone_height_m(
+    4.0, source_to_barrier_m=8.0), 2))            # 5.93 m
+print(environment.reference_microphone_height_m(4.0))   # 5.5 m
+```
+
+## 6. El tiempo que hace es parte de la medida
+
+Dos campañas separadas por meses son dos días de tiempo distinto, y el apartado 6
+se va casi entero en eso. El viento entra como la componente vectorial de la
+velocidad media sobre la línea que va de la fuente al receptor, positiva a favor.
+La tabla 1 da una clase a favor y una de calma a cualquier distancia, y añade una
+clase a contraviento sólo para distancias cortas.
+
+```python
+print(environment.wind_class(2.5))                        # downwind
+print(environment.wind_class(-2.0, short_distance=True))  # upwind
+print(environment.wind_class(-2.0))                       # None
+```
+
+Que la geometría sea de distancia corta tampoco es cuestión de opinión. 6.3.1
+imprime una desigualdad para la campaña "antes" y dos para la "después", todas
+contra el mismo cociente de 0,1, y las dos campañas pueden no coincidir:
+
+```python
+print(environment.is_short_distance(
+    source_height_m=1.0, receiver_height_m=1.5, barrier_height_m=4.0,
+    source_to_barrier_m=10.0, barrier_to_receiver_m=20.0,
+))   # (False, True)
+```
+
+Por encima de 5 m/s en valor absoluto no se mide nada, lo que es un rechazo y no
+una clase. Las dos campañas tienen además que coincidir dentro de 2 m/s en la
+componente y de 10 °C en la temperatura, y la nubosidad se anota en las cuatro
+clases de la tabla 2, porque el gradiente de temperatura que curva un rayo al
+aire libre no se mide directamente y el cielo es el mejor indicio a mano.
+
+### Cómo se hace la medida
+
+Fije primero las posiciones de receptor y la de referencia, y consérvelas para
+las dos campañas: si no, la resta no significa nada. Ponga el micrófono de
+referencia al menos 1,5 m por encima del borde superior de la barrera, en un
+plano vertical que pase por ella, medidos desde su punto más alto cuando el
+remate no es un borde recto, o use la regla angular de la NOTA cuando la zona de
+fuente esté a menos de 15 m. Anote en cada medida la componente de viento sobre
+la línea fuente-receptor, la temperatura y la nubosidad, y pare cuando el viento
+pase de 5 m/s. Repita al menos tres veces. Cuando llegue la segunda campaña,
+compruebe antes que nada que el tiempo sigue coincidiendo dentro de 2 m/s y
+10 °C, porque un desajuste ahí no lo arregla nada de lo que venga después.
+
+## 7. Una corrección, tres normas, tres respuestas
+
+Las tres normas se encuentran con el mismo problema: el nivel medido lleva sonido
+que no vino de la fuente. Las tres lo resuelven de forma distinta, y las
+diferencias no son de redondeo.
+
+La **ISO 11820** imprime una tabla escalonada, en positivo, para **restar**: 3 dB
+con un margen de 3 dB, bajando a 0,5 dB con 9 y 10, nada por encima, y por debajo
+de 3 dB las medidas no son válidas. La **ISO 10847** imprime una tabla
+escalonada, en negativo, para **sumar**: 2 dB con un margen de 4 o 5, 1 dB de 6 a
+9, nada a partir de 10, y por debajo de 4 dB los resultados no son válidos. La
+**ISO 11821** no imprime tabla ninguna y enmarca la resta energética, corrigiendo
+sólo dentro de una ventana de 6 dB a 10 dB y rechazando cualquier margen más
+estrecho, porque el fondo del que habla incluye el ruido que genera el viento y
+el remedio para eso es un día más tranquilo.
+
+```python
+print(noise_control.silencer_background_correction_db([9.0]))   # [0.5] dB menos
+print(environment.barrier_background_correction_db([9.0]))      # [-1.] dB suma
+print(round(80.0 - noise_control.background_corrected_level_db(
+    [80.0], [71.0])[0], 2))                                     # 0.58 dB menos
+```
+
+Tres normas, un margen de 9 dB, tres respuestas: 0,5 dB, 1 dB y 0,58 dB. Por eso
+se mantienen como tres implementaciones, y una comprobación de conformidad las
+enfrenta en el margen en el que se separan. Las dos tablas y sus signos opuestos
+están registradas en el registro de erratas como una diferencia que **no** es una
+errata, para que nadie las funda en un solo auxiliar.
+
+La ISO 11820 ofrece una segunda vía para rodear el sonido ajeno, para el caso en
+que las fuentes sobre las que trabaja el silenciador se puedan apagar y medir
+aparte: la resta energética de las ecuaciones (17) y (18), con un tope de 3 dB.
+Pasado el tope la magnitud no queda determinada, y lo que se puede enunciar en su
+lugar es la desigualdad del apartado 4. `extraneous_corrected_mean_level_db`
+devuelve el nivel corregido y si se llegó al tope, para que un número topado no
+se pueda escribir como una determinación.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La **ISO 11820:1996** con toda su aritmética: las diferencias de niveles de las
+ecuaciones (1), (2) y (3); la potencia acústica de las ecuaciones (5), (7), (9) y
+(11) con la superficie reverberante de las ecuaciones (6), (10) y (12); la
+pérdida por transmisión de la ecuación (19) y la pérdida por inserción de la
+ecuación (21) con la corrección de campo por temperatura de las ecuaciones (20) y
+(22); las veinte instalaciones de la figura 1 con las reglas de superficie del
+apartado 9; la tabla de fondo del apartado 4 y la resta energética de sonido
+ajeno de las ecuaciones (17) y (18) con su tope de 3 dB; el plegado a octavas de
+9.1.5; las distancias de medida de las ecuaciones (15) y (16); y las magnitudes
+de flujo de las ecuaciones (13), (14) y (27) a (31).
+
+La **ISO 11821:1997**: la atenuación de 5.8 y la atenuación ponderada A de 5.9,
+rechazada con fuente artificial; la corrección de fondo enmarcada de 5.7 con su
+propia ventana; el índice de directividad de la definición 3.10 y el límite de
+aceptación de 5.2.2; la geometría de micrófonos de 5.5.2 con su suelo; la regla
+de repeticiones de 5.6.2.1 para una fuente impulsiva; y los umbrales impresos de
+la esfera del operario, el alcance al aire libre y la desviación típica de
+reproducibilidad.
+
+La **ISO 10847:1997**: el método directo de 8.2.1 y el indirecto de 8.2.2 con sus
+dos correcciones de receptor; la tabla de fondo de 6.4; las clases de viento de
+la tabla 1 y las de nubosidad de la tabla 2; el ensayo de distancia corta de
+6.3.1; la altura del micrófono de referencia de 7.2.2 con la alternativa angular
+de su NOTA; la distancia de campo semilibre de 8.1.2; y la geometría del
+emplazamiento equivalente de 6.1.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Aquí no se predice nada. La pérdida por inserción que se espera de una barrera y
+la atenuación por la que se elige un silenciador se calculan en otro sitio, a
+partir de la geometría y de los datos de catálogo; esta página parte de niveles
+medidos en el sitio. Aquí tampoco se cualifica ningún instrumento ni ningún
+entorno de ensayo: las clases de sonómetro, la pantalla antiviento, los intervalos
+de calibración y el montaje del micrófono son procedimiento. La equivalencia de
+un emplazamiento sustituto es un juicio que la norma pide a dos partes, y el
+radio y el sector que enuncia se llevan aquí como los números que son y no como
+un ensayo que pueda correr un programa. Las plantillas de informe son prosa.
+Ninguno de los tres documentos imprime un ejemplo numérico resuelto, así que aquí
+no se reproduce ninguno.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Encapsulados y cabinas medidos](/phonometry/es/devices/noise-control/enclosure-cabin-insulation/):
+  la misma forma de mirar aplicada a una caja alrededor de una máquina y a una
+  cabina alrededor de un operario.
+- [Medir un silenciador](/phonometry/es/devices/noise-control/silencer-measurement/):
+  el método de laboratorio de la ISO 7235, con el conducto de ensayo y la medida
+  por sustitución de los que la ISO 11820 prescinde.
+- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/):
+  la pérdida por inserción que se predice para una pantalla o un encapsulado, que
+  es la magnitud que estas normas miden en vez de calcular.
+- [Propagación del sonido al aire libre](/phonometry/es/environment/propagation/outdoor-propagation/):
+  el término de atenuación por barrera de la ISO 9613-2 que calcula una
+  predicción para la barrera que mide la ISO 10847.
+- [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
+  la otra forma de determinar una magnitud en una sala que nunca se construyó
+  para eso.
+
+</SeeAlso>

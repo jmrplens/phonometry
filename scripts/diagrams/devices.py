@@ -3022,6 +3022,223 @@ def _d_enclosure_cabin_measurement(s: SVG, th: Theme) -> None:
     )
 
 
+def _d_silencer_in_situ(s: SVG, th: Theme) -> None:
+    """The ISO 11820 measurement: one run, two measurement surfaces.
+
+    The laboratory method of ISO 7235 substitutes a straight duct for the
+    silencer and reads the difference of two runs. In situ there is nothing to
+    substitute, so the quantity comes from the two sides of the one
+    installation that exists: a mean level on each measurement surface, the
+    ratio of the two areas, and the difference of the two field corrections.
+    The distances are Equations (15) and (16), the areas are the rules clause 9
+    attaches to each of the twenty installations of Figure 1, and the boxed
+    line at the foot is Equation (19).
+    """
+    duct_y, duct_h = 210.0, 64.0
+    axis = duct_y + duct_h / 2
+    x_fan, w_fan = 45.0, 96.0
+    x_sil, w_sil = 330.0, 150.0
+    x_room, w_room = 610.0, 250.0
+
+    s.text(450, 92, "One installation, two measurement surfaces", 17, th.fg, bold=True)
+
+    # Source side: the machine and the duct that carries its sound.
+    s.rect(x_fan, duct_y - 18, w_fan, duct_h + 36, th.panel, th.fg, rx=6, sw=2.2)
+    s.circle(x_fan + w_fan / 2, axis, 17, th.fg)
+    s.circle(x_fan + w_fan / 2, axis, 7, th.bg)
+    s.text(x_fan + w_fan / 2, duct_y + duct_h + 46, "the machine", 13, th.muted)
+
+    s.rect(
+        x_fan + w_fan, duct_y, x_sil - x_fan - w_fan, duct_h, th.panel, th.fg, sw=2.0
+    )
+    s.rect(
+        x_sil + w_sil, duct_y, x_room - x_sil - w_sil, duct_h, th.panel, th.fg, sw=2.0
+    )
+
+    # The silencer itself, splitters and all.
+    s.rect(x_sil, duct_y - 12, w_sil, duct_h + 24, th.panel, th.primary, rx=5, sw=2.6)
+    for k in range(4):
+        s.line(
+            x_sil + 20 + 32 * k,
+            duct_y - 6,
+            x_sil + 20 + 32 * k,
+            duct_y + duct_h + 6,
+            th.primary,
+            2.4,
+        )
+    s.text(
+        x_sil + w_sil / 2,
+        duct_y - 26,
+        "the silencer, as installed",
+        13,
+        th.primary,
+        bold=True,
+    )
+
+    # The receiving room, drawn as a room because case 2 makes it one.
+    s.rect(x_room, duct_y - 78, w_room, duct_h + 150, "none", th.fg, rx=4, sw=2.2)
+    s.text(
+        x_room + w_room / 2,
+        duct_y + duct_h + 88,
+        "the room it discharges into",
+        13,
+        th.muted,
+    )
+
+    # The two measurement surfaces and the distances that place them.
+    s.line(
+        265.0, duct_y - 42, 265.0, duct_y + duct_h + 42, th.secondary, 2.0, dash="6,4"
+    )
+    s.text(265.0, duct_y - 56, "$S_2$: the duct cross-section", 13, th.secondary)
+    for k in range(3):
+        s.circle(265.0, duct_y + 14 + 18 * k, 5, th.secondary)
+
+    s.line(560.0, duct_y - 42, 560.0, duct_y + duct_h + 42, th.accent, 2.0, dash="6,4")
+    s.text(700.0, duct_y - 96, "$S_1$: a quarter of the room absorption", 13, th.accent)
+    for k in range(3):
+        s.circle(x_room + 60 + 70 * k, duct_y - 30 + 34 * k, 5, th.accent)
+
+    s.dim(
+        x_fan + w_fan + 6,
+        duct_y + duct_h + 78,
+        265.0,
+        duct_y + duct_h + 78,
+        "$d_u$",
+        size=14,
+    )
+    s.dim(
+        x_sil + w_sil + 6,
+        duct_y + duct_h + 78,
+        560.0,
+        duct_y + duct_h + 78,
+        "$d_d$",
+        size=14,
+    )
+    s.text(196, duct_y + duct_h + 104, "$d_u = 1,5 √(4S_u/π)$", 13, th.muted)
+    s.text(523, duct_y + duct_h + 104, "$d_d = 12√S_d − 10√S_f$", 13, th.muted)
+
+    s.arrow(x_fan + w_fan, axis, x_sil - 8, axis, th.fg, 2.0)
+    s.arrow(x_sil + w_sil + 8, axis, x_room - 8, axis, th.fg, 2.0)
+
+    # What the two surfaces are worth once they are read.
+    s.rect(70, 420, 760, 66, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(450, 448, "$D_{ts} = D_{tps} + 10 lg(S_2/S_1) + K_2 − K_1$", 18, th.fg)
+    s.text(
+        450,
+        472,
+        "the level difference, the ratio of the two areas, and what the two sides do not share",
+        13,
+        th.muted,
+    )
+
+    s.text(
+        450,
+        516,
+        "Figure 1 draws twenty installations: sixteen give a transmission loss and four an insertion loss",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        538,
+        "the source side and the receiver side are each a duct, a diffuse room, a room without one, or open space",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        566,
+        "and the flow is measured too: a silencer that is quiet and blocks the duct has not been measured",
+        13,
+        th.secondary,
+    )
+
+
+def _d_screen_in_situ(s: SVG, th: Theme) -> None:
+    """The ISO 11821 measurement: two runs and four distances.
+
+    A removable screen is the one device of the three that can be taken away,
+    so the standard asks for the room with it and the room without it, and the
+    attenuation is the difference. Where the microphones stand is 5.5.2: a
+    quarter, a half, once and twice the screen height, floored at 1 m, which is
+    why a low screen is measured at three distances rather than four.
+    """
+    floor = 430.0
+    x_screen = 330.0
+    h_screen = 200.0
+    top = floor - h_screen
+
+    s.text(
+        450, 92, "Two runs, and four distances behind the screen", 17, th.fg, bold=True
+    )
+    s.ground(floor, 55, 860)
+
+    # The source, which keeps running between the two campaigns.
+    s.rect(110, floor - 84, 96, 84, th.panel, th.fg, rx=5, sw=2.2)
+    s.circle(158, floor - 42, 15, th.fg)
+    s.circle(158, floor - 42, 6, th.bg)
+    s.text(158, floor + 30, "the machine, unchanged", 13, th.muted)
+
+    # The screen, and the run without it drawn as its ghost.
+    s.rect(x_screen - 9, top, 18, h_screen, th.panel, th.primary, rx=3, sw=2.6)
+    s.text(
+        x_screen,
+        top - 18,
+        "the screen: one run with it, one without",
+        13,
+        th.primary,
+        bold=True,
+    )
+    s.dim(x_screen - 40, floor, x_screen - 40, top, "$h$", size=15, label_side="left")
+
+    # The four microphone positions, with the floor the nearest is held out to.
+    for label, x in (
+        ("$h/4$", x_screen + 62),
+        ("$h/2$", x_screen + 124),
+        ("$h$", x_screen + 248),
+        ("$2h$", x_screen + 430),
+    ):
+        s.mic(x, floor - 150, floor, scale=0.85)
+        s.text(x, floor - 166, label, 14, th.accent, bold=True)
+    s.dim(x_screen + 9, floor + 54, x_screen + 62, floor + 54, "≥ 1 m", size=13)
+
+    # The operator the geometry is written for.
+    s.person(x_screen + 248, floor, h=96)
+    s.text(
+        x_screen + 248, floor - 190, "operator height 1,55 m ± 0,075 m", 13, th.muted
+    )
+
+    s.rect(70, 496, 760, 62, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        450,
+        522,
+        "$D_p = L_{p1} - L_{p2}$, band by band and position by position",
+        17,
+        th.fg,
+    )
+    s.text(
+        450,
+        546,
+        "the smallest attenuation is found at the most remote position and the largest at the nearest",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        588,
+        "no microphone stands closer than 1 m, so a screen of 2 m or less is measured at three distances, not four",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        612,
+        "an artificial source has to pass the twelve-position directivity test first, and may never give the A-weighted value",
+        13,
+        th.secondary,
+    )
+
+
 def _d_open_end_solid_angles(s: SVG, th: Theme) -> None:
     """The five mounting configurations of ISO 7235 Table B.1.
 

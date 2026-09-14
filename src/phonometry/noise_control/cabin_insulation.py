@@ -184,6 +184,9 @@ MIN_MICROPHONE_HEIGHT_M: float = 1.0
 
 #: 6.5.2 and 6.7: the radius of the sphere or circle around the operator's
 #: head, and around the middle of a cabin with no defined operator position.
+#: ISO 11821 5.5.1 prints the same sphere for a screen, and
+#: :mod:`phonometry.noise_control.screen_in_situ` re-exports this rather than
+#: printing the number twice.
 OPERATOR_SPHERE_RADIUS_M: float = 0.3
 
 #: 6.5.2 and 6.7: the inclination of a rotating microphone path.

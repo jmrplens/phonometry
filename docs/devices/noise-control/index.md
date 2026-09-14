@@ -70,6 +70,9 @@ occupational limit applies, in [Occupational exposure
 - [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](enclosure-cabin-insulation.md):
   what a built enclosure is worth rather than what it was designed to be worth,
   and the cabin that is the same problem inverted.
+- [Silencers, Screens and Barriers In Situ](in-situ-noise-control.md):
+  the silencer in the duct it was fitted to, the screen that can be wheeled
+  away, and the barrier that was built years ago.
 - [Duct-Borne Noise: Fan to Room](duct-path.md): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.

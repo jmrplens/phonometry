@@ -265,6 +265,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.environment.sources.cnossos_road",
             "phonometry.environment.propagation.ground_barriers",
             "phonometry.environment.propagation.noise_reducing_devices",
+            "phonometry.environment.propagation.barrier_in_situ",
             "phonometry.environment.propagation.refraction",
             "phonometry.environment.propagation.air_absorption",
             "phonometry.environment.sources.cnossos_rail",
@@ -358,6 +359,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.noise_control.enclosures",
             "phonometry.noise_control.enclosure_insulation",
             "phonometry.noise_control.cabin_insulation",
+            "phonometry.noise_control.silencer_in_situ",
+            "phonometry.noise_control.screen_in_situ",
             "phonometry.noise_control.room_to_room",
             "phonometry.noise_control.valves",
             "phonometry.noise_control.valves_hydrodynamic",
@@ -450,6 +453,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "MANDATORY_BAND_RANGE_HZ": "phonometry.noise_control.enclosure_insulation",
     "PREFERRED_BAND_RANGE_HZ": "phonometry.noise_control.enclosure_insulation",
     "leak_ratio": "phonometry.noise_control.enclosure_insulation",
+    # ISO 11957 prints the operator sphere first and ISO 11821 reuses it, so
+    # the cabin module owns the constant and the screen module imports it.
+    "OPERATOR_SPHERE_RADIUS_M": "phonometry.noise_control.cabin_insulation",
     "seal_ratio": "phonometry.noise_control.enclosure_insulation",
     # The two sound speeds and the jet diameter are owned by the aerodynamic
     # valve module and imported by the hydrodynamic one, which IEC 60534-8-4

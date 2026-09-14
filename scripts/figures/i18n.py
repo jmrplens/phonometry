@@ -3518,6 +3518,64 @@ _ES_EXACT = {
         "que la respuesta se mueva entre ellas; pasadas las seis, el\n"
         "exceso se hace constar en el informe"
     ),
+    # ISO 11820, ISO 11821 and ISO 10847: three measurements made where the
+    # thing being measured already stands.
+    "ISO 11820 Table 1, taken off the measured level": (
+        "Tabla 1 de la ISO 11820, restada del nivel medido"
+    ),
+    "ISO 10847 Table 3, printed negative and added": (
+        "Tabla 3 de la ISO 10847, impresa en negativo y sumada"
+    ),
+    "ISO 11821 clause 5.7, the energy subtraction": (
+        "Apartado 5.7 de la ISO 11821, la resta energética"
+    ),
+    "Margin over the background [dB]": "Margen sobre el ruido de fondo [dB]",
+    "Decibels removed from the measured level": (
+        "Decibelios que se quitan del nivel medido"
+    ),
+    "One correction, three standards, three answers": (
+        "Una corrección, tres normas, tres respuestas"
+    ),
+    "at a margin of 9 dB one table takes off 0,5 dB and the\n"
+    "other 1 dB, and under their own thresholds neither\n"
+    "corrects at all: the measurement is refused": (
+        "con un margen de 9 dB una tabla quita 0,5 dB y la otra 1 dB,\n"
+        "y por debajo de su propio umbral ninguna corrige nada: la\n"
+        "medición se rechaza"
+    ),
+    "A quarter of the screen height": "Un cuarto de la altura de la pantalla",
+    "Half the screen height": "La mitad de la altura de la pantalla",
+    "The screen height itself": "La altura de la pantalla",
+    "Twice the screen height": "El doble de la altura de la pantalla",
+    "Screen height [m]": "Altura de la pantalla [m]",
+    "Distance from the screen [m]": "Distancia a la pantalla [m]",
+    "Where the microphones stand": "Dónde se colocan los micrófonos",
+    "no microphone stands closer than 1 m, so a screen of 2 m\n"
+    "or less is measured at three distances rather than four:\n"
+    "its two nearest positions run together on the floor": (
+        "ningún micrófono se acerca a menos de 1 m, así que una\n"
+        "pantalla de 2 m o menos se mide a tres distancias y no a\n"
+        "cuatro: sus dos posiciones más cercanas se juntan en el suelo"
+    ),
+    "Reference microphone height of 7.2.2": (
+        "Altura del micrófono de referencia, 7.2.2"
+    ),
+    "1,5 m above the top edge": "1,5 m por encima del borde superior",
+    "Top edge of the barrier, 4 m": "Borde superior de la pantalla, 4 m",
+    "Distance from the near end of the source to the barrier [m]": (
+        "Distancia del extremo cercano de la fuente a la pantalla [m]"
+    ),
+    "Height above the ground [m]": "Altura sobre el suelo [m]",
+    "The microphone that hears the source": ("El micrófono que escucha a la fuente"),
+    "for a source region nearer than 15 m the microphone rises\n"
+    "until it looks over the top edge by 10 degrees, which asks\n"
+    "for more height than the clearance rule and drops back to\n"
+    "it the moment the source is far enough away": (
+        "con una zona de fuente a menos de 15 m el micrófono sube\n"
+        "hasta mirar por encima del borde superior 10 grados, lo que\n"
+        "pide más altura que la regla de distancia libre y vuelve a\n"
+        "ella en cuanto la fuente se aleja lo bastante"
+    ),
     # --- WP emission & electroacoustics figures (result .plot() labels) ---
     "Carrier $f_2$": "Portadora $f_2$",
     r"Sidebands $f_2 \pm n \cdot f_1$": r"Bandas laterales $f_2 \pm n \cdot f_1$",

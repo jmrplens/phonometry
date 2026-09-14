@@ -47,6 +47,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   inside the window 6.7 sets; and `uncertainty_conditions` is what clause 10
   will and will not say.
 
+- **ISO 11820:1996**, a silencer measured where it stands, in
+  `phonometry.noise_control.silencer_in_situ`. The laboratory method of ISO
+  7235 asks for a test duct and a known termination; this one asks for the
+  installation as built and answers with the transmission loss of Equation
+  (19) or the insertion loss of Equation (21), each the level difference plus
+  the ratio of the two measurement areas plus the difference of the two field
+  corrections. `installation_case` is Figure 1 as data, all twenty
+  installations with the area rule clause 9 gives each side, and the two loss
+  functions refuse a case that belongs to the other quantity. The flow side of
+  the measurement is here as well, from the total pressure loss of Equation
+  (13) to the velocity inside the silencer of Equation (31), because a
+  silencer that is quiet and blocks the duct has not been measured, it has
+  been half measured.
+
+- **ISO 11821:1997**, the attenuation of a removable screen measured in situ,
+  in `phonometry.noise_control.screen_in_situ`. `screen_attenuation` is the
+  difference between the run without the screen and the run with it, and the
+  A-weighted pair of 5.9 is refused with an artificial source, because then
+  the spectrum weighted would be the loudspeaker's. `background_corrected_level_db`
+  is the boxed formula of 5.7 inside its own window, `directivity_index_db` is
+  the twelve-position test an artificial source has to pass, and
+  `microphone_distances_m` is the quarter, half, once and twice the screen
+  height of 5.5.2, floored at 1 m, so that for a low screen two positions
+  coincide the way the clause says they do.
+
+- **ISO 10847:1997**, the in-situ insertion loss of an outdoor barrier, in
+  `phonometry.environment.propagation.barrier_in_situ`. The direct method
+  needs the site before the barrier was built and the indirect one borrows an
+  equivalent site, and both normalise with a reference microphone above the
+  top edge so that a source that ran differently on the two days does not read
+  as barrier performance. `wind_class` is Table 1, `is_short_distance` is the
+  geometry test of 6.3.1 that decides whether the upwind class exists at all,
+  and `barrier_background_correction_db` is Table 3, whose values are printed
+  negative and are added, where the ISO 11820 table prints the same physical
+  thing positive and subtracts it.
+
+- Two errata entries for ISO 10847:1997, both read from the page as printed:
+  an upwind wind class whose interval runs from + 1 to − 5 m/s, and a clause
+  that asks one prime to mean the campaign in its equations and the receiver
+  type in its symbol list. The two stepped background tables of ISO 11820 and
+  ISO 10847, which disagree at a margin of 9 dB and carry opposite signs, are
+  recorded as a difference that is not an erratum, so that nobody merges them.
+
 - `emission.reverberation_background_correction` publishes the background
   correction K1 of ISO 3741:2010 Equation (14) on its own, with the
   frequency-dependent qualification of 9.1.2. It was already inside the

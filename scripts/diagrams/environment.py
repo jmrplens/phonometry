@@ -826,6 +826,85 @@ def _d_ground_regions(s: SVG, th: Theme) -> None:
 # ---------------------------------------------------------------------------
 
 
+def _d_barrier_in_situ(s: SVG, th: Theme) -> None:
+    """The ISO 10847 measurement: the same two microphones, twice.
+
+    A barrier cannot be wheeled away, so the two runs are two campaigns months
+    apart, and the reference microphone is what makes them comparable: it
+    stands above the top edge, hears the source and not the barrier, and
+    whatever the source did differently on the second day it heard too. The
+    direct method needs the site before the barrier was built; the indirect one
+    borrows that campaign from an equivalent site and says so.
+    """
+    for row, (base, title, built) in enumerate(
+        (
+            (250.0, "Before: no barrier, or an equivalent site", False),
+            (500.0, "After: the barrier as built", True),
+        )
+    ):
+        colour = th.secondary if row == 0 else th.primary
+        s.text(60, base - 150, title, 15, colour, bold=True, anchor="start")
+        s.ground(base, 55, 860)
+
+        # The source region, which is a road or a yard rather than a point.
+        s.rect(70, base - 52, 150, 52, th.panel, th.fg, rx=5, sw=2.0)
+        s.circle(145, base - 26, 13, th.fg)
+        s.circle(145, base - 26, 5, th.bg)
+        s.text(145, base + 30, "the source region", 13, th.muted)
+
+        top = base - 132.0
+        if built:
+            s.rect(430, top, 20, 132, th.panel, th.primary, rx=3, sw=2.6)
+            s.text(440, top - 62, "the barrier", 13, th.primary, bold=True)
+        else:
+            s.rect(430, top, 20, 132, "none", th.muted, rx=3, sw=1.4, dash="5,4")
+            s.text(440, top - 62, "where it will stand", 13, th.muted)
+
+        # The reference microphone: 1,5 m clear of the top edge, on the plane
+        # through it, so that it hears the source and not the barrier.
+        s.mic(440, top - 46, top, scale=0.8)
+        s.line(430, top, 450, top, th.muted, 1.2, dash="3,3")
+        s.dim(470, top, 470, top - 46, "1,5 m", size=13, label_side="right")
+        s.text(440, base + 30, "reference microphone", 13, th.accent)
+
+        # The receiver, at 1,2 m or more, where somebody actually stands.
+        s.mic(740, base - 86, base, scale=0.9)
+        s.text(740, base + 30, "receiver position", 13, th.accent)
+        s.dim(790, base, 790, base - 86, "≥ 1,2 m", size=13, label_side="right")
+
+        s.arrow(225, base - 26, 415, top + 24, colour, 1.8)
+        if built:
+            s.path(
+                f"M 440 {top} Q 590 {top - 34} 740 {base - 86}",
+                stroke=colour,
+                sw=1.8,
+                dash="6,4",
+            )
+        else:
+            s.arrow(225, base - 26, 725, base - 86, colour, 1.8)
+
+    # The weather is part of the measurement, so it goes on the plate.
+    s.rect(70, 620, 760, 92, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        450, 648, "$D_{IL} = (L_{ref,A} - L_{ref,B}) - (L_{r,A} - L_{r,B})$", 18, th.fg
+    )
+    s.text(
+        450,
+        672,
+        "the reference term normalises the source: a louder day cancels out of the answer",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        698,
+        "both campaigns within 2 m/s on the wind component and 10 \u00b0C on the temperature, "
+        "and never above 5 m/s",
+        13,
+        th.secondary,
+    )
+
+
 def _d_barrier_four_paths(s: SVG, th: Theme) -> None:
     gy = 260.0
     x0, x1 = 110.0, 800.0

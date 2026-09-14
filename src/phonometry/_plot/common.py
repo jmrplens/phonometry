@@ -1399,3 +1399,115 @@ _ABSORPTION_QUANTITY_LABELS: Final = {
     "equivalent_area": r"Equivalent absorption area $A_\mathrm{T}$ [m²]",
     "practical_coefficient": r"Practical absorption coefficient $\alpha_\mathrm{p}$",
 }
+
+
+def _plot_two_runs(
+    ax: Axes | None,
+    frequencies: np.ndarray | None,
+    upper: np.ndarray,
+    lower: np.ndarray,
+    insulation: np.ndarray,
+    *,
+    labels: tuple[str, str, str],
+    ylabel: str,
+    difference_label: str,
+    frequency_label: str,
+    band_label: str,
+    title: str,
+    language: str,
+    kwargs: dict[str, Any],
+) -> Axes:
+    """Two measured spectra, the area between them, and their difference.
+
+    The shape ISO 11546, ISO 11957, ISO 11821 and ISO 10847 share: a run
+    without the barrier, a run with it, and the difference that is the
+    vertical gap between the two. The
+    gap is washed in so that the difference is visible as an area, and the
+    difference itself is drawn against its own axis, because it starts at zero
+    while the levels do not.
+
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param frequencies: Band centres in hertz, or ``None`` for band indices.
+    :param upper: The louder run: without the enclosure, or in the room.
+    :param lower: The quieter run: with the enclosure, or inside the cabin.
+    :param insulation: The difference between them, in decibels.
+    :param labels: The legend entries for ``upper``, ``lower`` and
+        ``insulation``, already localised.
+    :param ylabel: The label of the level axis, already localised.
+    :param difference_label: The label of the difference axis, already
+        localised.
+    :param frequency_label: The label of a logarithmic frequency axis,
+        already localised.
+    :param band_label: The label of a band-index axis, already localised.
+    :param title: The title, already localised.
+    :param language: Label language, for the axis localisation pass.
+    :param kwargs: Forwarded to the insulation ``Axes.plot``.
+    :return: The axes carrying the levels.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    continuous = frequencies is not None
+    x = (
+        np.asarray(frequencies, dtype=np.float64)
+        if continuous
+        else np.arange(upper.size, dtype=np.float64)
+    )
+    ax.fill_between(x, lower, upper, color=theme_fill(_C_PRIMARY, ax), lw=0.0)
+    ax.plot(
+        x,
+        upper,
+        color=_C_REFERENCE,
+        lw=1.4,
+        ls="--",
+        marker="s",
+        ms=3,
+        label=labels[0],
+    )
+    ax.plot(
+        x,
+        lower,
+        color=_C_SECONDARY,
+        lw=1.4,
+        ls="-.",
+        marker="v",
+        ms=3,
+        label=labels[1],
+    )
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.grid(visible=True, which="both", alpha=0.3)
+
+    twin = ax.twinx()
+    style_default(kwargs, "color", _C_TERTIARY)
+    style_default(kwargs, "lw", 2.0)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    style_default(kwargs, "label", labels[2])
+    twin.plot(x, insulation, **kwargs)
+    twin.set_ylabel(difference_label, color=_C_TERTIARY)
+    twin.tick_params(axis="y", labelcolor=_C_TERTIARY)
+    twin.grid(visible=False)
+    handles, names = ax.get_legend_handles_labels()
+    extra_handles, extra_names = twin.get_legend_handles_labels()
+    ax.legend(
+        handles + extra_handles,
+        names + extra_names,
+        loc="best",
+        fontsize="small",
+        framealpha=1.0,
+    )
+    # The twin axis resets the shared x-axis, so the ticks are set last.
+    if continuous:
+        ax.set_xlabel(frequency_label)
+        # The language has to be forwarded: the tick labels of a logarithmic
+        # axis are written by this formatter, and `localize_axes` below skips
+        # exactly those axes, so a Spanish figure would keep 31.5 for 31,5.
+        format_frequency_axis(ax, language=language)
+        format_frequency_axis(twin, language=language)
+    else:
+        ax.set_xlabel(band_label)
+        ax.set_xticks(x)
+    localize_axes(ax, language)
+    localize_axes(twin, language)
+    return ax

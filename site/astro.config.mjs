@@ -233,11 +233,27 @@ const { '@context': _identityContext, ...canonicalPerson } = await fetch(
       ? response.json()
       : Promise.reject(new Error(`HTTP ${response.status}`)),
   )
+  .then((document) => {
+    // Parsing is not verifying: an error page can be valid JSON, and so is
+    // `{}`. Without this, a document that parsed but is not the Person node
+    // was spliced into the graph verbatim, leaving an entity with no `@id`
+    // and no `@type`. The shape is checked, not the id: hard-coding the
+    // canonical id here would put back the copy this arrangement removed.
+    const id = document?.["@id"];
+    if (document?.["@type"] !== "Person" || typeof id !== "string" || !id) {
+      throw new Error(
+        `the document is not a Person node ` +
+          `(@type=${JSON.stringify(document?.["@type"])}, ` +
+          `@id=${JSON.stringify(id)})`,
+      );
+    }
+    return document;
+  })
   .catch((error) => {
     throw new Error(
-      `[identity] Could not read the canonical Person entity: ` +
-        `${error.message}. The build stops here on purpose, so this ` +
-        `site never publishes an identity it could not verify.`,
+      `[identity] Canonical Person entity unusable: ` +
+        `${error.message}. The build stops here on purpose: this ` +
+        `site publishes the canonical identity or it does not build.`,
       { cause: error },
     );
   });

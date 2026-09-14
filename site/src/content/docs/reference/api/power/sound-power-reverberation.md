@@ -125,6 +125,46 @@ octave is the 50, 63 and 80 Hz thirds and the 8 kHz octave the 6,3, 8 and
 | :--- | :--- |
 | ValueError | for a frequency outside Table F.1, a repeated frequency, an octave whose three thirds are not all present, or levels that do not carry one value per frequency. |
 
+## reverberation_background_correction
+
+```python
+reverberation_background_correction(
+    levels: ArrayLike,
+    background_levels: ArrayLike,
+    frequencies: ArrayLike,
+) -> NDArray[np.float64]
+```
+
+Background-noise correction $K_1$, ISO 3741:2010 Equation (14).
+
+$K_1 = -10 \lg (1 - 10^{-0,1 \Delta L_p})$, the decibels to take off
+a band level measured with the background in it. The qualification of
+clause 9.1.2 is frequency dependent: a margin of 15 dB or more needs no
+correction at all, and below the lower criterion, 6 dB for the bands at or
+under 200 Hz and at or over 6,3 kHz and 10 dB between them, the correction
+is held at the criterion value and the corrected level is an upper bound.
+
+Other standards reach for this one by name rather than repeat it:
+ISO 11957:1996 asks for a correction "in accordance with ISO 3741" four
+times over, and [`phonometry.noise_control.cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/) calls
+this.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | Band levels measured with the background present, in decibels. |
+| `background_levels` | Background levels in the same bands, in decibels. |
+| `frequencies` | Nominal band centre frequencies, in hertz. |
+
+**Returns:** $K_1$ per band, in decibels, to be subtracted from `levels`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For inputs that do not match band for band, that are not finite, or a band centre that is not strictly positive. |
+
 ## ReverberationSoundEnergyResult
 
 ```python

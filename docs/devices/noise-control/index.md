@@ -67,6 +67,9 @@ occupational limit applies, in [Occupational exposure
   four-pole method and the reactive-versus-dissipative choice.
 - [Measuring a Silencer (ISO 7235 and ISO 11691)](silencer-measurement.md):
   where a catalogue insertion loss comes from, and how repeatable it is.
+- [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](enclosure-cabin-insulation.md):
+  what a built enclosure is worth rather than what it was designed to be worth,
+  and the cabin that is the same problem inverted.
 - [Duct-Borne Noise: Fan to Room](duct-path.md): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.

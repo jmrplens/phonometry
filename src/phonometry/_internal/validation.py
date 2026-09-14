@@ -101,6 +101,25 @@ def require_non_negative(value: float, name: str) -> float:
     return float(value)
 
 
+def require_finite(value: float, name: str) -> float:
+    """Require a finite number, of any sign (rejects NaN and infinities).
+
+    The scalar sibling of :func:`require_finite_array`, for the levels a
+    caller may pass one at a time: a level is a level whatever its sign, and
+    an array of them is already refused when it is not finite, so a scalar
+    that slips through as ``nan`` would be the one hole left.
+
+    :param value: The value to validate.
+    :param name: Parameter name used in the error message.
+    :return: The validated value as a ``float``.
+    :raises ValueError: for a non-finite value.
+    """
+    if not math.isfinite(value):
+        msg = f"'{name}' must be finite."
+        raise ValueError(msg)
+    return float(value)
+
+
 def require_fraction(value: float, name: str) -> float:
     """Require a finite fraction in ``[0, 1)``.
 
@@ -173,6 +192,10 @@ def check_engine(engine: str) -> None:
     raise ValueError(msg)
 
 
+#: The rank of a matrix of one row per position and one column per band.
+_MATRIX_RANK = 2
+
+
 def _as_float64(x: ArrayLike, name: str) -> np.ndarray:
     """Convert *x* to ``float64``, naming the parameter when numpy cannot.
 
@@ -243,6 +266,30 @@ def require_finite_array(x: ArrayLike, name: str) -> np.ndarray:
     arr = np.atleast_1d(_as_float64(x, name))
     if arr.ndim != 1 or arr.size == 0:
         msg = f"'{name}' must be a non-empty 1-D array."
+        raise ValueError(msg)
+    if not np.all(np.isfinite(arr)):
+        msg = f"'{name}' must contain only finite values."
+        raise ValueError(msg)
+    return arr
+
+
+def require_finite_matrix(x: ArrayLike, name: str) -> np.ndarray:
+    """Coerce *x* to a non-empty 2-D float64 array of finite values.
+
+    The two-dimensional sibling of :func:`require_finite_array`, for the level
+    matrices a standard writes as one row per measurement position and one
+    column per band. A single row may be given one-dimensionally and arrives
+    as a matrix of one row.
+
+    :param x: The input (1-D or 2-D array-like).
+    :param name: Parameter name used in the error message.
+    :return: The validated ``float64`` array, always 2-D.
+    :raises ValueError: for a non-numeric, empty, ragged, higher-dimensional
+        or non-finite input.
+    """
+    arr = np.atleast_2d(_as_float64(x, name))
+    if arr.ndim != _MATRIX_RANK or arr.size == 0:
+        msg = f"'{name}' must be a non-empty 2-D array, one row per position."
         raise ValueError(msg)
     if not np.all(np.isfinite(arr)):
         msg = f"'{name}' must contain only finite values."

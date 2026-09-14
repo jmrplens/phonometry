@@ -3471,6 +3471,53 @@ _ES_EXACT = {
     "Exact + coherent ground (four paths)": "Exacto + suelo coherente (cuatro caminos)",
     "Kurze-Anderson grazing limit (5 dB)": "Límite rasante de Kurze-Anderson (5 dB)",
     "Insertion loss [dB]": "Pérdida por inserción [dB]",
+    # ISO 11546 and ISO 11957: the measured insulation of an enclosure and of
+    # a cabin.
+    "Sound power without the enclosure": "Potencia acústica sin el encapsulado",
+    "Sound power with the enclosure": "Potencia acústica con el encapsulado",
+    "Insertion loss $D_W$ of Equation (1)": (
+        "Pérdida por inserción $D_W$ de la ecuación (1)"
+    ),
+    "Sound power level [dB re 1 pW]": "Nivel de potencia acústica [dB re 1 pW]",
+    "The insertion loss is the gap, band by band": (
+        "La pérdida por inserción es el hueco, banda a banda"
+    ),
+    "A-weighted insertion loss $D_{WA}$ = 19.3 dB,\n"
+    "which is the single number a declaration carries": (
+        "Pérdida por inserción ponderada A $D_{WA}$ = 19,3 dB,\n"
+        "que es el número único que lleva una declaración"
+    ),
+    "Precision and engineering methods, $K_2 \\leq 2$ dB": (
+        "Métodos de precisión y de ingeniería, $K_2 \\leq 2$ dB"
+    ),
+    "Survey methods, $K_2 \\leq 7$ dB": "Métodos de control, $K_2 \\leq 7$ dB",
+    "The seven room descriptions of Table C.2": (
+        "Las siete descripciones de sala de la tabla C.2"
+    ),
+    "Mean sound absorption coefficient $\\alpha$": (
+        "Coeficiente medio de absorción acústica $\\alpha$"
+    ),
+    "Required area ratio $S_V/S$": "Cociente de superficies exigido $S_V/S$",
+    "How much room a method needs": "Cuánta sala necesita un método",
+    "an empty room with hard walls needs about 140 times the\n"
+    "measurement surface for a precision method, and a well\n"
+    "absorbing one about 14": (
+        "una sala vacía de paredes duras necesita unas 140 veces la\n"
+        "superficie de medida para un método de precisión, y una\n"
+        "bien absorbente unas 14"
+    ),
+    "Largest deviation of $D'_p$ between two positions [dB]": (
+        "Mayor desviación de $D'_p$ entre dos posiciones [dB]"
+    ),
+    "Loudspeaker positions required": "Posiciones de altavoz exigidas",
+    "The count is read off the answer": "El recuento se lee en la respuesta",
+    "three positions to begin with, and one more for every\n"
+    "decibel the answer moves between them; past six the\n"
+    "excess is stated in the report instead": (
+        "tres posiciones para empezar, y una más por cada decibelio\n"
+        "que la respuesta se mueva entre ellas; pasadas las seis, el\n"
+        "exceso se hace constar en el informe"
+    ),
     # --- WP emission & electroacoustics figures (result .plot() labels) ---
     "Carrier $f_2$": "Portadora $f_2$",
     r"Sidebands $f_2 \pm n \cdot f_1$": r"Bandas laterales $f_2 \pm n \cdot f_1$",

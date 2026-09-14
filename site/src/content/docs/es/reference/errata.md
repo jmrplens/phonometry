@@ -6026,10 +6026,270 @@ dos ediciones con las mismas entradas y en el mismo orden.
   medidos.
 - **Estado:** sin comunicar.
 
+## ISO 11546-1:1995, 9.4 c) (una magnitud remitida al apartado de incertidumbre)
+
+- **Localización:** el punto 9.4 c) 2) en la página impresa 9 (página 16 del
+  PDF de la copia BS EN ISO 11546-1:2009 leída aquí, cuyos folios van siete por
+  detrás de las páginas del PDF), frente al apartado 8 de la página impresa 8.
+- **Lo impreso:** «2) A-weighted sound power insulation, $D_{WA}$ (see clause
+  8);», listado bajo «9.4 Acoustical data» entre las magnitudes que debe
+  registrar una medida con la fuente sonora real.
+- **El problema:** el apartado 8 de esta parte es «Uncertainty», y no dice nada
+  de $D_{WA}$: enuncia las desviaciones típicas que cabe esperar de cada método
+  y manda un valor declarado a la ISO 4871. $D_{WA}$ se define en la definición
+  3.9 y se calcula con la ecuación (2) del apartado 6.2. Quien siga la remisión
+  llega a un apartado que no define la magnitud que fue a buscar.
+- **Evidencia:** el punto 9.4 c) 2) de la página impresa 9 y el título y el
+  cuerpo del apartado 8 de la página impresa 8. Verificado en la página 16 del
+  PDF (p. impresa 9) y en la página 15 del PDF (p. impresa 8) de la
+  ISO 11546-1:1995 tal como se publica en la BS EN ISO 11546-1:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la ecuación (2)
+  está impresa correctamente donde le toca.
+- **Comportamiento de la biblioteca:**
+  [`sound_power_insulation`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/enclosure_insulation.py)
+  devuelve $D_{WA}$ de la ecuación (2) y cita el apartado 6.2 para ella.
+- **Estado:** sin comunicar.
+
+## ISO 11546-1:1995, apartado 8 (una palabra mal escrita en la declaración de incertidumbre)
+
+- **Localización:** el primer párrafo del apartado 8 en la página impresa 8
+  (página 15 del PDF).
+- **Lo impreso:** «When the actual sound source or the artificial sound source
+  method is used, it is expected that measurements in confirmity with this part
+  of ISO 11546 will yield standard deviations which are equal to or less than
+  those given in the International Standard used».
+- **El problema:** «confirmity» por «conformity». La frase es la que ata toda
+  la declaración de incertidumbre de la parte a una condición, así que la
+  palabra mal escrita es justo la que dice cuándo vale esa declaración.
+- **Evidencia:** el primer párrafo del apartado 8 en la página impresa 8.
+  Verificado en la página 15 del PDF (p. impresa 8) de la ISO 11546-1:1995 tal
+  como se publica en la BS EN ISO 11546-1:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:** nada que tomar; ningún número depende de
+  ello.
+- **Estado:** sin comunicar.
+
+## ISO 11546-2:1995, anexo C, tabla C.1 (una columna encabezada con una norma que no existe)
+
+- **Localización:** la tabla C.1 en la página impresa 12 (página 18 del PDF
+  de la copia BS EN ISO 11546-2:2009 leída aquí, cuyos folios van seis por
+  detrás de las páginas del PDF).
+- **Lo impreso:** la última columna de la tabla se encabeza «ISO 10204», con
+  las llamadas 3) y 4), sobre las celdas $K_2 \leq 7$ y $\Delta L \geq 6$. La
+  nota 4) al pie de esa misma tabla dice «If $K_2 \leq 2$, the method
+  specified in ISO 11204 is classified as an engineering method».
+- **El problema:** la ISO 10204 es una norma de documentos de inspección de
+  productos metálicos y no tiene nada que ver con la acústica. La columna es
+  la de la ISO 11204, como dice su propia nota al pie y como dice el párrafo
+  que hay sobre la tabla: el anexo abre nombrando «ISO 3743-1, ISO 3744,
+  ISO 3746, ISO 3747, ISO 9614-1, ISO 9614-2, ISO 11201, ISO 11202 and
+  ISO 11204», sin ninguna ISO 10204 entre ellas, y repite la lista antes del
+  paso a).
+- **Evidencia:** el encabezado de columna y su nota 4) en la tabla C.1 de la
+  página impresa 12, frente a las dos listas de esa misma página. Verificado
+  en la página 18 del PDF (p. impresa 12) de la ISO 11546-2:1995 tal como se
+  publica en la BS EN ISO 11546-2:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna; las dos
+  celdas bajo el encabezado son los requisitos de la ISO 11204 y son
+  correctas.
+- **Comportamiento de la biblioteca:**
+  [`TEST_ENVIRONMENT_REQUIREMENTS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/enclosure_insulation.py)
+  indexa esa columna como `"ISO 11204"`, y un test comprueba que no existe
+  ninguna clave `"ISO 10204"`.
+- **Estado:** sin comunicar.
+
+## ISO 11546-2:1995, definición 3.11 (una estimación que remite al anexo equivocado)
+
+- **Localización:** la definición 3.11 en la página impresa 3 (página 9 del
+  PDF), frente a los anexos C y D de las páginas impresas 12 y 15.
+- **Lo impreso:** «**3.11 estimated noise insulation due to the enclosure,**
+  $D_{WA,e}$ or $D_{pA,e}$: Calculated reduction in A-weighted sound power or
+  sound pressure level obtained from $D_W$ or $D_p$, measured in accordance
+  with this part of ISO 11546, and a specific noise spectrum. (See annex C.)»
+- **El problema:** el anexo C de esta parte es «Guidelines for evaluating the
+  applicability of different test environments for *in situ* measurements», y
+  no calcula esa estimación. La magnitud que la definición nombra se calcula
+  en el **anexo D**, «Estimated noise insulation due to the enclosure for a
+  specific noise spectrum». La remisión es la que lleva la parte 1, donde la
+  estimación sí es el anexo C; la parte 2 intercaló antes el anexo del
+  entorno de ensayo y el puntero no se movió.
+- **Evidencia:** la definición de la página impresa 3 y los títulos de los
+  anexos C y D de las páginas impresas 12 y 15. Verificado en la página 9 del
+  PDF (p. impresa 3), la página 18 del PDF (p. impresa 12) y la página 21 del
+  PDF (p. impresa 15) de la ISO 11546-2:1995 tal como se publica en la
+  BS EN ISO 11546-2:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la fórmula es
+  la misma en las dos partes.
+- **Comportamiento de la biblioteca:**
+  [`estimated_a_weighted_insulation`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/enclosure_insulation.py)
+  cita el anexo C de la parte 1 y el anexo D de la parte 2, que es donde cada
+  una la imprime.
+- **Estado:** sin comunicar.
+
+## ISO 11546-2:1995, anexo C, pasos c) y d) (un subíndice en la mitad equivocada de un cociente)
+
+- **Localización:** el procedimiento por letras del anexo C en la página
+  impresa 12 (página 18 del PDF).
+- **Lo impreso:** «c) Calculate $S_V/S$ for the actual situation
+  ($S_V/S_\text{actual}$)» y «d) If $S_V/S_\text{actual} \geq S_V/S$
+  determined from figure C.1, the test environment is estimated to be
+  applicable».
+- **El problema:** «actual» califica a la situación, no a la superficie de
+  medida, pero está impreso como subíndice de $S$ sola, de modo que la
+  expresión se lee como $S_V$ partido por una «$S$ actual» y el paso d) se
+  lee como la comparación de dos cocientes distintos del mismo $S_V$. En el
+  procedimiento hay una sola superficie de medida; los dos lados de la
+  desigualdad son el cociente del recinto que se juzga y el cociente leído en
+  la figura C.1 para el mismo $\alpha$.
+- **Evidencia:** los pasos c) y d) y el párrafo que los precede en la página
+  impresa 12. Verificado en la página 18 del PDF (p. impresa 12) de la
+  ISO 11546-2:1995 tal como se publica en la BS EN ISO 11546-2:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la figura C.1
+  es una curva y el anexo no imprime ningún caso resuelto.
+- **Comportamiento de la biblioteca:**
+  [`test_environment_applicability`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/enclosure_insulation.py)
+  devuelve `actual_area_ratio` y `required_area_ratio` como dos cocientes con
+  nombre de la misma superficie de medida, de modo que la comparación no
+  puede leerse al revés.
+- **Estado:** sin comunicar.
+
+## ISO 11546-2:1995, anexo C, primer párrafo (una palabra mal escrita en la lista de normas relacionadas)
+
+- **Localización:** el párrafo de apertura del anexo C en la página impresa
+  12 (página 18 del PDF).
+- **Lo impreso:** «In these standards, detailed requirements concerning
+  testing conditions and evironments are stated».
+- **El problema:** «evironments» por «environments». La frase es la que
+  establece para qué sirve todo el anexo, y el título del anexo, el párrafo
+  siguiente y la tabla C.1 escriben la palabra correctamente.
+- **Evidencia:** el párrafo de apertura de la página impresa 12, frente al
+  título del anexo en esa misma página. Verificado en la página 18 del PDF
+  (p. impresa 12) de la ISO 11546-2:1995 tal como se publica en la
+  BS EN ISO 11546-2:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:** nada que tomar; ningún número depende
+  de ello.
+- **Estado:** sin comunicar.
+
+## ISO 11957:1996, 6.2 (una distancia de baja frecuencia que relaja la regla que tiene encima)
+
+- **Localización:** el apartado 6.2 «Cabin locations» en la página impresa 3
+  (página 12 del PDF de la copia BS EN ISO 11957:2009 leída aquí, cuyos
+  folios van nueve por detrás de las páginas del PDF).
+- **Lo impreso:** «For measurements in the frequency range from 100 Hz to
+  10 000 Hz, the distance between the cabin and the walls and ceiling of the
+  room shall be at least one-half wavelength corresponding to the centre
+  frequency of the lowest frequency band of interest. [...] For measurements
+  in the frequency range from 50 Hz to 80 Hz, the distance shall be at least
+  2 m».
+- **El problema:** las dos frases no empalman. Media longitud de onda a
+  100 Hz son 1,72 m y crece al bajar la frecuencia, así que a 80 Hz la
+  primera regla pediría 2,14 m y a 50 Hz, 3,43 m. La frase que toma el relevo
+  por debajo de 100 Hz **rebaja** por tanto el requisito, a 2 m, justo donde
+  el argumento de la longitud de onda pide más. La NOTE 11 del apartado 6.4
+  hace de 50 Hz a 10 kHz el intervalo preferente, así que la rama relajada es
+  la que usa una medida preferente.
+- **Evidencia:** las dos frases del apartado 6.2 en la página impresa 3,
+  frente a la NOTE 11 del apartado 6.4 en la página impresa 4. Verificado en
+  la página 12 del PDF (p. impresa 3) y la página 13 del PDF (p. impresa 4)
+  de la ISO 11957:1996 tal como se publica en la BS EN ISO 11957:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna; la norma no
+  imprime ninguna disposición resuelta.
+- **Comportamiento de la biblioteca:**
+  [`minimum_cabin_clearance_m`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/cabin_insulation.py)
+  devuelve los 2 m planos de 50 Hz a 80 Hz y media longitud de onda por
+  encima, exactamente como está impreso, y un test comprueba que la rama baja
+  es la menor de las dos para que la no monotonía no pueda «arreglarse» en
+  silencio.
+- **Estado:** sin comunicar.
+
+## ISO 11957:1996, 6.2 (una distancia a los difusores que repite la distancia a las paredes)
+
+- **Localización:** la segunda frase de la regla de distancias del apartado
+  6.2 en la página impresa 3 (página 12 del PDF).
+- **Lo impreso:** «[...] shall be at least one-half wavelength corresponding
+  to the centre frequency of the lowest frequency band of interest.
+  Furthermore, the distance between the cabin and any diffusing elements in
+  the room shall be at least one-half of this wavelength».
+- **El problema:** «this wavelength» es la longitud de onda de la banda más
+  baja, así que «one-half of this wavelength» es la distancia que la frase
+  anterior acaba de exigir a las paredes y al techo. Introducida por
+  «Furthermore», la frase se lee como un requisito añadido y enuncia el
+  mismo. O es una repetición, o «this wavelength» quería decir la media
+  longitud de onda y la distancia a los difusores es un cuarto de la longitud
+  de onda; lo impreso no lo decide.
+- **Evidencia:** las dos frases, leídas una tras otra, en la página impresa
+  3. Verificado en la página 12 del PDF (p. impresa 3) de la ISO 11957:1996
+  tal como se publica en la BS EN ISO 11957:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:**
+  [`minimum_cabin_clearance_m`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/cabin_insulation.py)
+  devuelve una sola distancia para las paredes, el techo y los elementos
+  difusores, que es la lectura que llevan las palabras, y lo dice.
+- **Estado:** sin comunicar.
+
+## ISO 11957:1996, 6.7 (un método de corrección nombrado con una palabra que no lo es)
+
+- **Localización:** la frase del ruido de fondo del apartado 6.7 en la página
+  impresa 5 (página 14 del PDF).
+- **Lo impreso:** «If the difference is in the range 6 dB to 10 dB, the result
+  of the measurement shall be corrected for the effect of the background
+  noise in acdance with ISO 3741».
+- **El problema:** «acdance» por «accordance», en la frase que dice qué
+  corrección aplicar al nivel de ruido interior. El apartado 6.4 imprime la
+  misma instrucción correctamente dos páginas antes.
+- **Evidencia:** la frase de la página impresa 5, frente a la frase
+  correspondiente del apartado 6.4 en la página impresa 4. Verificado en la
+  página 14 del PDF (p. impresa 5) y la página 13 del PDF (p. impresa 4) de
+  la ISO 11957:1996 tal como se publica en la BS EN ISO 11957:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:**
+  [`internal_noise_level`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/cabin_insulation.py)
+  aplica la corrección de la ISO 3741 dentro de la ventana de 6 dB a 10 dB
+  que fija esa misma frase.
+- **Estado:** sin comunicar.
+
+## ISO 11957:1996, 7.2.1 (una regla de margen sobre el fondo con dos palabras traspuestas)
+
+- **Localización:** el párrafo del espectro de la fuente del apartado 7.2.1
+  en la página impresa 6 (página 15 del PDF).
+- **Lo impreso:** «The output shall be sufficiently high to give a sound
+  pressure level inside the cabin exceeding the background noise level by at
+  least 6 dB and preferably more by than 12 dB for all frequency bands of
+  interest».
+- **El problema:** «preferably more by than 12 dB» por «preferably by more
+  than 12 dB». El mismo requisito está impreso correctamente en el apartado
+  6.4, dos páginas antes, que es lo que zanja la lectura buscada.
+- **Evidencia:** la frase de la página impresa 6, frente a esa misma frase
+  del apartado 6.4 en la página impresa 4. Verificado en la página 15 del PDF
+  (p. impresa 6) y la página 13 del PDF (p. impresa 4) de la ISO 11957:1996
+  tal como se publica en la BS EN ISO 11957:2009.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:**
+  [`MIN_SIGNAL_TO_BACKGROUND_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/cabin_insulation.py)
+  y `PREFERRED_SIGNAL_TO_BACKGROUND_DB` llevan 6 dB y 12 dB, y el aviso
+  nombra el margen que realmente se alcanzó.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la
 concordancia con las fuentes publicadas:
+
+- **ISO 11546-1:1995, anexos A y B:** la figura B.1 se titula «Source
+  spectrum for an artificial sound source constructed according to the
+  guidelines given in annex A», mientras que el anexo A, que pide una chapa de
+  acero de 4 mm por 800 mm (aprox.) por 300 mm (aprox.), añade en su propio
+  último párrafo que «the length of the steel plate used for this measurement
+  was 600 mm» y que una fuente construida según el anexo puede dar otro
+  espectro. La figura es por tanto la ilustración de una fuente una cuarta
+  parte más corta que la longitud aproximada que prescribe el anexo, y el
+  anexo lo dice. Verificado en la página 17 del PDF (p. impresa 10) y la
+  página 19 del PDF (p. impresa 12) de la ISO 11546-1:1995 tal como se publica
+  en la BS EN ISO 11546-1:2009. No se registra como errata porque la propia
+  norma declara la diferencia; se registra aquí para que
+  [`ARTIFICIAL_SOURCE_EXAMPLE_LWA_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/enclosure_insulation.py)
+  no se lea como una propiedad de una fuente del anexo A.
 
 - **ISO 7235:2003, Ecuaciones (10), (21) y (22):** la ley de los gases
   ideales viene impresa con

@@ -2737,6 +2737,20 @@ _ES: dict[str, str] = {
     "attenuates only: 4, 5, 6 (supply) and 4, 5 (return); attenuates and "
     "regenerates: 2, 3; self-noise only: 8 and the grille": "solo atenúan: 4, 5, 6 (impulsión) y 4, 5 (retorno); atenúan y regeneran: 2, 3; solo ruido propio: 8 y la rejilla",
     "the return wins above 1 kHz: its silencer floors the room near 25 dB, and no amount of supply attenuation moves that": "por encima de 1 kHz manda el retorno: su silenciador deja un suelo de 25 dB que la impulsión no puede bajar",
+    # ISO 11546 and ISO 11957 measured (devices/noise-control).
+    "How an enclosure and a cabin are measured (ISO 11546, ISO 11957)": "Cómo se miden un encapsulado y una cabina (ISO 11546, ISO 11957)",
+    "ISO 11546: two runs of the same machine": "ISO 11546: dos medidas de la misma máquina",
+    "the measurement surface is the same in both": "la superficie de medida es la misma en las dos",
+    "without the enclosure": "sin el encapsulado",
+    "with the enclosure": "con el encapsulado",
+    "the enclosure": "el encapsulado",
+    "ISO 11957: one room, one cabin": "ISO 11957: una sala, una cabina",
+    "the room, driven by a loudspeaker or by the work itself": "la sala, excitada por un altavoz o por el propio trabajo",
+    "the cabin, empty": "la cabina, vacía",
+    "in the room": "en la sala",
+    "one quantity kept in, one kept out, and the same arithmetic both ways": "una magnitud que se retiene dentro, otra que se deja fuera, y la misma aritmética en los dos sentidos",
+    "the machine that cannot be run twice has two substitutes: the reciprocity method and the artificial source of Annex A": "la máquina que no se puede hacer funcionar dos veces tiene dos sustitutos: el método de reciprocidad y la fuente artificial del anexo A",
+    "and in situ the number of loudspeaker positions is read off how much the answer moved between them": "y en obra el número de posiciones de altavoz se lee en cuánto se movió la respuesta entre ellas",
     # ISO 7235 silencer measurement (devices/noise-control/silencers).
     "How a silencer is measured: the ISO 7235 substitution method": "Cómo se mide un silenciador: el método de sustitución de la ISO 7235",
     # diagram_open_end_solid_angles

@@ -126,8 +126,8 @@ mobility is the natural currency of the structure-borne power standards
 (power is force times velocity, so
 $P = \tfrac{1}{2}\operatorname{Re}\{Y\}\,|F|^2$ at a contact); the
 reciprocals appear whenever a source is described by what it imposes rather
-than by how it responds. A driving-point mobility is read as three regimes — a
-stiffness line, a peak and a mass line — which section 4 shows on the plot.
+than by how it responds. A driving-point mobility is read as three regimes
+(a stiffness line, a peak and a mass line), which section 4 shows on the plot.
 
 ### Why two mobilities decide the power
 
@@ -223,7 +223,7 @@ functions this page has already introduced.
   over the whole frequency range of interest. This is the requirement that
   matters, because it is what keeps the suspension out of the answer.
 - As a **minimum** requirement, every rigid-body resonance of the suspended
-  structure shall be **below half the lowest frequency of interest** — the
+  structure shall be **below half the lowest frequency of interest**: the
   lowest frequency of *interest*, not the first elastic mode.
 - The masses of suspension components near the structure (hooks, turnbuckles)
   shall be **less than one tenth** of the free effective mass of the structure
@@ -299,7 +299,7 @@ Every transducer you attach adds mass, and the spurious force needed to
 accelerate that mass is measured as though the structure had produced it. The
 symptom is the damaging part: uncompensated inertia loading **shifts the
 frequencies of the response peaks**, and a resonance measured in the wrong place
-is inherited by everything downstream — the modal fit, the damping from the
+is inherited by everything downstream: the modal fit, the damping from the
 half-power bandwidth, the $|Y| = 1/c$ read of section 2. Rotational inertia does
 the same to moments (6.4.3), and impedance heads are the worst offenders because
 their moment of inertia about the mounting point can be large.
@@ -318,7 +318,7 @@ consistent with sensitivity; then, if that is not enough, compensate.
   digitally. A *transfer*-mobility measurement therefore needs a separate
   accelerometer at the driving point to supply that signal.
 - **What it cannot do.** It compensates translational inertia at the driving
-  point, in the excitation direction, only — never rotational inertia. The
+  point, in the excitation direction, only: never rotational inertia. The
   standard **strongly recommends** reconsidering the transducer selection and
   redesigning the attachment hardware ahead of using it, and confines it to the
   range where the ratio of attachment-and-transducer effective mass to the
@@ -357,8 +357,8 @@ depending on *where* it drops.
 - **Notches at the resonances specifically** can also mean the exciter's force
   drops there, which is inherent when a shaker drives a lightly damped
   structure. That leads to the bias worth knowing before recommending H1: if
-  the force signal falls below the noise floor, the H1 estimate — the
-  cross-spectrum over the *force* auto-spectrum — reads **too low**, exactly at
+  the force signal falls below the noise floor, the H1 estimate (the
+  cross-spectrum over the *force* auto-spectrum) reads **too low**, exactly at
   the resonance peak the reader is being taught to measure the damping from.
   H2 (response auto-spectrum in the denominator) has the opposite bias, being
   the one to reach for when the noise is on the force; Hv sits between them.
@@ -584,7 +584,7 @@ The SDOF is a reference for the *definitions*, not a model of anything a
 building acoustician owns. For a large plate or a long beam, driven away from
 its edges, the reflected waves that make a real structure resonate have decayed
 before they return, and the driving-point mobility takes the closed form of the
-equivalent **infinite** structure — which is exactly the stand-in EN 12354-5
+equivalent **infinite** structure, which is exactly the stand-in EN 12354-5
 wants for a receiver mobility when no measurement exists. Three characters,
 from Cremer, Heckl & Petersson Table 5.1:
 
@@ -595,7 +595,7 @@ from Cremer, Heckl & Petersson Table 5.1:
   every frequency and a magnitude falling as $\omega^{-1/2}$, because the
   bending wave speed $c_\mathrm{B}$ itself grows as $\sqrt{\omega}$;
 - a **rod in longitudinal motion** is $Y = 1/(\rho c_\mathrm{L} S)$, real and flat
-  again — the mechanical analogue of a matched transmission line.
+  again: the mechanical analogue of a matched transmission line.
 
 ```python
 import numpy as np

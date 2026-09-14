@@ -195,7 +195,7 @@ coherence functions (Eqs. 7.109, 7.35, 7.87), the Gaussian-elimination
 conditioning recursion (Eq. 7.94), the partial coherent output spectra and
 their exact decomposition of the output (Eqs. 7.86/7.116/7.121), and the
 Section 9.3 random errors of the multiple and conditioned estimates
-(Eqs. 9.98-9.101) — all exposed by `miso_coherence` and `MISOCoherenceResult`.
+(Eqs. 9.98-9.101): all exposed by `miso_coherence` and `MISOCoherenceResult`.
 
 **Not covered.** The chapter's multiple-input frequency-response estimates (the
 gain factors $L_{iy}$), the linear model that predicts the output from the

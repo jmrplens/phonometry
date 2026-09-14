@@ -135,7 +135,7 @@ eng.plot()   # the LW(f) spectrum, as in the figure above (needs matplotlib)
 The two totals are not interchangeable: `total_level` is the unweighted band sum
 $10\lg\sum_j 10^{0.1 L_{W,j}}$, while `sound_power_level_a` is the A-weighted
 total that the fiche boxes and that a noise declaration quotes. They differ by
-the A-weighting of the spectrum — 2.0 dB on this casing, several decibels more
+the A-weighting of the spectrum: 2.0 dB on this casing, several decibels more
 on a low-frequency-heavy one.
 
 Set the two parts side by side on one casing and the price of Part 1's
@@ -144,8 +144,8 @@ assumption is a picture rather than an argument:
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_sound_power.svg" alt="Radiated sound power level per octave band, comparing the ISO/TS 7849-1 upper limit (radiation factor of one) with the ISO/TS 7849-2 engineering value (measured radiation factor)" width="82%" />
 
 *Paired bars per band for a 1.6 m² casing: Part 1's upper limit against Part 2's
-engineering value. The gap **is** $-10\log_{10}\varepsilon_j$ — 7.0 dB at
-125 Hz, 3.5 dB at 250 Hz, 1.2 dB at 500 Hz and nothing from 2 kHz up — so the
+engineering value. The gap **is** $-10\log_{10}\varepsilon_j$: 7.0 dB at
+125 Hz, 3.5 dB at 250 Hz, 1.2 dB at 500 Hz and nothing from 2 kHz up; so the
 error Part 1 makes is largest in the low bands, exactly where a large thin
 casing radiates worst.*
 
@@ -209,8 +209,8 @@ vibration per Table 2.
 
 Those positions are not free: the standard divides the radiating surface $S$
 into $N$ equal cells and puts one accelerometer at the centre of each. Table 1
-fixes the initial $N$ from the area alone — **5** positions below 1 m²,
-**10** from 1 m² to 10 m², and $S/S_0$ positions above that ($S_0 = 1$ m²) — so
+fixes the initial $N$ from the area alone: **5** positions below 1 m²,
+**10** from 1 m² to 10 m², and $S/S_0$ positions above that ($S_0 = 1$ m²); so
 the 4 m² surface drawn below takes ten. Increase $N$ when the spread of the
 A-weighted velocity level over the positions, highest minus lowest in decibels,
 exceeds twice the Table 1 count; a strongly non-uniform field can instead be
@@ -260,7 +260,7 @@ The attachment is the part that silently costs bandwidth:
 
 That table has a direct consequence for the examples on this page, which run
 octave bands out to **4 kHz**: a magnet mount loses the top band outright, and
-loses it quietly — the level simply reads low rather than failing a check. A
+loses it quietly (the level simply reads low rather than failing a check). A
 scanning laser vibrometer avoids the mass loading and the mounting limit
 altogether, provided the beam stays perpendicular to the surface, since it too
 measures only the component along the beam.
@@ -294,10 +294,10 @@ to violate in the field:
 
 "Adjacent zones move in antiphase and their radiation largely cancels" is the
 sentence the whole caveat rests on, and it is a statement about a phase
-relationship between a travelling structural wave and the air on top of it —
-which a spectrum cannot draw. The clip below drives a 10 mm steel plate in air
+relationship between a travelling structural wave and the air on top of it
+(which a spectrum cannot draw). The clip below drives a 10 mm steel plate in air
 **along its whole length**, with a force on the plate rather than a wave
-arriving at it, because that is the emission case this method is about — and
+arriving at it, because that is the emission case this method is about, and
 because a plate driven only over a patch radiates from the patch, which below
 coincidence would be the only thing in the air and would teach the opposite of
 the truth. It then runs the same scene twice, at $f_\mathrm{c}/2$ and at $2f_\mathrm{c}$, with
@@ -316,7 +316,7 @@ Adjacent half-waves of the plate push and pull the same air in antiphase, and
 what the air shows is a skin of alternating lobes that clings to the plate and
 dies within a fraction of a wavelength. The pressure at the surface is of the
 same order as in the other panel; it is simply a quarter-cycle out of step
-with the velocity, so it carries no power away — which is what
+with the velocity, so it carries no power away: that is what
 $\varepsilon \ll 1$ *means*. Above coincidence the bending wave outruns sound,
 the trace match is satisfied, and a plane beam leaves at
 $\arcsin(c_0/c_\mathrm{B}) = 45°$.
@@ -324,12 +324,12 @@ $\arcsin(c_0/c_\mathrm{B}) = 45°$.
 Each panel is annotated with the closed forms its regime obeys, taken from the
 plate's own constants: below coincidence, that $\lambda_\mathrm{B} = 0.40$ m is *shorter*
 than the 0.57 m of sound in air, so $\sin\theta = \lambda/\lambda_\mathrm{B}$ has no
-solution — there is no angle for the sound to leave at — and the skin that
+solution (there is no angle for the sound to leave at), and the skin that
 stands in its place decays with a height of $1/\sqrt{k_\mathrm{B}^2 - k_0^2} = 0.091$ m;
 above coincidence, that $\lambda_\mathrm{B} = 0.20$ m is *longer* than the 0.14 m in air,
 so the trace match is satisfied and sends a beam out at 45°. Nothing is
 measured off the scene itself. Two quantities were tried and both were spoiled
-by the ends of the plate — a damping layer reflects a bending wave partially,
+by the ends of the plate (a damping layer reflects a bending wave partially),
 so the air carries a leftward beam on top of the rightward one, and the reading
 is the difference of the two rather than either. Terminating a bending wave
 well enough to read a number off it needs a much wider domain than a picture of
@@ -339,7 +339,7 @@ Two cautions on reading it. The scene is an effectively **infinite** plate in
 air, so what it demonstrates is below-coincidence cancellation, not the
 acoustic short circuit around an unbaffled panel: those are the same
 cancellation at two different scales, and the second one needs a finite source
-with a path around its edge. And the clip deliberately does *not* print a
+with a path around its edge. And the clip deliberately does not print a
 radiation factor. A $\varepsilon$ read off a scene like this would be an
 artefact of the drive: any finite driving aperture has a wavenumber spectrum
 broad enough to put some of itself inside the radiating region, and below
@@ -353,14 +353,14 @@ the clip is here for the mechanism behind it.
 None of that has to be taken on trust: the library predicts $\varepsilon$ for a
 plate, and it is the same `radiation_efficiency` model that drew the plate at
 the top of this page. The **critical frequency** follows from the surface mass
-and the bending stiffness — a 3 mm steel panel puts it near 4 kHz — and it is
+and the bending stiffness (a 3 mm steel panel puts it near 4 kHz), and it is
 where bending waves travel at the speed of sound and the plate begins to
 radiate like a piston. Everything below it is the acoustic short circuit.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/radiation_efficiency_sigma.svg" alt="The radiation efficiency sigma of the 1.5 by 1.25 metre plate on log-log axes from 50 Hz to 5 kHz, rising from about 0.003 at 63 Hz to a peak just above the critical frequency of 4073 Hz. The whole region below the sigma equals one line is shaded and labelled as the range where ISO/TS 7849-1 assumes epsilon equals one, with the radiation index marked at minus 23.4 dB at 125 Hz and minus 17.6 dB at 1 kHz" width="88%" />
 
 *The shaded area is the assumption Part 1 makes. For this plate it is worth
-25 dB at 63 Hz and 14 dB at 2 kHz, and it closes only at coincidence — which is
+25 dB at 63 Hz and 14 dB at 2 kHz, and it closes only at coincidence: this is
 the "10 dB and more" of the paragraph above, drawn.*
 
 <details>
@@ -387,9 +387,9 @@ plt.show()
 A predicted $\varepsilon$ feeds straight back into the determination:
 `sound_power_from_vibration(lv, area=…, radiation_factor=sigma.radiation_efficiency,
 frequencies=bands)` turns a Part 1 survey into a first estimate of the Part 2
-value. Take it for what it is — a *baffled flat plate with a known boundary
+value. Take it for what it is: a *baffled flat plate with a known boundary
 condition* is not a machine casing with ribs, apertures and a gearbox bolted to
-it — but it is enough to know whether the Part 1 number is 1 dB or 15 dB
+it, but it is enough to know whether the Part 1 number is 1 dB or 15 dB
 pessimistic before committing to an intensity measurement. The same
 $\varepsilon$ appears as $\sigma$, the radiation efficiency, in
 [Panel Sound Insulation](/phonometry/buildings/design/panel-sound-insulation/):
@@ -413,7 +413,7 @@ by the distribution and manner of the excitation and by the internal loss
 factor**, so a factor measured at idle does not carry to full load, and one
 measured on a soft mount does not carry to a bolted installation: the operating
 and mounting condition is part of the $\varepsilon$, exactly as it is part of
-every other emission value in this section. Clause 4.2 adds the modal caveat —
+every other emission value in this section. Clause 4.2 adds the modal caveat:
 in bands where only a very few modes are excited, $\varepsilon_j$ is set by
 *which* modes happen to be excited rather than by the surface's average
 radiating behaviour, so it is unstable from run to run and from machine to
@@ -513,7 +513,7 @@ The measurement clauses of both parts (instrumentation, source installation,
 environmental conditions: clauses 5 to 7) are not *implemented* as code, and
 neither are their measurement-uncertainty clauses and informative annexes:
 they are laboratory practice, and this guide states the rules of it that
-decide whether the inputs are valid at all — the Table 1 position counts, the
+decide whether the inputs are valid at all: the Table 1 position counts, the
 Table 2 extraneous-vibration ladder and the transducer mounting limits above.
 Part 2's clause 8 also asks for the radiation factor of a machine batch or
 family, averaging $\varepsilon_j$ over several machines and its standard
@@ -522,8 +522,8 @@ so pass an already-averaged $\varepsilon$ for a family determination. The
 sound power that feeds `radiation_factor` must come from an ISO 9614 intensity
 *determination*, which is [Sound Power by Intensity
 Scanning](/phonometry/devices/emission/sound-power-intensity/)
-(`sound_power_intensity`, or `sound_power_intensity_precision` for grade 1) —
-the [sound intensity guide](/phonometry/devices/emission/intensity/) covers
+(`sound_power_intensity`, or `sound_power_intensity_precision` for grade 1); the
+[sound intensity guide](/phonometry/devices/emission/intensity/) covers
 the probe and the field indicators behind it but computes no power.
 </ScopeClaim>
 </Scope>

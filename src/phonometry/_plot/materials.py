@@ -101,7 +101,7 @@ _STRINGS: dict[str, str] = {
     "Evaluation point ($u$ = ": "Punto de evaluación ($u$ = ",
     "Linear airflow velocity $u$ [mm/s]": "Velocidad lineal del aire $u$ [mm/s]",
     r"Pressure difference $\Delta p$ [Pa]": r"Diferencia de presión $\Delta p$ [Pa]",
-    "ISO 9053-1 static airflow resistance — ": "Resistencia al flujo de aire ISO 9053-1 — ",
+    "ISO 9053-1 static airflow resistance: ": "Resistencia al flujo de aire ISO 9053-1: ",
     "ISO 12999-2 absorption uncertainty": "Incertidumbre de absorción ISO 12999-2",
     "reproducibility": "reproducibilidad",
     "repeatability": "repetibilidad",
@@ -646,7 +646,7 @@ def plot_static_airflow(
     ax.set_xlabel(_t("Linear airflow velocity $u$ [mm/s]", language))
     ax.set_ylabel(_t(r"Pressure difference $\Delta p$ [Pa]", language))
     ax.set_title(
-        f"{_t('ISO 9053-1 static airflow resistance — ', language)}"
+        f"{_t('ISO 9053-1 static airflow resistance: ', language)}"
         rf"$R_\mathrm{{s}}$ = "
         f"{decimal_comma(f'{result.specific_resistance:.3g}', language)} Pa s/m"
     )
@@ -711,7 +711,7 @@ def plot_absorption_uncertainty(
     )
     ax.set_title(
         f"{_t('ISO 12999-2 absorption uncertainty', language)} "
-        f"({sigma}) — {_t(result.condition, language)}"
+        f"({sigma}): {_t(result.condition, language)}"
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend()

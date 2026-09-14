@@ -174,7 +174,7 @@ es adecuado para tu propósito sigue siendo cosa tuya.
 
 En concreto, para los laboratorios y las consultoras para los que está escrita
 sobre todo: la biblioteca calcula y documenta, no mide, así que **la trazabilidad
-se queda en la cadena de instrumentación** — un calibrador y un micrófono con
+se queda en la cadena de instrumentación**: un calibrador y un micrófono con
 certificados en vigor, e instrumentación con aprobación de modelo allí donde la
 medición tenga efectos legales. Las entidades de acreditación esperan que **el
 software de cálculo esté validado para su uso previsto y que quede registro de

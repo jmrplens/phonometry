@@ -4,9 +4,9 @@ description: "Where to begin with phonometry: the first analysis end to end, the
 ---
 
 phonometry computes acoustic quantities from the text of the standards that
-define them — ISO, IEC, ANSI and ASTM, the CNOSSOS-EU annex to Directive
-2002/49/EC, and the ICAO and ECAC aircraft documents — and every metric names
-the clause it implements. What that buys you, and how it is checked, is
+define them: ISO, IEC, ANSI and ASTM, the CNOSSOS-EU annex to Directive
+2002/49/EC, and the ICAO and ECAC aircraft documents. Every metric names the
+clause it implements. What that buys you, and how it is checked, is
 [Why phonometry](/phonometry/start/why-phonometry/).
 
 Seven short pages, meant to be read once before anything else. Each answers one

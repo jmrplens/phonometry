@@ -412,9 +412,9 @@ conscience.
 
 ## What this guide covers
 
-**Covered.** Bendat & Piersol Section 4.5.2 with Table A.6 — the reverse
+**Covered.** Bendat & Piersol Section 4.5.2 with Table A.6 (the reverse
 arrangement trend test in `trend_test`, its exact and normal-approximation
-p-values and Example 4.4 — the Wald & Wolfowitz (1940) runs test
+p-values and Example 4.4), the Wald & Wolfowitz (1940) runs test
 (`trend_test(method="runs")`), the Section 10.3.1.1 segment mean-square
 stationarity procedure with Example 10.3 (`stationarity_test`), and the
 Rice (1945) level-crossing and peak statistics of Section 5.5

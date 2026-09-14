@@ -60,8 +60,8 @@ and log-linearly in slant distance (Eq. 4-4).
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/airport_noise.svg" alt="Noise-power-distance curves for two engine power settings, the event level falling log-linearly with slant distance between the tabulated nodes" width="82%" />
 
 *The markers are the only distances the table asserts; everything between them
-is the interpolation. The two curves are close to parallel — 8.7 to 9.2 dB
-apart over the whole range — so thrust mostly shifts the level while distance
+is the interpolation. The two curves are close to parallel (8.7 to 9.2 dB
+apart over the whole range), so thrust mostly shifts the level while distance
 sets the shape, and the fall is 21.7 dB per decade of slant distance rather
 than the 20 dB of pure divergence, the excess being the reference atmosphere's
 absorption. Power is interpolated **linearly**, not in decibels: 16 000 N reads
@@ -114,7 +114,7 @@ attenuation rates of Appendix D Table D-1, no precipitation, wind below 8 m/s,
 a 160 kn groundspeed for the exposure levels, and flat acoustically soft ground
 with the microphone 1.2 m above it. Those attenuation rates are arithmetic
 averages over European and American certification campaigns, so the reference
-day is a notional atmosphere — Doc 29 calls it the *AIR-1845 atmosphere* —
+day is a notional atmosphere (Doc 29 calls it the *AIR-1845 atmosphere*)
 rather than a temperature and a humidity you could quote back. Every correction
 in section 2 exists to undo one of those assumptions.
 
@@ -122,7 +122,7 @@ The tables may be used as tabulated while the site average stays inside the
 §2.5 envelope: air temperature below 30 °C, the product of temperature in
 degrees Celsius and relative humidity in percent above 500, and wind below
 8 m/s. Outside it the *tables themselves* have to be converted by the Appendix D
-procedure, which this chain does not do — `impedance_adjustment` only rescales
+procedure, which this chain does not do: `impedance_adjustment` only rescales
 the levels for the specific acoustic impedance of the air, and there is no
 humidity argument anywhere in the chain.
 
@@ -150,12 +150,12 @@ The flight arrives as a path of points, and the method cuts it into segments.
 | 3 | power, the NPD power parameter | whatever the table is indexed by |
 | 4 | true airspeed | m/s |
 
-$N$ points make $N-1$ segments, so every per-segment mask carries $N-1$ entries
-— which is why the ground-roll masks below read `xs[:-1] < 1500.0` and not
+$N$ points make $N-1$ segments, so every per-segment mask carries $N-1$ entries.
+This is why the ground-roll masks below read `xs[:-1] < 1500.0` and not
 `xs < 1500.0`. Two defaults decide more than they look like they do. The speed
 column enters the duration correction relative to `reference_speed`, whose
 default is 82.31 m/s, the Doc 29 160 kn reference, so a path flown at exactly
-that speed carries no duration correction at all — which is the case in every
+that speed carries no duration correction at all, which is the case in every
 example on this page, and varying the column is how you see the term work. And
 `mounting=` defaults to `"wing"`: that is a property of the aeroplane rather
 than a modelling preference, so pass `"fuselage"` or `"propeller"` explicitly,
@@ -211,8 +211,8 @@ a given receiver.
 *The lateral attenuation is the big term and the only one that can reach double
 figures: $\Lambda$ is 10.86 dB at grazing incidence and identically zero above
 an elevation angle of 50°, while the distance factor $\Gamma(\ell)$ ramps from
-zero on the ground track to unity at 914 m — so a receiver under the track gets
-none of it and one 900 m to the side at low elevation gets all of it. The
+zero on the ground track to unity at 914 m: a receiver under the track gets
+none of it, and one 900 m to the side at low elevation gets all of it. The
 installation term is worth 1.5 dB between a wing and a fuselage mounting at
 $\varphi = 0$ and nothing at all for a propeller. The duration correction is
 $10\lg(V_{\text{ref}}/V_{\text{seg}})$, so a departure flown at 100 m/s loses
@@ -296,8 +296,8 @@ flyover.plot()   # per-segment contributions (needs matplotlib)
 
 *Thirty-nine segments, and one of them is the answer: segment 6 contributes
 82.1 dB against a total of 82.3 dB, which is 94 % of the energy. That is what
-the noise fraction does — the contribution collapses within a couple of segments
-of the closest point of approach — and it is why a contour is only ever as good
+the noise fraction does (the contribution collapses within a couple of segments
+of the closest point of approach), and it is why a contour is only ever as good
 as the flight path near each receiver. The ground-roll segments are hatched:
 they are 40 dB down here, but move the receiver behind the runway and the
 start-of-roll term brings them back.*
@@ -364,7 +364,7 @@ below 50°, and the lobe behind the runway threshold is the start-of-roll
 directivity of the jet exhaust, which is why the contour does not close
 symmetrically at the runway end. The outermost contours are the least
 trustworthy: they are set by the segments at the greatest slant distance, where
-the NPD table is being extrapolated. This is one movement, not a study — a
+the NPD table is being extrapolated. This is one movement, not a study: a
 planning contour accumulates many such events into an $L_\mathrm{den}$-style index,
 which is this page's "Not covered".*
 

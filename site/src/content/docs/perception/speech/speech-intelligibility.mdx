@@ -121,7 +121,7 @@ print(round(float(spectrum_levels[8]), 1))         # 31.5 dB at 1 kHz
 ```
 
 So the correction runs from **15.5 dB at 160 Hz to 32.7 dB at 8 kHz** for the
-one-third-octave procedure, and is 28.5 dB at 1 kHz for the octave procedure —
+one-third-octave procedure, and is 28.5 dB at 1 kHz for the octave procedure:
 that is, a measured 55 dB band level at 1 kHz is a 31.5 dB spectrum level, not
 a 55 dB one. Feed band levels straight in and both the speech and the noise are
 15 to 33 dB too high, band by band, and the failure is silent: the index stays
@@ -142,7 +142,7 @@ any speech input more than about 15 dB above that is a band level.
 The reason the three inputs can be combined at all is that they describe the
 same point in space. ANSI S3.5-1997 defines the equivalent speech and noise
 spectrum levels at the position corresponding to the **centre of the listener's
-head, midway between the ears, with the listener absent** — both are field
+head, midway between the ears, with the listener absent**. Both are field
 quantities at an unoccupied listening position. So: measure the noise there
 with the talker or source of interest silent, and the speech there with the
 talker at the real distance and vocal effort.
@@ -184,7 +184,7 @@ clause 5.7 (unity for the standard spectra used on this page) reduces $A_i$
 further; phonometry applies it automatically.
 
 Every array in that chain is on the result, so the whole of clause 5 can be
-drawn for a case where the spread of masking does the work — a fan or a duct
+drawn for a case where the spread of masking does the work: a fan or a duct
 that puts all its energy below 450 Hz:
 
 <ThemeImage
@@ -196,7 +196,7 @@ that puts all its energy below 450 Hz:
 *The band audibility $A_i$ is a position inside a 30 dB window: at the bottom
 edge the band is fully masked, at the top fully audible, and in between it is a
 straight line. The window is centred on $D_i$, and $D_i$ follows $Z_i$, which is
-the point of the figure — there is **no noise at all** above 400 Hz, yet the
+the point of the figure. There is **no noise at all** above 400 Hz, yet the
 masking at 1 kHz is 23 dB, spread upward from the low bands. That upward skirt
 is what makes the SII more than a band-by-band signal-to-noise ratio, and it is
 the term the octave procedure of section 5 drops.*
@@ -302,12 +302,12 @@ functions specific to the speech material and the listeners, which is why the
 same 0.5 supports high sentence scores and much lower nonsense-syllable scores.
 Never quote an SII as "X % intelligible" without naming the material. As
 practical anchors, above about 0.75 is the design target where unfamiliar
-material must be understood — the same ladder that makes `requirement=0.75` a
+material must be understood: the same ladder that makes `requirement=0.75` a
 reasonable value in the fiche of section 7; 0.45 to 0.75 is workable for
 familiar material in a known context; below about 0.3 speech communication
 cannot be relied on. And mind the resolution: the inputs are measured spectra
 with their own uncertainty, so differences of a few hundredths are noise. When
-two conditions score alike, the per-band audibility profile — not the scalar —
+two conditions score alike, the per-band audibility profile, not the scalar,
 is the part that tells you what to fix.
 
 ### 3.2 With a raised hearing threshold
@@ -366,15 +366,15 @@ population input, but the two standards are tabulated on different grids and
 the transfer is the caller's decision, not an automatic one. ISO 7029 returns
 **eleven audiometric frequencies** (125 to 8000 Hz) while the one-third-octave
 SII procedure needs **eighteen** values at 160 Hz to 8000 Hz, and ANSI S3.5
-defines no interpolation — the page's own "Not covered" block says no
+defines no interpolation: the page's own "Not covered" block says no
 resampling between band sets is provided. So make the choice explicit:
 interpolate the audiometric thresholds on a logarithmic frequency axis onto the
 SII band centres, or take the nearest audiometric frequency for each band, and
 say which in the report. There is a second mismatch: `age_threshold` returns
 the *deviation* from the median 18-year-old, which is a hearing threshold level
-in dB HL only if that baseline is taken as 0 dB HL — an assumption worth
+in dB HL only if that baseline is taken as 0 dB HL (an assumption worth
 stating, and one to drop entirely when a real audiogram exists, since measured
-dB HL values can be fed directly. Finally, mind the direction of the error: a
+dB HL values can be fed directly). Finally, mind the direction of the error: a
 coarse interpolation smooths away the 3 kHz to 6 kHz notch that a noise-exposed
 audiogram carries, and those are bands with high importance weight, so the SII
 comes out optimistic.
@@ -601,7 +601,7 @@ not see that noise reaching up into the speech-bearing bands.
 *The agreement above is a property of the stimulus, not of the procedures. On
 white noise all four track each other; on a masker that lives below 450 Hz the
 three procedures that carry the upward spread of masking collapse together
-while the octave procedure does not move at all — **0.81 index units apart** at
+while the octave procedure does not move at all: **0.81 index units apart** at
 the loudest point, which is most of the scale. An octave-band SII under
 low-frequency-dominated noise is an upper bound, not an estimate.*
 

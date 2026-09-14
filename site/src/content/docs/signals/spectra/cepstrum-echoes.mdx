@@ -241,8 +241,8 @@ an echo and not an unrelated spectral periodicity.
 
 Everything above runs on a synthetic click, and the input the method actually
 consumes is an impulse response. Measure it with any of the library's
-excitations — an exponential sweep, an MLS, or the Golay pair of
-[system measurement](/phonometry/signals/spectra/system-measurement/) — keep the
+excitations (an exponential sweep, an MLS, or the Golay pair of
+[system measurement](/phonometry/signals/spectra/system-measurement/)), and keep the
 direct sound and the reflection inside one record, and pass the impulse response
 straight to `echo_detection`.
 
@@ -255,20 +255,20 @@ degree.
 
 **The coefficient is an amplitude ratio at the microphone, not a surface
 property.** $a = 0.5$ means the reflection arrives at half the amplitude of the
-direct sound — a quarter of the energy — and the two together ripple the
+direct sound (a quarter of the energy), and the two together ripple the
 magnitude spectrum between $+3.5$ and $-6.0$ dB, which is the ripple section 3
 isolates. But $a$ already contains the extra spherical spreading of the longer
 path, so the surface's own reflection factor is
 $R = a\,(r_\text{reflected}/r_\text{direct})$. For an 8 ms delay over a 1 m
-direct path that ratio is 3.74, so $R = 3.74\,a$ — a number that cannot exceed
+direct path that ratio is 3.74, so $R = 3.74\,a$: a number that cannot exceed
 one, which means an apparent $a$ above $1/(1 + c t_0/r_\text{direct})$ is not a
 single specular reflection at all. Where $R$ is valid, the absorption
 coefficient at that angle of incidence is $\alpha = 1 - R^2$; the
 [absorption pages](/phonometry/materials/absorbers/absorption-measurement/) own
 the standardized routes to the same quantity.
 
-**A negative peak is a phase inversion.** A pressure-release boundary — or an
-inverted electrical path — flips the sign of the reflection, and the whole
+**A negative peak is a phase inversion.** A pressure-release boundary (or an
+inverted electrical path) flips the sign of the reflection, and the whole
 rahmonic series flips with it.
 
 Four conditions decide whether the number means anything:
@@ -276,7 +276,7 @@ Four conditions decide whether the number means anything:
 1. `min_quefrency` above the duration of the direct arrival, so the source's own
    spectral envelope is outside the search band.
 2. The reflection at least 10 dB above the noise floor of the response.
-3. The second rahmonic present at $2t_0$ with the opposite sign — the check that
+3. The second rahmonic present at $2t_0$ with the opposite sign: the check that
    separates a real echo from an unrelated spectral periodicity.
 4. An analysed span several times the delay being sought. The ripple has period
    $1/t_0$ in frequency and a record of length $T$ resolves the spectrum only to
@@ -402,7 +402,7 @@ The round trip above is exact to machine precision because the record is
 smooth, noiseless and close to minimum phase. The complex cepstrum is not
 robust in general, and the reason is the phase. It needs an unwrapped phase that
 can be followed continuously across the whole band, and wherever the magnitude
-approaches zero — a deep null, a zero near the unit circle — the phase turns by
+approaches zero (a deep null, a zero near the unit circle), the phase turns by
 $\pi$ in the space of a bin or two and the unwrapper can jump the wrong way.
 Every quefrency downstream then inherits the error. The power and real cepstra
 are immune, because they never look at phase at all.
@@ -411,7 +411,7 @@ Three guards. Zero-pad with `nfft` so the phase is sampled finely enough for the
 unwrapper to track it; keep the record's signal-to-noise ratio high in the bands
 that matter, since additive noise randomises the phase exactly where the
 magnitude is small; and **check the round trip with `invert()` before trusting
-any edited cepstrum** — a failed unwrap shows up immediately as a reconstruction
+any edited cepstrum**: a failed unwrap shows up immediately as a reconstruction
 error far above 1e-10. When the record cannot support it, use the power cepstrum
 for detection and the real-cepstrum folding of `minimum_phase` when only a
 magnitude-consistent phase is needed.
@@ -511,7 +511,7 @@ The band argument is where the bearing chain is won or lost, and neither the
 band nor the transducer is a free choice.
 
 **The band.** Run a plain spectrum of the raw record first and look for the
-broad hump the defect impacts excite — a structural resonance of the housing,
+broad hump the defect impacts excite: a structural resonance of the housing,
 typically somewhere between 1 and 20 kHz for rolling-element bearings. Put the
 band around that hump. Make it several times wider than the highest repetition
 rate you need to see (three to five times the highest defect frequency, so its
@@ -528,7 +528,7 @@ of the accelerometer, not by the sensor's own datasheet limit, and that is
 exactly the band the bearing chain needs. Stud mounting or a thin layer of
 adhesive keeps a general-purpose accelerometer usable to roughly 10 kHz; a
 magnet base typically collapses that to a couple of kilohertz and a hand-held
-probe to about 1 kHz — that is, the mounting alone can destroy the band the
+probe to about 1 kHz: that is, the mounting alone can destroy the band the
 method depends on. Put the sensor on the bearing housing, in the load zone, as
 close to the outer race as the machine allows, with its axis in the load
 direction and the cable strain-relieved. ISO 5348 is the mounting reference.
@@ -548,8 +548,8 @@ print(round(wide.amplitude[k120], 4),        # 0.0093 — buried
 ```
 
 The lines the chain produces are identified by *frequency*, not by amplitude,
-and the kinematic families that name them — ball-pass outer and inner race, ball
-spin, cage, gear mesh and its shaft-rate sidebands — are computed from the
+and the kinematic families that name them (ball-pass outer and inner race, ball
+spin, cage, gear mesh and its shaft-rate sidebands) are computed from the
 geometry and the shaft speed at
 [Machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/),
 which draws them straight onto an envelope spectrum like this one. Running the

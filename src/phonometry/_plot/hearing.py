@@ -51,10 +51,10 @@ _REDUCTION_LABEL = "Predicted noise level reduction [dB]"
 _C_MINUS_A_LABEL = "$L_{p,C} - L_{p,A}$ [dB]"
 _SUBJECT_LABEL = "Test subject"
 _SPREAD_LABEL = r"$\pm s_f$"
-_HML_TITLE = "ISO 4869-2 HML method — $H$ = {h}, $M$ = {m}, $L$ = {l} dB"
+_HML_TITLE = "ISO 4869-2 HML method: $H$ = {h}, $M$ = {m}, $L$ = {l} dB"
 #: The curve of Formulae (16) and (17) carries its own label rather than a
-#: slice of the title: deriving one from the other by splitting on the dash
-#: breaks the moment a translation punctuates differently.
+#: slice of the title: deriving one from the other by splitting on the
+#: punctuation breaks the moment a translation punctuates differently.
 _HML_CURVE_LABEL = "$PNR$ from $H$ = {h}, $M$ = {m}, $L$ = {l} dB"
 _NIPTS_LABEL = "NIPTS [dB]"
 _FRACTILE_LABEL = "Fractile {v}"
@@ -69,11 +69,11 @@ _STRINGS: dict[str, str] = {
     "mean attenuation $m_f$": r"atenuación media $m_f$",
     _SPREAD_LABEL: _SPREAD_LABEL,
     "assumed protection $APV_{{f{x}}}$": "protección supuesta $APV_{{f{x}}}$",
-    "ISO 4869-2 assumed protection values — {x} % performance": "ISO 4869-2 valores de protección supuesta — rendimiento del {x} %",
-    _HML_TITLE: "ISO 4869-2 método HML — $H$ = {h}, $M$ = {m}, $L$ = {l} dB",
+    "ISO 4869-2 assumed protection values: {x} % performance": "ISO 4869-2 valores de protección supuesta: rendimiento del {x} %",
+    _HML_TITLE: "ISO 4869-2 método HML: $H$ = {h}, $M$ = {m}, $L$ = {l} dB",
     _HML_CURVE_LABEL: "$PNR$ a partir de $H$ = {h}, $M$ = {m}, $L$ = {l} dB",
-    "ISO 4869-2 single number rating — $SNR$ = {snr} dB": "ISO 4869-2 índice de número único — $SNR$ = {snr} dB",
-    "ISO 4869-2 octave-band method — $L'_{{p,A{x}}}$ = {level} dB": "ISO 4869-2 método por bandas de octava — $L'_{{p,A{x}}}$ = {level} dB",
+    "ISO 4869-2 single number rating: $SNR$ = {snr} dB": "ISO 4869-2 índice de número único: $SNR$ = {snr} dB",
+    "ISO 4869-2 octave-band method: $L'_{{p,A{x}}}$ = {level} dB": "ISO 4869-2 método por bandas de octava: $L'_{{p,A{x}}}$ = {level} dB",
     "per subject": "por sujeto",
     "reference noises (Table 2)": "ruidos de referencia (Tabla 2)",
     "protected band level": "nivel de banda protegido",
@@ -90,10 +90,10 @@ _STRINGS: dict[str, str] = {
     _FRACTILE_LABEL: "Fractil {v}",
     "male": "hombre",
     "female": "mujer",
-    "ISO 7029 hearing threshold — {sex}, age {age}": "ISO 7029 umbral de audición — {sex}, edad {age}",
-    r"ISO 1999 NIPTS — $L_\mathrm{{EX,8h}}$ = {lex} dB, {years} yr": r"ISO 1999 NIPTS — $L_\mathrm{{EX,8h}}$ = {lex} dB, {years} años",
-    "ISO 1999 HTLAN — {sex}, age {age}, {lex} dB / {years} yr": "ISO 1999 HTLAN — {sex}, edad {age}, {lex} dB / {years} años",
-    r"ISO 9612 daily noise exposure — $L_\mathrm{{EX,8h}}$ = {lex} dB ($U$ = {u} dB)": r"ISO 9612 exposición diaria al ruido — $L_\mathrm{{EX,8h}}$ = {lex} dB "
+    "ISO 7029 hearing threshold: {sex}, age {age}": "ISO 7029 umbral de audición: {sex}, edad {age}",
+    r"ISO 1999 NIPTS: $L_\mathrm{{EX,8h}}$ = {lex} dB, {years} yr": r"ISO 1999 NIPTS: $L_\mathrm{{EX,8h}}$ = {lex} dB, {years} años",
+    "ISO 1999 HTLAN: {sex}, age {age}, {lex} dB / {years} yr": "ISO 1999 HTLAN: {sex}, edad {age}, {lex} dB / {years} años",
+    r"ISO 9612 daily noise exposure: $L_\mathrm{{EX,8h}}$ = {lex} dB ($U$ = {u} dB)": r"ISO 9612 exposición diaria al ruido: $L_\mathrm{{EX,8h}}$ = {lex} dB "
     r"($U$ = {u} dB)",
 }
 
@@ -145,7 +145,7 @@ def plot_age_threshold(
     ax.set_ylabel(_t("Threshold deviation from age 18 [dB]", language))
     ax.invert_yaxis()  # audiogram convention: worse hearing downward
     ax.set_title(
-        _t("ISO 7029 hearing threshold — {sex}, age {age}", language).format(
+        _t("ISO 7029 hearing threshold: {sex}, age {age}", language).format(
             sex=_t(result.sex, language), age=decimal_comma(f"{result.age:g}", language)
         )
     )
@@ -210,7 +210,7 @@ def plot_nipts(
     # axis ticks beside it already draw. The duration is validated positive.
     ax.set_title(
         _t(
-            r"ISO 1999 NIPTS — $L_\mathrm{{EX,8h}}$ = {lex} dB, {years} yr", language
+            r"ISO 1999 NIPTS: $L_\mathrm{{EX,8h}}$ = {lex} dB, {years} yr", language
         ).format(
             lex=decimal_comma(fmt_minus(result.l_ex, "g"), language),
             years=decimal_comma(f"{result.years:g}", language),
@@ -263,7 +263,7 @@ def plot_htlan(
     ax.set_ylabel(_t("Hearing threshold level [dB]", language))
     ax.invert_yaxis()  # audiogram convention: worse hearing downward
     ax.set_title(
-        _t("ISO 1999 HTLAN — {sex}, age {age}, {lex} dB / {years} yr", language).format(
+        _t("ISO 1999 HTLAN: {sex}, age {age}, {lex} dB / {years} yr", language).format(
             sex=_t(result.sex, language),
             age=decimal_comma(f"{result.age:g}", language),
             lex=decimal_comma(fmt_minus(result.l_ex, "g"), language),
@@ -337,7 +337,7 @@ def plot_occupational_exposure(
     ax.set_ylabel(_t("A-weighted level [dB]", language))
     ax.set_title(
         _t(
-            r"ISO 9612 daily noise exposure — $L_\mathrm{{EX,8h}}$ = {lex} dB ($U$ = {u} dB)",
+            r"ISO 9612 daily noise exposure: $L_\mathrm{{EX,8h}}$ = {lex} dB ($U$ = {u} dB)",
             language,
         ).format(
             lex=format_number(result.lex_8h, language, decimals=1),
@@ -412,7 +412,7 @@ def plot_assumed_protection(
     )
     ax.set_ylabel(_t(_ATTENUATION_LABEL, language))
     ax.set_title(
-        _t("ISO 4869-2 assumed protection values — {x} % performance", language).format(
+        _t("ISO 4869-2 assumed protection values: {x} % performance", language).format(
             x=result.performance
         )
     )
@@ -539,7 +539,7 @@ def plot_snr_rating(
     ax.set_xlabel(_t(_SUBJECT_LABEL, language))
     ax.set_ylabel(_t(_REDUCTION_LABEL, language))
     ax.set_title(
-        _t("ISO 4869-2 single number rating — $SNR$ = {snr} dB", language).format(
+        _t("ISO 4869-2 single number rating: $SNR$ = {snr} dB", language).format(
             snr=result.reported
         )
     )
@@ -597,7 +597,7 @@ def plot_protected_level(
     performance = result.performance if result.performance is not None else ""
     ax.set_title(
         _t(
-            "ISO 4869-2 octave-band method — $L'_{{p,A{x}}}$ = {level} dB", language
+            "ISO 4869-2 octave-band method: $L'_{{p,A{x}}}$ = {level} dB", language
         ).format(x=performance, level=result.reported_level)
     )
     ax.legend(loc="best", fontsize="small")

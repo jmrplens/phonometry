@@ -109,7 +109,7 @@ noise costs a hearing threshold.
 ### [Rooms and buildings](buildings/index.md)
 
 Sound in the built environment, split along its natural line: what happens
-inside one room, and what passes between rooms — measured, rated and
+inside one room, and what passes between rooms: measured, rated and
 predicted.
 
 **[Room acoustics](buildings/rooms/index.md)**
@@ -247,7 +247,7 @@ methods, which predict what a whole airport does to the land around it.
 
 ### [Underwater acoustics](underwater/index.md)
 
-The same physics on a different scale and a different reference — levels re 1
+The same physics on a different scale and a different reference: levels re 1
 µPa, a medium that refracts sound into channels carrying it for kilometres,
 and the marine mammals that hear it.
 
@@ -284,7 +284,7 @@ silencers.
 **[Broadcast](devices/broadcast/index.md)**
 
 - [Programme loudness & true peak](devices/broadcast/program-loudness.md): the ITU-R BS.1770-5 programme loudness (K-weighting, gated 400 ms blocks, channel weights including the Annex 3 positions) and the oversampled true-peak level in dBTP, with the EBU R 128 −23 LUFS practice, the Tech 3341 EBU Mode momentary/short-term/integrated meters and the Tech 3342 loudness range, validated against the official EBU test signals
-- [Quasi-peak programme meter (ITU-R BS.468-4)](devices/broadcast/quasi-peak.md): the psophometric quasi-peak detector of clause 2 — eleven tone-burst acceptance windows where the Recommendation prints no time constant at all, the clause 2.6 calibration that makes a reading dBqps, and the three fitted time scales those windows identify only to within a factor of 1.61 to 2.09
+- [Quasi-peak programme meter (ITU-R BS.468-4)](devices/broadcast/quasi-peak.md): the psophometric quasi-peak detector of clause 2: eleven tone-burst acceptance windows where the Recommendation prints no time constant at all, the clause 2.6 calibration that makes a reading dBqps, and the three fitted time scales those windows identify only to within a factor of 1.61 to 2.09
 
 **[Noise control](devices/noise-control/index.md)**
 

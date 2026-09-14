@@ -55,7 +55,7 @@ Una sonda p-p (véase la
 [guía de Intensidad acústica](/phonometry/es/devices/emission/intensity/)) se
 barre de forma continua sobre cada uno de los $N$ segmentos de una superficie
 que encierra la fuente, informando de la intensidad normal con signo promediada
-por segmento $\langle I_{n,i} \rangle$ — una fila por segmento, una columna por
+por segmento $\langle I_{n,i} \rangle$: una fila por segmento, una columna por
 banda.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="Una sonda de intensidad acústica p-p de dos micrófonos: dos micrófonos de presión separados por un espaciador, a partir de los cuales se estima el gradiente de presión y, por tanto, la intensidad normal" width="70%" />
@@ -83,8 +83,8 @@ en lo posible de modo que una zona de flujo neto entrante no se promedie junto a
 una de flujo saliente, y de modo que cada segmento mire a un componente de la
 máquina. Su distancia media a la superficie de la fuente es de al menos
 **200 mm** para una superficie vibrante extensa, reducible a 100 mm para una
-fuente pequeña y compacta — momento en el cual la acción a) de la Tabla B.1,
-«alejar la superficie», deja de estar a tu alcance.
+fuente pequeña y compacta. En ese momento, la acción a) de la Tabla B.1
+(«alejar la superficie») deja de estar a tu alcance.
 
 El barrido en sí es un recorrido, no un conjunto de puntos. Su elemento básico
 es una línea recta; el recorrido debe cubrir el segmento de manera uniforme y a
@@ -99,7 +99,7 @@ eje de la sonda se mantiene normal a la superficie durante todo el recorrido, y
 quien mide se coloca al lado del segmento que está barriendo, no delante.
 
 Para el grado de ingeniería cada segmento se barre **dos veces, y los dos
-recorridos deben ser ortogonales** — el segundo barrido girado 90° siempre que
+recorridos deben ser ortogonales**: el segundo barrido girado 90° siempre que
 sea posible (apartado 8.3.1). Eso es `normal_intensity_2`: no una repetición del
 mismo barrido, sino el girado. El criterio 3 existe precisamente para cazar un
 campo que no se repite, y repetir un recorrido idéntico lo supera en una
@@ -155,7 +155,7 @@ superficie a la máquina o apantallándola. $F_{+/-}$ se lee de otra manera: cer
 cuando todos los segmentos radian hacia fuera, y 3 dB cuando las potencias
 parciales entrante y saliente ya son comparables a la neta, así que por encima de
 3 dB la superficie está a caballo entre dos fuentes y el arreglo es volver a
-recortarla — promediar más tiempo no ayuda, porque el problema es dónde está la
+recortarla. Promediar más tiempo no ayuda, porque el problema es dónde está la
 superficie, no lo ruidosa que sea la estimación.
 
 Cuando falla el criterio 1, los remedios son baratos antes que caros: agrandar la
@@ -164,7 +164,7 @@ montar un **espaciador mayor** para subir $\delta_{pI0}$ (véase
 [Elegir la sonda](/phonometry/es/devices/emission/intensity/#elegir-la-sonda)),
 y solo después plantearse mejor equipo. Rebajar la pretensión de grado de
 ingeniería a inspección da por sí sola 3 dB de $L_\mathrm{d}$, porque $K$ pasa de 10 dB a
-7 dB — a costa del grado.
+7 dB: el cambio cuesta el grado.
 
 ```python
 import numpy as np
@@ -269,7 +269,7 @@ una banda fuera, por razones distintas:
 
 El apartado 10.6 b) hace además que declarar esa omisión forme parte de la
 determinación: un $L_{W\mathrm{A}}$ informado sin decir qué bandas se descartaron no es
-conforme. La consecuencia va en un solo sentido — el total es una
+conforme. La consecuencia va en un solo sentido: el total es una
 **subestimación**, y quien lee puede acotarlo sumando las bandas omitidas a su
 nivel calculado y devolviéndolas. Ojo también al modo de fallo del propio
 cribado: sin `pressure_levels` ni `pressure_residual_index` los criterios no se
@@ -294,7 +294,7 @@ Tabla 2 tabula $s$ por banda solo para el grado de **ingeniería**; para el grad
 de inspección da un único valor ponderado A de 4 dB, y esta implementación
 reutiliza esos 4 dB como límite por banda de inspección. Es una extrapolación
 deliberada, no un valor normativo, y es más laxa que cualquier límite de grado 2
-de la tabla — así que superar el criterio 3 en grado de inspección no es prueba
+de la tabla: superar el criterio 3 en grado de inspección no es por tanto prueba
 de repetibilidad de grado 2. La Tabla 2 está además acotada: `_table2_s` lanza un
 error fuera de las bandas de octava de 63 Hz a 4 kHz y de las de tercio de octava
 de 50 Hz a 6,3 kHz, de modo que una octava de 8 kHz es una excepción, no un
@@ -304,7 +304,7 @@ límite ancho.
 
 El `"Sonda de intensidad p-p clase 1 (IEC 61043)"` de la ficha es una afirmación
 con apartados detrás. El instrumento **incluida su sonda** debe cumplir la
-IEC 61043, verificado en laboratorio al menos una vez al año — o al menos cada
+IEC 61043, verificado en laboratorio al menos una vez al año, o al menos cada
 dos años si se aplica un calibrador de intensidad antes de cada determinación de
 potencia (apartado 6.2). Antes de cada serie, un calibrador IEC 60942 de clase 0
 o de clase 1 pasa por cada micrófono de la sonda (apartado 6.2.1), y el ensayo de
@@ -518,14 +518,14 @@ par de llamadas aparte, y sin ella la mitad de precisión de esta página es un
 cálculo con los criterios quitados.
 
 `precision_field_indicators` calcula los indicadores del Anexo B a partir de los
-mismos arrays por segmento — los indicadores presión-intensidad con y sin signo
+mismos arrays por segmento: los indicadores presión-intensidad con y sin signo
 $F_{pI_n}$, la no uniformidad del campo $F_\mathrm{S}$ y la variabilidad temporal $F_\mathrm{T}$
 cuando se aporta una intensidad por ventana temporal. `precision_qualification`
 evalúa después los cinco criterios del Anexo C por banda:
 
 1. **repetibilidad del barrido**,
    $\lvert L_{I_n}(1) - L_{I_n}(2) \rvert \le s/2$ con $s$ de la Tabla 1
-   (Ec. C.1) — la mitad de la tolerancia que admite la ISO 9614-2, que es casi
+   (Ec. C.1): la mitad de la tolerancia que admite la ISO 9614-2, que es casi
    todo lo que cuesta la «precisión»;
 2. **suficiencia de la capacidad dinámica**,
    $L_\mathrm{d} \ge F_{pI_n}^{\text{con signo}}$ con $L_\mathrm{d} = \delta_{pI0} - K$ y

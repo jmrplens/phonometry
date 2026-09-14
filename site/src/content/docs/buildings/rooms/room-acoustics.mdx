@@ -109,12 +109,12 @@ D50 0.05, Ts 10 ms) that sets how precisely it is worth reporting.
 point where the response first rises significantly above the background while
 still being more than 20 dB below its maximum, and `room_parameters` applies
 that trigger per band before integrating, so any propagation and system delay
-carried by the recording is removed automatically — a measured IR needs no
+carried by the recording is removed automatically. A measured IR needs no
 manual trimming. It matters asymmetrically. The reverberation times use only the
 *slope* of the decay and are indifferent to where it starts, but C50, C80 and
 $T_\mathrm{s}$ integrate *from* $t = 0$, so an onset placed one millisecond late throws
 away part of the direct sound and can move C50 and C80 by several decibels and
-$T_\mathrm{s}$ by tens of milliseconds, while leaving T20 and T30 almost untouched — the
+$T_\mathrm{s}$ by tens of milliseconds, while leaving T20 and T30 almost untouched. The
 error is invisible in the number everyone checks. The detector deliberately errs
 early, which is the harmless direction. Two working rules follow: never trim an
 IR by hand to remove its pre-delay, and be suspicious of C50/C80 from a
@@ -201,8 +201,8 @@ energy parameters match their closed forms (C80 = 3.05 dB, D50 = 0.499,
 Ts = 72 ms). A real room has a steeper early slope, so EDT < T30.
 
 **What the energy parameters mean.** C50 and D50 are the same measurement in two
-units, tied by $C_{50} = 10\lg[D_{50}/(1-D_{50})]$ — the printed pair above
-satisfies it, since $D_{50}$ = 0.499 gives $C_{50}$ = −0.02 dB — so a speech
+units, tied by $C_{50} = 10\lg[D_{50}/(1-D_{50})]$; the printed pair above
+satisfies it, since $D_{50}$ = 0.499 gives $C_{50}$ = −0.02 dB, so a speech
 space aiming at $D_{50} > 0.5$ is aiming at $C_{50} > 0$ dB, and there is no
 point quoting both as if they were independent evidence. For music, C80 in
 unoccupied concert and multi-purpose halls up to 25 000 m³ typically runs
@@ -215,7 +215,7 @@ audience shortens the decay and raises clarity, so an occupied hall is not
 described by them. And unlike T30, the energy parameters are early-energy
 quantities that vary strongly from seat to seat, so a single-position value
 means little: report the spatial mean with its spread (below). The JND column
-sets the reporting resolution in the other direction — a 0.5 dB difference in
+sets the reporting resolution in the other direction: a 0.5 dB difference in
 C80 between two designs is not a difference at all.
 
 On a real, frequency-dependent decay the per-band `.plot()` is the working
@@ -361,7 +361,7 @@ Luxemburg, 2012). `room_parameters` reports that INR per band as
 `dynamic_range` and tightens the acceptance limits to 46 dB (T20) and 54 dB
 (T30) before
 flagging a value valid, so the residual truncation-and-compensation bias of
-a flagged-valid time stays inside 5 % — the relative JND Table A.1 tabulates
+a flagged-valid time stays inside 5 %: the relative JND Table A.1 tabulates
 for EDT and the value customarily applied to T20 and T30, for which the table
 gives none. When a band fails its flag,
 the order of remedies is: use T20 instead of T30 (its window needs 10 dB
@@ -373,11 +373,11 @@ back to EDT, never to a fit stretched into the noise.
 **Where the noise floor comes from, and how to lose it.** The background level
 is estimated from the **last tenth** of the onset-trimmed response, so the
 recording must actually contain the room's steady background *after* the decay
-has finished — half a second or more of it. A file trimmed to the audible decay,
+has finished (half a second or more of it). A file trimmed to the audible decay,
 or a `length=` set to the decay alone, makes the analyser measure decaying
 signal as if it were noise: the estimated floor sits too high, the truncation
 point moves earlier, the compensated tail is computed from the wrong crossing,
-and the per-band validity flags are applied to a fictitious dynamic range — all
+and the per-band validity flags are applied to a fictitious dynamic range, all
 without an error or a warning. Record silence after the excitation (the same
 silence ISO 18233 6.2.2.3 asks for), keep it in the file, and let
 `room_parameters` find the crossing rather than trimming to taste. The
@@ -453,7 +453,7 @@ decay statistics stop telling the whole story: the field is ruled by
 discrete **room modes**. The constant is not a physical one. Each mode damped to
 a reverberation time $T$ has a half-power bandwidth of about $2.2/T$ hertz, the
 modal density grows as $4\pi Vf^2/c_0^3$, and requiring roughly three modes
-inside one bandwidth gives $2000\sqrt{T/V}$ — a *choice* of how much overlap
+inside one bandwidth gives $2000\sqrt{T/V}$: a *choice* of how much overlap
 counts as diffuse, which is why stricter texts quote 4000 for the same physics.
 The transition is soft, so a band straddling $f_\mathrm{s}$ should be checked position by
 position rather than trusted, and the
@@ -486,7 +486,7 @@ nodal pattern.
 
 $B\,T$ is the **bandwidth-time product**: $B$ the bandwidth of the analysis band
 in hertz and $T$ the reverberation time in that band, in seconds. The two
-symbols in that cell are not the same $T$ as the filter's — "$T$ = 0.2 s" means
+symbols in that cell are not the same $T$ as the filter's: "$T$ = 0.2 s" means
 the reverberation time. The 125 Hz octave is about 88 Hz wide, so a 0.2 s decay
 gives $B\,T \approx 18$ and only just clears the ISO 3382-2 §7.3 threshold of
 16; halve the decay or move to third octaves and it does not, which is the
@@ -542,7 +542,7 @@ print(int(valid.sum(axis=0).min()))        # 3 positions survived the flag
 ```
 
 Here the spread runs 4 to 5 %, right at the JND, so it belongs in the report
-beside the mean — three positions that agree to 5 % are three positions that
+beside the mean: three positions that agree to 5 % are three positions that
 disagree audibly. Note also what the mask is for: `np.nanmean` over the masked
 array is the arithmetic mean clause 8 a) prescribes, but only over the
 combinations whose band actually passed, and the surviving count is part of the
@@ -611,11 +611,11 @@ result.report(
 
 Three of those entries are there because ISO 3382-2 clause 9.2 asks for them and
 the fiche has no dedicated field for any of them. Clause 9.2 i) requires the
-**degree of precision** — survey, engineering or precision — so it belongs in
+**degree of precision** (survey, engineering or precision), so it belongs in
 `measurement_standard` rather than being left implied. Clause 9.2 e) requires
 the **condition of the room**, furnishing and the number of persons present, and
 clause 4.1 fixes what "unoccupied" may mean: no people, or at most two allowed
-to stand in for the unoccupied state unless otherwise specified — that goes in
+to stand in for the unoccupied state unless otherwise specified; that goes in
 `specimen`. And clause 9.2 c) and i) together require a **scaled sketch plan**
 carrying the source and microphone positions with their heights, which the fiche
 does not draw: produce it alongside and reference it, as `notes` does here.

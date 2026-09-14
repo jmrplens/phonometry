@@ -63,7 +63,7 @@ A marine mammal does not hear every frequency equally, so an underwater noise
 assessment cannot compare a broadband level against a single number. Regulatory
 practice instead **weights** the spectrum with a filter shaped like the hearing
 group's sensitivity, sums the weighted energy, accumulates it over the whole
-activity and compares the result against a published onset criterion — the
+activity and compares the result against a published onset criterion: the
 exposure at which a **temporary threshold shift (TTS)** in hearing sensitivity
 begins, and the higher one at which the shift becomes permanent, historically
 **PTS** and, since the 2024 guidance, **auditory injury (AUD INJ)**. This page
@@ -97,7 +97,7 @@ Read the column you are working in. `auditory_weighting` and
 `exposure_criteria` take the code of the `guidance` you select;
 `group_audiogram` always takes the **Southall** code, because the audiograms are
 Southall's. So `group_audiogram(f, "PW")` raises even though `"PW"` is a valid
-NMFS 2024 weighting group — ask for `"PCW"` — and `auditory_weighting(f, "PCW")`
+NMFS 2024 weighting group (ask for `"PCW"`); `auditory_weighting(f, "PCW")`
 raises under the default guidance for the mirror-image reason.
 `hearing_groups(guidance)` lists the codes a version defines, and passing a
 code from the wrong version raises rather than silently returning the wrong
@@ -201,7 +201,7 @@ example. An echolocating orca is an active sonar: it pays the propagation loss
 twice, so with a source level $SL = 198.2$ dB re 1 µPa²m², a salmon target
 strength $TS = -29.0$ dB re m² and its own hearing threshold in place of a
 detection threshold, the hearing-limited figure of merit is
-$(SL + TS - HT)/2 = 59.0$ dB re m² — the maximum *one-way* loss it can afford.
+$(SL + TS - HT)/2 = 59.0$ dB re m²: the maximum *one-way* loss it can afford.
 The [sonar equation](/phonometry/underwater/underwater-propagation/#sonar-equation)
 those terms come from, and `detection_range`, turn that figure into a range.
 
@@ -210,7 +210,7 @@ those terms come from, and `detection_range`, turn that figure into a range.
 An audiogram and a weighting function look alike and answer different questions,
 and substituting one for the other is a common error in assessments. An
 **audiogram** is a detection threshold, measured behaviourally or by evoked
-potential; it answers questions about audibility, masking and detection range —
+potential; it answers questions about audibility, masking and detection range:
 the orca-versus-salmon figure of merit above is exactly that kind of question. A
 **weighting function** is fitted to *susceptibility* data, the frequency
 dependence of temporary threshold shift, and it is the only one of the two that
@@ -251,8 +251,8 @@ explicit argument and is carried on the result:
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/marine_mammal_weighting.svg" alt="Auditory weighting functions of the five NMFS 2024 in-water hearing groups: low-frequency cetaceans peak near 1.4 kHz, high-frequency cetaceans near 11 kHz, very high-frequency cetaceans near 27 kHz, phocid pinnipeds near 5.6 kHz and otariid pinnipeds near 7.8 kHz, each falling steeply outside its passband" width="82%" loading="eager" />
 
 *Five band-passes of the same algebraic form, and choosing the wrong one costs
-more than the criterion itself does. At 1 kHz — where a pile drive or a ship
-puts most of its energy — the LF filter is at −0.03 dB and the VHF filter at
+more than the criterion itself does. At 1 kHz (where a pile drive or a ship
+puts most of its energy), the LF filter is at −0.03 dB and the VHF filter at
 −33.84 dB, so the same measured spectrum yields two weighted exposures 34 dB
 apart before any threshold is applied. The −6 dB passbands barely overlap
 (96 Hz-15 kHz for LF against 5.9-113 kHz for VHF), and the AUD INJ thresholds in
@@ -366,7 +366,7 @@ plt.show()
 `exposure_criteria` returns the published TTS and injury onset criteria of a
 group. Impulsive noise carries a **dual metric**: a weighted sound exposure
 level *and* an unweighted ("flat") peak sound pressure level, and the criterion
-that produces the larger **isopleth** governs — the isopleth being the contour
+that produces the larger **isopleth** governs: the isopleth being the contour
 on which the criterion is exactly met, so the metric that pushes it furthest
 from the source is the one that sets the mitigation zone.
 
@@ -400,7 +400,7 @@ numbers with a column removed.
 The tables are internally consistent in ways the library pins as tests: the
 non-impulsive injury level is always TTS + 20 dB, the published weighted TTS
 onset is always the rounded $K + C$, and in Southall's impulsive table the SEL
-criteria run TTS + 15 dB and the peak criteria TTS + 6 dB — which the table
+criteria run TTS + 15 dB and the peak criteria TTS + 6 dB, which the table
 above satisfies row by row.
 
 ## A worked pile-driving assessment
@@ -426,8 +426,8 @@ hearing group's passband**. The NMFS 2024 upper transition frequencies $f_2$ are
 26.6 kHz (LF), 129 kHz (HF), 186 kHz (VHF), 68.3 kHz (PW) and 43.8 kHz (OW), and
 the generalised hearing ranges reach further still (LF to 36 kHz, VHF to
 165 kHz). As a rule the sample rate has to be about 2.5 times the highest band
-edge that matters, so the 48 kHz record below — bands resolved to roughly 20 kHz
-— supports LF, is marginal for OW, and truncates HF, VHF and PW badly. A
+edge that matters, so the 48 kHz record below (bands resolved to roughly 20 kHz)
+supports LF, is marginal for OW, and truncates HF, VHF and PW badly. A
 porpoise assessment needs a few hundred kilohertz.
 
 `weighted_exposure` cannot detect a truncated spectrum: it weights what it is
@@ -463,7 +463,7 @@ Read those six numbers in order, because each one is a step. The record's
 unweighted single-strike exposure is **135.7 dB re 1 µPa²·s**; LF weighting takes
 it to **133.5 dB**, costing barely 2 dB, because a 200 Hz hammer sits inside the
 low-frequency cetacean passband. Accumulating 3 000 strikes adds
-$10\log_{10}3000 = 34.8$ dB and gives **168.3 dB** — that term, not the
+$10\log_{10}3000 = 34.8$ dB and gives **168.3 dB**: that term, not the
 weighting, is what usually decides the outcome. The margins are then read
 against the criteria: `sel_margin` = **−14.7 dB** against the 183 dB auditory
 injury criterion, so `exceeds_injury` is `False`, but the cumulative level clears
@@ -553,8 +553,8 @@ its criterion, and separately the range beyond which the flat peak no longer
 exceeds its own, with the larger of the two governing.
 
 The bridge from this page to that radius runs through the propagation guide.
-Take the band SEL at the range it was measured at — 750 m, per ISO 18406 —
-propagate it to a trial range with `propagation_loss` at each band centre,
+Take the band SEL at the range it was measured at (750 m, per ISO 18406)
+and propagate it to a trial range with `propagation_loss` at each band centre,
 re-run `weighted_exposure` on the propagated spectrum for the strike count of
 the campaign, and read off the range where `sel_margin` crosses zero. Then
 repeat for the flat peak, where only the single-trip loss applies.
@@ -582,7 +582,7 @@ for r in (750.0, 800.0, 1000.0, 3000.0):
 For this campaign the low-frequency TTS isopleth sits at about **800 m**, and
 there is no injury isopleth at all: the cumulative level is 14.7 dB below the
 183 dB criterion even at the measurement range. The peak isopleth does not exist
-either, for the same reason — which is exactly the case where the *larger*
+either, for the same reason: this is exactly the case where the *larger*
 isopleth rule has nothing to choose between, and the assessment reduces to one
 radius.
 
@@ -590,7 +590,7 @@ Two consequences follow, and both belong in the report. The governing metric can
 **change with range**, because the accumulated SEL carries the $+10\log_{10}N$
 term and the peak does not, so the two isopleths shrink at different rates. And
 a cumulative number means nothing without two facts attached: the range at which
-the strike was measured or modelled, and the **accumulation window** — 3 000
+the strike was measured or modelled, and the **accumulation window**: 3 000
 strikes means one pile driven inside that window, conventionally 24 hours in the
 regulatory guidance, not a whole campaign.
 

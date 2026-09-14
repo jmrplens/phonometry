@@ -118,8 +118,8 @@ quantities.
 
 The descriptors and the attenuation terms: how the ISO 1996-1 indicators are
 built, what the NT ACOU 112 prominence criterion measures, where each ISO 9613
-term comes from, and — filed here rather than under devices, because the
-mathematics is the same — the sound-power determination derivations and the
+term comes from, and the sound-power determination derivations (filed here
+rather than under devices, because the mathematics is the same) and the
 ISO 9612 occupational-exposure uncertainty.
 
 - [Environmental descriptors (ISO 1996-1)](/phonometry/reference/theory/environment-transport/#environmental-descriptors-iso-1996-1)

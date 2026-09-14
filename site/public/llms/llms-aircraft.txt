@@ -14,8 +14,8 @@ kinds. **Certification** fixes a single number per aircraft type to the last
 decimal, at reference points a standard places around the runway. **Contour
 methods** take that certified fleet and predict what an airport does to the
 ground around it. The four pages of this section cover both, and they share a
-common anatomy: a rigorously standardised **source descriptor** — a spectral
-time history, a noise-power-distance table or a noise hemisphere — plus
+common anatomy: a rigorously standardised **source descriptor** (a spectral
+time history, a noise-power-distance table or a noise hemisphere) plus
 standardised **propagation adjustments** that place the source at a receiver.
 
 [Aircraft noise: Effective Perceived Noise Level](https://jmrplens.github.io/phonometry/aircraft/aircraft-noise/)
@@ -62,7 +62,7 @@ hemisphere page replaces both. Read the fixed-wing pages in that order: the EPNL
 page defines the certified metric, the Doc 29 page turns certified aeroplanes
 into ground contours from tables written by hand, and the ANP page replaces
 those hand-written tables with the published fleet data. The rotorcraft page
-stands on its own — a different standard and a different source model — and can
+stands on its own (a different standard and a different source model) and can
 be read first if helicopters are what you came for.
 
 The three metrics are not interchangeable. EPNL is a *certification* metric of
@@ -87,8 +87,8 @@ land-use study is finally judged on.
 ## What this section does not cover
 
 **Single events only.** The Doc 29 chain builds single-event contours; it does
-not assemble the cumulative multi-event indices — an Lden-style sum over a
-full flight schedule — that a complete noise-contour study needs on top of
+not assemble the cumulative multi-event indices, an Lden-style sum over a
+full flight schedule, that a complete noise-contour study needs on top of
 them. That last step is where a land-use decision is actually made, and it is
 not here.
 
@@ -374,9 +374,9 @@ att.plot()                    # band vs pure-tone mid-band (needs matplotlib)
 Part 36 test window), over path lengths to 7620 m, and is reciprocal
 (source↔receiver).
 
-The adjustment those attenuations feed — Appendix 2 §8, which transports a
-measured EPNL to the reference day and the reference flight path — is not
-implemented, in either its simplified or its integrated form:
+The adjustment those attenuations feed is given by Appendix 2 §8, which
+transports a measured EPNL to the reference day and the reference flight path.
+This is not implemented, in either its simplified or its integrated form:
 `air_attenuation` and `sae_band_attenuation` are exactly the test-day and
 reference-day coefficients of its first terms, but the flight-path geometry
 and the four $\Delta$ terms are left to the reader. The EPNL of section 3 is
@@ -530,7 +530,7 @@ The tables may be used as tabulated while the aerodrome's average conditions
 stay inside the Doc 29 §2.5 envelope: air temperature below 30 °C, the product
 of temperature (°C) and relative humidity (%) above 500, and wind below 8 m/s.
 Outside it the *tables themselves* have to be converted by the Appendix D
-procedure, which this chain does not implement — `impedance_adjustment` takes
+procedure, which this chain does not implement: `impedance_adjustment` takes
 only temperature and pressure, and no humidity argument enters the chain
 anywhere. One restriction runs under all of it: the SAE AIR 5662 lateral
 attenuation, and with it the whole single-event chain that uses it, is derived
@@ -990,7 +990,7 @@ here where Doc 29 measures at 1.2 m. The metric defaults to the sound exposure
 level and the stage length to 1, and the optional `temperature_c` and
 `atmospheric_pressure_kpa` arguments feed the Doc 29 atmospheric impedance
 adjustment, defaulting to the 15 °C and 101.325 kPa of the standard atmosphere
-— a bookkeeping term worth +0.07 dB there, not a weather correction.
+(a bookkeeping term worth +0.07 dB there, not a weather correction).
 
 ```python
 import numpy as np
@@ -1085,7 +1085,7 @@ microphone, with two more 150 m to each side.
 
 The library implements the method, not the data: **no hemisphere database
 ships with phonometry, and there is no NORAH file reader**, so the arrays
-below are assembled by the reader — from a flight-test campaign that
+below are assembled by the reader: from a flight-test campaign that
 de-propagates each emission direction back to the 60 m reference sphere, or
 from the NORAH2 reference database, which covers eleven rotorcraft types.
 
@@ -1229,18 +1229,18 @@ A hovering or idling helicopter is measured differently from a flyover: on a
 **ring of ground microphones** around the stationary aircraft (the CAEP
 in-ground hover practice the guidance points at), one band spectrum per ring
 bearing (0° at the nose, positive to starboard), reduced to the ring's polar
-distance — commonly 70 m rather than the flyover database's 60 m. The
-guidance defines four conditions — in-ground hover (HIGE), out-of-ground
-hover (HOGE), reduced-rpm idle and full-rpm idle — and three approaches in
+distance (commonly 70 m rather than the flyover database's 60 m). The
+guidance defines four conditions: in-ground hover (HIGE), out-of-ground
+hover (HOGE), reduced-rpm idle and full-rpm idle, and three approaches in
 descending priority: measure all four rings (Approach 1), measure the HIGE
 ring and the other three in the 0° direction only (Approach 2), or measure
 the HIGE ring alone and apply fixed offsets (Approach 3).
 
 `hover_ring_hemisphere` extends the ring to a full `RotorcraftHemisphere`
 "assuming constant directivity in φ": each bin $(\varphi, \theta)$ reads the
-ring at the bearing $\pm\theta$ of its own half — port bins from negative
+ring at the bearing $\pm\theta$ of its own half: port bins from negative
 bearings, starboard bins from positive ones, and the $\varphi = 0$ column
-under the aircraft takes the energy mean of the $\pm\theta$ ring values —
+under the aircraft takes the energy mean of the $\pm\theta$ ring values,
 with periodic interpolation in the energy domain. The NORAH2 reference
 implementation reads the same ring by the horizontal bearing of the emission
 direction instead (constant directivity in elevation, `mapping="bearing"`);
@@ -1249,7 +1249,7 @@ steep emission angles.
 
 `hover_derived_hemisphere` derives HOGE and the idles from the HIGE
 hemisphere by a uniform level offset: a measured 0°-direction difference
-(Approach 2, passed as `offset_db`), or the published Approach 3 constants —
+(Approach 2, passed as `offset_db`), or the published Approach 3 constants:
 +12 dB for HOGE, −12 dB for reduced-rpm idle and −2.5 dB for full-rpm idle,
 all from the HIGE disk. The guidance warns that those constants come from
 measurements with inverted microphones on ground plates and may not hold for

@@ -242,9 +242,9 @@ See the [Loudness guide](/phonometry/perception/psychoacoustics/loudness/) for u
 ISO 532-1 is one of three loudness models; two newer families refine the auditory front-end and add the sound-quality metrics tonality and roughness.
 
 All three are calibrated so that a 1 kHz tone at 40 dB SPL is 1 sone, so they
-agree at that anchor and diverge away from it — most visibly in level dependence,
+agree at that anchor and diverge away from it (most visibly in level dependence,
 where Zwicker doubles the sone value every 10 dB and the Sottek model grows by
-about 1.65× — and in their treatment of narrowband against broadband signals.
+about 1.65×) and in their treatment of narrowband against broadband signals.
 Sone values from different models are therefore not interchangeable: the model
 belongs beside every number, and two models must never be mixed in one
 comparison. The division of labour is what usually settles the choice.
@@ -359,8 +359,8 @@ only for sounds with energy above the knee (15 to 15.8 Bark, about 2.5 to
 3 kHz) and leaves everything below it untouched.*
 
 **What these three numbers are for.** Each unit is anchored on a reference sound
-— 1 tu$_\mathrm{HMS}$ for a 1 kHz tone at 40 dB, 1 asper for a fully modulated
-70 Hz-modulated tone, 1 acum for the 920–1080 Hz narrowband noise at 60 dB —
+(1 tu$_\mathrm{HMS}$ for a 1 kHz tone at 40 dB, 1 asper for a fully modulated
+70 Hz-modulated tone, 1 acum for the 920–1080 Hz narrowband noise at 60 dB)
 precisely because
 no standard states an absolute criterion for any of them. There is no roughness
 or tonality that "fails". They earn their keep as *differences* between design
@@ -461,7 +461,7 @@ $$
 intelligibility actually varies, and the informative Annex F qualification bands
 cut that range into 0.04-wide letters with edges at 0.36, 0.40 … 0.76, from U
 below 0.36 to A+ at 0.76 and above; `STIResult.rating` returns the letter, and
-Annex G Table G.1 gives an example use for each band — band G (0.48-0.52) is
+Annex G Table G.1 gives an example use for each band: band G (0.48-0.52) is
 labelled the target value for voice-alarm systems, which is where the familiar
 "STI ≥ 0.5" requirement comes from, and H (0.44-0.48) the normal lower limit
 for such systems. Two cautions come with the letter. Annexes F and G are
@@ -469,8 +469,8 @@ informative, and Edition 5's own Scope says the document does not provide
 criteria for certifying a transmission channel, so a project requirement belongs
 in the contract as a numeric STI with the letter used to report it. And the
 0.04 band width is itself set by the typical uncertainty of a direct
-measurement, which for STIPA runs about 0.02 to 0.03 — wider than the 0.02
-half-width of a band — so a value within about 0.02 of an edge may legitimately
+measurement, which for STIPA runs about 0.02 to 0.03 (wider than the 0.02
+half-width of a band), so a value within about 0.02 of an edge may legitimately
 be graded either side, and the STI is quoted beside the letter and averaged over
 several positions rather than trusted at one.
 
@@ -491,8 +491,8 @@ band lost at 2 kHz costs several times what the same band costs at 160 Hz.*
 
 All inputs are **equivalent spectrum levels** (clauses 3.11/3.55), that is
 per-hertz quantities: a measured one-third-octave band level becomes $E'_i$ or
-$N'_i$ only after subtracting $10\log_{10}$ of that band's bandwidth in hertz —
-about 23.6 dB in the 1 kHz band and over 30 dB at the top of the range — which
+$N'_i$ only after subtracting $10\log_{10}$ of that band's bandwidth in hertz
+(about 23.6 dB in the 1 kHz band and over 30 dB at the top of the range), which
 is why the standard speech spectra sit near 25 dB at 1 kHz for a normal voice.
 Each of the three inputs comes from a defined measurement: the speech input is
 either one of the four built-in vocal efforts, defined at 1 m in front of the
@@ -561,7 +561,7 @@ pressure level measured **with the listener absent**, at the point where the
 centre of the head would be. The free-field column applies to pure tones in a
 free progressive plane wave with the subject facing the source (frontal
 incidence); the diffuse-field column applies to one-third-octave bands of white
-or pink noise in a diffuse field — and up to 8 kHz to any narrower noise band as
+or pink noise in a diffuse field, and up to 8 kHz to any narrower noise band as
 well. That difference in geometry is exactly why the columns coincide below
 1 kHz and separate above it: at high frequency the frontal-incidence head and
 pinna gain exceeds the all-direction average, so less free-field level is needed

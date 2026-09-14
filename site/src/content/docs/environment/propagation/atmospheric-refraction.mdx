@@ -143,14 +143,14 @@ logarithmic term follows from a wind speed measured at a stated height once
 $z_0$ is fixed: matching the profile at that height gives
 $b = u_\mathrm{SR}(z_1)\,/\,\ln(1 + z_1/z_0)$. A 10 m mast reading of 4 m/s blowing
 straight down the propagation path over grassland ($z_0 = 0.1$ m) therefore
-gives $b = 4 / \ln(101) = 0.87$ m/s — close to the "+1 m/s typical" above, and
+gives $b = 4 / \ln(101) = 0.87$ m/s, close to the "+1 m/s typical" above, and
 `log_linear_sound_speed_profile(0.867)` duly returns 344.0 m/s at 10 m.
 
 Only the **component along the propagation direction** enters $c_\text{eff}$:
 $u_\mathrm{SR}(z) = u(z)\cos(\pi - \alpha)$ with $\alpha$ the angle between the
 meteorological wind direction (the direction the wind blows *from*) and the
 direction the sound travels (Eq. 1.19). The same 4 m/s at 60° to the path is
-worth 2 m/s along it, so $b = 0.43$ m/s downwind and $-0.43$ m/s upwind — one
+worth 2 m/s along it, so $b = 0.43$ m/s downwind and $-0.43$ m/s upwind: one
 wind, two atmospheres, which is the whole upwind/downwind asymmetry in one line
 of arithmetic. It is also the physics behind the ISO 9613-2 favourable-condition
 window (wind within ±45° of the source-receiver line at 1 to 5 m/s measured 3 to
@@ -168,8 +168,8 @@ $z_0$ is a property of the cover, not of the weather. Attenborough &
 Van Renterghem quote a range from 0.0002 m for still water to about 0.1 m for
 grass (§1.4), use 0.02 m for the worked profiles of their Figure 1.20, and
 estimate 0.1 m for the meteorological tower whose year of data they fit with
-this profile shape; rougher covers — crops with scattered obstacles,
-hedgerows, scrub, suburban terrain — run from a few tenths of a metre to about
+this profile shape; rougher covers (crops with scattered obstacles,
+hedgerows, scrub, suburban terrain) run from a few tenths of a metre to about
 1 m and are best taken from the Davenport roughness classification. The default
 `roughness_length=0.1` of `log_linear_sound_speed_profile` is the grassland
 value, so it is the one argument to change first when the site is not a field.
@@ -283,7 +283,7 @@ expression above, since the bounding ray leaves the source horizontally.
 
 These closed forms are the exact oracle for the ray tracer: a circle fit of a
 traced ray recovers $R_\mathrm{c}$ to machine precision. They are also the cheapest
-answer to the question the whole page turns on — *is my range long enough for
+answer to the question the whole page turns on: *is my range long enough for
 refraction to matter?*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/shadow_zone_map.svg" alt="The closed-form shadow-zone distance on a logarithmic ordinate against the magnitude of an upward sound-speed gradient from 0.02 to 0.4 per second, for three source and receiver height pairs of 0.5 and 1.5 m, 2 and 2 m, and 2 and 10 m. All three curves fall as the gradient steepens; a marker on the middle curve at the representative gradient of 0.1 per second sits near 233 m, and a second marker gives the page's own 110 m case at the equivalent linear gradient of the b = minus 1 logarithmic profile. A secondary axis converts the gradient into the radius of curvature Rc = c0 over the gradient, running from 17 km down to 850 m" width="88%" />

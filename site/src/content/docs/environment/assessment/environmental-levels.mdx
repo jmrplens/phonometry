@@ -93,7 +93,7 @@ band 10 dB before the 12/4/8 h energy average, which is why an $L_\mathrm{den}$ 
 in the high 60s, and the Environmental Noise Directive reports strategic maps in
 5 dB $L_\mathrm{den}$ bands from 55 dB upward. The +5 and +10 dB weights are the price
 of exposure at the hours when people are at home and asleep, so an evening or a
-night source moves $L_\mathrm{den}$ far more than its energy share suggests — in the
+night source moves $L_\mathrm{den}$ far more than its energy share suggests: in the
 profile above, the evening is 1.8 dB *quieter* than the day and lasts a third as
 long, yet the +5 dB weight gives it 36 % of the energy that makes up the 64.3 dB
 against the day's 51 %. Two limits on reading it. The reported indicator is a **long-term**
@@ -167,7 +167,7 @@ residential areas the same clause fixes the microphone height at
 
 The reason the two corrections are not simply 6 and 3 dB is interference.
 Flush-mounted, the direct and reflected waves are in phase everywhere on the
-surface, so the doubling is coherent and broadband — which is why Annex B
+surface, so the doubling is coherent and broadband, which is why Annex B
 recommends this position, not the 3 dB one, for stationary sources and low
 frequencies. Two metres out, the path difference is finite and frequency
 dependent, so the 3 dB is an ideal-case average that a canyon or a nearby
@@ -180,7 +180,7 @@ Two consequences for everything below. `lden`, `ldn` and
 `composite_rating_level` consume the **corrected** level, so applying the
 correction is the reader's step and no function on this page will do it. And the
 reported level must always name its position and state whether a correction was
-made — a rule the standard states in the same clause, and the reason an END
+made: a rule the standard states in the same clause, and the reason an END
 façade indicator, which is *defined* to include the reflection, must not be
 corrected at all.
 
@@ -204,14 +204,14 @@ tonal adjustment, the residual-noise correction and the uncertainty budget.
 Everything on this page assumes a level that was obtained the way ISO 1996-2
 requires, and the requirements are short enough to state in full.
 
-The **whole chain** — microphones, cables, windscreens, recording devices and any
-other accessory — meets class 1 of IEC 61672-1, for free-field or
+The **whole chain** (microphones, cables, windscreens, recording devices and any
+other accessory) meets class 1 of IEC 61672-1, for free-field or
 random-incidence application as appropriate, and the filters meet class 1 of
 IEC 61260 (5.1). A **windscreen is always used outdoors**, and it does not make
 wind noise go away: the standard's own estimate for a 13 mm microphone in a
 90 mm windscreen is an A-weighted wind-noise level of about
 $-18 + 70\log_{10} v$ dB with the wind normal to the diaphragm and
-$-32 + 83\log_{10} v$ dB with it parallel, $v$ in m/s — which is 31 dB(A) at
+$-32 + 83\log_{10} v$ dB with it parallel, $v$ in m/s, which is 31 dB(A) at
 5 m/s and 52 dB(A) at 10 m/s, i.e. above the residual of a quiet rural night
 before the wind is anywhere near a gale. Class 1 tolerance limits themselves
 only apply between −10 °C and +50 °C.
@@ -342,7 +342,7 @@ ISO 1996-2:2017 and every entry has a name, a source and a size:
 
 | Contribution | Where it comes from | $c_j u_j$ |
 | :--- | :--- | :--- |
-| Measured level $L_\mathrm{eq,1h}$ | $u = 0{,}5$ dB — which already absorbs the class 1 sound level meter's own 0,5 dB default — multiplied by the residual-correction sensitivity $c_{L'}$ of Formula (F.7) | 0,59 dB |
+| Measured level $L_\mathrm{eq,1h}$ | $u = 0{,}5$ dB (which already absorbs the class 1 sound level meter's own 0,5 dB default), multiplied by the residual-correction sensitivity $c_{L'}$ of Formula (F.7) | 0,59 dB |
 | Source operating conditions | 1 000 vehicles counted, $10/\sqrt{1000}$ (Formula (8)) | 0,30 dB |
 | **Meteorology** | favourable conditions, Formula (12) | **2,00 dB** |
 | Microphone location | the +5,7 dB flush-mounted correction of Annex B | 0,40 dB |
@@ -351,14 +351,14 @@ ISO 1996-2:2017 and every entry has a name, a source and a size:
 `combined_standard_uncertainty` also accepts $(u_j, c_j)$ **pairs**, so the
 sensitivity coefficients need not be pre-multiplied by hand, and
 `residual_correction_uncertainty` supplies exactly the two coefficients of
-Formulae (F.7)/(F.8) — both of which grow without bound as the residual
+Formulae (F.7)/(F.8), both of which grow without bound as the residual
 approaches the measured level, which is the same 3 dB cliff as above seen from
 the uncertainty side.
 
 Now read the column. The meteorology term alone is 2,0 dB and it sets the
 answer: drop it and the combined uncertainty falls from 2,18 dB to 0,86 dB. The
 instrument is nowhere near the top of the list. **A class 1 meter does not make
-an environmental measurement accurate** — how representative the propagation
+an environmental measurement accurate.** How representative the propagation
 conditions and the source operation were during that hour is what decides it, and
 the cheapest way to shrink $u$ is therefore to measure more often, which is what
 `uncertainty_from_repeated_measurements` is for.
@@ -387,7 +387,7 @@ follows once you have applied them.
 ## See also
 
 - [Integrated and Statistical Levels](/phonometry/signals/levels/levels/): the $L_\mathrm{eq}$/$L_\mathrm{Aeq}$, percentile and event levels the indicators of this page are assembled from.
-- [Impulsive sound prominence (NT ACOU 112)](/phonometry/environment/assessment/impulsive-sound/): the measured impulsive adjustment $K_\mathrm{I}$, and `rating_level`, which combines impulse-adjusted sub-intervals over a reference time — the sub-daily counterpart of `composite_rating_level` here, which combines whole periods with their time-of-day and character adjustments (ISO 1996-1 clause 6.5).
+- [Impulsive sound prominence (NT ACOU 112)](/phonometry/environment/assessment/impulsive-sound/): the measured impulsive adjustment $K_\mathrm{I}$, and `rating_level`, which combines impulse-adjusted sub-intervals over a reference time, the sub-daily counterpart of `composite_rating_level` here, which combines whole periods with their time-of-day and character adjustments (ISO 1996-1 clause 6.5).
 - [Spanish noise regulation (RD 1367/2007)](/phonometry/environment/assessment/spanish-noise-regulation/): one national application of exactly this chain, with its own tonal, low-frequency and impulsive corrections.
 - [Objective audibility of tones in noise (ISO/PAS 20065)](/phonometry/perception/psychoacoustics/tone-audibility/): the tonal audibility whose mean value maps to the $K_\mathrm{t}$ adjustment (Table J.1).
 - [Prominent Discrete Tones](/phonometry/perception/psychoacoustics/tone-prominence/): the ECMA-418-1 tone-to-noise and prominence-ratio verdicts, complementary emission screening for the tonal question.

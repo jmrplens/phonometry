@@ -61,12 +61,12 @@ target spectrum for the next measurement's sweep.
 The two acquisition tools recover the response through their own
 deconvolution: correlation with the pair for Golay, spectral division by the
 sweep's spectrum for shaped sweeps. All three tools on this page sit in the same
-two-channel frame the diagram draws — a generator driving the loudspeaker under
-test, one channel carrying the electrical reference and one the microphone — and
-differ only in the excitation and the deconvolution. The Golay pair of section 1
-recovers the response by correlation with the codes; the shaped sweep of section
-2 by spectral division; and the broadband-noise route the diagram itself
-annotates, which belongs to the
+two-channel frame the diagram draws: a generator drives the loudspeaker under
+test, with one channel carrying the electrical reference and one the microphone.
+They differ only in the excitation and the deconvolution. The Golay pair of
+section 1 recovers the response by correlation with the codes; the shaped sweep
+of section 2 by spectral division; and the broadband-noise route the diagram
+itself annotates, which belongs to the
 [electroacoustics guide](/phonometry/devices/electroacoustics/electroacoustics/),
 by the $H_1 = G_{xy}/G_{xx}$ estimator with a coherence that polices it. The
 regularized inversion of section 3 then works on whichever measured response
@@ -80,7 +80,7 @@ A Golay pair is two binary sequences $a$ and $b$ of length $L = 2^n$, built by a
 two-line recursion (Havelock Part I Ch. 6, Eq. (1)): starting from
 $a_1 = (+1, +1)$ and $b_1 = (+1, -1)$, each step sets
 $a_{k+1} = [\,a_k \mid b_k\,]$ and $b_{k+1} = [\,a_k \mid -b_k\,]$, doubling
-the length every time — so `golay_pair(14)` returns two codes of
+the length every time; thus `golay_pair(14)` returns two codes of
 $2^{14} = 16384$ samples. Their defining property is *algebraic*, not
 approximate: the two periodic autocorrelations sum to
 
@@ -185,20 +185,20 @@ sample-accurate, zero-latency loop. A real run has four decisions.
 
 **Emission.** Play each code back to back and **discard at least one whole
 period** before keeping anything, so the system reaches the periodic steady
-state the circular correlation assumes — the same condition the aliasing warning
-enforces, seen from the other side. Then keep a whole number of periods, and
+state the circular correlation assumes (the same condition the aliasing warning
+enforces, seen from the other side). Then keep a whole number of periods, and
 repeat for the second code without touching gain or geometry.
 
 **Alignment, which is the one that fails silently.** The recovery is a circular
 cross-correlation, so any latency between the emitted and recorded streams
-appears as a *rotation* of the impulse response — annoying but recoverable. The
+appears as a *rotation* of the impulse response: annoying but recoverable. The
 real damage is that **both recordings must be cut at the same offset**: the
 exact complementarity only survives if the $a$ and $b$ records are aligned with
 each other to the sample, and a one-sample discrepancy destroys the sidelobe
 cancellation the whole method rests on, leaving a raised floor that looks like
-noise. Get the offset once with a loopback channel — record the electrical drive
+noise. Get the offset once with a loopback channel: record the electrical drive
 alongside the microphone and measure it with `time_delay` from the
-[delay estimation](/phonometry/signals/spectra/correlation-delay/) page — then
+[delay estimation](/phonometry/signals/spectra/correlation-delay/) page, then
 apply the same cut to both.
 
 **Level and background.** Set the amplifier so the code's peak leaves headroom
@@ -341,7 +341,7 @@ measurement. Five decisions turn it into one.
   signal-to-noise ratio, instead of a good midrange and a useless bottom octave.
 - **The duration follows from the margin you are short of.** Doubling the sweep
   length buys about 3 dB of SNR in the deconvolved response, so the duration is
-  arithmetic — bounded above by the time-invariance of the system: a room with
+  arithmetic, bounded above by the time-invariance of the system: a room with
   moving air, or a loudspeaker heating up, sets the ceiling long before the
   arithmetic does.
 - **The record needs a tail.** The excitation must carry a silence at least as
@@ -354,8 +354,8 @@ measurement. Five decisions turn it into one.
 - **Shaping does not cost the distortion separation.** That separation is a
   property of the sweep's *group delay*, not of its magnitude: the $k$-th
   harmonic of an instantaneous frequency $f$ arrives at the time the sweep
-  passes $kf$, so as long as the group delay is monotonic — which the recursion
-  guarantees for any non-zero target — the distortion products still deconvolve
+  passes $kf$, so as long as the group delay is monotonic (which the recursion
+  guarantees for any non-zero target), the distortion products still deconvolve
   to times before the linear response. Shaping only changes how far before,
   because a target that dwells longer at low frequencies spreads the harmonic
   packets differently from the exponential sweep's constant per-octave dwell.
@@ -368,8 +368,8 @@ measurement. Five decisions turn it into one.
 
 The inversion is only as good as its input, and a measured loudspeaker response
 is not a synthetic band-pass. Measure on the reference axis at a stated distance
-— 1 m is the IEC 60268-5 convention the
-[loudspeakers guide](/phonometry/devices/electroacoustics/loudspeakers/) uses —
+(1 m is the IEC 60268-5 convention the
+[loudspeakers guide](/phonometry/devices/electroacoustics/loudspeakers/) uses)
 with a measurement microphone, in an anechoic room if you have one. If you do
 not, put source and microphone as far from every surface as the room allows and
 **time-gate the impulse response before the first reflection**. That gate sets
@@ -378,13 +378,13 @@ and 1 m apart, the floor reflection arrives 4.7 ms after the direct sound, so
 the gated response is only valid above roughly $1/4.7\ \text{ms} \approx
 210$ Hz. Set `f_range` inside the band the gate actually validated and let the
 regularization cap everything outside it, because equalizing an ungated in-room
-response builds the room's modes into the filter — and they move with the
+response builds the room's modes into the filter, and they move with the
 microphone. Below the gate's limit, a ground-plane measurement is the usual
 alternative.
 
 Equalizing with a measured response means inverting it, and a plain
-reciprocal $1/H(f)$ explodes wherever the system radiates little energy - a
-notch in-band, everything out-of-band - turning an equalizer into a noise
+reciprocal $1/H(f)$ explodes wherever the system radiates little energy (a
+notch in-band, everything out-of-band), turning an equalizer into a noise
 amplifier. Müller & Massarani confine the inversion with a band-pass
 (Secs. 3.1, 4.5); the general form of that confinement is Kirkeby & Nelson's
 frequency-dependent Tikhonov regularization,
@@ -510,7 +510,7 @@ default that yields the 1e-5 dB flatness above only makes sense on a noiseless
 synthetic response, and expecting that number from a real measurement is the
 mistake. Read the two reported numbers accordingly: `flatness_db` is how flat
 the band comes out, `max_gain_db` the worst-case boost the filter can ever
-apply — the number to check against the amplifier's headroom before playing
+apply: the number to check against the amplifier's headroom before playing
 anything through it.
 
 The asymmetry practitioners rely on is worth stating outright: **cut deep and
@@ -561,7 +561,7 @@ the three differ on four axes that decide a real measurement:
 
 So: the sweep for distortion rejection, the MLS for legacy hardware, and the
 pair when exact, correlation-noise-free deconvolution of a *stationary fixture*
-matters (HRTF rigs, calibration fixtures) — where 3 dB of signal-to-noise ratio
+matters (HRTF rigs, calibration fixtures): where 3 dB of signal-to-noise ratio
 is cheap and the last decimal of the impulse response is what you came for. Harmonic analysis of what sweeps *discard* lives in
 [swept-sine distortion](/phonometry/devices/electroacoustics/swept-sine-distortion/). The Welch
 machinery used to verify the shaped sweep is the

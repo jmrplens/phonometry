@@ -741,7 +741,7 @@ range:
 | `gap` | float | m | > 0 | Cavity depth $d$ |
 | `cavity_medium` | `PorousMediumResult` | — | default `None` | Porous fill; lowers $f_0$ |
 | `width` (slit) | float | m | > 0 | Slit width $w$. **Second** positional argument of both `slit_transmission_coefficient` and `slit_resonance_frequencies` |
-| `depth` (slit) | float | m | > 0 | Slit depth $d$ (the wall thickness). **Third** positional argument of `slit_transmission_coefficient`, **first** of `slit_resonance_frequencies` — the two functions take the pair in opposite orders |
+| `depth` (slit) | float | m | > 0 | Slit depth $d$ (the wall thickness). **Third** positional argument of `slit_transmission_coefficient`, **first** of `slit_resonance_frequencies`: the two functions take the pair in opposite orders |
 | `field` / `position` (slit) | str | — | `'diffuse'`/`'normal'`, `'mid'`/`'edge'` | Incident field and slit location |
 | `radius` / `depth` (hole) | float | m | > 0 | Circular-aperture radius $a$ / depth $d$ |
 | `areas` / `reduction_indices` | seq | m² / dB | length $N$ | Composite elements (1-D or (N, bands)) |
@@ -773,7 +773,7 @@ cavity boost (Eqs 7.62-7.64); Hopkins' Gomperts slit and the Wilson & Soroka
 circular hole with the area-weighted composite sum (Eq. 4.92); the
 Leppington/Maidanik plate radiation efficiency (Eqs 2.227-2.230); and the
 Cremer Table 5.1 point impedances and mobilities of infinite plates and beams
-with the injected-power relation — through `single_panel_transmission_loss`,
+with the injected-power relation, via `single_panel_transmission_loss`,
 `double_wall_transmission_loss`, `slit_transmission_coefficient`,
 `composite_transmission_loss`, `radiation_efficiency`,
 `infinite_plate_impedance`, `infinite_beam_mobility` and `injected_power`.
@@ -798,7 +798,7 @@ neither route predicts. Only the sinusoidal corrugation has equivalent
 stiffnesses here; trapezoidal cladding needs its own, from the literature
 Vigran cites. On the wall-tie side the inputs are printed data but no published
 $R$ of a bridged masonry cavity wall is tabulated, so the per-band penalty the
-ties cause has **no numeric oracle** — only the resonance shift is anchored
+ties cause has **no numeric oracle**: only the resonance shift is anchored
 (Hopkins Fig. 4.35, 26 Hz to 50 Hz). The coupling loss factor is not fed into a
 full statistical energy analysis: combining it with the airborne path would
 need the whole room-plate-cavity-plate-room chain.

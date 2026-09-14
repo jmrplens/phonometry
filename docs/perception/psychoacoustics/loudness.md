@@ -260,10 +260,10 @@ ISO 226:2023 clause 4.1 defines the normal equal-loudness-level contours from 20
 ## Standards
 
 ISO 532-1:2017, *Acoustics — Methods for calculating
-loudness — Part 1: Zwicker method* — stationary and time-varying loudness in
+loudness — Part 1: Zwicker method*: stationary and time-varying loudness in
 sones from the normative Annex A.4 reference program, with the N5/N10
 percentile loudness, validated against the Annex B set.
-ISO 226:2023, *Acoustics — Normal equal-loudness-level contours* — the
+ISO 226:2023, *Acoustics — Normal equal-loudness-level contours*: the
 contours (Formula 1), the loudness level of pure tones (Formula 2) and the
 hearing threshold.
 

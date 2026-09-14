@@ -73,7 +73,7 @@ absorption where the layer is a fair fraction of the wavelength, which at
 300 Hz means tens of centimetres. Acoustic metamaterial absorbers break that
 rule with resonance instead of bulk. A rigid panel of thin closed slits, each
 loaded by Helmholtz resonators, slows the sound inside the slit so drastically
-that a 3 cm panel resonates at about 300 Hz — where an empty quarter-wave
+that a 3 cm panel resonates at about 300 Hz, where an empty quarter-wave
 cavity would have to be ten times deeper, since 3 cm of plain air resonates at
 2.9 kHz (section 3). Tuning the panel's internal losses against its leakage then
 produces **perfect absorption**, $\alpha = 1$, at a design frequency where the
@@ -115,7 +115,7 @@ reflection at zero.
 Two lengths set the panel geometry and appear in every call below. The
 **lattice step** `lattice_step` = $a$ is the spacing between successive
 resonators *along* one slit, so a slit loaded by $N$ resonators is
-$L = N a$ deep — that, and not the resonator's own cavity, is what makes the
+$L = N a$ deep: that, and not the resonator's own cavity, is what makes the
 panel 30 mm thick in the example. The **period** `period_m` = $d$ is the spacing
 between slits *across* the panel face, so one slit of height $h$ serves each
 period and the front face is referred to the cell area $S_0 = d\,a$. The
@@ -202,7 +202,7 @@ Jiménez et al. 2016), and $M_{\Delta l}$ the radiation correction of the slit
 mouth. $\kappa_\mathrm{s}$, $\rho_\mathrm{s}$ and $S_\mathrm{s}$ are the visco-thermal effective bulk
 modulus, effective density and cross-section of the slit. $S_0 = d\,a$ is the
 area of one period of the panel face, so $Z_0 = \rho_0 c_0/S_0$ is the
-section 1 matching impedance *referred to that same area* — the panel is
+section 1 matching impedance *referred to that same area*: the panel is
 matched when the sound entering one period is exactly consumed by it. Note the
 symbol does double duty: in section 1 $Z_0$ is the medium impedance
 $\rho_0 c_0$, here it is that impedance divided by a cross-section.
@@ -212,7 +212,7 @@ the resonator's **cavity length** and solves for the **slit height**; the
 lattice step and the period stay as passed. For the 300 Hz design below the
 cavity goes from the 30 mm of the starting resonator to 44.7 mm and the slit
 lands at 0.978 mm, while the panel stays 30 mm deep because
-$L = N a = 1 \times 30$ mm — which is $\lambda/38$ at 300 Hz. A reader who
+$L = N a = 1 \times 30$ mm, which is $\lambda/38$ at 300 Hz. A reader who
 wants a deeper panel adds resonators, not cavity.
 
 `critical_coupling_design` inverts the model: given a target frequency and
@@ -360,7 +360,7 @@ the height the loss balance breaks and the reflection rebuilds it.
 Every snippet and figure above is at normal incidence, and the matching
 condition carries a $\cos\theta$: $\mathrm{Re}(Z)\cos\theta = Z_0$. The
 structure is locally reacting, so the internal chain is angle-independent and
-only the front-face air impedance moves with $\theta$ — a panel matched at
+only the front-face air impedance moves with $\theta$; a panel matched at
 normal incidence therefore becomes progressively mismatched as the angle
 grows, without the resonance moving in frequency. How much it costs is a
 question the model answers directly, and the answer is milder than the
@@ -380,10 +380,10 @@ for degrees in (0.0, 15.0, 30.0, 45.0, 60.0):
 
 The peak stays at 300 Hz and falls only to 0.89 at 60°, which is what the
 source paper means by *quasi-omnidirectional* absorption. Two design options
-follow. Tune at the angle the panel will mostly see —
-`critical_coupling_design` takes the same `angle_rad` argument — when the
-installation has a dominant direction; or accept the normal-incidence design,
-which is the more tolerant choice across angle. Either way, expect a
+follow. Tune at the angle the panel will mostly see (`critical_coupling_design`
+takes the same `angle_rad` argument) when the installation has a dominant
+direction; or accept the normal-incidence design, which is the more tolerant
+choice across angle. Either way, expect a
 reverberation-room measurement of such a panel to come out below the
 normal-incidence $\alpha = 1$, since the diffuse field weights exactly the
 oblique angles where the match is worst.
@@ -462,8 +462,8 @@ print(round(float(c_ratio.min()), 3), round(float(f_sweep[c_ratio.argmin()])))  
 The wavenumber the result returns is not a fitted number: it is the product of
 two visco-thermal models the library also exposes on their own. The empty slit
 already has a complex effective density and bulk modulus, set by the viscous
-and thermal boundary layers against its walls — which is why a sub-millimetre
-slit is lossy at all — and each resonator adds a shunt impedance in parallel
+and thermal boundary layers against its walls, which is why a sub-millimetre
+slit is lossy at all, and each resonator adds a shunt impedance in parallel
 with it.
 
 ```python
@@ -520,7 +520,7 @@ principle hiding inside the classical resonant absorbers of the
 
 The price of resonance is bandwidth, and it is worth a number rather than an
 adjective. The 300 Hz design keeps $\alpha \geq 0.8$ from 282 Hz to 320 Hz and
-$\alpha \geq 0.5$ from 266 Hz to 341 Hz — a third of an octave, against a
+$\alpha \geq 0.5$ from 266 Hz to 341 Hz, a third of an octave, against a
 50 mm porous blanket that gives about 0.68 at 500 Hz and keeps working over
 decades above it. A metamaterial absorber is therefore a tool for a *known*
 tonal or modal problem, not a general treatment: it buys depth with bandwidth.
@@ -585,7 +585,7 @@ relative to the structure. The 50 mm period here does not fit a 29 mm tube at
 all and fits a 100 mm circular tube only as two whole periods across one
 diameter, which is not a symmetric cut. The clean route is a **square or
 rectangular tube whose side is an integer number of periods**, with the rigid
-tube walls acting as the symmetry planes of the infinite array — and then the
+tube walls acting as the symmetry planes of the infinite array, and then the
 plane-wave ceiling has to be recomputed for that geometry with
 `plane_wave_frequency_range(..., shape="rectangular")` on the maximum side
 length, not on a nominal diameter.
@@ -601,7 +601,7 @@ describes.
 for a duct, the honest verification is a 10–12 m² specimen in a reverberation
 room to [ISO 354](/phonometry/materials/absorbers/absorption-measurement/), and the
 result will be the random-incidence coefficient, not the $\alpha = 1$ the
-normal-incidence design promises — for the reason set out under off-normal
+normal-incidence design promises, for the reason set out under off-normal
 incidence above.
 
 ## What this guide covers

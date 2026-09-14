@@ -270,10 +270,10 @@ and F.
 **Not covered.** The work analysis of Clause 7 and the microphone placement of
 Clauses 12.3 and 12.4 are procedures, not calculations: they stay with the
 surveyor, and Table B.1 is reproduced as guidance with the caller choosing the
-strategy — nothing here applies it. Hearing-protector attenuation (the
-**ISO 4869** series) is not applied, so the $L_\mathrm{EX,8h}$ computed here, and the
-limit-value comparison the fiche prints on it, is the **unprotected** exposure
-— which is also what the **ISO 1999** hearing-loss model expects. Annex C
+strategy: nothing here applies it. Hearing-protector attenuation (the
+**ISO 4869** series) is not applied, so the $L_\mathrm{EX,8h}$ computed here (and the
+limit-value comparison the fiche prints on it) is the **unprotected** exposure,
+which is also what the **ISO 1999** hearing-loss model expects. Annex C
 offers no uncertainty model for $L_{p,\mathrm{Cpeak}}$ (Table C.5, Note 1), which is why
 the peak is reported without one rather than with a zero one.
 

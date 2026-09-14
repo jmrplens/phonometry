@@ -86,7 +86,7 @@ _STRINGS: dict[str, str] = {
     "Spectral density [dB re 1/Hz]": "Densidad espectral [dB re 1/Hz]",
     "Power spectrum [dB]": "Espectro de potencia [dB]",
     r"{pct} % confidence ($\chi^2$, $n_\mathrm{{d}}$ = {nd})": r"{pct} % de confianza ($\chi^2$, $n_\mathrm{{d}}$ = {nd})",
-    r"Welch spectral density — $\varepsilon_\mathrm{{r}}$ = {er} %": r"Densidad espectral de Welch — $\varepsilon_\mathrm{{r}}$ = {er} %",
+    r"Welch spectral density: $\varepsilon_\mathrm{{r}}$ = {er} %": r"Densidad espectral de Welch: $\varepsilon_\mathrm{{r}}$ = {er} %",
     "Cross-spectral density (Bendat & Piersol)": "Densidad espectral cruzada (Bendat y Piersol)",
     r"$\pm$ s.d.$[\hat{\theta}_{xy}]$ (Eq. 9.52)": r"$\pm$ d.e.$[\hat{\theta}_{xy}]$ (Ec. 9.52)",
     r"$\hat{G}_{yy}$ (output)": r"$\hat{G}_{yy}$ (salida)",
@@ -111,7 +111,7 @@ _STRINGS: dict[str, str] = {
     r"$\hat{R}_{xy}(\tau)$ (context)": r"$\hat{R}_{xy}(\tau)$ (contexto)",
     "95 % interval (Eq. 8.130)": "Intervalo 95 % (Ec. 8.130)",
     "Normalized correlation": "Correlación normalizada",
-    "Time-delay estimate — {method}": "Estimación del retardo temporal — {method}",
+    "Time-delay estimate: {method}": "Estimación del retardo temporal: {method}",
     "Reference IR": "RI de referencia",
     "Aligned IR (delay {n} samples)": "RI alineada (retardo {n} muestras)",
     "Impulse-response alignment (sub-sample)": "Alineación de la respuesta al impulso (submuestra)",
@@ -161,12 +161,12 @@ _STRINGS: dict[str, str] = {
     "Scalloping loss {sl} dB": "Pérdida de festoneado {sl} dB",
     "Window metrics (Harris 1978): {window}": "Métricas de la ventana (Harris 1978): {window}",
     r"{pct} % confidence ($\chi^2$, $\bar\nu$ = {nu})": r"{pct} % de confianza ($\chi^2$, $\bar\nu$ = {nu})",
-    "Thomson multitaper density — $K$ = {k} tapers, $NW$ = {nw}": "Densidad multitaper de Thomson — $K$ = {k} tapers, $NW$ = {nw}",
+    "Thomson multitaper density: $K$ = {k} tapers, $NW$ = {nw}": "Densidad multitaper de Thomson: $K$ = {k} tapers, $NW$ = {nw}",
     "Measured response $|H|$": "Respuesta medida $|H|$",
     r"Inverse filter $|H_{\mathrm{inv}}|$": r"Filtro inverso $|H_{\mathrm{inv}}|$",
     r"Equalized $|H \cdot H_{\mathrm{inv}}|$": r"Ecualizado $|H \cdot H_{\mathrm{inv}}|$",
     "Equalized band": "Banda ecualizada",
-    "Regularized inversion (Kirkeby) — flatness {flat} dB": "Inversión regularizada (Kirkeby) — planitud {flat} dB",
+    "Regularized inversion (Kirkeby): flatness {flat} dB": "Inversión regularizada (Kirkeby): planitud {flat} dB",
     "Time synchronous average (McFadden 1987)": "Promediado síncrono en el tiempo (McFadden 1987)",
     "Averaged periodic waveform ($N$ = {n})": "Forma de onda periódica promediada ($N$ = {n})",
     "Time [ms]": "Tiempo [ms]",
@@ -290,7 +290,7 @@ def plot_spectral_density(
         ),
         line_label="$\\hat{G}_{xx}(f)$",
         title=_t(
-            r"Welch spectral density — $\varepsilon_\mathrm{{r}}$ = {er} %",
+            r"Welch spectral density: $\varepsilon_\mathrm{{r}}$ = {er} %",
             language,
             er=er,
         ),
@@ -339,7 +339,7 @@ def plot_multitaper_spectral_density(
         ),
         line_label="$\\hat{S}^{(mt)}(f)$",
         title=_t(
-            r"Thomson multitaper density — $K$ = {k} tapers, $NW$ = {nw}",
+            r"Thomson multitaper density: $K$ = {k} tapers, $NW$ = {nw}",
             language,
             k=result.n_tapers,
             nw=nw,
@@ -818,7 +818,7 @@ def plot_time_delay(
         if result.method == "direct"
         else _t("Normalized correlation", language)
     )
-    ax.set_title(_t("Time-delay estimate — {method}", language, method=result.method))
+    ax.set_title(_t("Time-delay estimate: {method}", language, method=result.method))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
@@ -1078,7 +1078,7 @@ def plot_resampled_signal(
     applied (evaluated from :attr:`filter_taps` at the intermediate rate
     ``original_fs·up``), with the passband edge, the stopband edge at the
     smaller Nyquist frequency (where aliases fold), the designed stopband
-    attenuation line and the rejected band shaded — the delivered
+    attenuation line and the rejected band shaded: the delivered
     anti-alias spec, read off the delivered filter.
 
     :param result: A
@@ -1533,7 +1533,7 @@ def plot_inverse_filter(
     ax.set_ylim(bottom=-60.0, top=20.0)
     flat = format_number(result.flatness_db, language, decimals=2)
     ax.set_title(
-        _t("Regularized inversion (Kirkeby) — flatness {flat} dB", language, flat=flat)
+        _t("Regularized inversion (Kirkeby): flatness {flat} dB", language, flat=flat)
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")

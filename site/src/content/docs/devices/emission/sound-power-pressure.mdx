@@ -127,15 +127,15 @@ Worked on a 1,4 × 0,9 × 1,1 m floor-standing machine:
 $d_0 = \sqrt{0.7^2 + 0.45^2 + 1.1^2} = 1.38$ m, so a hemisphere needs
 $r \ge 2.8$ m and $S = 2\pi r^2 = 49.3$ m². The same machine boxed at $d = 1$ m
 gives $a = 1.7$ m, $b = 1.45$ m, $c = 2.1$ m and
-$S = 4(2.47 + 3.05 + 3.57) = 36.3$ m² — a quarter less surface, and a surface
+$S = 4(2.47 + 3.05 + 3.57) = 36.3$ m² (a quarter less surface), and a surface
 that stays inside a normal test hall. That is the usual reason a large or
 elongated source is boxed rather than domed, and clause 7.2.3 makes it explicit:
 where the required radius grows so large that the clause 4 environment
 requirements no longer hold, a hemisphere should not be used at all.
 
 Read backwards, this also bounds the examples on this page. The `radius=1.5`
-below is legitimate for a source of $d_0 \le 0.75$ m — a benchtop appliance or a
-small pump — and not for the 1,4 m machine just worked; the `radius=4.0` of the
+below is legitimate for a source of $d_0 \le 0.75$ m (a benchtop appliance or a
+small pump), and not for the 1,4 m machine just worked; the `radius=4.0` of the
 report example in section 3 covers $d_0$ up to 2 m.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces.svg" alt="Measurement surfaces of ISO 3744: a hemisphere of radius r enveloping a compact source on a reflecting plane, with the ten Annex B microphone positions marked, and a right parallelepiped (box) at measurement distance d around a large source" width="88%" />
@@ -160,8 +160,8 @@ reference box (clause 7.2.2).
 `levels_positions` is not any array of decibels: it is the per-position,
 per-band **time-averaged** level with the source running in its declared
 operating mode, taken through a chain the standard specifies. The whole
-instrumentation system — microphones, cables and the windscreen if one is
-fitted — shall meet IEC 61672-1 class 1, and the filters IEC 61260 class 1
+instrumentation system (microphones, cables and the windscreen if one is
+fitted) shall meet IEC 61672-1 class 1, and the filters IEC 61260 class 1
 (clause 5.1). A class 1 IEC 60942 sound calibrator is applied to each microphone
 **before and after** each series to check the whole measuring chain, and, with
 no adjustment in between, the two readings shall differ by no more than
@@ -173,7 +173,7 @@ mechanics of that check are on
 
 Each microphone is oriented with its reference direction normal to the
 measurement surface, and at a corner of a box surface pointing at the origin $O$
-(clause 7.2.2) — which is why a free-field capsule and a diffuse-field capsule
+(clause 7.2.2), which is why a free-field capsule and a diffuse-field capsule
 are aimed differently on the same stand.
 
 Each level is time-averaged over a typical period of operation: the interval
@@ -181,7 +181,7 @@ Each level is time-averaged over a typical period of operation: the interval
 in the test report (clause 8.2.1). A traversing microphone integrates over an
 integer number of full traverses, and at least two. The background reading is
 taken **immediately before or immediately after** the source reading, at the
-same positions and over the same interval — so `background_levels` is a
+same positions and over the same interval; so `background_levels` is a
 same-day, same-array `(NM, NB)` measurement, not a spectrum copied from another
 session, and pairing mismatched readings is the most common way a $K_1$ ends up
 wrong.
@@ -351,7 +351,7 @@ the determination is a determination "for the meteorological conditions at the
 time and place of the test" (clause 8.2.5). At altitudes above 500 m or
 temperatures below 10 °C that becomes a bias, and clause 8.2.5 then requires the
 result to be carried to reference conditions per **Annex G, which is
-normative** — the same kind of term the ISO 3741 and ISO 3745 sections write out
+normative**: the same kind of term the ISO 3741 and ISO 3745 sections write out
 explicitly as $C_1$ and $C_2$. The size of it: clause H.4.2.7 states that below
 500 m no meteorological or radiation-impedance correction is required, that at
 120 m and 23 °C the correction is zero, and that at 500 m it reaches 0.6 dB.
@@ -382,7 +382,7 @@ it to $L_W$ exactly as Eq. G.3 adds it to $L_J$.
 | `room` | `RoomEnvironment` or None | — | default `None` (free field) | The room data behind $K_2$; its fields are the three routes to $A$ below |
 | `room.absorption_area` | float or 1D array | m² | > 0 | $A$ for $K_2$ (direct); per-band array → per-band $K_2$ |
 | `room.reverberation_time`, `room.volume` | float/array, float | s, m³ | > 0 | $A = 0.16\,V/T$ for $K_2$; per-band $T$ → per-band $K_2$ |
-| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Eq. A.7); per-band $\alpha$ → per-band $K_2$ |
+| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | -, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Eq. A.7); per-band $\alpha$ → per-band $K_2$ |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | default `0.0` | $\sigma_\text{omc}$, operating/mounting instability, folded into $U$ |
 
@@ -425,7 +425,7 @@ plt.show()
 Ten is the count for **one** reflecting plane. Against two planes the array is
 the five key positions 2, 3, 6, 7 and 9 of Table B.2; in a corner, against three
 planes, it is the three positions 1, 2 and 3 of Table B.3 (clause 8.1.1). The
-survey method uses coarser arrays again — four positions over one plane.
+survey method uses coarser arrays again: four positions over one plane.
 
 Those counts are a starting point, not a result. Clause 8.1.1 requires
 **additional** positions if any one of three conditions holds:
@@ -434,15 +434,15 @@ Those counts are a starting point, not a result. Clause 8.1.1 requires
   10 dB over one reflecting plane, 5 dB over two, or 3 dB over three;
 - **b)** the apparent A-weighted directivity index exceeds 5 dB in any
   direction;
-- **c)** a large source radiates from only a small part of itself — the openings
+- **c)** a large source radiates from only a small part of itself: the openings
   of an otherwise enclosed machine being the standard's own example.
 
 The two have different answers. Condition a) is met by adding positions 11 to 20
 of the same table (or, equivalently, by repeating the key array with the source
 rotated −60° for Table B.1 or 180° for Table B.2): the surface is still sampled
 evenly, so the plain energy average still applies. Conditions b) and c) are met
-by a **localized investigation** — extra positions concentrated around the
-maximum, numerically equal to the level range found — and those positions carry
+by a **localized investigation**, extra positions concentrated around the
+maximum numerically equal to the level range found, and those positions carry
 *unequal* segment areas, so the mean must then be the area-weighted one of
 clause 8.2.2.2 and not the equal-area average `sound_power_pressure` computes.
 Note 3 adds a priority rule that saves a lot of wasted work: when the background
@@ -483,7 +483,7 @@ explicit meteorological correction.
 
 The left-hand panel of the clip below is what that room is for. With the
 boundaries absorbing, a microphone sees only what the source sends its way, so
-the level falls with distance and the array has to sample a whole surface —
+the level falls with distance and the array has to sample a whole surface,
 which is why the only geometry the method needs, once the room is qualified, is
 the surface term $10\log_{10}(S/S_0)$. The right-hand panel is the
 reverberation-room alternative of
@@ -512,8 +512,8 @@ the measurement radius. The microphone positions are the standardized
 unit-vector arrays of Tables D.1 (sphere), E.1 (hemisphere) and E.2 (hemisphere,
 broadband).
 
-There is no separate $K_1$ term in that formula because $\overline{L_p}$ —
-unprimed, unlike section 1's — is the surface average of the levels **after**
+There is no separate $K_1$ term in that formula because $\overline{L_p}$
+(unprimed, unlike section 1's) is the surface average of the levels **after**
 each one has been background-corrected on its own,
 
 $$
@@ -530,8 +530,8 @@ corrected one, which is the $\overline{L_p}$ of the formula above.
 $d_0$ the distance from the acoustic centre to the furthest point of the source
 (in a hemi-anechoic room, $r \ge 2 d_0$ or $r \ge 3 h_0$, whichever is larger,
 $h_0$ being the height of the acoustic centre above the floor), $r \ge \lambda/4$
-at the lowest frequency of interest, and $r \ge 1$ m — 0.5 m only for a small,
-low-noise source over a limited band — with the whole surface inside the region
+at the lowest frequency of interest, and $r \ge 1$ m (0.5 m only for a small,
+low-noise source over a limited band) with the whole surface inside the region
 qualified per Annex A or B. Worked: a 0.6 × 0.5 × 0.7 m benchtop source has
 $d_0 = \sqrt{0.3^2 + 0.25^2 + 0.7^2} = 0.80$ m, so $r \ge 1.6$ m; at a lowest
 band of 100 Hz, $\lambda/4 = 0.86$ m does not bind and neither does the 1 m
@@ -540,7 +540,7 @@ about 0.5 m of characteristic dimension.
 
 **The array is not free either.** Positions 1 to 20 are used first, and 21 to 40
 are added only when the difference between the highest and lowest level in any
-band of interest is not less than half the number of positions — a check on data
+band of interest is not less than half the number of positions; a check on data
 the reader already has, `levels.max(0) - levels.min(0) >= 0.5 * levels.shape[0]`.
 If 40 positions still fail it, a localized investigation is required and the
 positions then carry unequal areas, which is what `areas=` is for.
@@ -619,11 +619,11 @@ fiche prints them on its measurement-basis strip.
 The margins and the intervals behind those numbers are stricter than section 1's.
 The background, averaged over all positions, shall be at least **6 dB** below the
 source level in every band and at least **10 dB** below from 250 Hz to 5 kHz
-(clause 5.2.1.1) — a band that cannot reach it may instead be excluded from the
+(clause 5.2.1.1), a band that cannot reach it may instead be excluded from the
 range of interest if its corrected A-weighted band power is at least 15 dB below
 the highest (clause 5.2.1.2). Where the margin falls short anyway, clause 9.4.2
 freezes $K_{1i}$ at the value the criterion produces, 1.26 dB for the bands at
-and below 200 Hz and at and above 6,3 kHz, 0,46 dB from 250 Hz to 5 kHz — and
+and below 200 Hz and at and above 6,3 kHz, 0,46 dB from 250 Hz to 5 kHz, and
 then *requires* the test report, and the tables and graphs in it, to state that
 those bands are upper bounds. `precision_background_correction` applies exactly
 that rule; declaring the omission is the reader's job.
@@ -634,7 +634,7 @@ interval stated in the report, and at least two full traverses when a traversing
 microphone is used. The background is measured immediately before or immediately
 after the source, at the same positions and over the same interval. Forty
 positions at 30 s in the low bands is why a grade-1 run takes so much longer than
-the grade-2 one of section 1 — the cost of the grade is mostly time.
+the grade-2 one of section 1: the cost of the grade is mostly time.
 
 ### `sound_power_anechoic()` parameters
 

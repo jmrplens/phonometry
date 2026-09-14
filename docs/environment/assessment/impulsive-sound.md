@@ -321,10 +321,10 @@ adjustment to $L_\mathrm{Aeq}$ (clause 8, Formula 2) and the rating level (claus
 Note 1), with the onset defined in clauses 4.5-4.7.
 
 **Not covered.** Only the graduated $K_\mathrm{I}$ of Formula 2 is implemented. NT ACOU
-112's Note 4 to clause 7 records an older Nordic guideline — a flat 5 dB
+112's Note 4 to clause 7 records an older Nordic guideline: a flat 5 dB
 adjustment from subjective judgement, recommended when $K_\mathrm{I} > 3$ for noise
 characteristic of working operations and offered where the graduated method
-cannot be applied — and that fallback is not implemented. **ISO 1996-1**
+cannot be applied. That fallback is not implemented. **ISO 1996-1**
 Table A.1's category adjustments (5 dB regular, 12 dB highly impulsive) appear
 here only as the assessor's-judgement baseline this measurement replaces, not
 as a function of their own.

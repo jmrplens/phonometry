@@ -45,7 +45,7 @@ is what the whole chain looks like once a state has legislated it: the
 corrected level LKeq with its tonal, low-frequency and impulsive corrections
 Kt, Kf and Ki, evaluation periods split into noise phases, and the limit tables
 an activity is judged against by land use. Read it as the worked example of a
-national layer even if you do not work in Spain — it shows which parts of
+national layer even if you do not work in Spain: it shows which parts of
 ISO 1996 a regulation typically restates, and which it replaces. Kf, the
 correction driven by the difference between the C-weighted and the A-weighted
 level, has no counterpart in ISO 1996 at all.
@@ -85,7 +85,7 @@ Pages elsewhere on the site that this section leans on:
 The library starts where the sound level meter stops. ISO 1996-2 fixes the
 receiver positions and the façade corrections that turn a raw measurement into
 the level these functions expect, and those position and correction procedures
-are **not implemented** — only the arithmetic that follows once you have
+are **not implemented**: only the arithmetic that follows once you have
 applied them. The same is true nationally: the Annex IV measurement procedures
 of RD 1367/2007 (microphone positions, series duration, number of
 measurements) are not implemented either, and the acoustic zoning, noise maps
@@ -197,7 +197,7 @@ counterpart in the library.
 | `ldn(lday, lnight, hours=(15, 9))` | | +10 dB night (3.6.5) |
 | `composite_rating_level(periods)` | iterable of `(level_db, hours, adjustment_db)`; hours positive, finite and summing to 24 | General Formulae (5)-(6); adjustments per Table A.1 |
 
-Where you put the microphone changes the number: ISO 1996-2 fixes the receiver positions and their façade corrections. The diagram is measurement context, not something the library computes — those position and correction procedures are not implemented, so apply the corrections to your levels yourself before any function on this page consumes them:
+Where you put the microphone changes the number: ISO 1996-2 fixes the receiver positions and their façade corrections. The diagram is measurement context, not something the library computes; those position and correction procedures are not implemented, so apply the corrections to your levels yourself before any function on this page consumes them:
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_env_measurement.svg" alt="Environmental noise measurement positions per ISO 1996-2: free field, 2 m from the facade and flush-mounted, with their corrections" width="92%"></picture>
 
@@ -653,10 +653,10 @@ adjustment to $L_\mathrm{Aeq}$ (clause 8, Formula 2) and the rating level (claus
 Note 1), with the onset defined in clauses 4.5-4.7.
 
 **Not covered.** Only the graduated $K_\mathrm{I}$ of Formula 2 is implemented. NT ACOU
-112's Note 4 to clause 7 records an older Nordic guideline — a flat 5 dB
+112's Note 4 to clause 7 records an older Nordic guideline: a flat 5 dB
 adjustment from subjective judgement, recommended when $K_\mathrm{I} > 3$ for noise
 characteristic of working operations and offered where the graduated method
-cannot be applied — and that fallback is not implemented. **ISO 1996-1**
+cannot be applied. That fallback is not implemented. **ISO 1996-1**
 Table A.1's category adjustments (5 dB regular, 12 dB highly impulsive) appear
 here only as the assessor's-judgement baseline this measurement replaces, not
 as a function of their own.

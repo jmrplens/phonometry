@@ -78,8 +78,8 @@ can be requested with `frequencies=`.
 **18 to 80 years** over the audiometric frequencies 125 Hz to 8000 Hz
 (clause 4.1), and adds a caution of its own: from 3000 Hz to 8000 Hz the values
 above 70 years are informative only, because at those frequencies the threshold
-of many of the oldest subjects could not be measured at all — it ran off the
-audiometer's scale — so the fitted spread there rests on a truncated sample.
+of many of the oldest subjects could not be measured at all (it ran off the
+audiometer's scale), so the fitted spread there rests on a truncated sample.
 The power law is anchored at 18 years, where the median deviation is zero by
 construction, and an age below that is refused outright, since the quantity is
 defined *as* a deviation from 18. Nothing stops it at the top, though:
@@ -224,8 +224,8 @@ print(hearing.reference_threshold("diffuse-field")[4])   # 0.8 dB at 1000 Hz
 
 ### What the reference zero is referenced to
 
-These values calibrate **sound-field** audiometry — the loudspeaker-based test
-methods of ISO 8253-2 — and not earphone audiometry. They hold under the four
+These values calibrate **sound-field** audiometry (the loudspeaker-based test
+methods of ISO 8253-2), not earphone audiometry. They hold under the four
 conditions ISO 389-7 clause 1 lists, and only those:
 
 - **The field.** With the listener absent, the field is a free progressive
@@ -235,8 +235,8 @@ conditions ISO 389-7 clause 1 lists, and only those:
   white or pink noise in the diffuse field. Up to 8 kHz either column also
   applies to any other noise band narrower than the critical band.
 - **The measurement point.** The sound pressure level is measured *with the
-  listener absent*, at the point the centre of the listener's head will occupy
-  — not at the ear, and not with the subject in the chair.
+  listener absent*, at the point the centre of the listener's head will occupy,
+  not at the ear, and not with the subject in the chair.
 - **The ears.** Listening is binaural.
 
 The values also carry a *procedure*. Definition 3.1 notes that the whole
@@ -282,10 +282,10 @@ same ear needs 1.6 dB less pressure in the free field, because head diffraction
 and the ear-canal resonance give it more gain there. Three things make that
 addition legitimate, and all three belong in the report. The ISO 7029 output is
 a *deviation* from the median 18-year-old, and it is a hearing threshold level
-in dB HL only insofar as the reference zero is that same median — ISO 7029
+in dB HL only insofar as the reference zero is that same median (ISO 7029
 clause 1 says exactly this, and its NOTE 2 warns that the two do not always
 coincide, because the reference zeros were established on subjects up to 25 or
-30 years old whose hearing is on average slightly worse. The two standards also
+30 years old whose hearing is on average slightly worse). The two standards also
 describe different listening conditions (ISO 7029 monaural through earphones,
 ISO 389-7 binaural in a sound field), so the sum estimates the field level that
 ear would need rather than reproducing a measurement. And the field is a
@@ -406,9 +406,9 @@ noise-induced shift into a real audiogram. That combination *is* implemented,
 by `htlan`, but it is documented in the [noise-induced hearing
 loss](/phonometry/perception/hearing/noise-induced-hearing-loss/) guide rather
 than here; this page stops at the age component. Of ISO 389-7:2005, this
-module returns only the eleven audiometric rows of Table 1. The other 27 — the
+module returns only the eleven audiometric rows of Table 1. The other 27 (the
 third octaves from 20 Hz to 100 Hz, the intermediate third octaves between the
-audiometric points, and the extended high frequencies from 9 kHz to 18 kHz —
+audiometric points, and the extended high frequencies from 9 kHz to 18 kHz)
 are not carried, and neither is Amendment 1:2016, so low-frequency and
 extended-high-frequency work has to read the table itself. The earphone
 reference zeros of ISO 389-2 (insert earphones) and ISO 389-8 (circumaural,

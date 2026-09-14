@@ -16,7 +16,7 @@ same default `high_accuracy` design: the analog prototype is fitted at the
 sample rate rather than transformed blind, so the bilinear frequency warping
 never reaches the response. For G that keeps its 0.25 Hz to 315 Hz range
 within 0.0001 dB whatever the input rate, which matters exactly where G is
-used — infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits close
+used: infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits close
 to Nyquist and the warping grows quadratically. `high_accuracy=False` gives
 the plain bilinear design instead, about a decibel low at 315 Hz at fs = 2000
 and exactly on the 0 dB reference at 10 Hz. Unlike before, the flag is
@@ -222,14 +222,14 @@ The `verify_weighting_class` verifier, described in section 6 of
 of this guide that have published tolerance tables. For `B` it uses
 ANSI S1.4-1983 (Table IV design goals, Table V
 limits) and the "class" verdicts read as the standard's instrument **Types**
-1 and 2 — or, with `edition="1979"`, the IEC 651:1979 Table V limits, whose
+1 and 2, or with `edition="1979"`, the IEC 651:1979 Table V limits, whose
 footnote makes one mask govern every weighting characteristic and which add
 the laboratory-grade Type 0 (the two Type 0 columns are *not* the same mask:
 ANSI is two-sided and stricter at 10/12.5/16 Hz where IEC 651 is upper-only).
 For `AU` it uses IEC 61012:1990 Table 1 (nominal A + nominal U with
 the separate-unit tolerances, zero at the 1 kHz reference); IEC 61012
 publishes a single tolerance set, so both margin slots agree and the verdict
-is simply complies (1) or not (`None`) — note that checking the rows above
+is simply complies (1) or not (`None`); note that checking the rows above
 20 kHz needs `fs` ≥ 96 kHz (below that they are dropped and the verdict is
 `range_limited`). `G` and `D` are rejected: ISO 7196 defines one ±1 dB
 tolerance with no class structure, and the withdrawn IEC 537 left no

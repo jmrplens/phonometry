@@ -468,7 +468,7 @@ Both curves are read one angle at a time, and a seabed is never struck at one
 angle. In the clip a 100 Hz burst 36 m above the bed sends an expanding front
 whose contact with the seabed starts directly beneath the source at
 $\psi = 90°$ and runs outward, sweeping the grazing angle down through 24.62°
-and on to a few degrees — the whole $|R|(\psi)$ curve traversed once, in
+and on to a few degrees, the whole $|R|(\psi)$ curve traversed once, in
 order. The scene is run twice, changing only the sediment. Over the sand the
 beam entering the bottom switches off at the critical ray, leaving a bright
 evanescent skin that carries nothing away; over a slow mud, which has no

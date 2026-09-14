@@ -65,9 +65,9 @@ Llama a `psychoacoustics.loudness_zwicker(x, fs, calibration_factor=sens)`
 sobre una grabación calibrada. Si solo tienes el espectro, usa
 `loudness_zwicker_from_spectrum(levels_28)` con los 28 niveles de banda de
 tercio de octava de 25 Hz a 12,5 kHz. Cualquiera de los dos resultados lleva
-`loudness_level` en fonios y `loudness` en sonios — el $N$ estacionario único
+`loudness_level` en fonios y `loudness` en sonios (el $N$ estacionario único
 con `stationary=True`, y si no el máximo $N_\text{max}$ de la traza de
-sonoridad — más los percentiles de informe `n5` y `n10` cuando el análisis es
+sonoridad), más los percentiles de informe `n5` y `n10` cuando el análisis es
 variable en el tiempo.
 
 ## Sonoridad en sonios (ISO 532-1, Zwicker)
@@ -132,8 +132,8 @@ de la página siguiente.
 donde estaría el centro de la cabeza de quien escucha, con esa persona ausente;
 eso es lo que hace que la sonoridad calculada sea la de una presentación
 *diótica*, el mismo sonido en ambos oídos. La geometría dibujada abajo es la
-posición de observador de ECMA-74 — 1,00 m desde la caja de referencia, 1,50 m
-sobre el plano reflectante — porque ISO 532-1 no prescribe distancia propia y
+posición de observador de ECMA-74 (1,00 m desde la caja de referencia, 1,50 m
+sobre el plano reflectante) porque ISO 532-1 no prescribe distancia propia y
 la toma de la norma de emisión que corresponda.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_loudness_capture.svg" alt="Tres disposiciones de captación para una medición de sonoridad ISO 532-1: el panel A, una cámara semianecoica con el equipo en ensayo en su caja de referencia y un micrófono 1,00 m por delante a 1,50 m de altura, donde estaría la cabeza de la persona ausente; el panel B, el mismo equipo en una sala reverberante con el campo reflejado llegando al micrófono en la posición de escucha; el panel C, un simulador de cabeza y torso cuyos dos canales pasan por una ecualización de campo libre, de campo difuso o ID antes de dos cadenas de Zwicker independientes" width="92%" />
@@ -143,13 +143,13 @@ $N_\mathrm{D}$; el tipo de campo forma parte del resultado, no es una preferenci
 
 **Qué campo, y por qué hay que declararlo.** `field="free"` aplica la función
 de transferencia de campo libre frontal de la cabeza y el oído externo y encaja
-con un campo directo — cámara anecoica, cerca de una fuente, al aire libre;
+con un campo directo: cámara anecoica, cerca de una fuente, al aire libre;
 `field="diffuse"` aplica la de incidencia aleatoria y encaja con una sala
 reverberante o con una medición in situ. La corrección es una forma espectral
 fija que se aplica a los niveles de banda antes de la etapa de bandas críticas,
 máxima por encima de 1 kHz, donde más difieren la difracción en la cabeza y la
 resonancia del canal auditivo: sobre un espectro plano de 60 dB el resultado en
-campo difuso es de 33,9 sonios frente a 31,9 sonios en campo libre, un 6 % —
+campo difuso es de 33,9 sonios frente a 31,9 sonios en campo libre (un 6 %),
 poco al lado de un error de calibración, bastante cuando se están comparando
 dos productos. El apartado 4 exige especificar el tipo de campo y el apartado 7
 lo mete en el informe, así que «N = 13,1 sonios» está incompleto: escribe $N_\mathrm{F}$
@@ -157,16 +157,16 @@ o $N_\mathrm{D}$, o pon «campo libre» al lado del número.
 
 **Grabaciones con cabeza artificial.** El Anexo D gobierna la vía del simulador
 de cabeza y torso: la grabación debe llevar ya una ecualización acorde con el
-entorno de medida — de campo libre solo para una única fuente frontal a más de
-1,5 m, de campo difuso en entornos reflectantes, ecualización ID en vehículos —
+entorno de medida (de campo libre solo para una única fuente frontal a más de
+1,5 m, de campo difuso en entornos reflectantes, ecualización ID en vehículos)
 y cada canal de oído se analiza por separado, informando de los dos y citando
 el máximo o la media como valor único.
 
 **Qué tiene que contener el informe** (apartado 7): el sonido evaluado, una
 referencia a ISO 532-1, qué método se usó (el estacionario del apartado 5 o el
 variable en el tiempo del apartado 6), el campo sonoro F o D, el tipo de datos
-de entrada (niveles de banda o señal temporal), la sonoridad en sonios y — en
-un análisis variable en el tiempo — la función temporal de sonoridad, con
+de entrada (niveles de banda o señal temporal), la sonoridad en sonios y (en
+un análisis variable en el tiempo) la función temporal de sonoridad, con
 $N_\text{max}$ y $N_5$ cuando se requieran. `ZwickerLoudness.report()` imprime
 la mitad acústica de esa lista; el resto llega por `ReportMetadata`.
 

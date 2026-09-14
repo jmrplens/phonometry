@@ -142,8 +142,8 @@ for conformity and never a certificate of it.
 **No severity verdict is issued for a machine.** The machinery pages predict
 *where* a line would be, never whether it is present or whether the machine is
 in trouble: the amplitude criteria that turn a present line into an assessment
-— crest-factor and kurtosis trending, and the velocity severity bands of ISO
-10816 / ISO 20816 — are outside the library, as are rotor balancing (ISO 21940)
+(crest-factor and kurtosis trending, and the velocity severity bands of ISO
+10816 / ISO 20816) are outside the library, as are rotor balancing (ISO 21940)
 and order tracking.
 
 **Nor is one issued for what people feel in a building.** The 2003 edition of
@@ -158,9 +158,9 @@ finding of damage.
 
 Two structural predictions are idealisations rather than measurements. The
 junction transmission coefficients are a closed-form result for a rigid,
-simply supported junction — the *measured* vibration reduction index of ISO
+simply supported junction (the *measured* vibration reduction index of ISO
 10848 is [Laboratory flanking
-transmission](../buildings/insulation/flanking-lab.md) — and the FRF
+transmission](../buildings/insulation/flanking-lab.md)) and the FRF
 page returns element-wise free reciprocals, correct for a driving-point or
 single-path use but not a full FRF matrix, with no impact-hammer processing
 (ISO 7626-5) and no blocked matrix quantities. On the isolator page, parts 4

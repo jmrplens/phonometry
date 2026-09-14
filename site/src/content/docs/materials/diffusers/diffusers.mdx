@@ -134,13 +134,13 @@ snippets further down cannot repair a run that broke them.
 - **Bands and scale.** One-third-octave bands from 100 Hz to 5000 Hz at full
   scale (Clause 5). The method is routinely run on 1:$N$ physical scale
   models, where every centre frequency multiplies by $N$ and every length in
-  this list divides by it — that is how surfaces too large for any
+  this list divides by it: that is how surfaces too large for any
   reverberation room are graded at all.
 - **Room.** Volume $V \ge 200\,N^{-3}$ m³ (Clause 6.1.2), and an empty-room
   equivalent absorption area $A_1 \le 0.30\,V^{2/3}$ (Clause 6.1.3), whose
   rule-of-thumb form is $A_1/S \le 1$: too absorbent a room leaves the four
-  decays too short to differ measurably. Diffusing elements must be **fixed** —
-  rotating vanes are explicitly banned, unlike ISO 354 — the room and its
+  decays too short to differ measurably. Diffusing elements must be **fixed**
+  (rotating vanes are explicitly banned, unlike ISO 354), the room and its
   contents invariant, and any air-circulation system switched off
   (Clause 6.1.1).
 - **Turntable and base plate.** A circular rigid base plate symmetrical about
@@ -149,7 +149,7 @@ snippets further down cannot repair a run that broke them.
   (Clause 6.2).
 - **Specimen.** Circular, diameter at least $N^{-1} \times 3.0$ m; or square
   with an edge of at least $N^{-1} \times 2.65$ m, flush-mounted on a base
-  plate of at least $N^{-1} \times 3.75$ m diameter (Clause 6.3.1) — which is
+  plate of at least $N^{-1} \times 3.75$ m diameter (Clause 6.3.1): this is
   where the 10 m² of the snippet below comes from. The structural depth must
   stay under $h \le d/16$ of the turntable diameter $d$ (Clause 6.3.2), the
   perimeter must be sealed but **not** boxed in by a rigid border of fixed
@@ -160,8 +160,8 @@ snippets further down cannot repair a run that broke them.
 - **Excitation and averaging.** A deterministic signal, evaluated by the
   integrated impulse-response method (Clause 7.1): periodic pseudo-random
   noise or a sweep per ISO 18233. Either radiate continuously for one whole
-  revolution of the turntable — with a 5 s period and one revolution per
-  minute, 12 signal periods — or take $n$ measurements with the sample stepped
+  revolution of the turntable (with a 5 s period and one revolution per
+  minute, 12 signal periods) or take $n$ measurements with the sample stepped
   by $\Delta\varphi = 360°/n$, with $60 \le n \le 120$ and $n = 72$ (5° steps)
   preferred, the excitation identical each time and the averaging phase-locked
   (Clause 7.3).
@@ -171,7 +171,7 @@ snippets further down cannot repair a run that broke them.
 - **Evaluation.** Backward integration restricted to the linear slope, the
   integration limit at $-30$ dB and the reverberation time read between $-5$
   and $-20$ dB (Clause 7.5). $T_1$, $T_2$ and $T_3$ decay linearly, but
-  **$T_4$ is a superposition of two decays and only the first is evaluated** —
+  **$T_4$ is a superposition of two decays and only the first is evaluated**;
   reading the late slope of $T_4$ is the single commonest way to invent
   scattering that is not there.
 - **Settling and climate.** Do not start until $15/N$ minutes after leaving
@@ -257,7 +257,7 @@ print(round(float(materials.scattering_coefficient(alpha_spec, alpha_s)), 4))
 ```
 
 Nine points of humidity across the four situations move the 5 kHz scattering
-coefficient by 0.012 — an eighth of the value, in the direction that
+coefficient by 0.012: an eighth of the value, in the direction that
 *over*-reports it. That is the whole reason Clause 6.1.1 wants the room
 untouched and Clause 7.3 wants the run finished quickly; the correction
 repairs a drift that was measured, not one that was guessed at afterwards.
@@ -341,7 +341,7 @@ Two checks decide that, and both are already in the library.
 $T_1$ and $T_3$ are equal: the empty base plate is the same absorber whether
 it turns or not. A base plate that is not quite symmetrical about the axis
 shortens $T_3$, and Eq. (6) reads that asymmetry back out as a spurious
-scattering coefficient of the arrangement itself — the same arithmetic as
+scattering coefficient of the arrangement itself: the same arithmetic as
 Eq. (5), applied to the pair that carries no specimen:
 
 $$
@@ -448,7 +448,7 @@ source-receiver pair (Clause 7.3):
 
 1. Measure $h_1(t)$, the impulse response with the test surface in place.
 2. Measure $h_2(t)$, the same thing with the test surface removed. Nothing
-   else may move between the two takes — the subtraction below is only as good
+   else may move between the two takes; the subtraction below is only as good
    as that.
 3. Measure $h_3(t)$, again without the test surface, with the source centred
    on the reference point and facing the receiver. This one is needed once the
@@ -468,7 +468,7 @@ $$
 
 A **rectangular** window is then placed over $h_4$: unity where the sample's
 reflections are, zero elsewhere (Clause 7.4.3). Its edges come from the
-shortest and the longest sample-to-receiver path — the shortest from plain
+shortest and the longest sample-to-receiver path: the shortest from plain
 geometry, the longest from paths that are not first-order reflections, which
 is why the standard recommends looking at the impulse response rather than
 computing the window blind. Two traps sit here: the deconvolution moves the
@@ -574,7 +574,7 @@ A_i = \sin\frac{\Delta\theta}{2}\ (\theta = 90°).
 $$
 
 Every angle in those three forms is handled in **radians**, including the
-$\Delta\phi$ under the $4\pi$ of the zenith term — that is what keeps the
+$\Delta\phi$ under the $4\pi$ of the zenith term; that is what keeps the
 zenith dimensionally consistent with the other two. On the standard
 5° × 5° hemisphere the areas come out 0.0685 at the zenith, 0.0076 at
 $\theta = 5°$ (the smallest, so $A_\text{min}$) and 0.0436 at the pole, so the
@@ -594,8 +594,8 @@ is the arrangement that satisfies that for a typical test panel; shrink the arc
 and more receivers fall inside the specular zone, which makes the panel look
 more diffusing than it is. The 5° receiver spacing is a maximum
 ($\Delta\theta \le 5°$, $\Delta\varphi \le 5°$), not a suggestion, and the
-five source positions the two-dimensional technique uses — 0°, $\pm 30°$ and
-$\pm 60°$ from the reference normal — are the ones behind the
+five source positions the two-dimensional technique uses (0°, $\pm 30°$, and
+$\pm 60°$ from the reference normal) are the ones behind the
 `TWO_DIMENSIONAL_SOURCE_WEIGHTS` of the random-incidence snippet below.
 
 Two legitimate departures exist, and both must be reported with the
@@ -647,7 +647,7 @@ simulated panels are a single short period read in the near field of a 2-D
 grid; the prediction that follows is a six-period 3.6 m array read in the far
 field, where the periodicity funnels the energy into a few grating lobes and
 drives every coefficient down. Diffusion coefficients only compare within one
-geometry, one arc and one distance — which is why ISO 17497-2 fixes all three.
+geometry, one arc and one distance; that is why ISO 17497-2 fixes all three.
 
 <Video
   name="anim_fdtd_diffusion"
@@ -812,7 +812,7 @@ own definition note is blunt about the top of that range: complete diffusion
 would give 1, but **real diffusers rarely exceed 0.7** (3.9). A flat panel of
 the same footprint scores a few thousandths on the same rig, commercial
 diffusers occupy roughly the 0.2 to 0.6 band inside their working range, and a
-polar response uniform at every angle — which is what 1 requires — does not
+polar response uniform at every angle (which is what 1 requires) does not
 exist.
 
 So why does the worked example land at 0.11 rather than at a brochure number?

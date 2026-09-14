@@ -531,6 +531,12 @@ jobs:
         python-version: "3.13"
     - name: Check the hand-written markdown
       run: python scripts/check_markdown_hazards.py
+    - name: No em dash in the published prose
+      # The house style writes its prose without the em dash, in the pages,
+      # the mirrors, the CHANGELOG, the docstrings and the figure labels
+      # alike; a standard's title reproduced as printed keeps its own. Static,
+      # stdlib only, so it runs here with the markdown checks.
+      run: python scripts/check_em_dashes.py
 
   # A form feed is one invisible byte, and inside a raw docstring it is the
   # backslash and the f of the command that follows it: `\frac` was published

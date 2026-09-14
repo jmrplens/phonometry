@@ -82,9 +82,9 @@ Pages elsewhere on the site that this section leans on:
 ## What this section does not cover
 
 These pages implement the signal processing of a sound level meter, not the
-meter. The rest of IEC 61672-1 — level ranges, overload indication, the
+meter. The rest of IEC 61672-1 (level ranges, overload indication, the
 self-generated noise floor, the directional response and the IEC 61672-3
-periodic tests — is not implemented anywhere in the library, so nothing here
+periodic tests) is not implemented anywhere in the library, so nothing here
 assigns a class to a physical instrument; [Build a sound level
 meter](https://jmrplens.github.io/phonometry/signals/sound-level-meter/) states exactly what a class
 verdict from the library does and does not mean. Two curves come without a
@@ -294,8 +294,8 @@ for recording in batch:
 
 The curves of §1 are analog: poles and zeros in the $s$ plane. Turning them
 into a digital filter with the bilinear transform is exact in magnitude and
-wrong in frequency — it puts the prototype's response at
-$2 f_\mathrm{s} \tan(\pi f / f_\mathrm{s})$ instead of at $2 \pi f$ — and the
+wrong in frequency: it puts the prototype's response at
+$2 f_\mathrm{s} \tan(\pi f / f_\mathrm{s})$ instead of at $2 \pi f$, and the
 error grows quadratically toward Nyquist. At $f_\mathrm{s} = 48$ kHz that plain
 design reads 15.7 dB below the A design goal at the 19 952.6 Hz row, and at
 $f_\mathrm{s} = 32$ kHz it reads 61.4 dB below it at 15 848.9 Hz.
@@ -319,13 +319,13 @@ at every Table 3 row their deviation stays inside the 0.05 dB the table itself
 is rounded to.
 
 The band the fit controls is the curve's own standardised range, clipped at
-the top to 99.5 % of the Nyquist frequency — enough to contain every frequency
+the top to 99.5 % of the Nyquist frequency, enough to contain every frequency
 these standards state a requirement at, the closest approach being Table 3's
 15 848.9 Hz row at 0.9906 of Nyquist when $f_\mathrm{s} = 32$ kHz. Above that
 last half percent the response is not claimed: no digital filter can track an
 analog curve past Nyquist, and the magnitude of a real-coefficient filter has
-zero slope there. That is where the 468 row of the table above comes from —
-its skirt is still falling at about $-30$ dB/octave where the band ends — and
+zero slope there. That is where the 468 row of the table above comes from;
+its skirt is still falling at about $-30$ dB/octave where the band ends, and
 it is 3 % of that curve's $\pm 2$ dB tolerance, not an accuracy shortfall.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf.svg" alt="A-weighting high-frequency accuracy at 48 kHz: analytic curve versus plain bilinear versus the design fitted at the sample rate, with error subplot" width="80%"></picture>
@@ -584,7 +584,7 @@ same default `high_accuracy` design: the analog prototype is fitted at the
 sample rate rather than transformed blind, so the bilinear frequency warping
 never reaches the response. For G that keeps its 0.25 Hz to 315 Hz range
 within 0.0001 dB whatever the input rate, which matters exactly where G is
-used — infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits close
+used: infrasound is often recorded at 1 kHz or 2 kHz, where 315 Hz sits close
 to Nyquist and the warping grows quadratically. `high_accuracy=False` gives
 the plain bilinear design instead, about a decibel low at 315 Hz at fs = 2000
 and exactly on the 0 dB reference at 10 Hz. Unlike before, the flag is
@@ -790,14 +790,14 @@ The `verify_weighting_class` verifier, described in section 6 of
 of this guide that have published tolerance tables. For `B` it uses
 ANSI S1.4-1983 (Table IV design goals, Table V
 limits) and the "class" verdicts read as the standard's instrument **Types**
-1 and 2 — or, with `edition="1979"`, the IEC 651:1979 Table V limits, whose
+1 and 2, or with `edition="1979"`, the IEC 651:1979 Table V limits, whose
 footnote makes one mask govern every weighting characteristic and which add
 the laboratory-grade Type 0 (the two Type 0 columns are *not* the same mask:
 ANSI is two-sided and stricter at 10/12.5/16 Hz where IEC 651 is upper-only).
 For `AU` it uses IEC 61012:1990 Table 1 (nominal A + nominal U with
 the separate-unit tolerances, zero at the 1 kHz reference); IEC 61012
 publishes a single tolerance set, so both margin slots agree and the verdict
-is simply complies (1) or not (`None`) — note that checking the rows above
+is simply complies (1) or not (`None`); note that checking the rows above
 20 kHz needs `fs` ≥ 96 kHz (below that they are dropped and the verdict is
 `range_limited`). `G` and `D` are rejected: ISO 7196 defines one ±1 dB
 tolerance with no class structure, and the withdrawn IEC 537 left no
@@ -975,7 +975,7 @@ $$
 
 The asymmetry has a consequence worth stating: unlike F and S, Impulse is not a
 filter. Its coefficient depends on the signal, so an I-weighted level is not
-additive — the I-weighted level of two sources running together cannot be
+additive; the I-weighted level of two sources running together cannot be
 derived from the two measured separately, while their $L_\mathrm{eq}$ values can.
 
 ### Choosing F, S or I
@@ -1062,7 +1062,7 @@ plt.show()
 By default, the exponential integrator starts from rest (`y[-1] = 0`);
 `initial_state=None` and `initial_state='zero'` are the same thing. Passing
 `'first'` seeds the integrator with the square of the very first sample,
-$x[0]^2$ — an unbiased but extremely noisy estimate of the mean square (one
+$x[0]^2$: an unbiased but extremely noisy estimate of the mean square (one
 degree of freedom), and for a tone it depends entirely on the phase at the
 cut: a sine starting at a zero crossing makes `'first'` bit-identical to
 `'zero'`. A float resumes a state you saved yourself (which is what block
@@ -1070,7 +1070,7 @@ processing does in section 6), and an array broadcastable to the input shape
 without the time axis does the same per channel.
 
 If the recorded segment is a continuation of a signal already running, seed
-the integrator with something robust — the mean square of the first half
+the integrator with something robust: the mean square of the first half
 second is a far better estimate than a single sample. If the record is the
 *start* of the event, do not seed at all: let it start from rest and discard
 the first $5\tau$ (0.6 s Fast, 5 s Slow), which is exactly what `ln_levels`
@@ -1681,7 +1681,7 @@ environmental indicators and determination procedures are covered in
 **Not covered.** **IEC 61252 was revised in 2025; only the formulae of the
 implemented first edition (1993) are here**, not the newer one. The ISO 1996-1
 whole-day indicators ($L_\mathrm{den}$, $L_\mathrm{dn}$, the rating levels) and the
-ISO 1996-2 determination procedures are not on this page either — they are in
+ISO 1996-2 determination procedures are not on this page either; they are in
 [Environmental levels](https://jmrplens.github.io/phonometry/environment/assessment/environmental-levels/).
 
 ---

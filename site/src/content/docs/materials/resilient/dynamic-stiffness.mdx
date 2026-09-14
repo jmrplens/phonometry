@@ -145,7 +145,7 @@ One material defeats the peak-reading altogether. When the internal damping is
 high the vertical vibration maximum is not pronounced, and the standard's
 answer is to stop looking at the magnitude: locate the resonance from the
 **phase shift** between the excitation and the vibration signal instead. That
-phase is not a fallback reading of the same thing — it is a sharper one, and
+phase is not a fallback reading of the same thing; it is a sharper one, and
 watching a sweep run through $f_\mathrm{r}$ shows why.
 
 <Video
@@ -156,7 +156,7 @@ watching a sweep run through $f_\mathrm{r}$ shows why.
   description="A sinusoidal sweep from 8 Hz to 60 Hz drives the 8 kg load plate on its resilient specimen while the response magnitude and phase are tracked. Below the 25 Hz resonance the plate moves in phase with the force; at resonance the amplitude peaks and the motion falls a quarter cycle behind, crossing minus 90 degrees; above it the plate moves against the force towards antiphase. The plate is watched stroboscopically at the drive frequency and its motion is drawn on a compressed amplitude scale, so what moves on screen is the phase relationship rather than the 25 Hz oscillation itself."
 />
 
-The magnitude peak is broad — it is what the loss factor makes of it — while
+The magnitude peak is broad (it is what the loss factor makes of it) while
 the phase runs through $-90°$ steeply and crosses it at $f_\mathrm{r}$ whatever the
 damping. That is the whole reason the standard offers the phase reading for
 damped materials, and it is worth having on any rig, because a peak that is
@@ -296,7 +296,7 @@ but not from a floor several metres across, so the standard computes $s'_\mathrm
 and adds it back. At **low** $r$ it escapes from both: there is no gas spring
 to add, but the method can no longer separate the two contributions either.
 In that third case report $s' = s'_\mathrm{t}$ with the reservation, and state the
-estimated error of disregarding $s'_\mathrm{a}$ — the standard asks for exactly that.
+estimated error of disregarding $s'_\mathrm{a}$: the standard asks for exactly that.
 Note also where $r$ comes from: it is the same viscous property ISO 9053
 measures, but along the layer rather than through it, and here it is an input
 rather than something the method determines. Take the porosity $\varepsilon$
@@ -304,8 +304,8 @@ for $s'_\mathrm{a}$ as the standard's 0.9 unless it has been measured.
 
 **Mind the prefix.** $r$ is the quantity ISO 9053 calls $\sigma$ and reports in
 Pa·s/m², while EN 29052-1 writes it $r$ and thresholds it in **kPa·s/m²**. The
-library follows the standard, so `airflow_resistivity` is in kPa·s/m² — the one
-argument on this page that is not plain SI. A mineral wool measured at
+library follows the standard, so `airflow_resistivity` is in kPa·s/m² (the one
+argument on this page that is not plain SI). A mineral wool measured at
 50 000 Pa·s/m² goes in as `50.0`, not `50000.0`; convert an
 [ISO 9053 result](/phonometry/materials/absorbers/airflow-resistance/) with
 `sigma / 1000`. Passing the Pa·s/m² number lands silently in the
@@ -418,7 +418,7 @@ millimetres, so a thin permeable layer cannot be soft whatever its frame does.
 by $\Delta L = 30\lg(f/f_0)$ for sand-cement and calcium-sulfate screeds
 (ISO 12354-2 Formula (C.1)), and by $40\lg(f/f_0)$ for asphalt and dry floors.
 So the 47 Hz of the worked determination gives about 31 dB at 500 Hz and
-nothing at all at and below $f_0$ — and halving $f_0$ buys roughly 9 dB
+nothing at all at and below $f_0$. Halving $f_0$ buys roughly 9 dB
 across the whole band, which is why the entire method exists. The practical
 target is to keep $f_0$ below the lowest band of interest.
 

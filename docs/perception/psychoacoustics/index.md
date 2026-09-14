@@ -101,7 +101,7 @@ to 32 kHz before the running FFT; this implementation works at the native
 rate, a deviation that stays inside the standard's expanded uncertainty but
 that you should undo by resampling first if strict clause-by-clause
 conformance matters. And the Osses 2016 fluctuation-strength signal model is
-validated for amplitude-modulated stimuli only, with a documented floor — a
+validated for amplitude-modulated stimuli only, with a documented floor: a
 steady 1 kHz tone reads about 0.09 vacil rather than 0.
 
 Finally, none of these metrics is a community response: annoyance here is a

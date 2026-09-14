@@ -26,7 +26,7 @@ every path is formed per band, and the result shows which path dominates each
 band rather than only whether the room passes.
 
 **Which of the two do you run?** Run the simplified model when what you have is
-catalogue weighted ratings — $R_\mathrm{w}$, $\Delta L_\mathrm{w}$, a mass per unit area — and the
+catalogue weighted ratings such as $R_\mathrm{w}$, $\Delta L_\mathrm{w}$, and a mass per unit area, and the
 question is whether the partition meets a limit. Run the detailed one when you
 have per-band element and junction spectra, or the material properties the
 standard can calculate them from, and the question is *which path to fix in
@@ -78,7 +78,7 @@ reissued by ISO as a second edition, ISO 12354-1:2017 and ISO 12354-2:2017,
 which is not word for word the earlier text: where a formula changed between the
 prints, the [errata registry](https://jmrplens.github.io/phonometry/reference/errata/) records both. Parts
 3 to 6 keep their EN designation in the editions used here. Every guide names
-the edition it was read from — EN 12354-1:2000 and EN 12354-2:2000 for the
+the edition it was read from: EN 12354-1:2000 and EN 12354-2:2000 for the
 simplified models on
 [Predicting Sound Insulation](insulation-prediction.md),
 including the tabulated flanking correction $K$ that the 2017 impact part
@@ -151,9 +151,9 @@ Pages elsewhere on the site that this section leans on:
 **A prediction is only as good as the element data you feed it, and the
 library takes that data as given.** The element ratings, the junction indices
 and the covering improvements are parameters the entry points consume,
-supplied from measurement or computed with this section's own estimators —
-the Annex E junction catalogue, the floating-floor and lining improvement
-laws, the Annex B homogeneous-element chain and the panel-physics models —
+supplied from measurement or computed with this section's own estimators
+(the Annex E junction catalogue, the floating-floor and lining improvement
+laws, the Annex B homogeneous-element chain and the panel-physics models),
 and nothing checks the numbers you pass. Only the structure-to-airborne
 adjustment terms of EN 12354-5 Annexes D and F have no estimator here at all
 and must come from the standard's own tables. The simplified prediction page
@@ -171,7 +171,7 @@ assumes a frequency-independent driving-point impedance, so a joisted or
 battened lightweight floor is outside it; soft coverings are treated as linear
 springs; there is no per-band prediction of a lining's improvement, because
 Annex D is a single-number method; and heavy impact sources such as the rubber
-ball are not covered by any of these models at all — their rating is [Heavy
+ball are not covered by any of these models at all: their rating is [Heavy
 and Soft Impact
 Sources](../insulation/heavy-impact-sources.md).
 

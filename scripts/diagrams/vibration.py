@@ -260,7 +260,7 @@ def _d_hand_arm_vibration(s: SVG, th: Theme) -> None:
     s.text(
         45,
         410,
-        "2  either side of the hand — usual practice",
+        "2  either side of the hand: usual practice",
         13,
         th.fg,
         "start",
@@ -1320,7 +1320,7 @@ def _d_power_injection_rig(s: SVG, th: Theme) -> None:
         450,
         566,
         "$Π_{in} = ½ Re{F v*}$ at the drive point, from an "
-        "impedance head — not the amplifier setting",
+        "impedance head, not the amplifier setting",
         15,
         th.fg,
     )

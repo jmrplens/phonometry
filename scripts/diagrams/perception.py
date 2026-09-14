@@ -25,7 +25,7 @@ def _d_emission_positions(s: SVG, th: Theme) -> None:
     s.ground(gy, 40, 860)
 
     # --- Left: seated operator at table-top equipment (side view) ---------
-    s.text(240, 72, "Operator — seated (P2)", 21, th.fg, bold=True)
+    s.text(240, 72, "Operator, seated (P2)", 21, th.fg, bold=True)
     tx = 80.0
     table_y = gy - 150.0
     s.line(tx + 18, gy, tx + 18, table_y, th.fg, 3)
@@ -59,7 +59,7 @@ def _d_emission_positions(s: SVG, th: Theme) -> None:
 
     # --- Right: bystander positions (top view), equal face distances ------
     cx, cyv = 700.0, 270.0
-    s.text(cx, 72, "Bystanders — top view", 21, th.fg, bold=True)
+    s.text(cx, 72, "Bystanders, top view", 21, th.fg, bold=True)
     s.text(cx, 100, "height 1.50 m", 17, th.muted)
     s.rect(cx - 52, cyv - 40, 104, 80, th.panel, th.primary, rx=8, sw=2)
     s.text(cx, cyv + 8, "EUT", 19, th.primary, bold=True)
@@ -236,7 +236,7 @@ def _d_hearing_threshold(s: SVG, th: Theme) -> None:
     s.text(
         cx,
         549,
-        "free-field / diffuse-field (Table 1) — the dB HL / dB SPL zero",
+        "free-field / diffuse-field (Table 1): the dB HL / dB SPL zero",
         12,
         th.muted,
         "middle",
@@ -414,7 +414,7 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     # letter by letter.
     ax0, pw = 26.0, 418.0
     s.rect(ax0, 48, pw, 330, th.panel, th.muted, rx=12, sw=1.6)
-    s.text(ax0 + pw / 2, 76, "A — Free field  (NF)", 17, th.fg, bold=True)
+    s.text(ax0 + pw / 2, 76, "A: Free field  (NF)", 17, th.fg, bold=True)
     s.text(ax0 + pw / 2, 98, "hemi-anechoic room, one frontal source", 13, th.muted)
 
     gy = 336.0
@@ -454,7 +454,7 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     # --- Panel B: diffuse field --------------------------------------------
     bx0 = 456.0
     s.rect(bx0, 48, pw, 330, th.panel, th.muted, rx=12, sw=1.6)
-    s.text(bx0 + pw / 2, 76, "B — Diffuse field  (ND)", 17, th.fg, bold=True)
+    s.text(bx0 + pw / 2, 76, "B: Diffuse field  (ND)", 17, th.fg, bold=True)
     s.text(bx0 + pw / 2, 98, "reverberant or in-situ room", 13, th.muted)
 
     rx0, ry0, rw, rh = bx0 + 26, 118.0, pw - 52, 196.0
@@ -493,7 +493,7 @@ def _d_loudness_capture(s: SVG, th: Theme) -> None:
     # --- Panel C: head-and-torso simulator (Annex D) ------------------------
     s.rect(26, 396, 848, 228, th.panel, th.muted, rx=12, sw=1.6)
     s.text(
-        60, 424, "C — Head-and-torso simulator (Annex D)", 17, th.fg, "start", bold=True
+        60, 424, "C: Head-and-torso simulator (Annex D)", 17, th.fg, "start", bold=True
     )
 
     hx, hy = 130.0, 486.0
@@ -574,7 +574,7 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
     s.text(
         x0 + 16,
         y + 26,
-        "1 — single microphone where the head would be, one frontal source",
+        "1: single microphone where the head would be, one frontal source",
         15,
         th.fg,
         "start",
@@ -599,7 +599,7 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
     s.text(
         x0 + 16,
         y + 26,
-        "2 — the same microphone, reverberant or in-situ field",
+        "2: the same microphone, reverberant or in-situ field",
         15,
         th.fg,
         "start",
@@ -628,7 +628,7 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
     s.text(
         x0 + 16,
         y + 26,
-        "3 — probe microphone in the ear canal",
+        "3: probe microphone in the ear canal",
         15,
         th.fg,
         "start",
@@ -654,7 +654,7 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
         hy + 17,
         hx + 58,
         hy + 17,
-        "10 mm — 5 mm above 3 kHz",
+        "10 mm (5 mm above 3 kHz)",
         offset=32,
         size=12,
     )
@@ -668,7 +668,7 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
     # --- 4: head and torso simulator ----------------------------------------
     y = rows[3]
     s.text(
-        x0 + 16, y + 26, "4 — head-and-torso simulator", 15, th.fg, "start", bold=True
+        x0 + 16, y + 26, "4: head-and-torso simulator", 15, th.fg, "start", bold=True
     )
     hx, hy = 108.0, y + 82.0
     s.path(
@@ -691,7 +691,7 @@ def _d_mg_capture_routes(s: SVG, th: Theme) -> None:
     s.text(240, hy - 18, "accurate model of", 11, th.fg)
     s.text(240, hy - 2, "an average adult?", 11, th.fg)
     s.text(336, hy - 22, "yes: no correction", 11, th.accent, "start")
-    s.text(336, hy + 4, "no: correction file —", 11, th.secondary, "start")
+    s.text(336, hy + 4, "no: correction file,", 11, th.secondary, "start")
     s.text(336, hy + 22, "not implemented", 11, th.secondary, "start")
     result(
         y,
@@ -735,7 +735,7 @@ def _d_tone_audibility_acquisition(s: SVG, th: Theme) -> None:
     s.text(
         x0,
         66,
-        "1 — the source runs through its operating states "
+        "1: the source runs through its operating states "
         "(clause 5.1: all of them must be covered)",
         14,
         th.fg,
@@ -761,7 +761,7 @@ def _d_tone_audibility_acquisition(s: SVG, th: Theme) -> None:
     s.text(
         x0,
         196,
-        "2 — basic spectra (under 1 s) are merged line by line "
+        "2: basic spectra (under 1 s) are merged line by line "
         "into 3 s spectra (clause 4.3)",
         14,
         th.fg,
@@ -781,7 +781,7 @@ def _d_tone_audibility_acquisition(s: SVG, th: Theme) -> None:
     s.text(
         x0,
         310,
-        "3 — each merged spectrum gives one decisive audibility $ΔL_j$ (clause 5.3.8)",
+        "3: each merged spectrum gives one decisive audibility $ΔL_j$ (clause 5.3.8)",
         14,
         th.fg,
         "start",
@@ -905,7 +905,7 @@ def _d_dosimeter(s: SVG, th: Theme) -> None:
     strip(
         y1,
         "Task-based (Clause 9)",
-        "split the day into tasks — ≥ 3 samples (│) each, and a duration",
+        "split the day into tasks: ≥ 3 samples (│) each, and a duration",
     )
     edges = [0.0, 0.1875, 0.8125, 1.0]  # the Annex D welder: 1.5 h / 5 h / 1.5 h
     cols = [th.accent, th.primary, th.secondary]
@@ -1088,13 +1088,13 @@ def _d_tone_audibility(s: SVG, th: Theme) -> None:
 
     step(
         52,
-        "Narrow-band FFT spectrum — line spacing $Δf$ = 2.7 Hz",
+        "Narrow-band FFT spectrum: line spacing $Δf$ = 2.7 Hz",
         "Annex E engine spectrum; peak detected at $f_T$ = 137.3 Hz (not on a slope)",
         th.fg,
     )
     step(
         138,
-        "Critical band about the tone — $Δf_c$ = 101.36 Hz",
+        "Critical band about the tone: $Δf_c$ = 101.36 Hz",
         "geometric placement: corners 95.67 and 197.04 Hz, $√(f_1·f_2) = f_T$",
         th.primary,
     )
@@ -1258,7 +1258,7 @@ def _d_objective_intelligibility(s: SVG, th: Theme) -> None:
     )
     step(
         310,
-        "384 ms segments — 30 frames, the unit of comparison",
+        "384 ms segments (30 frames), the unit of comparison",
         "long enough to hold the slow modulations that carry speech",
         th.primary,
     )
@@ -1432,7 +1432,7 @@ def _d_soundfield_audiometry(s: SVG, th: Theme) -> None:
         th.secondary,
         "0 dB HL here is the RETSPL of the earphone",
         "fitted (ISO 389-1 / -2 / -8), referred to a",
-        "coupler — never an ISO 389-7 value",
+        "coupler, never an ISO 389-7 value",
     )
 
     # ---------------- shared caption strip --------------------------------

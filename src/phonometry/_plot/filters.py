@@ -52,7 +52,7 @@ _STRINGS: dict[str, str] = {
     # The mid-band subscript is upright (m abbreviates "mid-band", as
     # IEC 61260-1:2014 5.4.1 prints it); its braces are doubled because this
     # title is the one string here that goes through ``str.format``.
-    r"IEC 61260-1 class {cls} mask — $f_{{\mathrm{{m}}}}$ = {fm} Hz": r"Máscara clase {cls} IEC 61260-1 — $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+    r"IEC 61260-1 class {cls} mask: $f_{{\mathrm{{m}}}}$ = {fm} Hz": r"Máscara clase {cls} IEC 61260-1: $f_{{\mathrm{{m}}}}$ = {fm} Hz",
     "lowpass": "paso bajo",
     "highpass": "paso alto",
     "magnitude": "magnitud",
@@ -208,7 +208,7 @@ def plot_filter_class(
     ax.set_ylabel(_t("Relative attenuation [dB]", language))
     ax.set_title(
         _t(
-            r"IEC 61260-1 class {cls} mask — $f_{{\mathrm{{m}}}}$ = {fm} Hz",
+            r"IEC 61260-1 class {cls} mask: $f_{{\mathrm{{m}}}}$ = {fm} Hz",
             language,
             cls=cls,
             fm=format_number(fm, language, decimals=0),

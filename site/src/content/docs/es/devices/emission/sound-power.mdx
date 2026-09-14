@@ -122,8 +122,8 @@ fila de presión acústica con la ISO 3741 y se dibuja en su propia página.
 Las ocho dan la misma magnitud, y la última llega sin micrófono. Que
 *coincidan* es comprobable, y merece comprobarse una vez: el bloque de abajo
 lleva una misma fuente sintética por tres de las vías y compara sus espectros.
-No es una reproducción del diagrama de arriba — un esquema de montaje no tiene
-equivalente en matplotlib — sino un contraste que puedes ejecutar.
+No es una reproducción del diagrama de arriba (un esquema de montaje no tiene
+equivalente en matplotlib), sino un contraste que puedes ejecutar.
 
 <details>
 <summary>Mostrar tres vías calculadas sobre una misma fuente</summary>
@@ -170,7 +170,7 @@ plt.show()
 ### Antes del método: las condiciones de funcionamiento y de montaje
 
 Elegir una vía es la segunda decisión. La primera es qué se está midiendo
-exactamente — y para la mayoría de las familias de máquinas ya está tomada. Un
+exactamente, y para la mayoría de las familias de máquinas ya está tomada. Un
 **código de ensayo de ruido** es la norma de tipo C de una familia de máquinas:
 fija la norma básica de determinación, la disposición de micrófonos, el montaje
 y el modo de funcionamiento, y prevalece sobre las especificaciones generales de
@@ -183,7 +183,7 @@ Dos reglas del apartado 6 de la ISO 3744 deciden si una determinación es
 repetible siquiera. El **equipo auxiliar** debe quedar fuera del entorno de
 ensayo si es posible; lo que no se pueda retirar ni silenciar lo suficiente
 cuenta como *parte de la fuente*, y la caja de referencia crece hasta
-englobarlo. Y el **montaje** debe ser el típico, real o simulado — apoyos
+englobarlo. Y el **montaje** debe ser el típico, real o simulado: apoyos
 elásticos solo si la máquina va montada elásticamente en campo, porque una
 máquina pequeña que por sí sola radia mal en baja frecuencia se vuelve un buen
 radiador a través del panel grande al que va atornillada.
@@ -238,9 +238,9 @@ primera coincidencia nombra la norma.
    parar, un entorno que destroza una cápsula, un recinto sin sitio para una
    superficie: cuando no cabe ninguna medición acústica, la vía de velocidad
    superficial estima la misma magnitud a partir de acelerómetros sobre la
-   carcasa (ISO/TS 7849-1 y -2). Responde a una pregunta sutilmente distinta
-   — caracteriza lo que radia la *estructura*, y queda ciega al sonido que
-   escapa por aberturas, tomas y rendijas — y cuesta un factor de radiación que
+   carcasa (ISO/TS 7849-1 y -2). Responde a una pregunta sutilmente distinta:
+   caracteriza lo que radia la *estructura*, y queda ciega al sonido que
+   escapa por aberturas, tomas y rendijas, y cuesta un factor de radiación que
    hay que suponer (Parte 1, un límite superior) o medir una vez (Parte 2).
 6. **¿Cómo de repetible es la propia máquina?** Nada de lo anterior acota
    $\sigma_\text{omc}$, y en una máquina de proceso puede pesar más que toda la
@@ -278,8 +278,8 @@ energía sobre un intervalo y da un *ritmo* de flujo de energía, así que
 caracteriza a la máquina solo si la máquina es invariante en el tiempo durante
 ese intervalo. Una máquina cíclica es admisible cuando el tiempo de promediado
 abarca un número entero de ciclos, y el ciclo pasa entonces a formar parte de la
-condición de funcionamiento declarada. Para un suceso aislado — una carrera de
-prensa, un portazo — el descriptor no es $L_W$ sino el **nivel de energía
+condición de funcionamiento declarada. Para un suceso aislado (una carrera de
+prensa, un portazo), el descriptor no es $L_W$ sino el **nivel de energía
 acústica $L_J$**, la misma integral de superficie tomada sobre el suceso en vez
 de por segundo, definido en los mismos apartados de la ISO 3741, la ISO 3744 y
 la ISO 3746 y determinado por `sound_energy_pressure` sobre la [superficie
@@ -349,7 +349,7 @@ Una declaración adopta una de dos formas alternativas (apartado 4):
 $K_{W\mathrm{A}}$ combina la incertidumbre de medición (reproducibilidad) y, para un lote,
 la dispersión de producción; para una sola máquina $K = 1{,}645\,\sigma_\mathrm{R}$
 (anexo A.2.2), donde 1,645 es el cuantil unilateral del 95 % de la distribución
-normal — el valor declarado es un límite superior, así que solo se está cubriendo
+normal: el valor declarado es un límite superior, así que solo se está cubriendo
 una cola. Un
 [`NoiseEmissionDeclaration`](/phonometry/es/reference/api/power/sound-power/)
 contiene una o varias declaraciones por modo de funcionamiento y genera la
@@ -421,9 +421,9 @@ El redondeo es una trampa aparte. Una declaración de **número único** se
 verifica frente a $L_{W\mathrm{Ad}}$, la suma sin redondear $L_{W\mathrm{A}} + K_{W\mathrm{A}}$ redondeada
 una sola vez; una declaración de **número doble** se verifica frente a
 $\mathrm{redondeo}(L_{W\mathrm{A}}) + \mathrm{redondeo}(K_{W\mathrm{A}})$, que puede diferir en un
-decibelio entero. La biblioteca expone los dos veredictos por separado
-— `verified` para la regla de número único y `verified_dual` para la de número
-doble —, de modo que una declaración de número doble hay que leerla del segundo,
+decibelio entero. La biblioteca expone los dos veredictos por separado:
+`verified` para la regla de número único y `verified_dual` para la de número
+doble, de modo que una declaración de número doble hay que leerla del segundo,
 no del primero.
 
 Un matiz sobre el primer fragmento de arriba: pasa
@@ -435,7 +435,7 @@ Los otros dos argumentos merecen su procedencia. `emission_pressure_level` es el
 **nivel de presión acústica de emisión** ponderado A $L_{p\mathrm{A}}$ en el puesto de
 trabajo, determinado según la ISO 11201 (campo esencialmente libre), la
 ISO 11202 (inspección, con una corrección ambiental) o la ISO 11204 (con
-correcciones locales) — ninguna de las cuales está implementada aquí, así que
+correcciones locales): ninguna de las cuales está implementada aquí, así que
 llega como valor medido de fuera, tomado bajo las mismas condiciones de
 instalación y funcionamiento que la potencia acústica. `basic_standards` nombra
 las normas de determinación que hay detrás de esos dos números, y el **código de
@@ -490,8 +490,8 @@ en su propia página; la ISO 3745 no define ninguno.
 El nivel de presión acústica de emisión $L_{p\mathrm{A}}$ que
 acompaña a $L_{W\mathrm{A}}$ en una declaración se consume, no se determina: la ISO
 11201, la ISO 11202 y la ISO 11204 quedan fuera de la biblioteca. Los
-criterios de lote del apartado 6.3 de ISO 4871 no se evalúan — solo la
-verificación de máquina única del apartado 6.2 — y su estadística de lote más
+criterios de lote del apartado 6.3 de ISO 4871 no se evalúan: solo la
+verificación de máquina única del apartado 6.2, y su estadística de lote más
 allá del caso de máquina única $K = 1{,}645\,\sigma_\mathrm{R}$ (Anexo A.2.2) se
 enuncia, no se deriva.
 </ScopeClaim>

@@ -11,7 +11,7 @@
 # Written by the renderer. To refresh one clip, re-render it:
 #     python scripts/generate_graphs.py --animations --anim <clip>
 anim_block_vs_exponential 5975c3338d283897
-anim_comb_filtering 15848d19008cc409
+anim_comb_filtering 56fd527621b07759
 anim_dynamic_stiffness_sweep a37ea99f37d63bc3
 anim_elastic_coincidence b0c695d7fc354871
 anim_elastic_halfspace_waves 848ba69cf2d8f612
@@ -39,15 +39,15 @@ anim_fdtd_side_branch b8fa60209365c1a7
 anim_fdtd_slit_absorber edcf0518ee433331
 anim_fdtd_transmission_tube f6d5c75efa846b39
 anim_feedback_howl 7e32ff225514f7e6
-anim_flanking_paths a25bf5b11d7af139
+anim_flanking_paths 5dda9872eb086d3c
 anim_image_source_buildup 15a2f356b222ce6c
-anim_instantaneous_intensity 2d183924422ad599
+anim_instantaneous_intensity e7743135a6f03981
 anim_intensity_scan_power 6a2065358710c6fd
 anim_iso717_shift c22ef454675f6afd
 anim_loudness_gating 3b3f20b717552ee8
 anim_modulation_transfer bbcacd543871b201
 anim_onset_detection 61ae018eaf2565e7
-anim_power_two_rooms 660fcbf5569f7b15
+anim_power_two_rooms 0a3d4260d2116b47
 anim_schroeder dfcb656e709f3af9
 anim_specific_loudness 1ec33e06d5be0407
 anim_standing_wave_tube 8c413baaaf9476f2

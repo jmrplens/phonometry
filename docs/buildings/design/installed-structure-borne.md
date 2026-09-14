@@ -133,8 +133,8 @@ $$
 
 with $S_0 = A_0 = 10\ \text{m}^2$, and the paths combine energetically (Formula 17).
 
-$D_\mathrm{sa}$ is normally **negative** — the standard's own Annex I columns run from
-about $-14$ dB at 63 Hz to $-45$ dB at 2 kHz — and Formula (18a) subtracts it,
+$D_\mathrm{sa}$ is normally **negative** (the standard's own Annex I columns run from
+about $-14$ dB at 63 Hz to $-45$ dB at 2 kHz), and Formula (18a) subtracts it,
 so a negative value *raises* the predicted level. Annex F.2 gives the working
 form $D_{\mathrm{sa},i} = 10\log_{10}(400 f_{\mathrm{c},i}\sigma_i / m_i f^2)$, which is
 `structure_to_airborne_adjustment`; passing a positive number in its place

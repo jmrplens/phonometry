@@ -33,7 +33,7 @@ Use the ISO 2631-1 metrics first, and let two numbers decide when to move on. A
 **crest factor above 9** says the basic weighted r.m.s. method is no longer
 adequate for that record, which is the ISO 2631-1 trigger for reaching for the
 running and dose measures. A **band-limited vertical peak acceleration above
-9.81 m/s²** — 1 g, the free-fall threshold — puts the exposure in ISO 2631-5's
+9.81 m/s² (1 g, the free-fall threshold) puts the exposure in ISO 2631-5's
 clause 5 regime, the severe shocks with possible loss of contact with the seat
 that this library implements, rather than in its Annex A finite-element model
 for exposures in which the occupant stays seated. The measurement front-end
@@ -83,8 +83,8 @@ implemented, which is what makes the 1 g delineation above a routing decision
 rather than a preference.
 
 And the verdict stops at the directive itself. An A(8) is assessed against
-the action and limit values of Directive 2002/44/EC — each marked exceeded or
+the action and limit values of Directive 2002/44/EC (each marked exceeded or
 not, the exposure zone named, and a PASS/FAIL verdict issued against the
-limit value — but the library applies no national transposition of the
+limit value) but the library applies no national transposition of the
 directive, and the conclusion of a workplace risk assessment is not a number
 this section produces.

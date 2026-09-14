@@ -251,8 +251,8 @@ plt.show()
 Both one-parameter models are being evaluated far **below** their published fit
 range for any outdoor ground, and the `PorousAbsorberWarning` these calls raise
 says so: the range is $0.01 < X < 1$ with $X = \rho_0 f/\sigma$, and the
-grassland above sits at $X = 3.8\times10^{-4}$ at 63 Hz and 0.024 at 4 kHz — the
-asphalt curve of the figure never enters the range at all. Below the range the
+grassland above sits at $X = 3.8\times10^{-4}$ at 63 Hz and 0.024 at 4 kHz;
+the asphalt curve of the figure never enters the range at all. Below the range the
 Delany-Bazley regression is an extrapolation whose classic failure is a negative
 real part of the surface impedance; **Miki** is the passivity-constrained refit
 to prefer there (see the fit-range paragraph of
@@ -295,16 +295,16 @@ The clip below is that formula as a field. It is the
 once at 100 Hz and once at 500 Hz, each with a barrier-free reference run over
 the same ground so the annotated insertion loss is a true one. The geometry
 fixes the path difference at 1.06 m for the receiver it marks, so the Fresnel
-number is $N = 0.62$ at 100 Hz and $N = 3.1$ at 500 Hz — the same screen, a
-factor of five apart in $N$ purely because $\lambda$ changed — and the field
+number is $N = 0.62$ at 100 Hz and $N = 3.1$ at 500 Hz (the same screen, a
+factor of five apart in $N$ purely because $\lambda$ changed), and the field
 shows what that buys: about 8 dB against about 17 dB. Two things are worth
 watching for. The edge of the lit region running down from the top of the
 screen is the shadow boundary, the $N \to 0$ locus where the formula bottoms
 out at 5 dB; and inside the shadow the field is a cylindrical wave centred on
 the top of the screen, which is what "the edge acts as a secondary source"
 looks like. One caveat: the ground in the clip is perfectly rigid, so it shows
-diffraction alone and none of the finite-impedance ground effect of section 1
-— the coherent four-path model below adds that, and its curve swings tens of
+diffraction alone and none of the finite-impedance ground effect of section 1;
+the coherent four-path model below adds that, and its curve swings tens of
 decibels where this one is smooth.
 
 <Video
@@ -482,8 +482,8 @@ Both entry points take their distances **along the ground from the source**, and
 neither takes a distance from the barrier. That is the trap worth naming: in
 `barrier_insertion_loss(bands, 1.0, 50.0, 4.0, 100.0, 1.5)` the receiver is
 100 m from the *source*, i.e. 50 m past the screen, not 100 m past it. The two
-functions also spell the same option differently — `model=` on `ground_effect`,
-`ground_model=` on `barrier_insertion_loss` — and order their geometry
+functions also spell the same option differently (`model=` on `ground_effect`,
+`ground_model=` on `barrier_insertion_loss`) and order their geometry
 differently, which is why the two positional calls on this page are not
 parallel.
 
@@ -523,7 +523,7 @@ where its ±1.5 dB against the exact solution is far inside the uncertainty of
 everything else in the chain. The exact rigid half-plane when the behaviour near
 the shadow boundary matters (it gives 6 dB there against Kurze-Anderson's 5 dB,
 and the 6 dB is the physically correct halved field). The coherent four-path
-model only when the narrowband interference structure is the question — never
+model only when the narrowband interference structure is the question: never
 raw as a design value.
 
 **The coherent curve must be averaged before it means anything.** It is a
@@ -542,7 +542,7 @@ nominal performance. Neither effect exists in any model on this page.
 **Diffraction is the screening limit, not the realised one.** The insertion loss
 a built barrier delivers is the smaller of the diffraction result and the
 transmission loss of the panel itself, and the obstacle has to qualify as a
-barrier in the first place — surface density, a closed surface, and a horizontal
+barrier in the first place: surface density, a closed surface, and a horizontal
 extent normal to the path larger than the wavelength. Those qualifying rules are
 stated in the
 ["Barrier pitfalls" section of Outdoor Sound Propagation](/phonometry/environment/propagation/outdoor-propagation/);

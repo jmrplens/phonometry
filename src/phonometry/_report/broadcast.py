@@ -255,8 +255,8 @@ def _statement(result: ProgramLoudnessResult, language: str = "en") -> str:
     """The boxed single-number statement ``I = X LUFS (LRA = Y, max TP = Z)``.
 
     Each of the three readings is stated by :func:`_measured`, so a programme
-    the measurement left undefined is boxed as ``I = — LUFS`` rather than as
-    an infinity dressed up as a level.
+    the measurement left undefined is boxed with the empty-cell em dash
+    rather than with an infinity dressed up as a level.
     """
     integrated = _measured(float(result.integrated), language)
     lra = _measured(float(result.loudness_range), language)

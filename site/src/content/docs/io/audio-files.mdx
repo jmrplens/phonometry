@@ -50,8 +50,8 @@ A measurement WAV is only interpretable together with three things the
 samples do not carry: the sample rate, the calibration that turns digital
 full scale into pascals, and the provenance that says where and when the
 recording was made. `phonometry.io` treats all of that as part of the file's
-meaning. `read()` returns a `Signal` — samples plus rate, calibration,
-channel labels and `bext` provenance in one immutable object — and every
+meaning. `read()` returns a `Signal` (samples plus rate, calibration,
+channel labels and `bext` provenance in one immutable object), and every
 function on this page follows the same defaults: the native sample rate is
 kept, channels are never mixed down, and no sample is ever normalized,
 because each of those "conveniences" silently destroys the level or the
@@ -96,8 +96,8 @@ The object stands in for the bare array anywhere: `np.asarray(sig)` yields
 the samples (1-D for one channel, `(channels, samples)` for several), so
 every `(x, fs, ...)` function of the library already takes it in place of
 the array, with the rate still passed alongside. Much of the library goes
-further and takes the `Signal` itself — the object already knows its rate and
-its calibration, and asking you to repeat either is asking for a
+further and takes the `Signal` itself (the object already knows its rate and
+its calibration), and asking you to repeat either is asking for a
 transcription error. The object supplies the rate when `fs` is omitted, and
 an explicit `fs` that disagrees with it raises rather than being arbitrated. That covers the level
 functions (`leq`, `laeq`, `ln_levels`, `sel`, `lc_peak`, `sound_exposure`
@@ -153,7 +153,7 @@ point, and the same convention as libsndfile and MATLAB. The eternal
 calibrator tone is read through this same reader, so any fixed scaling
 constant divides out of every calibrated level, exactly.
 
-`info()` answers from the headers alone — no sample is decoded, so it is
+`info()` answers from the headers alone: no sample is decoded, so it is
 instant on a 12-hour RF64, and it still describes a compressed WAV that
 `read()` would need the extra for:
 
@@ -190,7 +190,7 @@ print(f"Leq = {float(signals.leq(sig)):.1f} dB")          # 70.0
 
 No `calibration_factor` argument, no `fs` argument at the level call: the
 `Signal` carries both, and the two are carried under different rules. An
-explicit `calibration_factor` still wins over the one the object carries —
+explicit `calibration_factor` still wins over the one the object carries:
 the caller knows more than an object, after a re-calibration or for a
 deliberate what-if. An explicit `fs` does not win: the rate is a fact of the
 recording rather than a preference, so a value that disagrees with the
@@ -256,7 +256,7 @@ print(f"Leq = {xl2_leq:.1f} dB")               # 113.7, the published level
 No hand-typed sensitivity anywhere: the instrument's file carried its own
 full scale, the reader surfaced it, and the published 113.7 dB came out
 the other end. A recording made by the same meter is calibrated with the
-same two lines — which is why both files going through the same reader is
+same two lines: which is why both files going through the same reader is
 the one rule that matters.
 
 The figure below is this page in one image: the same API wrote a 24-bit BWF
@@ -314,15 +314,15 @@ plt.show()
 
 ## The lossy warning, and the XL2 story behind it
 
-By default an NTi XL2 records WAV — compressed to 4-bit ADPCM. The manual is
+By default an NTi XL2 records WAV (compressed to 4-bit ADPCM). The manual is
 explicit about the intent: the compressed recording is a listening record,
 and linear WAV (with the Extended Acoustic Pack) is what is "required for
 post-processing on the PC". The distinction matters because a lossy decoder
 reconstructs an *approximation* of the waveform: a level computed from it is
 not defensible as a measurement, however plausible the number looks.
 
-So lossy sources are read, not refused — a listening copy is still worth
-opening — but never silently:
+So lossy sources are read, not refused (a listening copy is still worth
+opening), but never silently:
 
 ```python
 import soundfile as sf
@@ -344,8 +344,8 @@ one, and a library whose job is preserving levels should not make it easy.
 
 Two adjacent cases the module deliberately does not cover: dictaphone
 AAC/M4A, where the honest route is a one-line external conversion
-(`ffmpeg -i note.m4a note.wav`, then `read("note.wav")` — with the same
-caveat, since AAC is lossy too); and DAQ formats that are not audio at all
+(`ffmpeg -i note.m4a note.wav`, then `read("note.wav")`), with the same
+caveat, since AAC is lossy too; and DAQ formats that are not audio at all
 (TDMS from LabVIEW hardware, UFF from modal analysis), which have their own
 Python readers (`npTDMS`, `pyuff`).
 
@@ -381,7 +381,7 @@ print(f"streamed {streamed:.4f} dB, whole file {whole:.4f} dB")
 # streamed 66.4200 dB, whole file 66.4200 dB
 ```
 
-The two numbers are not close — they are identical, to the last bit,
+The two numbers are not close: they are identical, to the last bit,
 because a stateful filter carries its state across block boundaries and the
 stream contributes every sample exactly once. Both sides run the same default
 design, since block processing no longer costs the weighting filter anything
@@ -391,22 +391,22 @@ detail). The same construction drives an `OctaveFilterBank` with
 
 ## Writing a BWF with its provenance
 
-`write()` produces WAV/BWF — PCM 16, 24 (packed in-house; SciPy cannot),
-32, float 32/64 — and promotes to RF64 automatically past 4 GiB. Three
+`write()` produces WAV/BWF: PCM 16, 24 (packed in-house; SciPy cannot),
+32, float 32/64. It promotes to RF64 automatically past 4 GiB. Three
 promises, each the opposite of a documented ecosystem default: it never
-normalizes, it never resamples, and clipping is never silent — samples past
+normalizes, it never resamples, and clipping is never silent: samples past
 full scale on an integer subtype are saturated, counted and reported with a
 `ClippingWarning` naming the count and the peak overshoot in dBFS. Optional
 `dither="tpdf"` adds one-LSB triangular dither when quantising to
-`PCM_16` — the Lipshitz, Wannamaker and Vanderkooy prescription for
-16-bit listening copies — and is refused elsewhere, because dither only adds
+`PCM_16` (the Lipshitz, Wannamaker and Vanderkooy prescription for
+16-bit listening copies) and is refused elsewhere, because dither only adds
 noise to data that faces numerical analysis rather than ears.
 
 Provenance is first-class. A `Signal`'s own `bext` is carried by default
 when it has one; a `BroadcastMetadata` you build is written field by field
 at its EBU Tech 3285 offsets; and `bext="loudness"` additionally measures
-the five version-2 loudness values — programme loudness, loudness range,
-maximum true peak, momentary and short-term maxima — with the library's own
+the five version-2 loudness values (programme loudness, loudness range,
+maximum true peak, momentary and short-term maxima) with the library's own
 [ITU-R BS.1770 implementation](/phonometry/devices/broadcast/program-loudness/)
 on the samples being written. Every written chunk's `CodingHistory` is
 extended, never replaced, with the EBU R98-formatted line describing this
@@ -424,7 +424,7 @@ print(delivered.bext.max_true_peak_level)   # -20.08 (dBTP, measured)
 
 ## The sidecar: how the calibration travels
 
-No audio container has a field for a microphone calibration — `bext` has
+No audio container has a field for a microphone calibration; `bext` has
 none, and its loudness values are programme loudness, not sensitivity. The
 industry answer is proprietary companions (a meter's report text, a
 manufacturer's project file); seismology's answer, a standardized sidecar
@@ -432,7 +432,7 @@ beside the waveform, is the one worth copying. `write(sidecar=True)` (or
 `write_sidecar()` for an existing file) puts a small versioned JSON at
 `<audio>.phonometry.json` carrying the calibration factor, the calibrator
 tone's metadata and the channel labels, and `read()` applies it
-automatically — an explicit argument still wins, and a sidecar written by a
+automatically: an explicit argument still wins, and a sidecar written by a
 newer schema or another tool is refused loudly rather than half-understood.
 
 ```python
@@ -448,8 +448,8 @@ read it back with no arguments, and the absolute level is intact.
 
 `convert()` moves a file between lossless containers with everything
 intact: samples at full precision (a WAV-24 to FLAC to WAV-24 round trip
-returns bit-identical codes), the `bext` chunk carried — into FLAC it rides
-in an `APPLICATION` block the readers here understand — the sidecar copied
+returns bit-identical codes), the `bext` chunk carried: into FLAC it rides
+in an `APPLICATION` block the readers here understand. The sidecar is copied
 byte for byte, and one line appended to the `CodingHistory` naming the
 coding step. Lossy targets are refused by policy. The conversion streams,
 so an hour of RF64 converts in constant memory:
@@ -500,12 +500,12 @@ Because a WAV carries no calibration: the samples come back in digital
 full-scale units (±1.0), and only a calibrator take recorded through the
 same chain turns them into pascals. Read the calibrator file with `read()`,
 derive the factor with `sensitivity()`, and pass it as
-`calibration_factor=` — or write it into the sidecar once and let `read()`
+`calibration_factor=`, or write it into the sidecar once and let `read()`
 apply it from then on.
 
 ### Can I compute Leq from the meter's compressed voice-note WAV?
 
-You can make the call, and the library will answer — after a
+You can make the call, and the library will answer after a
 `LossyCompressionWarning`, with `source.lossy` stamped on the signal. The
 number is not defensible: an ADPCM or MP3 decoder reconstructs an
 approximation of the waveform, and the error is program-dependent. Use the
@@ -516,7 +516,7 @@ meter's linear recording mode for anything that produces a level.
 Almost certainly not for measurements: the base install reads every linear
 WAV variant meters and field recorders write, including 24-bit, EXTENSIBLE
 multichannel and RF64 files past 4 GiB. The extra is for FLAC archives,
-AIFF/Ogg/Opus/MP3, and the compressed WAV listening copies — and it bundles
+AIFF/Ogg/Opus/MP3, and the compressed WAV listening copies, and it bundles
 libsndfile under the LGPL, which the base install deliberately avoids.
 
 <SeeAlso>

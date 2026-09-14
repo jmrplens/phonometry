@@ -64,17 +64,17 @@ is $R_\mathrm{s}$ per metre of thickness. Two helpers walk that chain from what 
 instrument actually shows: `linear_airflow_velocity(q_v, area)` is the
 Clause 3.4 definition $u = q_v/A$ (a rig reads a volumetric flow off a
 rotameter, never a velocity), and
-`specific_airflow_resistance(resistance, area)` is Clause 3.2's $R_\mathrm{s} = R\,A$ —
-which also accepts the other route,
-`specific_airflow_resistance(pressure_drop_pa=…, velocity=…)`, for a bench that
-logs $\Delta p$ and $u$ and never forms $R$ at all.
+`specific_airflow_resistance(resistance, area)` is Clause 3.2's
+$R_\mathrm{s} = R\,A$; it also accepts the other route,
+`specific_airflow_resistance(pressure_drop_pa=…, velocity=…)`, for a bench
+that logs $\Delta p$ and $u$ and never forms $R$ at all.
 
 **Which way the flow must go.** $A$ is defined as the area *perpendicular to
 the direction of flow*, and that direction is a choice, not a formality: a
 fibrous board whose fibres lie in the plane resists through-thickness flow
 quite differently from in-plane flow, so $\sigma$ is a directional property of
 any material with an oriented microstructure. ISO 9053-2 Clause 7.1 makes it
-explicit — a non-homogeneous specimen is measured in one or more chosen
+explicit. A non-homogeneous specimen is measured in one or more chosen
 orientations, and the orientation goes in the report (ISO 9053-1 Clause 9 (g)
 asks for the same thing). Drive the specimen in the direction the sound will
 travel through it in service, which for a wall-mounted layer means through the
@@ -97,7 +97,7 @@ $u = 0.5\ \text{mm/s}$ (Clause 7.5); the highest velocity must not exceed
 zero-velocity specific airflow resistance.
 
 Neither velocity is arbitrary, and Clause 7.5 says why. A plane wave of
-particle velocity 0.5 mm/s carries a sound pressure of 0.2 Pa — 80 dB — so the
+particle velocity 0.5 mm/s carries a sound pressure of 0.2 Pa (80 dB), so the
 reference velocity puts the steady-flow rig at the amplitude the material will
 actually meet in use, which is the whole reason an aerodynamic measurement
 predicts an acoustic quantity. The 15 mm/s ceiling is the same arithmetic at
@@ -188,7 +188,7 @@ representative: at least 10 pores across for a foam, 10 fibres for a fibrous
 material, 10 grains for a granular one, and where the microstructure is
 unknown, at least 95 mm in diameter or 90 mm on the smallest edge
 (Clause 6.2.1). The measurement cell has the *same* lateral dimensions as the
-specimen — its own floor is 29 mm (Clause 5.2) — and needs a free space of at
+specimen (its own floor is 29 mm per Clause 5.2) and needs a free space of at
 least one diameter in front of the specimen so the flow arrives laminar and
 unidirectional, with more than a diameter behind it recommended for thin,
 low-porosity specimens. The specimen rests on a perforated support or a
@@ -217,12 +217,12 @@ pushes the other way.
 **In-position thickness.** The thickness that defines $d$, and with it the
 tested bulk density, is measured with the specimen in the cell, by bringing
 the gauge into contact with the upper surface and compressing it lightly
-(Clauses 7.3 and 7.4) — not with a rule on the bench beforehand.
+(Clauses 7.3 and 7.4), not with a rule on the bench beforehand.
 
 **Instrument tolerances.** The volumetric flow and the differential pressure
 must each be good to ±5 % of the indicated value (Clauses 5.4 and 5.5), the
 flow tap sits between the source and the specimen, and the pressure instrument
-must resolve down to 0.1 Pa — which the worked example above needs, since the
+must resolve down to 0.1 Pa; the worked example above needs this, since the
 whole reading at the reference velocity is 8.1 Pa. The flow source should
 reach 0.5 mm/s and hold it stable (Clause 5.3).
 
@@ -230,13 +230,13 @@ reach 0.5 mm/s and hold it stable (Clause 5.3).
 and nothing in this library performs it: at least one *calibrated* test
 specimen shall be measured before a series of measurements, at least once a
 day, after any hardware or software change, and after any significant change
-of conditions — 0.5 kPa of pressure, 5 °C of temperature or 5 % of humidity.
+of conditions (0.5 kPa of pressure, 5 °C of temperature or 5 % of humidity).
 The artefact is normally made of straight cylindrical pores precisely because
 its resistance follows in closed form from the same $8\eta h/(\phi r^2)$, so
 the check is against theory rather than against another laboratory, and the
 measured value must land within ±10 % of it. Record the check beside the
-measurement — the `notes` field of the fiche is the place — because the result
-object carries only the fit.
+measurement (the `notes` field of the fiche is the place to put it), because
+the result object carries only the fit.
 
 **How much agreement to expect.** Usually three specimens are measured
 (Clause 6.3), and Clause 8 puts the inter-laboratory reproducibility at around
@@ -316,13 +316,13 @@ $\kappa'$ the **effective** ratio of specific heats.
 **What the formula is saying.** The airtight termination is the reference: with
 it the cavity is a sealed compliance, the piston's whole swept volume goes into
 compressing the air, and the level is high. Put the specimen in its place and
-most of that flow bleeds through the pores instead, so the cavity level falls —
-and the drop $L_{p,\mathrm{t}} - L_{p,\mathrm{s}}$ *is* the measurement. The stroke ratio
+most of that flow bleeds through the pores instead, so the cavity level falls.
+The drop $L_{p,\mathrm{t}} - L_{p,\mathrm{s}}$ *is* the measurement. The stroke ratio
 $h_\mathrm{t}/h_\mathrm{s}$ only normalises the two runs to the same volume velocity, which is
 why the two strokes are deliberately unequal: ISO 9053-2 Clause 6.2 NOTE 1
 gives 1.4 mm with the airtight termination against 14 mm with the specimen for
-a 10 mm piston, a 100 mm cell and a cavity near $10^{-3}$ m³ — exactly the
-example below — so that both levels land inside the analyser's useful range.
+a 10 mm piston, a 100 mm cell and a cavity near $10^{-3}$ m³ (exactly the
+example below), so that both levels land inside the analyser's useful range.
 Two consequences are worth having. Only a level *difference* at one frequency
 enters, so the sound measuring device needs no absolute calibration and its
 frequency response is not critical; what matters is level linearity
@@ -366,9 +366,10 @@ R = materials.alternating_airflow_resistance(
 print(round(R))                   # 222956  airflow resistance R [Pa*s/m^3]
 ```
 
-$b$ is 1.83 mm at 2 Hz — millimetre-scale, against a cavity 100 mm across. That
-is why $\kappa'$ enters through the *surface-to-volume ratio* $S/V$ and not
-through the cavity's absolute size: only the air within a boundary layer of the
+$b$ is 1.83 mm at 2 Hz, which is millimetre-scale, against a cavity 100 mm
+across. That is why $\kappa'$ enters through the *surface-to-volume ratio*
+$S/V$ and not through the cavity's absolute size: only the air within a
+boundary layer of the
 wall exchanges heat with it, so a rig scaled down at constant shape keeps the
 same $b$ while $S/V$ grows, and the correction grows with it.
 
@@ -381,7 +382,7 @@ uncorrected adiabatic 1.4.
 *The Annex A correction over the whole 1–4 Hz piston band. It falls as the
 frequency falls (a thicker boundary layer reaches more of the air) and rises
 with the cavity's surface-to-volume ratio, which is the only geometric
-quantity it depends on. For the Annex A.3 cavity — $S/V = 60$ 1/m — the
+quantity it depends on. For the Annex A.3 cavity ($S/V = 60$ 1/m), the
 correction is about 2 %, and since $R$ is proportional to $\kappa'$, skipping
 it biases every reported resistance by that much. A cavity twice as compact
 doubles the penalty, so a scaled-down rig cannot treat the correction as
@@ -426,8 +427,8 @@ standard offers four knobs: change the specimen length, the specimen diameter,
 the cavity volume, the piston frequency or the piston stroke. It is also worth
 checking that the flow the piston drives through the specimen lands in the
 recommended window: Clause 6.2 gives $q_v = 2\pi f h A_\mathrm{P}$ and Formula (1)
-$v_\mathrm{s} = q_v/A$, and recommends rms velocities between 0.5 mm/s and 4 mm/s —
-the same physical regime as the static method's reference velocity.
+$v_\mathrm{s} = q_v/A$, and recommends rms velocities between 0.5 mm/s and 4 mm/s.
+This is the same physical regime as the static method's reference velocity.
 
 ```python
 # The same run, with the background level so the Formula (4) check is live,
@@ -453,13 +454,14 @@ print(round(r_s, 1), round(r_s / 0.05))    # 1751.1 Pa*s/m, 35022 Pa*s/m^2
 **What Part 2 returns, and what it does not.** Unlike the static method,
 `alternating_airflow_resistance` returns a bare resistance in Pa·s/m³, not a
 result object: there is no `StaticAirflowResult` equivalent, so no `.plot()`
-and no ISO 9053-2 fiche, and the two steps to $R_\mathrm{s}$ and $\sigma$ are the
-caller's — which is what the last two lines above do. What Part 2 buys instead
-is the specimens Part 1 cannot hold: very open or very thin materials whose
-static pressure drop is too small to read against the rig's own leakage, and
-delicate or granular samples a steady flow would deform or displace. The two
+and no ISO 9053-2 fiche. The two steps to $R_\mathrm{s}$ and $\sigma$ are the
+caller's responsibility; that is what the last two lines above do. What Part 2
+buys instead is the specimens Part 1 cannot hold: very open or very thin
+materials whose static pressure drop is too small to read against the rig's own
+leakage, and delicate or granular samples a steady flow would deform or
+displace. The two
 methods should agree inside the reproducibility quoted above when the specimen
-is properly sealed, with one documented exception — ISO 9053-2 Clause 5 NOTE
+is properly sealed, with one documented exception. ISO 9053-2 Clause 5 NOTE
 warns that for materials whose visco-inertial transition frequency lies below
 100 Hz (coarse metal or plant fibres, low-porosity foams with big pores,
 coarse road pavements) the static method can legitimately give a different
@@ -501,14 +503,14 @@ where commercial absorber products cluster.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/flow_resistivity_window.svg" alt="Left panel: normal-incidence absorption against frequency for a 50 mm hard-backed porous layer at flow resistivities of 2, 8, 20, 33 and 100 kPa s per square metre, showing a transparent layer at the lowest value and a reflecting one at the highest. Right panel: absorption at 500 Hz and 1 kHz and the diffuse-field value against the dimensionless ratio sigma d over rho0 c0 on a logarithmic axis, with the region between 1 and 4 shaded" width="88%" />
 
 *The window, drawn. Left: the same 50 mm hard-backed layer at five
-resistivities. The 2 kPa·s/m² layer is too transparent everywhere — the wave
+resistivities. The 2 kPa·s/m² layer is too transparent everywhere. The wave
 passes through it, reflects off the wall and comes back out. The
 100 kPa·s/m² one leads below about 400 Hz, where more resistance still helps,
 and then saturates near 0.89 while the three window curves reach 1: above
 1 kHz the wave is reflecting off the face before the pores can act. Right: the
 same family read against the dimensionless $\sigma d/(\rho_0 c_0)$, with the
 $1$ to $4$ window shaded. The optimum is flat-topped, which is the practical
-point — a catalogue spread of tens of percent inside the window costs almost
+point. A catalogue spread of tens of percent inside the window costs almost
 nothing, and the same spread just outside it costs a great deal. Note also
 that the diffuse-field curve peaks lower on the axis than the
 normal-incidence one, so a layer optimised in the tube is slightly

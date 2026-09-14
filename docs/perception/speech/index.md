@@ -57,7 +57,7 @@ the STI consumes the impulse responses of
 hearing thresholds quantified in
 [Hearing threshold](../hearing/hearing-threshold.md). STOI and
 ESTOI have an upstream too, but a different kind of one: they take waveforms,
-so what feeds them is whatever produced the clean and the degraded recording —
+so what feeds them is whatever produced the clean and the degraded recording,
 which is why they sit beside the signal-processing tools of [Signals and
 spectra](../../signals/spectra/index.md) rather than beside a measurement
 standard.
@@ -91,6 +91,6 @@ loud and shouted speech spectra are carried for the one-third-octave procedure
 only, and the tabulated band-importance functions are each table's
 average-speech compromise, with Annex B's material-specific alternatives left
 to you through the `band_importance=` argument. There is no resampling between
-the four band procedures — each is fed spectra on its own bands. And the
+the four band procedures: each is fed spectra on its own bands. And the
 female speech option is not missing from the STI: Edition 5 of IEC 60268-16
 removed it, so there is nothing left to implement.

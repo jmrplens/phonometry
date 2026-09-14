@@ -959,8 +959,8 @@ def animate_instantaneous_intensity(output_dir: str) -> None:
     # Progressive: p and u in phase -> p·u >= 0, non-zero mean (net flow).
     # Standing (at a point): p and u 90 deg out of phase -> p·u averages zero.
     cases = [
-        (T("Progressive wave — active"), 0.0, T("p and u in phase")),
-        (T("Standing wave — reactive"), np.pi / 2, T("p and u 90° apart")),
+        (T("Progressive wave: active"), 0.0, T("p and u in phase")),
+        (T("Standing wave: reactive"), np.pi / 2, T("p and u 90° apart")),
     ]
     fig = _anim_figure()
     fig.suptitle(
@@ -1597,7 +1597,7 @@ def animate_flanking_paths(output_dir: str) -> None:
         lab = ax.text(
             lab_x,
             yt,
-            f"{pn['key']} — {pn['desc']}",
+            f"{pn['key']}: {pn['desc']}",
             ha="left",
             va="center",
             color=_pending_ink(pn["color"]),
@@ -1657,7 +1657,7 @@ def animate_flanking_paths(output_dir: str) -> None:
                 lab.set_color(pn["color"])
             arts += [pn["pulse"], pn["trail"], *pn["arcs"], lab]
         verdict.set_text(
-            T("$R\u2032_\\mathrm{w}$ sums all paths — always below the wall alone")
+            T("$R\u2032_\\mathrm{w}$ sums all paths: always below the wall alone")
             if tc >= 9.4
             else ""
         )
@@ -2478,7 +2478,7 @@ def animate_power_two_rooms(output_dir: str) -> None:
     note_a = ax_a.text(
         4.0,
         0.92,
-        T("direct sound only — no reflections"),
+        T("direct sound only, no reflections"),
         ha="center",
         va="bottom",
         color=COLOR_FG,
@@ -2838,7 +2838,7 @@ def animate_comb_filtering(output_dir: str) -> None:
     stages = (
         (2.0, T("high mic: dense comb")),
         (5.6, T("lower: notches move up")),
-        (9.0, T("on the floor: copies merge — no comb in band")),
+        (9.0, T("on the floor: copies merge, no comb in band")),
     )
     sweep_s = (_ANIM_FRAMES - _ANIM_HOLD) / _ANIM_FPS
 

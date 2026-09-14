@@ -102,7 +102,7 @@ $0.58\,c_0/d$ for a wide-spaced tube and the spacing singularity
 $0.45\,c_0/s$ once the microphones are far apart. The 100 mm tube with 100 mm
 spacing covers the 200 Hz to 1250 Hz one-third-octave bands and the 29 mm tube
 with 20 mm spacing the 1 kHz to 5 kHz bands, so the pair splices in the
-1 kHz to 1.25 kHz overlap — and even together they do not reach the 100 Hz,
+1 kHz to 1.25 kHz overlap, and even together they do not reach the 100 Hz,
 125 Hz and 160 Hz bands, which is why low-frequency absorption data come from
 the reverberation room and not from a tube. The ASTM bar is the same hardware
 under E2611's constants: wider at the bottom (a 1 % of wavelength floor
@@ -161,14 +161,14 @@ is a separate set of constraints, and Clause 4.3 fixes both ends of it.
 **Away from the source.** The loudspeaker radiates cross-modes as well as the
 plane wave. Below the first cut-on they die out within about three tube
 diameters, so the nearest microphone is recommended to be at least three
-diameters from the source and shall in any case be no closer than one — 300 mm
+diameters from the source and shall in any case be no closer than one: 300 mm
 and 100 mm respectively on the 100 mm tube of the figure above.
 
 **Away from the specimen.** The specimen distorts the field near its face too,
 and the minimum depends on what the specimen looks like: half a diameter for a
 *non-structured* sample, one diameter for a *semi-laterally structured* one,
 and two diameters for a *strongly asymmetrical* one. On a 100 mm tube that is
-50 mm, 100 mm and 200 mm — so the $x_1$ = 150 mm of the figure above is
+50 mm, 100 mm and 200 mm, so the $x_1$ = 150 mm of the figure above is
 comfortable for a plain porous sample, adequate for a perforated facing and
 too close for a strongly structured specimen such as a resonator array. Nothing
 enforces this: `reflection_factor` only rejects $x_1 \le 0$, so an $x_1$ chosen
@@ -182,7 +182,7 @@ and the microphone diameter under 20 % of the spacing, and small against
 $c_0/f_\mathrm{u}$, so the capsule averages a negligible piece of the wave
 (Clause 4.4). The reference plane, $x = 0$, is normally the specimen surface,
 but a profiled or laterally structured specimen has its reference plane placed
-some distance *in front* of it — and $x_1$ is measured to that plane, not to
+some distance *in front* of it, and $x_1$ is measured to that plane, not to
 the sample holder.
 
 The same helper covers square and rectangular tubes: pass `shape="square"` or
@@ -209,10 +209,10 @@ absorption of the modelled sample through the same reduction chain.
 
 A probe traverses the standing wave
 and reads the level difference $\Delta L = L_\text{max} - L_\text{min}$ between a
-pressure maximum and the adjacent minimum. The standing-wave ratio — written
+pressure maximum and the adjacent minimum. The standing-wave ratio (written
 $s$ in ISO 10534-1, the same letter Part 2 uses for the microphone spacing of
 section 1; the two never appear in the same equation, and the code keeps them
-apart as `swr` and `spacing` — follows in closed form together with the
+apart as `swr` and `spacing`) follows in closed form together with the
 reflection magnitude and the absorption:
 
 $$
@@ -385,12 +385,12 @@ plane to the farther microphone.
 
 **What an error in $x_1$ costs, and what it does not.** $x_1$ enters only
 through $e^{\,2 j k_0 x_1}$, a pure phase rotation. It therefore leaves
-$|r|$ — and hence the absorption spectrum — completely untouched, while
+$|r|$ (and hence the absorption spectrum) completely untouched, while
 rotating the real and imaginary parts of the surface impedance. At 1.5 kHz in
 air a 2 mm error in $x_1$ rotates the reflection phase by about 6°, enough to
 move a flow resistivity fitted from that impedance noticeably. The practical
-consequences are two: measure $x_1$ to the *reference plane* — the specimen
-face, or the plane in front of a profiled specimen — rather than to the sample
+consequences are two: measure $x_1$ to the *reference plane* (the specimen
+face, or the plane in front of a profiled specimen) rather than to the sample
 holder, since a specimen that does not sit where it was meant to moves $x_1$
 with it; and read a healthy-looking $\alpha$ beside an implausible impedance
 (a negative real part, say) as an $x_1$ or a mismatch fault, not as a material
@@ -432,16 +432,16 @@ normalised impedance, applying the plane-wave frequency-range check and optional
 tube attenuation. Its `.plot()` draws the absorption spectrum
 $\alpha(f)$ with the reflection-factor magnitude $|r|$ overlaid, and
 `normalized_surface_admittance(r)` gives the reciprocal quantity that a
-locally-reacting boundary condition — an FDTD or BEM wall, the library's own
-solver — consumes.
+locally-reacting boundary condition (an FDTD or BEM wall, the library's own
+solver) consumes.
 
 ### 3.1 Correcting the channel mismatch (Clause 7.5)
 
 A channel is a microphone plus its preamplifier plus its analyser input, and no
 two are identical. ISO 10534-2 Clause 7.5 does not recommend correcting for
 that, it **requires** it: "one of the following procedures … shall be used".
-Annex E.1.2 is blunter still — with two microphones the phase mismatch "is
-unavoidable and shall be compensated for" — and E.1.3 adds that the amplitudes
+Annex E.1.2 is blunter still (with two microphones the phase mismatch "is
+unavoidable and shall be compensated for") and E.1.3 adds that the amplitudes
 should be within 0.3 dB of each other to begin with. The correction is a
 complex division applied exactly where $|r|$ is small and the phase of
 $H_{12}$ carries the whole answer, which is why the symptom of skipping it is
@@ -449,8 +449,8 @@ frequency-dependent wander rather than an offset: the snippet below leaves a
 0.5 dB / 1° mismatch uncorrected on a specimen whose true absorption is 0.75
 and gets 0.73, 0.78 and 0.72 in three neighbouring bands. On a near-perfect
 absorber the same mismatch pushes the spectrum against the $\alpha = 1$
-ceiling, which is where the classic uncorrected-tube signature — an absorption
-just above 1 or just below 0 — comes from.
+ceiling, which is where the classic uncorrected-tube signature (an absorption
+just above 1 or just below 0) comes from.
 
 Both permitted procedures use the same measurement, made twice:
 
@@ -465,7 +465,7 @@ Both permitted procedures use the same measurement, made twice:
 The difference between the two procedures is only how often step 2 is done.
 Clause 7.5.1 repeats the swap for *every* specimen, which suits a small number
 of samples; Clause 7.5.2 determines $H_\mathrm{c}$ once against a calibration specimen
-and keeps it for the whole series, which suits a production run — after which
+and keeps it for the whole series, which suits a production run, after which
 the microphones must stay where they are. The one-microphone technique of
 Annex B needs no correction at all, because there is only one channel: it buys
 that with measurement time, and it is the same argument that makes the
@@ -519,7 +519,7 @@ trustworthy are most of ISO 10534-2. In the order they matter:
 - **The source end (Clauses 4.9, 4.11).** The loudspeaker membrane covers at
   least two thirds of the tube cross-section, sits in an insulating box against
   airborne flanking to the microphones, and is elastically isolated from the
-  tube — structure-borne excitation of the tube wall is a classic mimic of
+  tube: structure-borne excitation of the tube wall is a classic mimic of
   absorption. At least 200 mm of effective absorbent lining near the
   loudspeaker damps the air-column resonances.
 - **The specimen end (Clause 4.7).** The back plate is rigid and tightly fixed,
@@ -532,8 +532,8 @@ trustworthy are most of ISO 10534-2. In the order they matter:
   temperature under 0.2 dB.
 
 Everything the ISO 10534-2 report needs about the geometry is already in the
-fiche's metadata block — tube diameter and shape, microphone spacing, mounting,
-temperature and pressure — so that block reads as a report checklist rather
+fiche's metadata block (tube diameter and shape, microphone spacing, mounting,
+temperature and pressure), so that block reads as a report checklist rather
 than decoration.
 
 **Tube attenuation, and when to switch it on.** The plane wave in the tube is
@@ -549,7 +549,7 @@ reflected wave is already weak. Two cautions come with it. Clause A.2.1.5 says
 plainly that this estimate ignores porous or dirty walls and any object in the
 tube, so it is a **lower limit**: a large discrepancy is a sign to clean or
 re-qualify the tube, not a number to trust. And the standard prefers the
-measured route — determine the attenuation from the empty tube at mid and upper
+measured route: determine the attenuation from the empty tube at mid and upper
 frequencies (Eqs. (A.13)/(A.14), after every modification of the tube) and
 extrapolate downwards.
 
@@ -699,8 +699,8 @@ termination. The matrix has four unknowns, and one measurement of the four
 microphone transfer functions supplies only two independent equations, so the
 general method changes the termination and repeats the whole measurement:
 E2611 Clause 8.5.4.1 solves the two sets together (Eq. (22)). In practice the
-tube ends in a weakly anechoic termination — a wedge or pyramid of glass fibre
-about 30 cm long — and Clause 6.2.8 asks for it to be *easily removable*
+tube ends in a weakly anechoic termination (a wedge or pyramid of glass fibre
+about 30 cm long) and Clause 6.2.8 asks for it to be *easily removable*
 precisely so that an open or a blocked end can provide the second load. All
 four transfer functions of each load are referenced to one common channel, and
 each of them carries the same switched-configuration mismatch correction as
@@ -710,12 +710,12 @@ tube (Clause 6.4.2), as in Part 2.
 
 **The one-load method is not the general method with fewer steps.** Clause
 8.5.4.2 closes the system instead by *assuming* the specimen is geometrically
-symmetric — "presenting the same physical properties to the sound field on
-either side" — so that reciprocity gives $T_{11} = T_{22}$ and
+symmetric ("presenting the same physical properties to the sound field on
+either side") so that reciprocity gives $T_{11} = T_{22}$ and
 $T_{11}T_{22} - T_{12}T_{21} = 1$ (Eq. (23)), and one termination, preferably
 the anechoic one, is enough. That holds for a homogeneous layer and fails for
 any asymmetric build-up: a facing on one side, a gradient density, a mounted
-membrane, a stack of unequal layers — which is most of what people actually put
+membrane, a stack of unequal layers (which is most of what people actually put)
 in a transmission tube. `transfer_matrix_one_load` does not and cannot detect
 the asymmetry: it warns about the plane-wave range and about an ill-conditioned
 denominator, and otherwise returns a plausible, wrong matrix, and with it a
@@ -814,7 +814,7 @@ the tube wall. What the
 [sound reduction index $R$](/phonometry/buildings/insulation/insulation-lab/) is,
 is a diffuse-field quantity measured on a full-size element with its real
 mounting, and it carries the element's own bending waves, its edge conditions
-and its coincidence dip — none of which exist inside a tube. Expect the
+and its coincidence dip, none of which exist inside a tube. Expect the
 normal-incidence value to sit *above* a field-incidence estimate for a
 mass-controlled layer, and expect the tube to miss the resonance and
 coincidence dips of a real panel entirely. Use the tube TL to compare

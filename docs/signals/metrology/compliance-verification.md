@@ -153,8 +153,8 @@ neither is something a software library can run on itself.
 filters) is the type-approval regime a *model* passes once: the tests
 necessary to verify conformance to **all mandatory specifications** of the
 Part 1 (IEC 61672-2:2013 clause 1; IEC 61260-2:2016 subclause 1.1), on
-physical specimens — IEC 61260-2 requires at least three of them
-(subclause 4.1). That includes everything a transfer function does not have:
+physical specimens (IEC 61260-2 requires at least three of them
+(subclause 4.1)). That includes everything a transfer function does not have:
 static pressure, air temperature and humidity influence, electrostatic and
 radio-frequency immunity, directional response, acoustical tests of the
 weightings with the microphone in the sound field, level linearity of real
@@ -178,7 +178,7 @@ software inherits it. A verdict from one of the five that grade a measurement
 is narrower still: it belongs to the numbers somebody put in, on the day they
 were measured, and nothing else inherits it. Neither is a pattern evaluation,
 a periodic test, or a certificate for any physical device: nothing here has a microphone, a temperature or a serial
-number, and a real front end brings its own paper — the meter's periodic
+number, and a real front end brings its own paper: the meter's periodic
 test per IEC 61672-3 and the calibrator's conformance per IEC 60942, both
 discussed in [Calibration and dBFS](calibration.md). A defensible report
 names both verdicts: the library's design verdict with the version and its

@@ -499,7 +499,7 @@ def generate_fdtd_plane_wave_launch(output_dir: str) -> None:
     ax_t.set_title("Cut across the front (row 80)", pad=10)
     ax_t.annotate(
         "largest difference between neighbouring columns:\n"
-        f"{spread:.1e} Pa — the row is bit-identical",
+        f"{spread:.1e} Pa, so the row is bit-identical",
         xy=(0.03, 0.88),
         xycoords="axes fraction",
         fontsize=9,

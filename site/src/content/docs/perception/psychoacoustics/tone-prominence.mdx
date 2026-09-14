@@ -53,7 +53,7 @@ Three numbers, in that order: the ratio is the tone's excess over its masking
 noise in decibels, the criterion is the frequency-dependent line it has to
 clear, and `prominent` is the comparison of the two. Quote a result as
 "TNR = 45.6 dB against an 8.0 dB criterion at 1 kHz, prominent by 37.6 dB",
-never as a bare boolean — the margin is what tells a reviewer whether the
+never as a bare boolean: the margin is what tells a reviewer whether the
 verdict survives the measurement uncertainty. (This synthetic tone is
 absurdly prominent; the 250 Hz fan tone further down clears its criterion by
 2.1 dB, which is the interesting case.)
@@ -232,7 +232,7 @@ frequency for the whole average. A fan or pump whose speed drifts smears the
 tone across many bins: the tone band widens, part of the tone is counted as
 masking noise, and the TNR reads low, while the PR is affected less but still
 sees a smeared band. Clause 11.2 gives the diagnostic rather than leaving it to
-judgement — if the tone band is wider than 15 % of the critical bandwidth,
+judgement: if the tone band is wider than 15 % of the critical bandwidth,
 repeat the analysis with a finer resolution, and a tone band that *stays* wider
 than 15 % through that iteration indicates a tone of time-varying frequency or
 another phenomenon. At that point the assessment is invalid rather than merely
@@ -258,7 +258,7 @@ library performs.
 />
 
 **Which position's numbers are reported.** ECMA-418-1 clause 6 is explicit. If
-the equipment has an operator position, measure there — at the loudest of them
+the equipment has an operator position, measure there: at the loudest of them
 when there is more than one, judged by the A-weighted level. If it has none,
 measure at the bystander position with the highest A-weighted level *and* at
 every other bystander position within 0.5 dB of it. The geometry comes from
@@ -292,7 +292,7 @@ bandwidth, and if it does, the analysis is repeated finer.
 
 **The weighting trap.** Clause 7 forbids any frequency weighting on the
 analyser input, A-weighting included. Both ratios compare levels inside and
-across critical bands, so a weighting curve tilts the comparison — harmless for
+across critical bands, so a weighting curve tilts the comparison: harmless for
 a TNR at 1 kHz, worth several tenths of a decibel for a PR at low frequency,
 where the A-curve falls steeply across three consecutive critical bands. The
 ratios are indifferent to *absolute* calibration but not to spectral shape,

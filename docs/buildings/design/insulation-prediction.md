@@ -350,7 +350,7 @@ converted to their in-situ values before the paths are formed. Use the
 simplified model here when only the weighted element ratings are known and the
 question is whether the room passes; use the detailed one when the element
 spectra exist and the question is which path sets which band. The element
-inputs themselves — $R_\mathrm{w}$, $\Delta R_\mathrm{w}$, $\Delta L_\mathrm{w}$, mass per unit area —
+inputs themselves ($R_\mathrm{w}$, $\Delta R_\mathrm{w}$, $\Delta L_\mathrm{w}$, mass per unit area)
 are taken as given, from laboratory data or from the mass-law estimates of
 [Predicting panel sound insulation](panel-sound-insulation.md). **EN 12354-5**
 (service equipment) is in

@@ -1463,7 +1463,7 @@ def _d_standing_wave_tube(s: SVG, th: Theme) -> None:
     s.text(
         450,
         648,
-        "magnitude from the ratio, phase from the position — which is why "
+        "magnitude from the ratio, phase from the position, which is why "
         "Part 1 is the arbitration method",
         13,
         th.muted,

@@ -68,7 +68,7 @@ and the numbers are meaningless without it.
 
 **The bench.** Clause 3.1.2 puts the amplifier under *rated conditions*: the
 rated power supply; the source e.m.f. applied through the **rated source
-impedance**; the output terminals loaded with the **rated load impedance** — a
+impedance**; the output terminals loaded with the **rated load impedance**: a
 non-inductive power resistor, not a loudspeaker, so the load is known and the
 measurement repeatable; the source a sinusoid at the 1 kHz standard reference
 frequency of IEC 60268-1; the volume control set so that the rated
@@ -88,8 +88,8 @@ quoted without its level cannot be compared with either.
 
 **Two conditions that are easy to skip.** A Class D output must pass the
 analogue low-pass filter of IEC 61606-1 between the load and the analyser
-(clause 3.1.2, NOTE 2, Figure 2), or the switching residual is counted as noise
-— and the AES17 20 kHz digital band-limit of section 2 cannot remove a residual
+(clause 3.1.2, NOTE 2, Figure 2), or the switching residual is counted as noise,
+and the AES17 20 kHz digital band-limit of section 2 cannot remove a residual
 that has already aliased inside the converter. And clause 9 requires the
 amplifier to be run under approximately standard measuring conditions for 1 h
 before the first reading, because internal heating moves the output voltage.
@@ -123,8 +123,8 @@ total). The tones should fall on FFT bins: use coherent sampling (an integer
 number of periods) or a low-leakage window so the amplitudes are read without
 spectral leakage.
 
-Only the harmonics that fall **below Nyquist** are summed — the implementation
-stops the sum at the first order that reaches $f_\mathrm{s}/2$ — so the effective order
+Only the harmonics that fall **below Nyquist** are summed: the implementation
+stops the sum at the first order that reaches $f_\mathrm{s}/2$, so the effective order
 count shrinks as the test frequency rises: at 48 kHz a 1 kHz test sums ten
 orders and a 7 kHz test sums two, and a THD sweep at fixed `n_harmonics` is not
 measuring the same quantity at both ends. Sample at 96 kHz or higher when
@@ -139,9 +139,9 @@ quotes every figure with its frequency and its input or output level, and why a
 curve of THD against level says more than any single number: an amplifier is
 cleanest at a few watts and folds over near clipping, while a loudspeaker's THD
 grows monotonically with excursion. The orders of magnitude are worth
-carrying — below 0.01 % for a competent power amplifier at rated output, 0.1 to
+carrying: below 0.01 % for a competent power amplifier at rated output, 0.1 to
 1 % for a converter chain, 1 to 3 % for a direct radiator through its mid band
-and around 10 % where it reaches its excursion limit — because they mean a
+and around 10 % where it reaches its excursion limit, because they mean a
 "2 %" reading condemns an amplifier and is unremarkable for a woofer.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/distortion.svg" alt="Magnitude spectrum of a 1 kHz single-tone test in dB relative to the fundamental, with the first five harmonics marked above a broadband noise floor, annotated with THD (F), THD (R), THD+N and SINAD" width="82%" loading="eager" />
@@ -216,7 +216,7 @@ plt.show()
 - *Band ceiling* (14.12.4.1). If the harmonics that matter fall above the upper
   limit of the amplifier or of the analyser, the measured THD is misleadingly
   low. The highest valid fundamental is $f_\text{limit}/n$ for the highest
-  significant order $n$ — the clause's own case is a 30 kHz limit with a
+  significant order $n$: the clause's own case is a 30 kHz limit with a
   significant fifth harmonic, giving 6 kHz, or 10 kHz if the third is the
   highest that matters. A THD sweep taken to 10 kHz at 48 kHz sampling falls
   for that reason and not because the device improved.
@@ -353,7 +353,7 @@ at 48 kHz would revisit the same 48 samples for ever and hide the
 differential-non-linearity errors of the codes it never touches. The -60 dBFS
 level keeps the converter well clear of its own overload region, where its
 distortion rather than its noise would dominate, while still giving the notch a
-fundamental to remove — which is why the result is referred to full scale and
+fundamental to remove, which is why the result is referred to full scale and
 not to the test tone.
 
 Read the output on this scale. A correctly dithered 16-bit path is bounded at
@@ -375,7 +375,7 @@ tests, each with its own per-order definition; the last is a fixed-tone variant
 of the second, and the bullets run in clause order:
 
 - **Modulation distortion** (14.12.7): a large low tone $f_1$ and a small high
-  tone $f_2$, whose *amplitude* ratio — not a frequency ratio — is preferably
+  tone $f_2$, whose *amplitude* ratio (not a frequency ratio) is preferably
   4:1, which the clause realises by setting the $f_1$ output 12 dB and the
   $f_2$ output 24 dB below the rated output voltage. The frequencies are
   chosen far apart (60 Hz and 7 kHz here) so the sidebands are resolvable and
@@ -408,8 +408,8 @@ harmonics of the test tones fall outside it altogether, and DIM for anything
 with feedback and a slew-rate limit. The reason to run any of them once a THD
 is already in hand is that intermodulation products are *inharmonic*: the ear
 reads them as roughness rather than as timbre and hears them at levels an equal
-THD would pass unnoticed, and a device with memory — a thermally modulated
-amplifier, a woofer Doppler-shifting a tweeter's output — can show a low THD
+THD would pass unnoticed, and a device with memory (a thermally modulated
+amplifier, a woofer Doppler-shifting a tweeter's output) can show a low THD
 and poor modulation distortion.
 
 One warning about the reference. IEC 60268-3 admits two presentations of the
@@ -467,7 +467,7 @@ plt.show()
 </details>
 
 The other three tests return scalars, so the only way to see *which* products
-each of them counts — the entire difference between them — is to mark them on
+each of them counts (the entire difference between them) is to mark them on
 the spectrum of one device:
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/intermodulation_tests.svg" alt="Three stacked spectra of the same weakly non-linear device: the difference-frequency test at 13 and 14 kHz with the second-order product at 1 kHz and the two third-order products at 12 and 15 kHz tagged; the total difference-frequency test at 8 and 11.95 kHz with only the two in-band products near 3.95 and 4.05 kHz shaded; and the dynamic-intermodulation signal, whose low-passed 3.15 kHz square-wave comb beats against the 15 kHz sine to leave a set of products below 15 kHz, each stemmed and labelled with its harmonic index k" width="92%" />
@@ -545,8 +545,8 @@ like a noisy device. Tap the reference electrically after the generator rather
 than reusing the ideal array you generated, so that whatever the generator
 itself does appears in both channels and cancels. Excite with broadband noise
 or a sweep at a level that keeps the device at the operating point of section
-0. Remove the delay between the two channels — or make the Welch segment
-several times longer than it — because an uncompensated delay both tilts the
+0. Remove the delay between the two channels, or make the Welch segment
+several times longer than it, because an uncompensated delay both tilts the
 $H_1$ phase and depresses $\gamma^2$ band by band. `transfer_function` picks
 `nperseg` for about 4 Hz resolution when you do not give it one; the physical
 arrangement is the one drawn on
@@ -556,8 +556,8 @@ arrangement is the one drawn on
 causes and they are told apart by experiment: extraneous noise on either
 channel (the coherence recovers when the excitation level is raised),
 non-linearity in the device (it falls at high drive and recovers at low drive),
-and bias errors — leakage where the resolution is too coarse near a sharp
-resonance, and above all a delay longer than the segment. Averaging is what
+and bias errors (leakage where the resolution is too coarse near a sharp
+resonance, and above all a delay longer than the segment). Averaging is what
 converts the coherence into an error bar: the normalised random error of the
 $|H_1|$ estimate is
 $\varepsilon = \sqrt{1-\gamma^2}\,/\,(|\gamma|\sqrt{2 n_\mathrm{d}})$ for $n_\mathrm{d}$

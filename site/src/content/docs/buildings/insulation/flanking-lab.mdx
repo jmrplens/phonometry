@@ -149,7 +149,7 @@ averaging detector.
 
 Expect a few tenths of a second on a heavy concrete plate built into a
 building, falling with frequency, and much less on a well-damped lightweight
-element — which is why the lightweight route of Formula (14) drops $T_\mathrm{s}$
+element, which is why the lightweight route of Formula (14) drops $T_\mathrm{s}$
 entirely. The loss-factor identity is the sanity check on a measured value: at
 500 Hz a $T_\mathrm{s}$ of 0.35 s gives $\eta = 2.2/(500 \times 0.35) = 0.013$, a
 plausible total loss factor for an in-situ heavy plate, while an $\eta$ coming
@@ -167,8 +167,8 @@ octave bands (Annex A).
 
 *$K_{ij}$ climbs steadily with frequency for a rigid junction of heavy walls,
 so no single band represents it. The dashed line is the arithmetic mean over
-200–1250 Hz, the range Annex A prescribes, and it is that mean — not the curve
-— that an EN 12354 prediction consumes.*
+200–1250 Hz, the range Annex A prescribes, and it is that mean (not the curve)
+that an EN 12354 prediction consumes.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -312,7 +312,7 @@ exceeds 10 dB (Formulae (23) and (24)). Heavy shielding on a light element can
 change the very transmission being measured and is to be avoided. **A $K_{ij}$
 or $D_\mathrm{n,f}$ quoted without a statement of how the other elements were
 shielded, and of how that shielding was verified, is a room-pair number with a
-path label attached to it** — and it flows straight into an EN 12354
+path label attached to it.** And it flows straight into an EN 12354
 prediction, where the error is unbounded in direction.
 
 **Accelerometers (Clause 7.2.3).** Mounted directly on the surface of the test
@@ -330,13 +330,13 @@ the lowest.
 **Excitation (Clause 7.2.4).** Steady-state, from an electrodynamic shaker
 driven with noise or from a tapping machine (adapted for walls, with the
 impacts mechanically controlled to repeat), or transient, from single or
-manually repeated hammer blows — in which case $D_{v,ij}$ must be measured on
+manually repeated hammer blows, in which case $D_{v,ij}$ must be measured on
 both elements **simultaneously**. Manual multiple hits are spread over 1 m² to
 2 m² at 1 Hz to 2 Hz over 20 s to 30 s. In every band the receiving element's
 velocity level must exceed the background by at least 10 dB; below that, the
 ISO 10140-4 correction applies and must not exceed 1.3 dB. Take care that the
 source's own airborne noise, or radiation from the excited element, does not
-excite the others — that is the same failure the shielding exists to prevent,
+excite the others. That is the same failure the shielding exists to prevent,
 arriving by a different route.
 
 **Positions (Clause 7.2.5).** At least **four** excitation positions on a
@@ -369,8 +369,8 @@ open-plan fit-out, and it is not what a partition's $R_\mathrm{w}$ describes.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/ceiling_plenum_flanking.svg" alt="Two panels: the ceiling-plenum flanking reduction index Rcl per octave band for two plenum depths against the sum of the two ceiling reduction indices, and the normalized ceiling attenuation of an accredited ASTM E1414 test report with the fitted ASTM E413 contour and its shaded deficiencies giving CAC 34" width="92%" />
 
-*Left: the plenum charges a fixed penalty against the sum of the two ceilings —
-about 10 dB for this geometry — and doubling its depth pays back only 3 dB of
+*Left: the plenum charges a fixed penalty against the sum of the two ceilings
+(about 10 dB for this geometry), and doubling its depth pays back only 3 dB of
 it, which is why the tile is the lever and the void is not. Right: the same
 quantity as an accredited laboratory measures it, with the ASTM E413 contour
 fitted to the measured $D_\mathrm{n,c}$ and its deficiencies shaded; the class is read

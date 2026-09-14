@@ -418,7 +418,7 @@ and `align_impulse_responses`; and the Hilbert `envelope` with instantaneous
 phase and frequency (Chapter 13).
 
 **Not covered.** `correlation` and `time_delay` model one common-path delay
-between exactly two sensors — the $y(t) = \alpha\,x(t-\tau_0) + n(t)$ model of
+between exactly two sensors, the $y(t) = \alpha\,x(t-\tau_0) + n(t)$ model of
 Eq. 5.21. A record with several arrivals, a direct path plus reflections, is
 not separated: the direct correlator reports the single largest peak, the same
 limitation `echo_detection` carries on the

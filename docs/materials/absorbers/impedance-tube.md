@@ -213,7 +213,7 @@ Two practical cautions from the standard's own text. The minima far from the
 sample are shallower than the theory above says, because the travelling waves
 decay along the tube (viscous and thermal losses at the wall); ISO 10534-1
 has the operator read the minimum **nearest** the sample and, for precision
-work, extrapolate the minimum levels to the sample face — that extrapolation,
+work, extrapolate the minimum levels to the sample face: that extrapolation,
 like the standard's probe-body corrections, stays with the operator: the
 closed forms here consume the levels as read. And the method
 leans on the purity of the tone: any harmonic distortion from a hard-driven

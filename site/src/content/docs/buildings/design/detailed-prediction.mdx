@@ -70,9 +70,9 @@ $T_\mathrm{s,situ} = T_\mathrm{s,lab}$, so the in-situ correction is 0 dB and
 $R_\mathrm{situ} = R$.
 
 The Annex L building, and steps 1 to 5 below, are the Type A branch. Two
-consequences are worth carrying. The classification is **per frequency band** —
+consequences are worth carrying. The classification is **per frequency band**.
 Notes 2 to both definitions say a masonry wall can be Type A low and mid and
-Type B at the top of the range — so the binary heading of the lightweight section
+Type B at the top of the range, so the binary heading of the lightweight section
 further down is a simplification of a boundary that actually moves with
 frequency. And at a mixed junction (clause 4.2.2.3, "for example Type B wall on
 Type A floor") Formula (10) may still be used as an approximation, with the Type
@@ -179,7 +179,7 @@ $T_\mathrm{s,situ}$ comes from the same Formula (C.1) chain the page already run
 critical frequency a laboratory $R$ contains forced transmission, which a
 flanking path does not carry: only free bending waves cross a junction. Annex B.1
 therefore corrects a measured $R$ to resonant transmission only before it enters
-a flanking path — the 8 dB estimate for a single frame element without a cavity —
+a flanking path (the 8 dB estimate for a single frame element without a cavity)
 while the **direct** path keeps the forced transmission the laboratory measured.
 That is `resonant_sound_reduction_index`, and `in_situ_element(...,
 resonant_only=True)` does the same on a calculated element.
@@ -231,7 +231,7 @@ r_flanking = building.resonant_sound_reduction_index(r_situ, bands,
 
 | Quantity | Where it comes from |
 | :--- | :--- |
-| $R$, $L_\mathrm{n}$ per band | ISO 10140-2 / ISO 10140-3 test report — **with the laboratory structural reverberation time from the same report** |
+| $R$, $L_\mathrm{n}$ per band | ISO 10140-2 / ISO 10140-3 test report (**with the laboratory structural reverberation time from the same report**) |
 | $\Delta R$ of a lining | ISO 10140-1 Annex G, or ISO 12354-1 Annex D |
 | $\Delta L$ of a covering | [ISO 16251-1](/phonometry/buildings/design/impact-improvement/) or ISO 10140-3 |
 | $K_{ij}$ per junction | ISO 10848-1/-4, or the [Annex E catalogue](/phonometry/buildings/design/insulation-prediction/) |
@@ -494,7 +494,7 @@ plt.show()
 
 Read the rating the same way. $L'_\mathrm{n,w} = 41$ dB with $C_\mathrm{I} = +2$ dB means the
 unweighted, walking-relevant level sits above the weighted rating, which is the
-signature of a floor whose improvement is concentrated high up — exactly what a
+signature of a floor whose improvement is concentrated high up, exactly what a
 floating floor with $f_0 = 52{,}8$ Hz and a 30 lg law does. Three levers move it,
 in the order the model responds to them: a *softer* resilient layer lowers $f_0$
 and lifts the whole improvement curve; a *heavier* base slab lowers the bare
@@ -656,7 +656,7 @@ assembly and ISO 717 rating through `detailed_airborne_prediction` and
 `reciprocity_impact_level`; and the two fiches through `.report()`. The
 airborne model is stated by Clause 5 to carry no bias error and a standard
 deviation of 1,5 dB to 2,5 dB for buildings of homogeneous elements, assuming
-good workmanship — the lower figure when every aspect is taken into account,
+good workmanship: the lower figure when every aspect is taken into account,
 the higher for complex situations or when the structural reverberation time is
 neglected.
 </ScopeClaim>

@@ -538,7 +538,7 @@ presión cuadrática media que lejos de ella, así que un micrófono a 50 mm del
 elemento lee 3 dB por encima del promedio de recinto de ese mismo campo. El
 promedio de recinto de la parte 1 no arrastra esa acumulación y resta 6; el
 promedio de superficie sí la arrastra y resta 9. Todo lo demás de la fórmula
-—la razón de áreas, el signo de la intensidad, la combinación de subáreas— es
+(la razón de áreas, el signo de la intensidad, la combinación de subáreas) es
 el método que ya se tiene.
 
 El precio es una condición de validez que la parte 1 no tiene. La duplicación
@@ -615,9 +615,9 @@ print(desnudo.surface_pressure_intensity_indicator, desnudo.qualified)   # None 
 ```
 
 Una banda rechazada se marca, no se descarta. La respuesta de la norma a un
-$F_{pI}$ por encima del límite es mejorar el entorno de medición —aumentar
+$F_{pI}$ por encima del límite es mejorar el entorno de medición: aumentar
 primero la distancia de medición entre 5 y 10 cm, luego reducir los flancos o
-mejorar el absorbente opuesto—, así que el índice se calcula igual y el
+mejorar el absorbente opuesto. Por eso el índice se calcula igual y el
 veredicto viaja a su lado.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/low_frequency_intensity.svg" alt="Izquierda: el índice de reducción acústica por intensidad a baja frecuencia por banda de tercio de octava de 50 Hz a 160 Hz en barras, con las bandas de 50 y 63 Hz rayadas porque su indicador presión-intensidad superficial supera los 10 dB, y el indicador dibujado como curva en un eje gemelo frente a su línea de límite de 10 dB. Derecha: el índice de reducción acústica calculado del panel flexible del anexo A con la tolerancia de 4 dB que el anexo admite sombreada a su alrededor y una curva medida que se mantiene dentro" width="92%" />

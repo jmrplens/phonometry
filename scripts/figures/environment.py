@@ -285,10 +285,10 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
     pos_bottom = np.zeros(len(bands))
     neg_bottom = np.zeros(len(bands))
     for term, color, label in [
-        (att.a_div, COLOR_PRIMARY, r"$A_{\mathrm{div}}$ — divergence"),
-        (att.a_atm, COLOR_TERTIARY, r"$A_{\mathrm{atm}}$ — atmospheric"),
-        (att.a_gr, "#9467bd", r"$A_{\mathrm{gr}}$ — ground"),
-        (att.a_bar, "#ff7f0e", r"$A_{\mathrm{bar}}$ — barrier"),
+        (att.a_div, COLOR_PRIMARY, r"$A_{\mathrm{div}}$: divergence"),
+        (att.a_atm, COLOR_TERTIARY, r"$A_{\mathrm{atm}}$: atmospheric"),
+        (att.a_gr, "#9467bd", r"$A_{\mathrm{gr}}$: ground"),
+        (att.a_bar, "#ff7f0e", r"$A_{\mathrm{bar}}$: barrier"),
     ]:
         bottom = np.where(term >= 0.0, pos_bottom, neg_bottom)
         ax.bar(
@@ -313,7 +313,7 @@ def generate_outdoor_attenuation_breakdown(output_dir: str) -> None:
         markerfacecolor="white",
         markeredgewidth=1.4,
         zorder=5,
-        label="$A$ — total",
+        label="$A$: total",
     )
 
     ax.set_title("ISO 9613-2 Attenuation Breakdown (with a 4 m barrier)", pad=12)
@@ -439,7 +439,7 @@ def generate_cnossos_road_speed_law(output_dir: str) -> None:
             ]
         )
         ax.plot(
-            speeds, total, color=color, linewidth=2.4, zorder=5, label=f"{name} — total"
+            speeds, total, color=color, linewidth=2.4, zorder=5, label=f"{name}: total"
         )
         ax.plot(
             speeds,
@@ -448,7 +448,7 @@ def generate_cnossos_road_speed_law(output_dir: str) -> None:
             linewidth=1.3,
             linestyle="--",
             zorder=4,
-            label=f"{name} — rolling",
+            label=f"{name}: rolling",
         )
         ax.plot(
             speeds,
@@ -457,7 +457,7 @@ def generate_cnossos_road_speed_law(output_dir: str) -> None:
             linewidth=1.3,
             linestyle=":",
             zorder=4,
-            label=f"{name} — propulsion",
+            label=f"{name}: propulsion",
         )
         crossing = int(np.argmin(np.abs(rolling - propulsion)))
         ax.plot(
@@ -1570,7 +1570,7 @@ def generate_ground_reflection_coefficient(output_dir: str) -> None:
         rp_mag,
         color=COLOR_PRIMARY,
         linewidth=2.0,
-        label=r"$|R_{\mathrm{p}}|$ — plane wave",
+        label=r"$|R_{\mathrm{p}}|$: plane wave",
         zorder=4,
     )
     left.semilogx(
@@ -1578,7 +1578,7 @@ def generate_ground_reflection_coefficient(output_dir: str) -> None:
         q_mag,
         color=COLOR_SECONDARY,
         linewidth=2.0,
-        label="$|Q|$ — spherical wave",
+        label="$|Q|$: spherical wave",
         zorder=4,
     )
     left.invert_xaxis()

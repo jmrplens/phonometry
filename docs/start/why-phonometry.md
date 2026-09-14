@@ -76,7 +76,7 @@ level.
 
 Table 4 fixes the excitation but not the plumbing, so here is the plumbing. A
 4 kHz sine is generated at 48 kHz for 2 s. The **reference** is the steady Fast
-level of that continuous sine, averaged over its last half second — once the
+level of that continuous sine, averaged over its last half second. Once the
 integrator has settled, this is $L_\mathrm{A}$ in the standard's notation. The
 burst of the stated duration is then cut out of *the same* sine, so its phase
 and amplitude are identical to the reference tone's, and zeros surround it. The
@@ -105,7 +105,7 @@ allowance, because a detector that
 solves the defining equation has no free parameter left to get wrong. A block
 integrator can also sit inside class 1 at a favourable alignment, but what it
 spends of the budget is set by how the burst happens to straddle a 125 ms
-block, which is luck rather than design — and the first column of Table 4
+block, which is luck rather than design. The first column of Table 4
 tightens to ±0.5 dB for bursts of 200 ms and longer, where there is little
 margin left to lose.
 

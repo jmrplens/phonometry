@@ -94,7 +94,7 @@ metadata header (company, worker or group, workplace, date of assessment), a
 table of the median $N_{50}$ and the fractile NIPTS at the six audiometric
 frequencies beside the spectrum plot with its fractile band, and the boxed
 shift averaged over the 2/3/4 kHz hearing-handicap set together with the
-exposure conditions — $L_\mathrm{EX,8h}$, the duration in years and the population
+exposure conditions: $L_\mathrm{EX,8h}$, the duration in years and the population
 percentage $Q$. Two notes keep it honest and both are printed on the fiche:
 the values are a statistical prediction for the exposed population, not
 anyone's audiogram, and ISO 1999 leaves the choice of handicap frequencies to
@@ -230,8 +230,8 @@ externally supplied HTLA array; computing database B itself is out of scope.
 **Test-report fiche.** `HtlanResult.report(path)` renders the companion fiche
 for the combined threshold, following ISO 1999:2013 clause 6.1. It carries the
 same prediction-basis line and metadata header as the NIPTS fiche, but its
-table has three columns — the age component $H$, the noise component $N$ and
-the combined $H'$ at each audiometric frequency — beside the three-curve plot,
+table has three columns (the age component $H$, the noise component $N$ and
+the combined $H'$ at each audiometric frequency) beside the three-curve plot,
 and the boxed value is the threshold averaged over the 2/3/4 kHz
 hearing-handicap set, printed with the listener and exposure conditions (age
 and sex, $L_\mathrm{EX,8h}$ over the exposure years, and the population percentage

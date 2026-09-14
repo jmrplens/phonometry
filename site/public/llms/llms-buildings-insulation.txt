@@ -432,7 +432,7 @@ procedures behind them.
 and implemented nowhere: nothing checks the position counts, the separations,
 the averaging times, the band range, the test-opening geometry or the
 loss-factor requirement. The mounting condition survives only as free text in
-the report metadata — which is what ISO 10140-1 asks for, since it requires a
+the report metadata: this is what ISO 10140-1 asks for, since it requires a
 mounting to be *described* rather than picked from a list. Nothing estimates
 the suite's $R'_\text{max}$ either, so a result approaching the facility's
 ceiling is produced without complaint; that qualification comes from the
@@ -581,9 +581,9 @@ plt.show()
 Both levels are already-measured inputs: the scanning probe, the
 two-microphone acquisition and the phase-mismatch calibration behind $L_{p1}$
 and $L_{I\mathrm{n}}$ are not implemented, and nothing here enforces the Clause 6.4
-acquisition either — the 0.1 m to 0.3 m measurement distance, the 0.1 m/s to
+acquisition either (the 0.1 m to 0.3 m measurement distance, the 0.1 m/s to
 0.3 m/s scan speed, the 90°-rotated second scan with its 1.0 dB validity
-test, the 10 dB background margin — so a single scan will produce a number
+test, the 10 dB background margin); so a single scan will produce a number
 just as readily as a qualified pair.
 
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
@@ -767,7 +767,7 @@ that is exactly where a source room stops being able to answer. A room a
 laboratory can build has too few modes down there for a space average to
 describe the field driving the specimen: move the microphones and the average
 moves with them. ISO 15186-3 keeps the intensity probe on the receiving side
-and changes the other end of the measurement — the source-room level is read
+and changes the other end of the measurement: the source-room level is read
 **on the surface of the test specimen itself**, from fixed microphones no more
 than 50 mm from it (Clause 6.3):
 
@@ -793,7 +793,7 @@ of it, and Clause 1.1 says what to do instead: combine these results with
 ISO 140-3 and ISO 15186-1 into one curve over 50 Hz to 5000 Hz. The Clause 6.4.2
 indicator $F_{pI} = L_p - L_{I\mathrm{n}}$ is the same as everywhere else in the
 series, and both of its levels are read on the measurement surface in the
-*receiving* room — not the surface level Formula (7) is built from. Its two
+*receiving* room, not the surface level Formula (7) is built from. Its two
 limits distinguish the specimen: $F_{pI} > 10$ dB refuses a sound-reflecting one
 and $F_{pI} > 6$ dB one presenting a sound-absorbing surface in the receiving
 room. Since the standard asks for that second pressure measurement only "if
@@ -839,7 +839,7 @@ D_{I\mathrm{n,e}} = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} - 10\lg\frac{A_
 $$
 
 The $10\lg N$ inside the bracket is subtracted, so it reaches $D_{I\mathrm{n,e}}$
-**added** — the sign this library derives, and the opposite of what
+**added**: the sign this library derives, and the opposite of what
 ISO 15186-1 prints for the same quantity. Two parts of one series print the
 two signs; this is the one that agrees with the physics and with
 ISO 10140-2 Formula (6). The Part 1 print is registered in
@@ -858,7 +858,7 @@ print(np.round(element.d_i_n_e, 1))     # [32. 33. 34. 36. 37. 39.]
 
 Annex A is normative: measure a limp panel of more than 1 m², calculate what
 it should read, and require the two to agree within **4,0 dB** from 50 Hz to
-160 Hz. The calculated half is forced transmission alone — mass law reduced by
+160 Hz. The calculated half is forced transmission alone: mass law reduced by
 the radiation efficiency of a plate driven by a diffuse field,
 
 $$
@@ -1021,10 +1021,10 @@ $\overline{K}_{ij}$, as Part 4 Clause 9 requires. Because ISO 10848 contains no
 worked numeric example, conformance is anchored on closed-form identities
 (simplified $K_{ij}$, $a_j$ at $f_\mathrm{ref}$, $\eta$).
 
-Those checks are the only enforcement there is. The acquisition itself —
-shielding the other elements, a shield meeting $\Delta R_\text{min}$, the
+Those checks are the only enforcement there is. The acquisition itself
+(shielding the other elements, a shield meeting $\Delta R_\text{min}$, the
 position counts and separations, the accelerometer mass-loading inequality,
-$T_\mathrm{s}$ measured on the elements in their installed state rather than assumed —
+$T_\mathrm{s}$ measured on the elements in their installed state rather than assumed)
 is the operator's responsibility, and nothing here checks any of it.
 
 ```python
@@ -1897,15 +1897,15 @@ ISO 16283 family (ISO 16283-3:2016) has its own page.
 
 **Not covered.** Every field function takes levels the caller has already
 corrected for background noise (ISO 16283-1 Clause 9.2). Measuring the
-background level — source off, same positions, same averaging — is the
+background level (source off, same positions, same averaging) is the
 operator's job, and nothing here verifies that the 6 dB floor was met.
 (`background_correction` is the **ISO 10140-4** *laboratory* variant and does
 not match the field thresholds.) The position counts, distances and
 placements of ISO 16283-1/-2 are documented above and checked nowhere: energy
 averaging happens once positions are supplied, but nothing verifies how many
-were taken or where. The low-frequency procedure of Clause 8 *is* implemented
-— the 25 m³ trigger, Formula (12), Formula (13) and the 63 Hz octave
-reverberation time of Clause 10.4 — but it is fed corner levels the operator
+were taken or where. The low-frequency procedure of Clause 8 *is* implemented:
+the 25 m³ trigger, Formula (12), Formula (13) and the 63 Hz octave
+reverberation time of Clause 10.4, but it is fed corner levels the operator
 measured, and the only sampling requirement it enforces is a warning below the
 four corners per source position Clause 8.3 asks for.
 The other members of the family have their own pages: the façade part
@@ -2930,7 +2930,7 @@ What the functions do not do is police the survey. They consume band levels
 wherever they came from: nothing verifies the sweep, the source corner, the
 tapping-machine positions or the one-corner-plus-two-central
 service-equipment recipe, and nothing checks the 6 dB signal-to-background
-floor of Clause 6.2.1 — nor applies a correction when it was not met, which
+floor of Clause 6.2.1 nor applies a correction when it was not met, which
 is the method's own rule (record the level, and note that the result was
 affected by an unknown amount). The ± 2 dB agreement with the engineering
 method is the standard's own estimate (Clause 6.6 NOTE), not something the

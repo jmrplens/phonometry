@@ -42,9 +42,9 @@ import Video from '../../../../../components/Video.astro';
 
 Una máquina funciona en un recinto, un muro separa ese recinto de otro
 ocupado, y alguien quiere saber qué oye el ocupante. Es una cadena corta de
-cuatro eslabones — el nivel reverberante que la máquina establece en el lado
+cuatro eslabones (el nivel reverberante que la máquina establece en el lado
 emisor, la pérdida por transmisión del muro, la absorción del recinto receptor
-y el criterio frente al que se juzga el resultado — y la unión entre el segundo
+y el criterio frente al que se juzga el resultado), y la unión entre el segundo
 y el tercero es justo el punto donde la aritmética sorprende: **la reducción de
 ruido no es la pérdida por transmisión del muro.**
 
@@ -84,13 +84,12 @@ $$
 
 con $\text{NR} = L_{p1} - L_{p2}$ la reducción de ruido entre los dos campos
 reverberantes, $\text{TL} = 10\log_{10}(1/\tau)$ la **pérdida por transmisión**
-de la partición — el nombre que Norton y Karczub, y la literatura
+de la partición (el nombre que Norton y Karczub, y la literatura
 norteamericana, dan a la magnitud que mide ISO 10140-2 y que ISO 717-1 valora
 como **índice de reducción acústica** $R$; son el mismo número, y su índice
 global es el $R_\mathrm{w}$ que se usa más abajo, de modo que el $R$ y el $R_\mathrm{w}$ de un
 informe de ensayo de laboratorio entran directamente en esta ecuación (véase
-[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/))
-—, $S_\mathrm{w}$ el área de la partición y $S_2 \alpha_2$ el área de absorción sonora
+[Índices globales de aislamiento (ISO 717)](/phonometry/es/buildings/insulation/insulation-ratings/)). $S_\mathrm{w}$ es el área de la partición y $S_2 \alpha_2$ el área de absorción sonora
 equivalente del recinto receptor.
 
 Leyendo el logaritmo se entiende toda la página. Una **partición grande hacia
@@ -112,8 +111,8 @@ devuelve una medición en campo de los dos recintos. Las normas de medición no
 informan $D$ en bruto, y por la razón que este apartado acaba de explicar: $D$
 depende del recinto receptor. La normalizan, o bien a un tiempo de
 reverberación de referencia, $D_\mathrm{nT} = D + 10\log_{10}(T/T_0)$ con
-$T_0 = 0{,}5$ s — la magnitud en la que está escrita la mayoría de la
-reglamentación residencial —, o bien a un área de absorción de referencia de
+$T_0 = 0{,}5$ s (la magnitud en la que está escrita la mayoría de la
+reglamentación residencial), o bien a un área de absorción de referencia de
 10 m², $D_\mathrm{n} = D - 10\log_{10}(A/10)$. La magnitud propia del muro es $R$, y su
 versión en campo, $R' = D + 10\log_{10}(S/A)$, incluye los flancos y por eso
 queda siempre por debajo del $R$ de laboratorio que supone este cálculo.
@@ -290,8 +289,8 @@ relación de régimen estacionario, que además tiene en cuenta la energía que
 sobrevive a su primera reflexión y sigue alimentando el campo reverberante, y es
 lo que necesita $L_{p1} = L_W + 10\log_{10}(4/R)$ en el lado emisor. Las dos
 coinciden en un recinto muy reflectante y divergen a medida que $\alpha$ crece
-— se separan en $10\log_{10}[1/(1-\alpha)]$, 0,5 dB con $\alpha = 0{,}1$ y
-3,0 dB con $\alpha = 0{,}5$ — y usar el área de absorción donde va la constante
+(se separan en $10\log_{10}[1/(1-\alpha)]$, 0,5 dB con $\alpha = 0{,}1$ y
+3,0 dB con $\alpha = 0{,}5$), y usar el área de absorción donde va la constante
 de recinto sesga la respuesta hacia predecir *demasiada* reducción de ruido.
 `equivalent_absorption_area` admite además objetos discretos y un término de
 absorción del aire, que es por donde entran el mobiliario, las personas y, en un
@@ -503,17 +502,17 @@ Usar la columna impresa mantiene el oráculo en lo publicado.
 Hay una salvedad que viene del apartado 6 y que aquí muerde más fuerte. La
 pérdida por transmisión de panel necesaria es una cota superior exactamente
 igual que lo es la de la partición, y por razones más marcadas: un cerramiento
-es pequeño, así que la proporción entre sus aberturas inevitables — puerta de
+es pequeño, así que la proporción entre sus aberturas inevitables (puerta de
 acceso, pasos de cables y tuberías, aberturas de refrigeración, ranuras de
-transportador — y su área total es mucho mayor que la de un muro, y una fracción
+transportador) y su área total es mucho mayor que la de un muro, y una fracción
 abierta del uno por ciento limita la pérdida por inserción alcanzada a unos
 20 dB por muy de 35 dB que sea el panel que pide este cálculo. La máquina
 tampoco debe tocar el cerramiento ni compartir su base: un contacto atornillado
 radia la vibración de la máquina desde la piel exterior y sortea los paneles por
-completo. Mete las aberturas en el cálculo en vez de confiar en la suerte — la
+completo. Mete las aberturas en el cálculo en vez de confiar en la suerte. La
 vía del compuesto y la construcción dibujada están en
-[Control de ruido industrial, apartado 2.1](/phonometry/es/devices/noise-control/noise-control/#21-lo-que-el-cerramiento-entrega-de-verdad-fugas-puertas-y-aberturas)
-— y usa el mismo `flanking_penalty` de abajo como el sitio honrado donde anotar
+[Control de ruido industrial, apartado 2.1](/phonometry/es/devices/noise-control/noise-control/#21-lo-que-el-cerramiento-entrega-de-verdad-fugas-puertas-y-aberturas),
+y usa el mismo `flanking_penalty` de abajo como el sitio honrado donde anotar
 lo que quede sin modelar.
 
 ## 6. Lo que la predicción no sabe
@@ -529,8 +528,8 @@ pasa a ser una cota superior.
 El clip de abajo dibuja lo que la ecuación deja fuera. La cadena del
 apartado 3 solo pone precio a la trayectoria directa, la vía **Dd** a través
 de la partición; los otros tres pulsos salen del recinto emisor por los muros,
-el suelo o el techo de flanco — **Ff** de flanco a flanco, **Fd** de flanco a
-partición, **Df** de partición a flanco — y vuelven a radiar al otro lado sin
+el suelo o el techo de flanco (**Ff** de flanco a flanco, **Fd** de flanco a
+partición, **Df** de partición a flanco), y vuelven a radiar al otro lado sin
 haber pasado nunca por la pérdida por transmisión que usó el cálculo. Cada
 camino mengua en cada elemento y en cada unión que atraviesa, y por eso
 ninguno tiene que ser grande por sí solo para que la suma de los tres domine
@@ -575,7 +574,7 @@ no tiene nada que decir por debajo de la frecuencia de Schroeder de cada uno
 (`schroeder_frequency`), donde mandan los modos discretos. La sala de control de
 5 m × 5 m × 3 m de arriba, 75 m³, tiene una frecuencia de Schroeder de 163 Hz
 para un tiempo de reverberación de medio segundo, que es justo por lo que la
-banda de 125 Hz del problema 4.18 — la banda que gobierna toda la respuesta —
+banda de 125 Hz del problema 4.18 (la banda que gobierna toda la respuesta)
 hay que leerla como una estimación y no como una cifra. La llamada es
 `schroeder_frequency(0.5, 75.0)`, primero el tiempo de reverberación y después
 el volumen, y devuelve 163,3 Hz para ese recinto.

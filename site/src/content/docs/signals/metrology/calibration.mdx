@@ -126,12 +126,12 @@ $S = 20\ \mu\text{Pa}\cdot 10^{94/20} / 1.0 = 1.002$ Pa per digital unit: one
 digital unit is one pascal, which is what a chain whose full scale sits just
 above the calibrator level looks like. The measurement record has amplitude
 0.2, hence an RMS of 0.141 digital units, hence 0.142 Pa, hence
-$20\log_{10}(0.142 / 2\times 10^{-5}) = 77.0$ dB SPL — which is the 1 kHz band
+$20\log_{10}(0.142 / 2\times 10^{-5}) = 77.0$ dB SPL: the 1 kHz band
 the snippet prints.
 
 That gives the sanity rule for every later session. $S$ is the pascal-per-unit
-scale of the chain, so $94 - L_\text{cal,dBFS}$ — the calibrator level minus the
-RMS level of the calibrator take in dBFS — is the sound pressure level that
+scale of the chain, so $94 - L_\text{cal,dBFS}$ (the calibrator level minus the
+RMS level of the calibrator take in dBFS) is the sound pressure level that
 would drive the converter to a digital RMS of 1.0. If that number is not within
 a few decibels of the loudest level the chain was set up for, something is wrong
 with the take: a clipped or half-scale recording, a `target_spl` left at 94.0 for
@@ -149,22 +149,22 @@ part of the measurement, not a preliminary to it. Six steps:
 1. **Set the gain for the loudest level you expect, and lock it.** $S$ is valid
    only while the chain stays exactly as calibrated, and a gain knob moved after
    the check shifts every level by an amount nothing downstream can detect.
-2. **Disable every automatic process on the interface** — gain riding, limiting,
-   noise suppression, "voice" enhancement — and record at 24 bit. Any of them
+2. **Disable every automatic process on the interface** (gain riding, limiting,
+   noise suppression, "voice" enhancement) and record at 24 bit. Any of them
    makes the chain non-linear, and the calibrator take is the one signal on which
    that is invisible, because it is a single steady tone.
 3. **Take the windscreen off and fit the adaptor supplied with the calibrator.**
    An adaptor is an integral part of the sound calibrator (5.1.1), and where the
    manual gives adaptor design data it also gives the insertion distance and the
    minimum microphone diameter at which sealing occurs (6.3 u). Check that your
-   microphone model *and configuration* — with or without the protective grid —
+   microphone model *and configuration* (with or without the protective grid)
    is in the manual's list (6.3 a): the specified level holds for the models and
    configurations stated there (5.3.1.3), and the manual states how much the
    level moves with the effective load volume of the inserted microphone
    (6.3 k), the air volume bounded by the reference plane, the diaphragm and the
    capsule wall (3.13).
-4. **Insert the capsule fully to the reference plane** — the plane of contact
-   between microphone and calibrator (3.12) — hold the assembly still and let it
+4. **Insert the capsule fully to the reference plane** (the plane of contact
+   between microphone and calibrator, 3.12), hold the assembly still and let it
    settle. The manual states two settling times: the calibrator's own, which may
    not exceed 30 s (5.1.10), and the time the microphone-and-calibrator
    combination needs after they are coupled (6.3 e).
@@ -173,7 +173,7 @@ part of the measurement, not a preliminary to it. Six steps:
    microphone coupled and the calibrator *switched off*, the level the microphone
    reads must be at least 30 dB below the level being measured for periodic
    testing (B.4.2), and 40 dB below for pattern evaluation (A.5.3). For a 94 dB
-   calibrator that is a background below 64 dB at the capsule — a number you can
+   calibrator that is a background below 64 dB at the capsule (a number you can
    record and check in ten seconds, and the one that decides whether
    `narrowband=True` is optional (see the figure below).
 6. **Record 5 to 10 s of settled tone**, trim the handling noise at both ends,
@@ -197,7 +197,7 @@ the pressure and free-field sensitivities of a measurement capsule coincide
 closely enough that no correction is applied. It also means $S$ is a
 single-frequency anchor. The *shape* of the chain's response away from the
 calibrator frequency comes from the microphone's own free-field data, not from
-this check — the three sensitivities and where each applies are laid out in
+this check; the three sensitivities and where each applies are laid out in
 [Microphones](/phonometry/devices/electroacoustics/microphones/). Put the
 windscreen back on before measuring, and remember it has its own insertion loss
 of a few tenths of a decibel at high frequency, which the calibration did not see.
@@ -239,8 +239,8 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
   Table 1); they are supplied with a barometer, or their manual specifies one
   (5.1.8), and the manual states the correction and its uncertainty (6.3 i, 6.3 m).
   A pistonphone generates a fixed volume displacement, so its output follows the
-  ambient static pressure — of order a tenth of a decibel for ordinary weather
-  and around −1 dB at 1000 m above sea level. Every other calibrator, by
+  ambient static pressure (of order a tenth of a decibel for ordinary weather
+  and around −1 dB at 1000 m above sea level). Every other calibrator, by
   5.1.7, must meet its class with no environmental correction at all. When a
   correction *is* required, apply it to the target level and not to the results:
 
@@ -326,7 +326,7 @@ plt.show()
 ### Broadband noise in the take, and what it costs
 
 The RMS of the calibrator recording is the denominator of $S$, so anything in
-the take that is not the tone inflates it and shrinks the factor — and every
+the take that is not the tone inflates it and shrinks the factor; and every
 level derived from that factor then reads *low*, by
 $-10\log_{10}(1 + 1/\mathrm{SNR})$ with SNR the tone-to-noise power ratio in the
 recording. Passing `narrowband=True` replaces the full-band RMS with a coherent
@@ -417,9 +417,9 @@ capsule-and-preamplifier property and not a converter one (see
 smaller of the two at least 10 dB above the loudest event you expect. A clipped
 event does not announce itself: it reads *low*, and plausibly so.
 
-**The floor.** Record 30 s with the capsule in a quiet enclosure — the closed
+**The floor.** Record 30 s with the capsule in a quiet enclosure (the closed
 calibrator cavity with the drive switched off does nicely, which is the same
-take the coupling step already asks for — and run it through the same factor.
+take the coupling step already asks for) and run it through the same factor.
 That level is the chain's inherent noise, microphone plus preamplifier plus
 converter. A measured level within 3 dB of it is not a measurement of the
 source; one within 10 dB needs the background correction that the emission and
@@ -464,7 +464,7 @@ $S$ is pascals per digital unit; on the
 [Microphones](/phonometry/devices/electroacoustics/microphones/) page $M$ is
 volts per pascal, exposed as `sensitivity_mv_per_pa`, and the free-field,
 pressure and random-incidence ratings are three different numbers for the same
-capsule — use the free-field one at the reference frequency.
+capsule: use the free-field one at the reference frequency.
 
 What the route costs: it inherits the capsule's individual deviation from its
 rated value (a few tenths of a decibel for a laboratory microphone with an
@@ -515,7 +515,7 @@ record, at the time of the check:
   configuration used (with or without the protective grid);
 - the adaptor fitted, if any;
 - the sensitivity obtained before the series, the one obtained after it, and
-  their difference — the drift bound;
+  their difference (the drift bound);
 - sample rate, bit depth and the gain setting, exactly as locked;
 - air temperature, static pressure and relative humidity, plus any static
   pressure correction applied to `target_spl` and where it came from;
@@ -559,7 +559,7 @@ spl_dbfs, freq = filters.octave_filter(
 
 This is the **RMS-referenced** convention: a signal whose RMS is 1.0 reads
 0 dBFS, so a full-scale sine, whose RMS is 0.707, reads −3.01 dBFS in
-`mode='rms'`. AES17 — and the meters, DAWs and loudness tools that follow it —
+`mode='rms'`. AES17 (and the meters, DAWs and loudness tools that follow it)
 normalise a full-scale *sine* to 0 dBFS instead, so the same file measured by
 two tools differs by exactly 3.01 dB with neither of them wrong. Note that
 `mode='peak'` with `dbfs=True` reads 0 dBFS for that same sine, because its peak
@@ -571,8 +571,8 @@ carry its convention with it.
 
 Half of what this library computes does not care which frame it is in, and the
 other half is silently meaningless without $S$. The dividing line is whether the
-quantity is built from a *ratio* or a *shape* — invariant — or from an absolute
-value — not.
+quantity is built from a *ratio* or a *shape* (invariant) or from an absolute
+value (not).
 
 **Frame-invariant** (the same number in dBFS as in dB SPL): reverberation times
 and decay slopes, transfer functions and coherence, correlation and delay,
@@ -585,7 +585,7 @@ $L_\mathrm{Aeq}$ against a limit, SEL, noise dose and exposure, the percentile l
 $L_N$, every psychoacoustic quantity anchored to 20 µPa (loudness in sones,
 sharpness, the ECMA-418-2 chain), the peak criteria of hearing-conservation
 rules, and every conformance verdict in the library. None of these functions
-refuses uncalibrated samples — they cannot tell — so the frame is a decision the
+refuses uncalibrated samples (they cannot tell), so the frame is a decision the
 analyst has to record beside the result.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/dbfs_versus_spl.svg" alt="Left: the same third-octave band spectrum computed with a calibration factor and with dbfs=True, superimposed once the constant offset is added. Right: the first cycles of a band-filtered tone burst overshooting the drive amplitude by 1.32 decibels, which is what mode='peak' reads" width="92%" />
@@ -625,8 +625,8 @@ spl_peak, freq = filters.octave_filter(recording, fs, mode='peak')
 :::note
 `mode='peak'` measures the absolute maximum of the **filtered** band signal,
 which includes the filter's onset transient (overshoot). Signals that start
-abruptly may read about 1 dB high — 1.32 dB for the tone burst drawn in the
-right-hand panel above. This is inherent to IIR band filters (an analog sound
+abruptly may read about 1 dB high (1.32 dB for the tone burst drawn in the
+right-hand panel above). This is inherent to IIR band filters (an analog sound
 level meter behaves the same way), not a processing artifact.
 :::
 
@@ -637,7 +637,7 @@ float64 internally before any squaring. The conversion is a dtype cast, not a
 rescaling: an int16 sample of +32767 enters as 32767.0, not as 1.0. That is
 harmless *as long as the calibrator recording and the measurement are in the
 same format*, because `sensitivity` then returns a factor 32768 times smaller
-and the two cancel exactly — a tone that reads 87.958 dB from float arrays reads
+and the two cancel exactly: a tone that reads 87.958 dB from float arrays reads
 87.958 dB from the int16 arrays of the same recordings. It is not harmless
 otherwise: the same tone read uncalibrated is 87.94 dB as float and 172.14 dB as
 int16, a $20\log_{10}(32768) = 90.3$ dB offset, and applying a float-derived

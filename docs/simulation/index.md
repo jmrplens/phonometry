@@ -88,7 +88,7 @@ absorbing layers, which are themselves sized by the **lowest** frequency. The
 run must last long enough for the field to cross the domain, and for a
 steady-state answer long enough for the transient to leave before the analysis
 window opens. The cost is cells times steps, so halving the cell size costs
-eight times more in 2D — a factor of four in cells and a factor of two in steps.
+eight times more in 2D: a factor of four in cells and a factor of two in steps.
 The acoustic page gives the numbers for each link, and the elastic page adds the
 extra sampling that free surfaces and interface waves demand.
 
@@ -113,8 +113,8 @@ so in its own opening.
 **Two dimensions, and no way around it.** Everything a 2D cross-section cannot
 say about a 3D room, neither solver says, and the cylindrical spreading above
 is only the most visible consequence. The open boundary is a quadratic-ramp
-absorbing layer — the simple precursor of a perfectly matched layer, not a PML
-— so grazing incidence is absorbed less cleanly than normal incidence, and the
+absorbing layer (the simple precursor of a perfectly matched layer, not a PML),
+so grazing incidence is absorbed less cleanly than normal incidence, and the
 elastic solver has no elastic PML at all, which shows most on grazing Rayleigh
 waves. The medium is non-moving: **wind and flow advection are not modelled**,
 so a refraction study here comes from a height-dependent sound-speed profile

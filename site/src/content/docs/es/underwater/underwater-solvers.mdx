@@ -400,8 +400,8 @@ sobre los mismos rayos y con el mismo integrador.
 ### Un fondo en pendiente: la primera dependencia de la distancia
 
 Pasar un par `bathymetry` de nodos, `(ranges_m, depths_m)`, sustituye el
-fondo horizontal por un **perfil de profundidad lineal a trozos** — la frontera
-facetada de la Fig. 3.20 de Jensen — mientras el perfil de velocidad del
+fondo horizontal por un **perfil de profundidad lineal a trozos** (la frontera
+facetada de la Fig. 3.20 de Jensen, mientras el perfil de velocidad del
 sonido sigue siendo independiente de la distancia. El integrador localiza
 cada cruce contra la polilínea interpolada y refleja el rayo especularmente
 sobre la faceta local (Ec. 3.121), así que un rebote en una pendiente de
@@ -412,7 +412,7 @@ ser una constante de cada rayo solo *entre* rebotes de fondo, y una
 consecuencia se afronta en vez de taparse: un rayo empinado más allá de la
 vertical correría hacia atrás en distancia, cosa que un integrador cuya
 variable independiente es la distancia no puede llevar, así que se termina
-en ese rebote y sus muestras son `NaN` de ahí en adelante — un dibujo
+en ese rebote y sus muestras son `NaN` de ahí en adelante. Un dibujo
 simplemente se acaba donde el rayo dio la vuelta. En una cuña isovelocidad
 todo rayo son líneas rectas y espejos, así que cada ángulo de abajo es
 exacto:
@@ -457,9 +457,9 @@ coeficiente por camino de abajo deja de sostenerse.
 
 El abanico dibuja todos los caminos que el perfil admite; a un receptor solo
 llegan unos pocos. Esos son los **eigenrayos**, «los rayos que pasan por ese
-punto» (Jensen §3.3.5.2), y su lista — un retardo, un ángulo de salida y otro
+punto» (Jensen §3.3.5.2), y su lista (un retardo, un ángulo de salida y otro
 de llegada, los contadores de toques en los contornos y una amplitud compleja
-por camino — es la estructura de llegadas que la ecuación del sonar consume
+por camino) es la estructura de llegadas que la ecuación del sonar consume
 como multitrayecto, el esqueleto de una respuesta al impulso del canal, y
 aquello contra lo que ecualiza el trabajo de comunicaciones. `eigenrays` toma
 el abanico trazado y un receptor y los encuentra como raíces: hay un eigenrayo
@@ -467,7 +467,7 @@ allí donde la profundidad de un rayo a la distancia del receptor cruza la
 profundidad del receptor, así que un par de rayos adyacentes del abanico que
 lo encajonan acota uno, y cada acotación se cierra por bisección **sobre
 trazados nuevos a través del mismo perfil**, nunca interpolando entre los
-rayos trazados — los dos rayos de una acotación pueden llevar historias de
+rayos trazados. Los dos rayos de una acotación pueden llevar historias de
 rebotes distintas, y una mezcla de ambos es un camino que el agua no contiene
 (el riesgo de interpolación de Jensen §3.7.5.1). Cada llegada es un rayo
 real, con su tiempo de propagación, sus ángulos y sus contadores de rebote
@@ -516,10 +516,10 @@ el tono que oye un receptor es $p(\omega) = \sum_j a_j e^{i\omega\tau_j}$, su
 pérdida $-20\lg|p(\omega)|$ en la misma escala que los otros tres métodos, y
 la respuesta al impulso de una banda es esa suma transformada. Cada amplitud
 lleva un $(-1)$ por toque en la superficie y el coeficiente del fondo por
-toque en el fondo — el $\mp1$ de los reflectores perfectos o, con el mismo
+toque en el fondo (el $\mp1$ de los reflectores perfectos o, con el mismo
 `FluidSeabed` que toman los haces, la
 $\mathcal{R}$ de Rayleigh del ángulo rasante propio de cada rayo, módulo y
-fase — y el $(-i)^m$ de la Ec. (3.79) por cada cáustica cruzada, la forma
+fase), y el $(-i)^m$ de la Ec. (3.79) por cada cáustica cruzada, la forma
 discreta del $-\pi/2$ que la rama de la raíz cuadrada del método de haces
 gasta de forma continua. Validado contra el único entorno cuya estructura de
 llegadas es forma cerrada entera, la red de imágenes de la guía de ondas
@@ -768,9 +768,9 @@ dinámico cruza cada rebote en pendiente con el impulso de reflexión de las
 Ecs. (3.122)-(3.123) evaluado en la faceta local. Dos de los dispositivos de
 la guía horizontal se generalizan con él, cada uno con su coste declarado.
 La escalera de imágenes del receptor pliega cada columna de receptores
-sobre su propia faceta — profundidad *e* inclinación, porque un plano de
+sobre su propia faceta (profundidad e inclinación), porque un plano de
 plegado equivocado en la inclinación de la faceta desplaza una imagen del
-primer pliegue metros frente a una longitud de onda — de modo que la pila
+primer pliegue metros frente a una longitud de onda. De modo que la pila
 vertical de espejos se convierte en el abanico diédrico en torno al vértice
 local, exacto para una sola faceta; a pendiente cero es la escalera
 horizontal bit a bit, cosa que un test deja clavada. Y los peldaños
@@ -778,15 +778,15 @@ envueltos del abanico dejan que las colas analíticas de los haces lleven las
 llegadas que ningún eje integrado puede: un camino que subió la pendiente,
 se empinó más allá de la vertical y volvió es un peldaño envuelto, analítico
 en vez de integrado. El propio haz, una vez empinado más allá de la
-vertical, se termina en ese rebote con su peso a cero — una suma que avanza
+vertical, se termina en ese rebote con su peso a cero. Una suma que avanza
 en distancia conserva solo lo que aún viaja hacia delante, exactamente igual
-que la ecuación parabólica de un solo sentido no conserva retrodispersión —
+que la ecuación parabólica de un solo sentido no conserva retrodispersión,
 y una cola no se acepta más allá de dos extensiones de la marcha desde su
 muestra, porque más allá estaría poniendo precio a geometría de cuña que la
 polilínea nunca describió (medido: hasta 11 dB de campo inventado sobre un
 fondo inclinado al que ningún haz llega siquiera, 0,001 dB con el
 presupuesto en su sitio). Validado contra la **cuña ideal**, que tiene
-solución exacta por imágenes — un abanico de $2\pi/\beta$ fuentes imagen
+solución exacta por imágenes: un abanico de $2\pi/\beta$ fuentes imagen
 con signo sobre una circunferencia en torno al vértice, construido en el
 test con geometría pura y probado contra las dos condiciones de contorno
 antes de juzgar: un solo rebote de faceta a 0,05 dB, y a 1,85 dB en el peor
@@ -794,9 +794,9 @@ caso / 0,67 dB en media del campo *completo* a través de una cuña fina de
 2,8° en la que cada celda es multitrayecto denso, la mayor parte llegadas
 cerca de su propio punto de giro, números que se mueven en el cuarto
 decimal al partir en dos el paso de distancia. El lecho fluido disipativo
-de arriba no puede combinarse con una pendiente — un ángulo rasante por haz
+de arriba no puede combinarse con una pendiente. Un ángulo rasante por haz
 es un hecho de fondo horizontal, y el método se niega a fingir lo
-contrario — así que una pasada en pendiente toma los reflectores perfectos
+contrario. Así que una pasada en pendiente toma los reflectores perfectos
 de `bottom`.
 
 **Dónde se acaba.** Cuatro límites, en el orden en que aprietan.

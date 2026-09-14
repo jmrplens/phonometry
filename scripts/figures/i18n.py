@@ -1006,7 +1006,7 @@ _ES_EXACT = {
     "Level re steady state [dB]": "Nivel re estado estacionario [dB]",
     # ISO 18233 excitation signals + recovered impulse response
     "ISO 18233 excitation signals": "Señales de excitación ISO 18233",
-    "Exponential sine sweep — waveform": "Barrido sinusoidal exponencial — forma de onda",
+    "Exponential sine sweep: waveform": "Barrido sinusoidal exponencial: forma de onda",
     "Sweep spectrogram (exponential rise)": "Espectrograma del barrido (ascenso exponencial)",
     "MLS magnitude spectrum (flat)": "Espectro de magnitud de la MLS (plano)",
     "Recovered room impulse response (ISO 18233)": "Respuesta al impulso de la sala recuperada (ISO 18233)",
@@ -1439,10 +1439,10 @@ _ES_EXACT = {
     # facade_prediction figure (EN 12354-3 Annex F)
     "EN 12354-3 Façade Sound Insulation (Annex F example)": "Aislamiento acústico de fachada EN 12354-3 (ejemplo del Anexo F)",
     "Reduction index / level difference [dB]": "Índice de reducción / diferencia de niveles [dB]",
-    r"$R_\mathrm{p}$ — wall": r"$R_\mathrm{p}$ — muro",
-    r"$R_\mathrm{p}$ — window": r"$R_\mathrm{p}$ — ventana",
-    r"$R_\mathrm{p}$ — skylight": r"$R_\mathrm{p}$ — claraboya",
-    r"$R_\mathrm{p}$ — air inlet": r"$R_\mathrm{p}$ — entrada de aire",
+    r"$R_\mathrm{p}$: wall": r"$R_\mathrm{p}$: muro",
+    r"$R_\mathrm{p}$: window": r"$R_\mathrm{p}$: ventana",
+    r"$R_\mathrm{p}$: skylight": r"$R_\mathrm{p}$: claraboya",
+    r"$R_\mathrm{p}$: air inlet": r"$R_\mathrm{p}$: entrada de aire",
     r"$R^{\prime}$ (façade)": r"$R^{\prime}$ (fachada)",
     "air inlet limits the low bands": "la entrada de aire limita las bandas bajas",
     "$R^{\\prime}_\\mathrm{tr,s,w}$ = 31 dB   ($C_\\mathrm{tr}$ = −3)\n"
@@ -1485,15 +1485,15 @@ _ES_EXACT = {
     "stripping": "descortezado",
     # vibration_weighting_family: the nine ISO 8041-1 weightings on one axis.
     "The nine human-vibration weightings (ISO 8041-1 Table 3)": "Las nueve ponderaciones de vibración humana (ISO 8041-1, Tabla 3)",
-    "Wk — seat surface, vertical (ISO 2631-1)": "Wk — superficie del asiento, vertical (ISO 2631-1)",
-    "Wd — seat surface, horizontal": "Wd — superficie del asiento, horizontal",
-    "Wc — backrest, x": "Wc — respaldo, x",
-    "We — rotational (per rad)": "We — rotacional (por rad)",
-    "Wj — recumbent, under the head": "Wj — tumbado, bajo la cabeza",
-    "Wm — building occupants, all axes (ISO 2631-2)": "Wm — ocupantes de edificios, todos los ejes (ISO 2631-2)",
-    "Wb — rail ride comfort, vertical (ISO 2631-4)": "Wb — confort de marcha ferroviaria, vertical (ISO 2631-4)",
-    "Wf — motion sickness, vertical": "Wf — mareo, vertical",
-    "Wh — hand-transmitted, all three axes (ISO 5349-1)": "Wh — transmitida a la mano, los tres ejes (ISO 5349-1)",
+    "Wk: seat surface, vertical (ISO 2631-1)": "Wk: superficie del asiento, vertical (ISO 2631-1)",
+    "Wd: seat surface, horizontal": "Wd: superficie del asiento, horizontal",
+    "Wc: backrest, x": "Wc: respaldo, x",
+    "We: rotational (per rad)": "We: rotacional (por rad)",
+    "Wj: recumbent, under the head": "Wj: tumbado, bajo la cabeza",
+    "Wm: building occupants, all axes (ISO 2631-2)": "Wm: ocupantes de edificios, todos los ejes (ISO 2631-2)",
+    "Wb: rail ride comfort, vertical (ISO 2631-4)": "Wb: confort de marcha ferroviaria, vertical (ISO 2631-4)",
+    "Wf: motion sickness, vertical": "Wf: mareo, vertical",
+    "Wh: hand-transmitted, all three axes (ISO 5349-1)": "Wh: transmitida a la mano, los tres ejes (ISO 5349-1)",
     "whole body: 0.5–80 Hz": "cuerpo entero: 0,5–80 Hz",
     "hand-arm Wh: 6.3–1250 Hz": "mano-brazo Wh: 6,3–1250 Hz",
     "Wf peaks at 0.17 Hz:\nmotion sickness is sub-hertz": "Wf tiene su máximo en 0,17 Hz:\nel mareo está por debajo del hercio",
@@ -1517,8 +1517,8 @@ _ES_EXACT = {
     r"$A_\mathrm{z}(t)$, spinal response (Formula 2)": r"$A_\mathrm{z}(t)$, respuesta espinal (Fórmula 2)",
     "(a)  The seat-to-spine filter turns an impact into a ringing response": "(a)  El filtro asiento-columna convierte un impacto en una "
     "respuesta que resuena",
-    "(b)  Each peak's share of $\\sum A_{\\mathrm{z},i}^6$ — "
-    "dose $D_\\mathrm{z}$ = 32.5 m/s²": "(b)  La parte de cada pico en $\\sum A_{\\mathrm{z},i}^6$ — "
+    "(b)  Each peak's share of $\\sum A_{\\mathrm{z},i}^6$, "
+    "dose $D_\\mathrm{z}$ = 32.5 m/s²": "(b)  La parte de cada pico en $\\sum A_{\\mathrm{z},i}^6$, "
     "dosis $D_\\mathrm{z}$ = 32,5 m/s²",
     "0.4 s of free fall at $-1\\,g$:\n"
     "the 0.01 Hz high pass of 5.1.3 keeps it": "0,4 s de caída libre a $-1\\,g$:\n"
@@ -1776,11 +1776,11 @@ _ES_EXACT = {
     "Two ratings: the RC Mark II tag reads the character": "Dos calificaciones: la etiqueta RC Mark II lee el carácter",
     "Tag threshold (D.3): +5 / +3 dB": "Umbral de etiqueta (D.3): +5 / +3 dB",
     "Level minus the room's own RC curve [dB]": "Nivel menos la curva RC propia de la sala [dB]",
-    "ISO 7029 — age-related threshold (male)": "ISO 7029 — umbral por edad (hombres)",
-    "ISO 389-7 — reference threshold of hearing": "ISO 389-7 — umbral de referencia de la audición",
+    "ISO 7029: age-related threshold (male)": "ISO 7029: umbral por edad (hombres)",
+    "ISO 389-7: reference threshold of hearing": "ISO 389-7: umbral de referencia de la audición",
     "Audiometric frequency [Hz]": "Frecuencia audiométrica [Hz]",
     # audiometric_zero_earphones: ISO 389-1 against the sound-field zero.
-    "ISO 389-1 — what 0 dB HL is in the coupler": "ISO 389-1: qué son 0 dB HL en el acoplador",
+    "ISO 389-1: what 0 dB HL is in the coupler": "ISO 389-1: qué son 0 dB HL en el acoplador",
     "A headphone zero is not a loudspeaker zero": "El cero de un auricular no es el de un altavoz",
     "Test frequency [Hz]": "Frecuencia de ensayo [Hz]",
     "Reference level (RETSPL) [dB]": "Nivel de referencia (RETSPL) [dB]",
@@ -1795,7 +1795,7 @@ _ES_EXACT = {
     "Reference threshold [dB]": "Umbral de referencia [dB]",
     "Free-field (frontal)": "Campo libre (frontal)",
     "Diffuse-field": "Campo difuso",
-    "ANSI S3.5-1997 — speech spectra by vocal effort": "ANSI S3.5-1997 — espectros de voz por esfuerzo vocal",
+    "ANSI S3.5-1997: speech spectra by vocal effort": "ANSI S3.5-1997: espectros de voz por esfuerzo vocal",
     "Speech spectrum level [dB SPL]": "Nivel del espectro de voz [dB SPL]",
     "SII vs vocal effort in a fixed noise": "SII frente al esfuerzo vocal en un ruido fijo",
     "Onset rate [dB/s]": "Tasa de crecimiento [dB/s]",
@@ -1822,8 +1822,8 @@ _ES_EXACT = {
     "Raised": "Elevada",
     "Loud": "Fuerte",
     "Shout": "Grito",
-    r"ISO 1999 — NIPTS at $L_{\mathrm{EX,8h}}$ = 95 dB": r"ISO 1999 — NIPTS a $L_{\mathrm{EX,8h}}$ = 95 dB",
-    "ISO 1999 — HTLAN (male, age 60, 95 dB / 30 yr)": "ISO 1999 — HTLAN (hombres, 60 años, 95 dB / 30 años)",
+    r"ISO 1999: NIPTS at $L_{\mathrm{EX,8h}}$ = 95 dB": r"ISO 1999: NIPTS a $L_{\mathrm{EX,8h}}$ = 95 dB",
+    "ISO 1999: HTLAN (male, age 60, 95 dB / 30 yr)": "ISO 1999: HTLAN (hombres, 60 años, 95 dB / 30 años)",
     "Median NIPTS [dB]": "NIPTS mediana [dB]",
     "Hearing threshold level [dB]": "Nivel del umbral de audición [dB]",
     "10-90 % band (40 yr)": "Banda 10-90 % (40 años)",
@@ -1831,7 +1831,7 @@ _ES_EXACT = {
     "Noise (NIPTS)": "Ruido (NIPTS)",
     "Age + noise (HTLAN)": "Edad + ruido (HTLAN)",
     # Perception / hearing + speech (B15b)
-    "ISO 7029 median at 4 kHz — men against women": "Mediana de ISO 7029 a 4 kHz: hombres frente a mujeres",
+    "ISO 7029 median at 4 kHz: men against women": "Mediana de ISO 7029 a 4 kHz: hombres frente a mujeres",
     "The spread around the median (male)": "La dispersión en torno a la mediana (hombres)",
     "Male": "Hombres",
     "Female": "Mujeres",
@@ -2057,7 +2057,7 @@ _ES_EXACT = {
     "Fast attack / release": "Ataque / relajación rápidos",
     "Slow integration": "Integración lenta",
     # Fluctuation strength + psychoacoustic annoyance (Fastl & Zwicker; Osses 2016)
-    "Fluctuation Strength — 4 Hz Band-Pass Characteristic": "Intensidad de fluctuación — característica de paso de banda a 4 Hz",
+    "Fluctuation Strength: 4 Hz Band-Pass Characteristic": "Intensidad de fluctuación: característica de paso de banda a 4 Hz",
     "Fluctuation strength $F$ [vacil]": "Intensidad de fluctuación $F$ [vacil]",
     "AM-tone F, signal model [vacil]": "F de tono AM, modelo de señal [vacil]",
     "4 Hz reference": "referencia 4 Hz",
@@ -2103,7 +2103,7 @@ _ES_EXACT = {
     # hms_modulation_bandpass ylabel: symbols and units read the same
     r"$F$ [$\mathrm{vacil}_{\mathrm{HMS}}$] / $R$ [asper]": r"$F$ [$\mathrm{vacil}_{\mathrm{HMS}}$] / $R$ [asper]",
     # fluctuation_strength: the two models side by side
-    "Fluctuation Strength — the 4 Hz Band-Pass, and Which Model to Quote": "Intensidad de fluctuación: el paso de banda a 4 Hz y qué modelo "
+    "Fluctuation Strength: the 4 Hz Band-Pass, and Which Model to Quote": "Intensidad de fluctuación: el paso de banda a 4 Hz y qué modelo "
     "citar",
     "Both models on AM broadband noise, 60 dB": "Los dos modelos sobre ruido de banda ancha AM, 60 dB",
     "Signal model on the AM tone, 70 dB": "El modelo de señal sobre el tono AM, 70 dB",
@@ -2158,7 +2158,7 @@ _ES_EXACT = {
     "rated separately": "evaluados por separado",
     "energy-summed into one FG entry": "sumados en energía en una única entrada FG",
     "Annex E pair: 118.4 and 137.3 Hz,\n"
-    r"18.9 Hz apart — below $f_\mathrm{D}$, so combined": "Pareja del Anexo E: 118,4 y 137,3 Hz,\n"
+    r"18.9 Hz apart, below $f_\mathrm{D}$, so combined": "Pareja del Anexo E: 118,4 y 137,3 Hz,\n"
     r"separados 18,9 Hz, por debajo de $f_\mathrm{D}$: se combinan",
     # Electroacoustics (IEC 60268-3 distortion; Bendat & Piersol response)
     "Harmonic Distortion of a Single-Tone Test (IEC 60268-3)": "Distorsión armónica de un ensayo con tono único (IEC 60268-3)",
@@ -2171,8 +2171,8 @@ _ES_EXACT = {
     # (the estimator formulas and the SNR ratio are now pure mathtext and
     # read the same in both languages, so they carry no entry).
     "Choosing Between $H_1$ and $H_2$ (Bendat & Piersol)": "Elegir entre $H_1$ y $H_2$ (Bendat y Piersol)",
-    "Noise on the output — $H_1$ is unbiased": "Ruido en la salida — $H_1$ es el insesgado",
-    "Noise on the input — $H_2$ is unbiased": "Ruido en la entrada — $H_2$ es el insesgado",
+    "Noise on the output: $H_1$ is unbiased": "Ruido en la salida: $H_1$ es el insesgado",
+    "Noise on the input: $H_2$ is unbiased": "Ruido en la entrada: $H_2$ es el insesgado",
     # The measured coherence trace (la coherencia, feminine).
     "measured": "medida",
     # itu_r_468_weighting figure (ITU-R BS.468-4 network and CCIR-RMS form)
@@ -2539,8 +2539,8 @@ _ES_EXACT = {
     "sponge": "esponja",
     "Row envelope [dB re the forward field]": "Envolvente por fila [dB re el campo hacia delante]",
     "largest difference between neighbouring columns:\n"
-    "0.0e+00 Pa — the row is bit-identical": "mayor diferencia entre columnas contiguas:\n"
-    "0,0e+00 Pa — la fila es idéntica bit a bit",
+    "0.0e+00 Pa, so the row is bit-identical": "mayor diferencia entre columnas contiguas:\n"
+    "0,0e+00 Pa, de modo que la fila es idéntica bit a bit",
     "−38.4 dB of the field energy sits\n"
     "in the 20 sponge rows behind the line": "−38,4 dB de la energía del campo está\n"
     "en las 20 filas de esponja tras la línea",
@@ -2564,7 +2564,7 @@ _ES_EXACT = {
     "echo / incident = 0.938\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0.938": "eco / incidente = 0,938\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0,938",
     "Number of strikes $N$": "Número de golpes $N$",
     "Cumulative SEL [dB re 1 µPa²·s]": "SEL acumulado [dB re 1 µPa²·s]",
-    "ICAO Aircraft Flyover — Effective Perceived Noise Level (Annex 16)": "Sobrevuelo de aeronave ICAO — Nivel efectivo de ruido percibido (Anexo 16)",
+    "ICAO Aircraft Flyover: Effective Perceived Noise Level (Annex 16)": "Sobrevuelo de aeronave ICAO: Nivel efectivo de ruido percibido (Anexo 16)",
     "Level [PNdB]": "Nivel [PNdB]",
     "10 dB-down window": "Ventana 10 dB por debajo",
     # anim_epnl_flyover: EPNL assembled in the order the standard builds it.
@@ -2776,10 +2776,10 @@ _ES_EXACT = {
     "other paths": "otros caminos",
     r"$R^{\prime}$ (apparent)": r"$R^{\prime}$ (aparente)",
     "Transmission path": "Camino de transmisión",
-    "Dd — direct": "Dd — directo",
-    "Ff — flanking–flanking": "Ff — flanco–flanco",
-    "Fd — flanking–separating": "Fd — flanco–separador",
-    "Df — separating–flanking": "Df — separador–flanco",
+    "Dd: direct": "Dd: directo",
+    "Ff: flanking–flanking": "Ff: flanco–flanco",
+    "Fd: flanking–separating": "Fd: flanco–separador",
+    "Df: separating–flanking": "Df: separador–flanco",
     "dominant path": "camino dominante",
     # prediction_flanking_demo / detailed_prediction_paths info boxes:
     # ratings and formulae, symbols only (decimal commas aside).
@@ -2831,21 +2831,21 @@ _ES_EXACT = {
     "Medium heavy vehicles (2)": "Vehículos pesados medios (2)",
     "Heavy vehicles (3)": "Vehículos pesados (3)",
     "Motorcycles (4b)": "Motocicletas (4b)",
-    "Light vehicles (1) — total": "Vehículos ligeros (1) — total",
-    "Light vehicles (1) — rolling": "Vehículos ligeros (1) — rodadura",
-    "Light vehicles (1) — propulsion": "Vehículos ligeros (1) — propulsión",
-    "Heavy vehicles (3) — total": "Vehículos pesados (3) — total",
-    "Heavy vehicles (3) — rolling": "Vehículos pesados (3) — rodadura",
-    "Heavy vehicles (3) — propulsion": "Vehículos pesados (3) — propulsión",
+    "Light vehicles (1): total": "Vehículos ligeros (1): total",
+    "Light vehicles (1): rolling": "Vehículos ligeros (1): rodadura",
+    "Light vehicles (1): propulsion": "Vehículos ligeros (1): propulsión",
+    "Heavy vehicles (3): total": "Vehículos pesados (3): total",
+    "Heavy vehicles (3): rolling": "Vehículos pesados (3): rodadura",
+    "Heavy vehicles (3): propulsion": "Vehículos pesados (3): propulsión",
     "CNOSSOS-EU Single-Vehicle Sound Power against Speed (reference conditions)": "Potencia acústica de un vehículo frente a la velocidad "
     "(CNOSSOS-EU, condiciones de referencia)",
     "Speed $v$ [km/h]": "Velocidad $v$ [km/h]",
     r"A-weighted sound power $L_{W\!,\mathrm{A}}$ [dB(A) re 1 pW]": r"Potencia acústica ponderada A $L_{W\!,\mathrm{A}}$ [dB(A) re 1 pW]",
-    r"$A_{\mathrm{div}}$ — divergence": r"$A_{\mathrm{div}}$ — divergencia",
-    r"$A_{\mathrm{atm}}$ — atmospheric": r"$A_{\mathrm{atm}}$ — atmosférica",
-    r"$A_{\mathrm{gr}}$ — ground": r"$A_{\mathrm{gr}}$ — suelo",
-    r"$A_{\mathrm{bar}}$ — barrier": r"$A_{\mathrm{bar}}$ — barrera",
-    "$A$ — total": "$A$ — total",
+    r"$A_{\mathrm{div}}$: divergence": r"$A_{\mathrm{div}}$: divergencia",
+    r"$A_{\mathrm{atm}}$: atmospheric": r"$A_{\mathrm{atm}}$: atmosférica",
+    r"$A_{\mathrm{gr}}$: ground": r"$A_{\mathrm{gr}}$: suelo",
+    r"$A_{\mathrm{bar}}$: barrier": r"$A_{\mathrm{bar}}$: barrera",
+    "$A$: total": "$A$: total",
     "Spherical-Wave Ground Effect (Weyl-Van der Pol)": "Efecto suelo de onda esférica (Weyl-Van der Pol)",
     "Level re free field [dB]": "Nivel respecto al campo libre [dB]",
     "Fresh snow (10 kPa·s·m⁻²)": "Nieve reciente (10 kPa·s·m⁻²)",
@@ -2884,8 +2884,8 @@ _ES_EXACT = {
     "What the ground wave keeps alive (500 Hz, 50 m)": "Lo que la onda de suelo mantiene vivo (500 Hz, 50 m)",
     "Source = receiver height [m]  (grazing to the right)": "Altura de fuente = receptor [m]  (rasante hacia la derecha)",
     "Magnitude": "Módulo",
-    r"$|R_{\mathrm{p}}|$ — plane wave": r"$|R_{\mathrm{p}}|$ — onda plana",
-    "$|Q|$ — spherical wave": "$|Q|$ — onda esférica",
+    r"$|R_{\mathrm{p}}|$: plane wave": r"$|R_{\mathrm{p}}|$: onda plana",
+    "$|Q|$: spherical wave": "$|Q|$: onda esférica",
     "with $Q$ (spherical wave)": "con $Q$ (onda esférica)",
     r"with $R_{\mathrm{p}}$ alone (plane wave)": r"solo con $R_{\mathrm{p}}$ (onda plana)",
     "Wave-theoretic model: the path length alone": "Modelo ondulatorio: solo la longitud del camino",
@@ -3197,8 +3197,8 @@ _ES_EXACT = {
     r"intensity $p\cdot u$": r"intensidad $p\cdot u$",
     "amplitude (normalized)": "amplitud (normalizada)",
     r"Two-microphone p-p probe: instantaneous intensity $p\cdot u$": r"Sonda p-p de dos micrófonos: intensidad instantánea $p\cdot u$",
-    "Progressive wave — active": "Onda progresiva — activa",
-    "Standing wave — reactive": "Onda estacionaria — reactiva",
+    "Progressive wave: active": "Onda progresiva: activa",
+    "Standing wave: reactive": "Onda estacionaria: reactiva",
     "p and u in phase": "p y u en fase",
     "p and u 90° apart": "p y u desfasados 90°",
     r"spacer $\Delta r$": r"separador $\Delta r$",
@@ -3234,7 +3234,7 @@ _ES_EXACT = {
     "floor to wall": "de suelo a muro",
     "wall to floor": "de muro a suelo",
     r"junction: $K_{ij}$ attenuates each transfer": r"unión: $K_{ij}$ atenúa cada transferencia",
-    "$R\u2032_\\mathrm{w}$ sums all paths — always below the wall alone": "$R\u2032_\\mathrm{w}$ suma todos los caminos — siempre menor que el muro solo",
+    "$R\u2032_\\mathrm{w}$ sums all paths: always below the wall alone": "$R\u2032_\\mathrm{w}$ suma todos los caminos: siempre menor que el muro solo",
     "Intensity scanning over a box surface (ISO 9614-2)": "Barrido de intensidad sobre una superficie en caja (ISO 9614-2)",
     "p-p probe": "sonda p-p",
     r"normal intensity $I\cdot n$ on the surface": r"intensidad normal $I\cdot n$ en la superficie",
@@ -3265,7 +3265,7 @@ _ES_EXACT = {
     "Anechoic room (ISO 3745)": "Cámara anecoica (ISO 3745)",
     "Reverberation room (ISO 3741)": "Cámara reverberante (ISO 3741)",
     "microphone sphere, $r$": "esfera de micrófonos, $r$",
-    "direct sound only — no reflections": "solo sonido directo — sin reflexiones",
+    "direct sound only, no reflections": "solo sonido directo, sin reflexiones",
     "rotating microphone": "micrófono giratorio",
     "reflections build a diffuse field": "las reflexiones crean un campo difuso",
     "the room changes $L_p$, not the source power": "la sala cambia $L_p$, no la potencia de la fuente",
@@ -3278,7 +3278,7 @@ _ES_EXACT = {
     "response [dB]": "respuesta [dB]",
     "high mic: dense comb": "micro alto: peine denso",
     "lower: notches move up": "más bajo: los nulos suben",
-    "on the floor: copies merge — no comb in band": "en el suelo: las copias se funden — sin peine en banda",
+    "on the floor: copies merge, no comb in band": "en el suelo: las copias se funden, sin peine en banda",
     "first notch above 8 kHz": "primer nulo por encima de 8 kHz",
     # --- FDTD animation labels (third batch) ---
     "Barrier diffraction into the shadow zone (2D FDTD)": "Difracción en una barrera hacia la zona de sombra (FDTD 2D)",
@@ -3988,8 +3988,8 @@ _ES_EXACT = {
     "the event receiver": "el receptor del evento",
     "Mean Ground Plane and Equivalent Heights (ECAC Doc 32 / NORAH2)": "Plano medio del terreno y alturas equivalentes (ECAC Doc 32 / NORAH2)",
     "receiver": "receptor",
-    r"Raw ($V$, $\gamma$) plane — pass it as triangles=": r"Plano ($V$, $\gamma$) sin normalizar: se pasa como triangles=",
-    "Normalised plane — the library default": "Plano normalizado: el comportamiento por defecto",
+    r"Raw ($V$, $\gamma$) plane: pass it as triangles=": r"Plano ($V$, $\gamma$) sin normalizar: se pasa como triangles=",
+    "Normalised plane: the library default": "Plano normalizado: el comportamiento por defecto",
     "Airspeed $V$ [m/s]": "Velocidad aerodinámica $V$ [m/s]",
     r"Path angle $\gamma$ [°]": r"Ángulo de trayectoria $\gamma$ [°]",
     r"$F_\mathrm{fc}\,\gamma/\Delta\gamma$": r"$F_\mathrm{fc}\,\gamma/\Delta\gamma$",
@@ -5091,7 +5091,7 @@ _ES_PATTERNS = [
     (r"^Octave Band: (.+) Hz$", r"Banda de octava: \1 Hz"),
     (r"^(\d+) phon$", r"\1 fonios"),
     (r"^TNR = (.+) dB\n\(criterion (.+) dB\)$", "TNR = \\1 dB\\n(criterio \\2 dB)"),
-    (r"^MLS — first (\d+) of (\d+) samples$", r"MLS — primeras \1 de \2 muestras"),
+    (r"^MLS: first (\d+) of (\d+) samples$", r"MLS: primeras \1 de \2 muestras"),
     (r"^Measured 1/(\d+) Octave Bands$", r"Bandas de 1/\1 de octava medidas"),
     (r"^IEC target (.+) dB$", r"Objetivo IEC \1 dB"),
     (r"^([\d.]+) ms burst$", "R\u00e1faga de \\1 ms"),
@@ -5101,15 +5101,15 @@ _ES_PATTERNS = [
     ),
     (
         r"^Impulse Response \((.+) Hz Band\) - Transient/Stability Comparison$",
-        "Respuesta al impulso (banda de \\1 Hz) \u2014 transitorio y estabilidad",
+        "Respuesta al impulso (banda de \\1 Hz): transitorio y estabilidad",
     ),
     (
-        r"^1 kHz narrowband — \$N\$ = (\d+)\.(\d+) sone$",
-        "Banda estrecha de 1 kHz — $N$ = \\1,\\2 sonios",
+        r"^1 kHz narrowband: \$N\$ = (\d+)\.(\d+) sone$",
+        "Banda estrecha de 1 kHz: $N$ = \\1,\\2 sonios",
     ),
     (
-        r"^Flat broadband 60 dB — \$N\$ = (\d+)\.(\d+) sone$",
-        "Banda ancha plana a 60 dB — $N$ = \\1,\\2 sonios",
+        r"^Flat broadband 60 dB: \$N\$ = (\d+)\.(\d+) sone$",
+        "Banda ancha plana a 60 dB: $N$ = \\1,\\2 sonios",
     ),
     (
         r"^Pressure-intensity index\n\$\\delta_\{pI\}\$ = (\u2212?\d+)\.(\d+) dB$",
@@ -5228,7 +5228,7 @@ _ES_PATTERNS = [
     # sharpness_pair_and_targets band legends and centroids
     (
         (
-            r"^(\d+) Hz critical band — \$N\$ = (\d+)\.(\d+) sone, "
+            r"^(\d+) Hz critical band: \$N\$ = (\d+)\.(\d+) sone, "
             r"\$S\$ = (\d+)\.(\d+) acum$"
         ),
         r"Banda crítica de \1 Hz: $N$ = \2,\3 sonios, $S$ = \4,\5 acum",
@@ -5260,11 +5260,11 @@ _ES_PATTERNS = [
     # multiplication sign is now the real ×, and the pair is paid here.
     (r"^×(.+) at 4 Hz$", r"×\1 a 4 Hz"),
     (
-        r"^closed form, Eq\. 10\.2 — peak (.+) vacil$",
+        r"^closed form, Eq\. 10\.2: peak (.+) vacil$",
         r"forma cerrada, Ec. 10.2: máximo \1 vacil",
     ),
     (
-        r"^Osses 2016 signal model — peak (.+) vacil$",
+        r"^Osses 2016 signal model: peak (.+) vacil$",
         r"modelo de señal de Osses 2016: máximo \1 vacil",
     ),
     (r"^peak (.+) vacil at (.+) Hz$", r"máximo de \1 vacil a \2 Hz"),
@@ -5427,38 +5427,38 @@ _ES_PATTERNS = [
     # microphone_noise_weightings).
     (
         (
-            r"^\(a\) Difference frequency, 13 / 14 kHz — "
+            r"^\(a\) Difference frequency, 13 / 14 kHz: "
             r"\$d\(d,2\)\$ = (\d+)\.(\d+) %$"
         ),
-        r"(a) Diferencia de frecuencias, 13 / 14 kHz — $d(d,2)$ = \1,\2 %",
+        r"(a) Diferencia de frecuencias, 13 / 14 kHz: $d(d,2)$ = \1,\2 %",
     ),
     (
         (
-            r"^\(b\) Total difference frequency, 8 / 11\.95 kHz — "
+            r"^\(b\) Total difference frequency, 8 / 11\.95 kHz: "
             r"\$d\(\\mathrm\{TDFD\}\)\$ = (\d+)\.(\d+) %$"
         ),
         (
-            "(b) Diferencia total de frecuencias, 8 / 11,95 kHz — "
+            "(b) Diferencia total de frecuencias, 8 / 11,95 kHz: "
             r"$d(\\mathrm{TDFD})$ = \1,\2 %"
         ),
     ),
     (
         (
-            r"^\(c\) Dynamic intermodulation, 15 kHz \+ 3\.15 kHz square — "
+            r"^\(c\) Dynamic intermodulation, 15 kHz \+ 3\.15 kHz square: "
             r"DIM = (.+) %$"
         ),
         (
-            r"(c) Intermodulación dinámica, 15 kHz + cuadrada de 3,15 kHz — "
+            r"(c) Intermodulación dinámica, 15 kHz + cuadrada de 3,15 kHz: "
             r"DIM = \1 %"
         ),
     ),
     (
-        r"^One open microphone — headroom (.+) dB$",
-        r"Un micrófono abierto — margen \1 dB",
+        r"^One open microphone, headroom (.+) dB$",
+        r"Un micrófono abierto, margen \1 dB",
     ),
     (
-        r"^Four open microphones — headroom (.+) dB$",
-        r"Cuatro micrófonos abiertos — margen \1 dB",
+        r"^Four open microphones, headroom (.+) dB$",
+        r"Cuatro micrófonos abiertos, margen \1 dB",
     ),
     (
         r"^Omnidirectional \(\$b\$ = (\d+)\.(\d+)\): DI = (\d+)\.(\d+) dB$",
@@ -5689,8 +5689,8 @@ _ES_PATTERNS = [
     ),
     # Room-noise criteria (ANSI S12.2-2019) dynamic titles/legends
     (
-        r"^Noise Criteria — tangency method   NC-(.+)$",
-        r"Criterios de ruido — método de tangencia   NC-\1",
+        r"^Noise Criteria: tangency method   NC-(.+)$",
+        r"Criterios de ruido: método de tangencia   NC-\1",
     ),
     (r"^Room Criteria Mark II   RC-(.+)$", r"Criterios de sala Mark II   RC-\1"),
     (r"^Tangent @ (.+) Hz$", r"Tangente @ \1 Hz"),
@@ -5700,18 +5700,24 @@ _ES_PATTERNS = [
         r"^One rating: NC-(.+) for both rooms$",
         r"Una calificación: NC-\1 en las dos salas",
     ),
-    (r"^Duct rumble — tangent at (.+) Hz$", r"Retumbo de conducto — tangente en \1 Hz"),
-    (r"^Diffuser hiss — tangent at (.+) Hz$", r"Siseo de difusor — tangente en \1 Hz"),
-    (r"^Duct rumble — RC-(.+)$", r"Retumbo de conducto — RC-\1"),
-    (r"^Diffuser hiss — RC-(.+)$", r"Siseo de difusor — RC-\1"),
-    # ISO 18233 acquisition figures
     (
-        r"^Pistol shot \(no deconvolution\) — (.+) dB$",
-        r"Disparo de pistola (sin deconvolución) — \1 dB",
+        r"^Duct rumble \(tangent at (.+) Hz\)$",
+        r"Retumbo de conducto (tangente en \1 Hz)",
     ),
     (
-        r"^(.+) s sweep, deconvolved — (.+) dB$",
-        r"barrido de \1 s, deconvolucionado — \2 dB",
+        r"^Diffuser hiss \(tangent at (.+) Hz\)$",
+        r"Siseo de difusor (tangente en \1 Hz)",
+    ),
+    (r"^Duct rumble: RC-(.+)$", r"Retumbo de conducto: RC-\1"),
+    (r"^Diffuser hiss: RC-(.+)$", r"Siseo de difusor: RC-\1"),
+    # ISO 18233 acquisition figures
+    (
+        r"^Pistol shot \(no deconvolution\): (.+) dB$",
+        r"Disparo de pistola (sin deconvolución): \1 dB",
+    ),
+    (
+        r"^(.+) s sweep, deconvolved: (.+) dB$",
+        r"barrido de \1 s, deconvolucionado: \2 dB",
     ),
     (
         r"^sweep over pistol: \+(.+) dB\ntwo doublings of sweep length: \+(.+) dB$",
@@ -6256,19 +6262,19 @@ _ES_PATTERNS = [
     (r"^segment values span (.+) to (.+)$", r"los valores de segmento van de \1 a \2"),
     (
         (
-            r"^\(b\) Full band: \$A\$ = (.+), inside \((.+), (.+)\] — accepted, "
-            r"and blind$"
+            r"^\(b\) Full band: \$A\$ = (.+), inside \((.+), (.+)\] "
+            r"\(accepted and blind\)$"
         ),
-        r"(b) Banda completa: $A$ = \1, dentro de (\2, \3] — aceptado, y ciego",
+        r"(b) Banda completa: $A$ = \1, dentro de (\2, \3] (aceptado y ciego)",
     ),
     (
         (
             r"^\(c\) Band-limited (.+)-(.+) Hz: \$A\$ = (.+), outside "
-            r"\((.+), (.+)\] — rejected$"
+            r"\((.+), (.+)\] \(rejected\)$"
         ),
         (
             "(c) Limitado a la banda de \\1-\\2 Hz: $A$ = \\3, fuera de (\\4, \\5] "
-            "— rechazado"
+            "(rechazado)"
         ),
     ),
     # These three carry mathtext, so the automatic decimal-comma pass skips

@@ -150,7 +150,7 @@ _STRINGS: dict[str, str] = {
     "Hiss tolerance (+3 dB)": "Tolerancia de siseo (+3 dB)",
     _REVERBERATION_TIME_LABEL: "Tiempo de reverberación $T$ [s]",
     "EN 12354-6 reverberation time": "Tiempo de reverberación EN 12354-6",
-    "Reverberation-time models — ": "Modelos de tiempo de reverberación — ",
+    "Reverberation-time models: ": "Modelos de tiempo de reverberación: ",
     " dB per doubling": " dB por duplicación",
     " m (STI 0.50)": " m (STI 0,50)",
     " m (STI 0.20)": " m (STI 0,20)",
@@ -187,7 +187,7 @@ _STRINGS: dict[str, str] = {
     "Mode kind": "Tipo de modo",
     "Modal density [modes/Hz]": "Densidad modal [modos/Hz]",
     "Modal density d$N$/d$f$": "Densidad modal d$N$/d$f$",
-    "Room modes — {lx} × {ly} × {lz} m": "Modos de la sala — {lx} × {ly} × {lz} m",
+    "Room modes: {lx} × {ly} × {lz} m": "Modos de la sala: {lx} × {ly} × {lz} m",
     "Schroeder $f_\\mathrm{{s}}$ = {value} Hz": "$f_\\mathrm{{s}}$ de Schroeder = {value} Hz",
     # --- Restaurant crowd self-noise (Long Ch. 17) ---
     "Simultaneous talkers $N$": "Hablantes simultáneos $N$",
@@ -195,7 +195,7 @@ _STRINGS: dict[str, str] = {
     _ABSORPTION_AREA_LABEL: _ABSORPTION_AREA_LABEL,
     "Speech at {value} m": "Habla a {value} m",
     r"Communication limit ($L_\mathrm{SN}$ = −6 dB)": r"Límite de comunicación ($L_\mathrm{SN}$ = −6 dB)",
-    "Crowd self-noise — $L_W$ = {lw} dB per talker": "Ruido autogenerado del público — $L_W$ = {lw} dB por hablante",
+    "Crowd self-noise: $L_W$ = {lw} dB per talker": "Ruido autogenerado del público: $L_W$ = {lw} dB por hablante",
     # --- Sound strength G (ISO 3382-1:2009, A.2.1) ---
     "Sound strength $G$ [dB]": "Fuerza sonora $G$ [dB]",
     "ISO 3382-1 sound strength": "Fuerza sonora ISO 3382-1",
@@ -1053,7 +1053,7 @@ def plot_reverberation_models(
     _freq_axis(ax, freq, language=language)
     ax.set_ylabel(_t(_REVERBERATION_TIME_LABEL, language))
     ax.set_title(
-        f"{_t('Reverberation-time models — ', language)}"
+        f"{_t('Reverberation-time models: ', language)}"
         f"$V$ = {format_number(result.volume, language, decimals=0)} m³, "
         f"$S$ = {format_number(result.surface_area, language, decimals=0)} m²"
     )
@@ -1342,12 +1342,12 @@ def plot_image_source_reflectogram(
     ax.set_ylabel(_t("Reflection level re direct [dB]", language))
     if language == "es":
         ax.set_title(
-            f"Reflectograma de fuentes imagen — sala de "
+            f"Reflectograma de fuentes imagen: sala de "
             f"{dims} m, orden ≤ {result.max_order}"
         )
     else:
         ax.set_title(
-            f"Image-source reflectogram — {dims} m room, order ≤ {result.max_order}"
+            f"Image-source reflectogram: {dims} m room, order ≤ {result.max_order}"
         )
     ax.grid(visible=True, alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
@@ -1419,13 +1419,13 @@ def plot_steady_field(
     q = decimal_comma(f"{result.directivity:g}", language)
     if language == "es":
         ax.set_title(
-            f"Campo estacionario de la sala — $L_W$ = {lw} dB, "
+            f"Campo estacionario de la sala: $L_W$ = {lw} dB, "
             f"$R$ = {format_number(result.room_constant, language, decimals=0)} m², "
             f"$Q$ = {q}"
         )
     else:
         ax.set_title(
-            f"Steady-state room field — $L_W$ = {lw} dB, "
+            f"Steady-state room field: $L_W$ = {lw} dB, "
             f"$R$ = {result.room_constant:.0f} m², $Q$ = {q}"
         )
     ax.grid(visible=True, which="both", alpha=0.3)
@@ -1528,7 +1528,7 @@ def plot_shaped_sweep(
     axes[0].plot(time, x, color=color, lw=0.6, **kwargs)
     axes[0].set_xlabel(xlabel)
     axes[0].set_ylabel(_t("Amplitude", language))
-    axes[0].set_title(f"{title} — {_t('Crest factor', language)} {crest} dB")
+    axes[0].set_title(f"{title}: {_t('Crest factor', language)} {crest} dB")
     axes[0].grid(visible=True, alpha=0.3)
     axes[0].set_xlim(float(time[0]), float(time[-1]))
     localize_axes(axes[0], language)
@@ -1592,7 +1592,7 @@ def plot_room_modes(
     ladder.set_ylabel(_t("Mode kind", language))
     lx, ly, lz = result.dimensions
     ladder.set_title(
-        _t("Room modes — {lx} × {ly} × {lz} m", language).format(
+        _t("Room modes: {lx} × {ly} × {lz} m", language).format(
             lx=format_number(lx, language, decimals=1, trim=True),
             ly=format_number(ly, language, decimals=1, trim=True),
             lz=format_number(lz, language, decimals=1, trim=True),
@@ -1696,7 +1696,7 @@ def plot_crowd_noise(
     ax.set_xlabel(_t("Simultaneous talkers $N$", language))
     ax.set_ylabel(_t("Self-generated noise level [dB]", language))
     ax.set_title(
-        _t("Crowd self-noise — $L_W$ = {lw} dB per talker", language).format(
+        _t("Crowd self-noise: $L_W$ = {lw} dB per talker", language).format(
             lw=format_number(result.sound_power_level, language, decimals=0)
         )
     )

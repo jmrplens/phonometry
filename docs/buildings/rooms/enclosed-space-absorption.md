@@ -162,8 +162,8 @@ scattering objects are present) and an object fraction below 0.2. Outside
 those limits the field is not diffuse and the model errs on the optimistic
 side: the standard's own accuracy clause records measured reverberation
 times up to twice the prediction in low-diffusivity rooms. The standard's own
-scope goes further: very large or irregularly shaped spaces — concert halls,
-theatres, factories — are excluded from the model itself, not just from this
+scope goes further: very large or irregularly shaped spaces (concert halls,
+theatres, factories) are excluded from the model itself, not just from this
 implementation. The classical alternatives for those cases live in
 [Reverberation-time prediction](reverberation-prediction.md).
 
@@ -233,7 +233,7 @@ repository. Click the preview to open the PDF:
   the measured counterpart of the reverberation time predicted here.
 - [Sound Absorption Measurement and Rating](../../materials/absorbers/absorption-measurement.md):
   where the $\alpha_\mathrm{s}$ come from (ISO 354) and where $\alpha_\mathrm{w}$ is defined
-  (ISO 11654) — the rating §3 forbids as an input.
+  (ISO 11654), the rating §3 forbids as an input.
 - [Predicting Sound Insulation (EN 12354)](../design/insulation-prediction.md):
   the family member that consumes the $A$ computed here, through
   $D_\mathrm{nT} = D + 10\lg(T/T_0)$ and $R' = D + 10\lg(S/A)$.

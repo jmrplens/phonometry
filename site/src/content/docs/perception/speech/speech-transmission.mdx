@@ -83,8 +83,8 @@ results, band-weighted, into the index: the STI is an effective SNR of the
 *envelope*, mapped onto $[0, 1]$.
 
 That is a claim about a waveform, so it is worth watching on one. The clip
-below sends a fully modulated 4 Hz envelope — one syllable-rate burst and gap
-per quarter second — through the 1 kHz octave band of a room, and lets first
+below sends a fully modulated 4 Hz envelope (one syllable-rate burst and gap
+per quarter second) through the 1 kHz octave band of a room, and lets first
 the reverberation time and then the noise take it apart. The received trace is
 the probe convolved with the very $h_k^2(t)$ the Schroeder integral above runs
 on, so the depth $(\max - \min)/(\max + \min)$ you can measure off the screen
@@ -218,8 +218,8 @@ plt.show()
 
 Both routes below start from a signal that travelled a real path, and clause 7
 is specific about what produces it. The page covers two physically different
-measurements — an unamplified talker in a room, and a sound system driven
-electrically — and the setup differs mainly in where the signal enters.
+measurements: an unamplified talker in a room, and a sound system driven
+electrically. The setup differs mainly in where the signal enters.
 
 <ThemeImage
   src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sti_setup.svg"
@@ -233,9 +233,9 @@ because in a listening space intelligibility depends on the source directivity.
 In its absence, a small single-source high-quality loudspeaker with a cone
 diameter not exceeding 100 mm may be used, and it *shall* be described with the
 results. Verify that the source's one-third-octave frequency response is within
-±1 dB over the range the chosen signal needs — 88 Hz to 11.3 kHz for a full-STI
+±1 dB over the range the chosen signal needs (88 Hz to 11.3 kHz for a full-STI
 or impulse-response signal, or octave band by octave band from 125 Hz to 8 kHz
-for STIPA — measured in a free field, and equalize it if it is not. Then set it
+for STIPA), measured in a free field, and equalize it if it is not. Then set it
 on the axis of the microphone at the real talker position and distance, pointing
 in the normal speaking direction (clause 7.2 a to c).
 
@@ -250,8 +250,8 @@ normal input as possible so that every equalizer, delay and processor in the
 chain is included, and adjusted to the level of speech at that point by the
 same Annex J method (clause 7.4).
 
-**The receiver.** The measurement device — microphone, artificial ear or head
-simulator — shall be acoustically calibrated for sensitivity *and* frequency
+**The receiver.** The measurement device (microphone, artificial ear, or head
+simulator) shall be acoustically calibrated for sensitivity *and* frequency
 response, and the measurement made at the listener's normal location and
 listening height (about 1.2 m seated, 1.6 m standing). A single microphone
 shall be omnidirectional and of diffuse-field type; a directional microphone
@@ -261,7 +261,7 @@ ear. Measure the ambient noise at the same point with the source switched off,
 so it can be entered through `ambient=` or as `snr=`.
 
 **Before blaming the room**, verify the integrity of the test signal with a
-loop-back measurement — this catches a corrupted or over-compressed file, and
+loop-back measurement. This catches a corrupted or over-compressed file, and
 the standard advises against digitally compressed formats, noting that schemes
 of at least 128 kbit/s have been shown to work (clause 7.2 a).
 
@@ -288,7 +288,7 @@ res.plot()   # per-band modulation transfer index (MTI) bars, STI + rating in th
 it carries the whole noise degradation, so its provenance matters as much as
 the impulse response's. For each octave band it is the band level of the speech
 signal at the listener position minus the band level of the ambient noise
-measured at that same position with the source switched off — which is why the
+measured at that same position with the source switched off. This is why the
 argument accepts a 7-vector: real ambient noise is rarely flat, and ventilation
 noise concentrated at 125 Hz and 250 Hz costs the low bands far more than a
 single broadband figure suggests. With `snr=None` the calculation assumes a
@@ -296,10 +296,10 @@ noise-free channel, so the result is the room's own limit and an *upper bound*
 on what any listener will experience; quoting it as a measured STI is exactly
 what makes a hall look acceptable on paper. Measure the ambient spectrum once,
 measure or estimate the speech spectrum at the position, and pass the
-band-by-band difference — or, when the absolute levels matter because auditory
-masking and the reception threshold are in play, pass `level=` and `ambient=`
-instead so the level-dependent stages of the standard are applied rather than a
-pure ratio.
+band-by-band difference. Alternatively, when the absolute levels matter because
+auditory masking and the reception threshold are in play, pass `level=` and
+`ambient=` instead so the level-dependent stages of the standard are applied
+rather than a pure ratio.
 
 Whichever route produced it, the result is worth reading band by band before
 the single number is quoted: the STI is a weighted combination of seven
@@ -416,15 +416,15 @@ centre of the band:
 Three things follow. The familiar "STI ≥ 0.5" requirement of voice-alarm work
 is band **G**, whose comment in Table G.1 is literally "target value for VA
 systems"; Table G.1's own NOTE 1 adds that its values are minimum targets. The
-scale is deliberately coarse — one band per 0.04 STI — because that spacing is
+scale is deliberately coarse (one band per 0.04 STI) because that spacing is
 "based on the typical uncertainty of direct STI measurements", so a one-band
 difference is the smallest worth arguing about and quoting three decimals of
 STI is false precision. And 0.04 is *finer* than the ≈ 0.03 run-to-run scatter
 of a single STIPA measurement noted below, so a letter can move between repeats
 while the STI has not changed in substance. Annexes F and G are informative,
 and Edition 5's Scope says outright that the document does not provide criteria
-for certifying a transmission channel — so write a project requirement as a
-numeric STI, and use the letter to report it.
+for certifying a transmission channel. Write a project requirement as a numeric
+STI, and use the letter to report it.
 
 ### From positions to a rating for the space
 
@@ -439,13 +439,13 @@ one position in each loudspeaker coverage zone of a distributed system: clause
 The reduction rule is the part that is easy to get wrong. Clause 7.6.4 says
 that taking a simple mean of the results **can be misleading**, and that a
 better single figure, one that accounts for the spatial variation, is the
-**mean minus one standard deviation** — sometimes called the *rating of the
-space*, and the value a given location has about an 84 % probability of
+**mean minus one standard deviation** (sometimes called the *rating of the
+space*), the value a given location has about an 84 % probability of
 reaching if the results are Gaussian. Better still is to plot the whole
 statistical distribution. The practical consequence for a fiche: when a
 `requirement` is set, say whether the boxed number is one position, the worst
-position or the mean minus one standard deviation, because those are three
-different verdicts against the same limit — and the 0.04-wide Annex F bands are
+position, or the mean minus one standard deviation (as those are three
+different verdicts against the same limit). The 0.04-wide Annex F bands are
 the natural resolution at which to summarise the spread.
 
 ### Direct or indirect: choosing between them

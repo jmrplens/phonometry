@@ -24,7 +24,7 @@ sensation is specified in sones. Reaching for the wrong one is the commonest
 mistake in this area.
 
 The quantities are few. **Loudness** is reported in LUFS by the EBU and in LKFS
-by the ITU — identical units — and **1 LU is 1 dB**, so a loudness difference
+by the ITU (identical units) and **1 LU is 1 dB**, so a loudness difference
 and a level difference are the same size. **EBU R 128** sets the delivery
 target at **−23.0 LUFS** with a true-peak ceiling of **−1 dBTP**. The **loudness
 range**, in LU, says how far the programme moves between its quiet and loud
@@ -33,13 +33,13 @@ normalisation.
 
 Four documents own four different things, and the section is easier to read once
 that is clear. **ITU-R BS.1770** defines the algorithm: the K-weighting
-pre-filter — a roughly +4 dB spherical-head shelf followed by the RLB high-pass
-— the mean square in 400 ms blocks at 75 % overlap, the channel-weighted sum,
+pre-filter (a roughly +4 dB spherical-head shelf followed by the RLB high-pass),
+the mean square in 400 ms blocks at 75 % overlap, the channel-weighted sum,
 and the **two-stage gate** that makes the number usable on real programme (an
 absolute gate at −70 LKFS drops digital silence, then a relative gate 10 LU
 below the mean of the survivors drops the quiet passages that would otherwise
 dilute a dialogue level). **EBU R 128** sets the target and the ceiling.
-**EBU Tech 3341** defines the EBU Mode meter — the momentary, short-term and
+**EBU Tech 3341** defines the EBU Mode meter: the momentary, short-term and
 integrated time scales, and the compliance test set. **EBU Tech 3342** defines
 the loudness range. True peak is measured on an oversampled signal because an
 inter-sample peak can exceed every sample value, so a file that reads −0.2 dBFS
@@ -61,10 +61,10 @@ anywhere in it.
   the ITU-R BS.1770 K-weighting, gated 400 ms blocks and channel-weighted sum,
   the EBU R 128 target and ceiling, the Tech 3341 momentary, short-term and
   integrated meters, the Tech 3342 loudness range, the Annex 2 oversampled true
-  peak and the Annex 3 channel weights for advanced sound systems — validated
+  peak and the Annex 3 channel weights for advanced sound systems, validated
   against the EBU test signals and ending in an EBU R 128 report fiche.
 - [Quasi-peak programme meter (ITU-R BS.468-4)](https://jmrplens.github.io/phonometry/devices/broadcast/quasi-peak/):
-  the psophometric noise meter — the clause 2 quasi-peak detector, its eleven
+  the psophometric noise meter, the clause 2 quasi-peak detector, its eleven
   Table 2 and Table 3 acceptance windows, the clause 2.6 calibration that makes
   a reading dBqps, and the three fitted time scales those windows identify only
   to within a factor of 1.61 to 2.09.
@@ -85,8 +85,8 @@ BS.1770-5 **Annex 4, object-based audio, is out of scope**, and the library
 implements no spatial renderer, so an object-based programme has to be
 rendered to a loudspeaker layout before any of this applies. **EBU Tech 3343**
 is cited as production practice around these numbers, not as an algorithm:
-nothing here runs it. And loudness normalisation itself — the gain change, and
-any limiting that follows it — is a production step this library does not
+nothing here runs it. And loudness normalisation itself (the gain change, and
+any limiting that follows it) is a production step this library does not
 perform: it measures the programme and tells you the offset, and applying it
 is your encoder's job.
 
@@ -217,7 +217,7 @@ long quiet tail:
 
 *The relative gate (10 LU below the survivors) drops every block of the tail,
 so the integrated loudness holds the foreground at −23.0 LUFS while the
-ungated energy mean sinks towards −27.7 LUFS — and would keep sinking with
+ungated energy mean sinks towards −27.7 LUFS, and would keep sinking with
 every extra minute of ambience. Without the gate, quiet passages would let
 the foreground of a film mix ride far above the target.*
 
@@ -600,7 +600,7 @@ What clause 2 gives instead is **eleven acceptance windows**. Table 2 reads a
 single 5 kHz tone burst at eight durations from 1 ms to 200 ms; Table 3 reads
 a train of 5 ms bursts at 2, 10 and 100 per second. Every cell is a percentage
 of the reading the *same* tone gives steadily, so both tables are ratios and
-every absolute factor — the network's +11.7 dB at 5 kHz included — cancels.
+every absolute factor, the network's +11.7 dB at 5 kHz included, cancels.
 
 | Stimulus | Lower | Reference | Upper | Window |
 |---|---:|---:|---:|---:|
@@ -653,7 +653,7 @@ print(round(result.level_db, 2), result.level_unit)        # -2.41 dBqps
 The whole content of clause 2 in one picture: the needle rises over the first
 half second, ripples once the charge between bursts and the decay in the gaps
 balance, and falls away after the train stops. The gap between the two
-horizontal lines is Table 3's 10 bursts per second cell, drawn to scale — the
+horizontal lines is Table 3's 10 bursts per second cell, drawn to scale: the
 train reads 75.8 % of the steady tone against a printed 77 %, inside the 72 to
 82 % window.
 
@@ -693,7 +693,7 @@ presents its samples in pascals, as everywhere else in this library, and then
 has to be given a `reference` of its own: 0.775 V is not a pressure, and
 BS.468-4 offers no pressure to put in its place, so the call refuses rather
 than printing `20 lg(p / 0.775)` under a name clause 3 reserves for voltages.
-`result.level_unit` names whichever scale came out — `"dBqps"`,
+`result.level_unit` names whichever scale came out: `"dBqps"`,
 `"dB re 20 uPa"`, or the reference itself.
 
 ## 4. The ballistics, and how much the tables pin them down
@@ -738,25 +738,25 @@ So the reading device, not the charge, is the constant the tables pin down
 least. No reading this library produces for any signal other than a gated
 5 kHz sine can be tighter than that.
 
-Three is also the model order the tables support. A fourth constant — the
-informative Note's second peak rectifier — buys 0.011 dB and is left
+Three is also the model order the tables support. A fourth constant, the
+informative Note's second peak rectifier, buys 0.011 dB and is left
 unidentified over a factor of 15.9. A fifth buys 0.036 dB at the worst point,
 concentrated on the two cells whose printed reference is quantised to ±0.064
 and ±0.056 dB, and its two middle constants move by factors of 3.0 and 2.1
 under a change in the last decimal of the objective. Past three constants the
 fit is fitting the rounding of the table.
 
-The six choices behind the numbers — full-wave rectification as the absolute
+The six choices behind the numbers (full-wave rectification as the absolute
 value, the asymmetric one-pole rectifier, the symmetric reading device, the
 maximum-over-the-record reading rule, the steady-tone reference and running
-the ballistics at the input rate — are inseparable. Change any one and the
+the ballistics at the input rate) are inseparable. Change any one and the
 three constants have to be refitted.
 
 ## 5. Conformance
 
 `verify_quasi_peak_dynamics` builds the clause 2.1 and 2.2 stimuli exactly as
-specified — a 5 kHz sine starting at a zero crossing and lasting an integral
-number of full periods, through the weighting network — and reads each against
+specified: a 5 kHz sine starting at a zero crossing and lasting an integral
+number of full periods, through the weighting network, and reads each against
 the same chain's steady reading.
 
 ```python
@@ -771,7 +771,7 @@ print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
 All eleven windows are met at 32, 44.1, 48, 96 and 192 kHz. The worst margin
 is 0.259 dB, at the 100 bursts per second cell whose upper limit is the
 physical ceiling. Between those five rates no reading moves by more than
-0.080 dB, or 4.2 % of its own window — which is why the peak-follower worry
+0.080 dB, or 4.2 % of its own window, which is why the peak-follower worry
 about reading the largest *sample* rather than the largest value of the
 waveform does not bite here: the 1.41 ms charge spans fourteen half-periods of
 the rectified 5 kHz carrier, so the ripple is long gone before any maximum is
@@ -840,7 +840,7 @@ fitted. The conformity evidence is real and it is published, in
 ## See also
 
 - [Programme loudness & true peak](https://jmrplens.github.io/phonometry/devices/broadcast/program-loudness/): the other ITU-R BS
-  meter, and the opposite design — a gated mean square with published
+  meter, and the opposite design: a gated mean square with published
   coefficients where this one is a peak follower with none.
 - [Frequency weightings](https://jmrplens.github.io/phonometry/signals/levels/weighting/): the 468 curve
   itself, beside A, C and Z.

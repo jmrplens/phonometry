@@ -138,7 +138,7 @@ eng.plot()   # el espectro LW(f), como en la figura de arriba (requiere matplotl
 Los dos totales no son intercambiables: `total_level` es la suma en bandas sin
 ponderar $10\lg\sum_j 10^{0{,}1 L_{W,j}}$, mientras que `sound_power_level_a` es
 el total ponderado A que la ficha recuadra y que cita una declaración de ruido.
-Se diferencian en la ponderación A del espectro — 2,0 dB en esta carcasa,
+Se diferencian en la ponderación A del espectro: 2,0 dB en esta carcasa,
 varios decibelios más en una con mucho peso en baja frecuencia.
 
 Poner las dos partes una al lado de la otra sobre una misma carcasa convierte el
@@ -148,8 +148,8 @@ precio de la hipótesis de la Parte 1 en un dibujo en vez de en un argumento:
 
 *Barras emparejadas por banda para una carcasa de 1,6 m²: el límite superior de
 la Parte 1 frente al valor de ingeniería de la Parte 2. La separación **es**
-$-10\log_{10}\varepsilon_j$ — 7,0 dB a 125 Hz, 3,5 dB a 250 Hz, 1,2 dB a 500 Hz
-y nada de 2 kHz hacia arriba —, así que el error que comete la Parte 1 es mayor
+$-10\log_{10}\varepsilon_j$: 7,0 dB a 125 Hz, 3,5 dB a 250 Hz, 1,2 dB a 500 Hz
+y nada de 2 kHz hacia arriba; así que el error que comete la Parte 1 es mayor
 en las bandas graves, justo donde peor radia una carcasa grande y delgada.*
 
 <details>
@@ -213,9 +213,9 @@ vibración extraña según la Tabla 2.
 
 Esas posiciones no son libres: la norma divide la superficie radiante $S$ en
 $N$ celdas iguales y coloca un acelerómetro en el centro de cada una. La
-Tabla 1 fija el $N$ inicial solo a partir del área — **5** posiciones por
+Tabla 1 fija el $N$ inicial solo a partir del área: **5** posiciones por
 debajo de 1 m², **10** de 1 m² a 10 m², y $S/S_0$ posiciones por encima
-($S_0 = 1$ m²) —, así que la superficie de 4 m² dibujada abajo lleva diez.
+($S_0 = 1$ m²); así que la superficie de 4 m² dibujada abajo lleva diez.
 Hay que aumentar $N$ cuando la dispersión del nivel de velocidad ponderado A
 entre las posiciones, el más alto menos el más bajo en decibelios, supera el
 doble del número de la Tabla 1; un campo muy poco uniforme puede tratarse en
@@ -268,8 +268,8 @@ La sujeción es la parte que cuesta ancho de banda en silencio:
 
 Esa tabla tiene una consecuencia directa para los ejemplos de esta página, que
 llegan en bandas de octava hasta **4 kHz**: un montaje con imán pierde la banda
-superior sin remedio, y la pierde en silencio — el nivel simplemente sale bajo,
-no falla ninguna comprobación. Un vibrómetro láser de barrido evita a la vez la
+superior sin remedio, y la pierde en silencio (el nivel simplemente sale bajo,
+no falla ninguna comprobación). Un vibrómetro láser de barrido evita a la vez la
 carga de masa y el límite de sujeción, siempre que el haz se mantenga
 perpendicular a la superficie, ya que también él mide solo la componente a lo
 largo del haz.
@@ -305,10 +305,10 @@ dos hipótesis son fáciles de violar en campo:
 «Zonas adyacentes se mueven en contrafase y su radiación se cancela en gran
 medida» es la frase sobre la que descansa toda la advertencia, y es una
 afirmación sobre la relación de fase entre una onda estructural que viaja y el
-aire que tiene encima — que es justo lo que un espectro no puede dibujar. El
+aire que tiene encima (que es justo lo que un espectro no puede dibujar). El
 clip de abajo excita una placa de acero de 10 mm en aire **a lo largo de toda
 su longitud**, con una fuerza sobre la placa y no con una onda que llega a
-ella, porque ese es el caso de emisión del que trata este método — y porque una
+ella, porque ese es el caso de emisión del que trata este método, y porque una
 placa excitada solo en un parche radia desde el parche, que por debajo de la
 coincidencia sería lo único que habría en el aire y enseñaría lo contrario de
 la verdad. Después ejecuta la misma escena dos veces, a $f_\mathrm{c}/2$ y a $2f_\mathrm{c}$, sin
@@ -328,7 +328,7 @@ aire en contrafase, y lo que el aire enseña es una piel de lóbulos alternos qu
 se pega a la placa y muere en una fracción de longitud de onda. La presión en
 la superficie es del mismo orden que en el otro panel; simplemente va un cuarto
 de ciclo desfasada respecto de la velocidad, así que no se lleva potencia
-alguna — que es lo que $\varepsilon \ll 1$ *significa*. Por encima de la
+alguna: eso es lo que $\varepsilon \ll 1$ *significa*. Por encima de la
 coincidencia la onda de flexión adelanta al sonido, la traza acústica iguala la
 longitud de onda de flexión y un haz plano se marcha a
 $\arcsin(c_0/c_\mathrm{B}) = 45°$.
@@ -336,14 +336,14 @@ $\arcsin(c_0/c_\mathrm{B}) = 45°$.
 Cada panel lleva anotadas las formas cerradas que obedece su régimen, sacadas
 de las propias constantes de la placa: por debajo de la coincidencia, que
 $\lambda_\mathrm{B} = 0{,}40$ m es *más corta* que los 0,57 m del sonido en aire, así que
-$\sin\theta = \lambda/\lambda_\mathrm{B}$ no tiene solución — no hay ángulo por el que el
-sonido pueda salir — y la piel que ocupa su lugar decae con una altura de
+$\sin\theta = \lambda/\lambda_\mathrm{B}$ no tiene solución (no hay ángulo por el que el
+sonido pueda salir), y la piel que ocupa su lugar decae con una altura de
 $1/\sqrt{k_\mathrm{B}^2 - k_0^2} = 0{,}091$ m; por encima de la coincidencia, que
 $\lambda_\mathrm{B} = 0{,}20$ m es *más larga* que los 0,14 m en aire, así que la traza
 acústica iguala la longitud de onda de flexión y lanza un haz a 45°. No
 se mide nada sobre la escena misma. Se probaron dos magnitudes y las dos las
-estropearon los extremos de la placa — una capa amortiguadora refleja
-parcialmente una onda de flexión, de modo que el aire lleva un haz hacia la
+estropearon los extremos de la placa (una capa amortiguadora refleja
+parcialmente una onda de flexión), de modo que el aire lleva un haz hacia la
 izquierda encima del que va hacia la derecha, y la lectura es la diferencia de
 los dos y no uno cualquiera de ellos. Terminar una onda de flexión lo bastante
 bien como para leerle un número exige un dominio mucho más ancho del que cabe
@@ -368,7 +368,7 @@ detrás.
 Nada de eso hay que creérselo sin más: la biblioteca predice $\varepsilon$ para
 una placa, y es el mismo modelo `radiation_efficiency` que dibujó la placa al
 principio de esta página. La **frecuencia crítica** sale de la masa superficial
-y de la rigidez a flexión — un panel de acero de 3 mm la sitúa cerca de 4 kHz —
+y de la rigidez a flexión (un panel de acero de 3 mm la sitúa cerca de 4 kHz),
 y es donde las ondas de flexión viajan a la velocidad del sonido y la placa
 empieza a radiar como un pistón. Todo lo que queda por debajo es el
 cortocircuito acústico.
@@ -376,7 +376,7 @@ cortocircuito acústico.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/radiation_efficiency_sigma.svg" alt="La eficiencia de radiación sigma de la placa de 1,5 por 1,25 metros en ejes logarítmicos de 50 Hz a 5 kHz, subiendo desde unos 0,003 en 63 Hz hasta un máximo justo por encima de la frecuencia crítica de 4073 Hz. Toda la región por debajo de la línea sigma igual a uno aparece sombreada y rotulada como el rango en el que la ISO/TS 7849-1 supone épsilon igual a uno, con el índice de radiación marcado en menos 23,4 dB a 125 Hz y menos 17,6 dB a 1 kHz" width="88%" />
 
 *El área sombreada es la hipótesis que hace la Parte 1. Para esta placa vale
-25 dB a 63 Hz y 14 dB a 2 kHz, y solo se cierra en la coincidencia — que es los
+25 dB a 63 Hz y 14 dB a 2 kHz, y solo se cierra en la coincidencia: estos son los
 «10 dB o más» del párrafo anterior, dibujados.*
 
 <details>
@@ -403,9 +403,9 @@ plt.show()
 Un $\varepsilon$ predicho vuelve directamente a la determinación:
 `sound_power_from_vibration(lv, area=…, radiation_factor=sigma.radiation_efficiency,
 frequencies=bands)` convierte una determinación de control de la Parte 1 en
-una primera estimación del valor de la Parte 2. Tómalo por lo que es — una
+una primera estimación del valor de la Parte 2. Tómalo por lo que es: una
 *placa plana con pantalla y una condición de contorno conocida* no es la
-carcasa de una máquina con nervios, aberturas y un reductor atornillado —, pero
+carcasa de una máquina con nervios, aberturas y un reductor atornillado, pero
 basta para saber si el número de la Parte 1 es 1 dB o 15 dB pesimista antes de
 comprometerse con una medición de intensidad. Ese mismo $\varepsilon$ aparece como $\sigma$, la
 eficiencia de radiación, en
@@ -431,7 +431,7 @@ pérdidas interno**, de modo que un factor medido a ralentí no vale a plena car
 y uno medido sobre un apoyo elástico no vale en una instalación atornillada: la
 condición de funcionamiento y de montaje forma parte del $\varepsilon$,
 exactamente igual que forma parte de cualquier otro valor de emisión de esta
-sección. El apartado 4.2 añade el matiz modal — en las bandas donde solo se
+sección. El apartado 4.2 añade el matiz modal: en las bandas donde solo se
 excitan unos pocos modos, $\varepsilon_j$ lo fijan *qué* modos se excitan y no el
 comportamiento radiante medio de la superficie, así que es inestable de una
 campaña a otra y de una máquina a otra. Eso convierte las bandas graves en la
@@ -537,7 +537,7 @@ instalación de la fuente, las condiciones ambientales: apartados 5 a 7) no
 están *implementados* como código, y tampoco lo están sus apartados de
 incertidumbre de medida ni sus anexos informativos: son práctica de
 laboratorio, y esta guía enuncia las reglas de esa práctica que deciden si las
-entradas son válidas siquiera — el número de posiciones de la Tabla 1, la
+entradas son válidas siquiera: el número de posiciones de la Tabla 1, la
 escalera de vibración extraña de la Tabla 2 y los límites de montaje del
 transductor de más arriba. El apartado 8 de la Parte 2 pide además el factor
 de radiación de un lote o familia de máquinas, promediando $\varepsilon_j$
@@ -547,8 +547,8 @@ ya promediado para una determinación de familia. La potencia acústica que
 alimenta a `radiation_factor` debe proceder de una *determinación* de
 intensidad según la ISO 9614, que es [Potencia acústica por barrido de
 intensidad](/phonometry/es/devices/emission/sound-power-intensity/)
-(`sound_power_intensity`, o `sound_power_intensity_precision` para el grado 1)
-— la [guía de intensidad acústica](/phonometry/es/devices/emission/intensity/)
+(`sound_power_intensity`, o `sound_power_intensity_precision` para el grado 1);
+la [guía de intensidad acústica](/phonometry/es/devices/emission/intensity/)
 cubre la sonda y los indicadores de campo que hay detrás, pero no calcula
 ninguna potencia.
 </ScopeClaim>

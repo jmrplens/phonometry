@@ -28,8 +28,8 @@ rest of this page builds. Nothing in it is drawn: the colonnade is a boolean
 plane-wave packet with a Gaussian envelope one wavelength wide, launched at
 $x = 0.30$ m into a 4 m × 1 m rigid-walled hall whose two ends absorb through
 sponges hidden outside the frame. The carrier is 800 Hz, so the wavelength is
-42.9 cm and the 10 to 17 cm columns are roughly a quarter to two fifths of it
-— the regime in which a rigid cylinder both casts a readable shadow and
+42.9 cm and the 10 to 17 cm columns are roughly a quarter to two fifths of it:
+the regime in which a rigid cylinder both casts a readable shadow and
 re-radiates strongly, which is why the coda that fills the hall is structured
 rather than noise. That coda is deterministic multiple scattering: it is what
 a diffuse field looks like *before* any statistical assumption is made about
@@ -155,8 +155,8 @@ carry its own boundary condition:
 Two limits of that machinery are worth naming. Interior geometry is rigid by
 construction: only the four domain sides accept an impedance or a sponge, so
 an interior surface can be softened only by backing it with a lossy `damping`
-region — and that region is a frequency-independent equivalent fluid rather
-than a porous model. And the governing equations assume a non-moving medium:
+region. That region is a frequency-independent equivalent fluid rather
+than a porous model. The governing equations assume a non-moving medium:
 wind or flow advection is not modelled, and the only impedance boundary is
 the frequency-independent real one of Eqs. 4.33-4.35.
 
@@ -242,7 +242,7 @@ pressure and outward normal velocity on a closed rectangle of cell faces
 into complex accumulators (an on-the-fly DFT per point and frequency, so a
 continuous-wave run stores no time histories), and the integral propagates
 those phasors to infinity with the free-space Green function
-$-(j/4)\,H_0^{(2)}(kR)$ — the same construction full-wave FEM solvers use to
+$-(j/4)\,H_0^{(2)}(kR)$: the same construction full-wave FEM solvers use to
 report scattering patterns from near-field data. Two properties carry the
 scheme: the staggered grid already holds $v_n$ exactly on the contour
 faces, and any field whose sources lie *outside* the contour integrates to
@@ -285,9 +285,9 @@ whose NTFF polar response tracks the Fraunhofer prediction of
 subwavelength metadiffuser below.
 
 The far-field chain is what finally closes the metadiffuser loop end to
-end: the Table-1 panel of the paper — every slit, neck and cavity meshed
-at 0.5 mm — driven to steady state by a plane wave, captured on a contour
-and transformed, against the `metadiffuser_polar_response` model (TMM +
+end: the Table-1 panel of the paper (every slit, neck and cavity meshed
+at 0.5 mm) is driven to steady state by a plane wave, captured on a contour,
+and transformed against the `metadiffuser_polar_response` model (TMM +
 Fraunhofer) of the materials module. That is the library-side counterpart
 of the TMM-vs-FEM comparison the metadiffuser paper itself reports, small
 discrepancies included: the transfer-matrix model homogenises each 7 cm
@@ -530,8 +530,8 @@ refinement).
 That bound is a *phase* speed error. A pulse travels at the **group** speed,
 and differentiating the same dispersion relation gives
 $v_\mathrm{g}/c = \cos\theta/\sqrt{1 - S^2\sin^2\theta}$ with $\theta = k\Delta x/2$,
-i.e. $1 - (1 - S^2)(k\,\Delta x)^2/8$ — the same law with 8 in place of 24,
-so a wavepacket arrives three times later than the phase rule suggests: 4.1 %
+i.e. $1 - (1 - S^2)(k\,\Delta x)^2/8$: the same law with 8 in place of 24.
+A wavepacket thus arrives three times later than the phase rule suggests: 4.1 %
 at ten cells per wavelength, not 1.4 %. Being a speed error, it is paid per
 metre travelled. The clip runs one 500 Hz burst down three plane tubes that
 differ only in $\Delta x$ (137.2, 68.6 and 34.3 mm, i.e. 5, 10 and 20 cells

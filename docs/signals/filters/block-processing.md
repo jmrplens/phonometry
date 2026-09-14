@@ -215,7 +215,7 @@ for x in audio_stream(block):            # your capture callback
 
 IEC 61260-1:2014, *Electroacoustics — Octave-band and
 fractional-octave-band filters — Part 1: Specifications*, and IEC 61672-1:2013,
-*Electroacoustics — Sound level meters — Part 1: Specifications* — block
+*Electroacoustics — Sound level meters — Part 1: Specifications*; block
 processing adds no normative content of its own: the streamed filters are the
 same designs those standards govern (see [Filter Banks](filter-banks.md),
 [Frequency Weighting](../levels/weighting.md) and [Time Weighting](../levels/time-weighting.md)),

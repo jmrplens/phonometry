@@ -323,8 +323,8 @@ These checks are pinned numerically in the
 
 ## What this guide covers
 
-**Covered.** The ray model — Runge-Kutta integration of Snell's law in
-`atmospheric_ray_paths` — with the closed-form linear-profile geometry
+**Covered.** The ray model (Runge-Kutta integration of Snell's law in
+`atmospheric_ray_paths`) with the closed-form linear-profile geometry
 (`ray_curvature_radius`, `shadow_zone_distance`, Salomons Sec. 4.4), and the
 Green's Function parabolic equation (`atmospheric_parabolic_equation`, Salomons
 Appendices G and H): the Gaussian starter, the finite-impedance ground
@@ -335,8 +335,8 @@ geometry to machine precision, and reciprocity and the shadow-zone collapse as
 tests.
 
 **Not covered.** Both models take one effective sound-speed profile that varies
-with height alone. A horizontally inhomogeneous atmosphere — a gradient that
-changes along the path — is outside their range-independent formulation, which
+with height alone. A horizontally inhomogeneous atmosphere (a gradient that
+changes along the path) is outside their range-independent formulation, which
 is the airborne counterpart of the range-independent ocean solvers. Both also
 assume flat ground at $z = 0$; neither accepts a terrain elevation profile.
 

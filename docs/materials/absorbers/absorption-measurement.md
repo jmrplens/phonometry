@@ -195,9 +195,9 @@ Each of those two numbers is read off a decay, and the clip below shows how
 one is read: the squared impulse response is integrated backwards from the
 tail, the Schroeder curve emerges, and the T20 and T30 regressions are fitted
 to a straight portion of it. That is the operation behind $T_1$, and again
-behind $T_2$ — the clip shows a *single* room, not the pair, so it answers
+behind $T_2$ (the clip shows a *single* room, not the pair, so it answers
 "where does one $T$ come from" and not "what does subtracting two of them
-cost". The second question is the one that governs this measurement, and
+cost"). The second question is the one that governs this measurement, and
 section 4 puts a number on it: because $\alpha_\mathrm{s}$ is a difference of two
 reciprocal decay times, its uncertainty is worst exactly where the two decays
 are most alike, at the low-frequency end.
@@ -209,9 +209,9 @@ are most alike, at the low-frequency end.
 A room volume below the 150 m³ minimum or a
 sample area outside 10–12 m² raises an advisory `AbsorptionWarning`; the result
 still returns. That advisory pair is the only check made: the rest of the
-Clause 6 / Annex A room qualification — the room-shape rule, the ceiling on the
+Clause 6 / Annex A room qualification (the room-shape rule, the ceiling on the
 empty room's absorption area $A_1$, the diffusivity qualification and the
-microphone and loudspeaker counts — is the laboratory's to verify, and nothing
+microphone and loudspeaker counts) is the laboratory's to verify, and nothing
 here checks any of it.
 
 ### `absorption_area()` / `absorption_coefficient()` parameters

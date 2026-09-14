@@ -62,7 +62,7 @@ normalized quantities carry the same $10\log_{10}(A_0 T_0/(0.16\,V))$ term
 with opposite signs, because a level difference improves when the receiving
 room is more absorbent and an impact level falls. Where the common partition
 area has not been measured, the survey method substitutes $V/7.5$ for $S$ when
-that is larger, $V$ being the volume of the receiving room — which should be
+that is larger, $V$ being the volume of the receiving room, which should be
 the smaller of the pair (Clause 3.6). It is a default partition area inferred
 from typical dwelling proportions, and because it can only raise $S$ it can
 only raise $R'$ relative to a measured area; state in the report when it was
@@ -76,7 +76,7 @@ The reverberation index is either **measured** (feed the reverberation time to
 type and volume with `estimate_reverberation_index(V, room)`: furnished
 `"kitchen"` / `"bathroom"` / `"furnished"`, or the unfurnished construction
 classes `"a"`–`"h"` and the mixed `"a+e"`…`"d+h"`. Clause 6.5 splits that in
-two — **Table 3** classifies the room and gives it its letter, **Table 4**
+two: **Table 3** classifies the room and gives it its letter, **Table 4**
 turns the letter and the volume into the index. A fourth quantity unique to
 this method is **service-equipment noise** $L_{XY}$, the energy average of
 three A- or C-weighted measurements taken to a fixed positional recipe set out
@@ -96,7 +96,7 @@ a plasterboard lining counts as light; a **heavy wall** is unlined masonry or
 block. A **light floor** is planks or boards on timber beams, a **heavy
 floor** a concrete slab. The **covering** is carpet (soft) against tiles or
 timber flooring (hard). Where the room mixes two constructions over roughly
-equal areas, average the two letters — that is what the mixed classes
+equal areas, average the two letters: that is what the mixed classes
 `"a+e"`…`"d+h"` are; where one construction clearly dominates by area, use its
 letter alone. Note that the covering and the floor construction are two
 separate axes, so "a hard floor" on its own does not pick a class.
@@ -197,7 +197,7 @@ plt.show()
 
 Everything above consumes band levels. What separates ISO 10052 from
 [ISO 16283](/phonometry/buildings/insulation/insulation-field/) is not the
-arithmetic, which is simpler, but *how those levels are obtained* — a body
+arithmetic, which is simpler, but *how those levels are obtained*: a body
 posture, a sweep and a stopwatch instead of five fixed microphone positions
 per room. The procedure is short enough to quote in full.
 
@@ -242,8 +242,8 @@ edges of the floor.
 
 **The rubber ball (Clause 6.3.2).** The heavy/soft branch measures the
 **Fast-weighted maximum** level $L_\mathrm{i,Fmax}$ in octave bands, about 10 s per
-measurement, from at least two fixed positions — one near the centre and one
-at a different height — separated by more than 0.7 m, at least 0.5 m from any
+measurement, from at least two fixed positions (one near the centre and one
+at a different height), separated by more than 0.7 m, at least 0.5 m from any
 boundary and at least 1.0 m from the impact position, averaged over positions
 band by band. Its single number is the ISO 717-2:2020 Annex D A-weighted sum,
 not a shifted reference curve; see
@@ -254,7 +254,7 @@ Wear hearing protection when measuring in the source room.
 at an angle of incidence as close to 45° as possible, preferably on the
 ground, with the slant distance $r$ from the source to the centre of the test
 specimen at least **7 m** ($d > 5$ m from the façade) and the position chosen
-so that the level varies as little as possible over the specimen — under 5 dB
+so that the level varies as little as possible over the specimen: under 5 dB
 per band across the whole façade (Clause 5). The outdoor microphone sits
 $(2.0 \pm 0.2)$ m from the plane of the façade, or further out if that is what
 it takes to keep 1 m of clearance from the nearest part of the façade, a
@@ -265,7 +265,7 @@ five fixed positions are sometimes necessary.
 
 **Service equipment (Clause 6.3.4).** Two fixed positions, three
 measurements. Position 1 is close to the apparently hardest surfaces of the
-room, preferably 0.5 m from the walls and from the floor or ceiling — in
+room, preferably 0.5 m from the walls and from the floor or ceiling, in
 practice a corner. Position 2 is in the reverberant field, the central area of
 the room. Take **one** measurement at position 1 and **two** at position 2,
 each covering one full operating cycle under normal conditions, and each on a
@@ -286,8 +286,8 @@ background noise (Clause 6.2.1). It fixes a signal-to-noise floor instead:
 adjust the source so that the receiving-room level exceeds the background by
 at least 6 dB in every band, checked by switching the source on and off before
 the run. Where the margin still falls below 6 dB, record the uncorrected level
-and state in the report that the level difference is underestimated — or, for
-service equipment, that the level is overestimated — by an unknown amount.
+and state in the report that the level difference is underestimated (or, for
+service equipment, that the level is overestimated) by an unknown amount.
 That is why no correction call appears anywhere on this page:
 `building.background_correction` implements the ISO 10140-4 laboratory rule
 and must not be applied to survey data. Earlier revisions of this guide said
@@ -296,7 +296,7 @@ that way is non-conforming and over-reports the insulation.
 
 The traffic method for façades is the awkward case: the receiving-room
 background cannot easily be separated from the traffic signal, so the rule
-becomes a duty of care — keep noise from sources inside the building as low as
+becomes a duty of care: keep noise from sources inside the building as low as
 practicable and say so in the report if you suspect it contaminated the
 result, because it can only make the façade look better than it is.
 
@@ -306,7 +306,7 @@ The trade this page opens on has a published size. Clause 6.6 NOTE states that
 survey results and the corresponding engineering method are estimated to agree
 **within ± 2 dB**, and Clause 6.6 itself requires the reproducibility of the
 procedure to be checked from time to time in accordance with ISO 12999-1,
-particularly after any change of procedure or instrumentation — the same
+particularly after any change of procedure or instrumentation: the same
 standard the
 [field guide's uncertainty section](/phonometry/buildings/insulation/insulation-field/#measurement-uncertainty-iso-12999-1)
 runs on. An *estimated* reverberation index adds to that: the tabulated
@@ -432,7 +432,7 @@ survey](#running-the-survey-clauses-5-and-6) is documented here but not
 nothing verifies the sweep, the source corner, the tapping-machine positions
 or the one-corner-plus-two-central service-equipment recipe. Nothing verifies
 that the 6 dB signal-to-background floor of Clause 6.2.1 was met either, and
-no correction is applied when it was not — that is the method's own rule, not
+no correction is applied when it was not: that is the method's own rule, not
 an omission. The ± 2 dB agreement with the engineering method is the
 standard's own estimate (Clause 6.6 NOTE), not something this library models
 or propagates: no survey result carries an uncertainty. When the stakes rise,

@@ -121,7 +121,7 @@ long quiet tail:
 
 *The relative gate (10 LU below the survivors) drops every block of the tail,
 so the integrated loudness holds the foreground at −23.0 LUFS while the
-ungated energy mean sinks towards −27.7 LUFS — and would keep sinking with
+ungated energy mean sinks towards −27.7 LUFS, and would keep sinking with
 every extra minute of ambience. Without the gate, quiet passages would let
 the foreground of a film mix ride far above the target.*
 

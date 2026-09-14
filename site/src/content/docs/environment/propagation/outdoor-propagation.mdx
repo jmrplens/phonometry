@@ -256,8 +256,8 @@ to the caller.
 ### Turning a real source into point sources
 
 Every equation below is written for a **point** source, so the first modelling
-step is turning a real plant into a set of them (Clause 4). An extended source —
-a road, a rail line, an industrial site — is divided into sections, a line source
+step is turning a real plant into a set of them (Clause 4). An extended source
+(a road, a rail line, an industrial site) is divided into sections, a line source
 into line sections and an area source into area sections, each carrying its own
 sound power and directivity and each represented by a point source at its
 centre. A group of point sources may then be collapsed into a single equivalent
@@ -267,8 +267,8 @@ the same height above the local ground plane, the propagation conditions from
 each of them to the receiver are the same, and the distance $d$ from the
 equivalent source to the receiver exceeds twice the largest dimension $H_\mathrm{max}$
 of the group ($d > 2H_\mathrm{max}$). If $d \le 2H_\mathrm{max}$, or if the propagation
-conditions differ between sub-sources — one screened by a building, another not
-— Clause 4 requires the group to be split back into its components.
+conditions differ between sub-sources (one screened by a building, another not),
+Clause 4 requires the group to be split back into its components.
 
 Applied to the case this section runs: a compressor hall whose radiating
 surfaces span 30 m collapses into one point source only beyond 60 m, so the
@@ -278,7 +278,7 @@ is out of scope: it comes from a measurement of the ISO 3740 family or from the
 supplier's declaration, in the eight octave bands from 63 Hz to 8 kHz. When only
 an A-weighted $L_{W\mathrm{A}}$ is available, the standard's own fallback (Clause 1,
 Note 1) is to evaluate the attenuation terms at 500 Hz and apply them to that
-single number — an estimate, not a band prediction. The two CNOSSOS-EU emission
+single number: an estimate, not a band prediction. The two CNOSSOS-EU emission
 guides,
 [road](/phonometry/environment/sources/cnossos-road-emission/) and
 [rail](/phonometry/environment/sources/cnossos-rail-emission/), stop exactly
@@ -329,8 +329,8 @@ a region whose extent the standard fixes (7.3.1, figure 1). Measured along the
 ground-plane distance $d_\mathrm{p}$, the **source region** runs $30 h_\mathrm{s}$ from the source
 towards the receiver (capped at $d_\mathrm{p}$), the **receiver region** runs $30 h_\mathrm{r}$
 back from the receiver, and the **middle region** is whatever is left between
-them. Hard cover — paving, water, ice, concrete, tamped ground — is $G = 0$;
-porous cover — grass, trees, farmland — is $G = 1$; a mixed region takes the
+them. Hard cover (paving, water, ice, concrete, tamped ground) is $G = 0$;
+porous cover (grass, trees, farmland) is $G = 1$; a mixed region takes the
 fraction of its length that is porous.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_ground_regions.svg" alt="Section to scale of a 200 m path with a source and a receiver 1.5 m above the ground: the source region shaded over the first 45 m as 30 times hs, the receiver region shaded over the last 45 m as 30 times hr, and the 110 m middle region between them hatched into 70 m of grass and 40 m of asphalt with Gm = 70/110 = 0.64; a formula box gives q = 1 minus 30 times (hs plus hr) over dp and an inset repeats the same path at 60 m where the source and receiver regions overlap, q = 0 and the middle region does not exist" width="92%" />
@@ -346,7 +346,7 @@ The middle region can also disappear. Table 3, note 2 defines
 $q = 1 - 30(h_\mathrm{s} + h_\mathrm{r})/d_\mathrm{p}$ when $d_\mathrm{p} > 30(h_\mathrm{s} + h_\mathrm{r})$ and $q = 0$ below it, and
 $A_\mathrm{m}$ is proportional to $q$: with these two heights the threshold sits at
 $d_\mathrm{p} = 30(1.5 + 1.5) = 90$ m, so on a 60 m path `ground_middle` is **ignored
-entirely** — passing 0.0 or 1.0 returns the identical $A_\mathrm{gr}$, silently. The
+entirely**: passing 0.0 or 1.0 returns the identical $A_\mathrm{gr}$, silently. The
 same $q$ gives the sanity check for the whole term. Over hard ground everywhere
 $A_\mathrm{s} = A_\mathrm{r} = -1.5$ dB and $A_\mathrm{m} = -3q$ in every band, so the 200 m path must
 return $A_\mathrm{gr} = -4.65$ dB ($q = 0.55$) and the 60 m path the familiar $-3$ dB of
@@ -489,8 +489,8 @@ plt.show()
 
 </details>
 
-`barrier_attenuation` returns $D_z$ itself — the raw diffraction insertion loss
-of Eq. (14) — which is *not* what the composite reports. For a top-edge barrier
+`barrier_attenuation` returns $D_z$ itself: the raw diffraction insertion loss
+of Eq. (14), which is *not* what the composite reports. For a top-edge barrier
 `a_bar` is `np.maximum(dz - a_gr, 0)` (Eq. (12), Note 13), and the equality
 printed above is the cleanest way to see that the ground effect is spent rather
 than kept: at 250 Hz the screened path had 13.79 dB of ground attenuation and

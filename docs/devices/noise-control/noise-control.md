@@ -30,16 +30,16 @@ models end to end, from the fan sound power to the room criterion, is
 
 `noise_control.hvac` gathers the Bies Chapter 8 duct methods:
 
-- `end_reflection_loss` — the low-frequency reflection back up an open duct end
+- `end_reflection_loss`: the low-frequency reflection back up an open duct end
   (ASHRAE Table 8.14, interpolated over diameter and frequency; it passes
   exactly through the tabulated nodes).
-- `elbow_insertion_loss` — the insertion loss per bend for square/round,
+- `elbow_insertion_loss`: the insertion loss per bend for square/round,
   vaned/unvaned and lined/unlined elbows keyed by $W/\lambda$ (ASHRAE
   Table 8.11).
-- `plenum_attenuation` — the plenum-chamber transmission loss by Wells' method
+- `plenum_attenuation`: the plenum-chamber transmission loss by Wells' method
   (Eq. (8.275)), whose reverberant term uses the plenum
   [room constant](../../buildings/rooms/room-image-sources.md).
-- `flow_noise_straight_duct`, `flow_noise_bend` — the flow-generated (self)
+- `flow_noise_straight_duct`, `flow_noise_bend`: the flow-generated (self)
   noise sound power of straight ducts and mitred bends (VDI 2081, Eqs. (8.251),
   (8.254)).
 
@@ -56,8 +56,8 @@ fn = hvac.flow_noise_straight_duct(bands, flow_velocity=10.0, area=0.04)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_end_reflection_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_end_reflection.svg" alt="Duct end reflection loss per octave band for flush duct terminations of 150, 300 and 600 mm diameter: the reflection back up the duct grows steeply towards low frequency and shrinks with duct size, exceeding 17 dB at 63 Hz for the 150 mm duct and vanishing above 1 kHz" width="88%"></picture>
 
-*The open end of a duct reflects low-frequency energy back up the run — for
-free, before any silencer: the smaller the duct against the wavelength, the
+*The open end of a duct reflects low-frequency energy back up the run: for
+free, before any silencer, the smaller the duct against the wavelength, the
 larger the loss, which is why small diffuser necks tame low-frequency fan
 rumble and why the correction must not be double-counted when a manufacturer's
 diffuser data already includes it.*
@@ -132,9 +132,9 @@ in branches and 2 to 3 m/s in the last run before an occupied room.
 
 **Test-report fiche.** `HvacSpectrumResult.report(path)` renders a one-page
 duct-noise fiche: the octave-band table of the spectrum beside the same curve
-plotted against frequency, the boxed single-number result — the A-weighted sound
+plotted against frequency, the boxed single-number result (the A-weighted sound
 power level when the spectrum is regenerated noise, the mean attenuation when it
-is a loss — and, when a `requirement` is declared, the verdict against it.
+is a loss), and, when a `requirement` is declared, the verdict against it.
 Rendering needs reportlab and, for the embedded figure, matplotlib
 (`pip install "phonometry[report,plot]"`).
 
@@ -177,8 +177,8 @@ $R_\mathrm{i} = S_\mathrm{i} \alpha_\mathrm{i}/(1-\alpha_\mathrm{i})$ (the same 
 steady-state room field). A hard interior wastes much of the panel $R$; lining
 it drives $C$ toward its floor $10\log_{10}0.3 = -5.2$ dB.
 
-**The panel transmission loss $R$ is supplied by the caller** — measured, or
-predicted by a panel model — as a per-band array or a callable of frequency.
+**The panel transmission loss $R$ is supplied by the caller** (measured, or
+predicted by a panel model) as a per-band array or a callable of frequency.
 This module never predicts $R$ itself; it combines a given $R$ with the
 interior absorption.
 
@@ -287,25 +287,25 @@ positions and with the machine at the same operating point, and the difference
 is reported band by band over at least 100 Hz to 5 kHz in third octaves.
 What has to be recorded includes the **leak ratio** (open area over interior
 surface area, with the openings described) and the **fill ratio** (source volume
-over interior volume) — the two numbers a prediction never captures.
+over interior volume): the two numbers a prediction never captures.
 
 ## What this guide covers
 
-**Covered.** The Bies §8.11-8.17 / ASHRAE HVAC methods —
+**Covered.** The Bies §8.11-8.17 / ASHRAE HVAC methods:
 `hvac.end_reflection_loss` (interpolated table) and
 `hvac.elbow_insertion_loss` (Table 8.11 lookup),
 `hvac.plenum_attenuation` (Wells' closed form) and
-`hvac.flow_noise_straight_duct` / `flow_noise_bend` (VDI 2081) — and the
+`hvac.flow_noise_straight_duct` / `flow_noise_bend` (VDI 2081), and the
 machine-enclosure insertion loss of Bies §7.4, Eqs. (7.103) and (7.111),
 through `enclosure_insertion_loss`, which combines a supplied panel
 transmission loss with the interior room-constant correction, together with the
 `composite_transmission_loss` of panels, doors and openings that feeds it.
 
-**Not covered.** The reactive elements — expansion chambers, side branches,
-extended tubes — live in [Silencers](silencers.md). Dissipative duct-lining
+**Not covered.** The reactive elements (expansion chambers, side branches,
+extended tubes) live in [Silencers](silencers.md). Dissipative duct-lining
 silencers are modelled from liner properties nowhere in the library: the
 lined-elbow figure here is a table lookup (Bies Table 8.11) and the plenum is
-Wells' closed form driven by a declared mean absorption — neither is a liner
+Wells' closed form driven by a declared mean absorption: neither is a liner
 model. Nothing on this page is a measurement: the ISO 11546 procedure of
 section 2 is described so a
 declared figure can be read, not implemented. Structure-borne transmission from

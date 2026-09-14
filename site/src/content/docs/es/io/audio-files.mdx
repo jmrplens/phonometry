@@ -50,9 +50,9 @@ Un WAV de medición solo es interpretable junto a tres cosas que las muestras
 no llevan: la frecuencia de muestreo, la calibración que convierte el fondo
 de escala digital en pascales, y la procedencia que dice dónde y cuándo se
 hizo la grabación. `phonometry.io` trata todo eso como parte del significado
-del archivo. `read()` devuelve un `Signal` — muestras más frecuencia,
+del archivo. `read()` devuelve un `Signal` (muestras más frecuencia,
 calibración, etiquetas de canal y procedencia `bext` en un único objeto
-inmutable — y todas las funciones de esta página siguen los mismos valores
+inmutable), y todas las funciones de esta página siguen los mismos valores
 por defecto: se conserva la frecuencia de muestreo nativa, los canales no se
 mezclan nunca, y ninguna muestra se normaliza jamás, porque cada una de esas
 «comodidades» destruye en silencio el nivel o los tiempos de los que depende
@@ -98,8 +98,8 @@ El objeto sustituye al array desnudo en cualquier parte: `np.asarray(sig)`
 entrega las muestras (1D para un canal, `(canales, muestras)` para varios),
 así que toda función `(x, fs, ...)` de la biblioteca ya lo admite en lugar
 del array, pasando la frecuencia igualmente al lado. Buena parte de la
-biblioteca va más allá y acepta el propio `Signal`: el objeto ya conoce su
-frecuencia y su calibración, y pedirte que repitas cualquiera de las dos es
+biblioteca va más allá y acepta el propio `Signal` (el objeto ya conoce su
+frecuencia y su calibración), y pedirte que repitas cualquiera de las dos es
 pedir un error de transcripción. El objeto pone la frecuencia cuando se omite
 `fs`, y una `fs` explícita que discrepe lanza en vez de arbitrarse. Eso abarca las funciones
 de nivel (`leq`, `laeq`, `ln_levels`, `sel`, `lc_peak`, `sound_exposure` y
@@ -157,7 +157,7 @@ razón mejor que el gusto: el tono del calibrador se lee por este mismo
 lector, así que cualquier constante fija de escalado se cancela exactamente
 en todo nivel calibrado.
 
-`info()` responde solo con las cabeceras — no se descodifica ni una muestra,
+`info()` responde solo con las cabeceras: no se descodifica ni una muestra,
 así que es instantáneo sobre un RF64 de 12 horas, y sigue describiendo un
 WAV comprimido para el que `read()` necesitaría el extra:
 
@@ -195,7 +195,7 @@ print(f"Leq = {float(signals.leq(sig)):.1f} dB")          # 70.0
 
 Sin argumento `calibration_factor` y sin argumento `fs` en la llamada de
 nivel: el `Signal` lleva los dos, y cada uno se rige por una regla distinta.
-Un `calibration_factor` explícito sigue ganando al que viene en el objeto —
+Un `calibration_factor` explícito sigue ganando al que viene en el objeto:
 quien llama sabe más que un objeto, tras una recalibración o para un supuesto
 deliberado. Un `fs` explícito no gana: la frecuencia de muestreo es un hecho
 de la grabación y no una preferencia, así que un valor que discrepe del que
@@ -264,7 +264,7 @@ Sin sensibilidad tecleada a mano en ninguna parte: el archivo del
 instrumento llevaba su propio fondo de escala, el lector lo sacó a la
 superficie, y por el otro extremo salió el 113,7 dB publicado. Una
 grabación hecha con el mismo sonómetro se calibra con las mismas dos
-líneas — por eso la única regla que importa es que los dos archivos pasen
+líneas: por eso la única regla que importa es que los dos archivos pasen
 por el mismo lector.
 
 La figura de abajo es esta página en una imagen: la misma API escribió un
@@ -322,7 +322,7 @@ plt.show()
 
 ## El aviso de pérdidas, y la historia del XL2 que hay detrás
 
-Por defecto un NTi XL2 graba WAV — comprimido a ADPCM de 4 bits. El manual
+Por defecto un NTi XL2 graba WAV (comprimido a ADPCM de 4 bits). El manual
 es explícito sobre la intención: la grabación comprimida es un registro de
 escucha, y el WAV lineal (con el Extended Acoustic Pack) es lo «necesario
 para el posprocesado en el PC». La distinción importa porque un
@@ -330,8 +330,8 @@ descodificador con pérdidas reconstruye una *aproximación* de la forma de
 onda: un nivel calculado a partir de ella no es defendible como medición,
 por plausible que parezca el número.
 
-Así que las fuentes con pérdidas se leen, no se rechazan — una copia de
-escucha sigue mereciendo abrirse — pero nunca en silencio:
+Así que las fuentes con pérdidas se leen, no se rechazan (una copia de
+escucha sigue mereciendo abrirse), pero nunca en silencio:
 
 ```python
 import soundfile as sf
@@ -355,8 +355,8 @@ conservar niveles no debería ponerlo fácil.
 
 Dos casos vecinos que el módulo no cubre a propósito: el AAC/M4A de las
 grabadoras de voz, donde la vía honesta es una conversión externa de una
-línea (`ffmpeg -i note.m4a note.wav`, y después `read("note.wav")` — con la
-misma advertencia, porque AAC también es con pérdidas); y los formatos de
+línea (`ffmpeg -i note.m4a note.wav`, y después `read("note.wav")`), con la
+misma advertencia, porque AAC también es con pérdidas; y los formatos de
 adquisición que no son audio (TDMS del hardware de LabVIEW, UFF del
 análisis modal), que tienen sus propios lectores en Python (`npTDMS`,
 `pyuff`).
@@ -406,24 +406,24 @@ detalle). La misma construcción alimenta un `OctaveFilterBank` con
 
 ## Escribir un BWF con su procedencia
 
-`write()` produce WAV/BWF — PCM de 16, 24 (empaquetado en casa; SciPy no
-sabe), 32 bits, float de 32/64 — y promociona a RF64 automáticamente
+`write()` produce WAV/BWF: PCM de 16, 24 (empaquetado en casa; SciPy no
+sabe), 32 bits, float de 32/64. Promociona a RF64 automáticamente
 pasados los 4 GiB. Tres promesas, cada una lo contrario de un valor por
 defecto documentado del ecosistema: nunca normaliza, nunca remuestrea, y el
-recorte nunca es silencioso — las muestras que superan el fondo de escala en
+recorte nunca es silencioso: las muestras que superan el fondo de escala en
 un subtipo entero se saturan, se cuentan y se comunican con un
 `ClippingWarning` que nombra el recuento y el exceso de pico en dBFS. El
 `dither="tpdf"` opcional añade dither triangular de un LSB al cuantizar a
-`PCM_16` — la receta de Lipshitz, Wannamaker y Vanderkooy para copias de
-escucha de 16 bits — y se rechaza en el resto, porque el dither solo añade
+`PCM_16` (la receta de Lipshitz, Wannamaker y Vanderkooy para copias de
+escucha de 16 bits) y se rechaza en el resto, porque el dither solo añade
 ruido a datos que van a análisis numérico y no a oídos.
 
 La procedencia es de primera clase. El `bext` propio de un `Signal` se
 transporta por defecto cuando lo tiene; un `BroadcastMetadata` que
 construyas se escribe campo a campo en sus posiciones de la EBU Tech 3285;
 y `bext="loudness"` mide además los cinco valores de sonoridad de la
-versión 2 — sonoridad de programa, rango de sonoridad, pico verdadero
-máximo, y los máximos momentáneo y a corto plazo — con la
+versión 2 (sonoridad de programa, rango de sonoridad, pico verdadero
+máximo, y los máximos momentáneo y a corto plazo) con la
 [implementación propia de la ITU-R BS.1770](/phonometry/es/devices/broadcast/program-loudness/)
 sobre las muestras que se están escribiendo. El `CodingHistory` de todo
 chunk escrito se extiende, nunca se sustituye, con la línea en formato
@@ -442,7 +442,7 @@ print(delivered.bext.max_true_peak_level)   # -20.08 (dBTP, medido)
 ## El sidecar: cómo viaja la calibración
 
 Ningún contenedor de audio tiene un campo para la calibración del
-micrófono — `bext` no lo tiene, y sus valores de sonoridad son sonoridad de
+micrófono; `bext` no lo tiene, y sus valores de sonoridad son sonoridad de
 programa, no sensibilidad. La respuesta de la industria son los compañeros
 propietarios (el informe de texto de un sonómetro, el archivo de proyecto de
 un fabricante); la de la sismología, un sidecar estandarizado junto a la
@@ -450,7 +450,7 @@ forma de onda, es la que merece copiarse. `write(sidecar=True)` (o
 `write_sidecar()` para un archivo ya existente) deja un pequeño JSON
 versionado en `<audio>.phonometry.json` con el factor de calibración, los
 metadatos del tono del calibrador y las etiquetas de canal, y `read()` lo
-aplica automáticamente — un argumento explícito sigue ganando, y un sidecar
+aplica automáticamente: un argumento explícito sigue ganando, y un sidecar
 escrito por un esquema más nuevo o por otra herramienta se rechaza a las
 claras en vez de entenderse a medias.
 
@@ -468,8 +468,8 @@ calibrada, léela de vuelta sin argumentos, y el nivel absoluto está intacto.
 `convert()` mueve un archivo entre contenedores sin pérdidas con todo
 intacto: las muestras a precisión completa (un viaje WAV de 24 bits a FLAC
 y de vuelta devuelve códigos idénticos al bit), el chunk `bext`
-transportado — dentro de FLAC viaja en un bloque `APPLICATION` que los
-lectores de aquí entienden — el sidecar copiado byte a byte, y una línea
+transportado: dentro de FLAC viaja en un bloque `APPLICATION` que los
+lectores de aquí entienden. El sidecar se copia byte a byte, y una línea
 añadida al `CodingHistory` que nombra el paso de codificación. Los destinos
 con pérdidas se rechazan por decisión. La conversión va en flujo, así que
 una hora de RF64 se convierte con memoria constante:
@@ -520,12 +520,12 @@ Porque un WAV no lleva calibración: las muestras vuelven en unidades de
 fondo de escala digital (±1,0), y solo una toma del calibrador grabada por
 la misma cadena las convierte en pascales. Lee el archivo del calibrador con
 `read()`, deriva el factor con `sensitivity()` y pásalo como
-`calibration_factor=` — o escríbelo una vez en el sidecar y deja que
+`calibration_factor=`, o escríbelo una vez en el sidecar y deja que
 `read()` lo aplique desde entonces.
 
 ### ¿Puedo calcular un Leq de la nota de voz WAV comprimida del sonómetro?
 
-Puedes hacer la llamada, y la biblioteca responderá — tras un
+Puedes hacer la llamada, y la biblioteca responderá tras un
 `LossyCompressionWarning`, con `source.lossy` estampado en la señal. El
 número no es defendible: un descodificador ADPCM o MP3 reconstruye una
 aproximación de la forma de onda, y el error depende del programa. Usa el
@@ -537,7 +537,7 @@ Para mediciones, casi seguro que no: la instalación base lee todas las
 variantes de WAV lineal que escriben sonómetros y grabadores de campo,
 incluidos los de 24 bits, el multicanal EXTENSIBLE y los RF64 de más de
 4 GiB. El extra es para archivos FLAC, AIFF/Ogg/Opus/MP3 y las copias WAV
-comprimidas de escucha — y empaqueta libsndfile bajo LGPL, que la
+comprimidas de escucha, y empaqueta libsndfile bajo LGPL, que la
 instalación base evita a propósito.
 
 <SeeAlso>

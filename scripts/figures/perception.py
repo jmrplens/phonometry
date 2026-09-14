@@ -150,7 +150,7 @@ def generate_loudness_pattern(output_dir: str) -> None:
         flat.specific,
         color=COLOR_SECONDARY,
         linewidth=1.6,
-        label=f"Flat broadband 60 dB — $N$ = {flat.loudness:.1f} sone",
+        label=f"Flat broadband 60 dB: $N$ = {flat.loudness:.1f} sone",
     )
     ax.fill_between(z, narrow.specific, color=COLOR_PRIMARY, alpha=0.35)
     ax.plot(
@@ -158,7 +158,7 @@ def generate_loudness_pattern(output_dir: str) -> None:
         narrow.specific,
         color=COLOR_PRIMARY,
         linewidth=1.6,
-        label=f"1 kHz narrowband — $N$ = {narrow.loudness:.1f} sone",
+        label=f"1 kHz narrowband: $N$ = {narrow.loudness:.1f} sone",
     )
 
     peak_z = float(z[np.argmax(narrow.specific)])
@@ -635,7 +635,7 @@ def generate_sharpness_pair_and_targets(output_dir: str) -> None:
             color=color,
             linewidth=1.8,
             label=(
-                f"{centre:g} Hz critical band — "
+                f"{centre:g} Hz critical band: "
                 f"$N$ = {result.loudness:.1f} sone, $S$ = {acum:.2f} acum"
             ),
         )
@@ -879,7 +879,7 @@ def generate_two_tone_separation(output_dir: str) -> None:
     ax.plot([137.3], [18.9], "s", color=COLOR_TERTIARY, markersize=9, zorder=5)
     ax.annotate(
         "Annex E pair: 118.4 and 137.3 Hz,\n"
-        r"18.9 Hz apart — below $f_\mathrm{D}$, so combined",
+        r"18.9 Hz apart, below $f_\mathrm{D}$, so combined",
         xy=(137.3, 18.9),
         xytext=(95.0, 44.0),
         fontsize=10,
@@ -1662,7 +1662,7 @@ def generate_fluctuation_strength(output_dir: str) -> None:
         f_bbn,
         color=COLOR_PRIMARY,
         linewidth=2.4,
-        label=(f"closed form, Eq. 10.2 — peak {f_bbn[bbn_peak]:.1f} vacil"),
+        label=(f"closed form, Eq. 10.2: peak {f_bbn[bbn_peak]:.1f} vacil"),
     )
     ax.plot(
         fmod[bbn_peak],
@@ -1681,7 +1681,7 @@ def generate_fluctuation_strength(output_dir: str) -> None:
         color=COLOR_SECONDARY,
         linewidth=2.0,
         markersize=7,
-        label=(f"Osses 2016 signal model — peak {f_noise.max():.1f} vacil"),
+        label=(f"Osses 2016 signal model: peak {f_noise.max():.1f} vacil"),
     )
     ax.axvline(
         4.0,
@@ -1757,7 +1757,7 @@ def generate_fluctuation_strength(output_dir: str) -> None:
     ax2.set_xticklabels(["1", "2", "4", "8", "16", "32"])
     ax2.legend(loc="upper right", fontsize=9)
 
-    fig.suptitle("Fluctuation Strength — the 4 Hz Band-Pass, and Which Model to Quote")
+    fig.suptitle("Fluctuation Strength: the 4 Hz Band-Pass, and Which Model to Quote")
     plt.tight_layout()
     save_figure(output_dir, "fluctuation_strength.svg")
     plt.close()
@@ -2421,7 +2421,7 @@ def generate_sii_vocal_efforts(output_dir: str) -> None:
     ax_s.xaxis.set_minor_formatter(mticker.NullFormatter())
     ax_s.set_xlabel("One-third-octave band [Hz]")
     ax_s.set_ylabel("Speech spectrum level [dB SPL]")
-    ax_s.set_title("ANSI S3.5-1997 — speech spectra by vocal effort", pad=10)
+    ax_s.set_title("ANSI S3.5-1997: speech spectra by vocal effort", pad=10)
     ax_s.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_s.set_axisbelow(True)
     ax_s.legend(loc="upper right")
@@ -2536,7 +2536,7 @@ def generate_hearing_threshold(output_dir: str) -> None:
     ax_age.invert_yaxis()
     ax_age.set_xlabel("Audiometric frequency [Hz]")
     ax_age.set_ylabel("Median threshold deviation from age 18 [dB]")
-    ax_age.set_title("ISO 7029 — age-related threshold (male)", pad=10)
+    ax_age.set_title("ISO 7029: age-related threshold (male)", pad=10)
     ax_age.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_age.set_axisbelow(True)
     ax_age.legend(loc="lower left")
@@ -2562,7 +2562,7 @@ def generate_hearing_threshold(output_dir: str) -> None:
     ax_ref.xaxis.set_minor_formatter(mticker.NullFormatter())
     ax_ref.set_xlabel("Audiometric frequency [Hz]")
     ax_ref.set_ylabel("Reference threshold [dB]")
-    ax_ref.set_title("ISO 389-7 — reference threshold of hearing", pad=10)
+    ax_ref.set_title("ISO 389-7: reference threshold of hearing", pad=10)
     ax_ref.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_ref.set_axisbelow(True)
     ax_ref.legend(loc="upper left")
@@ -2624,7 +2624,7 @@ def generate_age_threshold_sex_and_spread(output_dir: str) -> None:
         )
     ax_sex.set_xlabel("Age [years]")
     ax_sex.set_ylabel("Median deviation from age 18 [dB]")
-    ax_sex.set_title("ISO 7029 median at 4 kHz — men against women", pad=10)
+    ax_sex.set_title("ISO 7029 median at 4 kHz: men against women", pad=10)
     ax_sex.grid(color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_sex.set_axisbelow(True)
     ax_sex.legend(loc="upper left")
@@ -3537,7 +3537,7 @@ def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     ax_n.invert_yaxis()
     ax_n.set_xlabel("Audiometric frequency [Hz]")
     ax_n.set_ylabel("Median NIPTS [dB]")
-    ax_n.set_title(r"ISO 1999 — NIPTS at $L_{\mathrm{EX,8h}}$ = 95 dB", pad=10)
+    ax_n.set_title(r"ISO 1999: NIPTS at $L_{\mathrm{EX,8h}}$ = 95 dB", pad=10)
     ax_n.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_n.set_axisbelow(True)
     ax_n.legend(loc="lower left")
@@ -3556,7 +3556,7 @@ def generate_noise_induced_hearing_loss(output_dir: str) -> None:
     ax_h.invert_yaxis()
     ax_h.set_xlabel("Audiometric frequency [Hz]")
     ax_h.set_ylabel("Hearing threshold level [dB]")
-    ax_h.set_title("ISO 1999 — HTLAN (male, age 60, 95 dB / 30 yr)", pad=10)
+    ax_h.set_title("ISO 1999: HTLAN (male, age 60, 95 dB / 30 yr)", pad=10)
     ax_h.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_h.set_axisbelow(True)
     ax_h.legend(loc="lower left")
@@ -4100,7 +4100,7 @@ def generate_audiometric_zero_earphones(output_dir: str) -> None:
     ax_ref.xaxis.set_minor_formatter(mticker.NullFormatter())
     ax_ref.set_xlabel("Test frequency [Hz]")
     ax_ref.set_ylabel("Reference level (RETSPL) [dB]")
-    ax_ref.set_title("ISO 389-1 — what 0 dB HL is in the coupler", pad=10)
+    ax_ref.set_title("ISO 389-1: what 0 dB HL is in the coupler", pad=10)
     ax_ref.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_ref.set_axisbelow(True)
     ax_ref.legend(loc="upper right", fontsize=9)

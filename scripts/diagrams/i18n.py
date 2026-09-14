@@ -74,7 +74,7 @@ _ES: dict[str, str] = {
     "Thick barrier: two edges": "Barrera gruesa: dos bordes",
     # CNOSSOS-EU road source line geometry (environment/sources).
     "CNOSSOS-EU road source line geometry": "Geometría de la línea fuente viaria CNOSSOS-EU",
-    "Plan — two-lane urban arterial": "Planta — vía urbana de dos carriles",
+    "Plan: two-lane urban arterial": "Planta: vía urbana de dos carriles",
     "source line,": "línea fuente,",
     "one per lane centre": "una por eje de carril",
     "each segment carries L'W,eq,line,i + 10 lg(dL)": "cada segmento lleva L'W,eq,line,i + 10 lg(dL)",
@@ -89,9 +89,9 @@ _ES: dict[str, str] = {
     # CNOSSOS-EU railway source lines (environment/sources).
     "CNOSSOS-EU railway source lines and directivity angles": "Líneas fuente ferroviarias y directividad CNOSSOS-EU",
     "datum: the plane tangent to the two rail heads": "referencia: plano tangente a los dos carriles",
-    "A — rolling, impact, squeal,": "A — rodadura, impacto, chirrido,",
+    "A: rolling, impact, squeal,": "A: rodadura, impacto, chirrido,",
     "bridge, low traction": "puente, tracción baja",
-    "B — exhausts, roof apparatus,": "B — escapes, equipos de techo,",
+    "B: exhausts, roof apparatus,": "B: escapes, equipos de techo,",
     "pantograph recess": "hueco del pantógrafo",
     "receiver, 4 m": "receptor, 4 m",
     "$ψ > 0$": "$ψ > 0$",
@@ -113,7 +113,7 @@ _ES: dict[str, str] = {
     "soil fillet": "recrecido de tierra",
     "capsule diaphragm in the board plane, ≤ 13 mm": "diafragma de la cápsula en el plano del tablero, ≤ 13 mm",
     "primary windscreen ≈ 90 mm": "pantalla antiviento primaria ≈ 90 mm",
-    "secondary: high wind only —": "secundaria: solo con viento fuerte —",
+    "secondary, for high wind only:": "secundaria, solo con viento fuerte:",
     "document and correct its insertion loss": "documentar y corregir su pérdida por inserción",
     "Position (clause 7.1)": "Posición (capítulo 7.1)",
     "within ±15° of downwind": "dentro de ±15° de la dirección a sotavento",
@@ -128,7 +128,7 @@ _ES: dict[str, str] = {
     "Article 25.2 drops the third criterion for an activity already in "
     "operation": "El artículo 25.2 suprime el tercer criterio para una actividad ya "
     "en funcionamiento",
-    "1 — the day, split into evaluation periods (Annex I A.1)": "1 — el día, dividido en períodos de evaluación (Anexo I A.2)",
+    "1: the day, split into evaluation periods (Annex I A.1)": "1: el día, dividido en períodos de evaluación (Anexo I A.2)",
     "night 23-07": "noche 23-07",
     "day 07-19": "día 07-19",
     "evening 19-23": "tarde 19-23",
@@ -136,11 +136,11 @@ _ES: dict[str, str] = {
     "6 h, machine": "6 h, máquina",
     "4 h, rest": "4 h, resto",
     "noise phases $T_i$ of uniformly perceived level": "fases de ruido $T_i$ de nivel percibido uniforme",
-    "2 — each phase, corrected": "2 — cada fase, corregida",
+    "2: each phase, corrected": "2: cada fase, corregida",
     "$K_t + K_f + K_i ≤ 9$ dB (Annex IV A.3.3)": "$K_t + K_f + K_i ≤ 9$ dB (Anexo IV A.3.3)",
-    "3 — the period level": "3 — el nivel del período",
+    "3: the period level": "3: el nivel del período",
     "round_reported_level → 57 dB": "round_reported_level → 57 dB",
-    "4 — the annual value": "4 — el valor anual",
+    "4: the annual value": "4: el valor anual",
     "$L_{K,x}$ over the operating days": "$L_{K,x}$ sobre los días de actividad",
     "303 open / 62 closed → 56 dB": "303 abierta / 62 cerrada → 56 dB",
     "worst phase ≤ limit + 5 dB": "peor fase ≤ límite + 5 dB",
@@ -288,13 +288,13 @@ _ES: dict[str, str] = {
     "$r_c = √(Q·R/16π)$, so two steps of mounting move the crossover by a "
     "factor of 2.": "$r_c = √(Q·R/16π)$, así que dos escalones de montaje desplazan el "
     "cruce un factor 2.",
-    "Calibration chain — from calibrator to physical units": "Cadena de calibración — del calibrador a unidades físicas",
+    "Calibration chain: from calibrator to physical units": "Cadena de calibración: del calibrador a unidades físicas",
     # Speech Intelligibility Index (ANSI S3.5-1997)
     "Speech Intelligibility Index computation flow (ANSI S3.5-1997)": "Flujo de cálculo del índice de inteligibilidad del habla (ANSI S3.5-1997)",
     # Room-noise rating methods (ANSI/ASA S12.2-2019)
     "Room-noise rating methods (ANSI/ASA S12.2-2019): NC and RC Mark II": "Calificación del ruido de salas (S12.2-2019): NC y RC Mark II",
     "Octave-band sound pressure levels  $L(f)$": "Niveles de presión acústica por banda de octava  $L(f)$",
-    "NC — tangency method": "NC — método de tangencia",
+    "NC: tangency method": "NC: método de tangencia",
     "Table 1 curves": "curvas de la Tabla 1",
     "NC value in each band": "Valor NC en cada banda",
     "curve level = $L(f)$ at that $f$": "nivel de la curva = $L(f)$ en esa $f$",
@@ -337,8 +337,8 @@ _ES: dict[str, str] = {
     "Class 2 minimum (5.1.1)": "Clase 2 como mínimo (5.1.1)",
     "Octave bands 16 Hz – 8 kHz": "Bandas de octava 16 Hz – 8 kHz",
     "Room unoccupied, plant running": "Sala vacía, instalación en marcha",
-    "$L_{EQ}$ at the named position — or scan the whole space at ≤ 0.5 m/s "
-    "for ≥ 20 s": "$L_{EQ}$ en la posición indicada — o barrer toda la sala a ≤ 0,5 m/s "
+    "$L_{EQ}$ at the named position, or scan the whole space at ≤ 0.5 m/s "
+    "for ≥ 20 s": "$L_{EQ}$ en la posición indicada, o barrer toda la sala a ≤ 0,5 m/s "
     "durante ≥ 20 s",
     "green dashed: microphone exclusion zones (5.2.5)": "verde discontinuo: zonas excluidas para el micrófono (5.2.5)",
     "Before rating (5.3.2): is the noise steady?": "Antes de calificar (5.3.2): ¿es estacionario el ruido?",
@@ -348,12 +348,12 @@ _ES: dict[str, str] = {
     "screen 16, 31.5 and 63 Hz aurally and on a fast, Z-weighted meter, "
     "then check $L_{MAX} − L_{EQ}$ and $L_{10} − L_{EQ}$": "explorar 16, 31,5 y 63 Hz de oído y en rápida con ponderación Z; "
     "comprobar $L_{MAX} − L_{EQ}$ y $L_{10} − L_{EQ}$",
-    "against Table 3 — a field that fails belongs to RNC (clause 5.3), "
-    "not to NC or RC": "frente a la Tabla 3 — si falla, es RNC "
+    "against Table 3: a field that fails belongs to RNC (clause 5.3), "
+    "not to NC or RC": "frente a la Tabla 3: si falla, es RNC "
     "(cláusula 5.3), no NC ni RC",
     # Where the ISO 3382-3 measurement line goes (clauses 5.1 and 5.2)
     "Where the ISO 3382-3 measurement line goes (clauses 5.1 and 5.2)": "Dónde va la línea de medida de la ISO 3382-3 (cláusulas 5.1 y 5.2)",
-    "(a) Plan — 30 × 12 m floor, two ceiling zones": "(a) Planta — superficie de 30 × 12 m, dos zonas de techo",
+    "(a) Plan: 30 × 12 m floor, two ceiling zones": "(a) Planta: superficie de 30 × 12 m, dos zonas de techo",
     "absorbent raft ceiling": "techo con islas absorbentes",
     "plain plaster ceiling": "techo de yeso liso",
     "zones measured and reported separately": "las zonas se miden y se reportan por separado",
@@ -362,7 +362,7 @@ _ES: dict[str, str] = {
     "P1 at the nearest workstation; the path need not be straight": "P1 en el puesto más cercano; la trayectoria no tiene que ser recta",
     "only 2 m to 16 m enter $D_{2,S}$": "solo de 2 m a 16 m entran en $D_{2,S}$",
     "≥ 0.5 m from tables": "≥ 0,5 m de las mesas",
-    "(b) Section — both heights are 1.2 m (5.2.2)": "(b) Sección — ambas alturas son 1,2 m (5.2.2)",
+    "(b) Section: both heights are 1.2 m (5.2.2)": "(b) Sección: ambas alturas son 1,2 m (5.2.2)",
     "omnidirectional, pink noise": "omnidireccional, ruido rosa",
     "seated head position": "posición de la cabeza sentada",
     "Source (5.1.1):": "Fuente (5.1.1):",
@@ -382,7 +382,7 @@ _ES: dict[str, str] = {
     "≥ 2 source positions, or the line walked": "≥ 2 posiciones de fuente, o recorrer la línea",
     "in both directions": "en los dos sentidos",
     # Room-acoustics measurement setup (ISO 3382-1 / ISO 3382-2)
-    "Room plan (top view) — 10.0 × 6.0 m, 3.5 m high": "Planta de la sala (vista superior) — 10,0 × 6,0 m, 3,5 m de altura",
+    "Room plan (top view): 10.0 × 6.0 m, 3.5 m high": "Planta de la sala (vista superior): 10,0 × 6,0 m, 3,5 m de altura",
     "avoid symmetry lines": "evitar las líneas de simetría",
     "2.4 m $> d_{min}$": "2,4 m $> d_{min}$",
     "$d_{min}$": "$d_{min}$",
@@ -397,8 +397,8 @@ _ES: dict[str, str] = {
     "dodecahedron": "dodecaedro",
     "acoustic centre": "centro acústico",
     "$d_{min}$ = 2.0 m": "$d_{min}$ = 2,0 m",
-    "ISO 3382-1 Table 1 — omnidirectionality over gliding 30° arcs": "ISO 3382-1 Tabla 1 — omnidireccionalidad (arcos de 30°)",
-    "Hz / dB, measured at ≥ 1.5 m — in practice a dodecahedron, not a monitor": "Hz / dB, medido a ≥ 1,5 m — en la práctica un dodecaedro, no un monitor",
+    "ISO 3382-1 Table 1: omnidirectionality over gliding 30° arcs": "ISO 3382-1 Tabla 1: omnidireccionalidad (arcos de 30°)",
+    "Hz / dB, measured at ≥ 1.5 m (in practice a dodecahedron, not a monitor)": "Hz / dB, medido a ≥ 1,5 m (en la práctica un dodecaedro, no un monitor)",
     "Level (4.2.1):": "Nivel (4.2.1):",
     "≥ 45 dB over the background": "≥ 45 dB sobre el ruido de fondo",
     "per band for $T_{30}$, ≥ 35 dB for $T_{20}$": "por banda para $T_{30}$; 35 dB para $T_{20}$",
@@ -426,7 +426,7 @@ _ES: dict[str, str] = {
     "3  After linear deconvolution (B.5)": "3  Tras la deconvolución lineal (B.5)",
     "kept by default: the linear impulse response and its tail": "se conserva por defecto: la respuesta al impulso lineal y su cola",
     "discarded, or read as distortion": "se descarta o es distorsión",
-    "the linear deconvolution's own decaying noise tail — not the room": "la cola de ruido decreciente de la propia deconvolución — no la sala",
+    "the linear deconvolution's own decaying noise tail, not the room": "la cola de ruido decreciente de la propia deconvolución, no la sala",
     "Arrival time relative to the linear impulse response [s]": "Tiempo de llegada respecto a la respuesta al impulso lineal [s]",
     # Hearing threshold (ISO 7029 / ISO 389-7)
     "Hearing-threshold model (ISO 7029 age distribution, ISO 389-7 zero)": "Modelo del umbral de audición (ISO 7029 por edad, cero ISO 389-7)",
@@ -441,7 +441,7 @@ _ES: dict[str, str] = {
     "Expected hearing threshold level (dB HL)": "Nivel del umbral de audición esperado (dB HL)",
     "referenced to the audiometric zero": "referido al cero audiométrico",
     "Audiometric zero = ISO 389-7 reference threshold": "Cero audiométrico = umbral de referencia ISO 389-7",
-    "free-field / diffuse-field (Table 1) — the dB HL / dB SPL zero": "campo libre / campo difuso (Tabla 1) — el cero dB HL / dB SPL",
+    "free-field / diffuse-field (Table 1): the dB HL / dB SPL zero": "campo libre / campo difuso (Tabla 1): el cero dB HL / dB SPL",
     # Measurement uncertainty (ISO/IEC Guide 98-3 / Supplement 1)
     "Uncertainty: GUM propagation vs Monte Carlo (Guide 98-3)": "Incertidumbre: propagación GUM frente a Monte Carlo (Guía 98-3)",
     "Measurement model  $y = f(x_1, …, x_N)$": "Modelo de medida  $y = f(x_1, …, x_N)$",
@@ -451,7 +451,7 @@ _ES: dict[str, str] = {
     "Combine in quadrature": "Combinación en cuadratura",
     "$u_c^2 = Σ c_i^2 u^{2}(x_i)$ + correlation": "$u_c^2 = Σ c_i^2 u^{2}(x_i)$ + correlación",
     "Effective dof  (Annex G.4)": "Grados de libertad efectivos  (Anexo G.4)",
-    "$v_{eff}$ — Welch–Satterthwaite": "$v_{eff}$ — Welch–Satterthwaite",
+    "$v_{eff}$: Welch–Satterthwaite": "$v_{eff}$: Welch–Satterthwaite",
     "$U = k · u_c$": "$U = k · u_c$",
     "$k = t_{p}(v_{eff})$   (clause 6)": "$k = t_{p}(v_{eff})$   (cláusula 6)",
     "Monte Carlo  (Suppl. 1, 7)": "Monte Carlo  (Supl. 1, 7)",
@@ -549,7 +549,7 @@ _ES: dict[str, str] = {
     "grip force": "fuerza de agarre",
     "1  middle of the gripping zone, under the hand": "1  centro de la zona de agarre, bajo la mano",
     "the most representative location; needs an adaptor": "la ubicación más representativa; exige un adaptador",
-    "2  either side of the hand — usual practice": "2  a ambos lados de la mano — práctica habitual",
+    "2  either side of the hand: usual practice": "2  a ambos lados de la mano: práctica habitual",
     "on a side handle, average the two positions": "en empuñadura lateral, se promedian las dos",
     "3  underside of the handle, next to the hand": "3  bajo la empuñadura, junto a la mano",
     "grip and push force change the reading: report the": "las fuerzas de agarre y empuje alteran la lectura:",
@@ -611,7 +611,7 @@ _ES: dict[str, str] = {
     "Pa per": "Pa por",
     "digital unit": "unidad digital",
     "Stability: |max − mean| and |min − mean| ≤ 0.07 dB": "Estabilidad: |máx − media| y |mín − media| ≤ 0,07 dB",
-    "(IEC 60942:2017 Table 2, class 1) — else CalibrationWarning": "(IEC 60942:2017 Tabla 2, clase 1) — si no, CalibrationWarning",
+    "(IEC 60942:2017 Table 2, class 1); else CalibrationWarning": "(IEC 60942:2017 Tabla 2, clase 1); si no, CalibrationWarning",
     # Coupling the calibrator on the capsule (signals/metrology/calibration).
     "Coupling the calibrator (IEC 60942:2017)": "Acoplamiento del calibrador (IEC 60942:2017)",
     # The calibrator tone: a unit symbol, the same in Spanish. Shared by the
@@ -636,7 +636,7 @@ _ES: dict[str, str] = {
     "source in use": "fuente en marcha",
     # Instrumenting a synchronous average (signals/spectra/synchronous-averaging).
     "Instrumenting a synchronous average: tacho and accelerometer": "Instrumentar un promediado síncrono: tacómetro y acelerómetro",
-    "Gearbox — elevation": "Reductora — alzado",
+    "Gearbox: elevation": "Reductora: alzado",
     "pinion, 37 teeth": "piñón, 37 dientes",
     "wheel, 89 teeth": "rueda, 89 dientes",
     "tape": "cinta",
@@ -682,9 +682,9 @@ _ES: dict[str, str] = {
     "temperatura medida",
     # Instrumenting a MISO measurement (signals/spectra/miso-coherence).
     "Instrumenting a MISO measurement: one reference per source": "Instrumentar una medida MISO: una referencia por fuente",
-    "Plant room — plan": "Sala de máquinas — planta",
-    "A — fan": "A — ventilador",
-    "B — compressor": "B — compresor",
+    "Plant room: plan": "Sala de máquinas: planta",
+    "A: fan": "A: ventilador",
+    "B: compressor": "B: compresor",
     "receiver": "receptor",
     "1.5 m high": "a 1,5 m de altura",
     "ref 1": "ref 1",
@@ -740,35 +740,35 @@ _ES: dict[str, str] = {
     "microphone (5.3.1.2), and holds for": "El nivel especificado es el nivel en el diafragma del micrófono "
     "insertado (5.3.1.2), y vale para",
     "the microphone models and configurations listed in the manual "
-    "(5.3.1.3, 6.3 a) — IEC 60942:2017": "los modelos y configuraciones de micrófono que lista el manual "
-    "(5.3.1.3, 6.3 a) — IEC 60942:2017",
+    "(IEC 60942:2017, 5.3.1.3, 6.3 a)": "los modelos y configuraciones de micrófono que lista el manual "
+    "(IEC 60942:2017, 5.3.1.3, 6.3 a)",
     "Environmental noise measurement positions (ISO 1996-2)": "Posiciones de medida de ruido ambiental (ISO 1996-2)",
     "Building façade": "Fachada",
-    "A — free field": "A — campo libre",
-    "B — 2 m from façade": "B — a 2 m de la fachada",
-    "C — flush-mounted": "C — enrasado en fachada",
+    "A: free field": "A: campo libre",
+    "B: 2 m from façade": "B: a 2 m de la fachada",
+    "C: flush-mounted": "C: enrasado en fachada",
     "4.0 ± 0.2 m": "4,0 ± 0,2 m",
     "Emission measurement positions (ECMA-74)": "Posiciones de medida de emisión (ECMA-74)",
-    "Operator — seated (P2)": "Operador — sentado (P2)",
-    "Bystanders — top view": "Observadores, en planta",
+    "Operator, seated (P2)": "Operador, sentado (P2)",
+    "Bystanders, top view": "Observadores, en planta",
     "height 1.50 m": "altura 1,50 m",
     "0.25 m": "0,25 m",
     "1.20 m": "1,20 m",
     "1.00 m": "1,00 m",
     # Loudness capture geometry (perception/psychoacoustics/loudness).
     "Where the microphone goes for a loudness measurement (ISO 532-1)": "Dónde va el micrófono en una medida de sonoridad (ISO 532-1)",
-    "A — Free field  (NF)": "A — Campo libre  (NF)",
+    "A: Free field  (NF)": "A: Campo libre  (NF)",
     "hemi-anechoic room, one frontal source": "sala semianecoica, una sola fuente frontal",
     "listener absent:": "sin oyente:",
     "the result is diotic": "el resultado es diótico",
     "frontal incidence, 0°": "incidencia frontal, 0°",
     "1.50 m": "1,50 m",
     'field="free"  →  quote N as NF': 'field="free"  →  cita N como NF',
-    "B — Diffuse field  (ND)": "B — Campo difuso  (ND)",
+    "B: Diffuse field  (ND)": "B: Campo difuso  (ND)",
     "reverberant or in-situ room": "sala reverberante o in situ",
     "direct sound plus the reflected field, from every direction": "sonido directo más el campo reflejado, desde todas las direcciones",
     'field="diffuse"  →  quote N as ND': 'field="diffuse"  →  cita N como ND',
-    "C — Head-and-torso simulator (Annex D)": "C — Simulador de cabeza y torso (Anexo D)",
+    "C: Head-and-torso simulator (Annex D)": "C: Simulador de cabeza y torso (Anexo D)",
     "at the listening position": "en la posición de escucha",
     "Equalization matched": "Ecualización acorde",
     "to the room:": "con la sala:",
@@ -785,16 +785,16 @@ _ES: dict[str, str] = {
     # The spectra behind an ISO/PAS 20065 assessment
     # (perception/psychoacoustics/tone-audibility).
     "The spectra an ISO/PAS 20065 assessment is built on": "Los espectros de una evaluación ISO/PAS 20065",
-    "1 — the source runs through its operating states (clause 5.1: all of "
-    "them must be covered)": "1 — la fuente recorre sus estados de funcionamiento (capítulo 5.1: "
+    "1: the source runs through its operating states (clause 5.1: all of "
+    "them must be covered)": "1: la fuente recorre sus estados de funcionamiento (capítulo 5.1: "
     "hay que cubrirlos todos)",
     "idle": "ralentí",
     "full load": "plena carga",
-    "2 — basic spectra (under 1 s) are merged line by line into 3 s spectra "
-    "(clause 4.3)": "2 — los espectros básicos (menos de 1 s) se combinan línea a línea "
+    "2: basic spectra (under 1 s) are merged line by line into 3 s spectra "
+    "(clause 4.3)": "2: los espectros básicos (menos de 1 s) se combinan línea a línea "
     "en espectros de 3 s (4.3)",
-    "3 — each merged spectrum gives one decisive audibility $ΔL_j$ "
-    "(clause 5.3.8)": "3 — cada espectro combinado da una audibilidad decisiva $ΔL_j$ "
+    "3: each merged spectrum gives one decisive audibility $ΔL_j$ "
+    "(clause 5.3.8)": "3: cada espectro combinado da una audibilidad decisiva $ΔL_j$ "
     "(capítulo 5.3.8)",
     "Energy mean of the $J$ decisive audibilities": "Media energética de las $J$ audibilidades decisivas",
     "Formula (20); an empty spectrum counts as −10 dB (Formula 21)": "Fórmula (20); un espectro sin tono cuenta como −10 dB (Fórmula 21)",
@@ -808,25 +808,25 @@ _ES: dict[str, str] = {
     "$U ≤ 1.5$ dB: below 12 spectra, $U$ must be reported": "$U ≤ 1,5$ dB: con menos de 12 espectros, informar $U$",
     # ISO 532-2 capture routes (perception/psychoacoustics/advanced-loudness).
     "Which recording maps to which arguments (ISO 532-2 clause 7.2)": "Qué grabación corresponde a qué argumentos (ISO 532-2, cap. 7.2)",
-    "1 — single microphone where the head would be, one frontal source": "1 — un micrófono donde estaría la cabeza, una fuente frontal",
+    "1: single microphone where the head would be, one frontal source": "1: un micrófono donde estaría la cabeza, una fuente frontal",
     "listener absent": "sin oyente",
     "(diotic)": "(diótico)",
     "Table 1 free-field transfer": "función de transferencia de campo libre (Tabla 1)",
     "frontal incidence; the default": "incidencia frontal; es el valor por defecto",
-    "2 — the same microphone, reverberant or in-situ field": "2 — el mismo micrófono, campo reverberante o in situ",
+    "2: the same microphone, reverberant or in-situ field": "2: el mismo micrófono, campo reverberante o in situ",
     "Table 1 diffuse-field transfer": "transferencia de campo difuso (Tabla 1)",
     "also for diffuse-field earphones": "también para auriculares de campo difuso",
-    "3 — probe microphone in the ear canal": "3 — micrófono de sonda en el canal auditivo",
+    "3: probe microphone in the ear canal": "3: micrófono de sonda en el canal auditivo",
     "tympanic membrane": "membrana timpánica",
     "probe microphone": "micrófono de sonda",
-    "10 mm — 5 mm above 3 kHz": "10 mm — 5 mm por encima de 3 kHz",
+    "10 mm (5 mm above 3 kHz)": "10 mm (5 mm por encima de 3 kHz)",
     "no transfer function applied": "no se aplica función de transferencia",
     "the ear transfer is already in the signal": "la transferencia del oído ya está en la señal",
-    "4 — head-and-torso simulator": "4 — simulador de cabeza y torso",
+    "4: head-and-torso simulator": "4: simulador de cabeza y torso",
     "accurate model of": "¿modelo fiel de un",
     "an average adult?": "adulto medio?",
     "yes: no correction": "sí: sin corrección",
-    "no: correction file —": "no: archivo de corrección —",
+    "no: correction file,": "no: archivo de corrección,",
     "not implemented": "no implementado",
     'field="eardrum"  or  equalize': 'field="eardrum"  o  ecualizar',
     "clause 7.2.5": "capítulo 7.2.5",
@@ -918,7 +918,7 @@ _ES: dict[str, str] = {
     "Sound power methods compared": "Métodos de potencia acústica comparados",
     "Free field over a reflecting plane": "Campo libre sobre plano reflectante",
     "Reverberation test room": "Cámara reverberante de ensayo",
-    "In situ — any environment": "In situ — cualquier entorno",
+    "In situ, any environment": "In situ, cualquier entorno",
     "Grade 2 / 3 (engineering / survey)": "Grado 2 / 3 (ingeniería / control)",
     "Grade 1 (precision)": "Grado 1 (precisión)",
     "Sound pressure · enveloping surface": "Presión acústica · superficie envolvente",
@@ -935,7 +935,7 @@ _ES: dict[str, str] = {
     "Grade 1 / 2 per band, 3 on $L_{WA}$": "Grado 1 / 2 por banda, 3 en $L_{WA}$",
     "Sound intensity · discrete points": "Intensidad acústica · puntos discretos",
     "no non-positive bands · two criteria (Annex B)": "sin bandas no positivas · dos criterios (anexo B)",
-    "Any — no acoustic measurement": "Cualquiera — sin medida acústica",
+    "Any, no acoustic measurement": "Cualquiera, sin medida acústica",
     "Upper limit ($ε = 1$) / engineering": "Límite superior ($ε = 1$) / peritaje",
     "Surface velocity · accelerometers": "Velocidad superficial · acelerómetros",
     "$ε$ assumed (-1) or measured (-2)": "$ε$ supuesto (-1) o medido (-2)",
@@ -956,10 +956,10 @@ _ES: dict[str, str] = {
     "Separating element (D, d)": "Elemento separador (D, d)",
     "Flanking element (F, f)": "Elemento de flanco (F, f)",
     "junction": "unión",
-    "Dd — direct path: separating element both sides": "Dd — camino directo: elemento separador en ambos lados",
-    "Ff — flanking–flanking: flanking element both sides": "Ff — flanco–flanco: elemento de flanco en ambos lados",
-    "Fd — flanking (source) → separating (receiving)": "Fd — flanco (emisor) → separador (receptor)",
-    "Df — separating (source) → flanking (receiving)": "Df — separador (emisor) → flanco (receptor)",
+    "Dd: direct path, separating element both sides": "Dd: camino directo, elemento separador en ambos lados",
+    "Ff: flanking–flanking, flanking element both sides": "Ff: flanco–flanco, elemento de flanco en ambos lados",
+    "Fd: flanking (source) → separating (receiving)": "Fd: flanco (emisor) → separador (receptor)",
+    "Df: separating (source) → flanking (receiving)": "Df: separador (emisor) → flanco (receptor)",
     "R'w = −10 log10 Σ 10^(−Rij,w /10) dB   (EN 12354-1, Formula 26)": "R'w = −10 log10 Σ 10^(−Rij,w /10) dB   (EN 12354-1, Fórmula 26)",
     # d14 - ISO 9613-2 outdoor propagation geometry
     "ISO 9613-2 source–barrier–receiver geometry": "Geometría fuente–barrera–receptor (ISO 9613-2)",
@@ -1087,8 +1087,8 @@ _ES: dict[str, str] = {
     "one channel: the microphone sensitivity cancels and there is no "
     "inter-channel phase error": "un solo canal: la sensibilidad del micrófono se cancela y no hay "
     "desajuste de fase",
-    "magnitude from the ratio, phase from the position — which is why "
-    "Part 1 is the arbitration method": "magnitud por la razón, fase por la posición — por eso la Parte 1 es "
+    "magnitude from the ratio, phase from the position, which is why "
+    "Part 1 is the arbitration method": "magnitud por la razón, fase por la posición: por eso la Parte 1 es "
     "el método de arbitraje",
     # d15 - ISO 17497-1 random-incidence scattering (reverberation room)
     "Random-incidence scattering in a reverberation room (ISO 17497-1)": "Dispersión a incidencia aleatoria en cámara reverberante (ISO 17497-1)",
@@ -1119,7 +1119,7 @@ _ES: dict[str, str] = {
     "$d_n = (d − d_{ref}) / (1 − d_{ref})$   (Formula 7)": "$d_n = (d − d_{ref}) / (1 − d_{ref})$   (Fórmula 7)",
     "5° receiver steps · turntable rotates the sample · source fixed": "pasos de 5° entre receptores · la plataforma gira la probeta · fuente fija",
     # d17 - ISO 13472-1 in-situ road absorption, subtraction technique
-    "In-situ road absorption — subtraction technique (ISO 13472-1)": "Absorción in situ de carreteras — técnica de sustracción (ISO 13472-1)",
+    "In-situ road absorption: subtraction technique (ISO 13472-1)": "Absorción in situ de carreteras: técnica de sustracción (ISO 13472-1)",
     "Road surface": "Superficie de la carretera",
     "direct  $d_s−d_m$": "directo  $d_s−d_m$",
     "reflected  $d_s+d_m$": "reflejado  $d_s+d_m$",
@@ -1132,7 +1132,7 @@ _ES: dict[str, str] = {
     "$α(f) = 1 − (1/K_r^2)·|H_r/H_i|^2$   ·   $Δτ = 2 d_m / c$": "$α(f) = 1 − (1/K_r^2)·|H_r/H_i|^2$   ·   $Δτ = 2 d_m / c$",
     "Adrienne time window isolates the reflected response $H_r$": "La ventana temporal Adrienne aísla la respuesta reflejada $H_r$",
     # d18 - ISO 13472-2 in-situ road absorption, spot method
-    "In-situ road absorption — spot method (ISO 13472-2)": "Absorción in situ de carreteras — método puntual (ISO 13472-2)",
+    "In-situ road absorption: spot method (ISO 13472-2)": "Absorción in situ de carreteras: método puntual (ISO 13472-2)",
     "Road surface (test sample)": "Superficie de carretera (probeta)",
     "Spot method (ISO 13472-2)": "Método puntual (ISO 13472-2)",
     "$f_u = 0.58 c_0 / d$   (Clause 5.4.1)": "$f_u = 0,58 c_0 / d$   (apartado 5.4.1)",
@@ -1172,7 +1172,7 @@ _ES: dict[str, str] = {
     "• mics ≥ 2 m apart": "• micrófonos ≥ 2 m entre sí",
     "• ≥ 1 m from surfaces": "• ≥ 1 m de las superficies",
     "• mic height 1.2 m": "• altura del micrófono 1,2 m",
-    "ISO 3382-2 — reverberation-time measurement grades": "ISO 3382-2 — grados de medición del tiempo de reverberación",
+    "ISO 3382-2: reverberation-time measurement grades": "ISO 3382-2: grados de medición del tiempo de reverberación",
     "Source pos.": "Pos. fuente",
     "Mic pos.": "Pos. micróf.",
     "Source–mic comb.": "Comb. fuente–micróf.",
@@ -1222,11 +1222,11 @@ _ES: dict[str, str] = {
     "Impulse (I)": "Impulso (I)",
     "35 ms rise · 1500 ms fall": "35 ms subida · 1500 ms bajada",
     # block-processing
-    "State carried across blocks — TimeWeighting.process()": "Estado conservado entre bloques — TimeWeighting.process()",
+    "State carried across blocks: TimeWeighting.process()": "Estado conservado entre bloques: TimeWeighting.process()",
     "y[-1] (or the sosfilt zi vector) seeds the next block → identical to "
     "one continuous call": "y[-1] (o el vector zi de sosfilt) inicializa el bloque siguiente → "
     "idéntico a una llamada continua",
-    "State reset each block — reset() or a fresh call": "Estado reiniciado en cada bloque — reset() o una llamada nueva",
+    "State reset each block: reset() or a fresh call": "Estado reiniciado en cada bloque: reset() o una llamada nueva",
     "every block restarts from rest → spurious discontinuities at the seams": "cada bloque arranca desde reposo → discontinuidades espurias en las "
     "uniones",
     "block 1": "bloque 1",
@@ -1255,7 +1255,7 @@ _ES: dict[str, str] = {
     "privacy distance": "distancia de privacidad",
     "fitted STI = 0.20 · Cl. 3.7": "STI ajustado = 0,20 · Cl. 3.7",
     # ISO 12999-1
-    "Standard uncertainty  $u$  — reproducibility read from the tables": "Incertidumbre típica  $u$  — reproducibilidad leída de las tablas",
+    "Standard uncertainty  $u$: reproducibility read from the tables": "Incertidumbre típica  $u$: reproducibilidad leída de las tablas",
     "bands: Tables 2/4 · ratings: Tables 3/5 · situation A ($σ_R$) / B ($σ_{situ}$) / "
     "C ($σ_r$)": "bandas: Tablas 2/4 · índices: Tablas 3/5 · situación A ($σ_R$) / "
     "B ($σ_{situ}$) / C ($σ_r$)",
@@ -1409,8 +1409,8 @@ _ES: dict[str, str] = {
     "result is discarded (14.12.3.2 d)": "generador silenciado: residuo < 1/3 de la tensión de distorsión, "
     "o el resultado se descarta (14.12.3.2 d)",
     "highest significant harmonic inside the band: $f_1 ≤ f_{limit} / n$ "
-    "(14.12.4.1 — 30 kHz and $n = 5$ give 6 kHz)": "armónico significativo más alto dentro de la banda: "
-    "$f_1 ≤ f_{limit} / n$ (14.12.4.1 — 30 kHz y $n = 5$ dan 6 kHz)",
+    "(14.12.4.1, 30 kHz and $n = 5$ give 6 kHz)": "armónico significativo más alto dentro de la banda: "
+    "$f_1 ≤ f_{limit} / n$ (14.12.4.1, 30 kHz y $n = 5$ dan 6 kHz)",
     "AES17 band 20 Hz – 20 kHz": "banda AES17 de 20 Hz – 20 kHz",
     # The two sweep benches and the time budget
     "Playing and recording a sweep: the two benches and the time budget": "Reproducir y grabar un barrido: dos bancos y el reparto del tiempo",
@@ -1423,8 +1423,8 @@ _ES: dict[str, str] = {
     "Device": "Dispositivo",
     "under test": "en ensayo",
     "out": "salida",
-    "in — channel 1": "entrada — canal 1",
-    "loopback — channel 2 fixes $t = 0$": "bucle — el canal 2 fija $t = 0$",
+    "in: channel 1": "entrada: canal 1",
+    "loopback: channel 2 fixes $t = 0$": "bucle: el canal 2 fija $t = 0$",
     "source and microphone at 1.20 m over a hard floor": "fuente y micrófono a 1,20 m sobre suelo duro",
     "reflected path 2.60 m": "camino reflejado de 2,60 m",
     "$d$ = 1.00 m": "$d$ = 1,00 m",
@@ -1457,7 +1457,7 @@ _ES: dict[str, str] = {
     "Measurement strategies (Clauses 9–11)": "Estrategias de medición (apartados 9–11)",
     "Working day": "Jornada laboral",
     "Task-based (Clause 9)": "Basada en tareas (apartado 9)",
-    "split the day into tasks — ≥ 3 samples (│) each, and a duration": "dividir la jornada en tareas — ≥ 3 muestras (│) y su duración",
+    "split the day into tasks: ≥ 3 samples (│) each, and a duration": "dividir la jornada en tareas: ≥ 3 muestras (│) y su duración",
     "Job-based (Clause 10)": "Basada en la función (apartado 10)",
     "$N ≥ 5$ random samples over the homogeneous exposure group": "$N ≥ 5$ muestras aleatorias del grupo de exposición homogéneo",
     "Full-day (Clause 11)": "Jornada completa (apartado 11)",
@@ -1576,7 +1576,7 @@ _ES: dict[str, str] = {
     "$Π_2$ measured,  $Π_1 = 0$": "$Π_2$ medida,  $Π_1 = 0$",
     # Energy bookkeeping of the two runs: symbols only, identical in Spanish.
     "$E_1 = M_1⟨v_1^2⟩,   E_2 = M_2⟨v_2^2⟩$": "$E_1 = M_1⟨v_1^2⟩,   E_2 = M_2⟨v_2^2⟩$",
-    "$Π_{in} = ½ Re{F v*}$ at the drive point, from an impedance head — "
+    "$Π_{in} = ½ Re{F v*}$ at the drive point, from an impedance head, "
     "not the amplifier setting": "$Π_{in} = ½ Re{F v*}$ en el punto de excitación, con cabeza de "
     "impedancia, no con el ajuste del amplificador",
     "$⟨v^2⟩$ space-averaged over several positions per subsystem, away "
@@ -2050,10 +2050,10 @@ _ES: dict[str, str] = {
     "salvas sondean la dinámica",
     # Welch PSD pipeline (Bendat & Piersol)
     "The Welch PSD pipeline: segment, taper, average (Bendat & Piersol)": "PSD de Welch: segmentar, enventanar, promediar (Bendat & Piersol)",
-    "Record $x(t)$ — $f_s$ = 48 kHz, 20 s of pink noise": "Registro $x(t)$ — $f_s$ = 48 kHz, 20 s de ruido rosa",
+    "Record $x(t)$: $f_s$ = 48 kHz, 20 s of pink noise": "Registro $x(t)$: $f_s$ = 48 kHz, 20 s de ruido rosa",
     "960 000 samples, calibrated end to end: pascals in, Pa²/Hz out": "960 000 muestras, calibrado de extremo a extremo: pascales dentro, "
     "Pa²/Hz fuera",
-    "Split into 50 %-overlapped segments — nperseg = 4096": "División en segmentos con 50 % de solape — nperseg = 4096",
+    "Split into 50 %-overlapped segments: nperseg = 4096": "División en segmentos con 50 % de solape: nperseg = 4096",
     "467 segments of 85.3 ms; bin spacing $Δf = f_s/4096$ = 11.7 Hz": "467 segmentos de 85,3 ms; separación de bins $Δf = f_s/4096$ = "
     "11,7 Hz",
     "Hann taper on every segment": "Ventana de Hann en cada segmento",
@@ -2081,7 +2081,7 @@ _ES: dict[str, str] = {
     "high-pass, 1.5 kHz": "paso alto, 1,5 kHz",
     "noise $n(t)$": "ruido $n(t)$",
     "Output $y(t)$": "Salida $y(t)$",
-    "Welch cross-spectral matrix — $G_{xx}$ (2×2) and $G_{xy}$, nperseg = 2048": "Matriz de espectros cruzados de Welch — $G_{xx}$ (2×2) y "
+    "Welch cross-spectral matrix: $G_{xx}$ (2×2) and $G_{xy}$, nperseg = 2048": "Matriz de espectros cruzados de Welch: $G_{xx}$ (2×2) y "
     "$G_{xy}$, nperseg = 2048",
     "conditioning: Schur steps $G_{ij·r!}$ (Eq. 7.94), inputs ordered by descending ordinary coherence": "condicionamiento: pasos de Schur $G_{ij·r!}$ (Ec. 7.94), "
     "entradas ordenadas por coherencia ordinaria descendente",
@@ -2098,8 +2098,8 @@ _ES: dict[str, str] = {
     "parcial pequeña",
     # Time-frequency tiling trade-off
     "The time-frequency trade-off: two tilings of the same record": "El compromiso tiempo-frecuencia: dos teselados del mismo registro",
-    "Short window — nperseg = 256": "Ventana corta — nperseg = 256",
-    "Long window — nperseg = 1024": "Ventana larga — nperseg = 1024",
+    "Short window: nperseg = 256": "Ventana corta: nperseg = 256",
+    "Long window: nperseg = 1024": "Ventana larga: nperseg = 1024",
     "$T_B$ = 16 ms,  $B_e ≈ 1/T_B$ = 62.5 Hz": "$T_B$ = 16 ms,  $B_e ≈ 1/T_B$ = 62,5 Hz",
     "$T_B$ = 64 ms,  $B_e$ ≈ 15.6 Hz": "$T_B$ = 64 ms,  $B_e$ ≈ 15,6 Hz",
     "sharp click, smeared tone": "clic nítido, tono emborronado",
@@ -2161,14 +2161,14 @@ _ES: dict[str, str] = {
     # Correlation-based time-delay estimation (Knapp & Carter)
     "Time-delay estimation: two microphones and one correlation peak": "Estimación del retardo: dos micrófonos y un pico de correlación",
     "$Δr = c·τ_0$ ≈ 0.84 m  ($c$ = 343 m/s)": "$Δr = c·τ_0$ ≈ 0,84 m  ($c$ = 343 m/s)",
-    "mic 1 — $x(t)$": "micro 1 — $x(t)$",
-    "mic 2 — $y(t)$": "micro 2 — $y(t)$",
+    "mic 1: $x(t)$": "micro 1: $x(t)$",
+    "mic 2: $y(t)$": "micro 2: $y(t)$",
     "spacing $d$": "separación $d$",
     # The page's own displayed formula writes \sin (ISO 80000-2 notation),
     # so the plate keeps "sin"; the PHAT weight is shared notation too.
     "$sin θ = c·τ_0 / d$": "$sin θ = c·τ_0 / d$",
     "$ψ(f) = 1/|G_{xy}|$": "$ψ(f) = 1/|G_{xy}|$",
-    "cross-correlation against lag — $y(t) = α·x(t − τ_0) + n(t)$": "correlación cruzada frente al retardo — $y(t) = α·x(t − τ_0) + "
+    "cross-correlation against lag: $y(t) = α·x(t − τ_0) + n(t)$": "correlación cruzada frente al retardo: $y(t) = α·x(t − τ_0) + "
     "n(t)$",
     "direct correlator: broad peak": "correlador directo: pico ancho",
     "GCC-PHAT: sharp spike": "GCC-PHAT: pico estrecho",
@@ -2181,7 +2181,7 @@ _ES: dict[str, str] = {
     "Data qualification: the stationarity decision (Bendat & Piersol 10.3)": "Calificación de datos: decisión de estacionariedad (B&P 10.3)",
     "Time record $x(t)$": "Registro temporal $x(t)$",
     "before trusting any PSD, Leq or GUM average": "antes de confiar en cualquier promedio PSD, Leq o GUM",
-    "Mean square per interval — $N$ = 20 equal segments": "Media cuadrática por intervalo — $N$ = 20 segmentos iguales",
+    "Mean square per interval: $N$ = 20 equal segments": "Media cuadrática por intervalo: $N$ = 20 segmentos iguales",
     "each interval long against the record's lowest frequencies; also rms, mean or variance": "cada intervalo largo frente a las frecuencias más bajas del "
     "registro; también rms, media o varianza",
     "Reverse arrangement count $A$": "Recuento de inversiones $A$",
@@ -2237,10 +2237,10 @@ _ES: dict[str, str] = {
     "Zwicker $PA = N_5·(1 + √(w_S^2 + w_{FR}^2))$",
     # Tone audibility (ISO/PAS 20065)
     "Tone audibility: from spectrum to penalty (ISO/PAS 20065)": "Audibilidad tonal: del espectro al ajuste (ISO/PAS 20065)",
-    "Narrow-band FFT spectrum — line spacing $Δf$ = 2.7 Hz": "Espectro FFT de banda estrecha — resolución $Δf$ = 2,7 Hz",
+    "Narrow-band FFT spectrum: line spacing $Δf$ = 2.7 Hz": "Espectro FFT de banda estrecha: resolución $Δf$ = 2,7 Hz",
     "Annex E engine spectrum; peak detected at $f_T$ = 137.3 Hz (not on a slope)": "espectro del motor del Anexo E; pico detectado en $f_T$ = 137,3 Hz "
     "(no en una ladera)",
-    "Critical band about the tone — $Δf_c$ = 101.36 Hz": "Banda crítica en torno al tono — $Δf_c$ = 101,36 Hz",
+    "Critical band about the tone: $Δf_c$ = 101.36 Hz": "Banda crítica en torno al tono: $Δf_c$ = 101,36 Hz",
     "geometric placement: corners 95.67 and 197.04 Hz, $√(f_1·f_2) = f_T$": "colocación geométrica: esquinas en 95,67 y 197,04 Hz, "
     "$√(f_1·f_2) = f_T$",
     "Levels from the spectrum lines in the band": "Niveles desde las líneas del espectro en la banda",
@@ -2293,7 +2293,7 @@ _ES: dict[str, str] = {
     "Short-time DFT: 256-sample Hann frames, 50 % overlap": "DFT de corto plazo: tramas Hann de 256 muestras, 50 % de solape",
     "magnitudes grouped into 15 one-third-octave bands from 150 Hz": "magnitudes agrupadas en 15 bandas de tercio de octava desde "
     "150 Hz",
-    "384 ms segments — 30 frames, the unit of comparison": "Segmentos de 384 ms — 30 tramas, la unidad de comparación",
+    "384 ms segments (30 frames), the unit of comparison": "Segmentos de 384 ms (30 tramas), la unidad de comparación",
     "long enough to hold the slow modulations that carry speech": "lo bastante largos para las modulaciones lentas que llevan el "
     "habla",
     "STOI: envelope correlation": "STOI: correlación de envolventes",
@@ -2307,7 +2307,7 @@ _ES: dict[str, str] = {
     "1,9 kHz llega a 0,90",
     # Programme loudness (ITU-R BS.1770 / EBU R 128)
     "Programme loudness: the BS.1770 / R 128 metering chain": "Sonoridad de programa: la cadena de medición BS.1770 / R 128",
-    "Programme $x$ — channel weights $G_i$: 1.0 front, 1.41 surround": "Programa $x$ — pesos de canal $G_i$: 1,0 frontales, 1,41 envolventes",
+    "Programme $x$, channel weights $G_i$: 1.0 front, 1.41 surround": "Programa $x$, pesos de canal $G_i$: 1,0 frontales, 1,41 envolventes",
     "anchor: a 0 dB FS 997 Hz sine on one front channel reads −3.01 LKFS": "ancla: un seno de 997 Hz a 0 dB FS en un canal frontal marca "
     "−3,01 LKFS",
     "K-weighting: +4 dB spherical-head shelf + RLB high-pass": "Ponderación K: estante de +4 dB (cabeza esférica) + paso alto RLB",
@@ -2333,7 +2333,7 @@ _ES: dict[str, str] = {
     "ungated, the same 40 s example would read near −29 LUFS": "sin puertas, el mismo ejemplo de 40 s marcaría cerca de −29 LUFS",
     # Reverberation-time prediction (Sabine / Eyring)
     "Predicting the reverberation time: Sabine against Eyring": "Predicción del tiempo de reverberación: Sabine frente a Eyring",
-    "Room 10 × 7 × 3.5 m — $V$ = 245 m³, $S$ = 259 m²": "Sala de 10 × 7 × 3,5 m — $V$ = 245 m³, $S$ = 259 m²",
+    "Room 10 × 7 × 3.5 m: $V$ = 245 m³, $S$ = 259 m²": "Sala de 10 × 7 × 3,5 m: $V$ = 245 m³, $S$ = 259 m²",
     "hard end walls, lightly treated side walls, carpet and acoustic ceiling": "testeros duros, laterales con tratamiento ligero, moqueta y "
     "techo acústico",
     "mean absorption $ᾱ$ runs from 0.21 at 125 Hz to 0.51 at 4 kHz": "la absorción media $ᾱ$ va de 0,21 a 125 Hz a 0,51 a 4 kHz",
@@ -2646,7 +2646,7 @@ _ES: dict[str, str] = {
     "an exponential decay (C)": "una caída exponencial (C)",
     "INR = 55 dB": "INR = 55 dB",
     "Evaluation windows": "Ventanas de evaluación",
-    "hatched: the 15 dB margin ISO 3382-1 asks for beyond each window — EDT needs 25 dB, $T_{20}$ 35 dB, $T_{30}$ 45 dB": "rayado: el margen de 15 dB que exige la ISO 3382-1 más allá de cada ventana — EDT necesita 25 dB, $T_{20}$ 35 dB y $T_{30}$ 45 dB",
+    "hatched: the 15 dB margin ISO 3382-1 asks for beyond each window (EDT needs 25 dB, $T_{20}$ 35 dB, $T_{30}$ 45 dB)": "rayado: el margen de 15 dB que exige la ISO 3382-1 más allá de cada ventana (EDT necesita 25 dB, $T_{20}$ 35 dB y $T_{30}$ 45 dB)",
     "the library flags at 46 dB and 54 dB instead, where the fit's positive bias crosses 5 %": "la biblioteca avisa en 46 dB y 54 dB, donde el sesgo positivo del ajuste cruza el 5 %",
     "short of range? $T_{20}$ instead of $T_{30}$ -> a longer sweep or more averages -> EDT; never a fit into the noise": "¿falta rango? $T_{20}$ en vez de $T_{30}$ -> un barrido más largo o más promedios -> EDT; nunca un ajuste metido en el ruido",
     # --- ISO 3741 reverberation test room (devices/emission) ---
@@ -2714,7 +2714,7 @@ _ES: dict[str, str] = {
     "in the band of maximum level (ISO 9614-2, clause 6.2.2)": "en la banda de nivel máximo (ISO 9614-2, apartado 6.2.2)",
     "same signs → the two channels are swapped, or one is inverted": "mismos signos → los dos canales están intercambiados, o uno está invertido",
     "more than 1,5 dB apart → the probe disturbs its own field, or the channels are not matched": "más de 1,5 dB de diferencia → la sonda perturba su propio campo, o los canales no están emparejados",
-    "$δ_{pI0}$ belongs to the probe, its spacer and the analyser together — not to the microphones": "$δ_{pI0}$ pertenece al conjunto sonda, separador y analizador, no a los micrófonos",
+    "$δ_{pI0}$ belongs to the probe, its spacer and the analyser together, not to the microphones": "$δ_{pI0}$ pertenece al conjunto sonda, separador y analizador, no a los micrófonos",
     # Long's Table 14.9 installation (devices/noise-control/duct-path).
     "Long's Table 14.9 installation: every row of the sheet as a place": "La instalación de la Tabla 14.9 de Long: cada fila de la hoja, en su sitio",
     "Plant room": "Sala de máquinas",
@@ -2733,9 +2733,9 @@ _ES: dict[str, str] = {
     "6 · grille": "6 · rejilla",
     "$r$ = 1.83 m": "$r$ = 1,83 m",
     "$Q = 2$, flush in the ceiling": "$Q = 2$, enrasado en el techo",
-    "blue: the supply path — red: the return path — each box is one row of the sheet, stamped with its code": "azul: ramal de impulsión; rojo: ramal de retorno; cada caja es una fila de la hoja con su código",
-    "attenuates only: 4, 5, 6 (supply) and 4, 5 (return) — attenuates and "
-    "regenerates: 2, 3 — self-noise only: 8 and the grille": "solo atenúan: 4, 5, 6 (impulsión) y 4, 5 (retorno); atenúan y regeneran: 2, 3; solo ruido propio: 8 y la rejilla",
+    "blue: the supply path; red: the return path; each box is one row of the sheet, stamped with its code": "azul: ramal de impulsión; rojo: ramal de retorno; cada caja es una fila de la hoja con su código",
+    "attenuates only: 4, 5, 6 (supply) and 4, 5 (return); attenuates and "
+    "regenerates: 2, 3; self-noise only: 8 and the grille": "solo atenúan: 4, 5, 6 (impulsión) y 4, 5 (retorno); atenúan y regeneran: 2, 3; solo ruido propio: 8 y la rejilla",
     "the return wins above 1 kHz: its silencer floors the room near 25 dB, and no amount of supply attenuation moves that": "por encima de 1 kHz manda el retorno: su silenciador deja un suelo de 25 dB que la impulsión no puede bajar",
     # ISO 7235 silencer measurement (devices/noise-control/silencers).
     "How a silencer is measured: the ISO 7235 substitution method": "Cómo se mide un silenciador: el método de sustitución de la ISO 7235",
@@ -2758,8 +2758,8 @@ _ES: dict[str, str] = {
     "ISO 7235 y la Tabla 1 de la ISO 5135",
     "The bigger the solid angle, the more the mouth keeps in": "Cuanto mayor es el ángulo sólido, más retiene la boca",
     "a baffle is what makes an opening a good radiator": "lo que hace buena radiadora a una abertura es la pantalla",
-    "Series I — test object installed": "Serie I: con el objeto de ensayo",
-    "Series II — substitution duct": "Serie II: con el conducto de sustitución",
+    "Series I: test object installed": "Serie I: con el objeto de ensayo",
+    "Series II: substitution duct": "Serie II: con el conducto de sustitución",
     "test object": "objeto de ensayo",
     "substitution duct": "conducto de sustitución",
     "sealed, lined loudspeaker box": "caja de altavoces estanca",
@@ -2778,7 +2778,7 @@ _ES: dict[str, str] = {
     "signal ≥ 6 dB and preferably ≥ 10 dB above the background": "señal ≥ 6 dB y preferiblemente ≥ 10 dB sobre el ruido de fondo",
     "(5.2.2.2); IEC 61260 third octaves, class 1 chain (5.2.4.6)": "(5.2.2.2); tercios de octava IEC 61260, cadena clase 1 (5.2.4.6)",
     "the reported figure is an insertion loss against a substitution duct, not a transmission loss": "lo que se declara es una pérdida por inserción frente a un conducto de sustitución, no por transmisión",
-    "and the facility's own limiting insertion loss — flanking along the duct walls — caps what it can report at all": "y la pérdida por inserción límite de la instalación, por flancos en "
+    "and the facility's own limiting insertion loss (flanking along the duct walls) caps what it can report at all": "y la pérdida por inserción límite de la instalación, por flancos en "
     "las paredes, acota lo que puede declarar",
     # Room-to-room chain in section (devices/noise-control/room-to-room).
     "Plant room to operator room: every symbol of the balance, in section": "De la sala de máquinas a la de control: el balance en sección",
@@ -2790,9 +2790,9 @@ _ES: dict[str, str] = {
     "8 m": "8 m",
     "5 m": "5 m",
     "3 m": "3 m",
-    "source side — blower on the floor at a wall mid-point: $L_W$ = 105 dB at 125 Hz, $Q = 4$ adds 6.0 dB, $L_{p1}$ = 107.0 dB": "lado emisor: soplante en el suelo en el centro de una pared, $L_W$ = 105 dB a 125 Hz, $Q = 4$ suma 6,0 dB, $L_{p1}$ = 107,0 dB",
-    "partition — 5 m × 3 m = 15 m², TL = 39 dB at 125 Hz; the $τ S_w$ returned to the source room is off by default": "separación: 5 m × 3 m = 15 m², TL = 39 dB a 125 Hz; el $τ S_w$ devuelto al recinto emisor está desactivado por defecto",
-    "receiving side — $S_{2}α_{2}$ = 5.5 m² at 125 Hz rising to 39.2 m² at 4 kHz; $L_{p2}$ = 72.4 dB against 60 dB for NC 45": "lado receptor: $S_{2}α_{2}$ = 5,5 m² a 125 Hz y 39,2 m² a 4 kHz; $L_{p2}$ = 72,4 dB frente a los 60 dB de NC 45",
+    "source side, blower on the floor at a wall mid-point: $L_W$ = 105 dB at 125 Hz, $Q = 4$ adds 6.0 dB, $L_{p1}$ = 107.0 dB": "lado emisor: soplante en el suelo en el centro de una pared, $L_W$ = 105 dB a 125 Hz, $Q = 4$ suma 6,0 dB, $L_{p1}$ = 107,0 dB",
+    "partition, 5 m × 3 m = 15 m², TL = 39 dB at 125 Hz; the $τ S_w$ returned to the source room is off by default": "separación: 5 m × 3 m = 15 m², TL = 39 dB a 125 Hz; el $τ S_w$ devuelto al recinto emisor está desactivado por defecto",
+    "receiving side, $S_{2}α_{2}$ = 5.5 m² at 125 Hz rising to 39.2 m² at 4 kHz; $L_{p2}$ = 72.4 dB against 60 dB for NC 45": "lado receptor: $S_{2}α_{2}$ = 5,5 m² a 125 Hz y 39,2 m² a 4 kHz; $L_{p2}$ = 72,4 dB frente a los 60 dB de NC 45",
     "$NR = TL − 10 log_{10}[S_w / (S_{2}α_{2} + τ S_w)]$": "$NR = TL − 10 log_{10}[S_w / (S_{2}α_{2} + τ S_w)]$",
     "$S_{2}α_{2}$ passes the 15 m² of the wall between 250 and 500 Hz: below it the wall delivers less than its TL": "$S_{2}α_{2}$ supera los 15 m² del muro entre 250 y 500 Hz: por debajo, el muro entrega menos que su TL",
     "both levels are reverberant-field spatial averages; the balance says "
@@ -2800,7 +2800,7 @@ _ES: dict[str, str] = {
     "balance calla bajo 163 Hz (Schroeder, 75 m³)",
     # Machine enclosure in section (devices/noise-control/noise-control).
     "Machine enclosure in section: what IL = R − C really depends on": "Encapsulamiento de máquina en sección: de qué depende IL = R − C",
-    "$S_E$ = 24 m² of exposed shell — a 3.0 × 2.0 × 1.8 m box, five faces": "$S_E$ = 24 m² de envolvente expuesta: una caja de 3,0 × 2,0 × 1,8 m, cinco caras",
+    "$S_E$ = 24 m² of exposed shell: a 3.0 × 2.0 × 1.8 m box, five faces": "$S_E$ = 24 m² de envolvente expuesta: una caja de 3,0 × 2,0 × 1,8 m, cinco caras",
     "lined cooling outlet": "salida de refrigeración revestida",
     "a short lined duct, never a bare hole": "conducto corto revestido, nunca un agujero",
     "cable and pipe entry, sealed sleeve": "paso de cables y tuberías con manguito estanco",
@@ -2817,7 +2817,7 @@ _ES: dict[str, str] = {
     "cooling air needs a path": "el aire debe poder circular",
     "$IL = R − C$,   $C = 10 log_{10}(0.3 + S_E/R_i)$ = 3.4 dB": "$IL = R − C$,   $C = 10 log_{10}(0,3 + S_E/R_i)$ = 3,4 dB",
     "sealed shell (mean $R$ = 32.3 dB): mean IL = 28.9 dB": "envolvente sellada ($R$ medio = 32,3 dB): IL medio = 28,9 dB",
-    "with the door: 21.4 dB — with the 1 % gap as well: 15.1 dB, against the $10 log_{10}(S_E/S_a)$ = 20 dB cap": "con la puerta: 21,4 dB; con la rendija del 1 % además: 15,1 dB, frente al techo $10 log_{10}(S_E/S_a)$ = 20 dB",
+    "with the door: 21.4 dB; with the 1 % gap as well: 15.1 dB, against the $10 log_{10}(S_E/S_a)$ = 20 dB cap": "con la puerta: 21,4 dB; con la rendija del 1 % además: 15,1 dB, frente al techo $10 log_{10}(S_E/S_a)$ = 20 dB",
     "3.0 m": "3,0 m",
     "1.8 m": "1,8 m",
     "an enclosure delivers its worst element, not its panels": "un encapsulamiento entrega su peor elemento, no sus paneles",
@@ -2925,7 +2925,7 @@ _ES: dict[str, str] = {
     "19 azimuths × 19 polar angles at 10°, 31 one-third-octave bands from 10 Hz to 10 kHz": "19 acimutes × 19 ángulos polares cada 10°, 31 bandas de tercio de octava de 10 Hz a 10 kHz",
     "unmeasured bins are NaN, never 0 dB; mirrored-rotor class members read the same data at $−φ$": "las celdas no medidas son NaN, nunca 0 dB; con rotor espejado, la "
     "clase lee los mismos datos en $−φ$",
-    # Sound-field audiometry (ISO 389-7 / ISO 8253-2) — B15b
+    # B15b: Sound-field audiometry (ISO 389-7 / ISO 8253-2)
     "Sound-field audiometry and the ISO 389-7 reference zero": "Audiometría en campo sonoro y el cero de referencia de ISO 389-7",
     "A · Free field": "A · Campo libre",
     "pure tone · frontal · binaural": "tono puro · frontal · biaural",
@@ -2949,10 +2949,10 @@ _ES: dict[str, str] = {
     "ear simulator": "simulador de oído",
     "0 dB HL here is the RETSPL of the earphone": "0 dB HL aquí es el RETSPL del auricular",
     "fitted (ISO 389-1 / -2 / -8), referred to a": "colocado (ISO 389-1 / -2 / -8), referido a un",
-    "coupler — never an ISO 389-7 value": "acoplador, nunca un valor de ISO 389-7",
+    "coupler, never an ISO 389-7 value": "acoplador, nunca un valor de ISO 389-7",
     "Reference point: the midpoint of the line joining the listener's ear-canal openings": "Punto de referencia: el punto medio entre las entradas de los conductos auditivos",
     "the listener in the listening position; in A and B the level is measured there with the subject and chair absent": "el oyente en la posición de escucha; en A y B el nivel se mide ahí sin el sujeto ni la silla",
-    # ISO 9612 Clause 12.4 sound level meter geometry — B15b
+    # B15b: ISO 9612 Clause 12.4 sound level meter geometry
     "Sound level meter at a workstation (ISO 9612, Clause 12.4)": "Sonómetro en un puesto de trabajo (ISO 9612, capítulo 12.4)",
     "Worker absent": "Sin el trabajador",
     "the preferred Clause 12.4 placement": "la colocación preferente del capítulo 12.4",
@@ -2974,7 +2974,7 @@ _ES: dict[str, str] = {
     "beyond 0.4 m, use the worn instrument (12.3)": "más allá de 0,4 m, usar el instrumento portado (12.3)",
     "A fixed microphone position under-reads a hand-held tool close to the ear (13.1)": "Una posición fija de micrófono subestima una herramienta de mano próxima al oído (13.1)",
     "that is exactly when the worn personal exposure meter of Clause 12.3 is the right instrument": "es justo cuando el exposímetro personal portado del capítulo 12.3 es el instrumento adecuado",
-    # IEC 60268-16 clause 7 STI setup — B15b
+    # B15b: IEC 60268-16 clause 7 STI setup
     "Setting up an STI measurement (IEC 60268-16, clause 7)": "Montaje de una medida de STI (IEC 60268-16, capítulo 7)",
     "A · Unamplified talker": "A · Hablante sin amplificar",
     "acoustical input, clause 7.2": "entrada acústica, capítulo 7.2",
@@ -3002,7 +3002,7 @@ _ES: dict[str, str] = {
     "spread over the served area, worst corners included": "repartidas por el área servida, incluidos los peores rincones",
     "The rating of the space is the mean of the positions minus one standard deviation (7.6.4)": "La calificación del espacio es la media de las posiciones menos una desviación típica (7.6.4)",
     "a plain mean over the positions overstates coverage; better still, plot the whole distribution": "la media simple de las posiciones sobrestima la cobertura; mejor aún, represente toda la distribución",
-    # STOI/ESTOI capture bench — B15b
+    # B15b: STOI/ESTOI capture bench
     "Capturing a STOI pair through a real device": "Captura de un par para STOI a través de un dispositivo real",
     "clean": "señal",
     "speech file": "de voz limpia",

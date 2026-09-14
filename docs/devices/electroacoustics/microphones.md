@@ -88,8 +88,8 @@ weights THD. The quasi-peak detector is implemented too, as
 ([Quasi-peak programme meter](../broadcast/quasi-peak.md)), but it reads a
 *recording*, and `itu_r_468_weighting` is the network alone: an
 inherent-noise level computed from the network and an r.m.s. sum is still
-not a dBqps figure. Clause 17 has no waveform to hand it either — it takes
-the stated voltage or level from the data sheet — so
+not a dBqps figure. Clause 17 has no waveform to hand it either (it takes
+the stated voltage or level from the data sheet), so
 `MicrophoneNoise(weighting="CCIR")` stays what it always was, metadata
 recording how the supplier measured their figure rather than a measurement
 this library made.
@@ -172,7 +172,7 @@ is the laboratory behind the numbers: the anechoic room and its
 qualification, the reference microphone and its calibration certificate, the
 high-level source that produces a 140 dB field and the turntable are what
 the reported numbers mean, and the acquisition itself is not implemented
-here — the functions reduce the curves they are handed.
+here: the functions reduce the curves they are handed.
 
 The rated characteristics are also available interactively through `.plot()`,
 which draws **one concept per figure** with the same panel code the report

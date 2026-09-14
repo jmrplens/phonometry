@@ -758,8 +758,8 @@ analysis.
 
 **Not covered.** Nothing is predicted where the manufacturer publishes it: the
 sheet expects the published fan and terminal figures. There is no dissipative
-liner model — the splitter estimate is a lined-duct regression and the plenum
-is Wells' closed form — and above the first cut-on the element models rest on
+liner model (the splitter estimate is a lined-duct regression and the plenum
+is Wells' closed form), and above the first cut-on the element models rest on
 their empirical fit alone. Four paths of a real installation sit outside the
 calculation entirely, which is usually why a passing sheet meets a failing
 room: **duct breakout** from a trunk radiating through its own walls into a

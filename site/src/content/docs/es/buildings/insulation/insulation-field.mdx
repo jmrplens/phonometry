@@ -204,7 +204,7 @@ ser del mismo tipo, excitados al mismo nivel con señales similares pero no
 correlacionadas, y cada uno debe cumplir el requisito de directividad del
 Anexo A. La señal es estacionaria y de espectro continuo, y el nivel promediado
 en energía del recinto emisor no debe variar más de 8 dB entre bandas de tercio
-de octava contiguas, al menos por encima de 100 Hz — conforma el espectro
+de octava contiguas, al menos por encima de 100 Hz: conforma el espectro
 (normalmente hace falta un ecualizador gráfico) o recurre a mediciones
 sucesivas en banda limitada. Los altavoces se sitúan a 0,5 m como mínimo de
 cualquier paramento, preferiblemente a 1,0 m como mínimo del elemento
@@ -215,7 +215,7 @@ mínimo. Cuando el elemento de ensayo es el forjado y el altavoz está en el
 recinto superior, su base queda a 1,0 m como mínimo sobre el suelo.
 
 **Los micrófonos (apartado 7.3).** Un mínimo de **cinco** posiciones por
-recinto — y, con un único altavoz desplazado entre posiciones, cinco por
+recinto, y, con un único altavoz desplazado entre posiciones, cinco por
 recinto *y por posición de altavoz*. No puede haber dos posiciones en el mismo
 plano respecto a los paramentos del recinto, y el conjunto no debe formar una
 retícula regular.
@@ -253,7 +253,7 @@ print(np.round(l2_corr, 2))     # [44.   40.25 38.84 36.7 ]  <- última banda se
 [Medición del aislamiento en laboratorio](/phonometry/es/buildings/insulation/insulation-lab/),
 cuyo umbral superior es de 15 dB y no de 10 dB. Aplicada a datos de campo resta
 energía en la franja de margen de 10-15 dB en la que ISO 16283-1 no pide nada
-— hasta 0,458 dB con un margen de 10 dB — y, como actúa sobre el recinto
+(hasta 0,458 dB con un margen de 10 dB), y, como actúa sobre el recinto
 receptor, eso acaba siendo aislamiento declarado de más, banda a banda, en $D$.
 Para niveles de campo usa la expresión de tres regímenes de arriba.
 
@@ -751,7 +751,7 @@ globales citados aquí reutilizan los motores verificados de ISO 717-1/ISO
 <ScopeClaim status="not-covered" label="No cubierto">
 Todas las funciones de campo de aquí toman niveles que el usuario ya ha
 corregido por ruido de fondo (apartado 9.2 de la ISO 16283-1). La *medición*
-del nivel de fondo — fuente apagada, mismas posiciones, mismo promediado — es
+del nivel de fondo (fuente apagada, mismas posiciones, mismo promediado) es
 cosa del operador, y aquí nada verifica que se haya cumplido el mínimo de 6
 dB; la corrección en sí son tres líneas de NumPy, escritas en [Corrección por
 ruido de fondo](#correccion-por-ruido-de-fondo) más arriba.

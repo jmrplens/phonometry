@@ -4,8 +4,8 @@ description: "Por dónde empezar con phonometry: el primer análisis de principi
 ---
 
 phonometry calcula magnitudes acústicas a partir del texto de las normas que
-las definen — ISO, IEC, ANSI y ASTM, el anexo CNOSSOS-EU de la Directiva
-2002/49/CE y los documentos de aeronaves de OACI y ECAC — y cada métrica cita
+las definen: ISO, IEC, ANSI y ASTM, el anexo CNOSSOS-EU de la Directiva
+2002/49/CE y los documentos de aeronaves de OACI y ECAC. Cada métrica cita
 el apartado que implementa. Qué te aporta eso, y cómo se comprueba, está en
 [Por qué phonometry](/phonometry/es/start/why-phonometry/).
 

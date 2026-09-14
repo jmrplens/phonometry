@@ -521,15 +521,15 @@ ISO 16283 family (ISO 16283-3:2016) has its own page.
 
 **Not covered.** Every field function takes levels the caller has already
 corrected for background noise (ISO 16283-1 Clause 9.2). Measuring the
-background level — source off, same positions, same averaging — is the
+background level (source off, same positions, same averaging) is the
 operator's job, and nothing here verifies that the 6 dB floor was met.
 (`background_correction` is the **ISO 10140-4** *laboratory* variant and does
 not match the field thresholds.) The position counts, distances and
 placements of ISO 16283-1/-2 are documented above and checked nowhere: energy
 averaging happens once positions are supplied, but nothing verifies how many
-were taken or where. The low-frequency procedure of Clause 8 *is* implemented
-— the 25 m³ trigger, Formula (12), Formula (13) and the 63 Hz octave
-reverberation time of Clause 10.4 — but it is fed corner levels the operator
+were taken or where. The low-frequency procedure of Clause 8 *is* implemented:
+the 25 m³ trigger, Formula (12), Formula (13) and the 63 Hz octave
+reverberation time of Clause 10.4, but it is fed corner levels the operator
 measured, and the only sampling requirement it enforces is a warning below the
 four corners per source position Clause 8.3 asks for.
 The other members of the family have their own pages: the façade part

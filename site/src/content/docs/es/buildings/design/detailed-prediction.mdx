@@ -73,8 +73,8 @@ corrección in situ vale 0 dB y $R_\mathrm{situ} = R$.
 
 El edificio del Anexo L, y los pasos 1 a 5 de abajo, son la rama de Tipo A. Dos
 consecuencias conviene llevárselas. La clasificación es **por banda de
-frecuencia** — las notas 2 de las dos definiciones dicen que una pared de fábrica
-puede ser de Tipo A en bajas y medias y de Tipo B en lo alto del rango —, así que
+frecuencia**. Las notas 2 de las dos definiciones dicen que una pared de fábrica
+puede ser de Tipo A en bajas y medias y de Tipo B en lo alto del rango, así que
 el título binario de la sección de construcciones ligeras de más abajo simplifica
 una frontera que en realidad se mueve con la frecuencia. Y en una unión mixta
 (apartado 4.2.2.3, «por ejemplo, una pared de Tipo B sobre un forjado de
@@ -192,8 +192,8 @@ ejecuta.
 debajo de su frecuencia crítica, un $R$ de laboratorio contiene transmisión
 forzada, que una trayectoria por flancos no lleva: por una unión solo pasan ondas
 de flexión libres. El Anexo B.1 corrige, por tanto, un $R$ medido a transmisión
-resonante únicamente antes de que entre en una trayectoria por flancos — la
-estimación de 8 dB para un elemento de entramado simple sin cámara —, mientras
+resonante únicamente antes de que entre en una trayectoria por flancos (la
+estimación de 8 dB para un elemento de entramado simple sin cámara), mientras
 que la trayectoria **directa** conserva la transmisión forzada que midió el
 laboratorio. Eso es `resonant_sound_reduction_index`, y
 `in_situ_element(..., resonant_only=True)` hace lo mismo sobre un elemento
@@ -247,7 +247,7 @@ r_flanking = building.resonant_sound_reduction_index(r_situ, bands,
 
 | Magnitud | De dónde sale |
 | :--- | :--- |
-| $R$, $L_\mathrm{n}$ por banda | Informe de ensayo ISO 10140-2 / ISO 10140-3 — **con el tiempo de reverberación estructural de laboratorio del mismo informe** |
+| $R$, $L_\mathrm{n}$ por banda | Informe de ensayo ISO 10140-2 / ISO 10140-3 (**con el tiempo de reverberación estructural de laboratorio del mismo informe**) |
 | $\Delta R$ de un trasdosado | Anexo G de ISO 10140-1, o Anexo D de ISO 12354-1 |
 | $\Delta L$ de un revestimiento | [ISO 16251-1](/phonometry/es/buildings/design/impact-improvement/) o ISO 10140-3 |
 | $K_{ij}$ por unión | ISO 10848-1/-4, o el [catálogo del Anexo E](/phonometry/es/buildings/design/insulation-prediction/) |
@@ -518,7 +518,7 @@ plt.show()
 Lee la valoración de la misma manera. $L'_\mathrm{n,w} = 41$ dB con $C_\mathrm{I} = +2$ dB
 significa que el nivel sin ponderar, el que importa para el caminar, queda por
 encima de la valoración ponderada, que es la firma de un forjado cuya mejora se
-concentra arriba — exactamente lo que hace un suelo flotante con
+concentra arriba, exactamente lo que hace un suelo flotante con
 $f_0 = 52{,}8$ Hz y una ley de 30 lg. Hay tres palancas que lo mueven, en el
 orden en que el modelo les responde: una capa elástica *más blanda* baja $f_0$ y
 levanta toda la curva de mejora; una losa base *más pesada* baja directamente el
@@ -690,7 +690,7 @@ identidad de reciprocidad B.3/B.4 de la parte 2 mediante
 `reciprocity_impact_level`; y las dos fichas mediante `.report()`. El apartado
 5 declara que el modelo a ruido aéreo no tiene error sistemático y que su
 desviación típica es de 1,5 dB a 2,5 dB para edificios de elementos
-homogéneos, suponiendo una buena ejecución — la cifra menor cuando se tiene en
+homogéneos, suponiendo una buena ejecución: la cifra menor cuando se tiene en
 cuenta cada aspecto, la mayor en situaciones complejas o cuando se desprecia
 el tiempo de reverberación estructural.
 </ScopeClaim>

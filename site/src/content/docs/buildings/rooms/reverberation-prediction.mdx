@@ -135,7 +135,7 @@ fixes $c_0 = 345.6\ \mathrm{m/s}$ so that the factor is exactly the traditional
 0.16, which makes the
 [enclosed-space model](/phonometry/buildings/rooms/enclosed-space-absorption/)
 return reverberation times about 0.7 % shorter than
-`sabine_reverberation_time` for the same room — 0.608 s against 0.612 s for the
+`sabine_reverberation_time` for the same room (0.608 s against 0.612 s) for the
 8 × 5 × 3 m shoebox of §1. It is a rounding convention, not a physical
 disagreement: passing `speed_of_sound=345.6` to the classical function brings
 the two within 0.07 %, the residue of rounding $24\ln 10 = 55.262$ to 55.3.
@@ -176,7 +176,7 @@ plt.show()
 ## 0. Assembling the inputs
 
 All five models consume two things a drawing does not hand you directly: a list
-of areas with a coefficient each, and — for Fitzroy and Arau-Puchades — one mean
+of areas with a coefficient each, and (for Fitzroy and Arau-Puchades) one mean
 coefficient per pair of opposing walls. Almost every wrong prediction is a wrong
 take-off rather than a wrong formula, so this step deserves as much care as the
 choice of model.
@@ -196,7 +196,7 @@ Mounting depth and edge condition change them substantially, so a coefficient
 quoted for a product bonded direct to the substrate does not describe the same
 product on a 200 mm plenum. ISO 354 delivers one-third-octave data and an
 octave-band run takes the arithmetic mean of the three thirds. A datasheet's
-single-number rating — $\alpha_\mathrm{w}$, NRC, SAA — is *not* a substitute for the
+single-number rating ($\alpha_\mathrm{w}$, NRC, SAA) is *not* a substitute for the
 per-band table (see the
 [EN 12354-6 guide](/phonometry/buildings/rooms/enclosed-space-absorption/#3-where-the-input-data-comes-from),
 which states the prohibition normatively). Audience and seating are rated per
@@ -210,7 +210,7 @@ coefficient above 1.0 is a documented outcome rather than an error (§4).
 pair*, in the order $(\bar\alpha_x, \bar\alpha_y, \bar\alpha_z)$ where
 $\bar\alpha_i$ belongs to the pair perpendicular to axis $i$. Each is the
 area-weighted mean over both surfaces of the pair. In a shoebox the two
-surfaces have equal areas, so it reduces to their arithmetic mean — but not once
+surfaces have equal areas, so it reduces to their arithmetic mean, but not once
 one of them is split by a window or a lining. Absorption that is patchy *within*
 one pair (an absorptive wall facing a hard one) is outside both models even
 though the code still returns a number; that case belongs to §4's list of
@@ -243,8 +243,8 @@ print(round(room.fitzroy_reverberation_time((9.0, 7.0, 3.0), means), 2))       #
 print(round(room.arau_puchades_reverberation_time((9.0, 7.0, 3.0), means), 2)) # 0.76 s
 ```
 
-One take-off, both input forms. The spread it produces — 0.59 s from Sabine
-against 1.33 s from Fitzroy — is not a bug: all of this room's absorption sits
+One take-off, both input forms. The spread it produces (0.59 s from Sabine
+against 1.33 s from Fitzroy) is not a bug: all of this room's absorption sits
 on one wall pair, which is exactly the case §2 exists for and §4 warns about.
 
 ## 1. Sabine, Eyring and Millington-Sette
@@ -254,8 +254,8 @@ travels a **mean free path** $4V/S$ between reflections, so it meets a boundary
 $cS/4V$ times per second and gives up part of its energy each time. Take that
 loss as $\alpha$ per reflection and linearise it and you get **Sabine**: the
 decay rate is proportional to $\sum_i S_i\alpha_i$, and 60 dB of decay takes
-$k V / A$ seconds. Keep the loss multiplicative instead — after $n$ reflections
-the energy is down by $(1-\bar\alpha)^n$ — and the logarithm of that factor
+$k V / A$ seconds. Keep the loss multiplicative instead: after $n$ reflections
+the energy is down by $(1-\bar\alpha)^n$, and the logarithm of that factor
 gives **Eyring**'s $-S\ln(1-\bar\alpha)$, which is why Eyring is always the
 shorter of the two and why the two converge as $\bar\alpha \to 0$. Do the same
 bookkeeping surface by surface rather than on the mean and you get
@@ -309,7 +309,7 @@ $4mV$ grows with the **volume** while the boundary term grows with the
 **area**, so the air's share rises with the room's linear dimension. In the same
 120 m³ room the 2 kHz correction is 1.9 %; in a 20 000 m³ concert hall with
 $\bar\alpha = 0.15$ the 4 kHz Eyring time falls from 4.31 s to 2.49 s at
-20 °C / 50 % RH — 42 % — and to 1.52 s if the hall is dry at 20 % RH. That is
+20 °C / 50 % RH (42 %) and to 1.52 s if the hall is dry at 20 % RH. That is
 the second half of the behaviour: $m$ rises steeply with frequency and falls
 with humidity, so the driest condition is the worst case and a hall that
 measures well in a humid summer can sound noticeably brighter in winter. The
@@ -319,7 +319,7 @@ model, evaluated at the room's own temperature and humidity.
 
 Every statistical model also assumes a **diffuse field**, and low
 frequencies break that assumption first: below the **Schroeder frequency**
-$f_\mathrm{s} \approx 2000\sqrt{T/V}$ ($V$ in m³, $T$ in s — 141 Hz for a 200 m³
+$f_\mathrm{s} \approx 2000\sqrt{T/V}$ ($V$ in m³, $T$ in s: 141 Hz for a 200 m³
 classroom with $T$ = 1 s) the room responds as a set of discrete modes, not as
 a reverberant mixture. `room.schroeder_frequency(T, V)` computes it, and
 [the modes of a rectangular room](/phonometry/buildings/rooms/room-image-sources/#3-modes-of-a-rectangular-room)
@@ -352,7 +352,7 @@ $$
 
 Each $T_i$ has a physical reading: it is the reverberation time the room *would*
 have if every one of its boundaries absorbed like the wall pair on axis $i$, so
-it is the decay experienced by sound bouncing predominantly along that axis —
+it is the decay experienced by sound bouncing predominantly along that axis,
 which is why the formula uses the whole surface $S$ and not $S_i$. The weight
 $S_i/S$ is then the fraction of the boundary that steers energy into that axis.
 A shoebox with a soft floor and ceiling between hard walls therefore has three
@@ -385,13 +385,13 @@ simulated twice with the same **total** statistical absorption: spread over
 all four edges, or concentrated on the floor-and-ceiling pair (the carpeted
 floor and acoustic ceiling of this page's own example, α ≈ 0.79) between
 hard ends. Any formula built on a single mean $\bar\alpha$ sees the same
-number in both rooms, so the Sabine and Eyring predictions — evaluated for
-the two-dimensional section, whose mean free path is $\pi S/P$ — form one
+number in both rooms, so the Sabine and Eyring predictions (evaluated for
+the two-dimensional section, whose mean free path is $\pi S/P$) form one
 band shared by both. The spread room decays inside it, a straight line at
 T = 160 ms against Sabine's 201. The concentrated room's decay has no
 single slope, 183 ms early and 236 ms late, and it finishes 10 dB above its
 twin; the surviving field is visible in the RMS panel as a standing pattern
-between the hard ends, nearly uniform from floor to ceiling — sound running
+between the hard ends, nearly uniform from floor to ceiling, where sound runs
 parallel to the absorber, brushing it at grazing incidence instead of
 striking it, which is the field §4 describes in disproportionate rooms.
 
@@ -528,10 +528,10 @@ domain of validity:
   better than a single mean, but it is meant for measured, sub-unity
   coefficients: a single surface with $\alpha_i = 1$ drives the whole
   prediction to zero. Reverberation-room coefficients at or above 1.0 are a
-  documented ISO 354 outcome — edge diffraction scatters more energy into the
-  sample than its flat area intercepts, see
-  [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/)
-  — and they lie outside the domain of the logarithmic term. To use
+  documented ISO 354 outcome: edge diffraction scatters more energy into the
+  sample than its flat area intercepts (see
+  [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/))
+  and they lie outside the domain of the logarithmic term. To use
   Millington-Sette anyway you must bring the coefficient into $[0, 1)$, and
   that is a modelling decision the formula does not prescribe: whatever
   adjustment you choose (limiting to just below 1 is common), record it
@@ -591,7 +591,7 @@ mixing is left: an 800 Hz wavefront enters a 4 m rigid-walled hall filled
 with rigid columns 10 to 17 cm across, a quarter to two fifths of the
 42.9 cm wavelength. Every column diffracts the front and sheds a scattered
 wavelet, the wavelets interfere, and within a few passes the specular front
-has become energy spread over the whole hall with no preferred direction —
+has become energy spread over the whole hall with no preferred direction,
 which is the assumption Sabine and Eyring both start from, arriving here as
 a result rather than as a hypothesis. Nothing in the hall absorbs, so what
 you are watching is *only* the redistribution; the decay at the end is the
@@ -613,7 +613,7 @@ spread, the room is telling you its field is not diffuse.
 ### What value to aim at
 
 A prediction is only useful against a target, and a reverberation-time
-requirement is a **range across the octave bands**, not a single upper limit —
+requirement is a **range across the octave bands**, not a single upper limit,
 which is why the fiche of §5 prints the target as a reference line and emits no
 verdict. Anchors worth carrying:
 
@@ -639,8 +639,8 @@ and 1 kHz octaves, and the goal across frequency is a **flat** spectrum: a
 low-frequency rise of more than about 20 % over the mid-frequency value is what
 makes a treated room sound boomy even when it passes at 500 Hz, and a rise of
 that size is tolerated in music spaces but not in classrooms. And because the
-prediction band is often 20 to 30 % wide — the §0 classroom spans 0.59 s to
-1.33 s — a design that only just meets its target on the most favourable model
+prediction band is often 20 to 30 % wide (the §0 classroom spans 0.59 s to
+1.33 s), a design that only just meets its target on the most favourable model
 has no margin at all.
 
 ## 5. Prediction report (`.report()`)

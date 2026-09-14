@@ -88,7 +88,7 @@ differently: the arithmetic gives no sign of it.
 **Analyser settings (clause 4.2).** A class 1 chain per IEC 61672-1 with a
 lower limiting frequency at or below 20 Hz, an anti-aliasing filter ahead of
 the digitisation, and an amplitude resolution of at least 0.1 dB. The constant
-line spacing $\Delta f$ shall lie between 1.9 Hz and 4.0 Hz inclusive — the
+line spacing $\Delta f$ shall lie between 1.9 Hz and 4.0 Hz inclusive: the
 2.7 Hz of the Annex E example sits in the middle of that window, which is what
 `assess_tones(..., 2.7)` carries as its last argument. The Hanning window is
 *mandatory*, and it is where the −1.76 dB bandwidth correction of §2 comes
@@ -124,7 +124,7 @@ two bands are the caller's responsibility.*
 
 **When the method does not apply.** A source whose level or tone frequency
 moves too fast to be represented by a 3 s average cannot be assessed this way
-at all — start-up transients, strongly speed-varying machinery. Clause 5.1 puts
+at all: start-up transients, strongly speed-varying machinery. Clause 5.1 puts
 that exclusion in the standard rather than leaving it to judgement.
 
 **What the report has to carry** (clause 7): date and place; a description of
@@ -242,7 +242,7 @@ The two numbers in that block are not the same spectrum rated twice by the same
 rule. The tones at 118.4, 137.3 and 158.8 Hz all fall in one critical band, so
 clause 5.3.8 Step 3 merges them into an `FG` group at their combined level
 $L_\mathrm{T} = 72.15$ dB, and the standard's decisive value for spectrum 1 is the
-9.18 dB that opens the `mean_audibility` list — not the 5.01 dB the per-tone
+9.18 dB that opens the `mean_audibility` list, not the 5.01 dB the per-tone
 call prints, which is the largest of the nine individual audibilities
 `[0.75, 0.89, 1.02, 1.79, 1.93, 3.47, 4.39, 4.57, 5.01]`. Those 4.2 dB survive
 the averaging: the per-tone value in place of 9.18 pulls the campaign mean from
@@ -573,7 +573,7 @@ ISO/PAS 20065 text, which contradict it, recorded in the [errata
 registry](/phonometry/reference/errata/). Building the narrow-band FFT
 spectrum itself from a raw time-domain recording is not part of this module:
 every function here takes an already-computed spectrum (levels and
-frequencies), and §0 states what that spectrum has to be — including the
+frequencies), and §0 states what that spectrum has to be, including the
 clause 5.3.2 A-weighting, which the caller applies because the module is
 weighting agnostic.
 </ScopeClaim>

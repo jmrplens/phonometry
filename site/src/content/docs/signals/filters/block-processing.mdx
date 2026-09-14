@@ -67,7 +67,7 @@ streamed result against the *default* `octave_filter(x, fs, fraction=3)`
 instead and you will see a residual: measured on 4 s of pink noise at 48 kHz,
 the two designs differ by at most 0.083 dB, with a median of 0.007 dB and the
 largest differences in the low bands (0.083 dB at 50 Hz). That is expected, not
-a bug, and it does not change the class — but if you are validating a streaming
+a bug, and it does not change the class, but if you are validating a streaming
 pipeline, build both sides the same way or you will be chasing the design
 difference instead of the state carry.
 
@@ -155,7 +155,7 @@ for frame in sf.blocks("measurement.wav", blocksize=256, overlap=0):
 The commonest streaming task is the one the pitfalls above say is easy: the
 $L_\mathrm{eq}$, or the band spectrum, of a recording that does not fit in memory.
 It *is* easy, and it is exact rather than approximate, because $L_\mathrm{eq}$ has no
-time constant and no detector — only a sum of squares and a sample count:
+time constant and no detector, only a sum of squares and a sample count:
 
 ```python
 total_square, n_samples = 0.0, 0
@@ -167,8 +167,8 @@ for x in audio_stream(block):        # your capture callback
 leq = 10 * np.log10(total_square / (n_samples * (2e-5) ** 2))
 ```
 
-Two traps sit in those four lines. Weighting each block equally — averaging the
-per-block mean squares — is only correct when every block has the same length,
+Two traps sit in those four lines. Weighting each block equally (averaging the
+per-block mean squares) is only correct when every block has the same length,
 and the last one usually does not; accumulate the sum and the count separately,
 as above, and the arithmetic takes care of it. And never average the per-block
 *decibel* readings: that is the arithmetic-mean error of

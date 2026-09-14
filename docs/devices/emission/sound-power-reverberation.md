@@ -55,7 +55,7 @@ free-field route has to integrate over a measurement surface, while in the
 reverberation room on the right the reflected energy fills the space and the
 level stops depending on where a microphone is. That is the whole reason
 Eq. 20 can replace a surface integral with a handful of positions and a room
-constant — and the reason the room, not the array, is what has to be
+constant, and the reason the room, not the array, is what has to be
 qualified. Both routes end on the same $L_W$, because sound power is a
 property of the source and not of the room it is measured in.
 
@@ -235,7 +235,7 @@ One caveat on that example: it runs Eq. 20 on **octave** bands for
 compactness, and that is not a conforming ISO 3741 determination. Both
 methods are defined on one-third-octave bands, and octave-band results are
 formed afterwards by summing the one-third-octave band powers per Annex F
-(Eq. F.1) — a summation not implemented here, so it has to be done by hand —
+(Eq. F.1), a summation not implemented here (so it has to be done by hand),
 not by feeding octave levels into Eq. 20, whose Waterhouse and absorption
 terms would then be evaluated at the octave mid-frequency instead of at each
 third. Section 1's example, 100 Hz to 10 kHz in thirds, is the conforming

@@ -90,8 +90,8 @@ print(result.bands[0])
 `checked_to_omega` es la frecuencia normalizada $\Omega = f/f_\mathrm{m}$ más alta a la
 que se evaluó esa banda, y en un banco multitasa es el propio Nyquist diezmado
 de la banda, no el final de la máscara de la Tabla 1. En el banco de arriba va
-de 3,81 a 1,20, así que el requisito de banda atenuada lejana — al menos 70 dB
-para la clase 1 más allá de $\Omega = 4$ aproximadamente — no queda demostrado
+de 3,81 a 1,20, así que el requisito de banda atenuada lejana (al menos 70 dB
+para la clase 1 más allá de $\Omega = 4$ aproximadamente) no queda demostrado
 *sobre el filtro de banda* en absoluto. Se da por satisfecho gracias al paso
 bajo antialiasing que precede al diezmado, que eliminó esa energía antes de que
 la banda llegara a verla. `range_limited` es el indicador de que se ha usado
@@ -312,9 +312,9 @@ quedan por debajo porque cambian la máscara IEC por otra propiedad
 | `ellip` | — | Rizado en banda de paso y atenuada |
 | `bessel` | — | Retardo de grupo plano a costa de una caída lenta |
 
-Bajo la edición de 2014 esa misma ordenación se lee 1 / 1 / — / — / —:
-`cheby2` se junta con Butterworth en lo más alto porque ya no existe la clase 0
-para separarlos.
+Bajo la edición de 2014 esa misma columna se lee 1, 1 y sin clase para las
+otras tres: `cheby2` se junta con Butterworth en lo más alto porque ya no existe
+la clase 0 para separarlos.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/class_mask_architectures.svg" alt="Cuatro paneles, cada uno con la banda de octava de 1 kHz de un banco de orden 6 dibujada sobre el corredor de aceptación de IEC 61260-1, con las muestras fuera de tolerancia marcadas en rojo. Butterworth enhebra limpiamente el corredor de clase 1 e informa overall_class 1. Chebyshev I se sale del corredor en dos rachas cortas justo por dentro de cada borde de banda, donde está su rizado de banda de paso, e informa None. El elíptico hace lo mismo en los dos bordes e informa None. Bessel se sale del corredor a lo largo de toda la falda inferior porque cae demasiado despacio, e informa None" width="94%" />
 
@@ -378,8 +378,8 @@ por eso no dice nada de las partes de la máscara que no recorrió.
 Lo que sí se hereda merece constar en un informe: el veredicto de clase de esta
 página lo heredan todas las medidas hechas con los filtros de la biblioteca, y
 una cadena de hardware añade un veredicto propio. Nombra los dos. El régimen
-equivalente para los *sonómetros* — los ensayos periódicos de IEC 61672-3, y la
-IEC 60942 para el calibrador — está en
+equivalente para los *sonómetros* (los ensayos periódicos de IEC 61672-3, y la
+IEC 60942 para el calibrador) está en
 [Calibración y dBFS](/phonometry/es/signals/metrology/calibration/).
 
 ## 4. La ficha de conformidad (`.report()`)

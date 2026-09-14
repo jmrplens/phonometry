@@ -71,8 +71,8 @@ the plate, an accelerometer picks up its response, and the fundamental
 vertical resonance $f_\mathrm{r}$ of the plate-on-specimen system is read from the
 response peak; Formula 4 turns it into $s'_\mathrm{t}$. That extraction is the
 laboratory's: the Clause 7 procedures for reading $f_\mathrm{r}$ from the raw
-excitation-response signal — sinusoidal, white-noise or pulse excitation,
-with the extrapolation to zero force amplitude — are not implemented, and
+excitation-response signal (sinusoidal, white-noise or pulse excitation,
+with the extrapolation to zero force amplitude) are not implemented, and
 `apparent_dynamic_stiffness` expects the already-extrapolated $f_\mathrm{r}$.
 
 ```python
@@ -163,8 +163,8 @@ $f_0$ of Formula 2) beside the $f_0(s')$ design curve, and a boxed apparent
 dynamic stiffness $s'_\mathrm{t}$ (no pass/fail). Clause 9 rounds every stiffness to the
 nearest MN/m³; `language="es"` renders the Spanish fiche. The fiche always
 embeds the $f_0(s')$ design curve, so it needs both the report and plot extras
-(`pip install "phonometry[report,plot]"`). Clause 6's specimen selection — at
-least three 200 mm × 200 mm specimens — is not enforced, and neither is the
+(`pip install "phonometry[report,plot]"`). Clause 6's specimen selection (at
+least three 200 mm × 200 mm specimens) is not enforced, and neither is the
 Clause 9 report content: the fiche carries the excitation arrangement and the
 signal type only when the metadata supplies them.
 

@@ -166,7 +166,7 @@ remains yours.
 
 Concretely, for the laboratories and consultancies this is mostly written for:
 the library computes and documents, it does not measure, so **traceability
-stays with the hardware chain** — a calibrator and a microphone with valid
+stays with the hardware chain**: a calibrator and a microphone with valid
 certificates, and type-approved instrumentation wherever the measurement has
 legal effect. Accreditation bodies expect **calculation software to be
 validated for its intended use, with the record retained**, and the artefact

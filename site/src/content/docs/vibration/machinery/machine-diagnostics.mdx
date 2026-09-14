@@ -91,7 +91,7 @@ sections 2 and 4.
 | $g$ | the shared factor $g = (d/D)\cos\phi$ | — | 1 |
 | $N$ | number of gear teeth on the wheel (Norton's Eq. 8.3) | — | 2 |
 | $R$, $p$ | rotor bars, magnetic poles (not pole pairs) | — | 3 |
-| $s$, $f_\mathrm{e}$ | slip (a fraction, not a percentage), supply frequency | —, Hz | 3 |
+| $s$, $f_\mathrm{e}$ | slip (a fraction, not a percentage), supply frequency | dimensionless, Hz | 3 |
 | $N$, $V$ | number of rotor blades, number of stator vanes | — | 4 |
 | $N$ | number of pumping events per revolution | — | 4 |
 | $n$ | harmonic index (rotor-slot in section 3, blade in section 4) | — | 3, 4 |
@@ -108,7 +108,7 @@ speed is a factor-of-60 error that raises no exception.
 Norton reproduces the eleven equations collected by Shahan and Kamperman
 (Eqs. 8.4 to 8.14). They collapse to **seven distinct frequencies**, because
 four of the eleven are the rotating-inner-race counterparts of rows already in
-the table — either pairwise identical to them or reached through the
+the table: either pairwise identical to them or reached through the
 `rotating_race` argument. With the shaft speed $N$ in r/min, $Z$ rolling
 elements of diameter $d$ on a pitch diameter $D$, a contact angle $\phi$,
 and writing $g = (d/D)\cos\phi$ and $f_\mathrm{s} = N/60$:
@@ -143,7 +143,7 @@ Three of them carry the diagnosis: `BPFO` for an outer-race defect, `BPFI` for
 an inner-race defect, and `BDF` for a damaged rolling element or cage. The two
 rolling-element rows are one factor of two apart because they answer different
 questions: `BSF` is how fast a roller turns, `BDF` how often a defect on it
-strikes a race — twice per roller revolution, once against each. Evidence of a
+strikes a race: twice per roller revolution, once against each. Evidence of a
 damaged roller is therefore expected at `BDF` (183.3 Hz for the bearing above),
 usually modulated at the cage rate `FTF`, while the line the figure draws at
 91.7 Hz is the roller's rotational rate `BSF`. Two
@@ -163,7 +163,7 @@ same geometry:
 - an **inner-race** defect turns with the shaft, so it passes in and out of the
   load zone once per revolution. The impact train is amplitude-modulated at the
   shaft rate, and BPFI carries $\pm f_\mathrm{s}$ sidebands around the line and around
-  every harmonic — often more visible than the carrier itself;
+  every harmonic (often more visible than the carrier itself);
 - a **rolling-element** defect strikes the two races alternately while
   travelling round with the cage, so it is modulated at the cage rate: BDF
   carries $\pm\text{FTF}$ sidebands. That is what `FTF` and `FTF_rel` are in
@@ -204,14 +204,14 @@ one input the arithmetic cannot check.
 
 - **Where it comes from.** Not the nameplate: that is the synchronous or
   full-load speed, and a loaded induction machine runs below it. The value
-  wanted here is the running speed at the moment of the record — from a
+  wanted here is the running speed at the moment of the record: from a
   tachometer, a shaft encoder, a once-per-revolution optical or magnetic
   pickup, or from the measured `1x` peak in the spectrum itself. The last is
   the usual field practice and is circular unless it is done deliberately:
   find the `1x` peak first, then place everything else from it.
 - **What drift does.** If the speed wanders during the record, every predicted
   line smears in proportion to its order. A 1 % variation smears
-  $4\times\text{BPFO}$ — 828 Hz for the bearing above — by about 8 Hz, which is
+  $4\times\text{BPFO}$ (828 Hz for the bearing above) by about 8 Hz, which is
   enough to merge a harmonic with its neighbours and destroy the evidence the
   overlay looks for. The opening figure of this page depends on four BPFO
   harmonics standing separately, so it depends on a steady speed.
@@ -223,7 +223,7 @@ one input the arithmetic cannot check.
 Tacho error and bearing slip are different faults and behave differently. A
 wrong speed shifts *every* line coherently and by the same fraction; slip
 shifts only the bearing lines, by one or two per cent, and not
-deterministically — which is also why bearing evidence survives synchronous
+deterministically, which is also why bearing evidence survives synchronous
 averaging when gear evidence does not.
 
 ## 2. Gears
@@ -284,7 +284,7 @@ Read the supply frequency before the fault lines. `2fe` follows the *supply*,
 not the mains, so on a variable-frequency drive it moves with the drive
 setting: the 360 Hz above is twice 180 Hz, and a six-pole machine on a 50 Hz
 mains would run near 1000 r/min with `2fe` at 100 Hz instead. The printed
-`fsh` = 3600 Hz is the check the paragraph below is arguing for — at zero slip
+`fsh` = 3600 Hz is the check the paragraph below is arguing for: at zero slip
 Eq. (8.20) must reduce to the physical rotor-bar passing rate
 $R f_\mathrm{s} = 60 \times 60$ Hz.
 
@@ -412,7 +412,7 @@ and this method needs kilohertz. A stud mount into a prepared flat reaches tens
 of kilohertz; an adhesive or thin cyanoacrylate bond a little less; a magnet
 base typically a few kilohertz; a hand-held probe barely one. The band used
 below is 2-4 kHz, which a magnet base is marginal at and a hand probe cannot
-reach — this is the single most common reason an envelope analysis finds
+reach: this is the single most common reason an envelope analysis finds
 nothing on a bearing that is in fact spalled.
 
 **What to acquire.** The sample rate must clear the ringing resonance with

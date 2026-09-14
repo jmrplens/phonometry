@@ -448,7 +448,7 @@ such as depots, stations and loudspeakers, are treated by the industrial method.
 ## Standards
 
 Directive 2002/49/EC, Annex II, section 2.3 with the coefficient database of
-Appendix G, in the consolidated text — three instruments read together:
+Appendix G, in the consolidated text. Three instruments read together:
 
 - Commission Directive (EU) 2015/996
   ([eur-lex.europa.eu](https://eur-lex.europa.eu/eli/dir/2015/996/oj)),

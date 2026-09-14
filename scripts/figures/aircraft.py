@@ -81,7 +81,7 @@ def generate_epnl(output_dir: str) -> None:
     ax.set_xlabel("Time [s]")
     ax.set_ylabel("Level [PNdB]")
     ax.set_title(
-        "ICAO Aircraft Flyover — Effective Perceived Noise Level (Annex 16)", pad=12
+        "ICAO Aircraft Flyover: Effective Perceived Noise Level (Annex 16)", pad=12
     )
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
@@ -1541,7 +1541,7 @@ def generate_rotorcraft_flight_conditions(output_dir: str) -> None:
             w_raw,
             inside,
             outside,
-            r"Raw ($V$, $\gamma$) plane — pass it as triangles=",
+            r"Raw ($V$, $\gamma$) plane: pass it as triangles=",
             "Airspeed $V$ [m/s]",
             r"Path angle $\gamma$ [°]",
         ),
@@ -1552,7 +1552,7 @@ def generate_rotorcraft_flight_conditions(output_dir: str) -> None:
             w_norm,
             (inside[0] / dv, scale * inside[1] / dg),
             (outside[0] / dv, scale * outside[1] / dg),
-            "Normalised plane — the library default",
+            "Normalised plane: the library default",
             r"$V/\Delta V$",
             r"$F_\mathrm{fc}\,\gamma/\Delta\gamma$",
         ),

@@ -39,11 +39,11 @@ _RICE_CURVE_LABEL = "Rice ($r$ = {r})"
 #: renderers.
 _STRINGS: dict[str, str] = {
     r"Contribution to combined uncertainty $|c_i|\,u(x_i)$": r"Contribución a la incertidumbre combinada $|c_i|\,u(x_i)$",
-    "GUM uncertainty budget — $y$ = {value}": "Presupuesto de incertidumbre (GUM) — $y$ = {value}",
+    "GUM uncertainty budget: $y$ = {value}": "Presupuesto de incertidumbre (GUM): $y$ = {value}",
     "{pct} % coverage interval": "Intervalo de cobertura {pct} %",
     "Output quantity $y$": "Magnitud de salida $y$",
     "Probability density": "Densidad de probabilidad",
-    "Monte Carlo distribution (GUM Supplement 1) — $u(y)$ = {uy}": "Distribución de Monte Carlo (GUM Suplemento 1) — $u(y)$ = {uy}",
+    "Monte Carlo distribution (GUM Supplement 1): $u(y)$ = {uy}": "Distribución de Monte Carlo (GUM Suplemento 1): $u(y)$ = {uy}",
     "Sample": "Muestra",
     "Segment mean square": "Media cuadrática por segmento",
     "Segment RMS": "RMS por segmento",
@@ -123,7 +123,7 @@ def plot_uncertainty_budget(
     ax.invert_yaxis()
     ax.set_xlabel(_t(r"Contribution to combined uncertainty $|c_i|\,u(x_i)$", language))
     value = decimal_comma(fmt_minus(result.value, ".4g"), language)
-    ax.set_title(_t("GUM uncertainty budget — $y$ = {value}", language, value=value))
+    ax.set_title(_t("GUM uncertainty budget: $y$ = {value}", language, value=value))
     ax.legend(loc="lower right", fontsize="small")
     ax.grid(visible=True, axis="x", alpha=0.3)
     return ax
@@ -177,7 +177,7 @@ def plot_monte_carlo(
     uy = decimal_comma(f"{result.standard_uncertainty:.3g}", language)
     ax.set_title(
         _t(
-            "Monte Carlo distribution (GUM Supplement 1) — $u(y)$ = {uy}",
+            "Monte Carlo distribution (GUM Supplement 1): $u(y)$ = {uy}",
             language,
             uy=uy,
         )

@@ -58,7 +58,7 @@ transferencia característica. Butterworth, Chebyshev II y Bessel sitúan sus
 niveles por banda son directamente comparables. Los dos diseños de rizado
 constante (Chebyshev I, Elíptico) no: toman esos bordes como borde de *rizado*,
 lo que ensancha la banda y sesga todos los niveles por banda en unas décimas de
-decibelio fijas — ver el apartado 1, porque el sesgo es sistemático y no se
+decibelio fijas: ver el apartado 1, porque el sesgo es sistemático y no se
 promedia a cero.
 
 Al terminar esta página sabrás diseñar un banco para cualquier fracción $1/b$,
@@ -267,8 +267,8 @@ ejemplos de uso por arquitectura, hasta el crossover Linkwitz-Riley, es la
 
 ## 2. Parámetros de `octave_filter()` / `OctaveFilterBank`
 
-Los argumentos de cada día van primero y por posición — `x`, `fs`, `fraction`,
-`order`, `limits` — y todo lo demás se agrupa en cuatro dataclases congeladas
+Los argumentos de cada día van primero y por posición (`x`, `fs`, `fraction`,
+`order`, `limits`), y todo lo demás se agrupa en cuatro dataclases congeladas
 que se pasan por palabra clave: `design` (`FilterDesign`), `calibration`
 (`LevelCalibration`), `block_processing` (`BlockProcessing`) y `response_plot`
 (`ResponsePlot`). Al ser congeladas son hashables, que es lo que permite que dos
@@ -305,8 +305,8 @@ constructor y `bank.filter()` es el método por llamada.
 El reparto no es arbitrario: la `octave_filter()` de un solo uso diseña un banco
 y lo usa una vez, así que solo lleva las opciones de tiempo de diseño.
 `zero_phase` y `calculate_level` se deciden en cada llamada y por eso viven en
-`OctaveFilterBank.filter()` — `octave_filter(x, fs, zero_phase=True)` lanza
-`TypeError` —, mientras que el estado de streaming queda fijado al construir el
+`OctaveFilterBank.filter()`, mientras que llamar a `octave_filter(x, fs, zero_phase=True)` lanza
+`TypeError`. El estado de streaming queda fijado al construir el
 banco.
 
 `mode` tiene exactamente dos valores. `'rms'` da el nivel medio energético de la
@@ -676,8 +676,8 @@ IEC 61260-1:2014 (apartados 5.2-5.5) construye cada banda a partir de la
 razón de octava en base 10 $G = 10^{3/10} \approx 1{,}99526$, de modo que
 una octava no es exactamente 2. Las frecuencias centrales siguen
 $f_\mathrm{m} = 1000 \cdot G^{x/b}$ para $b$ impar y
-$f_\mathrm{m} = 1000 \cdot G^{(2x+1)/2b}$ para $b$ par — de modo que 1 kHz es una
+$f_\mathrm{m} = 1000 \cdot G^{(2x+1)/2b}$ para $b$ par (de modo que 1 kHz es una
 frecuencia central de banda en las fracciones impares y un *borde* de banda
-en las pares — y los bordes son $f_1 = f_\mathrm{m} G^{-1/2b}$ y
+en las pares), y los bordes son $f_1 = f_\mathrm{m} G^{-1/2b}$ y
 $f_2 = f_\mathrm{m} G^{+1/2b}$ en ambos casos; cada banda de tercio de
 octava abarca $G^{1/3} \approx 1{,}2589$, diez bandas por década.

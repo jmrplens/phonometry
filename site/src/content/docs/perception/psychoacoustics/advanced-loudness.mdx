@@ -213,7 +213,7 @@ fixes what the two ears do with the result.
 | One microphone at the centre of the position the absent listener's head would occupy, one frontal source | `'free'` | Table 1 column 2, the free-field transfer to the tympanic membrane |
 | The same microphone in a reverberant room or in situ | `'diffuse'` | Table 1 column 3, the diffuse-field transfer; also the right choice for diffuse-field earphones |
 | A probe microphone within 10 mm of the eardrum (5 mm when there are strong components above 3 kHz) | `'eardrum'` | Clause 7.2.4: the spectrum is already at the membrane, so no transfer function is applied |
-| A head-and-torso simulator | `'eardrum'`, but only if the simulator is an accurate acoustical model of an average adult | Clause 7.2.5; otherwise it needs its own correction file, which this API cannot express — equalize the recording to the free or diffuse field first and use the matching option |
+| A head-and-torso simulator | `'eardrum'`, but only if the simulator is an accurate acoustical model of an average adult | Clause 7.2.5; otherwise it needs its own correction file, which this API cannot express. Equalize the recording to the free or diffuse field first and use the matching option |
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mg_capture_routes.svg" alt="Four capture routes and the arguments each implies: a single microphone where the listener's head would be with one frontal source giving field free, the same microphone in a reverberant field giving field diffuse, a probe microphone within 10 mm of the tympanic membrane giving field eardrum with no transfer function, and a head-and-torso simulator giving field eardrum only if it is an accurate model of an average adult; a footer states that a diotic sound is about 1.5 times as loud as the same sound at one ear" width="92%" />
 
@@ -229,9 +229,9 @@ the result says which of the two was appropriate. In the other direction, a
 free-field recording analysed as `'eardrum'` under-reads by the same amount.
 
 **`presentation` is the other factor of two.** `monaural` computes one ear with
-the other silent, `diotic` presents the identical signal to both ears — which
+the other silent, `diotic` presents the identical signal to both ears (which
 is what a single free-field microphone recording represents, since both ears
-hear the same field — and `binaural` combines two independent ear signals
+hear the same field), and `binaural` combines two independent ear signals
 through the standard's inhibition stage. The definitional 1 kHz tone at 40 dB
 is 1.000 sone diotically and 0.667 sone monaurally, the 1.5 ratio clause 8.1
 states, and the inhibition is why two ears give about one and a half times one
@@ -311,7 +311,7 @@ a meter actually delivers: the levels of the 29 adjacent one-third-octave bands
 from 25 Hz to 16 kHz on the IEC 61260-1:2014 nominal centres. Each band is
 assumed flat and expanded internally into an equivalent set of components
 before the exact method runs. Two constraints are worth stating plainly:
-exactly 29 values, and a fixed grid — a meter that logs 20 Hz to 20 kHz has to
+exactly 29 values and a fixed grid. A meter that logs 20 Hz to 20 kHz has to
 be trimmed to it, and one that stops at 8 kHz cannot be used at all.
 
 ```python
@@ -336,7 +336,7 @@ The two standards do not even agree on where the spectrum ends: ISO 532-2 takes
 29 bands to 16 kHz, ISO 532-1 takes 28 to 12.5 kHz, which is why the slice is
 needed. The rest of the gap is the models: roex excitation and explicit
 binaural summation against the ISO 532-1 core loudness. Use `field="diffuse"`
-for a room measurement made with a free-field-corrected meter — the field
+for a room measurement made with a free-field-corrected meter; the field
 argument is where band-level users most often go wrong.
 
 ### `loudness_moore_glasberg()` and its `_from_spectrum` / `_from_third_octave` variants
@@ -450,7 +450,7 @@ roughness metrics. The loudness $N$ is reported in **sone_HMS**, and the same
 returns 0.9845 sone_HMS for that anchor rather than exactly 1: the 1.55 %
 residual comes from the mandated Clause 6.2.3 band averaging across the
 block-size-boundary bands excited by the tone's lower flank, near 800 to
-900 Hz — without any band averaging the chain reads 0.955, with averaging
+900 Hz. Without any band averaging the chain reads 0.955, with averaging
 restricted to same-block-size neighbours 0.996, and with the full
 cross-group recomputation the standard requires 0.9845. The calibration
 constant $c_\mathrm{N}$ is kept at its verbatim tabulated value rather than retuned,

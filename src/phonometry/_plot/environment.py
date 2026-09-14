@@ -59,7 +59,7 @@ if TYPE_CHECKING:
 _FREQ_LABEL = "Frequency [Hz]"
 _HEIGHT_LABEL = "Height [m]"
 _RANGE_LABEL = "Range [m]"
-_TOTAL_A_LABEL = "$A$ — total"
+_TOTAL_A_LABEL = "$A$, total"
 _FREE_FIELD_LABEL = "Level re free field [dB]"
 _LT_LABEL = "$L_\\mathrm{t}$ [dB]"
 
@@ -80,15 +80,15 @@ _STRINGS: dict[str, str] = {
     # comma pass, so the Spanish value carries it already converted; the braces
     # keep mathtext from spacing the comma as the punctuation mark it is.
     r"$K_\mathrm{I} = 1.8\,(P-5)$": r"$K_\mathrm{I} = 1{,}8\,(P-5)$",
-    "NT ACOU 112 — impulse adjustment to $L_\\mathrm{Aeq}$": "NT ACOU 112 — ajuste por impulsos a $L_\\mathrm{Aeq}$",
+    "NT ACOU 112: impulse adjustment to $L_\\mathrm{Aeq}$": "NT ACOU 112: ajuste por impulsos a $L_\\mathrm{Aeq}$",
     "knees $\\Delta L_\\mathrm{ta}=4,\\,10$ dB": "codos $\\Delta L_\\mathrm{ta}=4,\\,10$ dB",
     "Tonal audibility $\\Delta L_\\mathrm{ta}$ [dB]": "Audibilidad tonal $\\Delta L_\\mathrm{ta}$ [dB]",
     "Tonal adjustment $K_\\mathrm{t}$ [dB]": "Ajuste tonal $K_\\mathrm{t}$ [dB]",
     "ISO 1996-2 tonal adjustment": "Ajuste tonal ISO 1996-2",
-    r"$A_{\mathrm{div}}$ — divergence": r"$A_{\mathrm{div}}$ — divergencia",
-    r"$A_{\mathrm{atm}}$ — atmospheric": r"$A_{\mathrm{atm}}$ — atmosférica",
-    r"$A_{\mathrm{gr}}$ — ground": r"$A_{\mathrm{gr}}$ — suelo",
-    r"$A_{\mathrm{bar}}$ — barrier": r"$A_{\mathrm{bar}}$ — barrera",
+    r"$A_{\mathrm{div}}$, divergence": r"$A_{\mathrm{div}}$, divergencia",
+    r"$A_{\mathrm{atm}}$, atmospheric": r"$A_{\mathrm{atm}}$, atmosférica",
+    r"$A_{\mathrm{gr}}$, ground": r"$A_{\mathrm{gr}}$, suelo",
+    r"$A_{\mathrm{bar}}$, barrier": r"$A_{\mathrm{bar}}$, barrera",
     _TOTAL_A_LABEL: _TOTAL_A_LABEL,
     "Attenuation $A$ [dB]": "Atenuación $A$ [dB]",
     "ISO 9613-2 attenuation breakdown": "Desglose de atenuación ISO 9613-2",
@@ -315,7 +315,7 @@ def plot_impulse_prominence(
     )
     ax.set_xlabel(_t("Predicted prominence $P$", language))
     ax.set_ylabel(_t("Adjustment $K_\\mathrm{I}$ [dB]", language))
-    ax.set_title(_t("NT ACOU 112 — impulse adjustment to $L_\\mathrm{Aeq}$", language))
+    ax.set_title(_t("NT ACOU 112: impulse adjustment to $L_\\mathrm{Aeq}$", language))
     ax.set_ylim(bottom=0.0)
     ax.legend(loc=_LEGEND_UPPER_LEFT, fontsize="small")
     ax.grid(visible=True, alpha=0.3)
@@ -411,10 +411,10 @@ def plot_outdoor_attenuation(
     pos_bottom = np.zeros(n)
     neg_bottom = np.zeros(n)
     terms = (
-        (result.a_div, _C_PRIMARY, _t(r"$A_{\mathrm{div}}$ — divergence", language)),
-        (result.a_atm, _C_TERTIARY, _t(r"$A_{\mathrm{atm}}$ — atmospheric", language)),
-        (result.a_gr, _C_QUATERNARY, _t(r"$A_{\mathrm{gr}}$ — ground", language)),
-        (result.a_bar, _C_SECONDARY, _t(r"$A_{\mathrm{bar}}$ — barrier", language)),
+        (result.a_div, _C_PRIMARY, _t(r"$A_{\mathrm{div}}$, divergence", language)),
+        (result.a_atm, _C_TERTIARY, _t(r"$A_{\mathrm{atm}}$, atmospheric", language)),
+        (result.a_gr, _C_QUATERNARY, _t(r"$A_{\mathrm{gr}}$, ground", language)),
+        (result.a_bar, _C_SECONDARY, _t(r"$A_{\mathrm{bar}}$, barrier", language)),
     )
     for values, color, label in terms:
         term = np.asarray(values, dtype=np.float64)
@@ -1053,9 +1053,9 @@ def plot_road_device_rating(
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault(
         "label",
-        _t(r"$\alpha_\mathrm{S}$ — absorption coefficient", language)
+        _t(r"$\alpha_\mathrm{S}$, absorption coefficient", language)
         if absorbing
-        else _t(r"$R$ — sound reduction index [dB]", language),
+        else _t(r"$R$, sound reduction index [dB]", language),
     )
     ax.bar(positions, np.asarray(result.values, dtype=np.float64), **kwargs)
     ax.set_ylabel(
@@ -1071,7 +1071,7 @@ def plot_road_device_rating(
         color=_C_SECONDARY,
         marker="o",
         lw=1.6,
-        label=_t(r"$L_i$ — normalised traffic noise [dB]", language),
+        label=_t(r"$L_i$, normalised traffic noise [dB]", language),
     )
     spectrum.set_ylabel(_t(r"$L_i$ [dB]", language), color=_C_SECONDARY)
     spectrum.tick_params(axis="y", labelcolor=_C_SECONDARY)

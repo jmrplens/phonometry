@@ -129,16 +129,16 @@ Con números, sobre una máquina de suelo de 1,4 × 0,9 × 1,1 m:
 $d_0 = \sqrt{0{,}7^2 + 0{,}45^2 + 1{,}1^2} = 1{,}38$ m, así que una semiesfera
 necesita $r \ge 2{,}8$ m y $S = 2\pi r^2 = 49{,}3$ m². Esa misma máquina
 encajonada a $d = 1$ m da $a = 1{,}7$ m, $b = 1{,}45$ m, $c = 2{,}1$ m y
-$S = 4(2{,}47 + 3{,}05 + 3{,}57) = 36{,}3$ m² — una cuarta parte menos de
-superficie, y una superficie que cabe en una nave de ensayo normal. Esa es la
+$S = 4(2{,}47 + 3{,}05 + 3{,}57) = 36{,}3$ m² (una cuarta parte menos de
+superficie), y una superficie que cabe en una nave de ensayo normal. Esa es la
 razón habitual de que una fuente grande o alargada se encajone en vez de
 cubrirse con una cúpula, y el apartado 7.2.3 lo dice sin rodeos: cuando el radio
 necesario crece tanto que dejan de cumplirse los requisitos de entorno del
 apartado 4, no debe usarse una semiesfera en absoluto.
 
 Leído al revés, esto acota también los ejemplos de esta página. El `radius=1.5`
-de abajo es legítimo para una fuente de $d_0 \le 0{,}75$ m — un aparato de
-sobremesa o una bomba pequeña — y no para la máquina de 1,4 m recién calculada;
+de abajo es legítimo para una fuente de $d_0 \le 0{,}75$ m (un aparato de
+sobremesa o una bomba pequeña), y no para la máquina de 1,4 m recién calculada;
 el `radius=4.0` del ejemplo de informe de la sección 3 cubre $d_0$ hasta 2 m.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_surfaces.svg" alt="Superficies de medición de ISO 3744: una semiesfera de radio r envolviendo una fuente compacta sobre un plano reflectante, con las diez posiciones de micrófono del Anexo B marcadas, y un paralelepípedo recto (caja) a la distancia de medición d alrededor de una fuente grande" width="88%" />
@@ -164,8 +164,8 @@ esquina de la superficie, donde apunta al origen $O$ de la caja de referencia
 `levels_positions` no es un array de decibelios cualquiera: es el nivel
 **promediado en el tiempo** por posición y por banda con la fuente funcionando
 en su modo declarado, tomado a través de una cadena que la norma especifica.
-Todo el sistema de instrumentación — micrófonos, cables y el paravientos si se
-monta — debe cumplir la clase 1 de IEC 61672-1, y los filtros la clase 1 de
+Todo el sistema de instrumentación (micrófonos, cables y el paravientos si se
+monta) debe cumplir la clase 1 de IEC 61672-1, y los filtros la clase 1 de
 IEC 61260 (apartado 5.1). Antes y después de cada serie se aplica a cada
 micrófono un calibrador acústico de clase 1 según IEC 60942 para comprobar toda
 la cadena de medida y, sin ajuste alguno entremedias, las dos lecturas no deben
@@ -177,7 +177,7 @@ intervalos no mayores de un año. La mecánica de esa comprobación está en
 
 Cada micrófono se orienta con su dirección de referencia normal a la superficie
 de medición y, en una esquina de una superficie de caja, apuntando al origen $O$
-(apartado 7.2.2) — que es la razón de que una cápsula de campo libre y una de
+(apartado 7.2.2), que es la razón de que una cápsula de campo libre y una de
 campo difuso se apunten de forma distinta sobre el mismo trípode.
 
 Cada nivel se promedia en el tiempo sobre un periodo típico de funcionamiento:
@@ -186,7 +186,7 @@ que indicarlo en el informe de ensayo (apartado 8.2.1). Un micrófono en
 recorrido integra sobre un número entero de recorridos completos, y al menos
 dos. La lectura de fondo se toma **inmediatamente antes o inmediatamente
 después** de la lectura con la fuente, en las mismas posiciones y sobre el mismo
-intervalo — así que `background_levels` es una medida `(NM, NB)` del mismo día y
+intervalo; así que `background_levels` es una medida `(NM, NB)` del mismo día y
 del mismo conjunto de posiciones, no un espectro copiado de otra sesión, y
 emparejar lecturas dispares es la forma más común de acabar con un $K_1$
 equivocado.
@@ -361,7 +361,7 @@ aire, así que la determinación es una determinación «para las condiciones
 meteorológicas del momento y del lugar del ensayo» (apartado 8.2.5). Por encima
 de 500 m de altitud o por debajo de 10 °C eso pasa a ser un sesgo, y el apartado
 8.2.5 exige entonces llevar el resultado a las condiciones de referencia según
-el **Anexo G, que es normativo** — el mismo tipo de término que las secciones de
+el **Anexo G, que es normativo**: el mismo tipo de término que las secciones de
 ISO 3741 e ISO 3745 escriben explícitamente como $C_1$ y $C_2$. Su tamaño: el
 apartado H.4.2.7 dice que por debajo de 500 m no hace falta ninguna corrección
 meteorológica ni de impedancia de radiación, que a 120 m y 23 °C la corrección
@@ -393,7 +393,7 @@ Ec. G.1 la suma a $L_W$ exactamente como la Ec. G.3 la suma a $L_J$.
 | `room` | `RoomEnvironment` o None | — | por defecto `None` (campo libre) | Los datos de sala tras $K_2$; sus campos son las tres vías hacia $A$ de abajo |
 | `room.absorption_area` | float o array 1D | m² | > 0 | $A$ para $K_2$ (directo); un array por banda → $K_2$ por banda |
 | `room.reverberation_time`, `room.volume` | float/array, float | s, m³ | > 0 | $A = 0{,}16\,V/T$ para $K_2$; $T$ por banda → $K_2$ por banda |
-| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Ec. A.7); $\alpha$ por banda → $K_2$ por banda |
+| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | -, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Ec. A.7); $\alpha$ por banda → $K_2$ por banda |
 | `grade` | str | — | `'engineering'` (por defecto) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | por defecto `0.0` | $\sigma_\text{omc}$, inestabilidad de operación/montaje, incorporada a $U$ |
 
@@ -447,7 +447,7 @@ posiciones **adicionales** si se cumple cualquiera de tres condiciones:
   supera 10 dB sobre un plano reflectante, 5 dB sobre dos o 3 dB sobre tres;
 - **b)** el índice de directividad aparente ponderado A supera 5 dB en alguna
   dirección;
-- **c)** una fuente grande radia solo desde una parte pequeña de sí misma — las
+- **c)** una fuente grande radia solo desde una parte pequeña de sí misma: las
   aberturas de una máquina por lo demás cerrada son el ejemplo de la propia
   norma.
 
@@ -456,8 +456,8 @@ las posiciones 11 a 20 de la misma tabla (o, equivalentemente, repitiendo el
 conjunto clave con la fuente girada −60° para la Tabla B.1 o 180° para la
 Tabla B.2): la superficie se sigue muestreando por igual, así que la media
 energética simple sigue valiendo. Las condiciones b) y c) se atienden con una
-**investigación localizada** — posiciones extra concentradas alrededor del
-máximo, en número igual al recorrido de niveles hallado — y esas posiciones
+**investigación localizada**, posiciones extra concentradas alrededor del
+máximo en número igual al recorrido de niveles hallado, y esas posiciones
 llevan áreas de segmento *desiguales*, de modo que la media debe ser entonces la
 ponderada por áreas del apartado 8.2.2.2 y no la media de áreas iguales que
 calcula `sound_power_pressure`. La nota 3 añade una regla de prioridad que ahorra
@@ -501,7 +501,7 @@ posición y una corrección meteorológica explícita.
 El panel izquierdo del clip de abajo es para lo que sirve esa sala. Con los
 contornos absorbiendo, un micrófono solo ve lo que la fuente le manda, así que
 el nivel cae con la distancia y el conjunto de posiciones tiene que muestrear
-una superficie entera — que es la razón de que la única geometría que necesita
+una superficie entera, que es la razón de que la única geometría que necesita
 el método, una vez cualificada la sala, sea el término de superficie
 $10\log_{10}(S/S_0)$. El panel derecho es la alternativa en cámara reverberante
 de [ISO 3741](/phonometry/es/devices/emission/sound-power-reverberation/), y las
@@ -530,8 +530,8 @@ absorción del aire sobre el radio de medición. Las posiciones de micrófono so
 conjuntos normalizados de vectores unitarios de las Tablas D.1 (esfera), E.1
 (semiesfera) y E.2 (semiesfera, banda ancha).
 
-En esa fórmula no hay término $K_1$ aparte porque $\overline{L_p}$ — sin prima,
-a diferencia del de la sección 1 — es la media sobre la superficie de los
+En esa fórmula no hay término $K_1$ aparte porque $\overline{L_p}$
+(sin prima, a diferencia del de la sección 1) es la media sobre la superficie de los
 niveles **después** de corregir cada uno por su cuenta el ruido de fondo,
 
 $$
@@ -548,8 +548,8 @@ la corregida, que es el $\overline{L_p}$ de la fórmula de arriba.
 $d_0$ la distancia del centro acústico al punto más alejado de la fuente (en
 cámara semianecoica, $r \ge 2 d_0$ o $r \ge 3 h_0$, el que sea mayor, siendo
 $h_0$ la altura del centro acústico sobre el suelo), $r \ge \lambda/4$ a la
-frecuencia más baja de interés y $r \ge 1$ m — 0,5 m solo para una fuente
-pequeña y poco ruidosa en una banda limitada — con toda la superficie dentro
+frecuencia más baja de interés y $r \ge 1$ m (0,5 m solo para una fuente
+pequeña y poco ruidosa en una banda limitada) con toda la superficie dentro
 de la región cualificada según el Anexo A o el B. Con números: una fuente de
 sobremesa de 0,6 × 0,5 × 0,7 m tiene
 $d_0 = \sqrt{0{,}3^2 + 0{,}25^2 + 0{,}7^2} = 0{,}80$ m, así que $r \ge 1{,}6$ m;
@@ -560,7 +560,7 @@ para una fuente de menos de unos 0,5 m de dimensión característica.
 **El conjunto de posiciones tampoco lo es.** Primero se usan las posiciones 1
 a 20, y las 21 a 40 se añaden solo cuando la diferencia entre el nivel más
 alto y el más bajo en alguna banda de interés no es menor que la mitad del
-número de posiciones — una comprobación sobre datos que el lector ya tiene,
+número de posiciones; una comprobación sobre datos que el lector ya tiene,
 `levels.max(0) - levels.min(0) >= 0.5 * levels.shape[0]`. Si con 40 posiciones
 sigue sin cumplirse, hace falta una investigación localizada y las posiciones
 pasan entonces a tener áreas desiguales, que es para lo que está `areas=`.
@@ -640,13 +640,13 @@ base de medición.
 Los márgenes y los intervalos que hay detrás de esos números son más estrictos
 que los de la sección 1. El fondo, promediado sobre todas las posiciones, debe
 quedar al menos **6 dB** por debajo del nivel de fuente en todas las bandas y al
-menos **10 dB** por debajo entre 250 Hz y 5 kHz (apartado 5.2.1.1) — una banda
+menos **10 dB** por debajo entre 250 Hz y 5 kHz (apartado 5.2.1.1), una banda
 que no lo alcance puede excluirse en cambio del rango de interés si su potencia
 de banda ponderada A corregida queda al menos 15 dB por debajo de la más alta
 (apartado 5.2.1.2). Donde el margen se quede corto de todos modos, el apartado
-9.4.2 congela $K_{1i}$ en el valor que produce el criterio — 1,26 dB para las
+9.4.2 congela $K_{1i}$ en el valor que produce el criterio, 1,26 dB para las
 bandas de 200 Hz y por debajo y de 6,3 kHz y por encima, 0,46 dB entre 250 Hz y
-5 kHz — y *exige* entonces que el informe de ensayo, y las tablas y gráficas que
+5 kHz, y *exige* entonces que el informe de ensayo, y las tablas y gráficas que
 contenga, indiquen que esas bandas son cotas superiores.
 `precision_background_correction` aplica exactamente esa regla; declarar la
 omisión es cosa de quien lee.

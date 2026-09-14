@@ -73,8 +73,8 @@ $$
 
 so a loud but short task contributes little. The *job-based* (Clause 10) and
 *full-day* (Clause 11) strategies instead take random samples over a homogeneous
-exposure group — $N \ge 5$ samples for the job-based strategy, at least three
-whole shifts for the full-day one — energy-average them, and normalise that
+exposure group ($N \ge 5$ samples for the job-based strategy, at least three
+whole shifts for the full-day one), energy-average them, and normalise that
 average to the nominal eight-hour day with the effective working-day duration
 $T_\mathrm{e}$ in the same $10\log_{10}(T_\mathrm{e}/T_0)$ term. The daily level is the same
 either way; the strategies differ in how the **uncertainty** is built.
@@ -110,7 +110,7 @@ least 5 min; if the task itself is shorter than 5 min, the measurement lasts as
 long as the task. It may be shortened only when the level is found to be
 constant or repeatable, or when the task is a minor contributor to the total
 exposure. Cyclic noise is sampled over **at least three well-defined cycles**,
-still at least 5 min, and always over a whole number of cycles — a partial
+still at least 5 min, and always over a whole number of cycles. A partial
 cycle biases the task level by whatever part of the cycle it over-samples.
 Randomly fluctuating noise is sampled long enough to be representative, which
 is a judgement the report has to record.
@@ -121,7 +121,7 @@ task or on different workers in the group, so that the scatter feeding
 $u_{1a}$ is real variability rather than one lucky minute. The Annex D day in
 the snippet below is exactly this rule in action: welding keeps its three
 samples, while cutting/grinding has six, because the first three spanned more
-than 3 dB. Note what that buys — Eq. C.6 divides the scatter by $I(I-1)$, so it
+than 3 dB. Note what that buys: Eq. C.6 divides the scatter by $I(I-1)$, so it
 is the sample *count*, not the sample length, that shrinks the sampling term.
 
 **Where the microphone goes.** Two configurations, and the guide's opening
@@ -162,7 +162,7 @@ level-versus-time log against the observation notes: a dosimeter records a
 knock or a rub on the microphone as a genuine high-level event (Clause 13.2),
 and one such artefact can move the day's $L_\mathrm{EX,8h}$; any unexplained peak
 shall be investigated and the measurement repeated if the result is
-significantly affected — and with a non-logging instrument, repeated outright.
+significantly affected, and with a non-logging instrument, repeated outright.
 
 **And the rest of the rejection rules.** Avoid high airflow, and fit hand-held
 meters with a windscreen of at least 60 mm diameter (Clause 13.3; a 60 mm
@@ -215,7 +215,7 @@ the answer is moved by a term that is not a measured level at all. $T_\mathrm{e}
 time the worker is actually exposed, breaks away from the noise excluded,
 breaks spent in it included. The six job samples energy-average to 88.4 dB, and
 with $T_\mathrm{e} = 7.5$ h the normalisation $10\log_{10}(7.5/8)$ subtracts 0.3 dB, so
-$L_\mathrm{EX,8h}$ = 88.2 dB — *below* the sampled average. The six full-day samples
+$L_\mathrm{EX,8h}$ = 88.2 dB, which is *below* the sampled average. The six full-day samples
 energy-average to 89.5 dB, but that shift lasts 9.25 h, so the same term adds
 $10\log_{10}(9.25/8)$ = 0.6 dB and $L_\mathrm{EX,8h}$ = 90.1 dB, which is higher than
 four of the six individual samples. That is not an error: normalising a long
@@ -273,7 +273,7 @@ for n in (4, 10, 25, 50):
 
 Three regimes and a ceiling: 5 h up to five workers, then half an hour per
 extra worker to fifteen, then a quarter of an hour per worker to forty, then a
-flat 17 h — beyond forty the standard's advice is to split the group rather
+flat 17 h. Beyond forty, the standard's advice is to split the group rather
 than measure longer. Pass the planned figures as `n_workers=` and
 `sample_duration_hours=` to `job_based_exposure` and the result raises the
 advisory when the coverage falls short.
@@ -290,9 +290,9 @@ print([round(hearing.table_c4_contribution(n, 3.0), 1) for n in (3, 5, 10, 20, 3
 For a 3 dB sample scatter, the contribution $c_1 u_1$ collapses from 11.5 dB at
 three samples to 3.3 dB at five and 1.5 dB at ten, and then flattens: going
 from five to ten samples buys 1.8 dB, going from twenty to thirty buys 0.2 dB.
-That is where the Clause 10.4 advisory threshold of 3.5 dB sits — a job-based
-survey of a group with 3 dB of scatter crosses it below five samples — and it
-is the quantitative form of the "more samples, not a better meter" rule of §2.
+That is where the Clause 10.4 advisory threshold of 3.5 dB sits. A job-based
+survey of a group with 3 dB of scatter crosses it below five samples. This is
+the quantitative form of the "more samples, not a better meter" rule of §2.
 Note that the $N = 3$ and $N = 4$ rows of Table C.4 apply to full-day
 measurements only (Table C.4, NOTE 1).
 
@@ -338,7 +338,7 @@ eight and carries **91 %** of the variance, welding's five hours carry 9 %, and
 the quiet planning task carries nothing measurable. Second, "the sampling term
 dominates" is a rule of thumb, not an identity. With the default personal
 exposimeter the task sampling term overtakes the instrument term only once the
-sample standard deviation exceeds $1.5\sqrt{I}$ — about 3.7 dB at six samples —
+sample standard deviation exceeds $1.5\sqrt{I}$ (about 3.7 dB at six samples),
 and in this Annex D day it does not: cutting and grinding scatters by 3.0 dB
 over six samples, so $u_{1a} = 1.2$ dB against $u_2 = 1.5$ dB. The largest
 single segment here is in fact the **duration** of that short, loud task,
@@ -379,7 +379,7 @@ plt.show()
 The practical consequence still holds, and the right panel gives it a shape: a
 quadrature budget is set by its largest term, so tightening the instrument
 grade buys nothing while the sampling term sits above the floor, and the
-productive move is more samples — with a return that falls off fast. At a 3 dB
+productive move is more samples, with returns that fall off fast. At a 3 dB
 scatter the task-based $U$ goes 4.1 dB at three samples, 3.4 dB at ten, 3.1 dB
 at thirty, while the job-based strategy pays a far steeper penalty for a small
 $N$ (19.2 dB at three, 6.2 dB at five, 3.9 dB at ten) because Table C.4 does
@@ -481,8 +481,8 @@ repository; click the preview to open the PDF.
 
 <Scope>
 <ScopeClaim status="covered" label="Covered">
-The three measurement strategies of ISO 9612:2009 Clauses 9-11 —
-`task_based_exposure`, `job_based_exposure` and `full_day_exposure` — with the
+The three measurement strategies of ISO 9612:2009 Clauses 9-11,
+`task_based_exposure`, `job_based_exposure` and `full_day_exposure`, with the
 Clause 9.3 sampling rules and the Clause 12.3 / 12.4 microphone geometry
 stated here as the procedure that produces their inputs; the Annex C
 uncertainty budget (Formulae C.6, C.9 and C.12 with Tables C.4 and C.5, and
@@ -500,8 +500,8 @@ The work analysis of Clause 7 and the microphone placement of Clause 12.3 /
 guide documents them so the numbers fed to a `Task` mean something. Table B.1
 is reproduced as guidance and the caller picks the strategy; nothing here
 applies it. Hearing-protector attenuation (the ISO 4869 series) is not
-applied, so the $L_\mathrm{EX,8h}$ computed here — and the limit-value comparison the
-fiche prints on it — is the **unprotected** exposure, which is also what the
+applied, so the $L_\mathrm{EX,8h}$ computed here (and the limit-value comparison the
+fiche prints on it) is the **unprotected** exposure, which is also what the
 ISO 1999 hearing-loss model wants. And Annex C offers no uncertainty model for
 $L_{p,\mathrm{Cpeak}}$ (Table C.5, Note 1), which is why the peak is reported without
 one rather than with a zero one.

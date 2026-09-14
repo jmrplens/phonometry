@@ -199,7 +199,7 @@ these habits:
 | `room` | `RoomEnvironment` or None | — | default `None` (free field) | The room data behind $K_2$; its fields are the three routes to $A$ below |
 | `room.absorption_area` | float or 1D array | m² | > 0 | $A$ for $K_2$ (direct); per-band array → per-band $K_2$ |
 | `room.reverberation_time`, `room.volume` | float/array, float | s, m³ | > 0 | $A = 0.16\,V/T$ for $K_2$; per-band $T$ → per-band $K_2$ |
-| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Eq. A.7); per-band $\alpha$ → per-band $K_2$ |
+| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | -, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Eq. A.7); per-band $\alpha$ → per-band $K_2$ |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | default `0.0` | $\sigma_\text{omc}$, operating/mounting instability, folded into $U$ |
 

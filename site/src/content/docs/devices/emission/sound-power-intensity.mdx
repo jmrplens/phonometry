@@ -53,7 +53,7 @@ A p-p probe (see the
 [Sound Intensity guide](/phonometry/devices/emission/intensity/)) is swept
 continuously over each of $N$ segments of a surface enclosing the source,
 reporting the segment-averaged signed normal intensity
-$\langle I_{n,i} \rangle$ — one row per segment, one column per band.
+$\langle I_{n,i} \rangle$: one row per segment, one column per band.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_pp_probe.svg" alt="A two-microphone p-p sound intensity probe: two pressure microphones separated by a spacer, from which the pressure gradient and hence the normal intensity are estimated" width="70%" />
 
@@ -80,7 +80,7 @@ chosen where possible so that a region of net inflow is not averaged together
 with a region of net outflow, and so that each segment faces one component of
 the machine. Its mean distance from the source surface is at least **200 mm**
 for an extended vibrating surface, reducible to 100 mm for a small compact
-source — at which point action a) of Table B.1, "move the surface out", is no
+source. At that point, action a) of Table B.1 ("move the surface out") is no
 longer available to you.
 
 The scan itself is a path, not a set of points. Its basic element is a straight
@@ -95,7 +95,7 @@ axis stays normal to the surface throughout, and the operator stands to the side
 of the segment being scanned, not in front of it.
 
 For the engineering grade each segment is scanned **twice, and the two paths
-must be orthogonal** — the second sweep rotated 90° wherever that is possible
+must be orthogonal**: the second sweep rotated 90° wherever that is possible
 (clause 8.3.1). That is what `normal_intensity_2` is: not a repeat of the same
 sweep, but the rotated one. Criterion 3 exists precisely to catch a field that
 does not repeat, and repeating an identical path passes it on a determination
@@ -144,7 +144,7 @@ moving the surface *out*, and a strong external source, answered by moving the
 surface *in* towards the machine or by shielding it. $F_{+/-}$ reads
 differently: zero when every segment radiates outward, and 3 dB when the inward
 and outward partial powers are already comparable to the net, so above 3 dB the
-surface is straddling two sources and the fix is to re-cut it — averaging longer
+surface is straddling two sources and the fix is to re-cut it. Averaging longer
 does not help, because the problem is where the surface is, not how noisy the
 estimate is.
 
@@ -154,7 +154,7 @@ source, fit a **larger spacer** to raise $\delta_{pI0}$ (see
 [Choosing the probe](/phonometry/devices/emission/intensity/#choosing-the-probe)),
 and only then consider better hardware. Dropping the claim from engineering to
 survey grade buys 3 dB of $L_\mathrm{d}$ on its own, because $K$ goes from 10 dB to
-7 dB — at the cost of the grade.
+7 dB: the trade-off is the loss of grade.
 
 ```python
 import numpy as np
@@ -256,7 +256,7 @@ of it, for different reasons:
 
 Clause 10.6 b) also makes stating that omission part of the determination: an
 $L_{W\mathrm{A}}$ reported without saying which bands were dropped does not conform. The
-consequence is one-directional — the total is an **underestimate**, and the
+consequence is one-directional: the total is an **underestimate**, and the
 reader can bound it by summing the omitted bands at their computed level and
 adding them back. Note also the failure mode of the screening itself: without
 `pressure_levels` and `pressure_residual_index` the criteria cannot be
@@ -270,7 +270,7 @@ comes back per segment rather than as one verdict. A failing segment does not
 automatically void its band: clause 8.3.1 allows the determination to stand when
 the summed partial powers of the failing segments lie **more than 10 dB below**
 the source power obtained from the passing ones, their contribution then being
-negligible. What it does not allow is silence — the bands in which criterion 3
+negligible. What it does not allow is silence: the bands in which criterion 3
 was not satisfied must carry a statement in the report that their uncertainty
 exceeds the Table 2 value for the intended grade.
 
@@ -278,17 +278,17 @@ The `repeatability_limit` default deserves the same care. Table 2 tabulates $s$
 per band for the **engineering** grade only; for the survey grade it gives a
 single A-weighted value of 4 dB, and this implementation reuses that 4 dB as a
 per-band survey limit. That is a deliberate extrapolation, not a normative
-value, and it is looser than any grade-2 limit in the table — so a survey-grade
-criterion-3 pass is not evidence of grade-2 repeatability. Table 2 is also
-bounded: `_table2_s` raises outside the octave bands 63 Hz to 4 kHz and the
-one-third-octave bands 50 Hz to 6,3 kHz, so an 8 kHz octave is an exception, not
-a wide limit.
+value, and it is looser than any grade-2 limit in the table: a survey-grade
+criterion-3 pass is therefore not evidence of grade-2 repeatability. Table 2
+is also bounded: `_table2_s` raises outside the octave bands 63 Hz to 4 kHz and
+the one-third-octave bands 50 Hz to 6,3 kHz, so an 8 kHz octave is an
+exception, not a wide limit.
 
 ### The instrument and the environment
 
 The fiche's `"Class 1 p-p intensity probe (IEC 61043)"` is a claim with clauses
 behind it. The instrument **including its probe** shall comply with IEC 61043,
-verified in a laboratory at least annually — or at least every two years if an
+verified in a laboratory at least annually, or at least every two years if an
 intensity calibrator is applied before each power determination (clause 6.2).
 Before each series, a class 0 or class 1 IEC 60942 calibrator goes on each probe
 microphone (clause 6.2.1), and the probe-reversal test of clause 6.2.2 confirms
@@ -498,13 +498,13 @@ separate pair of calls, and without it the precision half of this page is a
 computation with its criteria removed.
 
 `precision_field_indicators` computes the Annex B indicators from the same
-segment arrays — the signed and unsigned pressure-intensity indicators
+segment arrays: the signed and unsigned pressure-intensity indicators
 $F_{pI_n}$, the field non-uniformity $F_\mathrm{S}$, and the temporal variability $F_\mathrm{T}$
 when a per-time-window intensity is supplied. `precision_qualification` then
 evaluates the five Annex C criteria per band:
 
 1. **scan repeatability**, $\lvert L_{I_n}(1) - L_{I_n}(2) \rvert \le s/2$ with
-   $s$ from Table 1 (Eq. C.1) — half the tolerance ISO 9614-2 allows, which is
+   $s$ from Table 1 (Eq. C.1): half the tolerance ISO 9614-2 allows, which is
    most of what "precision" costs;
 2. **dynamic-capability adequacy**, $L_\mathrm{d} \ge F_{pI_n}^{\text{signed}}$ with
    $L_\mathrm{d} = \delta_{pI0} - K$ and $K = 10$ dB (Eq. C.2);
@@ -543,7 +543,8 @@ Two bands fail here, and they fail for the reason the numbers say: at 250 Hz and
 at 4 kHz the signed indicator (12.2 dB and 9.2 dB) exceeds the probe's
 $L_\mathrm{d} = 5$ dB, so the instrument cannot resolve the net flux against its own
 residual index. That is criterion 2, and the answer is a better probe, a larger
-spacer or a surface moved away from the reactive near field — not a longer scan.
+spacer or a surface moved away from the reactive near field. A longer scan will
+not help.
 
 ## 3. The measurement report (`.report()`)
 

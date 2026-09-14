@@ -277,8 +277,8 @@ donde $b$ es la edad a la que empezó la exposición, $n$ el número de años de
 exposición, $i$ el contador de años $0 \le i \le n-1$ (de modo que $S_{\mathrm{u},i}$ es
 la resistencia última a la edad $b+i$) y $N$ el número de días de exposición al
 año. $S_{\mathrm{stat}} = m_\mathrm{z} \times 9{,}81\ \mathrm{m/s^2}$ es la tensión
-compresiva estática que la columna ya soporta bajo la gravedad — 0,284 MPa con
-el $m_\mathrm{z}$ masculino, 0,245 MPa con el femenino (`vibration.static_stress`) — y
+compresiva estática que la columna ya soporta bajo la gravedad: 0,284 MPa con
+el $m_\mathrm{z}$ masculino, 0,245 MPa con el femenino (`vibration.static_stress`), y
 $S_{\mathrm{age}}$ es la pérdida anual de resistencia última, 0,052 MPa/año en
 hombres y 0,039 MPa/año en mujeres (`vibration.ultimate_strength`, que devuelve
 5,71 MPa a los 20 años y 4,67 MPa a los 40 en un hombre). El denominador es,
@@ -375,7 +375,7 @@ result.plot()   # la curva de probabilidad de lesión con la R de esta evaluaci�
 Si se omiten, la dosis medida se toma sin cambios como dosis diaria, lo cual
 solo es correcto cuando el registro ya cubre toda la exposición diaria: para
 este registro de 10 s y una jornada de 4 h ese atajo divide la dosis entre
-$(t_\mathrm{d}/t_\mathrm{m})^{1/6} = 3{,}36$ y declara $R = 0{,}46$ en lugar de $1{,}53$ — un 3 %
+$(t_\mathrm{d}/t_\mathrm{m})^{1/6} = 3{,}36$ y declara $R = 0{,}46$ en lugar de $1{,}53$, un 3 %
 de probabilidad de lesión donde la exposición da un 58 %.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock.svg" alt="Izquierda: la transmisibilidad asiento-columna sube hasta cerca de 1,6 en una resonancia de 5 Hz y luego cae casi a cero en 80 Hz. Derecha: la probabilidad de lesión lumbar de Weibull frente a la variable de tensión R para hombre y mujer, con los niveles de riesgo del 10, 50 y 90 por ciento y el ejemplo masculino del Anexo C en R = 1,22, en torno al 37 por ciento" width="96%" />

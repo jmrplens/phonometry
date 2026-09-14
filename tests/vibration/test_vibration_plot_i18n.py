@@ -88,9 +88,9 @@ def test_multiple_shock_spanish_title_translates_sex() -> None:
         risk_thresholds=RISK_THRESHOLDS_MALE,
     )
     ax_en = res.plot(language="en")
-    assert ax_en.get_title() == "ISO 2631-5 injury probability — male"
+    assert ax_en.get_title() == "ISO 2631-5 injury probability: male"
     ax_es = res.plot(language="es")
-    assert ax_es.get_title() == "ISO 2631-5 probabilidad de lesión — hombre"
+    assert ax_es.get_title() == "ISO 2631-5 probabilidad de lesión: hombre"
 
 
 def test_unknown_language_raises() -> None:

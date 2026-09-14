@@ -604,7 +604,7 @@ on a semicircular plot with a decibel radial axis. This is the six-period
 $N = 7$ quadratic-residue diffuser of the anchor below, at 1 kHz. Its energy
 sits in a fan of discrete grating lobes rather than in one specular lobe, which
 is why $d_\theta$ is 0.11 where the flat reference of the same size scores
-0.005 — and why it is still nowhere near 1: the numerator rewards an even
+0.005, and why it is still nowhere near 1: the numerator rewards an even
 response, and a comb of lobes is not even.*
 
 See the [Diffusers guide](https://jmrplens.github.io/phonometry/materials/diffusers/diffusers/) for usage.
@@ -682,7 +682,7 @@ Formula 2):
 
 *The fit, and the single abscissa it is read at. The curve is slightly
 super-linear because the $b\,u^2$ term is real, but the reported quantity is the
-linear coefficient $a$ — the fit extrapolated back to zero velocity — evaluated
+linear coefficient $a$ (the fit extrapolated back to zero velocity), evaluated
 at the 0.5 mm/s reference velocity, which is why the reference velocity has to
 be stated with any resistivity that is quoted.*
 
@@ -751,7 +751,7 @@ two-load recovery of an asymmetric reciprocal specimen.
 
 *What the ISO 10534-2 formula returns: $\alpha$ and $|r|$ for a 50 mm porous
 absorber over the working band of a 100 mm tube. The two curves are the same
-information — $\alpha = 1 - |r|^2$ — so the figure is really one measurement
+information ($\alpha = 1 - |r|^2$), so the figure is really one measurement
 drawn twice, and the rise with frequency is the layer thickness growing against
 the wavelength.*
 
@@ -1305,7 +1305,7 @@ $$
 
 with the $1/(4\pi r_n)$ spherical spreading, the product of the wall **pressure reflection factors** $R_q = \sqrt{1 - \alpha_q}$ (Vorländer Eq. 11.39; $|R|^2 = 1-\alpha$ in energy) each raised to the number of reflections $k_{q,n}$ that image made off wall $q$, and the air pressure attenuation $e^{-m r_n/2}$ ($m$ the *intensity* attenuation constant). Along one axis the reflection counts of the image at lattice index $n$ and parity $p$ are $|n-p|$ and $|n|$ off the two walls (Allen & Berkley 1979), so the total order is $\sum_i |2 n_i - p_i|$; a shoebox has $\tfrac{2}{3}(2 i_0^3 + 3 i_0^2 + 4 i_0)$ audible images up to order $i_0$ (Kuttruff Eq. 9.23), and the reflection density grows as $\mathrm{d}N/\mathrm{d}t = 4\pi c^3 t^2 / V$ (Kuttruff Eq. 4.6).
 
-The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is exact only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only — no diffraction or diffuse scattering — and exact only for real, angle-independent reflection factors.
+The initial decay rate of the specular reverberant energy recovers the **Eyring** reverberation time $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$ (Kuttruff Eq. 5.23), because the mean reflection rate $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is exact only near cubic geometry; an elongated room sustains energy along its long axis, so the pure specular decay runs slower than Eyring's diffuse-field estimate (the anisotropy the Fitzroy/Arau-Puchades models correct). The model is specular only (no diffraction or diffuse scattering) and exact only for real, angle-independent reflection factors.
 
 ### Steady-state room field (Bies 6.4, Kuttruff 5.6)
 
@@ -2247,7 +2247,7 @@ from Cremer, Heckl & Petersson (2005) and Hopkins (2007).
 See the [Predicting Panel Sound Insulation guide](https://jmrplens.github.io/phonometry/buildings/design/panel-sound-insulation/) for
 usage.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities.svg" alt="Two stacked panels against frequency from 0.5 Hz to 2 kHz on a log axis. Top: mobility magnitude for a single-degree-of-freedom resonator, which resonates, against three infinite-structure closed forms — a 140 mm concrete plate, flat at about 2.6 times ten to the minus six metres per newton-second; a 100 by 200 mm steel beam falling as the inverse square root of frequency; and a steel strut in longitudinal motion, flat. Bottom: the phase of each, zero for the plate and the rod, minus 45 degrees for the beam" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/infinite_mobilities.svg" alt="Two stacked panels against frequency from 0.5 Hz to 2 kHz on a log axis. Top: mobility magnitude for a single-degree-of-freedom resonator, which resonates, against three infinite-structure closed forms: a 140 mm concrete plate, flat at about 2.6 times ten to the minus six metres per newton-second; a 100 by 200 mm steel beam falling as the inverse square root of frequency; and a steel strut in longitudinal motion, flat. Bottom: the phase of each, zero for the plate and the rod, minus 45 degrees for the beam" width="92%"></picture>
 
 *The three closed forms drawn against the finite resonator. The 140 mm concrete
 plate is real and frequency-independent at $2.6 \times 10^{-6}$ m/(N·s); the

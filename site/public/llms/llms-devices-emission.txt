@@ -40,9 +40,9 @@ radiation factor, which is what remains when the machine cannot be moved to a
 qualified room and its environment is too noisy for an enveloping surface:
 Part 1 gives an upper-limit value from the velocity alone, Part 2 an
 engineering value once the radiation factor has been estimated properly. It
-also answers a slightly different question from the acoustic routes — it
+also answers a slightly different question from the acoustic routes: it
 characterises what the *structure* radiates, and stays blind to sound escaping
-through openings, intakes and outlets — and it is the natural bridge to the
+through openings, intakes and outlets, and it is the natural bridge to the
 structure-borne pages, since the same surface velocity is what
 [Vibration and structure-borne sound](https://jmrplens.github.io/phonometry/vibration/) measures.
 
@@ -109,9 +109,9 @@ qualified. ISO 3745's free-field qualification of an anechoic or hemi-anechoic
 room, ISO 3741's reverberation-room qualification (eigenfrequency counting or
 a reference-source comparison) and the IEC 61043 residual-intensity test of a
 probe-and-analyser chain are all **assumed, not performed**: the library warns
-on the coarse advisory criteria the standards state explicitly — the Table 1
+on the coarse advisory criteria the standards state explicitly (the Table 1
 minimum volume, the position count, an inter-position spread above 1.5 dB, the
-ISO 3744 K₂ validity — and grades a residual-intensity index you measured
+ISO 3744 K₂ validity) and grades a residual-intensity index you measured
 yourself. The C₃ meteorological correction of ISO 3745 likewise needs an
 air-absorption coefficient you supply; it is not computed from ISO 9613-1
 here.
@@ -273,9 +273,9 @@ order; the first match names the standard.
    an environment that destroys a capsule, an enclosure with no room for a
    surface: when no acoustic measurement is possible, the surface-velocity route
    estimates the same quantity from accelerometers on the casing
-   (ISO/TS 7849-1 and -2). It answers a subtly different question — it
+   (ISO/TS 7849-1 and -2). It answers a subtly different question: it
    characterises what the *structure* radiates, and stays blind to sound
-   escaping through openings, intakes and gaps — and it costs a radiation factor
+   escaping through openings, intakes and gaps, and it costs a radiation factor
    you must either assume (Part 1, an upper limit) or measure once (Part 2).
 
 ### What the accuracy grades mean
@@ -685,7 +685,7 @@ these habits:
 | `room` | `RoomEnvironment` or None | — | default `None` (free field) | The room data behind $K_2$; its fields are the three routes to $A$ below |
 | `room.absorption_area` | float or 1D array | m² | > 0 | $A$ for $K_2$ (direct); per-band array → per-band $K_2$ |
 | `room.reverberation_time`, `room.volume` | float/array, float | s, m³ | > 0 | $A = 0.16\,V/T$ for $K_2$; per-band $T$ → per-band $K_2$ |
-| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | —, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Eq. A.7); per-band $\alpha$ → per-band $K_2$ |
+| `room.mean_absorption_coefficient`, `room.room_surface` | float/array, float | -, m² | `(0,1]`, > 0 | $A = \alpha\,S_v$ (Eq. A.7); per-band $\alpha$ → per-band $K_2$ |
 | `grade` | str | — | `'engineering'` (default) / `'survey'` | ISO 3744 vs ISO 3746 |
 | `omc_uncertainty` | float | dB | default `0.0` | $\sigma_\text{omc}$, operating/mounting instability, folded into $U$ |
 
@@ -1204,7 +1204,7 @@ free-field route has to integrate over a measurement surface, while in the
 reverberation room on the right the reflected energy fills the space and the
 level stops depending on where a microphone is. That is the whole reason
 Eq. 20 can replace a surface integral with a handful of positions and a room
-constant — and the reason the room, not the array, is what has to be
+constant, and the reason the room, not the array, is what has to be
 qualified. Both routes end on the same $L_W$, because sound power is a
 property of the source and not of the room it is measured in.
 
@@ -1384,7 +1384,7 @@ One caveat on that example: it runs Eq. 20 on **octave** bands for
 compactness, and that is not a conforming ISO 3741 determination. Both
 methods are defined on one-third-octave bands, and octave-band results are
 formed afterwards by summing the one-third-octave band powers per Annex F
-(Eq. F.1) — a summation not implemented here, so it has to be done by hand —
+(Eq. F.1), a summation not implemented here (so it has to be done by hand),
 not by feeding octave levels into Eq. 20, whose Waterhouse and absorption
 terms would then be evaluated at the octave mid-frequency instead of at each
 third. Section 1's example, 100 Hz to 10 kHz in thirds, is the conforming
@@ -2468,7 +2468,7 @@ call for more positions or a redistribution.
 
 What is implemented is the calculation, not the laboratory practice: the
 measurement clauses of both parts (instrumentation, source installation,
-environmental conditions — clauses 5 to 7), their measurement-uncertainty
+environmental conditions: clauses 5 to 7), their measurement-uncertainty
 clauses and the informative annexes are not code, so the position counts and
 the Table 2 ladder are rules the reader keeps, not checks the functions run.
 Part 2's clause 8 also defines the radiation factor of a machine batch or
@@ -2507,10 +2507,10 @@ to violate in the field:
 "Adjacent zones move in antiphase and their radiation largely cancels" is a
 statement about a phase relationship between a travelling structural wave and
 the air on top of it, which no spectrum can draw. The clip below drives a
-10 mm steel plate in air along its whole length — a force on the plate, not a
-wave arriving at it, and over the whole plate rather than a patch, because a
+10 mm steel plate in air along its whole length (a force on the plate, not a
+wave arriving at it, and over the whole plate rather than a patch), because a
 patch radiates from the patch and below coincidence that would be the only
-thing in the air — and runs the same scene twice, at $f_\mathrm{c}/2$ and at
+thing in the air, and runs the same scene twice, at $f_\mathrm{c}/2$ and at
 $2f_\mathrm{c}$, with nothing differing between the panels but the drive frequency.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_radiation_efficiency_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_radiation_efficiency.gif" alt="Animation: a bending wave running along a steel plate in air, with alternating pressure lobes that cling to the plate and fade out within centimetres in the lower-frequency panel, and a plane beam departing at forty-five degrees in the higher-frequency panel" width="640" height="360" loading="lazy"></picture>
@@ -2522,7 +2522,7 @@ one. Adjacent half-waves push and pull the same air in antiphase, and what
 the air shows is a skin of alternating lobes that clings to the plate and
 dies within a fraction of a wavelength: the pressure at the surface is of the
 same order as in the other panel, but a quarter-cycle out of step with the
-velocity, so it carries no power away — which is what $\varepsilon \ll 1$
+velocity, so it carries no power away: that is what $\varepsilon \ll 1$
 *means*. Above coincidence the bending wave outruns sound, the trace match is
 satisfied, and a plane beam leaves at $\arcsin(c_0/c_\mathrm{B}) = 45°$. Each panel
 is annotated with the closed forms its regime obeys, from the plate's own

@@ -80,8 +80,8 @@ encima de 20 Hz la respuesta cae a 24 dB/octava, lo que mantiene la energía del
 rango audible fuera de una lectura de infrasonido; entre 1 Hz y 20 Hz
 aproximadamente *sube* a 12 dB/octava, siguiendo el crecimiento abrupto de la
 percepción del infrasonido; y por debajo de 1 Hz aproximadamente vuelve a caer a
-24 dB/octava, rechazando las fluctuaciones de presión casi estáticas — carga de
-viento, deriva barométrica, oscilación del edificio — que un micrófono registra
+24 dB/octava, rechazando las fluctuaciones de presión casi estáticas (carga de
+viento, deriva barométrica, oscilación del edificio) que un micrófono registra
 y nadie oye. Úsala con fuentes con energía significativa por
 debajo de 20 Hz (aerogeneradores, climatización, voladuras):
 
@@ -363,7 +363,7 @@ El verificador `verify_weighting_class`, descrito en la sección 6 de
 las curvas de esta guía que tienen tablas de tolerancias publicadas. Para `B`
 usa ANSI S1.4-1983 (objetivos de diseño de
 la Tabla IV, límites de la Tabla V) y los veredictos de «clase» se leen como
-los **Tipos** de instrumento 1 y 2 de la norma — o, con `edition="1979"`, los
+los **Tipos** de instrumento 1 y 2 de la norma, o con `edition="1979"`, los
 límites de la Tabla V de IEC 651:1979, cuya nota al pie hace que una sola
 máscara gobierne todas las características de ponderación y que añaden el
 Tipo 0 de grado de laboratorio (las dos columnas de Tipo 0 *no* son la misma
@@ -372,7 +372,7 @@ IEC 651 solo tiene límite superior). Para `AU` usa la Tabla 1 de
 IEC 61012:1990 (A nominal + U nominal con las tolerancias de filtro como
 unidad separada, cero en la referencia de 1 kHz); IEC 61012 publica un único
 juego de tolerancias, así que ambos márgenes coinciden y el veredicto es
-simplemente conforme (1) o no (`None`) — ten en cuenta que comprobar las
+simplemente conforme (1) o no (`None`); ten en cuenta que comprobar las
 filas por encima de 20 kHz requiere `fs` ≥ 96 kHz (por debajo se descartan y
 el veredicto queda `range_limited`). `G` y `D` se rechazan: ISO 7196 define
 una única tolerancia de ±1 dB sin estructura de clases y la retirada IEC 537

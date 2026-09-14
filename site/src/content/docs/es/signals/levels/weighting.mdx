@@ -328,8 +328,8 @@ for recording in batch:
 
 Las curvas de la sección 1 son analógicas: polos y ceros en el plano $s$.
 Convertirlas en filtro digital con la transformación bilineal es exacto en
-magnitud y erróneo en frecuencia — sitúa la respuesta del prototipo en
-$2 f_\mathrm{s} \tan(\pi f / f_\mathrm{s})$ en vez de en $2 \pi f$ — y el error
+magnitud y erróneo en frecuencia: sitúa la respuesta del prototipo en
+$2 f_\mathrm{s} \tan(\pi f / f_\mathrm{s})$ en vez de en $2 \pi f$, y el error
 crece de forma cuadrática hacia Nyquist. A $f_\mathrm{s} = 48$ kHz ese diseño
 simple queda 15,7 dB por debajo del objetivo de diseño de la A en la fila de
 19 952,6 Hz, y a $f_\mathrm{s} = 32$ kHz queda 61,4 dB por debajo en 15 848,9 Hz.
@@ -365,8 +365,8 @@ aproximación más estrecha la fila de 15 848,9 Hz de la Tabla 3, al 0,9906 de
 Nyquist cuando $f_\mathrm{s} = 32$ kHz. Por encima de ese último medio por
 ciento la respuesta no se afirma: ningún filtro digital puede seguir una curva
 analógica más allá de Nyquist, y la magnitud de un filtro de coeficientes
-reales tiene pendiente nula allí. De ahí sale la fila 468 de la tabla anterior
-—su falda sigue cayendo a unos $-30$ dB/octava donde termina la banda— y es el
+reales tiene pendiente nula allí. De ahí sale la fila 468 de la tabla anterior;
+su falda sigue cayendo a unos $-30$ dB/octava donde termina la banda, y es el
 3 % de la tolerancia de $\pm 2$ dB de esa curva, no una carencia de exactitud.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/weighting_accuracy_hf.svg" alt="Precisión en alta frecuencia de la ponderación A a 48 kHz: curva analítica frente a bilineal simple y diseño ajustado a la frecuencia de muestreo, con error" width="80%" />

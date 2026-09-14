@@ -240,8 +240,8 @@ whose floating-floor estimate this page reproduces from the EN 29052-1
 dynamic stiffness, with the worked floor of its Annex G (context for design,
 not a measurement).
 
-**Not covered.** The mock-up facility itself — the plate dimensions, the
-resilient supports, the tapping-machine positions of Clause 5 — is not checked:
+**Not covered.** The mock-up facility itself (the plate dimensions, the
+resilient supports, the tapping-machine positions of Clause 5) is not checked:
 the functions consume measured acceleration levels wherever they came from. The
 ISO 12354-2:2017 Annex C floating-floor formulae are quoted here as design aids
 and evaluated inline; the helpers that wrap them, the tapping-machine force

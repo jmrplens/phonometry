@@ -180,7 +180,7 @@ _STRINGS: dict[str, str] = {
     "action": "acción",
     "limit": "límite",
     "peak at {v} Hz": "máximo en {v} Hz",
-    "ISO 2631-5 injury probability — {sex}": "ISO 2631-5 probabilidad de lesión — {sex}",
+    "ISO 2631-5 injury probability: {sex}": "ISO 2631-5 probabilidad de lesión: {sex}",
     "male": "hombre",
     "female": "mujer",
     _RISK_LABEL: r"$R$ = {r},  $\Pi$ = {p} %",
@@ -1328,7 +1328,7 @@ def plot_multiple_shock(
     ax.set_xlabel(_t("Stress variable $R$", language))
     ax.set_ylabel(_t("Probability of lumbar injury [%]", language))
     ax.set_title(
-        _t("ISO 2631-5 injury probability — {sex}", language).format(
+        _t("ISO 2631-5 injury probability: {sex}", language).format(
             sex=_t(str(result.sex), language)
         )
     )

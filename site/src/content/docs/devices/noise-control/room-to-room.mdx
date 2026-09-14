@@ -42,9 +42,9 @@ import Video from '../../../../components/Video.astro';
 
 A machine runs in one room, a wall separates that room from an occupied one,
 and someone wants to know what the occupant hears. It is a short chain of four
-links — the reverberant level the machine builds up on the source side, the
+links (the reverberant level the machine builds up on the source side, the
 transmission loss of the wall, the absorption of the receiving room, and the
-criterion the result is laid against — and the joint between the second and the
+criterion the result is laid against), and the joint between the second and the
 third is where the arithmetic surprises people: **the noise reduction is not the
 transmission loss of the wall.**
 
@@ -57,7 +57,7 @@ balance and §4.10 for the enclosure. Its problems 4.16, 4.18 and 4.21 carry
 printed octave-band answers, and all three are pinned in the
 [conformance report](/phonometry/reference/conformance/).
 
-Here is the whole page in one drawing — Norton's problem 4.18 in section, with
+Here is the whole page in one drawing: Norton's problem 4.18 in section, with
 every symbol of the balance sitting where it physically belongs.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_room_to_room.svg" alt="Section through two rooms sharing a wall, drawn at fifty pixels per metre. On the left an 8 by 10 by 3 metre plant room with a bare floor and an absorbent ceiling, a blower standing on the floor against a wall with the quarter-space wedge of its Q = 4 position shaded and its radiated arcs drawn. In the middle the 5 by 3 metre separating wall, hatched, with a thin reverse arrow for the power it returns to the source room. On the right a 5 by 5 by 3 metre operator room with a carpet, the same absorbent ceiling and a standing occupant. A dashed arc rises over the wall through the ceiling void for the flanking path. Below, three lines give the source-side, partition and receiving-side numbers at 125 Hz, and the footer prints the balance with the crossing where the receiving room's absorption area passes the 15 square metres of the wall" width="92%" loading="eager" />
@@ -81,13 +81,12 @@ $$
 
 with $\text{NR} = L_{p1} - L_{p2}$ the noise reduction between the two
 reverberant fields, $\text{TL} = 10\log_{10}(1/\tau)$ the **transmission loss**
-of the partition — the name Norton & Karczub and the North American literature
+of the partition (the name Norton & Karczub and the North American literature
 use for the quantity ISO 10140-2 measures and ISO 717-1 rates as the **sound
 reduction index** $R$; they are the same number, and its single-number rating is
 the $R_\mathrm{w}$ used below, so the $R$ and $R_\mathrm{w}$ of a laboratory test report drop
 straight into this equation (see
-[Insulation ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/))
-— $S_\mathrm{w}$ the area of the partition and $S_2 \alpha_2$ the equivalent absorption
+[Insulation ratings (ISO 717)](/phonometry/buildings/insulation/insulation-ratings/)). $S_\mathrm{w}$ is the area of the partition and $S_2 \alpha_2$ the equivalent absorption
 area of the receiving room.
 
 Read the logarithm and the whole page follows. A **large partition into a
@@ -108,8 +107,8 @@ The $\text{NR}$ of this equation is the raw **level difference** $D$ that a
 field measurement of the two rooms returns. Measurement standards do not report
 $D$ raw, and for the reason this section has just given: $D$ depends on the
 receiving room. They normalise it, either to a reference reverberation time,
-$D_\mathrm{nT} = D + 10\log_{10}(T/T_0)$ with $T_0 = 0.5$ s — the quantity most
-residential regulations are written in — or to a reference absorption area of
+$D_\mathrm{nT} = D + 10\log_{10}(T/T_0)$ with $T_0 = 0.5$ s (the quantity most
+residential regulations are written in), or to a reference absorption area of
 10 m², $D_\mathrm{n} = D - 10\log_{10}(A/10)$. The wall's own quantity is $R$, and the
 field version of it, $R' = D + 10\log_{10}(S/A)$, includes flanking and is
 therefore always below the laboratory $R$ this calculation assumes.
@@ -283,8 +282,8 @@ the receiving-room balance of Equation (4.101). $R = S\alpha/(1-\alpha)$,
 accounts for the energy that survives its first reflection and goes on feeding
 the reverberant field, and it is what $L_{p1} = L_W + 10\log_{10}(4/R)$ needs on
 the source side. The two coincide for a live room and diverge as $\alpha$ grows
-— they differ by $10\log_{10}[1/(1-\alpha)]$, 0.5 dB at $\alpha = 0.1$ and
-3.0 dB at $\alpha = 0.5$ — and using the absorption area where the room constant
+(they differ by $10\log_{10}[1/(1-\alpha)]$, 0.5 dB at $\alpha = 0.1$ and
+3.0 dB at $\alpha = 0.5$), and using the absorption area where the room constant
 belongs biases the answer towards predicting *too much* noise reduction.
 `equivalent_absorption_area` also takes discrete objects and an air-absorption
 term, which is how furniture, people and, in a large room, the air itself enter
@@ -492,16 +491,16 @@ the printed column keeps the oracle the published one.
 One caveat carries over from section 6 and bites harder here. The required
 panel transmission loss is an upper bound in exactly the way the partition's
 is, and for sharper reasons: an enclosure is small, so the ratio of its
-unavoidable openings — access door, cable and pipe entries, cooling apertures,
-conveyor slots — to its total area is far higher than a wall's, and an open
+unavoidable openings (access door, cable and pipe entries, cooling apertures,
+conveyor slots) to its total area is far higher than a wall's, and an open
 fraction of one per cent caps the achieved insertion loss near 20 dB whatever
 the 35 dB panel this calculation asks for. The machine must also not touch the
 enclosure or share its base: a bolted contact radiates the machine's vibration
 from the outer skin and bypasses the panels entirely. Put the openings into the
-calculation rather than hoping — the composite route and the drawn construction
+calculation rather than hoping. The composite route and the drawn construction
 are in
-[Industrial noise control §2.1](/phonometry/devices/noise-control/noise-control/#21-what-the-enclosure-actually-delivers-leaks-doors-and-openings)
-— and use the same `flanking_penalty` below as the honest place to record
+[Industrial noise control §2.1](/phonometry/devices/noise-control/noise-control/#21-what-the-enclosure-actually-delivers-leaks-doors-and-openings),
+and use the same `flanking_penalty` below as the honest place to record
 whatever is left unmodelled.
 
 ## 6. What the prediction does not know
@@ -516,8 +515,8 @@ slab, and the equation's answer becomes an upper bound.
 The clip below draws what the equation leaves out. The chain of section 3
 prices the direct path only, the **Dd** route through the partition; the
 other three pulses leave the source room over the flanking walls, floor or
-ceiling — **Ff** flank to flank, **Fd** flank to partition, **Df** partition
-to flank — and re-radiate on the far side without ever passing through the
+ceiling (**Ff** flank to flank, **Fd** flank to partition, **Df** partition
+to flank) and re-radiate on the far side without ever passing through the
 transmission loss the calculation used. Each path shrinks at every element
 and junction it crosses, which is why no single one has to be large for the
 sum of the three to dominate a good partition.
@@ -558,8 +557,8 @@ frequency: Equation (4.101) is a diffuse-field balance in both rooms, so it has
 nothing to say below each room's Schroeder frequency (`schroeder_frequency`),
 where discrete modes rule. The 5 m × 5 m × 3 m operator room above, 75 m³, has
 a Schroeder frequency of 163 Hz for a half-second reverberation time, which is
-exactly why the 125 Hz band of problem 4.18 — the band that governs the whole
-answer — should be read as an estimate and not as a number. The call is
+exactly why the 125 Hz band of problem 4.18 (the band that governs the whole
+answer) should be read as an estimate and not as a number. The call is
 `schroeder_frequency(0.5, 75.0)`, reverberation time first and volume second,
 and it returns 163.3 Hz for that room.
 
@@ -567,7 +566,7 @@ In space: both levels are **reverberant-field spatial averages**. $L_{p2}$ is
 what a roving microphone would report over the receiving room, not the level at
 the desk pushed against the party wall, where the direct field of the radiating
 surface adds a few decibels within roughly a wavelength of it. The same holds in
-reverse on the source side — $L_{p1}$ is the reverberant level that drives the
+reverse on the source side: $L_{p1}$ is the reverberant level that drives the
 whole partition, and a person standing beside the machine is in its direct field
 and hears more, so a *measured* source-room level has to be taken away from both
 the machine and the wall to be the right input. It is the reason the field

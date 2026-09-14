@@ -86,9 +86,9 @@ and stays out of scope. So does the IEC TS 61400-14 declaration route, which
 turns a batch of measured machines into the declared value a planning authority
 receives. And two things a wind-turbine reader often arrives looking for sit
 outside IEC 61400-11 altogether: **amplitude modulation** (the swish, folded
-into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** — optional
+into $L_{W\mathrm{A}}$ and rated nowhere in this standard) and **infrasound** (optional
 measurements under 7.2.1 with no rating method attached, so their assessment
-falls to national guidance.
+falls to national guidance).
 
 ## 2. Tonal audibility
 
@@ -118,7 +118,7 @@ $\Delta L_\mathrm{a} > 0$.
 For a candidate between 20 and 70 Hz the Zwicker band above is not what the
 standard uses: subclause 9.5.3 substitutes the fixed absolute 20–120 Hz band,
 so `critical_bandwidth` comes back as 100 Hz for every such candidate and the
-band is *not centred on the tone* — a low-frequency result cannot be reconciled
+band is *not centred on the tone*. A low-frequency result cannot be reconciled
 with the CBW formula printed above. Blade-passing harmonics and low-speed
 gearbox tones live exactly there, so for a wind turbine this is no corner case.
 
@@ -184,9 +184,9 @@ document handed to a regulator, so the result renders one.
 `WindTurbineTonalityResult.report(path)` writes a one-page fiche following
 IEC 61400-11:2012+A1:2018 subclauses 9.5.2 to 9.5.8: a standard-basis line, an
 optional metadata header (source/situation, client, measurement position,
-instrumentation, date), the critical-band analysis table — tone frequency,
+instrumentation, date), the critical-band analysis table (tone frequency,
 critical bandwidth, tone level $L_{p\mathrm{t}}$, masking-noise level $L_{p\mathrm{n}}$, tonality
-$\Delta L_\mathrm{tn}$, audibility criterion $L_\mathrm{a}$ and tonal audibility $\Delta L_\mathrm{a}$ —
+$\Delta L_\mathrm{tn}$, audibility criterion $L_\mathrm{a}$ and tonal audibility $\Delta L_\mathrm{a}$)
 beside the narrowband spectrum with the critical band, the masking level and
 the tone marked, then the boxed $\Delta L_\mathrm{a}$ with the tone frequency and the
 audibility decision, an optional PASS/FAIL row, a note on how $\Delta L_\mathrm{a}$ is

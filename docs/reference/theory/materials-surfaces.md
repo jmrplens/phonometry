@@ -76,7 +76,7 @@ on a semicircular plot with a decibel radial axis. This is the six-period
 $N = 7$ quadratic-residue diffuser of the anchor below, at 1 kHz. Its energy
 sits in a fan of discrete grating lobes rather than in one specular lobe, which
 is why $d_\theta$ is 0.11 where the flat reference of the same size scores
-0.005 — and why it is still nowhere near 1: the numerator rewards an even
+0.005, and why it is still nowhere near 1: the numerator rewards an even
 response, and a comb of lobes is not even.*
 
 See the [Diffusers guide](../../materials/diffusers/diffusers.md) for usage.
@@ -154,7 +154,7 @@ Formula 2):
 
 *The fit, and the single abscissa it is read at. The curve is slightly
 super-linear because the $b\,u^2$ term is real, but the reported quantity is the
-linear coefficient $a$ — the fit extrapolated back to zero velocity — evaluated
+linear coefficient $a$ (the fit extrapolated back to zero velocity), evaluated
 at the 0.5 mm/s reference velocity, which is why the reference velocity has to
 be stated with any resistivity that is quoted.*
 
@@ -223,7 +223,7 @@ two-load recovery of an asymmetric reciprocal specimen.
 
 *What the ISO 10534-2 formula returns: $\alpha$ and $|r|$ for a 50 mm porous
 absorber over the working band of a 100 mm tube. The two curves are the same
-information — $\alpha = 1 - |r|^2$ — so the figure is really one measurement
+information ($\alpha = 1 - |r|^2$), so the figure is really one measurement
 drawn twice, and the rise with frequency is the layer thickness growing against
 the wavelength.*
 

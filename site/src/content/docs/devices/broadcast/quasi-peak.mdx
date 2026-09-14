@@ -55,8 +55,8 @@ What clause 2 gives instead is **eleven acceptance windows**. Table 2 reads a
 single 5 kHz tone burst at eight durations from 1 ms to 200 ms; Table 3 reads
 a train of 5 ms bursts at 2, 10 and 100 per second. Every cell is a
 percentage of the reading the *same* tone gives steadily, so both tables are
-ratios and every absolute factor — the network's +11.7 dB at 5 kHz
-included — cancels.
+ratios and every absolute factor, the network's +11.7 dB at 5 kHz
+included, cancels.
 
 | Stimulus | Lower | Reference | Upper | Window |
 |---|---:|---:|---:|---:|
@@ -113,7 +113,7 @@ print(round(result.level_db, 2), result.level_unit)        # -2.41 dBqps
 *The whole content of clause 2 in one picture: the needle rises over the first
 half second, ripples once the charge between bursts and the decay in the gaps
 balance, and falls away after the train stops. The gap between the two
-horizontal lines is Table 3's 10 bursts per second cell, drawn to scale — the
+horizontal lines is Table 3's 10 bursts per second cell, drawn to scale: the
 train reads 75.8 % of the steady tone against a printed 77 %, inside the 72 to
 82 % window.*
 
@@ -170,7 +170,7 @@ presents its samples in pascals, as everywhere else in this library, and then
 has to be given a `reference` of its own: 0.775 V is not a pressure, and
 BS.468-4 offers no pressure to put in its place, so the call refuses rather
 than printing `20 lg(p / 0.775)` under a name clause 3 reserves for voltages.
-`result.level_unit` names whichever scale came out — `"dBqps"`,
+`result.level_unit` names whichever scale came out: `"dBqps"`,
 `"dB re 20 uPa"`, or the reference itself.
 
 ## 4. The ballistics, and how much the tables pin them down
@@ -224,25 +224,25 @@ So the reading device, not the charge, is the constant the tables pin down
 least. No reading this library produces for any signal other than a gated
 5 kHz sine can be tighter than that.
 
-Three is also the model order the tables support. A fourth constant — the
-informative Note's second peak rectifier — buys 0.011 dB and is left
+Three is also the model order the tables support. A fourth constant, the
+informative Note's second peak rectifier, buys 0.011 dB and is left
 unidentified over a factor of 15.9. A fifth buys 0.036 dB at the worst point,
 concentrated on the two cells whose printed reference is quantised to ±0.064
 and ±0.056 dB, and its two middle constants move by factors of 3.0 and 2.1
 under a change in the last decimal of the objective. Past three constants the
 fit is fitting the rounding of the table.
 
-The six choices behind the numbers — full-wave rectification as $|x|$, the
+The six choices behind the numbers (full-wave rectification as $|x|$, the
 asymmetric one-pole rectifier, the symmetric reading device, the
 maximum-over-the-record reading rule, the steady-tone reference and running
-the ballistics at the input rate — are inseparable. Change any one and the
+the ballistics at the input rate) are inseparable. Change any one and the
 three constants have to be refitted.
 
 ## 5. Conformance
 
 `verify_quasi_peak_dynamics` builds the clause 2.1 and 2.2 stimuli exactly as
-specified — a 5 kHz sine starting at a zero crossing and lasting an integral
-number of full periods, through the weighting network — and reads each against
+specified: a 5 kHz sine starting at a zero crossing and lasting an integral
+number of full periods, through the weighting network, and reads each against
 the same chain's steady reading.
 
 ```python
@@ -257,7 +257,7 @@ print(row["stimulus"], round(row["reading_percent"], 2))       # 1 ms 16.94
 All eleven windows are met at 32, 44.1, 48, 96 and 192 kHz. The worst margin
 is 0.259 dB, at the 100 bursts per second cell whose upper limit is the
 physical ceiling. Between those five rates no reading moves by more than
-0.080 dB, or 4.2 % of its own window — which is why the peak-follower worry
+0.080 dB, or 4.2 % of its own window, which is why the peak-follower worry
 about reading the largest *sample* rather than the largest value of the
 waveform does not bite here: the 1.41 ms charge spans fourteen half-periods of
 the rectified 5 kHz carrier, so the ripple is long gone before any maximum is
@@ -344,9 +344,9 @@ table, no formula and no filter order, so nothing here implements it. The
 Annex 1 constant-resistance realization is an alternative hardware build of
 the same response, with coupled windings whose coupling coefficients the
 figure does not give, and adds nothing a software implementation needs. The
-instrument requirements of clauses 2.3, 2.6 and 2.7 — overload capacity, the
+instrument requirements of clauses 2.3, 2.6 and 2.7 (overload capacity, the
 law of a logarithmic stage, the calibrated scale range, input impedance and
-the 600 Ω termination — are hardware and are not modelled. There is no
+the 600 Ω termination) are hardware and are not modelled. There is no
 `.report()` fiche, for the reason in section 6.
 </ScopeClaim>
 </Scope>
@@ -356,7 +356,7 @@ the 600 Ω termination — are hardware and are not modelled. There is no
 ## See also
 
 - [Programme loudness & true peak](/phonometry/devices/broadcast/program-loudness/):
-  the other ITU-R BS meter, and the opposite design — a gated mean square with
+  the other ITU-R BS meter, and the opposite design: a gated mean square with
   published coefficients where this one is a peak follower with none.
 - [Frequency weightings](/phonometry/signals/levels/weighting/): the 468 curve
   itself, beside A, C and Z.

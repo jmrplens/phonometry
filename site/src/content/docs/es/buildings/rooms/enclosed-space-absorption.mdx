@@ -53,7 +53,7 @@ hace este cálculo. El área de absorción equivalente $A$ no es solo un fin en 
 misma: es la magnitud que convierte una predicción de aislamiento en una
 predicción valorada. Una predicción produce una diferencia de niveles $D$, y las
 valoraciones solo quedan definidas una vez que se conoce la absorción del recinto
-receptor — $D_\mathrm{nT} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$ —, mientras que la
+receptor: $D_\mathrm{nT} = D + 10\lg(T/T_0)$ y $R' = D + 10\lg(S/A)$. Mientras que la
 EN 12354-5 necesita esa misma $A$ para convertir la potencia acústica de una
 instalación de servicio en un nivel de sala. La dirección del error importa:
 sobrestimar la absorción del recinto receptor *favorece* el $D_\mathrm{nT}$ previsto, de
@@ -84,8 +84,8 @@ superficie: el área expuesta de un objeto crece como la potencia dos tercios de
 su volumen, así que la fórmula le atribuye a un objeto duro aproximadamente una
 cara de su cubo envolvente de superficie perfectamente absorbente. Es
 independiente de la frecuencia por construcción, y por eso queda restringida a
-objetos *duros e irregulares* — cualquier cosa blanda, resonante o tabulada
-necesita en su lugar un $A_{\mathrm{obj}}$ medido — y por eso el apartado 4.5
+objetos *duros e irregulares*; cualquier cosa blanda, resonante o tabulada
+necesita en su lugar un $A_{\mathrm{obj}}$ medido. Y por eso el apartado 4.5
 añade que los objetos solo cuentan cuando son grandes frente a la longitud de
 onda, de modo que lo que mida menos de 1 m puede dejarse fuera normalmente.
 
@@ -161,8 +161,8 @@ print(round(a2, 2), round(room.reverberation_time(a2, 29.75, object_fraction=psi
 ```
 
 Los dos números merecen leerse en vez de pasarlos por alto. Una sala desnuda de
-30 m³ con 2,1 s es inservible para el habla — más del triple de cualquier
-objetivo de aula — y seis muebles duros aportan después 2,77 m² de absorción
+30 m³ con 2,1 s es inservible para el habla (más del triple de cualquier
+objetivo de aula), y seis muebles duros aportan después 2,77 m² de absorción
 frente a los 2,26 m² de las seis superficies de la sala juntas, con lo que
 duplican con creces $A$ y reducen $T$ a la mitad. Casi todo eso viene de la
 absorción propia de los objetos; el término $\psi$ solo aporta el último 7 %,
@@ -312,8 +312,8 @@ print(np.round(deficit / np.array(tile), 0))     # [94. 37. 20. 14. 12. 11.  9.]
 
 La respuesta es la lección de diseño. Por encima de 500 Hz el objetivo necesita
 unos 20 m² de placa, que es exactamente el área del techo, y la sala tratada del
-§2 aterriza en efecto en 0,48 s. A 125 Hz haría falta **94 m²** — todo el
-cerramiento de la sala —, así que el objetivo es sencillamente inalcanzable con
+§2 aterriza en efecto en 0,48 s. A 125 Hz haría falta **94 m²** (todo el
+cerramiento de la sala), así que el objetivo es sencillamente inalcanzable con
 un producto poroso delgado, que es la regla general: el déficit es mayor a 125 Hz,
 justo donde esos productos son más flojos. Del propio modelo se siguen dos
 consecuencias. Como el nivel reverberante cae con $10\lg A$, duplicar el área de
@@ -350,8 +350,8 @@ misma convención de campo difuso que lo produjo es la que supone el modelo.
 
 **Nunca la valoración de número único.** La norma admite *solo datos por bandas
 de frecuencia*. La NOTA del apartado 3.2.1 dice de forma explícita que una
-valoración de número único obtenida según la EN ISO 11654 — $\alpha_\mathrm{w}$, y por el
-mismo argumento el NRC y el SAA de la práctica norteamericana — puede usarse para
+valoración de número único obtenida según la EN ISO 11654 ($\alpha_\mathrm{w}$, y por el
+mismo argumento el NRC y el SAA de la práctica norteamericana) puede usarse para
 comparar o especificar productos, pero **no puede usarse directamente para
 calcular las prestaciones in situ**. Esta es la forma más habitual de equivocar
 el cálculo, y ocurre en silencio, porque la API acepta un coeficiente escalar por
@@ -461,7 +461,7 @@ Por encima de esos límites numéricos hay dos declaraciones de alcance. El
 apartado 1 dice que el modelo está basado en la experiencia con salas de
 viviendas y oficinas y con espacios comunes como escaleras, pasillos y salas con
 maquinaria, y que **no está pensado para espacios muy grandes o de forma
-irregular, como auditorios, teatros y naves industriales** — para los cuales las
+irregular, como auditorios, teatros y naves industriales**. Para estos casos, las
 herramientas adecuadas son las normas de medición de acústica de salas y las
 fórmulas clásicas. Y el apartado 4.1 fija el intervalo normal de cálculo en las
 octavas de 125 Hz a 4 kHz, con una NOTA que deja constancia de que no existe
@@ -485,7 +485,7 @@ convierten tres de las magnitudes de esta página en juicios:
   exactitud.
 - En una escalera, un vestíbulo o una sala de máquinas el tiempo de reverberación
   es un descriptor pobre y el requisito se escribe mejor como una cantidad de
-  absorción — por eso `equivalent_absorption_area` se expone de forma
+  absorción: por eso `equivalent_absorption_area` se expone de forma
   independiente de `reverberation_time`, y no solo como un paso intermedio.
 
 **Estimar la exactitud (apartado 5).** La norma se niega a declarar una exactitud
@@ -508,8 +508,8 @@ for factor in (0.8, 1.0, 1.2):                 # el alfa del techo, más o menos
 ```
 
 Una incertidumbre del ±20 % en el coeficiente de una sola superficie mueve la
-predicción a 1 kHz de 0,48 s a 0,57 s o a 0,41 s — un +19 % y un −15 %,
-asimétricos porque $T$ va como $1/A$ — y de 2,13 s a 2,46 s o a 1,88 s a 125 Hz,
+predicción a 1 kHz de 0,48 s a 0,57 s o a 0,41 s (un +19 % y un −15 %,
+asimétricos porque $T$ va como $1/A$), y de 2,13 s a 2,46 s o a 1,88 s a 125 Hz,
 donde el techo carga con menos del total. Esa dispersión *es* la declaración de
 exactitud que la norma se niega a dar, de modo que un diseño que supere su
 objetivo por menos que eso no lo ha superado de verdad.
@@ -597,8 +597,8 @@ la Fórmula 5 en el §2b.
 El método informativo del Anexo D para recintos irregulares y distribución
 irregular de la absorción, que es adonde la propia norma manda los casos que
 incumplen el apartado 4.6 (incluido su propio caso 3 del Anexo E). Las
-exclusiones de alcance de la norma — espacios muy grandes o de forma
-irregular, como auditorios, teatros y naves industriales — quedan fuera del
+exclusiones de alcance de la norma (espacios muy grandes o de forma
+irregular, como auditorios, teatros y naves industriales) quedan fuera del
 modelo más que fuera de esta implementación. Aquí nada emite un veredicto: la
 EN 12354-6 da una estimación de campo difuso, y un objetivo pasado por
 `requirement` se dibuja solo como línea de referencia.

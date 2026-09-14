@@ -116,9 +116,9 @@ plt.show()
 Both levels are already-measured inputs: the scanning probe, the
 two-microphone acquisition and the phase-mismatch calibration behind $L_{p1}$
 and $L_{I\mathrm{n}}$ are not implemented, and nothing here enforces the Clause 6.4
-acquisition either — the 0.1 m to 0.3 m measurement distance, the 0.1 m/s to
+acquisition either (the 0.1 m to 0.3 m measurement distance, the 0.1 m/s to
 0.3 m/s scan speed, the 90°-rotated second scan with its 1.0 dB validity
-test, the 10 dB background margin — so a single scan will produce a number
+test, the 10 dB background margin); so a single scan will produce a number
 just as readily as a qualified pair.
 
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
@@ -302,7 +302,7 @@ that is exactly where a source room stops being able to answer. A room a
 laboratory can build has too few modes down there for a space average to
 describe the field driving the specimen: move the microphones and the average
 moves with them. ISO 15186-3 keeps the intensity probe on the receiving side
-and changes the other end of the measurement — the source-room level is read
+and changes the other end of the measurement: the source-room level is read
 **on the surface of the test specimen itself**, from fixed microphones no more
 than 50 mm from it (Clause 6.3):
 
@@ -328,7 +328,7 @@ of it, and Clause 1.1 says what to do instead: combine these results with
 ISO 140-3 and ISO 15186-1 into one curve over 50 Hz to 5000 Hz. The Clause 6.4.2
 indicator $F_{pI} = L_p - L_{I\mathrm{n}}$ is the same as everywhere else in the
 series, and both of its levels are read on the measurement surface in the
-*receiving* room — not the surface level Formula (7) is built from. Its two
+*receiving* room, not the surface level Formula (7) is built from. Its two
 limits distinguish the specimen: $F_{pI} > 10$ dB refuses a sound-reflecting one
 and $F_{pI} > 6$ dB one presenting a sound-absorbing surface in the receiving
 room. Since the standard asks for that second pressure measurement only "if
@@ -374,7 +374,7 @@ D_{I\mathrm{n,e}} = L_{p\mathrm{S}} - 9 - \left[ L_{I\mathrm{n}} - 10\lg\frac{A_
 $$
 
 The $10\lg N$ inside the bracket is subtracted, so it reaches $D_{I\mathrm{n,e}}$
-**added** — the sign this library derives, and the opposite of what
+**added**: the sign this library derives, and the opposite of what
 ISO 15186-1 prints for the same quantity. Two parts of one series print the
 two signs; this is the one that agrees with the physics and with
 ISO 10140-2 Formula (6). The Part 1 print is registered in
@@ -393,7 +393,7 @@ print(np.round(element.d_i_n_e, 1))     # [32. 33. 34. 36. 37. 39.]
 
 Annex A is normative: measure a limp panel of more than 1 m², calculate what
 it should read, and require the two to agree within **4,0 dB** from 50 Hz to
-160 Hz. The calculated half is forced transmission alone — mass law reduced by
+160 Hz. The calculated half is forced transmission alone: mass law reduced by
 the radiation efficiency of a plate driven by a diffuse field,
 
 $$

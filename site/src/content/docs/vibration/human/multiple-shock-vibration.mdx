@@ -77,7 +77,7 @@ rise from the seat.
 method detect loss of contact between the subject and the seat surface.
 Accelerations measured while contact is lost **shall not be counted as
 exposure**, and the loss of contact shall be detected and reported; the impact
-on landing after a free fall — the motion of the person *and* of the seat —
+on landing after a free fall (the motion of the person *and* of the seat)
 shall be fully taken into account. This is the instrumentation that the
 *severe* regime of clause 4 above actually requires, and it is what makes an
 ISO 2631-5 record different from an ISO 2631-1 one.
@@ -86,7 +86,7 @@ ISO 2631-5 record different from an ISO 2631-1 one.
 appropriate for the highest amplitudes anticipated over the measurement period.
 The digitised record should have a flat acceleration response from 0.01 Hz to at
 least 80 Hz, and a sampling rate of 256 samples per second or greater can be
-necessary depending on the anti-aliasing method used — which is where the
+necessary depending on the anti-aliasing method used, which is where the
 `fs = 256.0` of the worked example below comes from. Details of the measurement
 equipment, including the calibration method used, shall be provided.
 
@@ -96,7 +96,7 @@ infrequent, so the duration has to be estimated from how variable the impacts
 are: where a few severe shocks sit among many small ones, a longer record is
 needed to have a reasonable probability of capturing them. A complete work cycle
 is representative for a repeatable task such as a mine haul truck; for
-non-repeatable ones — off-road travel, military transport — the sufficient
+non-repeatable ones (off-road travel, military transport) the sufficient
 duration depends on the variability of the terrain. Trials that expose people to
 repeated shock need their own risk assessment, and shorter measurements first.
 
@@ -118,9 +118,9 @@ reader would otherwise give themselves.
 4. **Offset-correct** so that the recorded acceleration reads (0 ± 0.1) m/s²
    with the accelerometer at rest. The clause then adds the warning: subtraction
    of the mean **may not be appropriate** if the recorded acceleration is
-   asymmetric — and a shock record is asymmetric by construction, which is
+   asymmetric, and a shock record is asymmetric by construction, which is
    exactly the case a mean subtraction gets wrong.
-5. **Taper** — a cosine taper over several seconds, for instance — if the
+5. **Taper** (a cosine taper over several seconds, for instance) if the
    accelerometer was in motion at the start or the end of the recording, before
    the band limiting.
 6. **Band-limit** with a second-order Butterworth high pass at 0.01 Hz and a
@@ -158,8 +158,8 @@ A_\mathrm{z}(t) = \mathcal{F}^{-1}\!\left[H(f)\,\mathcal{F}[a_\mathrm{z}(t)]\rig
 $$
 
 The conditioning of section 2 is not optional here: because $H$ is unity at
-0 Hz by design, a DC offset — the 1 g gravity component of a DC-coupled
-accelerometer, say — passes straight into $A_\mathrm{z}(t)$ and corrupts the positive
+0 Hz by design, a DC offset (the 1 g gravity component of a DC-coupled
+accelerometer, say) passes straight into $A_\mathrm{z}(t)$ and corrupts the positive
 response peaks the dose is built from.
 
 ```python
@@ -263,8 +263,8 @@ where $b$ is the age at which the exposure started, $n$ the number of exposure
 years, $i$ the year counter $0 \le i \le n-1$ (so $S_{\mathrm{u},i}$ is the ultimate
 strength at age $b+i$), and $N$ the number of exposure days per year.
 $S_{\mathrm{stat}} = m_\mathrm{z} \times 9.81\ \mathrm{m/s^2}$ is the static compressive
-stress the spine already carries under gravity — 0.284 MPa for the male $m_\mathrm{z}$,
-0.245 MPa for the female one (`vibration.static_stress`) — and
+stress the spine already carries under gravity: 0.284 MPa for the male $m_\mathrm{z}$,
+0.245 MPa for the female one (`vibration.static_stress`), and
 $S_{\mathrm{age}}$ is the annual loss of ultimate strength, 0.052 MPa/year for
 males and 0.039 MPa/year for females (`vibration.ultimate_strength`, which
 returns 5.71 MPa at age 20 and 4.67 MPa at age 40 for a male). The denominator
@@ -359,7 +359,7 @@ result.plot()   # the injury-probability curve with this assessment's R marked (
 Omitted, the measured dose is taken unchanged as the daily dose, which is only
 correct when the record already covers the whole daily exposure: for this 10 s
 record and a 4 h day that shortcut divides the dose by
-$(t_\mathrm{d}/t_\mathrm{m})^{1/6} = 3.36$ and reports $R = 0.46$ instead of $1.53$ — a 3 %
+$(t_\mathrm{d}/t_\mathrm{m})^{1/6} = 3.36$ and reports $R = 0.46$ instead of $1.53$, a 3 %
 probability of injury where the exposure gives 58 %.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/multiple_shock.svg" alt="Left: the seat-to-spine transmissibility rising to about 1.6 near a 5 Hz resonance then rolling off to near zero by 80 Hz. Right: the Weibull probability of lumbar injury versus the stress variable R for male and female, with the 10, 50 and 90 percent risk levels and the Annex C male example at R = 1.22, about 37 percent" width="96%" />
@@ -507,8 +507,8 @@ probability with their Table C.1 coefficients and Table C.2 thresholds
 
 <ScopeClaim status="not-covered" label="Not covered">
 The Annex A / Annex E finite-element model for the *less severe* exposures of
-clause 4 — occupants who stay seated throughout, which is most agricultural
-and earth-moving work — is distributed by ISO as separate software and is not
+clause 4 (occupants who stay seated throughout, which is most agricultural
+and earth-moving work) is distributed by ISO as separate software and is not
 implemented here; a record from that regime has no route through this page.
 Neither is the horizontal spinal model of the withdrawn 2004 edition, so
 horizontal whole-body exposure goes to the r.m.s., running-r.m.s./MTVV and VDV

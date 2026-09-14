@@ -78,10 +78,10 @@ $\overline{K}_{ij}$, as Part 4 Clause 9 requires. Because ISO 10848 contains no
 worked numeric example, conformance is anchored on closed-form identities
 (simplified $K_{ij}$, $a_j$ at $f_\mathrm{ref}$, $\eta$).
 
-Those checks are the only enforcement there is. The acquisition itself —
-shielding the other elements, a shield meeting $\Delta R_\text{min}$, the
+Those checks are the only enforcement there is. The acquisition itself
+(shielding the other elements, a shield meeting $\Delta R_\text{min}$, the
 position counts and separations, the accelerometer mass-loading inequality,
-$T_\mathrm{s}$ measured on the elements in their installed state rather than assumed —
+$T_\mathrm{s}$ measured on the elements in their installed state rather than assumed)
 is the operator's responsibility, and nothing here checks any of it.
 
 ```python

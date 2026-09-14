@@ -22,7 +22,7 @@ pip install phonometry[full]    # all of the above (recommended)
 
 I recommend `pip install phonometry[full]`: it brings matplotlib, numba,
 reportlab, svglib and soundfile in one go, so every feature of the library is
-enabled. The base install computes every metric on NumPy and SciPy alone — and
+enabled. The base install computes every metric on NumPy and SciPy alone, and
 that includes reading every linear measurement WAV (24-bit, multichannel
 EXTENSIBLE, RF64) through `phonometry.io`; the only things it leaves
 unavailable are the figures (`.plot()` and the filter response plots), the
@@ -131,8 +131,8 @@ plt.show()
 
 ## Read a sound level meter WAV
 
-With a real meter you have two WAVs — the calibrator take and the
-measurement — and `phonometry.io` reads both as measurements: native rate
+With a real meter you have two WAVs: the calibrator take and the
+measurement. `phonometry.io` reads both as measurements: native rate
 kept, integer PCM scaled exactly to full scale, channels first, nothing
 normalized. The `Signal` it returns carries the sample rate and, once you
 attach it, the calibration, so the level functions stop asking you to
@@ -151,8 +151,8 @@ sig = io.read("measurement.wav", calibration_factor=cal)
 print(f"Leq = {float(signals.leq(sig)):.1f} dB")   # no fs, no factor to repeat
 ```
 
-The base install reads everything a meter writes — 24-bit PCM, multichannel
-EXTENSIBLE, overnight RF64 — and warns if the file is a compressed listening
+The base install reads everything a meter writes: 24-bit PCM, multichannel
+EXTENSIBLE, overnight RF64. It warns if the file is a compressed listening
 copy rather than a linear recording. Write the factor into the sidecar once
 (`io.write_sidecar("measurement.wav", cal)`) and from then on
 `io.read("measurement.wav")` comes back calibrated with no arguments at all.
@@ -175,7 +175,7 @@ spl, freq = filters.octave_filter(signal, fs=fs, fraction=3)
 ```
 
 Integer audio (e.g. int16 WAV data) is converted to float64 internally, so it
-is safe to pass `wavfile.read` output directly — but note it is *cast*, not
+is safe to pass `wavfile.read` output directly, but note it is *cast*, not
 rescaled to full scale, so keep calibrator and measurement in the same format;
 `io.read` in the previous section scales exactly and removes the concern.
 

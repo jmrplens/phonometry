@@ -35,7 +35,7 @@ The other two pages scale that foundation along two independent axes.
 [Block Processing](block-processing.md) scales it in *time*:
 signals that never fit in memory (hour-long recordings, live monitoring,
 embedded loggers) are processed buffer by buffer with carried filter state, so
-the result is bit-identical to a single pass *through the same bank* —
+the result is bit-identical to a single pass *through the same bank*:
 streaming rules out both the multirate decimation and the per-block detrending
 an offline bank uses by default, so the offline pass a streamed result is
 compared against has to be built the same way.
@@ -64,8 +64,8 @@ parameters) consumes the band signals or band levels these pages produce.
 ## What this section does not cover
 
 `verify_filter_class` checks a designed digital response against Table 1 of
-IEC 61260-1. The standard's conformance tests for the physical filter —
-overload recovery, linearity, the environmental influence quantities — apply
+IEC 61260-1. The standard's conformance tests for the physical filter
+(overload recovery, linearity, the environmental influence quantities) apply
 to an instrument and are not implemented, so a class verdict here is a
 statement about the design and not about a device. Near Nyquist the bilinear
 transform warps the frequency axis and the bank carries no correction for it,
@@ -74,7 +74,7 @@ beyond the processing Nyquist is reported as `range_limited` rather than
 verified, so keep the top band edge comfortably below Nyquist or raise `fs`.
 Two operations do not stream: zero-phase forward-backward filtering needs the
 whole signal, and rank statistics such as L90 have to be computed once on the
-pooled envelope. And the per-channel path never mixes channels — delay between
-two microphones, or how much of one channel a second explains, is [Correlation
+pooled envelope. And the per-channel path never mixes channels: delay
+between two microphones, or how much of one channel a second explains, is [Correlation
 and delay](../spectra/correlation-delay.md) and [Multiple and
 partial coherence](../spectra/miso-coherence.md).

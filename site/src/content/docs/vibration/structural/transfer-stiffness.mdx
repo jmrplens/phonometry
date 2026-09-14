@@ -113,7 +113,7 @@ carrying its service load.
   output-side mass *is* the preload, is simple but unstable for large isolators
   at high preloads; a frame with an actuator (typically hydraulic) applies the
   load instead, with auxiliary springs decoupling the blocking mass from the
-  frame — which is also what makes the indirect method less vulnerable to
+  frame, which is also what makes the indirect method less vulnerable to
   flanking transmission through the frame. Elements that are not resilient
   supports are loaded in the way their service demands: a static torque for a
   flexible coupling, a representative internal pressure for a bellows or hose
@@ -152,7 +152,7 @@ with $m_\mathrm{f}$ the mass of the output flange, which the `flange_mass=` keyw
 carries (it defaults to zero). It is not a refinement: ISO 10846-3 measures the
 vibration of the mass centre of the *compact body* formed by the blocking mass
 together with the output flange of the test element, so $m_\mathrm{f}$ is whatever is
-weighed with it — the flange and any auxiliary fixture that moves as part of the
+weighed with it: the flange and any auxiliary fixture that moves as part of the
 test element. Left at zero it reports a stiffness low by $m_2/(m_2 + m_\mathrm{f})$. The
 approximation is valid well above the mass/spring resonance, where $T$ is
 small.
@@ -186,7 +186,7 @@ complementary with respect to their strong and weak points". The third is the
 force and so yields the driving-point stiffness $k_{1,1}$ rather than
 $k_{2,1}$. Only at low frequencies, below the element's first internal
 resonance, where the driving-point and transfer stiffnesses are **equal**, can
-it be used to determine the transfer stiffness — which is why the series covers
+it be used to determine the transfer stiffness, which is why the series covers
 it at all: owners of expensive driving-point rigs can use them for the
 low-frequency transfer stiffness. That same identity is why the fiche of
 section 6 boxes the low-frequency *plateau* rather than a value at one
@@ -199,8 +199,8 @@ indirect method have names. It is valid between $f_2$ and $f_3$, "typically
 1), and the two are moved by opposite things:
 
 - **$f_2$** is where Inequality 2 starts to hold. Below it the rig's own
-  resonances — the element, the load-distribution plate, the blocking mass and
-  the auxiliary springs together — break the impedance mismatch. It sits at
+  resonances (the element, the load-distribution plate, the blocking mass and
+  the auxiliary springs together) break the impedance mismatch. It sits at
   roughly **three times the highest natural frequency** of that assembly, and a
   *heavier* blocking mass lowers it.
 - **$f_3$** is where the blocking mass stops moving as a rigid body. It is
@@ -213,8 +213,8 @@ indirect method have names. It is valid between $f_2$ and $f_3$, "typically
   $D = \sqrt{S}$, then take $f_3$ as the lowest frequency at which
   $m_{2,\text{eff}} = 2F_2/(a'_1 + a''_1)$ departs from $m_2$ by more than 1 dB.
 
-The two requirements pull against each other — heavy for a low $f_2$, compact
-for a high $f_3$ — which is why a wide range sometimes needs more than one
+The two requirements pull against each other (heavy for a low $f_2$, compact
+for a high $f_3$), which is why a wide range sometimes needs more than one
 blocking mass, and why a full isolator dataset is usually the direct and
 indirect methods spliced together. The direct method covers the bottom, from
 1 Hz (the lower bound of the ISO 10846-2 scope; in practice the floor is set by
@@ -286,7 +286,7 @@ whether a result exists at all, none of which is computed here.
 * **A unidirectionality pre-run** (6.4, Inequality 3). The acceleration in the
   excitation direction shall exceed the unwanted perpendicular components by at
   least **15 dB**, measured at the edge of the excitation mass in the plane of
-  the input flange — the accelerometer drawn on the rig figure. Bands that fail
+  the input flange: the accelerometer drawn on the rig figure. Bands that fail
   are excluded from the result.
 * **Transducers** (6.5, 6.6). Accelerometers and force transducers shall have a
   sensitivity level that is frequency-independent within **0,5 dB**, be
@@ -414,8 +414,8 @@ force, Equation (7) is satisfied by three orders of magnitude, and the
 datasheet number is directly usable. On a lightweight floor of 2 MN/m it is
 not: only two thirds of the blocked force arrives (−3.5 dB), Equation (7) fails,
 and the mount's characterisation no longer predicts what the installation does.
-That is not the isolator failing — a mobile receiver takes *less* force, so the
-real installation is quieter than the blocked-force estimate — it is the
+That is not the isolator failing (a mobile receiver takes *less* force, so the
+real installation is quieter than the blocked-force estimate); it is the
 *single-number description* failing, and the route out is a prediction that
 carries both mobilities:
 [installed structure-borne sound (EN 12354-5)](/phonometry/buildings/design/installed-structure-borne/),

@@ -67,7 +67,7 @@ def _d_calibration_chain(s: SVG, th: Theme) -> None:
     s.text(
         530,
         408,
-        "(IEC 60942:2017 Table 2, class 1) — else CalibrationWarning",
+        "(IEC 60942:2017 Table 2, class 1); else CalibrationWarning",
         17,
         th.fg,
     )
@@ -208,7 +208,7 @@ def _d_calibration_coupling(s: SVG, th: Theme) -> None:
         450,
         552,
         "the microphone models and configurations listed in the "
-        "manual (5.3.1.3, 6.3 a) — IEC 60942:2017",
+        "manual (IEC 60942:2017, 5.3.1.3, 6.3 a)",
         15,
         th.muted,
     )
@@ -344,7 +344,7 @@ def _d_uncertainty(s: SVG, th: Theme) -> None:
         th.fg,
     )
     _step(
-        lxc, 342, "Effective dof  (Annex G.4)", "$v_{eff}$ — Welch–Satterthwaite", th.fg
+        lxc, 342, "Effective dof  (Annex G.4)", "$v_{eff}$: Welch–Satterthwaite", th.fg
     )
     s.arrow(lxc, 220, lxc, 250, th.fg, 1.8)
     s.arrow(lxc, 312, lxc, 342, th.fg, 1.8)
@@ -609,7 +609,7 @@ def _d_block_processing(s: SVG, th: Theme) -> None:
     s.text(
         450,
         62,
-        "State carried across blocks — TimeWeighting.process()",
+        "State carried across blocks: TimeWeighting.process()",
         16,
         th.fg,
         "middle",
@@ -629,7 +629,7 @@ def _d_block_processing(s: SVG, th: Theme) -> None:
     s.text(
         450,
         300,
-        "State reset each block — reset() or a fresh call",
+        "State reset each block: reset() or a fresh call",
         16,
         th.fg,
         "middle",
@@ -1224,13 +1224,13 @@ def _d_spectral_analysis(s: SVG, th: Theme) -> None:
 
     step(
         52,
-        "Record $x(t)$ — $f_s$ = 48 kHz, 20 s of pink noise",
+        "Record $x(t)$: $f_s$ = 48 kHz, 20 s of pink noise",
         "960 000 samples, calibrated end to end: pascals in, Pa²/Hz out",
         th.fg,
     )
     step(
         138,
-        "Split into 50 %-overlapped segments — nperseg = 4096",
+        "Split into 50 %-overlapped segments: nperseg = 4096",
         "467 segments of 85.3 ms; bin spacing $Δf = f_s/4096$ = 11.7 Hz",
         th.primary,
     )
@@ -1344,7 +1344,7 @@ def _d_miso_coherence(s: SVG, th: Theme) -> None:
     s.text(
         450,
         265,
-        "Welch cross-spectral matrix — $G_{xx}$ (2×2) and $G_{xy}$, nperseg = 2048",
+        "Welch cross-spectral matrix: $G_{xx}$ (2×2) and $G_{xy}$, nperseg = 2048",
         14,
         th.fg,
         bold=True,
@@ -1415,7 +1415,7 @@ def _d_time_frequency(s: SVG, th: Theme) -> None:
             100.0,
             24.0,
             70.0,
-            "Short window — nperseg = 256",
+            "Short window: nperseg = 256",
             "$T_B$ = 16 ms,  $B_e ≈ 1/T_B$ = 62.5 Hz",
             "sharp click, smeared tone",
             180.0,
@@ -1427,7 +1427,7 @@ def _d_time_frequency(s: SVG, th: Theme) -> None:
             512.0,
             96.0,
             17.5,
-            "Long window — nperseg = 1024",
+            "Long window: nperseg = 1024",
             "$T_B$ = 64 ms,  $B_e$ ≈ 15.6 Hz",
             "sharp tone, smeared click",
             215.0,
@@ -1795,7 +1795,7 @@ def _d_miso_setup(s: SVG, th: Theme) -> None:
     x0, y0 = 46.0, 92.0
     room_w, room_h = 9.2 * scale, 5.2 * scale
     s.rect(x0, y0, room_w, room_h, th.panel, th.fg, rx=4, sw=2.4)
-    s.text(x0 + 12, y0 + 24, "Plant room — plan", 15, th.muted, anchor="start")
+    s.text(x0 + 12, y0 + 24, "Plant room: plan", 15, th.muted, anchor="start")
 
     # -- Machine A: a fan on resilient mounts ------------------------------
     ax, ay = x0 + 1.6 * scale, y0 + 3.4 * scale
@@ -1804,7 +1804,7 @@ def _d_miso_setup(s: SVG, th: Theme) -> None:
     for k in range(4):
         a = math.radians(45 + 90 * k)
         s.line(ax, ay, ax + 22 * math.cos(a), ay + 22 * math.sin(a), th.primary, 1.6)
-    s.text(ax, ay - 52, "A — fan", 15, th.fg, bold=True)
+    s.text(ax, ay - 52, "A: fan", 15, th.fg, bold=True)
     for k in (-1, 1):
         s.rect(ax + k * 26 - 8, ay + 40, 16, 9, th.muted, rx=2)
     s.rect(ax + 26 - 7, ay + 26, 14, 14, th.secondary, th.fg, rx=2, sw=1.2)
@@ -1814,7 +1814,7 @@ def _d_miso_setup(s: SVG, th: Theme) -> None:
     bx, by = ax + 3.0 * scale, ay
     s.rect(bx - 36, by - 36, 72, 72, th.bg, th.primary, rx=6, sw=2.2)
     s.rect(bx - 20, by - 16, 40, 32, th.panel, th.primary, rx=3, sw=1.4)
-    s.text(bx, by - 48, "B — compressor", 15, th.fg, bold=True)
+    s.text(bx, by - 48, "B: compressor", 15, th.fg, bold=True)
     mic2_x = bx + 36 + 0.3 * scale
     s.circle(mic2_x, by, 7, th.bg, th.secondary, 2.0)
     s.dim(bx + 36, by + 52, mic2_x, by + 52, "0.3 m", size=13)
@@ -1904,7 +1904,7 @@ def _d_tsa_setup(s: SVG, th: Theme) -> None:
     gy = 400.0
     s.ground(gy, 40, 470)
     s.rect(70, 140, 380, gy - 140, th.panel, th.fg, rx=6, sw=2.2)
-    s.text(80, 164, "Gearbox — elevation", 15, th.muted, anchor="start")
+    s.text(80, 164, "Gearbox: elevation", 15, th.muted, anchor="start")
 
     shaft_y = 252.0
     px, pr = 214.0, 38.0
@@ -2030,8 +2030,8 @@ def _d_correlation_delay(s: SVG, th: Theme) -> None:
 
     s.mic(330, 190, gy, 1.0)
     s.mic(570, 190, gy, 1.0)
-    s.text(314, 258, "mic 1 — $x(t)$", 11, th.fg, bold=True, anchor="end")
-    s.text(586, 258, "mic 2 — $y(t)$", 11, th.fg, bold=True, anchor="start")
+    s.text(314, 258, "mic 1: $x(t)$", 11, th.fg, bold=True, anchor="end")
+    s.text(586, 258, "mic 2: $y(t)$", 11, th.fg, bold=True, anchor="start")
     s.dim(330, 272, 570, 272, "spacing $d$", size=12)
     s.text(450, 242, "$sin θ = c·τ_0 / d$", 12, th.fg)
 
@@ -2040,7 +2040,7 @@ def _d_correlation_delay(s: SVG, th: Theme) -> None:
     s.text(
         450,
         366,
-        "cross-correlation against lag — $y(t) = α·x(t − τ_0) + n(t)$",
+        "cross-correlation against lag: $y(t) = α·x(t − τ_0) + n(t)$",
         13,
         th.fg,
         bold=True,
@@ -2100,7 +2100,7 @@ def _d_data_qualification(s: SVG, th: Theme) -> None:
     step(52, "Time record $x(t)$", "before trusting any PSD, Leq or GUM average", th.fg)
     step(
         134,
-        "Mean square per interval — $N$ = 20 equal segments",
+        "Mean square per interval: $N$ = 20 equal segments",
         "each interval long against the record's lowest frequencies; also "
         "rms, mean or variance",
         th.primary,

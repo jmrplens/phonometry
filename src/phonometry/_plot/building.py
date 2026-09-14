@@ -1028,7 +1028,7 @@ def plot_airborne_prediction(
     ax.set_xlabel(_t("Transmission path", language))
     ax.set_ylabel(_t(_SHARE_LABEL, language))
     ax.set_title(
-        rf"EN 12354-1 {_t('flanking prediction', language)} — "
+        rf"EN 12354-1 {_t('flanking prediction', language)}: "
         rf"$R^{{\prime}}_\mathrm{{w}}$ = "
         rf"{format_number(result.r_prime_w, language, decimals=1)} dB "
         rf"($R_\mathrm{{Dd,w}}$ = "
@@ -1081,7 +1081,7 @@ def plot_impact_prediction(
     ax.set_xticklabels(labels)
     ax.set_ylabel(_t("Level / correction [dB]", language))
     ax.set_title(
-        rf"EN 12354-2 {_t('impact prediction', language)} — "
+        rf"EN 12354-2 {_t('impact prediction', language)}: "
         rf"$L^{{\prime}}_\mathrm{{n,w}}$ = "
         rf"{format_number(result.l_prime_n_w, language, decimals=1)} dB"
     )
@@ -1217,7 +1217,7 @@ def plot_detailed_airborne_prediction(
     title = f"EN 12354-1 {_t('detailed prediction', language)}"
     if result.rating is not None:
         title += (
-            rf" — $R^{{\prime}}_\mathrm{{w}}$ = "
+            rf": $R^{{\prime}}_\mathrm{{w}}$ = "
             rf"{format_number(result.rating.rating, language, decimals=0)} dB"
         )
     return _plot_path_shares(
@@ -1252,7 +1252,7 @@ def plot_detailed_impact_prediction(
     title = f"EN 12354-2 {_t('detailed prediction', language)}"
     if result.rating is not None:
         title += (
-            rf" — $L^{{\prime}}_\mathrm{{n,w}}$ = "
+            rf": $L^{{\prime}}_\mathrm{{n,w}}$ = "
             rf"{format_number(result.rating.rating, language, decimals=0)} dB"
         )
     return _plot_path_shares(
@@ -1303,7 +1303,7 @@ def plot_in_situ_element(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Reduction index / impact level [dB]", language))
     ax.set_title(
-        f"{_t('In-situ element performance (ISO 12354)', language)} — {result.label}"
+        f"{_t('In-situ element performance (ISO 12354)', language)}: {result.label}"
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
@@ -1460,7 +1460,7 @@ def plot_band_uncertainty(
         else "$u$"
     )
     ax.set_title(
-        f"ISO 12999-1 {_t('band uncertainty', language)} ({quantity}) — "
+        f"ISO 12999-1 {_t('band uncertainty', language)} ({quantity}): "
         f"{result.measurand}, {_t('situation', language)} {result.situation}"
     )
     ax.grid(visible=True, which="both", alpha=0.3)
@@ -2248,8 +2248,8 @@ def plot_lining_improvement(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Sound reduction index improvement [dB]", language))
     ax.set_title(
-        f"{_t('Additional-layer rating (ISO 12354-1 Annex D)', language)} "
-        f"— {result.system}"
+        f"{_t('Additional-layer rating (ISO 12354-1 Annex D)', language)}: "
+        f"{result.system}"
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")

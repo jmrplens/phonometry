@@ -28,9 +28,9 @@ The standard answer to finding one of those lines under the broadband noise of
 a running machine is **envelope analysis**, and it is three steps in three
 places. Band-pass the record around the high-frequency housing resonance that
 the impacts ring, take the envelope spectrum so the repetition rate of the
-impacts becomes a discrete line — that step is [Cepstrum, echoes and the
+impacts becomes a discrete line (that step is [Cepstrum, echoes and the
 envelope spectrum](https://jmrplens.github.io/phonometry/signals/spectra/cepstrum-echoes/), one section
-away — and overlay the kinematic families, coloured by origin, so a shaft
+away) and overlay the kinematic families, coloured by origin, so a shaft
 harmonic can never be misread as bearing evidence. When two shafts have to be
 separated before their sidebands can be read, [Time synchronous
 averaging](https://jmrplens.github.io/phonometry/signals/spectra/synchronous-averaging/) does it first.
@@ -82,8 +82,8 @@ The severity verdict is a page of its own now:
 [Evaluating machine vibration](https://jmrplens.github.io/phonometry/vibration/machinery/machine-vibration-evaluation/)
 carries the ISO 20816-1 zones and criteria. What is still absent is the
 trending that feeds them. The amplitude criteria that turn a present
-line into an assessment — crest-factor and kurtosis trending, and the velocity
-severity bands the machine-specific parts of ISO 20816 print — are outside
+line into an assessment (crest-factor and kurtosis trending, and the velocity
+severity bands the machine-specific parts of ISO 20816 print) are outside
 this module, and rotor
 balancing (ISO 21940) and order tracking are absent from the library
 altogether. One published convention differs between sources and is flagged on

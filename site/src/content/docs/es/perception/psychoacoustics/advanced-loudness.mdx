@@ -217,7 +217,7 @@ el apartado 8.1 fija qué hacen con el resultado los dos oídos.
 | Un micrófono en el centro de la posición que ocuparía la cabeza de quien escucha, ausente, con una única fuente frontal | `'free'` | Columna 2 de la Tabla 1, la transferencia de campo libre hasta la membrana timpánica |
 | El mismo micrófono en una sala reverberante o in situ | `'diffuse'` | Columna 3 de la Tabla 1, la transferencia de campo difuso; también es la opción correcta para auriculares de campo difuso |
 | Un micrófono de sonda a menos de 10 mm del tímpano (5 mm cuando hay componentes fuertes por encima de 3 kHz) | `'eardrum'` | Apartado 7.2.4: el espectro ya está en la membrana, así que no se aplica ninguna función de transferencia |
-| Un simulador de cabeza y torso | `'eardrum'`, pero solo si el simulador es un modelo acústico fiel de un adulto medio | Apartado 7.2.5; si no, necesita su propio fichero de corrección, que esta API no sabe expresar — ecualiza antes la grabación a campo libre o a campo difuso y usa la opción que corresponda |
+| Un simulador de cabeza y torso | `'eardrum'`, pero solo si el simulador es un modelo acústico fiel de un adulto medio | Apartado 7.2.5; si no, necesita su propio fichero de corrección, que esta API no sabe expresar. Ecualiza antes la grabación a campo libre o a campo difuso y usa la opción que corresponda |
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_mg_capture_routes.svg" alt="Cuatro vías de captación y los argumentos que implica cada una: un único micrófono donde estaría la cabeza de quien escucha con una sola fuente frontal, que da field free; el mismo micrófono en un campo reverberante, que da field diffuse; un micrófono de sonda a menos de 10 mm de la membrana timpánica, que da field eardrum sin ninguna función de transferencia; y un simulador de cabeza y torso, que da field eardrum solo si es un modelo fiel de un adulto medio; un pie indica que un sonido diótico suena alrededor de 1,5 veces más sonoro que el mismo sonido en un solo oído" width="92%" />
 
@@ -235,9 +235,9 @@ apropiada. En el otro sentido, una grabación de campo libre analizada como
 `'eardrum'` se queda corta en la misma medida.
 
 **`presentation` es el otro factor dos.** `monaural` calcula un oído con el
-otro en silencio, `diotic` presenta la señal idéntica a los dos oídos — que es
+otro en silencio, `diotic` presenta la señal idéntica a los dos oídos (que es
 lo que representa la grabación de un único micrófono en campo libre, ya que
-ambos oídos escuchan el mismo campo — y `binaural` combina dos señales de oído
+ambos oídos escuchan el mismo campo), y `binaural` combina dos señales de oído
 independientes a través de la etapa de inhibición de la norma. El tono
 definitorio de 1 kHz a 40 dB es 1,000 sonios diótico y 0,667 sonios monoaural,
 la razón 1,5 que enuncia el apartado 8.1, y la inhibición es la razón de que
@@ -322,7 +322,7 @@ tercio de octava contiguas de 25 Hz a 16 kHz sobre los centros nominales de
 IEC 61260-1:2014. Cada banda se supone plana y se expande internamente en un
 conjunto equivalente de componentes antes de que corra el método exacto. Hay
 dos restricciones que conviene decir sin rodeos: exactamente 29 valores y una
-rejilla fija — un sonómetro que registre de 20 Hz a 20 kHz hay que recortarlo a
+rejilla fija. Un sonómetro que registre de 20 Hz a 20 kHz hay que recortarlo a
 ella, y uno que se detenga en 8 kHz no sirve en absoluto.
 
 ```python
@@ -348,7 +348,7 @@ toma 29 bandas hasta 16 kHz e ISO 532-1 toma 28 hasta 12,5 kHz, que es la razón
 del recorte. El resto de la diferencia son los modelos: excitación roex y suma
 binaural explícita frente a la sonoridad de núcleo de ISO 532-1. Usa
 `field="diffuse"` para una medición en sala hecha con un sonómetro corregido a
-campo libre — el argumento de campo es donde más se equivoca quien entra por
+campo libre; el argumento de campo es donde más se equivoca quien entra por
 niveles de banda.
 
 ### `loudness_moore_glasberg()` y sus variantes `_from_spectrum` / `_from_third_octave`
@@ -465,7 +465,7 @@ la misma ancla de 1 kHz/40 dB calibra el front-end. La implementación de sala
 limpia devuelve 0,9845 sone_HMS para esa ancla en lugar de exactamente 1: el
 residuo del 1,55 % viene del promediado de bandas que impone el apartado 6.2.3
 sobre las bandas que caen en la frontera entre tamaños de bloque y que excita
-el flanco inferior del tono, cerca de 800 a 900 Hz — sin ningún promediado de
+el flanco inferior del tono, cerca de 800 a 900 Hz. Sin ningún promediado de
 bandas la cadena da 0,955; con el promediado restringido a las vecinas del
 mismo tamaño de bloque, 0,996; y con el recálculo completo entre grupos que
 exige la norma, 0,9845. La constante de calibración $c_\mathrm{N}$ se conserva en su

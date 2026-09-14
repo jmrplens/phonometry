@@ -69,7 +69,7 @@ el nivel de presión y el de intensidad coinciden dentro de
 $10\log_{10}(\rho c / 400) = 0{,}14$ dB en condiciones normales del aire
 (apartado 5 de IEC 61043). Por eso el panel izquierdo de la figura de abajo
 muestra dos curvas superpuestas, y por eso el índice presión-intensidad tiene un
-suelo cercano a 0,14 dB y no a 0 — todo lo que una medición en campo enseñe por
+suelo cercano a 0,14 dB y no a 0. Todo lo que una medición en campo enseñe por
 encima de ese suelo es o bien un campo genuinamente reactivo o contaminado por
 ruido, o bien el propio error de fase del instrumento.
 
@@ -266,7 +266,7 @@ más posiciones de medición necesita la superficie.
 
 $F_4$ es el que se convierte en un número de posiciones, mediante el criterio 2
 del Anexo B, $N > C\,F_4^2$ (ecuación (B.2)). El factor $C$ no es una constante:
-la tabla B.2 lo hace depender de la banda **y** del grado que se pretende — unos
+la tabla B.2 lo hace depender de la banda **y** del grado que se pretende: unos
 11 en baja frecuencia y hasta 29 en la banda media para el grado de ingeniería,
 y 19 subiendo hasta 57 para precisión, con 8 para el caso ponderado A de
 inspección. Así que una misma no uniformidad del campo pide alrededor del doble
@@ -449,7 +449,7 @@ la cadena, no una especificación de los micrófonos.
 **Antes de cada serie (apartado 14).** Deja calentar el instrumento lo que diga
 el fabricante. En modo de presión acústica, aplica un calibrador acústico a los
 dos micrófonos, por turnos o a la vez, y ajusta hasta la indicación correcta
-dentro de **±0,1 dB en los dos canales** — el apartado 6.2.1 de ISO 9614-2 pide
+dentro de **±0,1 dB en los dos canales**: el apartado 6.2.1 de ISO 9614-2 pide
 aquí un calibrador IEC 60942 de clase 0 o de clase 1. Después aplica otra vez el
 dispositivo de intensidad residual y confirma que $\delta_{pI0}$ sigue cumpliendo
 el requisito de clase en el rango que cubre el dispositivo, con la compensación
@@ -461,9 +461,9 @@ Es la única comprobación que no necesita banco y la que caza el error que ning
 banco puede ver. Coloca la sonda sobre la superficie de medición, con el eje
 normal, en una posición donde la intensidad supere la media de la superficie;
 registra $I_\mathrm{n}$ en todas las bandas. Gira la sonda **180° alrededor de un eje
-normal al eje de medición**, dejando el centro acústico en el mismo sitio — lo
-que en la práctica significa montarla en un trípode en vez de sostenerla a mano
-— y mide otra vez. Para que el sistema de medición sea aceptable, en la banda de
+normal al eje de medición**, dejando el centro acústico en el mismo sitio, lo
+que en la práctica significa montarla en un trípode en vez de sostenerla a mano,
+y mide otra vez. Para que el sistema de medición sea aceptable, en la banda de
 nivel máximo **los dos valores de $I_\mathrm{n}$ deben tener signos opuestos y los dos
 niveles de intensidad deben diferir menos de 1,5 dB**. Los dos modos de fallo se
 leen como diagnóstico: signos iguales significan que los canales están cruzados
@@ -474,9 +474,9 @@ de ensayo.
 
 Ese signo merece leerse también en el uso normal, no solo en la comprobación. Una
 intensidad neta negativa en parte de una superficie envolvente significa que
-entra más potencia por ese trozo de la que sale — de lo más normal en la cara a
-la sombra de una máquina que está junto a otra más ruidosa, y completamente
-carente de sentido si los canales están cruzados.
+entra más potencia por ese trozo de la que sale, lo más normal en la cara a la
+sombra de una máquina que está junto a otra más ruidosa, y completamente carente
+de sentido si los canales están cruzados.
 
 ### Clasificar el instrumento: tabla 2 de IEC 61043
 
@@ -1066,9 +1066,9 @@ tabla 2 y el procedimiento opcional de concentración del apartado 8.3.2
 <ScopeClaim status="not-covered" label="No cubierto">
 El *ensayo* de intensidad residual de IEC 61043 no lo realiza la biblioteca:
 $\delta_{pI0}$ es un valor que quien mide obtiene en su propia cadena
-sonda-analizador, con el espaciador que va a montar, y aporta — el
-procedimiento está en *Medir el índice residual*, más arriba, y lo que
-phonometry hace con el número es clasificarlo frente a la tabla 2. La
+sonda-analizador, con el espaciador que va a montar, y aporta: el procedimiento
+está en *Medir el índice residual*, más arriba, y lo que phonometry hace con el
+número es clasificarlo frente a la tabla 2. La
 comprobación previa al uso del apartado 14 y el ensayo de inversión de la
 sonda de ISO 9614-2 son igualmente procedimientos, no funciones.
 </ScopeClaim>
@@ -1078,11 +1078,11 @@ sonda de ISO 9614-2 son igualmente procedimientos, no funciones.
 
 ## Véase también
 
-- [Potencia acústica por barrido de intensidad](/phonometry/es/devices/emission/sound-power-intensity/) — las vías de ISO 9614-2/-3 que consumen $\delta_{pI}$, los indicadores de campo y la capacidad dinámica.
-- [Potencia acústica](/phonometry/es/devices/emission/sound-power/) — la elección entre las vías de intensidad, de presión y de cámara reverberante.
-- [Potencia acústica a partir de la vibración](/phonometry/es/devices/emission/vibration-sound-power/) — el factor de radiación de ISO/TS 7849-2 necesita una potencia medida por intensidad.
-- [Calibración](/phonometry/es/signals/metrology/calibration/) — el escalado absoluto de los dos canales que el estimador da por supuesto.
-- [Teoría: análisis de señal](/phonometry/es/reference/theory/signal-analysis/) — la derivación por espectro cruzado que hay detrás de $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
+- [Potencia acústica por barrido de intensidad](/phonometry/es/devices/emission/sound-power-intensity/): las vías de ISO 9614-2/-3 que consumen $\delta_{pI}$, los indicadores de campo y la capacidad dinámica.
+- [Potencia acústica](/phonometry/es/devices/emission/sound-power/): la elección entre las vías de intensidad, de presión y de cámara reverberante.
+- [Potencia acústica a partir de la vibración](/phonometry/es/devices/emission/vibration-sound-power/): el factor de radiación de ISO/TS 7849-2 necesita una potencia medida por intensidad.
+- [Calibración](/phonometry/es/signals/metrology/calibration/): el escalado absoluto de los dos canales que el estimador da por supuesto.
+- [Teoría: análisis de señal](/phonometry/es/reference/theory/signal-analysis/): la derivación por espectro cruzado que hay detrás de $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
 - Referencia de la API: [`emission.intensity`](/phonometry/es/reference/api/power/intensity/).
 - Teoría: [Intensidad acústica (IEC 61043)](/phonometry/es/reference/theory/signal-analysis/#intensidad-acústica-iec-61043): la aproximación en diferencias finitas que hay detrás de una sonda p-p y los errores que comete.
 

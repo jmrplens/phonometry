@@ -73,8 +73,8 @@ concreta**, en cuyo caso el micrófono se sitúa en esa posición, o caracteriza
 **todo el recinto**, en cuyo caso el micrófono se pasea despacio por él a **no más
 de 0,5 m/s durante no menos de 20 s**.
 
-**Dónde va el micrófono.** A la altura de oído de los ocupantes — **1,6 m** de pie
-y **1,2 m** sentados para adultos, **1,1 m** y **0,75 m** para niños — y a no menos
+**Dónde va el micrófono.** A la altura de oído de los ocupantes: **1,6 m** de pie
+y **1,2 m** sentados para adultos, **1,1 m** y **0,75 m** para niños; y a no menos
 de **0,6 m** de cualquier superficie reflectante, **1,2 m** de la intersección de
 dos, o **2,4 m** de la intersección de tres. La regla de separación es la que
 muerde en una sala pequeña: un micrófono metido en una esquina ve la duplicación
@@ -97,8 +97,8 @@ bandas de 16 Hz y 31,5 Hz: a esas longitudes de onda «puede producirse duplicac
 de presión bastante más allá de las distancias de separación dadas arriba», así que
 un barrido de un recinto grande puede salir sesgado hacia arriba; y «cuanto más
 baja es la frecuencia, más estrecho es el ancho de banda y, por tanto, mayor la
-fluctuación temporal», así que una integración corta en la octava de 16 Hz — de
-apenas unos 11 Hz de ancho — se dispersa. Usa instrumentación con respuesta real
+fluctuación temporal», así que una integración corta en la octava de 16 Hz (de
+apenas unos 11 Hz de ancho) se dispersa. Usa instrumentación con respuesta real
 por debajo de 20 Hz, monta una pantalla antiviento incluso en interior, integra
 durante el tiempo suficiente y, si las bandas más bajas siguen siendo dudosas,
 declara desde 31,5 Hz y dilo. Las dos bandas son aquí determinantes: de ellas se
@@ -106,7 +106,7 @@ leen la etiqueta RC y la marca de fuera de rango del NC.
 :::
 
 La aritmética por bandas de octava que hay detrás del espectro de entrada
-— filtros, ponderación, promediado energético — está en
+(filtros, ponderación, promediado energético) está en
 [Niveles](/phonometry/es/signals/levels/levels/) y
 [Bancos de filtros](/phonometry/es/signals/filters/filter-banks/).
 
@@ -353,8 +353,8 @@ de desviación de la etiqueta.
 ### Qué valoración debería cumplir una sala
 
 Una valoración por sí sola no es una respuesta, y la norma lo sabe: la S12.2
-acompaña cada método con una tabla informativa de criterios recomendados por uso
-— una tabla ponderada A (Anexo C, Tabla C.1), una tabla NC/RNC (Anexo C, Tabla
+acompaña cada método con una tabla informativa de criterios recomendados por uso:
+una tabla ponderada A (Anexo C, Tabla C.1), una tabla NC/RNC (Anexo C, Tabla
 C.2, a la que apunta el apartado 5.2.6) y una tabla RC Mark II (Anexo D, Tabla
 D.2). Una especificación normalmente cita una de ellas, o un equivalente nacional.
 Referencias de la tabla NC/RNC:
@@ -387,7 +387,7 @@ estos métodos en absoluto.
 El espectro del apartado 1 se valora en **NC-42,5** y ese mismo espectro en el
 apartado 2 se valora en **RC-35**. No ha pasado nada raro: son escalas distintas y
 no deben sustituirse nunca la una por la otra. El NC por tangencia lo fija la única
-banda peor, esté donde esté — aquí el retumbo de 250 Hz —, mientras que el número
+banda peor, esté donde esté (aquí el retumbo de 250 Hz), mientras que el número
 RC es la media aritmética de los niveles de 500, 1000 y 2000 Hz e ignora todo lo
 demás en su parte numérica, y traslada el carácter del espectro a la etiqueta. Un
 espectro retumbante se valora por tanto siempre peor en NC que en RC, y el tamaño
@@ -553,8 +553,8 @@ en el repositorio; pulsa una vista previa para abrir el PDF.
 
 <Scope>
 <ScopeClaim status="covered" label="Cubierto">
-La Tabla 1 y los apartados 5.2.2/5.2.3 de la ANSI/ASA S12.2-2019 — la
-designación NC-(SIL) y el método de tangencia con su banda determinante —
+La Tabla 1 y los apartados 5.2.2/5.2.3 de la ANSI/ASA S12.2-2019 (la
+designación NC-(SIL) y el método de tangencia con su banda determinante)
 mediante `room.noise_criterion`; y la familia informativa RC Mark II del Anexo
 D, Tabla D.1 (`room.rc_curve`), con la valoración por media de frecuencias
 medias del apartado D.4 y la etiqueta neutro/retumbo/siseo del apartado D.3,

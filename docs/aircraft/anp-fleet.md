@@ -251,7 +251,7 @@ here where Doc 29 measures at 1.2 m. The metric defaults to the sound exposure
 level and the stage length to 1, and the optional `temperature_c` and
 `atmospheric_pressure_kpa` arguments feed the Doc 29 atmospheric impedance
 adjustment, defaulting to the 15 °C and 101.325 kPa of the standard atmosphere
-— a bookkeeping term worth +0.07 dB there, not a weather correction.
+(a bookkeeping term worth +0.07 dB there, not a weather correction).
 
 ```python
 import numpy as np

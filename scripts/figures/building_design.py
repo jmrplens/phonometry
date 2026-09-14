@@ -112,18 +112,16 @@ def generate_prediction_flanking_demo(output_dir: str) -> None:
     from matplotlib.patches import Patch
 
     handles = [
-        Patch(facecolor=COLOR_TERTIARY, edgecolor=COLOR_FG, label="Dd — direct"),
+        Patch(facecolor=COLOR_TERTIARY, edgecolor=COLOR_FG, label="Dd: direct"),
         Patch(
-            facecolor=COLOR_PRIMARY, edgecolor=COLOR_FG, label="Ff — flanking–flanking"
+            facecolor=COLOR_PRIMARY, edgecolor=COLOR_FG, label="Ff: flanking–flanking"
         ),
         Patch(
             facecolor=COLOR_SECONDARY,
             edgecolor=COLOR_FG,
-            label="Fd — flanking–separating",
+            label="Fd: flanking–separating",
         ),
-        Patch(
-            facecolor=df_orange, edgecolor=COLOR_FG, label="Df — separating–flanking"
-        ),
+        Patch(facecolor=df_orange, edgecolor=COLOR_FG, label="Df: separating–flanking"),
     ]
     ax.legend(handles=handles, loc="upper right", fontsize=9)
 

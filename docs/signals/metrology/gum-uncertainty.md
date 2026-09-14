@@ -90,8 +90,8 @@ The inputs are sampled independently; the Supplement's multivariate-Gaussian
 path for non-independent quantities (6.4.8) is not implemented, so correlated
 budgets belong to `combine_uncertainty`. The number of trials is fixed (no
 adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
-one, not the 5.3.4 shortest interval. Supplement 2 — models with multiple
-output quantities — is not implemented at all.
+one, not the 5.3.4 shortest interval. Supplement 2 (models with multiple
+output quantities) is not implemented at all.
 
 ```python
 from phonometry import metrology

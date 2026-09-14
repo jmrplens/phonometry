@@ -75,7 +75,7 @@ $$
 
 The microphone hears the direct wave and the road reflection in the same
 impulse response, and the mandatory geometry puts them only
-$2 d_\mathrm{m} / c \approx 1.5$ ms apart — far too little to gate apart at the bottom
+$2 d_\mathrm{m} / c \approx 1.5$ ms apart, far too little to gate apart at the bottom
 of the reported band. ISO 13472-1 therefore requires the **subtraction
 technique** (Clause 4.2) rather than plain time windowing, and that is the
 step the two arrays this page's functions consume come out of:
@@ -84,16 +84,16 @@ step the two arrays this page's functions consume come out of:
    change: the standard asks for a fixed, stable mechanical connection
    between them, because the subtraction is a cancellation of two nominally
    identical waveforms.
-2. Measure over the road and average until the impulse response is stable —
+2. Measure over the road and average until the impulse response is stable:
    **at least 50** responses (Clause 4.3), which is what beats the background
    noise and the meteorological variation.
 3. Repeat the identical measurement with the rig taken away from any
    reflecting surface. That free-field response **is** $h_\mathrm{i}$. Correct any
    residual time shift between the two takes, and make them within a short
-   time of each other — the standard recommends under 10 minutes — because
+   time of each other (the standard recommends under 10 minutes) because
    the delay is temperature dependent.
-4. Subtract: $h_\mathrm{r} = h_\text{road} - h_\mathrm{i}$. Everything the two takes share —
-   the direct wave, the loudspeaker, the microphone, the whole chain —
+4. Subtract: $h_\mathrm{r} = h_\text{road} - h_\mathrm{i}$. Everything the two takes share
+   (the direct wave, the loudspeaker, the microphone, the whole chain)
    cancels, and what survives is the surface reflection alone.
 5. Window $h_\mathrm{i}$ and $h_\mathrm{r}$ with the **same** window applied at their own
    arrival times ($T_{\mathrm{w},\text{direct}} = T_{\mathrm{w},\text{reflected}}$), transform,
@@ -101,8 +101,8 @@ step the two arrays this page's functions consume come out of:
 
 Two acceptance conditions ride on that chain. The signal-to-noise ratio must
 exceed **10 dB in every one-third-octave band from 250 Hz to 4 kHz**
-(Clause 7.4), and no calibration of level is needed at all — the method is a
-ratio of two transfer functions from the same chain (Clause 6.1) — but the
+(Clause 7.4), and no calibration of level is needed at all: the method is a
+ratio of two transfer functions from the same chain (Clause 6.1). But the
 Annex B reference measurement of section 1.2 is not optional for the same
 reason. The snippets below start from an `hi` and an `hr` that stand in for
 that pair; in the field they are the free-field reference and the windowed
@@ -138,12 +138,12 @@ the geometry factor cancel exactly. They do not: the loudspeaker and the
 microphone have their own responses along paths of different length, and the
 mandatory $K_\mathrm{r} = 2/3$ is a plane-wave idealisation of a finite geometry. At
 the bottom of the band, where a dense road absorbs a few percent, that
-residual error is comparable with the quantity being measured — which is why
+residual error is comparable with the quantity being measured, which is why
 Annex B makes a **reference measurement mandatory**, not advisory.
 
-The fix is one extra measurement per set-up. Lay a highly reflecting plate —
-plane, smooth, dense and jointless, and large enough to cover the whole
-maximum sampled area — on the same spot, and repeat the entire procedure over
+The fix is one extra measurement per set-up. Lay a highly reflecting plate
+(plane, smooth, dense and jointless, and large enough to cover the whole
+maximum sampled area) on the same spot, and repeat the entire procedure over
 it with the rig geometry unchanged. The measured pressure reflection factor of
 the reference is then the chain's own error function $e(f)$, because the plate
 itself reflects everything; dividing the road's measured factor by it removes
@@ -196,7 +196,7 @@ print(round(float(w.max()), 3))   # 1.0  (flat top and edges meet at unity)
 
 That length is the method's single free parameter, and it is a trade with two
 ends. The **total** window duration sets the lowest frequency the transform
-can resolve — 10.5 ms is about 95 Hz, and a 220 Hz lower limit needs roughly
+can resolve: 10.5 ms is about 95 Hz, and a 220 Hz lower limit needs roughly
 5 ms of flat portion, which is why the reported band starts at 250 Hz and not
 lower. Lengthening it buys low-frequency validity, and every millisecond added
 also admits reflections from the mast, the vehicle, the operator and anything
@@ -218,7 +218,7 @@ what subtraction leaves once the free-field reference has been taken away.
 The green gate is the Adrienne window at its default 0.5 + 5 + 5 ms, whose
 total duration sets both the 95 Hz floor marked in the bottom panel and the
 1.34 m radius of road that contributes. The parasitic arrival at 15.8 ms is
-outside it — and would not be if the window were lengthened to reach lower in
+outside it; it would not be if the window were lengthened to reach lower in
 frequency.*
 
 <details>
@@ -374,7 +374,7 @@ gates that decide whether a measurement may be made at all, and they, not the
 signal processing, are what usually invalidates a roadside campaign.
 
 - **The maximum sampled area must be clear.** Any object other than the
-  pavement — a fence, a rock, a barrier, a parked car — is a reflecting object.
+  pavement (a fence, a rock, a barrier, a parked car) is a reflecting object.
   None may be inside the sampled area, and anything outside it must be farther
   from the microphone than $d_\mathrm{s}$, that is farther than 1.25 m. The microphone
   stand itself must not influence the measurement.
@@ -499,7 +499,7 @@ below it because a band is only usable when its *whole* width is inside the
 valid range, and the 1600 Hz band reaches 1800 Hz. The 250 Hz floor is a
 **spacing** limit, not a length limit: below $f_\mathrm{min}$ the two microphones are
 closer than 5 % of a wavelength apart and there is no phase difference left to
-resolve. Tube length answers a different question — it must be long enough for
+resolve. Tube length answers a different question: it must be long enough for
 a plane wave to form, which Clause 5.4.2 meets by putting the microphones at
 least $3d$ from the source (a minimum length of 480 mm for the 100 mm tube).
 The resulting spacing window, 78 mm to 86 mm here, is why the standard
@@ -521,7 +521,7 @@ give the order.
 
 1. **Check the gates first.** The surface must be smooth, flat, free of debris
    and dry; the air between 5 °C and 30 °C and the road surface between 5 °C
-   and 45 °C, out of direct sunlight and away from strong heat sources — test
+   and 45 °C, out of direct sunlight and away from strong heat sources; test
    at night where that cannot be met. If any of these fails, the measurement
    cannot be carried out.
 2. **Warm up.** Switch the system on and leave it running for **at least
@@ -531,8 +531,8 @@ give the order.
    before each measurement series and after each hour of measurement, for
    every microphone position used. That calibration is what corrects the phase
    and amplitude mismatch between the two capsules.
-4. **Take the reference measurement** on a totally reflective specimen — a
-   10 mm steel plate is the standard's own example. Its one-third-octave
+4. **Take the reference measurement** on a totally reflective specimen:
+   a 10 mm steel plate is the standard's own example. Its one-third-octave
    absorption must come out below **0.03**; the result feeds the Annex A
    internal-loss correction, and it is taken at the same location immediately
    before or after the series.
@@ -541,7 +541,7 @@ give the order.
    from passing heavy vehicles and motorcycles, and discard any run a passing
    vehicle disturbed.
 6. **Seal.** Lay a bead of sealant in the fixture's groove, sized to the
-   surface texture — a few millimetres on a smooth surface, thicker on a
+   surface texture: a few millimetres on a smooth surface, thicker on a
    coarse one. Press the fixture onto the road: the right amount is when a
    little material squeezes out. If almost none does, lift the fixture, check
    for a **continuous circular impression**, add sealant and repeat. Then
@@ -552,7 +552,7 @@ give the order.
    low, raise the source level, remove the noise source or wait.
 8. **Verify the seal again.** Lift the fixture and confirm the sealing
    material was in tight contact in a closed circle. If in doubt, re-seal and
-   repeat the position — an air leak reads as absorption and there is nothing
+   repeat the position: an air leak reads as absorption and there is nothing
    in the data to distinguish the two.
 
 Two more things about the reduction. Systems commonly carry **two microphone
@@ -560,7 +560,7 @@ pairs** and splice their narrow-band results, each pair over the part of the
 band where its spacing is optimal (`spot_microphone_spacing_bounds` gives that
 window for any pair). And the Annex A internal-loss correction is applied
 **after** the narrow-band results have been averaged into one-third octaves
-and **before** negative bands are clipped to zero — the standard deliberately
+and **before** negative bands are clipped to zero: the standard deliberately
 lets the FFT produce negative narrow-band values and clips only at the end.
 Finish by repeating at **at least four positions** and reporting the mean and
 the standard deviation per band.

@@ -8,8 +8,8 @@ person when one of them is wrong. This page is those three.
 
 ## Who maintains phonometry
 
-I am José Manuel Requena Plens. I wrote phonometry — originally released as
-PyOctaveBand — and I maintain it: the implementations, the test suite, the
+I am José Manuel Requena Plens. I wrote phonometry (originally released as
+PyOctaveBand) and I maintain it: the implementations, the test suite, the
 documentation and the releases. There is no company behind it and no team, so
 anything wrong here is mine to fix.
 
@@ -33,7 +33,7 @@ record: Telecommunications Engineer specialised in Sound and Image at the
 Universidad de Alicante (2011-2018), MSc in Acoustics Engineering at the
 Universitat Politècnica de València (2018-2019), and acoustics researcher at
 the UPV from 2020 to 2023, publishing on acoustic metasurfaces, sound diffusers
-and acoustic field prediction — the papers are under the ORCID and Scholar
+and acoustic field prediction; the papers are under the ORCID and Scholar
 profiles above. Today I work in industrial R&D as a firmware and software
 engineer.
 
@@ -53,9 +53,9 @@ The method is the whole point of the project, and it is deliberately narrow.
    chosen is written down.
 2. **The standard's own reference values are transcribed into the test
    suite.** Where a standard publishes a worked example, a tolerance table or a
-   set of nominal responses — the IEC 61672-1 Table 3 weighting values and its
+   set of nominal responses (the IEC 61672-1 Table 3 weighting values and its
    Table 4 tone-burst responses, the IEC 61260-1 Table 1 filter limits, the
-   ISO 226 Annex B contours, and so on — those numbers become the expected
+   ISO 226 Annex B contours, and so on): those numbers become the expected
    values of real tests.
 3. **CI enforces them on every change.** A regression that moves a computed
    value outside the standard's acceptance limit fails the build, so a claim
@@ -76,7 +76,7 @@ The evidence is public. The conformance report lists, per check, the standard
 and clause, the normative expected value, the value the library computes, the
 delta and a pass or fail verdict, and CI regenerates it on every pull request
 so it cannot drift from the code. [Why phonometry](why-phonometry.md) walks the
-method end to end on a single case — time weighting under IEC 61672-1:2013 —
+method end to end on a single case (time weighting under IEC 61672-1:2013)
 if you want to see it applied before trusting it in general.
 
 ## Reporting an error
@@ -157,7 +157,7 @@ person using it.
 
 Concretely, for the laboratories and consultancies this is mostly written for:
 the library computes and documents, it does not measure, so **traceability
-stays with the hardware chain** — a calibrator and a microphone with valid
+stays with the hardware chain**: a calibrator and a microphone with valid
 certificates, and type-approved instrumentation wherever the measurement has
 legal effect. Accreditation bodies expect **calculation software to be
 validated for its intended use, with the record retained**, and the artefact

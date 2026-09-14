@@ -17,7 +17,7 @@ that a calibrated source is needed for, the other being the late lateral
 sound level, which is referred to the same free field. Everything else on
 the
 [room acoustic parameters page](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)
-— EDT, T20, T30, C50, C80, D50, $T_\mathrm{s}$ — is a decay time, a ratio of
+(EDT, T20, T30, C50, C80, D50, $T_\mathrm{s}$) is a decay time, a ratio of
 energies or a centre time read from one recording alone, and survives any
 gain you put in front of it. $G$ does not.
 
@@ -212,7 +212,7 @@ Both closed forms also hold at a characteristic impedance of exactly
 400 N·s·m⁻³, which is the value that makes the reference quantities
 consistent: $p_0^2 S_0 / \rho c = (20\ \text{µPa})^2 / 400 = 1$ pW, the
 reference sound power. Neither equation prints that caveat. Air at 20 °C
-and 101.325 kPa is nearer 413 N·s·m⁻³, worth 0.14 dB — an order of
+and 101.325 kPa is nearer 413 N·s·m⁻³, worth 0.14 dB, an order of
 magnitude more than either rounding. The offsets are a convention of the
 decibel scales, not a property of the air in the hall, and the library does
 not make them follow the weather.
@@ -226,8 +226,8 @@ useful". Near the source the direct field dominates and $G$ falls 6 dB per
 doubling; past the critical distance the reverberant field takes over and
 the curve flattens, at a level set by the room's absorption alone. Table A.1
 gives −2 dB to +10 dB as the typical range in unoccupied halls up to
-25 000 m³ — for the **single number**, the arithmetic mean of the 500 Hz and
-1 kHz octave bands, which is what the "m" of $G_m$ marks and what
+25 000 m³ (for the **single number**, the arithmetic mean of the 500 Hz and
+1 kHz octave bands), which is what the "m" of $G_m$ marks and what
 `res.plot()` draws across the shaded band.
 
 ```python

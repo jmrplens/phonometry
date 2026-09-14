@@ -164,7 +164,7 @@ and
 
 ## See also
 
-- [Conformance report](../CONFORMANCE.md) — what the numbers are checked against; this page is why the checks read the same everywhere.
-- [Errata in published sources](../ERRATA.md) — the other half of the evidence story: where the printed expected value is the thing that is wrong.
-- [Frequency weightings](../signals/levels/weighting.md) — the guide to the curves the deterministic design realises.
-- [Block processing](../signals/filters/block-processing.md) — the streaming identity the scope section leans on.
+- [Conformance report](../CONFORMANCE.md): what the numbers are checked against; this page is why the checks read the same everywhere.
+- [Errata in published sources](../ERRATA.md): the other half of the evidence story: where the printed expected value is the thing that is wrong.
+- [Frequency weightings](../signals/levels/weighting.md): the guide to the curves the deterministic design realises.
+- [Block processing](../signals/filters/block-processing.md): the streaming identity the scope section leans on.

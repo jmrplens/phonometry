@@ -46,44 +46,44 @@ the [Speech section](https://jmrplens.github.io/phonometry/perception/speech/).
 
 **Three pages, three different decibels**, and keeping them apart is most of the
 work. A **hearing threshold level** is in dB HL, measured relative to the
-audiometric zero, so 0 dB HL is a *different* sound pressure at every frequency
-— exactly what ISO 389-7 tabulates. A **daily exposure level** is in
+audiometric zero, so 0 dB HL is a *different* sound pressure at every frequency,
+exactly what ISO 389-7 tabulates. A **daily exposure level** is in
 A-weighted decibels normalised to eight hours: an energy dose of the sound
 outside the ear, with no listener in it. A **threshold shift** is a difference
 of two dB HL values, so it may be added to a hearing level and never to a sound
 pressure level. The chain between them runs one way only: ISO 9612 delivers a
 single A-weighted LEX,8h into the ISO 1999 formulae, which return dB HL. The
 only bridge back from hearing level to physical sound pressure is the ISO 389-7
-reference threshold on the threshold page — which is also what the SII needs
+reference threshold on the threshold page, which is also what the SII needs
 when a raised threshold is used as an input.
 
 ## Pages in this section
 
 In the order the chain runs.
 
-- **Baseline** — [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/):
+- **Baseline**: [Hearing threshold (age and reference zero)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-threshold/):
   the ISO 7029:2017 age-related threshold distribution and the ISO 389-7:2005
   reference threshold of hearing.
-- **Exposure** — [Occupational Noise Exposure (ISO 9612)](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/):
+- **Exposure**: [Occupational Noise Exposure (ISO 9612)](https://jmrplens.github.io/phonometry/perception/hearing/occupational-exposure/):
   the three measurement strategies for LEX,8h with the Annex C uncertainty
   budget.
-- **Damage** — [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/):
+- **Damage**: [Noise-induced hearing loss (ISO 1999)](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/):
   NIPTS and its population distribution, and the combination with age into
   HTLAN.
-- **Protection** — [Hearing Protectors (ISO 4869-2)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
+- **Protection**: [Hearing Protectors (ISO 4869-2)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
   the octave-band, HML and SNR methods that say what a protector actually
   leaves at the ear, and the assumed protection value all three start from.
 
 ## What this section does not cover
 
 **Nothing here is a verdict about a person.** ISO 1999 does not define a
-hearing handicap or a compensable fence — that line is set by national
+hearing handicap or a compensable fence. That line is set by national
 regulation, and the library applies none of it, so you supply and check the
 criterion yourself. The exposure side stops one step later: the LEX,8h and its
 one-sided 95 % upper limit come out of ISO 9612, and the fiche written by
 `ExposureResult.report()` does compare the LEX,8h against the Directive
 2003/10/EC action and limit values (80, 85 and 87 dB(A)) and issues the
-PASS/FAIL verdict against the limit value — but that is a verdict on an
+PASS/FAIL verdict against the limit value. But that is a verdict on an
 unprotected exposure, not on a person: the effective exposure behind hearing
 protectors, and any stricter national transposition, are still yours to check.
 
@@ -361,9 +361,9 @@ noise-induced shift into a real audiogram is **ISO 1999**:2013 clause 6.1
 Formula (1); that combination is implemented, as `htlan`, but it is documented
 in [Noise-induced hearing loss](https://jmrplens.github.io/phonometry/perception/hearing/noise-induced-hearing-loss/). Of
 ISO 389-7:2005 only the eleven audiometric rows of Table 1 are carried: the
-other 27 — the third octaves from 20 Hz to 100 Hz, the intermediate third
+other 27 (the third octaves from 20 Hz to 100 Hz, the intermediate third
 octaves between the audiometric points and the extended high frequencies from
-9 kHz to 18 kHz — are not, and neither is Amendment 1:2016, so low-frequency
+9 kHz to 18 kHz) are not, and neither is Amendment 1:2016, so low-frequency
 and extended-high-frequency work must read the table itself. The earphone
 reference zeros of **ISO 389-2** (insert earphones) and **ISO 389-8**
 (circumaural, the HDA 200 among them), the extended high frequencies of
@@ -647,10 +647,10 @@ and F.
 **Not covered.** The work analysis of Clause 7 and the microphone placement of
 Clauses 12.3 and 12.4 are procedures, not calculations: they stay with the
 surveyor, and Table B.1 is reproduced as guidance with the caller choosing the
-strategy — nothing here applies it. Hearing-protector attenuation (the
-**ISO 4869** series) is not applied, so the $L_\mathrm{EX,8h}$ computed here, and the
-limit-value comparison the fiche prints on it, is the **unprotected** exposure
-— which is also what the **ISO 1999** hearing-loss model expects. Annex C
+strategy: nothing here applies it. Hearing-protector attenuation (the
+**ISO 4869** series) is not applied, so the $L_\mathrm{EX,8h}$ computed here (and the
+limit-value comparison the fiche prints on it) is the **unprotected** exposure,
+which is also what the **ISO 1999** hearing-loss model expects. Annex C
 offers no uncertainty model for $L_{p,\mathrm{Cpeak}}$ (Table C.5, Note 1), which is why
 the peak is reported without one rather than with a zero one.
 
@@ -754,7 +754,7 @@ metadata header (company, worker or group, workplace, date of assessment), a
 table of the median $N_{50}$ and the fractile NIPTS at the six audiometric
 frequencies beside the spectrum plot with its fractile band, and the boxed
 shift averaged over the 2/3/4 kHz hearing-handicap set together with the
-exposure conditions — $L_\mathrm{EX,8h}$, the duration in years and the population
+exposure conditions: $L_\mathrm{EX,8h}$, the duration in years and the population
 percentage $Q$. Two notes keep it honest and both are printed on the fiche:
 the values are a statistical prediction for the exposed population, not
 anyone's audiogram, and ISO 1999 leaves the choice of handicap frequencies to
@@ -890,8 +890,8 @@ externally supplied HTLA array; computing database B itself is out of scope.
 **Test-report fiche.** `HtlanResult.report(path)` renders the companion fiche
 for the combined threshold, following ISO 1999:2013 clause 6.1. It carries the
 same prediction-basis line and metadata header as the NIPTS fiche, but its
-table has three columns — the age component $H$, the noise component $N$ and
-the combined $H'$ at each audiometric frequency — beside the three-curve plot,
+table has three columns (the age component $H$, the noise component $N$ and
+the combined $H'$ at each audiometric frequency) beside the three-curve plot,
 and the boxed value is the threshold averaged over the 2/3/4 kHz
 hearing-handicap set, printed with the listener and exposure conditions (age
 and sex, $L_\mathrm{EX,8h}$ over the exposure years, and the population percentage

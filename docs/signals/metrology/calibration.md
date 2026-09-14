@@ -96,9 +96,9 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
   seconds of *stable* tone (excluding handling noise at the start/end) for the
   RMS estimate to converge.
 
-The conformance tests of the calibrator itself — generated level, frequency,
+The conformance tests of the calibrator itself (generated level, frequency,
 distortion, and the environmental corrections for static pressure and
-temperature — are not implemented: when the calibrator's manual asks for a
+temperature) are not implemented: when the calibrator's manual asks for a
 pressure or temperature correction, apply it yourself and pass the corrected
 value as `target_spl`.
 
@@ -307,7 +307,7 @@ You can, but the tolerances chain: a class 1 measurement requires a class 1 (or 
 
 ## Standards
 
-IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
+IEC 60942:2017, *Electroacoustics — Sound calibrators*: the
 calibrator level and class assumptions behind `sensitivity()` (the 94 dB
 principal level and the Table 1 class tolerances) and the short-term
 level-fluctuation stability check of the reference recording (5.3.3, Table 2

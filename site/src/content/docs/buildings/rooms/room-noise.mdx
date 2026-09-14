@@ -64,7 +64,7 @@ criteria) fixes the instrument, the height and the clearances.
 
 **The instrument and the quantity.** The measured quantity is
 $L_{\mathrm{EQ}}$ per octave band, taken with an **integrating-averaging**
-meter — not a needle read by eye. Clause 5.1.1 sets the floor for the
+meter (not a needle read by eye). Clause 5.1.1 sets the floor for the
 A-weighted criteria at a meter meeting at least the **class 2** requirements
 of ANSI/ASA S1.4 Part 3 / IEC 61672-3; use a class 1 chain when the result
 will be argued over. There are two admissible geometries: characterise a
@@ -72,9 +72,9 @@ will be argued over. There are two admissible geometries: characterise a
 or characterise the **whole space**, in which case the microphone is swept
 slowly around it at **not more than 0.5 m/s for not less than 20 s**.
 
-**Where the microphone goes.** At the occupants' ear height —
+**Where the microphone goes.** At the occupants' ear height:
 **1.6 m** standing and **1.2 m** seated for adults, **1.1 m** and **0.75 m**
-for children — and no closer than **0.6 m** to any reflecting surface,
+for children; and no closer than **0.6 m** to any reflecting surface,
 **1.2 m** to the intersection of two, or **2.4 m** to the intersection of
 three. The standoff rule is the one that bites in a small room: a microphone
 tucked into a corner sees pressure doubling in the low bands and can add
@@ -95,15 +95,15 @@ awkward: at those wavelengths "pressure doubling may occur well beyond the
 standoff distances given above", so a scan of a large space can come back
 biased high; and "the lower the frequency, the narrower the bandwidth, and
 hence, the greater the temporal fluctuation", so a short integration in a
-16 Hz octave — only about 11 Hz wide — scatters. Use instrumentation with a
+16 Hz octave (only about 11 Hz wide) scatters. Use instrumentation with a
 genuine response below 20 Hz, fit a windscreen even indoors, integrate for
 long enough, and if the lowest bands are still suspect, report from 31.5 Hz
 and say so. Both bands are load-bearing here: the RC tag and the NC
 out-of-range label are read from them.
 :::
 
-The octave-band arithmetic behind the input spectrum — filters, weighting,
-energetic averaging — is in
+The octave-band arithmetic behind the input spectrum (filters, weighting,
+energetic averaging) is in
 [Levels](/phonometry/signals/levels/levels/) and
 [Filter Banks](/phonometry/signals/filters/filter-banks/).
 
@@ -131,7 +131,7 @@ and for **large random fluctuations** *before* computing either rating:
 Exceed any of those and large random fluctuations are indicated. A field that
 fails either screen belongs to the **RNC** method of clause 5.3, which needs a
 time series rather than a single spectrum and which this module does not
-implement — so `noise_criterion` and `room_criterion` would return a number
+implement, so `noise_criterion` and `room_criterion` would return a number
 that is not the standard's answer for that room. Both functions assume the
 screen has passed.
 :::
@@ -200,7 +200,7 @@ meeting rooms where the low-frequency noise had already been severe enough to
 require remedial work on the HVAC system. So the procedure is diagnostic, not
 pass/fail: more than 9 dB over the curve in any one of the 63, 125 or 250 Hz
 bands means complaints strong enough to require remedial action are *likely*.
-The table's footnote adds the other half of the story — in some of those same
+The table's footnote adds the other half of the story: in some of those same
 rooms the 31.5 Hz levels were high enough to indicate clearly perceptible
 vibration and rattle, which is the condition behind the $RV$ tag this module
 does not implement.
@@ -230,7 +230,7 @@ when a band at or below 500 Hz exceeds the curve by more than 5 dB, **hiss**
 
 None of those four shape rules is arbitrary. The **−5 dB per octave** slope is
 the balance point at which a broadband ventilation background is heard as
-bland rather than boomy or hissy — close enough to the ear's own falling
+bland rather than boomy or hissy, close enough to the ear's own falling
 sensitivity that the spectrum carries no timbre of its own, which is why
 Annex D was derived from 68 offices where nobody complained. The **55 dB
 floor** on the low RC numbers exists because below it the question stops being
@@ -267,7 +267,7 @@ print((spl - target).round(1))   # [ 2.  2.  4.  7.  7.  2.  0. -1. -1. -1.]
 
 That last line is the number a specification is written against: band by band,
 how far the room sits above or below "RC-35(N)". `rc_curve` accepts any index,
-while Table D.1 tabulates RC-25 to RC-50 only — which is what
+while Table D.1 tabulates RC-25 to RC-50 only, which is what
 `RCResult.out_of_family` flags.
 
 The strong low-frequency content of this spectrum lifts the 63–250 Hz bands
@@ -344,7 +344,7 @@ by the tag deviation tests.
 ### What rating a room should meet
 
 A rating on its own is not an answer, and the standard knows it: S12.2 pairs
-each method with an informative table of recommended criteria by occupancy —
+each method with an informative table of recommended criteria by occupancy:
 an A-weighted table (Annex C, Table C.1), an NC/RNC table (Annex C, Table C.2,
 which clause 5.2.6 points at) and an RC Mark II table (Annex D, Table D.2). A
 specification normally cites one of them, or a national equivalent. Anchors
@@ -365,12 +365,12 @@ from the NC/RNC table:
 | Hotel service support areas | 40–50 |
 
 These are **informative** and **unoccupied** values, with the noise of human
-activity excluded, and the RC table adds `(N)` to every entry — only a neutral
+activity excluded, and the RC table adds `(N)` to every entry: only a neutral
 spectrum should normally be accepted as a specification (clause D.3.1). Read
 them as ranges: a rating inside the range complies, and the governing band
 tells you where the margin is thinnest. They are also written for **steady**
-noise, so an intermittent source is assessed separately and — per the screen
-at the head of section 1 — a fluctuating or surging one is not assessed by
+noise, so an intermittent source is assessed separately and, per the screen
+at the head of section 1, a fluctuating or surging one is not assessed by
 these methods at all.
 
 ### The two numbers are not on the same scale
@@ -378,7 +378,7 @@ these methods at all.
 The spectrum of section 1 rates **NC-42.5** and the same spectrum in section 2
 rates **RC-35**. Nothing went wrong: they are different scales and must never
 be substituted for one another. NC by tangency is set by the single worst
-band wherever it falls — here the 250 Hz rumble — while the RC number is the
+band wherever it falls (here the 250 Hz rumble), while the RC number is the
 arithmetic mean of the 500, 1000 and 2000 Hz levels and ignores everything
 else in its numeric part, moving the character of the spectrum into the tag
 instead. A rumbly spectrum therefore always rates worse on NC than on RC, and
@@ -470,7 +470,7 @@ occupants. A hiss tag (`H`, more than 3 dB over at or above 1000 Hz)
 points at the terminal end: diffuser and grille face velocities or a
 throttled damper close to the outlet, and it is the range that masks
 speech. A neutral tag (`N`) means the level can still be wrong, but the
-character is right: reduce the whole spectrum rather than reshape it — which
+character is right: reduce the whole spectrum rather than reshape it, which
 usually means more room absorption rather than more duct lining, so it hands
 the problem to
 [Reverberation-time prediction](/phonometry/buildings/rooms/reverberation-prediction/)
@@ -538,8 +538,8 @@ repository; click a preview to open the PDF.
 
 <Scope>
 <ScopeClaim status="covered" label="Covered">
-ANSI/ASA S12.2-2019 Table 1 and clauses 5.2.2/5.2.3 — the NC-(SIL) designation
-and the tangency method with its governing band — through
+ANSI/ASA S12.2-2019 Table 1 and clauses 5.2.2/5.2.3 (the NC-(SIL) designation
+and the tangency method with its governing band) through
 `room.noise_criterion`; and the informative Annex D RC Mark II family of Table
 D.1 (`room.rc_curve`) with the clause D.4 mid-frequency-average rating and the
 clause D.3 neutral/rumble/hiss tag, through `room.room_criterion`. Both work

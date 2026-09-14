@@ -103,15 +103,15 @@ $K_{ij}$ is a property of the junction alone, and that is the whole point of it.
 It is the average of the two velocity level differences measured across the
 junction, corrected for the coupling length and for the equivalent absorption
 lengths of the two elements, so the same junction carries the same $K_{ij}$
-whatever building it is built into — which is what lets a catalogue of junction
-types exist. Bigger is better: $K_{ij}$ enters Formula (28a) with a plus sign, so
+whatever building it is built into (which is what lets a catalogue of junction
+types exist). Bigger is better: $K_{ij}$ enters Formula (28a) with a plus sign, so
 a high value is a junction that does not pass vibration on. The ranges are worth
 carrying in your head. A rigid cross junction of similar masses sits around
 8–13 dB and a rigid T junction about 3 dB lower (Annex E.3.2/E.3.3 give
 $K_{13} = 8{,}7 + 17{,}1M + 5{,}7M^2$ and $5{,}7 + 14{,}1M + 5{,}7M^2$); the
 corner and thickness-change junctions of Annex E.3.6 fall to $15M - 3$ dB
 (floored at $-2$ dB) and $5M^2 - 5$ dB, so at the worked example's mass ratio
-they return 0,1 dB and $-4{,}8$ dB — a junction that hides nothing; and a
+they return 0,1 dB and $-4{,}8$ dB, a junction that hides nothing; and a
 resilient interlayer or a lightweight double-leaf junction can exceed 20 dB
 (the same mass ratio through a `flexible_t` gives 20,9 dB). That upper range is
 what makes the internal wall of the worked example below almost invisible: it is
@@ -122,7 +122,7 @@ simplified model the Annex E values are read once, at 500 Hz, and stand in for a
 quantity that is only approximately frequency-independent.
 
 The mass argument is the place readers come unstuck. The Annex E fits are
-quadratic in $M = \lg(m'_{\perp,i}/m'_i)$ — the base-ten **logarithm** of the
+quadratic in $M = \lg(m'_{\perp,i}/m'_i)$: the base-ten **logarithm** of the
 mass ratio, with $m'_i$ the element carrying the path and $m'_{\perp,i}$ the
 perpendicular element of the junction (Formula E.3). The library takes the
 **mass ratio itself** and forms $M$ internally, so `mass_ratio=1.61` means the
@@ -131,7 +131,7 @@ is accepted, so passing an already-logged value returns a plausible but wrong
 answer: `junction_vibration_reduction("rigid_cross", "through", 0.2068)` returns
 $-0{,}3$ dB where the answer is 12,5 dB. And because $m'_i$ is the element *in
 the transmission path*, the same junction has a different mass ratio for
-$K_{13}$ and for $K_{12}$ — the ratio is per path, not per junction.
+$K_{13}$ and for $K_{12}$: the ratio is per path, not per junction.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_junction_catalogue.svg" alt="The Annex E junction catalogue: rigid cross, rigid T, T with a flexible interlayer, corner, thickness change and a lightweight double-leaf wall meeting a homogeneous floor, each with its elements numbered, its path branches coloured, the coupling length marked and the mass ratio worked for one panel" width="92%" />
 
@@ -143,7 +143,7 @@ worked example, `path='through'` gives 12,5 dB and `path='corner'` 8,9 dB.
 
 *Per-path indices above, share of transmitted energy below. The direct path is
 the strongest single contributor at 33 %, yet two thirds of what arrives in the
-receiving room has gone around the wall — which is the 5 dB between
+receiving room has gone around the wall, which is the 5 dB between
 $R_\mathrm{s,w} = 57$ dB and $R'_\mathrm{w} = 52$ dB. The dashed line is the assembled $R'_\mathrm{w}$,
 which necessarily sits below every individual path.*
 
@@ -229,8 +229,8 @@ path is visible.
 **Read the split as a budget, because that is the practical yield of the whole
 model.** The direct path is the largest single contributor here and it still
 carries only 33 % of the transmitted energy: two thirds of what arrives has gone
-*around* the wall. So perfecting the separating wall — making it infinitely good,
-not merely better — removes at most a third of the total, which is
+*around* the wall. So perfecting the separating wall (making it infinitely good,
+not merely better) removes at most a third of the total, which is
 $-10\lg(1 - 0.33) = 1.8$ dB. Specifying a heavier partition on this construction
 would be wasted money; the floor, the ceiling and the façade carry the rest, and
 a junction detail or a lining on *them* is what moves the answer. The rule
@@ -295,7 +295,7 @@ careful reader still gets wrong.
 
 The physics behind the halving is that two linings in series on the same
 vibrational path are not independent: the second one operates on a field the
-first has already reduced, so its full rating — measured on a bare element — is
+first has already reduced, so its full rating (measured on a bare element) is
 not available a second time. ISO 12354-2 Clause 4.3.3 carries the same rule where
 a floor covering and a receiving-side lining coexist. The direct path takes its
 own combined $\Delta R_\mathrm{Dd,w}$ through `delta_r_direct`.
@@ -309,10 +309,10 @@ $\Delta L_\mathrm{w}$ (ISO 717-2) and the flanking correction $K$ from Table 1.
 EN 12354-2:2000 one, which condenses all flanking transmission into the single
 tabulated correction $K$ read from the separating and mean flanking masses.
 ISO 12354-2:2017 reorganised the same simplified model into explicit per-path
-formulae — $L_\mathrm{n,d,w} = L_\mathrm{n,eq,0,w} - \Delta L_\mathrm{w} - \Delta L_\mathrm{d,w}$ (15) for
+formulae: $L_\mathrm{n,d,w} = L_\mathrm{n,eq,0,w} - \Delta L_\mathrm{w} - \Delta L_\mathrm{d,w}$ (15) for
 the direct path and, for each flanking path,
 $L_{\mathrm{n},ij,\mathrm{w}} = L_\mathrm{n,eq,0,w} - \Delta L_\mathrm{w} + (R_{i,\mathrm{w}} - R_{j,\mathrm{w}})/2 - \Delta R_{j,\mathrm{w}} -
-K_{ij} - 10\log_{10}(S_i/l_0 l_{ij})$ (16) — so **the Table 1 correction is
+K_{ij} - 10\log_{10}(S_i/l_0 l_{ij})$ (16): **the Table 1 correction is
 not in the current text at all**, even though the underlying physics and the
 accuracy statement are unchanged. The 2017 edition also states a field of
 application the 2000 text left implicit (Clause 4.3.1): the simplified model
@@ -329,7 +329,7 @@ $164 - 35\lg(m'/m'_0)$ is not a theory: it is a regression fitted to measured
 band. It works inside it because a bare massive slab's impact level is set by its
 mass and by the roughly constant loss factor of masonry construction. It fails
 outside it because a light or ribbed floor radiates through its own resonances
-rather than as a damped homogeneous plate — so the closed form is meaningless for
+rather than as a damped homogeneous plate, so the closed form is meaningless for
 a hollow-core, beam-and-block or joisted deck at any mass, and an extrapolation
 for a 900 kg/m² vault. The $m'$ it wants is the mass of the **bare structural
 floor**, without covering and without ceiling; the covering's effect is
@@ -467,8 +467,8 @@ about arithmetic.
   double-leaf partition beside a concrete floor is explicitly named as the case
   where the accuracy may be less.
 - **Dwelling-scale geometry.** It applies mainly to dwellings whose element
-  dimensions are similar to those of a test facility. Move far from that — a
-  hall, a plant room, a very long junction — and the deviation grows.
+  dimensions are similar to those of a test facility. Move far from that (a
+  hall, a plant room, a very long junction) and the deviation grows.
 - **Adjacent rooms only.** Clause 4.2.4 restricts the whole family to
   transmission between rooms that share the separating element, and secondary
   paths crossing more than one junction are neglected. Where the source is
@@ -488,7 +488,7 @@ the model's. Annex E.3.1 states four things the page's lookup does not show.
 Data exist only for junctions where the elements on either side **in the same
 plane have the same mass**. The measured points scatter by a typical **±3 dB**
 about the printed lines, and "in some cases the deviation can be much larger due
-to variations in junction details and in workmanship" — which is larger than the
+to variations in junction details and in workmanship", which is larger than the
 ~2 dB of the whole model, so on most real predictions the junction input, not the
 summation, dominates the error. The $K_{ij}$ values were deduced so that the
 estimated junction velocity level difference is right *on average*, which puts
@@ -496,8 +496,8 @@ them generally **5 dB below** the direction-averaged junction velocity level
 difference, so a measured $D_{v,ij}$ cannot be substituted for a $K_{ij}$ without
 that step. And the frequency independence holds "at least in the frequency range
 from 125 Hz to 2 000 Hz"; outside it the frequency effect can be larger. The way
-out is measured data: ISO 10848-4 for heavy junctions — which Annex E.3.1 itself
-recommends gathering at national level — and the
+out is measured data: ISO 10848-4 for heavy junctions (which Annex E.3.1 itself
+recommends gathering at national level) and the
 [flanking laboratory](/phonometry/buildings/insulation/flanking-lab/) where the
 junction is lightweight, non-homogeneous or simply not in the catalogue.
 

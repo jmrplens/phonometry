@@ -95,8 +95,8 @@ a radiation factor. Each method guide walks its routes in turn.
 
 **Two members of the ISO 3740 family are missing from that table on purpose.**
 ISO 3743-1 and ISO 3743-2 reach engineering grade on *small movable* sources in
-a hard-walled or a specially reverberant test room — the route most appliance
-noise test codes call for — and neither is implemented here. In practice, for
+a hard-walled or a specially reverberant test room (the route most appliance
+noise test codes call for), and neither is implemented here. In practice, for
 a small appliance, ISO 3744 over a hemisphere in the same room is usually
 available at the same grade. Their in situ relative, ISO 3747, is in the table
 and has its own guide, [Sound Power in Situ by Comparison](/phonometry/devices/emission/sound-power-in-situ/):
@@ -113,8 +113,8 @@ and is drawn on its own page.
 All eight deliver the same quantity, and the last one gets there without a
 microphone. The claim that they *agree* is checkable, and worth checking once:
 the block below drives one synthetic source through three of the routes and
-compares their spectra. It is not a reproduction of the diagram above — a setup
-diagram has no matplotlib equivalent — but a cross-check you can run.
+compares their spectra. It is not a reproduction of the diagram above (a setup
+diagram has no matplotlib equivalent), but a cross-check you can run.
 
 <details>
 <summary>Show three routes computed on one source</summary>
@@ -161,7 +161,7 @@ plt.show()
 ### Before the method: the operating and mounting conditions
 
 Choosing a route is the second decision. The first is what, exactly, is being
-measured — and for most machine families it has already been made for you. A
+measured, and for most machine families it has already been made for you. A
 **noise test code** is the type C standard for one family of machines: it fixes
 the basic determination standard, the microphone array, the mounting and the
 operating mode, and it overrides the general specifications of ISO 3744 or
@@ -174,7 +174,7 @@ Two rules from ISO 3744 clause 6 decide whether a determination is repeatable at
 all. **Auxiliary equipment** shall be outside the test environment if it can be;
 what cannot be removed or adequately quietened is counted as *part of the source*
 and the reference box grows to enclose it. And the **mounting** shall be the
-typical one, used or simulated — resilient mounts only if the machine is
+typical one, used or simulated: resilient mounts only if the machine is
 resiliently mounted in the field, because a small machine that is a poor
 low-frequency radiator on its own becomes a good one through a large panel it is
 bolted to.
@@ -225,9 +225,9 @@ order; the first match names the standard.
    an environment that destroys a capsule, an enclosure with no room for a
    surface: when no acoustic measurement is possible, the surface-velocity route
    estimates the same quantity from accelerometers on the casing
-   (ISO/TS 7849-1 and -2). It answers a subtly different question — it
+   (ISO/TS 7849-1 and -2). It answers a subtly different question: it
    characterises what the *structure* radiates, and stays blind to sound
-   escaping through openings, intakes and gaps — and it costs a radiation factor
+   escaping through openings, intakes and gaps, and it costs a radiation factor
    you must either assume (Part 1, an upper limit) or measure once (Part 2).
 6. **How repeatable is the machine itself?** None of the above bounds
    $\sigma_\text{omc}$, and on a process machine it can outrank the whole grade
@@ -264,8 +264,8 @@ the honest number is the one the declaration has to absorb.
 an interval and reports a *rate* of energy flow, so it characterises the machine
 only if the machine is time-invariant over that interval. A cyclic machine is
 admissible when the averaging time spans a whole number of cycles, and the cycle
-then becomes part of the declared operating condition. For a single event — one
-press stroke, one door slam — the descriptor is not $L_W$ at all but the **sound
+then becomes part of the declared operating condition. For a single event (one
+press stroke, one door slam), the descriptor is not $L_W$ at all but the **sound
 energy level $L_J$**, the same surface integral taken over the event rather than
 per second, defined in the same clauses of ISO 3741, ISO 3744 and ISO 3746 and
 determined by `sound_energy_pressure` over the [enveloping
@@ -332,7 +332,7 @@ A declaration takes one of two alternative forms (clause 4):
 
 $K_{W\mathrm{A}}$ combines the measurement (reproducibility) and, for a batch, the
 production spread; for a single machine $K = 1.645\,\sigma_\mathrm{R}$ (Annex A.2.2),
-where 1.645 is the 95 % one-sided quantile of the normal distribution — the
+where 1.645 is the 95 % one-sided quantile of the normal distribution: the
 declared value is an upper limit, so only one tail is being covered. A
 [`NoiseEmissionDeclaration`](/phonometry/reference/api/power/sound-power/)
 holds one or more per-operating-mode declarations and renders the ISO 4871
@@ -388,7 +388,7 @@ emission.NoiseEmissionDeclaration(
 Verification is a separate measurement, made by somebody else. One machine of
 the declared type is measured, giving a single level $L_1$, and the declaration
 holds when $L_1$ does not exceed the declared value (clause 6.2). That is the
-`verification_level` argument — a number the manufacturer does not supply.
+`verification_level` argument: a number the manufacturer does not supply.
 
 What makes such a measurement admissible is clause 6.1, and it is the part most
 often skipped: the verification shall follow the **same noise test code** as the
@@ -402,8 +402,8 @@ The rounding is a trap of its own. A **single-number** declaration is verified
 against $L_{W\mathrm{Ad}}$, the unrounded sum $L_{W\mathrm{A}} + K_{W\mathrm{A}}$ rounded once; a
 **dual-number** declaration is verified against
 $\mathrm{round}(L_{W\mathrm{A}}) + \mathrm{round}(K_{W\mathrm{A}})$, which can differ by a whole
-decibel. The library exposes both verdicts separately — `verified` for the
-single-number rule and `verified_dual` for the dual-number one — so a
+decibel. The library exposes both verdicts separately: `verified` for the
+single-number rule and `verified_dual` for the dual-number one, so a
 dual-number declaration must be read from the second, not from the first.
 
 One caveat on the first snippet above: it passes
@@ -414,7 +414,7 @@ illustration of the plumbing, not of a verification.
 The other two arguments deserve their provenance. `emission_pressure_level` is
 the A-weighted **emission sound pressure level** $L_{p\mathrm{A}}$ at the work station,
 determined by ISO 11201 (essentially free field), ISO 11202 (survey, with an
-environmental correction) or ISO 11204 (with local corrections) — none of which
+environmental correction) or ISO 11204 (with local corrections): none of which
 is implemented here, so it arrives as a measured value from elsewhere, taken
 under the same installation and operating conditions as the sound power.
 `basic_standards` names the determination standards behind those two numbers,
@@ -467,8 +467,8 @@ ISO 3746, ISO 3741 and ISO 3747, each on its own page; ISO 3745 defines none.
 The emission sound pressure level $L_{p\mathrm{A}}$ that
 stands beside $L_{W\mathrm{A}}$ in a declaration is consumed, not determined: ISO
 11201, ISO 11202 and ISO 11204 are outside the library. ISO 4871's batch
-criteria of clause 6.3 are not evaluated — only the clause 6.2 single-machine
-verification — and its batch statistics beyond the single-machine
+criteria of clause 6.3 are not evaluated: only the clause 6.2 single-machine
+verification, and its batch statistics beyond the single-machine
 $K = 1.645\,\sigma_\mathrm{R}$ case (Annex A.2.2) are stated, not derived.
 </ScopeClaim>
 </Scope>

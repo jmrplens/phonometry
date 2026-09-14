@@ -159,7 +159,7 @@ STI can itself be measured with the STIPA tools in the
 [Speech Transmission Index guide](../../perception/speech/speech-transmission.md).
 
 Two things stay outside the function. The fourth required single number, the
-average A-weighted background noise $L_{p,\mathrm{A,B}}$, is not computed here — it is
+average A-weighted background noise $L_{p,\mathrm{A,B}}$, is not computed here. It is
 the energetic A-weighted average of the per-position octave-band background
 levels, and it belongs in the report alongside the quantities this page
 produces. And nothing checks the measurement conditions of clauses 5.1 and

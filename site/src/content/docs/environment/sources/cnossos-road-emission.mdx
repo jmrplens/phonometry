@@ -141,8 +141,8 @@ plt.show()
 
 </details>
 
-**What a road source is worth.** This urban arterial — 1 200 light, 90 medium
-heavy, 45 heavy vehicles and 60 motorcycles per hour at 50 km/h — comes out at
+**What a road source is worth.** This urban arterial (1 200 light, 90 medium
+heavy, 45 heavy vehicles and 60 motorcycles per hour at 50 km/h) comes out at
 **84,2 dB(A) per metre of line**; the free-flowing motorway link of section 6
 (1 000 light and 120 heavy vehicles per hour at 90 and 80 km/h) reaches
 **88,6 dB(A) per metre**. Those are the two magnitudes to check your own result
@@ -150,7 +150,7 @@ against. The arithmetic behind them is worth holding on to: doubling the flow
 adds exactly 3 dB, while halving the speed adds 3 dB to the flow term
 $10\log_{10}(Q/1000v)$ and subtracts from the rolling term, so the two partly
 cancel and an urban link is only a few decibels below a motorway one. The
-spectrum says which mechanism is in charge — the motorway peaks at 1 kHz because
+spectrum says which mechanism is in charge: the motorway peaks at 1 kHz because
 rolling noise leads, the arterial peaks at 63 Hz and stays flatter, because at
 50 km/h with heavy vehicles and a junction 60 m away the propulsion term has
 taken over. The check a reader can run on either: `a_weighted_line_power` must
@@ -168,7 +168,7 @@ decibels. This is where each of them is read from.
 | Argument | What it means | Where it is read from | The trap |
 | :--- | :--- | :--- | :--- |
 | `RoadTraffic.flow_rate` ($Q_m$) | Vehicles of category $m$ per hour | Yearly average per hour, per time period (day / evening / night), per vehicle class and **per source line**, from traffic counting or a traffic model (2.2.1) | A peak-hour count. $Q$ is an annual average for the period, which is what makes the result an $L_\mathrm{den}$ ingredient |
-| `RoadTraffic.speed` ($v_m$) | Representative speed of category $m$ | In most cases the **lower** of the legal maximum for the road section and the legal maximum for the vehicle category; where local measurement data is unavailable, the legal maximum for the category (2.2.1) | Assuming a measured average is required. It is not — the standard's default *is* the legal limit, and heavy vehicles usually take a lower one than the section |
+| `RoadTraffic.speed` ($v_m$) | Representative speed of category $m$ | In most cases the **lower** of the legal maximum for the road section and the legal maximum for the vehicle category; where local measurement data is unavailable, the legal maximum for the category (2.2.1) | Assuming a measured average is required. It is not: the standard's default *is* the legal limit, and heavy vehicles usually take a lower one than the section |
 | `temperature_c` ($\tau$) | Air temperature | The **yearly average** air temperature of the period, from long-term meteorological data (2.2.10) | The survey-day value. At $K_1 = 0{,}08$ dB/°C, a 12 °C annual mean against a 20 °C afternoon is 0,6 dB on the light-vehicle rolling term |
 | `RoadTraffic.studded_fraction`, `studded_months` ($Q_{\mathrm{stud,ratio}}$, $T_\mathrm{s}$) | Fleet share and season | The average ratio of light vehicles per hour fitted with studded tyres **during** the months they are fitted, and the number of those months; the method forms $p_\mathrm{s} = Q_{\mathrm{stud,ratio}}\,T_\mathrm{s}/12$ itself (2.2.7) | Passing the year-averaged share, which applies $T_\mathrm{s}/12$ twice |
 | `junction_distance` ($x$) | Distance to the junction | Measured along the road from the point source to the nearest **intersection of this source line with another source line** (2.2.5) | Measuring to the stop line or the kerb. It is the line crossing, and only the last 100 m is affected |
@@ -181,7 +181,7 @@ Two consequences worth stating outright. First, the temperature has to belong to
 the *same* period as $Q$ and $v$: a night flow paired with an annual mean
 temperature and a night speed is what makes the resulting line power an $L_\mathrm{den}$
 ingredient rather than a snapshot of one evening. Second, the source line is a
-modelling object, not a lane marking — moving it from the lane centre to the
+modelling object, not a lane marking: moving it from the lane centre to the
 kerb changes every propagation distance downstream of it.
 
 ## 3. Rolling noise (2.2.4 to 2.2.10)
@@ -229,7 +229,7 @@ zero from $|x| \ge 100$ m.
 the line power. The temperature term is the only one that is exactly linear and
 the only one that changes sign; the studded term is a saturating band between 50
 and 90 km/h; and the junction term is not monotone, because the negative rolling
-coefficient and the positive propulsion coefficient taper together — for a
+coefficient and the positive propulsion coefficient taper together. For a
 crossing the deepest reduction is around 50 m, not at the junction.*
 
 <details>
@@ -354,7 +354,7 @@ correct one half uphill and the other downhill.
 each saturates at ±12 %, and both branches rise: downhill the engine brakes,
 uphill it works. At 80 km/h a 14 % descent is worth 6.0 dB(A) to a light
 vehicle and 11.2 dB(A) to a heavy one, while the same climb is worth 5.3 and
-12.0 dB(A) — and the light-vehicle downhill branch is the only one of the six
+12.0 dB(A), and the light-vehicle downhill branch is the only one of the six
 that does not scale with speed.*
 
 <details>
@@ -392,7 +392,7 @@ are not extrapolated into a queue. The flow term keeps the *true* speed, so the
 two halves of (2.2.1) pull in opposite directions and the line power has a
 minimum. For 1 000 light vehicles per hour on the reference surface,
 `road_source_power` returns 81,5 dB(A) per metre at 50 km/h, **76,2 at 20 km/h**,
-79,2 at 10 km/h and 82,2 at 5 km/h — the same road gets *louder* per metre as the
+79,2 at 10 km/h and 82,2 at 5 km/h; the same road gets *louder* per metre as the
 stream slows below the floor, purely because more vehicles are on each metre of
 it. A reader who does not know the floor cannot tell that from a modelled
 congestion effect.
@@ -436,7 +436,7 @@ row.beta["1"]            # -0.1, the speed coefficient
 *The reference surface is the zero line, so every curve reads directly as
 "louder or quieter than the CNOSSOS reference": the two-layer porous asphalt is
 6,3 dB below it at 1 kHz, hard elements not laid in herringbone are 31,4 dB above
-it at 63 Hz. The declared speed range in the legend is part of the row — a porous
+it at 63 Hz. The declared speed range in the legend is part of the row: a porous
 asphalt validated from 80 to 130 km/h is not a coefficient set for a 30 km/h
 street, the reference row alone carries no range, and the method offers no
 interpolation between rows.*
@@ -515,7 +515,7 @@ road = 10 * np.log10(energy)
 
 Two rules make a segmentation defensible, and neither is method: 2.5.3 declares
 the split out of scope, so this is engineering practice. Each segment must be
-short enough that the point source at its centre stands for the whole segment —
+short enough that the point source at its centre stands for the whole segment.
 ISO 9613-2 allows one equivalent point source only where the propagation
 distance exceeds twice the largest source dimension, so a segment seen from
 100 m may be tens of metres long while one seen from 10 m may not. And the road

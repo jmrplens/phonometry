@@ -806,11 +806,11 @@ for absolute scaling of the two channels.
 
 ## See also
 
-- [Sound Power by Intensity Scanning](sound-power-intensity.md) — the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
-- [Sound Power](sound-power.md) — choosing between the intensity, pressure and reverberation-room routes.
-- [Sound power from surface vibration](vibration-sound-power.md) — the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
-- [Calibration](../../signals/metrology/calibration.md) — the absolute scaling of the two channels the estimator assumes.
-- [Theory: signal analysis](../../reference/theory/signal-analysis.md) — the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
+- [Sound Power by Intensity Scanning](sound-power-intensity.md): the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
+- [Sound Power](sound-power.md): choosing between the intensity, pressure and reverberation-room routes.
+- [Sound power from surface vibration](vibration-sound-power.md): the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
+- [Calibration](../../signals/metrology/calibration.md): the absolute scaling of the two channels the estimator assumes.
+- [Theory: signal analysis](../../reference/theory/signal-analysis.md): the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
 - API reference: [`emission.intensity`](https://jmrplens.github.io/phonometry/reference/api/power/intensity/).
 - Theory: [Sound intensity (IEC 61043)](../../reference/theory/signal-analysis.md#sound-intensity-iec-61043): the finite-difference approximation behind a p-p probe and the errors it commits.
 
@@ -864,9 +864,9 @@ actions, the equation (B.3) confidence interval, the Table 2 uncertainty and
 the optional concentration procedure of clause 8.3.2.
 
 **Not covered.** The residual-intensity *test* of IEC 61043 is not performed
-here: $\delta_{pI0}$ is a
-value the caller measures on their own probe-and-analyser chain, with the
-spacer that will be fitted, and supplies — what the library does with the
-number is grade it against Table 2. The before-use check of clause 14 and the
-ISO 9614-2 probe-reversal test are procedures, not functions.
+here: $\delta_{pI0}$ is a value the caller measures on their own
+probe-and-analyser chain, with the spacer that will be fitted, and supplies:
+what the library does with the number is grade it against Table 2. The
+before-use check of clause 14 and the ISO 9614-2 probe-reversal test are
+procedures, not functions.
 

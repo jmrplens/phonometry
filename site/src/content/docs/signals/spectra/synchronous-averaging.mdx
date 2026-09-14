@@ -33,7 +33,7 @@ of periodic waveforms by time domain averaging* (1987).
 
 *Two things worth reading separately. Left, the $\sqrt N$ law doing its work:
 the noise on one period has an rms of 0.83, and after 40 averages the averaged
-waveform departs from the true one by 0.138 rms — a factor 6.0 against the
+waveform departs from the true one by 0.138 rms, a factor 6.0 against the
 $\sqrt{40} = 6.32$ the law predicts. Right, the choice that costs nothing: at
 order 32.05 the comb of $N = 20$ is 6×10⁻¹⁴, while the habitual power of two
 $N = 32$ still passes 0.19 of the interfering tone. Twenty averages beat
@@ -238,7 +238,7 @@ $N$.
 
 Everything above takes $T$ as given. In a real measurement $T$ has to be
 *measured*, and the assumption hiding behind a scalar `period_s` is that the shaft
-holds that period for the whole record — which is the dominant failure mode of
+holds that period for the whole record, which is the dominant failure mode of
 the technique and fails silently.
 
 **Getting the period.** Instrument the shaft with a once-per-revolution pulse: an
@@ -257,19 +257,19 @@ $$
 \left|\frac{\sin(\pi k N \delta)}{N \sin(\pi k \delta)}\right| ,
 $$
 
-so the loss grows with the harmonic number **and** with the number of averages —
+so the loss grows with the harmonic number **and** with the number of averages:
 exactly the two things one wants large. Keeping that loss under 1 dB needs
 roughly $k N \delta < 0.25$. Averaging 40 revolutions and expecting the 10th
 harmonic intact therefore demands the period be right to better than
 $0.25/(10 \times 40) = 6.3 \times 10^{-4}$, that is **0.06 % speed stability**;
 the 20th order at $N = 40$ demands 0.03 %. A machine holding speed to 1 % loses
 everything above the first order or two, progressively, and the resulting
-waveform looks smooth — which reads as a healthy gear.
+waveform looks smooth, which reads as a healthy gear.
 
 **The remedies, in order.** Take the period from the tacho rather than from the
 nameplate; slice on the measured pulse intervals (one average per speed plateau
-if the speed steps); angularly resample the record against the tacho — order
-tracking — before averaging when the speed drifts continuously; and failing all
+if the speed steps); angularly resample the record against the tacho (order
+tracking) before averaging when the speed drifts continuously; and failing all
 three, average fewer revolutions and accept the $\sqrt{N}$ penalty, because a
 short average at the right period beats a long average at the wrong one.
 
@@ -287,14 +287,14 @@ number of averages will remove it.
   and hides the mesh harmonics the average exists to show.
 - **Sample rate from the content you want to keep.** A 37-tooth pinion at
   1800 r/min meshes at $37 \times 30 = 1110$ Hz, so keeping five mesh harmonics
-  needs $f_\mathrm{s} \ge 2.56 \times 5550 = 14.2$ kHz — 16 kHz in practice, 25.6 kHz on
+  needs $f_\mathrm{s} \ge 2.56 \times 5550 = 14.2$ kHz: 16 kHz in practice, 25.6 kHz on
   an analyser that offers it.
 - **Record length of $N+1$ revolutions**, with $N$ chosen by the
   interfering-order rule of section 3 rather than by habit.
 - **Both channels on one simultaneously sampling front end**, at a gain fixed
   for the whole run: a channel skew shifts every block boundary and rotates the
   averaged waveform.
-- **Record the operating point** — speed, load, oil temperature — because a TSA
+- **Record the operating point**: speed, load, oil temperature, because a TSA
   waveform is comparable only with another taken at the same one.
 
 ## 4. Non-integer samples per period
@@ -352,9 +352,9 @@ the strong gear components no longer mask the modulation.
 
 What comes out of that chain is a set of *lines*, and the diagnosis is carried
 by their frequencies rather than by their amplitudes. The kinematic families of
-the machine — ball-pass frequency outer and inner race, ball spin, cage,
+the machine (ball-pass frequency outer and inner race, ball spin, cage,
 gear-mesh frequency and its shaft-rate sidebands, blade passing, motor slip and
-pole pass — are computed from the geometry and the shaft speed and drawn onto
+pole pass) are computed from the geometry and the shaft speed and drawn onto
 the measured envelope spectrum at
 [machine fault frequencies](/phonometry/vibration/machinery/machine-diagnostics/).
 Because those families are expressed in *orders of the shaft*, the same tacho

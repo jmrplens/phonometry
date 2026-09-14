@@ -93,8 +93,8 @@ print(round(float(fn.values[3]), 1))             # 32.4 dB, regenerated L_W at 5
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_end_reflection.svg" alt="Duct end reflection loss per octave band for flush duct terminations of 150, 300 and 600 mm diameter: the reflection back up the duct grows steeply towards low frequency and shrinks with duct size, exceeding 17 dB at 63 Hz for the 150 mm duct and vanishing above 1 kHz" width="88%" />
 
-*The open end of a duct reflects low-frequency energy back up the run — for
-free, before any silencer: the smaller the duct against the wavelength, the
+*The open end of a duct reflects low-frequency energy back up the run: for
+free, before any silencer, the smaller the duct against the wavelength, the
 larger the loss, which is why small diffuser necks tame low-frequency fan
 rumble and why the correction must not be double-counted when a manufacturer's
 diffuser data already includes it.*
@@ -200,9 +200,9 @@ panel. The sound power carries $50\log_{10}U$, so the velocity term alone costs
 delivered band levels of this duct rise by 15.6 dB at 63 Hz and 21.6 dB at
 4 kHz between 10 and 20 m/s. The fiche below passes its 45 dB(A) requirement at
 12 m/s with 38.8 dB(A); the same duct at 17 m/s returns 48.1 dB(A) and fails,
-with no other change. Hence the customary design velocities — roughly 7 to
+with no other change. Hence the customary design velocities: roughly 7 to
 10 m/s in plant-room mains, 4 to 5 m/s in branches and 2 to 3 m/s in the last
-run before an occupied room — and hence the rule that oversizing ductwork is
+run before an occupied room. Hence the rule that oversizing ductwork is
 the cheapest silencer there is. What the model returns is a **sound power
 level for one element**: it has to be entered into a path calculation and
 combined on a power basis with everything else, which is what
@@ -226,7 +226,7 @@ drawn above ($r = 1.2$ m, $S_\mathrm{w} = 6$ m², $\alpha = 0.2$) the two are 0.
 0.667, so the reverberant term rules: doubling the line of sight to 2.4 m buys
 0.9 dB and swinging the outlet a full radian off the inlet axis buys 0.6 dB,
 while raising the lining absorption from 0.2 to 0.6 buys 4.2 dB. Line it first.
-Once it *is* lined the balance inverts — at $\alpha = 0.6$ the reverberant term
+Once it *is* lined the balance inverts: at $\alpha = 0.6$ the reverberant term
 falls to 0.111, below the direct one, and the same two geometric moves are now
 worth 3.0 dB and 1.8 dB, 19.0 dB against 15.2 dB when both are made. The
 practical order is therefore: line the plenum, then take the outlet off the
@@ -272,8 +272,8 @@ interpolates the table.
 
 An `HvacSpectrumResult` also files itself: `.report()` renders a one-page
 duct-noise fiche with the per-band table beside the spectrum, the boxed
-single-number result — the A-weighted sound power level when the spectrum is
-regenerated noise, the mean attenuation when it is a loss — and, when a
+single-number result (the A-weighted sound power level when the spectrum is
+regenerated noise, the mean attenuation when it is a loss), and, when a
 `requirement` is declared, the verdict against it: a maximum $L_{W\mathrm{A}}$ in the
 first case, a minimum mean attenuation in the second.
 
@@ -311,7 +311,7 @@ repository; click the preview to open the PDF.
 An enclosure is a construction, and every symbol in the equation below is a
 feature of it. This is the fiche case at the end of the section, drawn: 24 m²
 of exposed shell, 30 m² of interior surface at a mean absorption of 0.30, and
-the four elements — door, penetration, cooling openings, machine mounting —
+the four elements (door, penetration, cooling openings, machine mounting)
 that decide whether it delivers what the panels promise.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_enclosure.svg" alt="Section through a close-fitting machine enclosure 3.0 m long and 1.8 m high standing on a slab, its wall drawn as three layers (sheet-steel mass, absorbent lining, perforated facing). Inside, the machine stands on vibration isolators clear of the shell. A hinged access door of 1.28 square metres and 15 dB transmission loss carries a compression seal at top and bottom and an unsealed 0.24 square metre gap at its foot. A cable and pipe entry passes through a sealed sleeve in the roof, a short lined duct takes cooling air out of the roof and another brings it in through the right-hand wall. The footer prints IL = R minus C with C = 3.4 dB, a mean insertion loss of 28.9 dB for the sealed shell, 21.4 dB with the door and 15.1 dB once the gap is added, against the 20 dB cap the open area sets" width="92%" />
@@ -345,7 +345,7 @@ $R_\mathrm{i} = 2.14$ m² and $C = +4.9$ dB, well on the losing side, which is w
 unlined or lightly lined box always sits; break-even here would need
 $\alpha_\mathrm{i} = 0.63$. Because $R_\mathrm{i}$ rises steeply as $\alpha_\mathrm{i}$ approaches one, the
 step from $\alpha_\mathrm{i} = 0.3$ to $0.7$ is a factor of five in $R_\mathrm{i}$ and
-$+4.9 \to -0.9$ dB in $C$ — **5.8 dB of insertion loss for the price of the
+$+4.9 \to -0.9$ dB in $C$: **5.8 dB of insertion loss for the price of the
 lining**. Note that `model="norton"` drops the $0.3$ and therefore has no floor,
 so the two models agree while the interior is hard and diverge once it is well
 lined (2.0 dB apart at $\alpha_\mathrm{i} = 0.7$ for this box).
@@ -460,8 +460,8 @@ at $R = 15$ dB in the 24 m² shell above pulls the mean composite $R$ from
 **bare opening**
 of relative area $S_\mathrm{a}/S_\mathrm{E}$ caps the composite at $10\log_{10}(S_\mathrm{E}/S_\mathrm{a})$ no
 matter what the panels are: one per cent of open area caps it at 20 dB, ten per
-cent at 10 dB. Add a 0.24 m² gap at the door foot — one per cent of this shell,
-the width of a badly hung door — and the fiche's 28.9 dB becomes 15.1 dB.
+cent at 10 dB. Add a 0.24 m² gap at the door foot (one per cent of this shell,
+the width of a badly hung door), and the fiche's 28.9 dB becomes 15.1 dB.
 
 The combination is the area-weighted energy sum, and a bare opening enters it
 with $R = 0$ ($\tau = 1$):
@@ -501,7 +501,7 @@ That is why a door seal, a cable sleeve and a gasketed panel joint are design
 elements with their own $R$ and not details. Cooling openings cannot simply be
 sealed either: an enclosed machine has to breathe, so the inlet and the outlet
 become short lined ducts or splitter silencers whose own insertion loss must
-exceed the panel's — the models are in section 1 and in
+exceed the panel's; the models are in section 1 and in
 [Silencers](/phonometry/devices/noise-control/silencers/). The slit and
 circular-aperture transmission models that give a gap its own frequency-
 dependent $R$ are in
@@ -522,8 +522,8 @@ measured by **ISO 11546-1:1995** under laboratory conditions, for declaration,
 and **ISO 11546-2:1995** in situ, for acceptance and verification. Both are
 substitution measurements of one shape: determine the sound power level (or the
 sound pressure level at a specified position) **with** the enclosure and again
-**without** it, and report the difference band by band —
-$D_W = L_W(\text{without}) - L_W(\text{with})$, ISO 11546-1 Equation (1) — over
+**without** it, and report the difference band by band:
+$D_W = L_W(\text{without}) - L_W(\text{with})$, ISO 11546-1 Equation (1), over
 at least 100 Hz to 5 kHz in third octaves or 125 Hz to 4 kHz in octaves, 50 Hz
 to 10 kHz and 63 Hz to 8 kHz being preferred (clause 6.2).
 
@@ -539,7 +539,7 @@ difference without either being converted (clause 6.1.4). And the **test
 environment** has to be good enough for the sound-power standard chosen from
 Table 1: ISO 11546-2 Table C.1 asks for an environmental correction
 $K_2 \le 2$ dB and a signal at least 6 dB above the background for ISO 3744,
-against $K_2 \le 7$ dB and 3 dB for the survey-grade ISO 3746 — which is the
+against $K_2 \le 7$ dB and 3 dB for the survey-grade ISO 3746, which is the
 practical ceiling on how large a measured insertion loss can be in a workshop.
 Verify the whole chain with a class 1 calibrator to $\pm 0.3$ dB before and
 after each series (clause 5).
@@ -575,7 +575,7 @@ tubes) have moved to
 [Silencers](/phonometry/devices/noise-control/silencers/), and dissipative
 duct-lining silencers are not modelled from liner properties anywhere: the
 lined-elbow figure here is a table lookup (Bies Table 8.11) and the plenum is
-Wells' closed form driven by a declared mean absorption — neither is a liner
+Wells' closed form driven by a declared mean absorption: neither is a liner
 model.
 `enclosure_insertion_loss` never predicts the panel transmission loss $R$
 itself; you supply it measured or from another model, and the module only

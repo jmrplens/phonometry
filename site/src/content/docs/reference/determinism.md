@@ -165,7 +165,7 @@ and
 
 ## See also
 
-- [Conformance report](/phonometry/reference/conformance/) — what the numbers are checked against; this page is why the checks read the same everywhere.
-- [Errata in published sources](/phonometry/reference/errata/) — the other half of the evidence story: where the printed expected value is the thing that is wrong.
-- [Frequency weightings](/phonometry/signals/levels/weighting/) — the guide to the curves the deterministic design realises.
-- [Block processing](/phonometry/signals/filters/block-processing/) — the streaming identity the scope section leans on.
+- [Conformance report](/phonometry/reference/conformance/): what the numbers are checked against; this page is why the checks read the same everywhere.
+- [Errata in published sources](/phonometry/reference/errata/): the other half of the evidence story: where the printed expected value is the thing that is wrong.
+- [Frequency weightings](/phonometry/signals/levels/weighting/): the guide to the curves the deterministic design realises.
+- [Block processing](/phonometry/signals/filters/block-processing/): the streaming identity the scope section leans on.

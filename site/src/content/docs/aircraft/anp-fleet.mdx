@@ -106,7 +106,7 @@ and engine mounting, because those change the *shape* of the answer rather than
 shifting it; check that the substitute's `power_parameter` is the same quantity
 as the original's, since a table indexed by corrected net thrust in pounds
 cannot take power settings computed for one indexed by anything else. Record the
-substitution with the results — it is a modelling assumption, not a detail. The
+substitution with the results (it is a modelling assumption, not a detail). The
 same reasoning applies one level down: a type whose NPD curves are tabulated but
 whose trajectory is not (see section 3) is usually better modelled with a
 substitute *trajectory* and its own NPD table than by substituting the whole
@@ -126,7 +126,7 @@ in power, which is what the curves below draw.
 the level, while distance sets the shape. The fall is close to the
 inverse-square rate at short range and steepens at long range as absorption
 accumulates, and the markers are the only distances at which the database
-asserts anything — everything between them is Doc 29 interpolation.*
+asserts anything: everything between them is Doc 29 interpolation.*
 
 <details>
 <summary>Show the code for this figure</summary>
@@ -167,7 +167,7 @@ print(curves.powers)                       # [10000. 14000. 19000. 23000.] lb
 print(curves.level(19000.0, [304.8, 1000.0, 3000.0]))
 ```
 
-The record's `power_parameter` names those units — never assume newtons.
+The record's `power_parameter` names those units: never assume newtons.
 
 The distances are metres. The database tabulates them in feet, at the ten Doc 29
 nodes from 200 ft to 25000 ft, and this bridge converts on read so everything
@@ -219,7 +219,7 @@ aircraft.load_anp_database().aircraft("747100").profile("D", stage_length=1).plo
 The **stage length** selects the trip-distance bin: a longer stage means more
 fuel, more weight and a shallower climb, so the same aircraft has one profile
 per bin. Doc 29 Vol. 2 Appendix G3.5 defines the bins by trip length in nautical
-miles — 1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, 5 is
+miles: 1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, 5 is
 2 500-3 500, 6 is 3 500-4 500, 7 is 4 500-5 500, and so on in 1 000 nmi steps to
 10 (7 500-8 500), with 11 for anything longer and "M" for maximum range at
 maximum take-off mass. The take-off weight of each profile is computed at the
@@ -349,7 +349,7 @@ The observer is `(x, y, z)` in metres in the **runway frame**, and the origin
 of that frame is not the airport boundary: $x$ runs along the runway centre
 line with $x = 0$ at start of roll for a departure and at the landing threshold
 for an arrival, so arrival profiles carry negative $x$ on final approach. The
-shipped data says it plainly — `db.profile("747100", "D", 1).path[0]` starts at
+shipped data says it plainly: `db.profile("747100", "D", 1).path[0]` starts at
 $x = 0$ (brake release) and ends 39.5 km downrange, while
 `db.profile("707", "A", 1).path[0]` starts at $x = -34.9$ km and ends 1.5 km
 past the threshold, so the two frames are nearly 35 km apart. $y$ is the lateral

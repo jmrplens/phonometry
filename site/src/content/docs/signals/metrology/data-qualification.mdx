@@ -57,7 +57,7 @@ say whether averaging is allowed.
 ## 0. Before the tests: validating the record
 
 Bendat & Piersol's Section 10.3 covers three activities and this module
-implements one of them. *Qualification* — the tests below — asks whether a
+implements one of them. *Qualification*, the tests below, asks whether a
 record is stationary. *Validation* asks whether it is a record of the thing at
 all, and it comes first, because every defect in the list below either fails the
 stationarity test for the wrong reason or, worse, passes it. Validation stays
@@ -95,7 +95,7 @@ Gaussian record must have.
 Alongside the numbers, the acquisition metadata has to travel with the file or
 none of this is reconstructible later: sample rate, bit depth, gain setting,
 the [calibration factor](/phonometry/signals/metrology/calibration/) and the take
-it came from, microphone and windscreen, and — outdoors — wind speed and
+it came from, microphone and windscreen, and (outdoors) wind speed and
 temperature. The rule is simply that validation precedes qualification: edit or
 reject first, then test for stationarity.
 
@@ -193,8 +193,8 @@ stationary record in twenty is rejected by construction, so screening the 31
 one-third-octave bands of a perfectly stationary record produces one or two
 rejections as the *expected* outcome. A single failing band is therefore not
 evidence of anything; a run of adjacent failing bands, or a failure of the
-broadband record, is. `alpha=` is the knob — tighten it when many bands are
-screened, loosen it when one record must be qualified conservatively — and the
+broadband record, is. `alpha=` is the knob: tighten it when many bands are
+screened, loosen it when one record must be qualified conservatively. The
 acceptance bounds move with it, because they come from the exact null
 distribution rather than from a table lookup.
 
@@ -298,15 +298,16 @@ Two design consequences follow, and they point in opposite directions to the
 obvious move. To see a *smaller* drift, lengthen the **record**, not the segment
 count: the scatter falls as $1/\sqrt{T_\text{seg}}$ while the trend stays put,
 so splitting the same record into more segments makes each one noisier. And keep
-$T_\text{seg}$ well above $1/B$ — at least $BT = 5$ per interval, and no fewer
-than ten cycles of the lowest frequency of interest — or the segment values stop
-being independent and the tabulated acceptance region no longer applies. A
+$T_\text{seg}$ well above $1/B$: at least $BT = 5$ per interval, and no fewer
+than ten cycles of the lowest frequency of interest. Otherwise, the segment
+values stop being independent and the tabulated acceptance region no longer
+applies. A
 20-segment test of a record band-limited to 20 Hz and above therefore needs
 intervals of at least 0.5 s, and so a record of at least 10 s.
 
 One shape of nonstationarity escapes this test by construction: a source that
-alternates between two steady states — a machine that loads and unloads, traffic
-in platoons — produces a non-monotonic segment sequence that the reverse
+alternates between two steady states (a machine that loads and unloads, traffic
+in platoons) produces a non-monotonic segment sequence that the reverse
 arrangement test can happily accept while the record is plainly not stationary.
 That is what `method="runs"` in section 3 is for, and the honest answer is
 usually to split the record by state (`segment_times` shows where) and qualify
@@ -539,7 +540,7 @@ wide.*
 Finally, the low-frequency half of the same argument, which section 4 opened with
 and never returned to: **the Rice formulas are written for a zero-mean process**.
 Subtract the record mean and high-pass away everything below the physically
-meaningful band before counting — 20 Hz for an audio-band acoustic record, the
+meaningful band before counting: 20 Hz for an audio-band acoustic record, the
 transducer's own lower cut-off for a vibration record. Wind and building rumble
 sit almost entirely in $m_0$ and contribute almost nothing to $m_2$, so they
 inflate $\sigma_x$ while leaving $\sigma_v$ alone and bias $N_0$ and every

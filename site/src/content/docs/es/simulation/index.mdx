@@ -114,7 +114,7 @@ frecuencia **más baja**. La ejecución debe durar lo suficiente para que el cam
 atraviese el dominio, y para una respuesta en régimen permanente lo suficiente
 para que el transitorio se haya ido antes de que se abra la ventana de análisis.
 El coste es celdas por pasos, así que partir por la mitad el tamaño de celda
-cuesta ocho veces más en 2D — un factor cuatro en celdas y un factor dos en
+cuesta ocho veces más en 2D: un factor cuatro en celdas y un factor dos en
 pasos. La página acústica da los números de cada eslabón, y la página elástica
 añade el muestreo extra que exigen las superficies libres y las ondas de
 interfase.
@@ -142,8 +142,8 @@ dice en su propia apertura.
 **Dos dimensiones, y no hay forma de esquivarlo.** Todo lo que una sección 2D
 no puede decir de una sala 3D, no lo dice ninguno de los dos esquemas, y la
 divergencia cilíndrica de más arriba es solo la consecuencia más visible. El
-contorno abierto es una capa absorbente de rampa cuadrática — el precursor
-sencillo de una capa perfectamente adaptada, no una PML —, así que la
+contorno abierto es una capa absorbente de rampa cuadrática (el precursor
+sencillo de una capa perfectamente adaptada, no una PML), así que la
 incidencia rasante se absorbe menos limpiamente que la normal, y el esquema
 elástico no tiene ninguna PML elástica, lo que más se nota en las ondas de
 Rayleigh rasantes. El medio no se mueve: **el viento y la advección por flujo

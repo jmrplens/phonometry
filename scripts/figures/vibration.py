@@ -795,17 +795,17 @@ def generate_vibration_weighting_family(output_dir: str) -> None:
     # comparable at all. Grouped by the part of the family each belongs to.
     freqs = np.geomspace(0.05, 1500.0, 900)
     curves = (
-        ("Wk", "Wk — seat surface, vertical (ISO 2631-1)", COLOR_PRIMARY, "-", 2.4),
-        ("Wd", "Wd — seat surface, horizontal", COLOR_PRIMARY, "--", 1.6),
-        ("Wc", "Wc — backrest, x", COLOR_PRIMARY, (0, (1, 1, 3, 1)), 1.6),
-        ("We", "We — rotational (per rad)", "#9467bd", "-.", 1.6),
-        ("Wj", "Wj — recumbent, under the head", "#9467bd", ":", 1.8),
-        ("Wm", "Wm — building occupants, all axes (ISO 2631-2)", "#ff7f0e", "-", 1.8),
-        ("Wb", "Wb — rail ride comfort, vertical (ISO 2631-4)", "#ff7f0e", "--", 1.6),
-        ("Wf", "Wf — motion sickness, vertical", COLOR_TERTIARY, "-", 2.0),
+        ("Wk", "Wk: seat surface, vertical (ISO 2631-1)", COLOR_PRIMARY, "-", 2.4),
+        ("Wd", "Wd: seat surface, horizontal", COLOR_PRIMARY, "--", 1.6),
+        ("Wc", "Wc: backrest, x", COLOR_PRIMARY, (0, (1, 1, 3, 1)), 1.6),
+        ("We", "We: rotational (per rad)", "#9467bd", "-.", 1.6),
+        ("Wj", "Wj: recumbent, under the head", "#9467bd", ":", 1.8),
+        ("Wm", "Wm: building occupants, all axes (ISO 2631-2)", "#ff7f0e", "-", 1.8),
+        ("Wb", "Wb: rail ride comfort, vertical (ISO 2631-4)", "#ff7f0e", "--", 1.6),
+        ("Wf", "Wf: motion sickness, vertical", COLOR_TERTIARY, "-", 2.0),
         (
             "Wh",
-            "Wh — hand-transmitted, all three axes (ISO 5349-1)",
+            "Wh: hand-transmitted, all three axes (ISO 5349-1)",
             COLOR_SECONDARY,
             "-",
             2.4,
@@ -1327,7 +1327,7 @@ def generate_spinal_response_peaks(output_dir: str) -> None:
     ax_p.set_ylabel(r"$A_\mathrm{z}$ [m/s²]")
     ax_p.set_xlabel("Time [s]")
     ax_p.set_title(
-        f"(b)  Each peak's share of $\\sum A_{{\\mathrm{{z}},i}}^6$ — "
+        f"(b)  Each peak's share of $\\sum A_{{\\mathrm{{z}},i}}^6$, "
         f"dose $D_\\mathrm{{z}}$ = "
         f"{dose:.1f} m/s²",
         fontsize=10,

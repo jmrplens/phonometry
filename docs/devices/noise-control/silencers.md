@@ -207,7 +207,7 @@ a 2D FDTD duct at its 285.8 Hz tuning frequency and at 150 Hz side by
 side. On tune the closed-end pressure ratchets up over about six periods
 to 8.2 times the incident wave (the lossless branch at exact resonance
 would reach ten); off tune it settles at 1.5 times immediately and never
-charges — the charge has the percent-wide bandwidth $f/Q$, while the
+charges; the charge has the percent-wide bandwidth $f/Q$, while the
 lossless TL spike is hertz-wide. The clip also reports the trim procedure
 once on screen: built at the drilled 300 mm, the simulated device rings at
 272.9 Hz, an effective length $c/4f = 314$ mm, the junction end correction
@@ -375,13 +375,13 @@ from the declared geometry. The figure a supplier publishes is an **insertion
 loss measured by substitution** to ISO 7235:2003: two series with everything
 else unchanged, one with the test object installed and one with a substitution
 duct in its place, differenced third octave by third octave as
-`D_i = L_pII - L_pI`. The rig carries its own requirements — a sealed, lined
+`D_i = L_pII - L_pI`. The rig carries its own requirements: a sealed, lined
 loudspeaker box driving at least 6 dB and preferably 10 dB above the background,
 a modal filter attenuating the fundamental by at least 3 dB and higher-order
 modes by at least 5 dB above cut-on, a substitution duct matched within 5 % in
 every linear dimension, a receiving side with a reflection coefficient no
 greater than 0.3, and at least three microphone positions on a line inclined to
-the duct axis — and every facility has a *limiting insertion loss* set by
+the duct axis, and every facility has a *limiting insertion loss* set by
 flanking along its own duct walls, which caps what it can report at all. A
 computed transmission loss and a catalogue insertion loss are therefore not the
 same quantity and must not be compared directly.
@@ -463,9 +463,9 @@ the insertion loss a supplier publishes.
 silencers are discussed for selection but never modelled from liner properties,
 and in the [HVAC methods](noise-control.md) the lined-elbow figure is a table
 lookup (Bies Table 8.11) and the plenum is Wells' closed form driven by a
-declared mean absorption — neither is a liner model.
-Mean-flow effects — convection, temperature gradients, the
-flow-dependent impedance of perforates — are outside the no-flow element
+declared mean absorption; neither is a liner model.
+Mean-flow effects (convection, temperature gradients, the
+flow-dependent impedance of perforates) are outside the no-flow element
 matrices used here. Nothing on this page is a measurement: the arithmetic of
 ISO 7235 has [a page of its own](silencer-measurement.md), shell breakout and
 the end corrections at the area jumps are not modelled, and the branch models

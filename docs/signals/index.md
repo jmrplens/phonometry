@@ -52,9 +52,9 @@ to anchor them to pascals.
 ## [Build a sound level meter](sound-level-meter.md)
 
 - [Build a sound level meter](sound-level-meter.md): the whole
-  chain assembled on one runnable page — calibration, frequency and time
+  chain assembled on one runnable page (calibration, frequency and time
   weighting, the integrated and statistical levels, the band decomposition and
-  the class verdict of each stage — as the worked introduction to the four
+  the class verdict of each stage) as the worked introduction to the four
   subsections below.
 
 ## [Octave filtering](filters/index.md)

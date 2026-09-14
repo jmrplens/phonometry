@@ -334,7 +334,7 @@ cuello de Helmholtz y solo en el extremo abierto (el del conducto) de un tubo
 de cuarto de onda. El resonador dibujado abajo es el caso de manual: su
 cuello mide 11,3 mm de diámetro ($a = 5{,}64$ mm) y 20 mm de largo, así que
 $l_\mathrm{e} \approx 20 + 2 \times 4{,}8 = 29{,}6$ mm y la sintonía baja de los
-122,1 Hz que devuelve la longitud taladrada a 100,3 Hz — un error del 22 % en
+122,1 Hz que devuelve la longitud taladrada a 100,3 Hz, un error del 22 % en
 una muesca que la figura de abajo enseña que solo tiene unos pocos hercios de
 ancho. Cuanto más corto y más ancho el cuello, mayor es la corrección en
 términos relativos, que es justo el régimen en el que vive un resonador
@@ -581,7 +581,7 @@ delante de la raíz cuadrada de Helmholtz. Para el aire,
 $c(T) = 343\sqrt{T/293}$ con $T$ en kelvin, así que un escape a 500 °C
 (773 K) funciona a unos 557 m/s, un factor 1,62, y el tubo de 0,3 m cortado
 para 285,8 Hz con valores de aire frío canta a 464 Hz en cuanto el tubo se
-calienta. Hay que pasar los valores de trabajo — `speed_of_sound=` y
+calienta. Hay que pasar los valores de trabajo: `speed_of_sound=` y
 `density=`, porque la densidad escala toda impedancia característica y por
 tanto la pérdida por inserción. La llamada con `speed_of_sound=557.0` del
 fragmento del apartado 1 es ese reajuste, y devuelve 464,2 Hz para el mismo
@@ -977,7 +977,7 @@ Solo se calculan elementos reactivos: los silenciadores disipativos
 no se modelan a partir de las propiedades del revestimiento, y en los [métodos
 HVAC](/phonometry/es/devices/noise-control/noise-control/) la cifra de codo
 revestido es una lectura de tabla (la Tabla 8.11 de Bies) y el plenum es la
-forma cerrada de Wells gobernada por una absorción media declarada — ninguno
+forma cerrada de Wells gobernada por una absorción media declarada; ninguno
 de los dos es un modelo de revestimiento. Los efectos del flujo
 medio (convección, gradientes de temperatura, impedancia de los perforados
 dependiente del flujo) quedan fuera de las matrices de elemento sin flujo que

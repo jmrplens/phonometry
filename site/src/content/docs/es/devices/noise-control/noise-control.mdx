@@ -96,7 +96,7 @@ print(round(float(fn.values[3]), 1))             # 32.4 dB, L_W regenerada a 500
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/hvac_end_reflection.svg" alt="Pérdida por reflexión del extremo del conducto por banda de octava para terminaciones enrasadas de 150, 300 y 600 mm de diámetro: la reflexión de vuelta al conducto crece con fuerza hacia baja frecuencia y disminuye con el tamaño del conducto, superando 17 dB a 63 Hz para el conducto de 150 mm y desapareciendo por encima de 1 kHz" width="88%" />
 
 *El extremo abierto de un conducto refleja energía de baja frecuencia de vuelta
-por el conducto — gratis, antes de cualquier silenciador: cuanto más pequeño
+por el conducto: gratis, antes de cualquier silenciador, cuanto más pequeño
 es el conducto frente a la longitud de onda, mayor es la pérdida, lo que
 explica que los cuellos de difusor pequeños domen el retumbo de baja frecuencia
 del ventilador, y por qué la corrección no debe contarse dos veces cuando los
@@ -209,9 +209,9 @@ hacia arriba los niveles por banda que entrega este conducto suben 15,6 dB a
 63 Hz y 21,6 dB a 4 kHz entre 10 y 20 m/s. La ficha de más abajo cumple su
 requisito de 45 dB(A) a 12 m/s con 38,8 dB(A); ese mismo conducto a 17 m/s
 devuelve 48,1 dB(A) y no cumple, sin ningún otro cambio. De ahí las velocidades
-de diseño habituales — del orden de 7 a 10 m/s en los colectores de sala de
+de diseño habituales (del orden de 7 a 10 m/s en los colectores de sala de
 máquinas, de 4 a 5 m/s en los ramales y de 2 a 3 m/s en el último tramo antes
-de un local ocupado — y de ahí la regla de que sobredimensionar el conducto es
+de un local ocupado), y de ahí la regla de que sobredimensionar el conducto es
 el silenciador más barato que existe. Lo que devuelve el modelo es un **nivel de
 potencia acústica de un solo elemento**: hay que meterlo en un cálculo de
 trayecto y combinarlo en energía con todo lo demás, que es lo que hace
@@ -283,9 +283,9 @@ interpola la tabla.
 
 Un `HvacSpectrumResult` también se archiva solo: `.report()` genera una ficha de
 ruido de conducto de una página, con la tabla por banda junto al espectro, el
-resultado de número único en su recuadro — el nivel de potencia acústica
+resultado de número único en su recuadro (el nivel de potencia acústica
 ponderado A cuando el espectro es ruido regenerado, la atenuación media cuando
-es una pérdida — y, cuando se declara un `requirement`, el veredicto frente a
+es una pérdida), y, cuando se declara un `requirement`, el veredicto frente a
 él: un $L_{W\mathrm{A}}$ máximo en el primer caso, una atenuación media mínima en el
 segundo.
 
@@ -324,8 +324,8 @@ el repositorio; pulsa la vista previa para abrir el PDF.
 Un cerramiento es una construcción, y cada símbolo de la ecuación de abajo es un
 rasgo suyo. Este es el caso de la ficha del final del apartado, dibujado: 24 m²
 de envolvente expuesta, 30 m² de superficie interior con una absorción media de
-0,30, y los cuatro elementos — puerta, pasamuros, aberturas de refrigeración y
-apoyo de la máquina — que deciden si entrega lo que prometen los paneles.
+0,30, y los cuatro elementos (puerta, pasamuros, aberturas de refrigeración y
+apoyo de la máquina) que deciden si entrega lo que prometen los paneles.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_machine_enclosure.svg" alt="Sección de un cerramiento de máquina ajustado, de 3,0 m de largo y 1,8 m de alto, apoyado sobre una solera, con la pared dibujada en tres capas (masa de chapa de acero, revestimiento absorbente y chapa perforada). Dentro, la máquina se apoya sobre aisladores de vibración sin tocar la envolvente. Una puerta de acceso abatible de 1,28 metros cuadrados y 15 dB de pérdida de transmisión lleva una junta de compresión arriba y abajo y una rendija sin sellar de 0,24 metros cuadrados a sus pies. Una entrada de cables y tuberías atraviesa un pasamuros sellado en la cubierta, un conducto revestido corto saca el aire de refrigeración por la cubierta y otro lo introduce por la pared derecha. El pie de figura imprime IL = R menos C con C = 3,4 dB, una pérdida por inserción media de 28,9 dB para la envolvente sellada, 21,4 dB con la puerta y 15,1 dB una vez añadida la rendija, frente al tope de 20 dB que fija el área abierta" width="92%" />
 
@@ -477,7 +477,7 @@ $R = 15$ dB en la envolvente de 24 m² de arriba baja el $R$ compuesto medio de
 **abertura desnuda** de área relativa $S_\mathrm{a}/S_\mathrm{E}$ limita el compuesto a
 $10\log_{10}(S_\mathrm{E}/S_\mathrm{a})$ sean cuales sean los paneles: un 1 % de área abierta la
 limita a 20 dB, y un 10 % a 10 dB. Añade una rendija de 0,24 m² a los pies de la
-puerta — el 1 % de esta envolvente, el ancho de una puerta mal colgada — y los
+puerta (el 1 % de esta envolvente, el ancho de una puerta mal colgada), y los
 28,9 dB de la ficha se quedan en 15,1 dB.
 
 La combinación es la suma energética ponderada por área, y una abertura desnuda
@@ -542,8 +542,8 @@ según la **ISO 11546-2:1995** in situ, para aceptación y verificación. Las do
 son mediciones por sustitución con una misma forma: se determina el nivel de
 potencia acústica (o el nivel de presión acústica en una posición especificada)
 **con** el cerramiento y otra vez **sin** él, y se informa la diferencia banda a
-banda — $D_W = L_W(\text{sin}) - L_W(\text{con})$, ISO 11546-1 Fórmula (1) —
-al menos de 100 Hz a 5 kHz en tercios de octava o de 125 Hz a 4 kHz en octavas,
+banda: $D_W = L_W(\text{sin}) - L_W(\text{con})$, ISO 11546-1 Fórmula (1), al
+menos de 100 Hz a 5 kHz en tercios de octava o de 125 Hz a 4 kHz en octavas,
 siendo preferibles de 50 Hz a 10 kHz y de 63 Hz a 8 kHz (apartado 6.2).
 
 Cuatro condiciones deciden si el resultado significa algo. La **fuente** debería
@@ -597,7 +597,7 @@ tubos extendidos) se han trasladado a
 silenciadores disipativos con revestimiento interior no se modelan a partir de
 las propiedades del revestimiento en ninguna parte: la cifra de codo revestido
 de esta página es una lectura de tabla (la Tabla 8.11 de Bies) y el plenum es
-la forma cerrada de Wells gobernada por una absorción media declarada —
+la forma cerrada de Wells gobernada por una absorción media declarada:
 ninguno de los dos es un modelo de revestimiento.
 `enclosure_insertion_loss` nunca predice la pérdida de transmisión de panel
 $R$; se aporta medida o de otro modelo, y el módulo solo la combina con la

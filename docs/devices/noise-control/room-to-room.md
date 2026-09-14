@@ -335,8 +335,8 @@ slab, and the equation's answer becomes an upper bound.
 The clip below draws what the equation leaves out. The chain of section 3
 prices the direct path only, the **Dd** route through the partition; the
 other three pulses leave the source room over the flanking walls, floor or
-ceiling — **Ff** flank to flank, **Fd** flank to partition, **Df** partition
-to flank — and re-radiate on the far side without ever passing through the
+ceiling (**Ff** flank to flank, **Fd** flank to partition, **Df** partition
+to flank) and re-radiate on the far side without ever passing through the
 transmission loss the calculation used. Each path shrinks at every element
 and junction it crosses, which is why no single one has to be large for the
 sum of the three to dominate a good partition.
@@ -381,8 +381,8 @@ whole answer - should be read as an estimate and not as a number.
 **Covered.** The Norton & Karczub §4.9 power balance (Eq. 4.101) as
 `room_to_room_transmission`, with `SourceRoom`, `equivalent_absorption_area`,
 `mean_absorption` and `room_constant`; the source-room level from a sound power
-level through the §4.6 Table 4.5 source models — constant power, constant
-volume, constant pressure — and the directivity of the machine's position;
+level through the §4.6 Table 4.5 source models (constant power, constant
+volume, constant pressure) and the directivity of the machine's position;
 `DesignCriterion` with its target, its flanking allowance and its ANSI/ASA
 S12.2-2019 rating, NC by default and RC Mark II with
 `DesignCriterion(family="RC")`, plus `.required_transmission_loss`,

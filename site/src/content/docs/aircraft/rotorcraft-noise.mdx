@@ -95,7 +95,7 @@ with holes. Doc 32 requires coverage of at least $-60° \le \varphi \le 60°$
 and the polar angles between the two 10 dB-down instants; measuring wider
 lateral angles, or polar angles approaching 0° and 180°, needs a more elaborate
 setup. The gap-filling of Eq. 6/7 is the direct consequence of that limit, not
-an implementation detail — outside the measured patch the level is the nearest
+an implementation detail; outside the measured patch, the level is the nearest
 filled bin's, and the energetic average of them where several are equally near.
 
 The condition matrix a database should span is fixed by Doc 32 §4.1: hemispheres
@@ -114,8 +114,8 @@ target's; where certification levels are unavailable or several classes qualify,
 weight becomes the governing parameter and the best-matching class *below* the
 type's weight is taken, with the level offset $\Delta\mathrm{EPNL}$ set to zero
 so the estimate stays conservative. Within a class, the offset is the difference
-in registered certification levels — take-off, overflight and approach levels
-correcting the climb, level and descent conditions respectively — and it enters
+in registered certification levels: take-off, overflight and approach levels
+correcting the climb, level and descent conditions respectively, and it enters
 here as `level_offset`.
 
 ## The noise hemisphere
@@ -283,10 +283,10 @@ distance-dependent adjustments as `reference_distance=h.distance`.
 
 Read the ground curve as three regions. At low frequency the direct ray and its
 ground reflection arrive almost in phase, so the level approaches 6 dB above
-free field — 5.3 dB at 50 Hz over hard ground in the figure, rising to 5.8 dB.
+free field (5.3 dB at 50 Hz over hard ground in the figure), rising to 5.8 dB.
 The first cancellation sits where the path difference is half a wavelength,
-which for this geometry — the source 150 m up, the microphone 1.5 m and 500 m
-of horizontal offset — falls at 200 Hz and is 13.7 dB deep; it marches upward as
+which for this geometry (the source 150 m up, the microphone 1.5 m and 500 m
+of horizontal offset) falls at 200 Hz and is 13.7 dB deep; it marches upward as
 the aircraft passes overhead, so the adjustment is a moving comb rather than a
 fixed spectrum shape. Over grass the finite impedance rotates the phase of the
 reflected wave and absorbs part of it, so the reinforcement is a little smaller
@@ -308,7 +308,7 @@ grass site wants:
 
 The letters are the CNOSSOS-EU classes of Doc 32 Table 3, in Pa·s/m²: `"A"`
 very soft (snow, moss) at 12.5·10³, `"B"` soft forest floor at 31.5·10³, `"C"`
-uncompacted loose ground — turf, grass, loose soil — at 80·10³, `"D"` normal
+uncompacted loose ground (turf, grass, loose soil) at 80·10³, `"D"` normal
 uncompacted ground such as pasture at 200·10³, `"E"` compacted field and gravel
 at 500·10³, `"F"` compacted dense ground such as a gravel road or car park at
 2·10⁶, `"G"` hard surfaces, most normal asphalt and concrete, at 20·10⁶, and
@@ -321,8 +321,8 @@ ICAO reference conditions and already contains the absorption of the first 60 m,
 which is why only the excess path is corrected; the coefficient for that excess
 path defaults to those same reference conditions (25 °C, 70 % RH, 101.325 kPa)
 unless a `RotorcraftAtmosphere` is passed. The difference is largest exactly
-where a helicopter spectrum still carries energy — the upper third-octave bands
-over long slant paths — so a cold, dry or high-altitude site needs the argument.
+where a helicopter spectrum still carries energy (the upper third-octave bands
+over long slant paths), so a cold, dry or high-altitude site needs the argument.
 `atmospheric_method` selects `"iso9613"` (the default) or `"sae"`; the two agree
 to about 0.05 dB below 3.15 kHz.
 
@@ -360,7 +360,7 @@ library triangulates the normalised
 $(V/\Delta V,\ F_\text{fc}\gamma/\Delta\gamma)$ plane, which keeps the two
 axes comparable for an arbitrary database. The NORAH tables instead ship a
 triangulation of the raw $(V, \gamma)$ plane, and it must be passed as
-`triangles` whenever you are reproducing a NORAH result — because the two
+`triangles` whenever you are reproducing a NORAH result, because the two
 disagree about which simplex encloses a query, and therefore about the blend
 weights.
 
@@ -409,30 +409,30 @@ plt.show()
 A hovering or idling helicopter is measured differently from a flyover: on a
 **ring of ground microphones** around the stationary aircraft (the CAEP
 in-ground hover practice the guidance points at), one band spectrum per ring
-bearing — 0° at the nose, positive to starboard — reduced to the ring's
+bearing (0° at the nose, positive to starboard) reduced to the ring's
 polar distance, commonly 70 m rather than the flyover database's 60 m.
-Guidance §A.3.5 defines four conditions — in-ground hover (HIGE),
-out-of-ground hover (HOGE), reduced-rpm idle and full-rpm idle — and three
+Guidance §A.3.5 defines four conditions: in-ground hover (HIGE),
+out-of-ground hover (HOGE), reduced-rpm idle and full-rpm idle, and three
 approaches in descending priority: measure all four rings; measure the HIGE
 ring and the other three in the 0° direction only; or measure the HIGE ring
 alone and apply fixed offsets.
 
 `hover_ring_hemisphere` extends the ring to a full `RotorcraftHemisphere`
 "assuming constant directivity in φ": each bin $(\varphi, \theta)$ reads the
-ring at the bearing $\pm\theta$ of its own half — port bins from negative
+ring at the bearing $\pm\theta$ of its own half: port bins from negative
 bearings, starboard bins from positive ones, and the $\varphi = 0$ column
-under the aircraft takes the energy mean of the $\pm\theta$ ring values —
+under the aircraft takes the energy mean of the $\pm\theta$ ring values,
 interpolating periodically in the energy domain. The NORAH2 reference
 implementation reads the same ring by the horizontal bearing of the emission
 direction instead (constant directivity in elevation): `mapping="bearing"`
 reproduces it. The two readings coincide on the hemisphere rim and part by
-several dB at steep emission angles — directly beneath the hover the
+several dB at steep emission angles; directly beneath the hover the
 constant-φ reading averages port and starboard where the prototype reads the
 nose bearing.
 
 `hover_derived_hemisphere` then derives HOGE and the idles from the HIGE
 hemisphere by a uniform level offset: a measured 0°-direction difference
-(Approach 2, passed as `offset_db`), or the published Approach 3 constants —
+(Approach 2, passed as `offset_db`), or the published Approach 3 constants:
 +12 dB for HOGE, −12 dB for reduced-rpm idle and −2.5 dB for full-rpm idle,
 all from the HIGE disk. A constant spectral shift moves the A-weighted level
 by exactly that value, which is how Table 3 (stated on $L_\mathrm{A}$ levels) extends
@@ -501,7 +501,7 @@ plt.show()
 
 :::note[The published offsets and the shipped ones]
 The guidance warns that its constants come from measurements with inverted
-microphones on ground plates and may not hold for other setups — and the
+microphones on ground plates and may not hold for other setups, and the
 NORAH2 public database actually ships **+8/−10/−2 dB** in every type's
 interpolation file. Pass those as `offset_db` to reproduce the prototype;
 the published Table 3 constants are the defaults. The Approach 3 prose also
@@ -541,8 +541,8 @@ res = aircraft.rotorcraft_event_level([hige], [0.0], [0.0], t, track, (100.0, 0.
 What stays outside the implementation is §A.3.5's last resort when no hover
 data exists at all: correcting two side-line level-flight microphones to the
 150 m hover circle by the ICAO Annex 16 integrated method, a
-measurement-correction chain this module — which consumes already-reduced
-hemispheres — does not model.
+measurement-correction chain this module, which consumes already-reduced
+hemispheres, does not model.
 
 ## Flight-path kinematics
 
@@ -628,20 +628,20 @@ Three numbers of the same event, and they are not interchangeable. **LASmax** is
 one instant: the largest A-weighted level of the history, and nothing about how
 long the event lasted. **SEL** integrates the whole history and normalises it to
 one second, so it exceeds LASmax by an amount that grows with slant distance and
-falls with speed — for the level flyover below, 60 kt at 150 m over a 120 m
+falls with speed; for the level flyover below, 60 kt at 150 m over a 120 m
 sideline, the gap is 10.3 dB; halve the speed and it grows to 12.2 dB, double
 the height and it grows to 12.5 dB. **EPNL** is a different animal: it is built
 from noy-weighted spectra with a tone correction over the 10 dB-down window
 (Doc 32 Eq. 28, running the [Annex 16 Appendix 2
 chain](/phonometry/aircraft/aircraft-noise/)), so it is not comparable with
-either — for the same event it reads 91.2 EPNdB against a SEL of 88.8 dB(A).
+either; for the same event it reads 91.2 EPNdB against a SEL of 88.8 dB(A).
 Use LASmax and SEL for contour and annoyance work, and EPNL only against
 certification levels.
 
 The shape of the history is worth reading too. Each emission is stamped at
 recorded time $t_\mathrm{r} = t_\mathrm{e} + r/c$, and $r$ is largest far from the closest point
 of approach and smallest at it, so the received history is compressed on the way
-in and stretched on the way out — the curve is asymmetric before any directivity
+in and stretched on the way out; the curve is asymmetric before any directivity
 is involved. Where LASmax actually falls then depends on the hemisphere: with
 the mildly forward-lobed one below it arrives about a second *before* the sound
 emitted at the closest point of approach, because the loudest emission direction
@@ -817,8 +817,8 @@ evaluated separately in that regime.
 
 Whether any of that is worth paying for is a question about wavelengths.
 Screening is governed by the path difference over the obstacle measured in
-wavelengths — the attenuation grows with $\delta/\lambda$ and is capped at
-25 dB — so a metre of path difference is worth little at 100 Hz and a great deal
+wavelengths (the attenuation grows with $\delta/\lambda$ and is capped at
+25 dB), so a metre of path difference is worth little at 100 Hz and a great deal
 at 4 kHz. For a rotorcraft the geometry rarely arises at all: the source is
 normally hundreds of metres up, so the line of sight is broken only for
 receivers far to the side or behind ridges, which is precisely where the levels
@@ -1031,9 +1031,9 @@ operation.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
-The §A.3.5 fallback for a type with no hover data at all — two side-line
+The §A.3.5 fallback for a type with no hover data at all (two side-line
 level-flight microphones corrected to the 150 m hover circle by the ICAO Annex
-16 integrated method — is a measurement-correction chain this module, which
+16 integrated method) is a measurement-correction chain this module, which
 consumes already-reduced hemispheres, does not model. **No hemisphere database
 ships with phonometry, and there is no NORAH file reader**: the method is
 implemented, the data is not, so the arrays come from a measurement campaign

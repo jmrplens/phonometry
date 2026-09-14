@@ -66,7 +66,7 @@ line up: in a plane progressive wave, where $I = p^2/(\rho c)$, the pressure and
 intensity levels agree to within $10\log_{10}(\rho c / 400) = 0.14$ dB at
 ordinary air conditions (IEC 61043 clause 5). That is why the left panel of the
 figure below shows two curves lying on top of each other, and why the
-pressure-intensity index has a floor near 0.14 dB rather than 0 — everything a
+pressure-intensity index has a floor near 0.14 dB rather than 0. Everything a
 field measurement shows above that floor is either a genuinely reactive or
 noise-contaminated field, or the instrument's own phase error.
 
@@ -256,7 +256,7 @@ larger it is, the more measurement positions the surface needs.
 
 $F_4$ is the one that turns into a number of positions, through criterion 2 of
 Annex B, $N > C\,F_4^2$ (Eq. B.2). The factor $C$ is not a constant: Table B.2
-makes it depend on the band **and** on the grade being claimed — about 11 at low
+makes it depend on the band **and** on the grade being claimed: about 11 at low
 frequency rising to 29 in the mid band for engineering grade, and 19 rising to
 57 for precision, with 8 for the A-weighted survey case. So the same field
 non-uniformity asks for roughly twice as many positions at grade 1 as at
@@ -430,7 +430,7 @@ property of the chain, not a specification of the microphones.
 **Before every series (clause 14).** Let the instrument warm up as the
 manufacturer says. In sound-pressure mode, apply a sound calibrator to the two
 microphones, in turn or simultaneously, and adjust to the correct indication
-within **±0,1 dB in both channels** — ISO 9614-2 clause 6.2.1 asks for a class 0
+within **±0,1 dB in both channels**: ISO 9614-2 clause 6.2.1 asks for a class 0
 or class 1 IEC 60942 calibrator here. Then apply the residual-intensity device
 again and confirm that $\delta_{pI0}$ still meets the class requirement over the
 range the device covers, with the manufacturer's phase compensation applied and,
@@ -441,8 +441,8 @@ check that needs no bench and catches the error no bench can see. Place the
 probe on the measurement surface, axis normal, at a position where the intensity
 exceeds the surface mean; record $I_\mathrm{n}$ in every band. Rotate the probe **180°
 about an axis normal to the measurement axis**, keeping the acoustic centre in
-the same place — which in practice means mounting it on a stand rather than
-holding it — and measure again. For the measurement system to be acceptable, in
+the same place, which in practice means mounting it on a stand rather than
+holding it, and measure again. For the measurement system to be acceptable, in
 the band of maximum level **the two values of $I_\mathrm{n}$ must have opposite signs and
 the two intensity levels must differ by less than 1,5 dB**. Read the two failure
 modes as diagnoses: identical signs mean the channels are swapped or one is
@@ -452,7 +452,7 @@ of the test report.
 
 That sign is worth reading in normal use too, not only in the check. A negative
 net intensity over part of an enclosing surface means more power entering that
-patch than leaving it — entirely normal on the shadow side of a machine standing
+patch than leaving it: entirely normal on the shadow side of a machine standing
 beside a louder one, and completely meaningless if the channels are swapped.
 
 ### Grading the instrument: IEC 61043 Table 2
@@ -1021,7 +1021,7 @@ concentration procedure of clause 8.3.2 (`sound_power_intensity_points`,
 <ScopeClaim status="not-covered" label="Not covered">
 The residual-intensity *test* of IEC 61043 is not performed by the library:
 $\delta_{pI0}$ is a value the caller measures on their own probe-analyzer
-chain, with the spacer that will be fitted, and supplies — the procedure is in
+chain, with the spacer that will be fitted, and supplies: the procedure is in
 *Measuring the residual index* above, and what phonometry does with the number
 is grade it against Table 2. The before-use check of clause 14 and the ISO
 9614-2 probe-reversal test are likewise procedures, not functions.
@@ -1032,11 +1032,11 @@ is grade it against Table 2. The before-use check of clause 14 and the ISO
 
 ## See also
 
-- [Sound Power by Intensity Scanning](/phonometry/devices/emission/sound-power-intensity/) — the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
-- [Sound Power](/phonometry/devices/emission/sound-power/) — choosing between the intensity, pressure and reverberation-room routes.
-- [Sound power from surface vibration](/phonometry/devices/emission/vibration-sound-power/) — the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
-- [Calibration](/phonometry/signals/metrology/calibration/) — the absolute scaling of the two channels the estimator assumes.
-- [Theory: signal analysis](/phonometry/reference/theory/signal-analysis/) — the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
+- [Sound Power by Intensity Scanning](/phonometry/devices/emission/sound-power-intensity/): the ISO 9614-2/-3 routes that consume $\delta_{pI}$, the field indicators and the dynamic capability.
+- [Sound Power](/phonometry/devices/emission/sound-power/): choosing between the intensity, pressure and reverberation-room routes.
+- [Sound power from surface vibration](/phonometry/devices/emission/vibration-sound-power/): the ISO/TS 7849-2 radiation factor needs an intensity-measured power.
+- [Calibration](/phonometry/signals/metrology/calibration/): the absolute scaling of the two channels the estimator assumes.
+- [Theory: signal analysis](/phonometry/reference/theory/signal-analysis/): the cross-spectral derivation behind $I(f) = -\mathrm{Im}\{G_{12}\}/(2\pi f \rho_0 \Delta r)$.
 - API reference: [`emission.intensity`](/phonometry/reference/api/power/intensity/).
 - Theory: [Sound intensity (IEC 61043)](/phonometry/reference/theory/signal-analysis/#sound-intensity-iec-61043): the finite-difference approximation behind a p-p probe and the errors it commits.
 

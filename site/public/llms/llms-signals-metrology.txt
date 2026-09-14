@@ -85,8 +85,8 @@ budgets that are specialisations of the GUM machinery described here.
 ## What this section does not cover
 
 Nothing here checks an instrument or a calibrator. The IEC 60942 conformance
-tests of the calibrator itself — generated level, frequency, distortion, and
-the corrections for static pressure and temperature — are not implemented, so
+tests of the calibrator itself (generated level, frequency, distortion, and
+the corrections for static pressure and temperature) are not implemented, so
 pass an already corrected `target_spl` when the manual asks for one, and the
 IEC 61672-3 periodic tests are cited as laboratory practice rather than run;
 [Compliance and
@@ -94,7 +94,7 @@ verification](https://jmrplens.github.io/phonometry/signals/metrology/compliance
 that boundary precisely, part by part. The dBFS half of the calibration page
 sits outside any standard and makes no physical claim: it is a reference
 frame, not a measurement. Data qualification implements the quantitative core
-of Bendat & Piersol's section 10.3 only — classifying a record's type,
+of Bendat & Piersol's section 10.3 only: classifying a record's type,
 validating it against physical limits and editing out glitches remain manual
 steps, as the book describes them. And an uncertainty budget is a model of
 *your* measurement: the library propagates whatever you declare, and never
@@ -205,9 +205,9 @@ calibrator as specified by **IEC 60942** (classes LS, 1 and 2):
   seconds of *stable* tone (excluding handling noise at the start/end) for the
   RMS estimate to converge.
 
-The conformance tests of the calibrator itself — generated level, frequency,
+The conformance tests of the calibrator itself (generated level, frequency,
 distortion, and the environmental corrections for static pressure and
-temperature — are not implemented: when the calibrator's manual asks for a
+temperature) are not implemented: when the calibrator's manual asks for a
 pressure or temperature correction, apply it yourself and pass the corrected
 value as `target_spl`.
 
@@ -416,7 +416,7 @@ You can, but the tolerances chain: a class 1 measurement requires a class 1 (or 
 
 ## Standards
 
-IEC 60942:2017, *Electroacoustics — Sound calibrators* — the
+IEC 60942:2017, *Electroacoustics — Sound calibrators*: the
 calibrator level and class assumptions behind `sensitivity()` (the 94 dB
 principal level and the Table 1 class tolerances) and the short-term
 level-fluctuation stability check of the reference recording (5.3.3, Table 2
@@ -518,8 +518,8 @@ The inputs are sampled independently; the Supplement's multivariate-Gaussian
 path for non-independent quantities (6.4.8) is not implemented, so correlated
 budgets belong to `combine_uncertainty`. The number of trials is fixed (no
 adaptive 7.9 procedure, at least 2 trials) and the interval is the symmetric
-one, not the 5.3.4 shortest interval. Supplement 2 — models with multiple
-output quantities — is not implemented at all.
+one, not the 5.3.4 shortest interval. Supplement 2 (models with multiple
+output quantities) is not implemented at all.
 
 ```python
 from phonometry import metrology
@@ -857,8 +857,8 @@ neither is something a software library can run on itself.
 filters) is the type-approval regime a *model* passes once: the tests
 necessary to verify conformance to **all mandatory specifications** of the
 Part 1 (IEC 61672-2:2013 clause 1; IEC 61260-2:2016 subclause 1.1), on
-physical specimens — IEC 61260-2 requires at least three of them
-(subclause 4.1). That includes everything a transfer function does not have:
+physical specimens (IEC 61260-2 requires at least three of them
+(subclause 4.1)). That includes everything a transfer function does not have:
 static pressure, air temperature and humidity influence, electrostatic and
 radio-frequency immunity, directional response, acoustical tests of the
 weightings with the microphone in the sound field, level linearity of real
@@ -882,7 +882,7 @@ software inherits it. A verdict from one of the five that grade a measurement
 is narrower still: it belongs to the numbers somebody put in, on the day they
 were measured, and nothing else inherits it. Neither is a pattern evaluation,
 a periodic test, or a certificate for any physical device: nothing here has a microphone, a temperature or a serial
-number, and a real front end brings its own paper — the meter's periodic
+number, and a real front end brings its own paper: the meter's periodic
 test per IEC 61672-3 and the calibrator's conformance per IEC 60942, both
 discussed in [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/). A defensible report
 names both verdicts: the library's design verdict with the version and its
@@ -1326,9 +1326,9 @@ conscience.
 
 ## What this guide covers
 
-**Covered.** Bendat & Piersol Section 4.5.2 with Table A.6 — the reverse
+**Covered.** Bendat & Piersol Section 4.5.2 with Table A.6 (the reverse
 arrangement trend test in `trend_test`, its exact and normal-approximation
-p-values and Example 4.4 — the Wald & Wolfowitz (1940) runs test
+p-values and Example 4.4), the Wald & Wolfowitz (1940) runs test
 (`trend_test(method="runs")`), the Section 10.3.1.1 segment mean-square
 stationarity procedure with Example 10.3 (`stationarity_test`), and the
 Rice (1945) level-crossing and peak statistics of Section 5.5

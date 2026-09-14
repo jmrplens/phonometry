@@ -54,8 +54,8 @@ import Video from '../../../../../components/Video.astro';
 
 Dos modelos clásicos predicen el campo sonoro de una sala rectangular antes de
 construirla. El modelo de **fuentes imagen** da el patrón determinista de
-reflexiones tempranas — toda la respuesta al impulso como suma de imágenes
-especulares de la fuente — mientras que el modelo **estacionario** da el nivel
+reflexiones tempranas (toda la respuesta al impulso como suma de imágenes
+especulares de la fuente), mientras que el modelo **estacionario** da el nivel
 estadístico al que se asienta una fuente de potencia conocida, separado en un
 campo directo y otro reverberante. Esta página cubre ambos en
 `phonometry.room`: el primero complementa la respuesta al impulso *medida* de la
@@ -68,7 +68,7 @@ que produce en el interior.
 
 ## 1. Respuesta al impulso por fuentes imagen
 
-Una sala rectangular rígida o absorbente — una *caja de zapatos* — refleja una
+Una sala rectangular rígida o absorbente (una *caja de zapatos*) refleja una
 fuente puntual en sus seis paredes, y cada reflexión es exactamente el sonido en
 campo libre de una **imagen especular** de la fuente. Reflejar una coordenada en
 una pared ($S_n = S - 2 d\,\mathbf{n}$) convierte la fuente en una retícula
@@ -260,8 +260,8 @@ cada banda dibujada sin aire (continua) y con $m$ a 20 °C y 50 % de HR (a trazo
 Las bandas se abren en abanico porque la absorción de las paredes sube con la
 frecuencia, de T30 = 1,06 s a 250 Hz a 0,25 s a 4 kHz. El término de aire es aquí
 el segundo mecanismo, mucho menor: quita un 0,4 % al decaimiento de 250 Hz y un
-4,4 % al de 4 kHz. Ese es el tamaño honesto del efecto en una sala de 105 m³ — las
-reflexiones sencillamente no recorren distancia suficiente — y es la razón de que
+4,4 % al de 4 kHz. Ese es el tamaño honesto del efecto en una sala de 105 m³ (las
+reflexiones sencillamente no recorren distancia suficiente), y es la razón de que
 la absorción del aire sea un
 [efecto de volumen](/phonometry/es/buildings/rooms/reverberation-prediction/#1-sabine-eyring-y-millington-sette)
 más que un efecto de frecuencia: pon esas mismas paredes alrededor de 2 000 m³ y
@@ -300,7 +300,7 @@ $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$, porque la tasa media de
 reflexiones $cS/4V$ es igual a $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. La
 coincidencia solo es estrecha en el límite casi cúbico: una sala alargada
 sostiene la energía a lo largo de su eje largo, así que su decaimiento
-*especular* puro es más lento que la estimación difusa de Eyring — exactamente
+*especular* puro es más lento que la estimación difusa de Eyring: exactamente
 la anisotropía que los
 [modelos de Fitzroy y Arau-Puchades](/phonometry/es/buildings/rooms/reverberation-prediction/)
 se construyeron para corregir. El modelo capta solo reflexiones especulares (sin
@@ -313,8 +313,8 @@ independientes del ángulo.
 un pasillo 6:1. Eyring *baja* al estirar la sala, porque estirar a volumen
 constante añade área de contorno; el decaimiento especular *sube*, porque el eje
 largo sigue devolviendo energía que el recorrido libre medio ya había dado por
-perdida. Los dos coinciden dentro de un 5 % para el cubo — la tolerancia
-documentada del apartado de validación de más abajo — y se separan de inmediato:
+perdida. Los dos coinciden dentro de un 5 % para el cubo (la tolerancia
+documentada del apartado de validación de más abajo) y se separan de inmediato:
 pasado aproximadamente 1,5:1 el decaimiento especular queda fuera de la banda de
 ±10 %, y en 6:1 es 2,5 veces la estimación de Eyring. Esta es la anisotropía que
 motiva los modelos de Fitzroy y Arau-Puchades, y la razón de que la guía de
@@ -413,9 +413,9 @@ dos décimas de segundo.
 *T30 leído por `room_parameters` sobre la RIR sintética, frente al orden con el que
 se construyó la retícula. La subida es el truncamiento: cada orden extra añade una
 capa de llegadas más tardías, así que la ventana de ajuste sigue encontrando más
-decaimiento que ajustar. La regla de completitud fija el **suelo** — por debajo del
+decaimiento que ajustar. La regla de completitud fija el **suelo** (por debajo del
 orden que cubre la ventana de ajuste el número está sencillamente mal, que es lo
-que cuantifica la tabla de arriba —, pero no es un criterio de convergencia. Pasado
+que cuantifica la tabla de arriba), pero no es un criterio de convergencia. Pasado
 el cruce, el T30 especular sigue derivando por encima de Eyring, porque una sala de
 7 × 5 × 3 no es casi cúbica y su eje largo sostiene energía que la estimación de
 campo difuso ya ha gastado; la figura siguiente barre exactamente eso. Lee el T30
@@ -459,15 +459,15 @@ el decaimiento trunca la cola exactamente igual, y en silencio.
 
 Otras dos advertencias pertenecen a este mismo apartado. `fs` cuantiza todas las
 llegadas a la retícula de muestreo, así que el trabajo con reflexiones tempranas
-— tiempos de llegada, ITDG, fracciones laterales — debe leer la tabla exacta
+(tiempos de llegada, ITDG, fracciones laterales) debe leer la tabla exacta
 `times` / `amplitudes` en lugar de buscar picos en la `ir` muestreada. Y
 `absorption` entra como un factor de reflexión de presión real e independiente
 del ángulo $\sqrt{1-\alpha}$, de modo que la incidencia rasante se trata igual
 que la normal.
 
 Y por último, la frontera honesta: si el orden que hace falta para cubrir el
-tiempo de reverberación vuelve impracticable la ejecución — una sala grande con
-un $L_\text{min}$ pequeño, o una cola larga — al método de imágenes puro se le
+tiempo de reverberación vuelve impracticable la ejecución (una sala grande con
+un $L_\text{min}$ pequeño, o una cola larga), al método de imágenes puro se le
 está pidiendo un trabajo que corresponde a un modelo híbrido con cola tardía
 estadística, o a la
 [simulación FDTD](/phonometry/es/simulation/fdtd-simulation/).
@@ -529,8 +529,8 @@ print(round(field.critical_distance, 2))       # 0.71 m
 field.plot()                                    # directo / reverberante / total vs distancia
 ```
 
-Para una sala que merece dibujarse — un taller de 12 × 8 × 4 m, $S$ = 352 m²,
-$\bar\alpha$ = 0,15, así que $R$ = 62 m² —, `SteadyFieldResult.plot()` dibuja los
+Para una sala que merece dibujarse (un taller de 12 × 8 × 4 m, $S$ = 352 m²,
+$\bar\alpha$ = 0,15, así que $R$ = 62 m²), `SteadyFieldResult.plot()` dibuja los
 niveles directo, reverberante y total frente a la distancia con la distancia
 crítica marcada: la curva total sigue el campo directo $1/r^2$ cerca de la fuente
 y se aplana en la meseta reverberante más allá de $r_\mathrm{c}$ = 1,11 m.
@@ -582,7 +582,7 @@ plt.show()
 lejos de la fuente es idéntico en las cuatro curvas, porque $Q$ nunca entra en el
 término $4/R$. Derecha: la absorción hace lo contrario. Escalonar $\bar\alpha$ de
 0,05 a 0,35 lleva la constante de sala de 18,5 m² a 189,5 m² y la meseta de
-83,3 dB a 73,2 dB — 10,1 dB, exactamente $10\lg(R_2/R_1)$ — mientras que la
+83,3 dB a 73,2 dB (10,1 dB, exactamente $10\lg(R_2/R_1)$), mientras que la
 asíntota de campo cercano no se mueve. Ese es el contenido preciso de «más allá de
 $r_\mathrm{c}$ solo la absorción, y no la distancia, baja el nivel», y son siete veces más
 absorción para 10 dB.*
@@ -633,7 +633,7 @@ print(round(float(room.steady_state_spl(90.0, 5.0, R)), 2))   # nivel a 5 m, dB
 concentra el campo directo en $Q/(4\pi r^2)$. Que *además* aumente la potencia
 radiada depende del comportamiento en impedancia de la propia fuente (Norton y
 Karczub, 2.ª ed., tabla 4.5), y `steady_state_spl` lo expone como `source_model`.
-Una fuente de **potencia constante** radia $\Pi_0$ esté donde esté — el valor por
+Una fuente de **potencia constante** radia $\Pi_0$ esté donde esté: el valor por
 defecto, y el modelo adecuado para una máquina cuya salida fijan sus propias
 pérdidas internas. Una fuente de **velocidad de volumen constante** queda cargada
 por los contornos reflectantes y radia $\Pi_0 Q$, de modo que una esquina añade
@@ -686,8 +686,8 @@ unos $2{,}2/T$ hercios, así que los modos de una sala que decae son resonancias
 solapadas y no líneas; el número de ellos por hercio es la **densidad modal** que
 se deriva en el §3, que crece con el cuadrado de la frecuencia, así que el
 solapamiento se vuelve inevitable por encima de cierta frecuencia. Pide
-aproximadamente tres modos dentro de una anchura de banda — impón
-$3 \approx (2,2/T)\,(4\pi V f^2/c_0^3)$ — y despejar $f$ da
+aproximadamente tres modos dentro de una anchura de banda (impón
+$3 \approx (2,2/T)\,(4\pi V f^2/c_0^3)$), y despejar $f$ da
 $f_\mathrm{s} \approx 2000\sqrt{T/V}$ con $c_0 \approx 343$ m/s. De ahí salen tres cosas.
 La constante codifica una *elección* de cuánto solapamiento cuenta como difuso,
 así que los autores más estrictos citan 4000 para la misma física. Una sala grande
@@ -855,7 +855,7 @@ mismo *número* de modos y un número de *frecuencias* completamente distinto.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_proportion_modes.svg" alt="Tres filas apiladas de marcas de modos hasta 200 hercios para tres salas del mismo volumen de 105 metros cúbicos, coloreadas por familia: un cubo de 4,72 metros cuyas marcas se amontonan en unas pocas frecuencias separadas por huecos vacíos amplios, una sala de 7,49 por 3,74 por 3,74 metros algo mejor, y una sala de proporciones de Bolt de 3,40 por 4,77 por 6,47 metros cuyas marcas están repartidas casi uniformemente; un cuarto panel debajo representa la separación entre frecuencias distintas consecutivas de las tres salas" width="88%" />
 
 *El mismo volumen en tres formas. El cubo de 4,72 m enumera 132 modos en solo
-**26 frecuencias distintas** — un amontonamiento de cinco a uno — con un hueco de
+**26 frecuencias distintas** (un amontonamiento de cinco a uno), con un hueco de
 15,0 Hz en la escalera; la sala 2:1:1 logra 36 frecuencias distintas de 129 y un
 hueco aún mayor, de 22,9 Hz; la sala de proporciones de Bolt 1 : 1,4 : 1,9 da
 **121 frecuencias distintas de 126** y su mayor hueco es de 9,5 Hz. Las

@@ -135,8 +135,8 @@ _STRINGS: dict[str, str] = {
     "Gain [dB]": "Ganancia [dB]",
     "Oscillation (0 dB)": "Oscilación (0 dB)",
     "Stability limit ({margin} dB margin)": "Límite de estabilidad (margen de {margin} dB)",
-    "Gain before feedback — stable, {head} dB spare": "Ganancia antes de la realimentación — estable, {head} dB de reserva",
-    "Gain before feedback — unstable by {head} dB": "Ganancia antes de la realimentación — inestable en {head} dB",
+    "Gain before feedback: stable, {head} dB spare": "Ganancia antes de la realimentación: estable, {head} dB de reserva",
+    "Gain before feedback: unstable by {head} dB": "Ganancia antes de la realimentación: inestable en {head} dB",
     "Talker (T)": "Hablante (T)",
     "Microphone (M)": "Micrófono (M)",
     "Loudspeaker (H)": "Altavoz (H)",
@@ -226,7 +226,7 @@ def plot_modulation_distortion(
     the four intermodulation sidebands at ``f2 ± f1`` and ``f2 ± 2f1`` as a
     stem-style spectrum in dB relative to the carrier, annotated with the
     IEC 60268-3 per-order values ``d_m,2``/``d_m,3`` and the SMPTE combined
-    RMS — the modulation counterpart of :func:`plot_harmonic_distortion`.
+    RMS: the modulation counterpart of :func:`plot_harmonic_distortion`.
 
     :param result: A
         :class:`~phonometry.electroacoustics.intermodulation.ModulationDistortionResult`.
@@ -1102,9 +1102,9 @@ def plot_feedback_stability(
     ax.set_ylabel(_t("Gain [dB]", language))
     head = format_number(abs(result.headroom), language, decimals=1)
     ax.set_title(
-        _t("Gain before feedback — stable, {head} dB spare", language, head=head)
+        _t("Gain before feedback: stable, {head} dB spare", language, head=head)
         if result.is_stable
-        else _t("Gain before feedback — unstable by {head} dB", language, head=head)
+        else _t("Gain before feedback: unstable by {head} dB", language, head=head)
     )
     ax.grid(visible=True, axis="y", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")

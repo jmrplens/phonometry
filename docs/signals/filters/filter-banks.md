@@ -7,7 +7,7 @@ characteristic. Butterworth, Chebyshev II and Bessel place their **−3 dB point
 on the ANSI S1.11 band edges**, so their band levels are directly comparable.
 The two equiripple designs (Chebyshev I, Elliptic) do not: they take those
 edges as the *ripple* edge instead, which widens the band and biases every band
-level by a fixed few tenths of a decibel — see section 1.
+level by a fixed few tenths of a decibel; see section 1.
 
 ## 1. Fractional octave bands: the math
 
@@ -26,12 +26,12 @@ repeat scaled by 10. phonometry designs each band as an SOS cascade on those
 edges, but only three of the five architectures put their −3 dB points on
 $f_1$ and $f_2$. Butterworth's SciPy design frequency *is* its −3 dB point;
 Chebyshev II is designed through its stopband edges, mapped back from the band
-edges analytically, and Bessel is normalized with `norm="mag"` — both
+edges analytically, and Bessel is normalized with `norm="mag"`. Both
 corrections exist so that their −3 dB points land on the edges too. Chebyshev I
 and Elliptic are handed the band edges directly, and SciPy reads them as the
 *equiripple passband* edge: at the default `ripple=0.1` the response there is
 −0.10 dB rather than −3 dB, the band is effectively wider, and every band
-level carries a systematic offset — median +0.33 dB (`cheby1`) and +0.25 dB
+level carries a systematic offset: median +0.33 dB (`cheby1`) and +0.25 dB
 (`ellip`) against Butterworth over a one-third-octave bank analysing 20 s of
 white noise. That offset is a *bias*, not scatter: it does not shrink with
 averaging time and it moves every band at once, so choose one architecture per
@@ -97,7 +97,7 @@ capture chain delivered:
 
 A band level is not read off a signal, it is *estimated* from it, and the
 narrower the band the longer that takes. The bandwidth of a $1/b$-octave band
-is $B = f_\mathrm{m}\,(G^{1/2b} - G^{-1/2b})$ — $0.231\,f_\mathrm{m}$ for one-third octaves —
+is $B = f_\mathrm{m}\,(G^{1/2b} - G^{-1/2b})$, or $0.231\,f_\mathrm{m}$ for one-third octaves,
 and two consequences follow. The filter has to **settle**: a band rings for a
 few times $1/B$, so that much of the front of the record is transient rather
 than level (about a second in the 12.5 Hz band, twelve milliseconds at 1 kHz).
@@ -146,8 +146,8 @@ everyday arguments stay first: `FilterDesign` (`design`), `LevelCalibration`
 `mode` has exactly two values. `'rms'` reports the energy-mean level of the
 band over the whole record, which is what every standard means by "band level".
 `'peak'` reports $20\log_{10}$ of the largest absolute sample inside the band:
-an instantaneous, band-limited, unweighted peak — not the C-weighted
-$L_\mathrm{Cpeak}$ of the [Levels](../levels/levels.md) guide — and on
+an instantaneous, band-limited, unweighted peak, not the C-weighted
+$L_\mathrm{Cpeak}$ of the [Levels](../levels/levels.md) guide, and on
 impulsive signals it is dominated by the filter's own ringing. There is no
 `'sum'` mode: a total across bands is an energy sum the caller performs,
 `10*np.log10(np.sum(10**(spl/10)))`, never an arithmetic mean of decibels.
@@ -449,7 +449,7 @@ one-third-octave band spans $G^{1/3} \approx 1.2589$, ten bands per decade.
 ## Standards
 
 IEC 61260-1:2014, *Electroacoustics — Octave-band and
-fractional-octave-band filters — Part 1: Specifications* — the base-10 mid
+fractional-octave-band filters — Part 1: Specifications*: the base-10 mid
 frequencies and band edges of §1 (5.2-5.5) and the nominal band labels; its
 Table 1 class acceptance limits are verified in
 [Filter class verification](filter-compliance.md). ANSI S1.11-2004,

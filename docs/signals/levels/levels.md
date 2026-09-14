@@ -496,6 +496,6 @@ environmental indicators and determination procedures are covered in
 **Not covered.** **IEC 61252 was revised in 2025; only the formulae of the
 implemented first edition (1993) are here**, not the newer one. The ISO 1996-1
 whole-day indicators ($L_\mathrm{den}$, $L_\mathrm{dn}$, the rating levels) and the
-ISO 1996-2 determination procedures are not on this page either — they are in
+ISO 1996-2 determination procedures are not on this page either; they are in
 [Environmental levels](../../environment/assessment/environmental-levels.md).
 

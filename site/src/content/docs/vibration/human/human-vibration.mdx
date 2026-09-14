@@ -119,7 +119,7 @@ usually within 10 cm of its centre; a seat back that cannot be reached may be
 measured on the frame behind the cushion and then corrected for the
 transmissibility of the cushion. Every measurement location must be reported.
 
-On a **resilient** surface — a seat cushion, a couch — the transducer is
+On a **resilient** surface (a seat cushion, a couch), the transducer is
 interposed between the person and the surface in a suitably formed mount that
 does not greatly alter the pressure distribution (5.3.2); the commonly used
 design for that mount is the semi-rigid disc of **ISO 10326-1**, drawn to size
@@ -129,23 +129,23 @@ The person adopts the posture that is normal for the environment.
 The three translational transducers at one location are positioned orthogonally
 and as close together as practicable (5.2.3). Where perfect alignment with the
 basicentric axes is impracticable, up to 15° of deviation is allowed, and the
-orientation of the axes relative to gravity is recorded (5.2.2) — on an inclined
+orientation of the axes relative to gravity is recorded (5.2.2): on an inclined
 seat the z axis is *not* vertical. The duration of measurement must be long
 enough for reasonable statistical precision and typical of the exposure being
 assessed, and it is reported with the result (5.5).
 
 ### Hand-arm: on the handle, in the gripping zone (ISO 5349-2, 6.1)
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hand_arm_vibration.svg" alt="Left: a chain-saw front handle of 30 mm diameter gripped by a hand over a gripping zone of about 100 mm, with three numbered accelerometer positions — under the hand at the middle of the gripping zone, either side of the hand, and on the underside of the handle next to the hand — the cable taped to the handle near the transducer, the grip force, and the basicentric x_h y_h z_h frame rotated so y_h lies along the handle axis. Right: the evaluation chain from the three Wh-weighted axis magnitudes to the vibration total value a_hv, the partial exposures A_i(8) over the contact times, and A(8) against the exposure action value 2.5 and exposure limit value 5 m/s^2 of Directive 2002/44/EC, with a box giving the mass, averaging, sampling and range rules" width="94%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hand_arm_vibration.svg" alt="Left: a chain-saw front handle of 30 mm diameter gripped by a hand over a gripping zone of about 100 mm, with three numbered accelerometer positions (under the hand at the middle of the gripping zone, either side of the hand, and on the underside of the handle next to the hand), the cable taped to the handle near the transducer, the grip force, and the basicentric x_h y_h z_h frame rotated so y_h lies along the handle axis. Right: the evaluation chain from the three Wh-weighted axis magnitudes to the vibration total value a_hv, the partial exposures A_i(8) over the contact times, and A(8) against the exposure action value 2.5 and exposure limit value 5 m/s^2 of Directive 2002/44/EC, with a box giving the mass, averaging, sampling and range rules" width="94%" />
 
 The accelerometer belongs at or near the surface of the hand where the vibration
-enters the body, preferably at the **middle of the gripping zone** — halfway
+enters the body, preferably at the **middle of the gripping zone**, halfway
 along the width of the hand on the handle (6.1.3). That position usually needs a
 mounting adaptor that fits under the hand or between the fingers, so in practice
 the transducers go either side of the hand or on the underside of the handle
 adjacent to the middle of the hand. Where the vibration differs across the width
-of the hand — flexibly mounted side handles on angle grinders are the standard
-case — two positions either side of the hand are used and **averaged**. The
+of the hand (flexibly mounted side handles on angle grinders are the standard
+case), two positions either side of the hand are used and **averaged**. The
 measurement is made for each gripping zone the operator actually uses, and the
 locations and orientations are reported with a sketch and dimensions (clause 9).
 
@@ -162,8 +162,8 @@ Three constraints decide whether the mounting is acceptable:
   needs an adaptor held in place by the operator's own grip.
 - **Posture and force (7.1).** Mounting a transducer changes how the tool is
   held and how much grip and push force is applied, and the standard lists that
-  change among the dominant uncertainty contributions — larger, it notes, than
-  instrumentation or calibration. The grip and feed forces belong in the report.
+  change among the dominant uncertainty contributions (larger, it notes, than
+  instrumentation or calibration). The grip and feed forces belong in the report.
 
 ### What the magnitude is an average of (ISO 5349-2, 5.4 and 6.1.11)
 
@@ -195,11 +195,11 @@ number rather than an obvious failure:
   insulation between the accelerometer and the vibrating surface.
 - **Triboelectric signal (6.2.3)**: a cable under high-amplitude vibrational
   stress generates charge by deformation, so it is secured to the vibrating
-  surface close to the accelerometer — taped to the handle, or clipped along the
-  air line on a pneumatic tool.
+  surface close to the accelerometer (taped to the handle, or clipped along the
+  air line on a pneumatic tool).
 - **DC-shift (6.2.4)**, the one that inflates a result rather than destroying
-  it. Very high accelerations at high frequency — percussive tools with no
-  damping system — mechanically overload a piezoelectric transducer and add a
+  it. Very high accelerations at high frequency (percussive tools with no
+  damping system) mechanically overload a piezoelectric transducer and add a
   false low-frequency component, exactly where the weighting has most gain. It
   shows in a frequency analysis as unrealistically high low-frequency values,
   and the standard's check is to convert the unweighted band r.m.s. acceleration
@@ -219,7 +219,7 @@ print((1000.0 * accel / (40.0 * bands**2)).round(2))   # [3.52 3.5  0.96 0.29 0.
 A handle visibly moving a millimetre cannot be moving 3.5; a factor of two or
 more between the computed and the observed motion means DC-shift is likely. A
 mechanical filter is the countermeasure, and a record showing DC-shift is
-discarded — the distortion affects the whole spectrum, so deleting the
+discarded: the distortion affects the whole spectrum, so deleting the
 low-frequency bands does not rescue it.
 
 Finally, the chain is checked with a **vibration calibrator before and after
@@ -326,7 +326,7 @@ The remaining three weightings belong to the companion parts rather than to
 ISO 2631-1's posture map: `Wm` for building occupants on all axes (ISO 2631-2),
 `Wb` for vertical rail ride comfort (ISO 2631-4), and `Wh` for
 hand-transmitted vibration on all three hand axes with every $k = 1$
-(ISO 5349-1) — which is why the hand-arm total of section 3 is a plain vector
+(ISO 5349-1): this is why the hand-arm total of section 3 is a plain vector
 sum with no multiplying factors in it.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vibration_weighting_family.svg" alt="All nine human-vibration weightings in decibels from 0.05 Hz to 1.5 kHz on a log frequency axis, colour-grouped into the whole-body weightings Wk, Wd and Wc, the rotational and recumbent weightings We and Wj, the building and rail weightings Wm and Wb, the motion-sickness weighting Wf peaking at 0.17 Hz, and the hand-arm weighting Wh peaking near 11 Hz; three bars above the curves mark the band each part of the family is tabulated over, 0.1 to 0.5 Hz for Wf, 0.5 to 80 Hz for the whole-body weightings and 6.3 to 1250 Hz for Wh" width="94%" />
@@ -514,8 +514,8 @@ print(round(float(np.max(running)), 3))               # 0.265, the MTVV above
 
 Every criterion passes, which is the point: the example proves the rule is not
 being triggered, not that the exposure is severe. A record with shocks in it
-behaves differently — five impacts on a 4.5 Hz ride oscillation, the ordinary
-content of an off-road seat:
+behaves differently, with five impacts on a 4.5 Hz ride oscillation, the
+ordinary content of an off-road seat:
 
 ```python
 fs_shock, duration_shock = 200.0, 20.0
@@ -650,7 +650,7 @@ public transport.
 The bands overlap on purpose, and the overlap is the whole message: 0.5 m/s² is
 simultaneously "a little uncomfortable" and "fairly uncomfortable", because the
 scale describes a distribution of reactions rather than a classification. That
-is also why ISO 2631-1 defines **no comfort limit** — acceptable magnitudes
+is also why ISO 2631-1 defines **no comfort limit**: acceptable magnitudes
 depend on trip duration and on what the passengers are trying to do (reading,
 eating, writing), on noise and on temperature. Quote the band, not a verdict.
 For orientation at the other end of the scale, the median perception threshold
@@ -677,8 +677,8 @@ range is too widespread to be reproduced in an International Standard. A reader
 who goes looking for a building limit in ISO 2631-2 will not find one. What
 clause 5 gives instead is
 the number that matters in practice: adverse comment in residential situations
-arises when magnitudes are only *slightly above the perception threshold* — the
-0.015 m/s² above — and complaints often come from the secondary effect of
+arises when magnitudes are only *slightly above the perception threshold* (the
+0.015 m/s² above) and complaints often come from the secondary effect of
 re-radiated noise rather than from the motion itself.
 
 The **daily exposure** normalises the exposure magnitude $a$ to a reference
@@ -777,8 +777,8 @@ per day; where the measurement was made while the hand was in contact with the
 vibrating surface, $T_i$ is the *total contact time per day* (5.5). The clause
 then carries an explicit Warning: asked about their typical daily tool usage,
 operators normally **overestimate**, because they report the period over which
-the tool is in use *including* the pauses — changing a nut, preparing the next
-workpiece. Since $A_i(8) \propto \sqrt{T_i}$, a two-fold overestimate of contact
+the tool is in use *including* the pauses (changing a nut, preparing the next
+workpiece). Since $A_i(8) \propto \sqrt{T_i}$, a two-fold overestimate of contact
 time inflates $A(8)$ by 41 %, which is more than enough to move a day across the
 exposure action value. A stopwatch, a tool-mounted data logger, video analysis
 or activity sampling are what the clause offers instead of asking.
@@ -829,7 +829,7 @@ the figure are extrapolation. Four further limits come with it, all of them from
 the Annex C notes:
 
 - The vascular guidance rests on epidemiological studies of tools whose
-  vibration is predominantly **above 30 Hz to 50 Hz** — chain saws, grinders,
+  vibration is predominantly **above 30 Hz to 50 Hz**: chain saws, grinders,
   rock drills. Measurements dominated by weighted acceleration at lower
   frequencies, particularly below about 20 Hz, should be treated with caution
   (NOTE 2).
@@ -904,8 +904,8 @@ company), `specimen` (the operator or worker whose exposure was determined),
 the footer identity `laboratory`, `operator`, `report_id` and `notes`.
 
 Two of those fields are what ISO 5349-2 clause 9 f) asks for, and they are not
-free text: `instrumentation` carries the instrument detail — make, model, serial
-number and its conformity to ISO 8041-1 — together with the transducer locations
+free text: `instrumentation` carries the instrument detail (make, model, serial
+number and its conformity to ISO 8041-1) together with the transducer locations
 and orientations and the mass of the transducer and mount; `calibration` carries
 the calibration traceability, the date of the most recent verification test and
 the result of the before-and-after functionality check of clause 6.3.1. A fiche
@@ -984,7 +984,7 @@ not substitute for.
 
 ## See also
 
-- [Multiple Shock Vibration](/phonometry/vibration/human/multiple-shock-vibration/): where a record goes once its crest factor and its clause 6.3.3 ratios say the r.m.s. cannot describe it — the ISO 2631-5 spinal-response model, and the seat-pad acquisition this page's whole-body half points at.
+- [Multiple Shock Vibration](/phonometry/vibration/human/multiple-shock-vibration/): where a record goes once its crest factor and its clause 6.3.3 ratios say the r.m.s. cannot describe it: the ISO 2631-5 spinal-response model, and the seat-pad acquisition this page's whole-body half points at.
 - [Sound power from surface vibration](/phonometry/devices/emission/vibration-sound-power/): the other thing a surface acceleration is used for, when the question is what the machine radiates rather than what the operator receives.
 - [Calibration](/phonometry/signals/metrology/calibration/): the before-and-after check of clause 6.3.1 and the traceability the fiche's `calibration` field records.
 - API reference: [`vibration.human.exposure`](/phonometry/reference/api/vibration/exposure/).

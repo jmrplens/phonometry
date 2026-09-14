@@ -123,7 +123,7 @@ movimiento, así que un receptor más rígido le saca ahora *más* potencia y la
 dependencia se invierte. Una bomba sobre una losa de hormigón es la fuente de
 fuerza de libro; una máquina pesada atornillada rígidamente a un forjado ligero
 de madera es el caso en el que la intuición se da la vuelta, y la zona intermedia
-— una máquina montada cerca de la resonancia de sus apoyos — es donde $D_\mathrm{C}$ es
+(una máquina montada cerca de la resonancia de sus apoyos) es donde $D_\mathrm{C}$ es
 menor e incluso puede hacerse negativo, porque el numerador $|Y_\mathrm{s} + Y_i|^2$ se
 desploma cuando las dos movilidades son comparables y están en oposición de fase.
 La curva exacta toca fondo con las movilidades igualadas, que es la mejor
@@ -137,7 +137,7 @@ la cisterna del Anexo I.3 las dos dan 68,2 dB a 63 Hz, a partir de
 $L_{W\mathrm{s,c}} = 84,4$ dB y $D_\mathrm{C} = 16,2$ dB. Fíjate en qué magnitud te entregan:
 $L_{W\mathrm{s,c}}$ es la entrada que toma esta página, y *no* es los 68,2 dB que la
 [página de EN 15657](/phonometry/es/buildings/design/structure-borne-power/)
-imprime como su nivel instalado — meter ese valor aquí resta $D_\mathrm{C}$ dos veces.
+imprime como su nivel instalado porque meter ese valor aquí resta $D_\mathrm{C}$ dos veces.
 
 La física detrás de $D_\mathrm{C}$ es la clásica potencia de entrada de una placa
 excitada en un punto: solo la parte real de la movilidad en el punto de
@@ -172,8 +172,8 @@ print(round(float(building.coupling_term_velocity_source(2e-4 + 1e-4j, 1 / (3e-5
 de fuerza y $D_\mathrm{C}$ sigue a $10\lg(|Y_\mathrm{s}|/\mathrm{Re}\{Y_i\})$; muy a la izquierda
 es una fuente de velocidad y sigue a $-10\lg(|Y_\mathrm{s}|\,\mathrm{Re}\{Z_i\})$; la
 curva exacta se separa de las dos asíntotas dentro de una década alrededor de las
-movilidades igualadas, donde alcanza su mínimo de 6,2 dB — máxima transferencia
-de potencia, mínimo aislamiento. La bomba del fragmento de código está en una
+movilidades igualadas, donde alcanza su mínimo de 6,2 dB (máxima transferencia
+de potencia, mínimo aislamiento). La bomba del fragmento de código está en una
 relación de solo 7,1, que es por lo que sus 9,9 dB exactos quedan 1,1 dB por
 encima del límite de fuente de fuerza. Añadir un apoyo elástico (Fórmula 19e)
 desplaza toda la curva hacia arriba: una movilidad de transferencia de
@@ -231,7 +231,7 @@ da las seis formas cerradas que usa. `typical_element_mobility` es esa tabla:
 
 La frecuencia no está en la columna de magnitudes que describen el elemento,
 porque es la frecuencia de banda de la predicción y no una propiedad del
-elemento — pero sí aparece en cuatro de las seis expresiones, así que esas
+elemento, pero sí aparece en cuatro de las seis expresiones, así que esas
 cuatro filas admiten `frequency` y las otras dos la rechazan. Elige la fila por
 lo que realmente transporta la vibración: una máquina pequeña y compacta es su
 masa total, una máquina sobre patas no rígidas es la fila masa-muelle, y la
@@ -263,7 +263,7 @@ La fila masa-muelle es la única con un punto de retorno. Es la suma en serie de
 una movilidad de muelle y una de masa, de modo que su segundo paréntesis
 contiene las dos reactancias, que se cancelan en
 $f_0 = (2\pi)^{-1}\sqrt{s(1+\eta^2)/M}$ y dejan $\lvert Y_\mathrm{s}\rvert$ en su
-*mínimo* limitado por el amortiguamiento — que es la frecuencia a la que el
+*mínimo* limitado por el amortiguamiento, que es la frecuencia a la que el
 montaje inyecta **más** potencia, porque una movilidad de fuente pequeña es un
 $D_\mathrm{C}$ pequeño. Esa es la resonancia del montaje, y $\eta$ es lo único que fija
 cuánto empeora. Una fila llamada con una magnitud que no la describe, o con una
@@ -280,7 +280,7 @@ EN 12354-5 da tres vías para llegar a ella, en orden decreciente de autoridad.
 la superficie, conforme a ISO 7626-1 con excitación translacional en un solo
 punto según ISO 7626-2 (se admite la excitación por impacto de ISO 7626-5), en
 banda estrecha y reducidas después a tercios de octava. El receptor **no** debe
-estar cargado dinámicamente mientras se mide su movilidad — una asimetría
+estar cargado dinámicamente mientras se mide su movilidad: una asimetría
 importante con la fuente, que en cambio se aísla o se suspende libremente.
 
 **Calculada, en el centro del panel.** Para una excitación en la zona central de
@@ -294,7 +294,7 @@ la movilidad se vuelve compleja y la fija la rigidez de los apoyos del elemento,
 no su propia masa y rigidez a flexión. Para el forjado de hormigón de 220 mm y
 5,00 m × 4,00 m del edificio resuelto, $f_{11}$ vale 39 Hz, holgadamente por
 debajo del rango, pero para una bancada de hormigón de 1,20 m × 0,80 m del mismo
-espesor vale 781 Hz, justo en medio — así que en elementos pequeños y rígidos la
+espesor vale 781 Hz, justo en medio, así que en elementos pequeños y rígidos la
 forma cerrada es la herramienta equivocada. Los elementos con vigas se dividen
 otra vez (Fórmula F.3.2): por debajo de $f_{11}$ se usa la rigidez a flexión
 efectiva $\sqrt{B'_xB'_y}$; por encima, la excitación entre vigas usa el campo de
@@ -307,7 +307,7 @@ $\mathrm{Re}\{Y_i\} = \mathrm{Re}\{Y_{i,\infty}\}\,[1 - J_0(2k_\mathrm{B}a)]$
 Eso convierte la distancia de fijación en una variable de proyecto y no en un
 detalle: en ese mismo forjado de hormigón, a 63 Hz, atornillar la máquina a
 0,20 m de una pared deja un 6,5 % de la parte real de la movilidad de centro de
-panel — 11,9 dB menos de potencia inyectada — y a 0,50 m deja un 37 %, que valen
+panel (11,9 dB menos de potencia inyectada) y a 0,50 m deja un 37 %, que valen
 4,3 dB. Acerca una bomba a una unión y alimentará menos al edificio.
 
 ```python
@@ -409,7 +409,7 @@ la trayectoria (Fórmula F.1), las longitudes de absorción equivalentes de los
 elementos intermedios se pueden tomar numéricamente iguales a sus superficies
 como primera estimación en elementos grandes o bien amortiguados, y un ajuste
 $\Delta K$ cubre las ondas longitudinales y en el plano que se le escapan a la
-teoría de ondas de flexión — unos 4 dB para dos uniones y 6 dB para tres o más,
+teoría de ondas de flexión (unos 4 dB para dos uniones y 6 dB para tres o más),
 con el $K_{ij}$ encadenado acotado inferiormente cerca de $-5$ dB, que
 corresponde a transmisión estructural total. Dos consecuencias para el dato que
 aportas aquí:
@@ -456,7 +456,7 @@ $$
 
 `res.total_level` es esa combinación por bandas y `res.overall_level` la suma de
 ella sobre el espectro. Para la cisterna del Anexo I.3 las cuatro trayectorias
-suman 41,4 dB a 63 Hz y el espectro entero cierra en 29 dB(A) — véase la nota
+suman 41,4 dB a 63 Hz y el espectro entero cierra en 29 dB(A); véase la nota
 sobre la ponderación que hay debajo del fragmento de código.
 
 ### El término de ajuste $D_\mathrm{sa}$
@@ -464,7 +464,7 @@ sobre la ponderación que hay debajo del fragmento de código.
 Una fuerza puntual bombea energía a ondas de flexión *libres*, mientras que un
 campo acústico incidente excita además ondas *forzadas*. $D_\mathrm{sa}$ es el factor
 de contabilidad que permite reutilizar el índice de flancos aéreo
-$R_{ij,\mathrm{ref}}$ — una magnitud aérea — para un elemento excitado
+$R_{ij,\mathrm{ref}}$ (una magnitud aérea) para un elemento excitado
 estructuralmente: convierte la potencia estructural inyectada en la potencia
 aérea incidente que dejaría al elemento con la misma energía de vibración libre
 (Fórmula 20a). Para la excitación por fuerza perpendicular de un elemento
@@ -487,7 +487,7 @@ frecuencias más altas hacen $D_\mathrm{sa}$ *más negativo*, a razón de
 $-20\log_{10}f$ una vez que $\sigma$ se ha saturado.
 
 :::caution
-**$D_\mathrm{sa}$ es normalmente negativo — pasa el valor tabulado con el signo con el
+**$D_\mathrm{sa}$ es normalmente negativo: pasa el valor tabulado con el signo con el
 que está impreso.**
 Las columnas del Anexo I de la propia norma van de unos $-14$ dB a 63 Hz a
 $-45$ dB a 2 kHz para elementos corrientes de hormigón y de fábrica. El término
@@ -542,8 +542,8 @@ cascada.
 
 `overall_level` es la suma energética simple de los $L_\mathrm{n,s}$ por banda sobre las
 bandas que hayas dado. **No** está ponderado A, y la magnitud en la que está
-escrita cualquier exigencia nacional de ruido de equipamientos — y la magnitud
-que produce la medición en campo de ISO 16032 — es el número único ponderado A
+escrita cualquier exigencia nacional de ruido de equipamientos (y la magnitud
+que produce la medición en campo de ISO 16032) es el número único ponderado A
 $L_\mathrm{n,s}(A)$. Los dos ejemplos resueltos de EN 12354-5 cierran en uno: 26 dB(A)
 para la bañera de hidromasaje del Anexo I.2 y 29 dB(A) para la cisterna del
 Anexo I.3. La diferencia no es pequeña. Los espectros de equipamientos están

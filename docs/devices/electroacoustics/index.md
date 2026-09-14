@@ -96,4 +96,4 @@ is level bookkeeping, not an acoustic model: it consumes two direct-field levels
 you supply, does not compute them from a coverage pattern, and predicts
 neither the ring frequency nor the effect of an equaliser or frequency
 shifter. And IEC 60268-16, the speech transmission index, is not part of this
-section at all — it is in [Speech](../../perception/speech/index.md).
+section at all: it is in [Speech](../../perception/speech/index.md).

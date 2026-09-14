@@ -79,7 +79,7 @@ A façade measurement asks a question an internal partition never does: **what
 is outside, and where is it?** There is no source room, so the reference level
 has to be established in a free field that a reflecting building is standing
 in, and every quantity on this page inherits the geometry of that choice.
-ISO 16283-3 resolves it by splitting the method twice over — a *global* result
+ISO 16283-3 resolves it by splitting the method twice over: a *global* result
 that describes the whole envelope as built, against an *element* result that
 describes one component; and a *loudspeaker* source that the operator controls,
 against *road traffic* that is free but arrives from everywhere. Those two
@@ -129,7 +129,7 @@ microphone reads a pressure dominated by the façade's own reflection and by
 whatever detail of the elevation it happens to sit against; much further out,
 it stops describing this façade and starts describing the street. Two metres is
 far enough that the direct and reflected paths have settled into a stable sum
-over most of the range and close enough to stay in the façade's field — but the
+over most of the range and close enough to stay in the façade's field, but the
 standard is candid about the cost, noting under Clause 9.6.1 that "systematic
 errors will occur at low frequencies due to interference effects". The
 practical consequence is the one to carry away: the reference level of a
@@ -171,7 +171,7 @@ it to elements or façades with $R'_\mathrm{w} < 40$ dB (Clause 10.1 NOTE).
 45° ± 5°, preferably on the ground or as high above it as practice allows, at a
 slant distance $r$ from the source to the centre of the specimen of at least
 **5 m** ($D > 3.5$ m) for the element method and at least **7 m** ($D > 5$ m)
-for the global method — the larger distance because the global method must
+for the global method: the larger distance because the global method must
 illuminate the whole façade evenly, not one element. Choose the position so the
 level varies as little as possible over the specimen: the directivity
 requirement is under 5 dB of local variation per band over a surface the size
@@ -184,7 +184,7 @@ receiving-room level at least 6 dB over the background.
 **Where the microphones go.** *Element method* (Clause 9.5.1): the microphone is
 fastened directly to the specimen, either with its axis parallel to the surface
 (centre of the membrane ≤ 10 mm from it) or normal to it (≤ 3 mm), with a
-hemispherical windscreen, securely fixed so it cannot move — and so that the
+hemispherical windscreen, securely fixed so it cannot move and so that the
 fixing itself does not change what the specimen transmits. Use **3 to 10** fixed
 positions, distributed evenly but asymmetrically and never in a regular grid.
 The count is not chosen up front: begin with $n = 3$, and if any two positions
@@ -192,7 +192,7 @@ differ by more than $n$ dB in any band, add positions, up to 10. A specimen
 mounted in a **recess** takes 10 positions outright, and a difference above
 10 dB must be stated in the report. *Global method* (Clauses 9.6.1 and 10.4.1):
 one microphone $(2.0 \pm 0.2)$ m from the plane of the façade, in front of the
-middle of it, at a height of **1.5 m above the receiving-room floor** — or 1 m
+middle of it, at a height of **1.5 m above the receiving-room floor**, or 1 m
 in front of a balustrade or similar protrusion where one intervenes. A room
 with more than one outside wall, or a very large one, needs a position on each
 façade, and a very large façade needs several loudspeaker positions each
@@ -419,9 +419,9 @@ fig.tight_layout(); plt.show()
 </details>
 
 The composite is easier to reason about drawn as areas. The elevation below is
-a **second, simpler façade** than the Annex F one above — a 6 m² masonry wall,
+a **second, simpler façade** than the Annex F one above: a 6 m² masonry wall,
 a 1.5 m² window and its 0.3 m² roller shutter box, chosen so the tiles are
-legible — not a drawing of the prediction just computed.
+legible, not a drawing of the prediction just computed.
 `plot_facade_elements` tiles it with every element's drawn area equal to its
 real area, and a prediction that retained its `elements` redraws *its own*
 façade with `fac.plot_geometry()`.
@@ -720,9 +720,9 @@ prediction write their one-page fiche through `.report()`.
 
 <ScopeClaim status="not-covered" label="Not covered">
 The band levels handed to `facade_insulation` are assumed already corrected
-for background noise, and ISO 16283-3's own procedural requirements — the ones
+for background noise, and ISO 16283-3's own procedural requirements (the ones
 set out under [Choosing and running the
-method](#choosing-and-running-the-method-clauses-9-and-10) — are documented
+method](#choosing-and-running-the-method-clauses-9-and-10)) are documented
 but not checked: nothing verifies the 45° ± 5° incidence, the 5 m / 7 m slant
 distances, the 3→10 microphone escalation and its recess special case, the 50
 pass-bys and the simultaneity of a traffic measurement, or that the method

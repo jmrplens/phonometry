@@ -13,7 +13,7 @@ One boundary runs through all of it: the **Schroeder frequency**. Above it a
 room has so many overlapping modes that a statistical description is the honest
 one, and every reverberation formula and decay parameter on these pages lives
 there. Below it the modes are discrete and separable, and no statistical model
-applies — which is why the measurement and prediction pages alike carry validity
+applies, which is why the measurement and prediction pages alike carry validity
 caveats at their lowest bands. A reader chasing a low-frequency problem should
 start from the modal treatment rather than from the decay parameters.
 
@@ -58,14 +58,14 @@ cite.
 European building-acoustics framework, when the room is an ordinary building
 space inside the clause 4.6 validity limits, and when the receiving-room
 absorption has to feed an EN 12354 insulation prediction. Use the classical
-family when the room falls outside that scope — a hall, a theatre, an
+family when the room falls outside that scope (a hall, a theatre, an
 industrial space, or a room whose absorption is concentrated on one axis so that
-an axial model is needed — or when a *band* of predictions rather than a single
+an axial model is needed) or when a *band* of predictions rather than a single
 normative value is what the situation deserves. Both share one failure mode, the
 loss of diffusivity, and they fail in the same direction: the measured
 reverberation time comes out longer than predicted, by up to a factor of two in
 the low-diffusivity rooms the standard's own accuracy clause records. And
-neither replaces a measurement — the measured counterpart is
+neither replaces a measurement: the measured counterpart is
 [Room Acoustics](room-acoustics.md).
 
 Related pages elsewhere: the absorption coefficient the prediction chain
@@ -118,7 +118,7 @@ carries no diffraction, no scattering off a diffuser and no finite-impedance
 boundary, and it stops when the reflection order runs out rather than when the
 sound does. Below the Schroeder frequency, where the statistical models give
 out, what this section offers is the mode *positions* of a rigid rectangular
-box — not the field of a real room at low frequency. For that, the [wave
+box, not the field of a real room at low frequency. For that, the [wave
 simulation](../../simulation/index.md) section runs an FDTD solver on the actual
 geometry.
 
@@ -127,9 +127,9 @@ importer, no material database and no renderer: the pages take dimensions,
 coefficients and impulse responses as inputs, and give back parameters. The
 absorption coefficients themselves come from [Materials and
 surfaces](../../materials/absorbers/index.md), and the model errs optimistically
-when the room is not diffuse — outside the EN 12354-6 clause 4.6 limits (no
+when the room is not diffuse (outside the EN 12354-6 clause 4.6 limits: no
 dimension more than five times another, opposite surfaces within a factor of
-three in absorption, object fraction below 0.2) the measured reverberation
+three in absorption, object fraction below 0.2), the measured reverberation
 time can reach twice the predicted one.
 
 Two coverage boundaries follow the standards. Only the normative clause 4

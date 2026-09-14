@@ -418,7 +418,7 @@ spectra.
 **Not covered.** Building the narrow-band FFT spectrum from a raw recording is
 no part of this module: every function takes an already-computed spectrum of
 levels and frequencies, and the opening section states what that spectrum has
-to be — including the clause 5.3.2 A-weighting, which the caller applies
+to be, including the clause 5.3.2 A-weighting, which the caller applies
 because the module is weighting agnostic. Where the two documents disagree, the
 distinctness edge-steepness test follows the **DIN 45681:2005-03** reading and
 its executable reference program rather than the asymmetric formulae printed in

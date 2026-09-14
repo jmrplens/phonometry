@@ -134,8 +134,8 @@ reduce exactly to Eyring for a uniform absorption distribution.
 
 The misrepresentation these two models exist for can be watched. The clip
 below simulates one flat 8 × 2.5 m section twice with the same **total**
-statistical absorption — spread over all four edges, or concentrated on the
-floor-and-ceiling pair (α ≈ 0.79) between hard ends — and races both
+statistical absorption (spread over all four edges, or concentrated on the
+floor-and-ceiling pair (α ≈ 0.79) between hard ends) and races both
 measured energy decays through the one Sabine-Eyring band the two rooms
 share. The spread room decays inside the band, a straight line at
 T = 160 ms against Sabine's 201; the concentrated room's decay has no
@@ -274,7 +274,7 @@ mixing is left: an 800 Hz wavefront enters a 4 m rigid-walled hall filled
 with rigid columns 10 to 17 cm across, a quarter to two fifths of the
 42.9 cm wavelength. Every column diffracts the front and sheds a scattered
 wavelet, the wavelets interfere, and within a few passes the specular front
-has become energy spread over the whole hall with no preferred direction —
+has become energy spread over the whole hall with no preferred direction,
 which is the assumption Sabine and Eyring both start from, arriving here as
 a result rather than as a hypothesis. Nothing in the hall absorbs, so what
 you are watching is *only* the redistribution; the decay at the end is the

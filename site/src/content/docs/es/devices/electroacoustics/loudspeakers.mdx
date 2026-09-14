@@ -123,10 +123,10 @@ resultado y admite exactamente tres montajes para un altavoz elemental: sobre
 una pantalla normalizada, dentro de una envoltura de medición normalizada
 (tipo A o tipo B) o dentro de una envoltura (caja) especificada; al aire, sin
 pantalla ninguna; o enrasado con el plano reflectante en campo libre sobre
-semiespacio. Los tres no son comparables — un altavoz medido al aire pierde
+semiespacio. Los tres no son comparables; un altavoz medido al aire pierde
 todo su extremo grave por cancelación entre la cara delantera y la trasera,
 mientras que ese mismo altavoz enrasado en el plano gana los 6 dB del
-semiespacio — y el apartado 11.1 señala que el borde radiante tiene que quedar
+semiespacio, y el apartado 11.1 señala que el borde radiante tiene que quedar
 sustancialmente enrasado con la superficie frontal, mediante un chaflán o una
 subpantalla fina y rígida. Un *sistema* de altavoces se mide normalmente sin
 pantalla adicional (10.2). El apartado 15 define después las tres cosas desde
@@ -151,8 +151,8 @@ $U_\mathrm{p}$, que para la sensibilidad característica vale numéricamente $\s
 (20.3.2). Donde no exista un filtro del ancho de banda adecuado, el apartado
 20.1.2.4 da el sustituto práctico: partir la banda en $n$ bandas de tercio de
 octava según IEC 61260, excitar cada una a $U_\mathrm{p}/\sqrt{n}$ y recombinar como el
-valor eficaz de las presiones de banda. La cadena de instrumentos — generador,
-amplificador, altavoz, amplificador de micrófono — tiene que ser plana dentro de
+valor eficaz de las presiones de banda. La cadena de instrumentos (generador,
+amplificador, altavoz, amplificador de micrófono) tiene que ser plana dentro de
 ±0,5 dB en todo el rango y con no linealidad de amplitud despreciable, y todos
 los medidores han de ser de valor eficaz verdadero (apartado 8); el rango de
 frecuencias en el que el error total se mantiene dentro de ±2 dB hay que
@@ -170,8 +170,8 @@ de 0,5 dB (7.3), y hay que declarar junto al resultado la distancia del
 micrófono *y el tiempo de captura máximo que permite el recinto*. El precio es
 un límite duro en baja frecuencia: una ventana solo puede resolver una
 frecuencia cuyo periodo quepa dentro de ella, así que una ventana libre de
-reflexiones de 5 ms — la que da una medición a 1 m con el micrófono a 1,2 m
-sobre un suelo duro — no sirve por debajo de unos 200 Hz, y el extremo grave
+reflexiones de 5 ms (la que da una medición a 1 m con el micrófono a 1,2 m
+sobre un suelo duro) no sirve por debajo de unos 200 Hz, y el extremo grave
 tiene que venir empalmado de una medición en campo cercano o en semiespacio.
 Esa es también la razón de que una curva enventanada y una curva anecoica
 discrepen por debajo de unos pocos cientos de hercios. La maquinaria de
@@ -263,7 +263,7 @@ Cada palabra de «pistón circular rígido en pantalla infinita» es una hipóte
 que un altavoz real incumple, y cada una tiene su fallo conocido. Una caja es
 una pantalla **finita**, así que por debajo de la frecuencia cuya longitud de
 onda supera la anchura de la pantalla la radiación se carga en $4\pi$ en vez de
-en $2\pi$ y la respuesta cae hasta 6 dB — el escalón de la pantalla —, y a su
+en $2\pi$ y la respuesta cae hasta 6 dB (el escalón de la pantalla), y a su
 alrededor la difracción en los cantos añade unos decibelios de rizado; nada de
 eso está en este modelo. Un cono deja de moverse **como una sola pieza** por
 encima de su primer modo de ruptura, típicamente unas cuantas veces la
@@ -384,7 +384,7 @@ y por eso aquí son entradas y no salidas.
 16.1 dice que la impedancia nominal es una resistencia pura que el fabricante
 *declara*, y acota esa declaración: el módulo más bajo **dentro del rango de
 frecuencias nominal** no será menor del 80 % de ella, y cualquier caída por
-debajo de ese valor fuera del rango — la corriente continua incluida — se
+debajo de ese valor fuera del rango (la corriente continua incluida) se
 declarará en la especificación. Esa es la línea dibujada en el panel de
 impedancia, y `minimum_impedance` es exactamente la magnitud a la que se le
 aplica. Lo que le importa a quien compra el altavoz es el módulo mínimo, no el
@@ -396,8 +396,8 @@ sostengan sobre un módulo que varía en un orden de magnitud a lo largo de la
 banda.
 
 El apartado 16.2.2 fija cómo se toma la curva: el altavoz en condiciones
-normales de medición, excitado a tensión constante o a corriente constante — lo
-primero suele preferirse — a un nivel lo bastante pequeño para mantenerlo en
+normales de medición, excitado a tensión constante o a corriente constante (lo
+primero suele preferirse) a un nivel lo bastante pequeño para mantenerlo en
 región lineal, con la advertencia de la propia norma de que la impedancia está
 muy influida por el nivel de excitación y de que habría que comprobar la
 coherencia de los datos a varios niveles. El módulo se mide al menos de 20 Hz a
@@ -584,9 +584,9 @@ El panel es un corte, y el apartado 23.1.2 dice cómo se toma un corte:
 El altavoz gira y el micrófono no: el punto de referencia se sitúa sobre el eje
 de giro para que la distancia de medición no cambie al barrer $\theta$
 (23.1.2.2). La regla que convierte el resultado en un *patrón* en lugar de en
-una familia de respuestas es la 23.1.2.3 — la tensión de entrada se reajusta en
+una familia de respuestas es la 23.1.2.3: la tensión de entrada se reajusta en
 cada frecuencia o banda para que la presión acústica en un punto especificado
-del eje de referencia se mantenga constante — y la presentación preferente es
+del eje de referencia se mantenga constante, y la presentación preferente es
 una familia de curvas polares en bandas declaradas, al menos 500 Hz, 1, 2, 4 y
 8 kHz, con el nivel en el eje de referencia como cero del diagrama. La variante
 paso a paso del apartado 13.1.2 de la norma de micrófonos usa 10° o 15°; aquí el
@@ -774,9 +774,9 @@ mediciones, no suposiciones. Tómalos en este orden.
    distancia de hablante de diseño; eso fija
    $Z_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{L}} - L_{\mathrm{T}\text{-}\mathrm{M}}$.
 5. **Lee $D_\mathrm{M}(\theta)$** en los propios datos polares del micrófono, en la
-   dirección en que queda el altavoz *respecto al* hablante — véase la
-   [familia de patrones](/phonometry/es/devices/electroacoustics/microphones/#patron-direccional)
-   —, en vez de suponerlo. Vale cero para una cápsula omnidireccional apunte a
+   dirección en que queda el altavoz *respecto al* hablante (véase la
+   [familia de patrones](/phonometry/es/devices/electroacoustics/microphones/#patron-direccional))
+   en vez de suponerlo. Vale cero para una cápsula omnidireccional apunte a
    donde apunte.
 
 La prueba de aceptación que todo el mundo acaba haciendo es el **ring-out**:

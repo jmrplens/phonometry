@@ -5,10 +5,10 @@
 An absorber can be characterised at three scales, and this subsection walks
 them from the finished product inwards: the mounted product in a reverberation
 room, the raw material in a flow rig, and the small sample in an impedance
-tube — the flow rig before the tube because the resistivity it measures is the
-single parameter every model the tube is fitted against starts from. Then come
-the prediction models that tie the three together, and the metamaterial designs
-that push them past the classical thickness rules.
+tube. The flow rig is presented before the tube because the resistivity it
+measures is the single parameter every model the tube is fitted against starts
+from. Then come the prediction models that tie the three together, and the
+metamaterial designs that push them past the classical thickness rules.
 
 [Sound Absorption Measurement and Rating](absorption-measurement.md)
 is the product scale: the ISO 354 reverberation-room measurement of the
@@ -64,8 +64,8 @@ meshed cell.
 ## What this section does not cover
 
 None of these pages qualifies a laboratory. ISO 354's room requirements of
-Annex A — the number of loudspeaker and microphone positions, the diffusing
-elements — are not checked; the functions convert an already-measured decay
+Annex A (the number of loudspeaker and microphone positions, the diffusing
+elements) are not checked; the functions convert an already-measured decay
 pair and only warn when the room volume or sample area falls outside the
 clause 6 limits. Two editions are cited but not implemented: the code follows
 the 1998/2001 transfer-function method of ISO 10534-2, not the 2023 edition,
@@ -74,6 +74,6 @@ and ASTM E2611-19, not E2611-24. The probe-traverse refinements of ISO 10534-1
 described but not automated. The prediction models are forward-only: they turn
 a resistivity into an impedance, and no inverse solver recovers the material
 parameters from a measured curve. And no measurement standard governs the
-metamaterial designs at all — a built panel is verified in the impedance tube
+metamaterial designs at all. A built panel is verified in the impedance tube
 or the reverberation room like any other absorber, which is why that page
 states a prediction and not a rating.

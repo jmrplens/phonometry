@@ -54,8 +54,8 @@ import Video from '../../../../components/Video.astro';
 
 Two classical models predict the sound field in a rectangular room before it is
 ever built. The **image-source** model gives the deterministic early reflection
-pattern — the whole room impulse response as a sum of mirror images of the
-source — while the **steady-state** model gives the statistical level a source
+pattern (the whole room impulse response as a sum of mirror images of the
+source), while the **steady-state** model gives the statistical level a source
 of known power settles to, split into a direct and a reverberant field. This
 page covers both in `phonometry.room`: the first complements the *measured*
 impulse response of the
@@ -68,7 +68,7 @@ produces indoors.
 
 ## 1. Image-source room impulse response
 
-A rigid or absorbing rectangular room — a *shoebox* — reflects a point source in
+A rigid or absorbing rectangular room (a *shoebox*) reflects a point source in
 its six walls, and each reflection is exactly the free-field sound of a **mirror
 image** of the source. Mirroring a coordinate in a wall
 ($S_n = S - 2 d\,\mathbf{n}$) turns the source into a regular lattice of images,
@@ -87,7 +87,7 @@ wall **pressure reflection factors** $R_w = \sqrt{1 - \alpha_w}$ each raised to
 the number of reflections $k_{w,n}$ that image made off wall $w$, and the air
 pressure loss $e^{-m r_n/2}$ over the path ($m$ the power (intensity)
 attenuation coefficient in neper per metre, so intensity falls as $e^{-m r}$ and
-pressure as $e^{-m r/2}$ — the same $m$ the
+pressure as $e^{-m r/2}$: the same $m$ the
 [reverberation-time](/phonometry/buildings/rooms/reverberation-prediction/) and
 [EN 12354-6](/phonometry/buildings/rooms/enclosed-space-absorption/) guides feed
 to their $4mV$ terms). A shoebox has exactly
@@ -136,13 +136,13 @@ print(round(float(room.eyring_reverberation_time(105.0, [(142.0, 0.12)])), 2))
 `image_source_rir` returns an `ImageSourceResult`. Its `ir` is the sampled RIR
 (a 1D array broadband, or one row per octave band for per-band absorption),
 while the **exact** sub-sample reflection table stays in `times`, `distances`,
-`orders`, `amplitudes` and `image_positions` — so the geometry is exact
+`orders`, `amplitudes` and `image_positions`, so the geometry is exact
 regardless of the sample rate. The direct sound and the individual early
 reflections are geometric quantities good to machine precision.
 
 Read as a list of arrivals, that table hides what the method actually is. Each
 image sits at a fixed distance $r_n$ from the receiver and contributes one
-arrival at $r_n/c$, so the echogram is not a signal that decays — it is a
+arrival at $r_n/c$, so the echogram is not a signal that decays: it is a
 static lattice of points being read off by a sphere expanding from the receiver
 at the speed of sound. That view turns the reflection density into something
 watchable: the sphere's volume grows as $t^3$, the lattice has one image per
@@ -156,7 +156,7 @@ reflection density quoted below. The clip sweeps it:
   height={1350}
   title="A sphere expanding from the receiver sweeping the mirror-room lattice"
   description="On the left, the 7 by 5 metre room sits at the centre of its grid of dashed mirror rooms, with the source as a star and the receiver as a triangle. A circle expands from the receiver at the speed of sound; as it reaches each image source that image lights up in its reflection-order colour and draws a straight line back to the receiver. On the right, the reflectogram fills in at the same instant: each image the circle reaches writes one stem at its arrival time and its level relative to the direct sound, under the dashed one-over-r spreading envelope. Below it a running count of arrivals climbs alongside the dashed analytic law, the two staying together as the count passes 44 at 30 milliseconds, 108 at 40, 202 at 50 and 344 at 60, where the law reads 348."
-  caption="The echogram is a lattice being swept, not a decaying signal. Because the expanding sphere gains volume as the cube of time while the images are spaced one per room volume, arrivals accumulate as the cube of time and their rate grows as its square — the early discrete reflections and the late diffuse tail are the same construction read at two densities."
+  caption="The echogram is a lattice being swept, not a decaying signal. Because the expanding sphere gains volume as the cube of time while the images are spaced one per room volume, arrivals accumulate as the cube of time and their rate grows as its square: the early discrete reflections and the late diffuse tail are the same construction read at two densities."
 />
 
 The reflectogram below shows the whole pattern: the direct sound at 0 dB, then
@@ -206,7 +206,7 @@ grid, coloured by reflection order.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/image_source_plan.svg" alt="Plan view of the image-source lattice of a 7 by 5 metre room outlined in the centre, with the source as a red star at (2, 1.6), the receiver as a blue triangle at (5.2, 3.4), and the image sources at the plane of the source coloured by reflection order, first order orange, second order green and third order purple, spreading in a regular grid of mirror rooms out to about 26 metres" width="88%" />
 
 *The same room, source and receiver as the reflectogram above, drawn to third
-order so the lattice stays legible — the reflectogram runs to order 10 and this
+order so the lattice stays legible. The reflectogram runs to order 10 and this
 plan is its first three shells. Each image sits in a mirror room at the height
 plane of the source, and its distance to the receiver alone fixes the arrival
 time and the $1/(4\pi r)$ spreading of that reflection.*
@@ -254,8 +254,8 @@ drawn without air (solid) and with $m$ at 20 °C / 50 % RH (dashed). The bands
 fan out because the wall absorption rises with frequency, from T30 = 1.06 s at
 250 Hz to 0.25 s at 4 kHz. The air term is the second, much smaller mechanism
 here: it takes 0.4 % off the 250 Hz decay and 4.4 % off the 4 kHz decay. That is
-the honest size of the effect in a 105 m³ room — the reflections simply do not
-travel far enough — and it is why air absorption is a
+the honest size of the effect in a 105 m³ room (the reflections simply do not
+travel far enough), and it is why air absorption is a
 [volume effect](/phonometry/buildings/rooms/reverberation-prediction/#1-sabine-eyring-and-millington-sette)
 rather than a frequency effect: put the same walls around 2 000 m³ and the same
 argument takes tens of per cent off the top band.*
@@ -292,7 +292,7 @@ RIR reproduces the **Eyring** reverberation time
 $T = -24 V \ln 10 / (c S \ln(1 - \bar\alpha))$, because the mean reflection rate
 $cS/4V$ equals $\tfrac{c}{2}(1/L_x + 1/L_y + 1/L_z)$. The match is close only in
 the near-cubic limit: an elongated room sustains energy along its long axis, so
-its pure *specular* decay runs slower than the diffuse-field Eyring estimate —
+its pure *specular* decay runs slower than the diffuse-field Eyring estimate:
 exactly the anisotropy the
 [Fitzroy and Arau-Puchades models](/phonometry/buildings/rooms/reverberation-prediction/)
 were built to correct. The model captures specular reflections only (no
@@ -305,8 +305,8 @@ wall reflection factors.
 to a 6:1 corridor. Eyring *falls* as the room is stretched, because stretching
 at constant volume adds boundary area; the specular decay *rises*, because the
 long axis keeps returning energy that the mean free path has already written
-off. The two agree to 5 % for the cube — the documented tolerance of the
-Validation section below — and part company immediately: past about 1.5:1 the
+off. The two agree to 5 % for the cube (the documented tolerance of the
+Validation section below) and part company immediately: past about 1.5:1 the
 specular decay is outside the ±10 % band, and at 6:1 it is 2.5 times the Eyring
 estimate. This is the anisotropy that motivates the Fitzroy and Arau-Puchades
 models, and the reason the reverberation-prediction guide lists disproportionate
@@ -402,8 +402,8 @@ default 20 is 2.1× short. The cost objection does not apply: order 60 is
 *T30 read by `room_parameters` from the synthetic RIR, against the order the
 lattice was built to. The rise is the truncation: every extra order adds a shell
 of later arrivals, so the fit window keeps finding more decay to fit. The
-completeness rule sets the **floor** — below the order that covers the fit
-window the number is simply wrong, which is what the table above quantifies —
+completeness rule sets the **floor** (below the order that covers the fit
+window the number is simply wrong, which is what the table above quantifies),
 but it is not a convergence criterion. Past the crossing the specular T30 keeps
 drifting above Eyring, because a 7 × 5 × 3 room is not near-cubic and its long
 axis sustains energy the diffuse-field estimate has already spent; the next
@@ -446,15 +446,15 @@ model that stopped generating reflections. A `duration` shorter than the decay
 truncates the tail exactly the same way, and silently.
 
 Two more caveats belong to the same section. `fs` quantises every arrival to
-the sample grid, so early-reflection work — arrival times, ITDG, lateral
-fractions — should read the exact `times` / `amplitudes` table rather than
+the sample grid, so early-reflection work (arrival times, ITDG, lateral
+fractions) should read the exact `times` / `amplitudes` table rather than
 peak-pick the sampled `ir`. And `absorption` enters as a real,
 angle-independent pressure reflection factor $\sqrt{1-\alpha}$, so grazing
 incidence is treated like normal incidence.
 
 Finally, the honest boundary: if the order needed to cover the reverberation
-time makes the run impractical — a large room with a small $L_\text{min}$, or a
-long tail — the pure image method is being asked to do a job that belongs to a
+time makes the run impractical (a large room with a small $L_\text{min}$, or a
+long tail), the pure image method is being asked to do a job that belongs to a
 hybrid model with a statistical late tail, or to the
 [FDTD solver](/phonometry/simulation/fdtd-simulation/).
 
@@ -480,7 +480,7 @@ The $(1-\bar\alpha)$ in the denominator of $R$ and the 4 in the level equation
 come from the same bookkeeping. Only the power *not* absorbed at the first
 encounter goes on to build the reverberant field, which is what divides $A$ by
 $(1-\bar\alpha)$; and the 4 is the diffuse-field factor between energy density
-and the intensity striking a surface — the same 4 as in the $4mV$ air term of
+and the intensity striking a surface: the same 4 as in the $4mV$ air term of
 the reverberation formulae. That gives $R$ its reading: it is the area of open
 window that would remove power at the same rate, so a room with $R$ = 25 m²
 behaves, as far as a distant listener is concerned, like a room with 25 m² of
@@ -514,8 +514,8 @@ print(round(field.critical_distance, 2))       # 0.71 m
 field.plot()                                    # direct / reverberant / total vs distance
 ```
 
-On a room worth drawing — a 12 × 8 × 4 m workshop, $S$ = 352 m²,
-$\bar\alpha$ = 0.15, so $R$ = 62 m² — `SteadyFieldResult.plot()` draws the
+On a room worth drawing (a 12 × 8 × 4 m workshop, $S$ = 352 m²,
+$\bar\alpha$ = 0.15, so $R$ = 62 m²), `SteadyFieldResult.plot()` draws the
 direct, reverberant and total levels against distance with the critical distance
 marked: the total curve follows the $1/r^2$ direct field near the source and
 flattens onto the reverberant plateau beyond $r_\mathrm{c}$ = 1.11 m.
@@ -567,7 +567,7 @@ field by 3 dB and pushes $r_\mathrm{c}$ out by $\sqrt{2}$, but the reverberant l
 from the source is identical in all four curves, because $Q$ never enters the
 $4/R$ term. Right: absorption does the opposite. Stepping $\bar\alpha$ from 0.05
 to 0.35 takes the room constant from 18.5 m² to 189.5 m² and the plateau from
-83.3 dB to 73.2 dB — 10.1 dB, exactly $10\lg(R_2/R_1)$ — while the near-field
+83.3 dB to 73.2 dB (10.1 dB, exactly $10\lg(R_2/R_1)$), while the near-field
 asymptote does not move. That is the precise content of "beyond $r_\mathrm{c}$ only
 absorption, not distance, lowers the level", and it is a seven-fold increase in
 absorption for 10 dB.*
@@ -618,7 +618,7 @@ print(round(float(room.steady_state_spl(90.0, 5.0, R)), 2))   # level at 5 m, dB
 concentrates the direct field into $Q/(4\pi r^2)$. Whether it *also* raises the
 radiated power depends on the source's own impedance behaviour (Norton &
 Karczub 2e, Table 4.5), and `steady_state_spl` exposes that as `source_model`.
-A **constant-power** source radiates $\Pi_0$ wherever it stands — the default,
+A **constant-power** source radiates $\Pi_0$ wherever it stands: the default,
 and the right model for a machine whose output is set by its internal losses. A
 **constant-volume** source is loaded by the reflecting boundaries and radiates
 $\Pi_0 Q$, so a corner adds $10\lg Q$ = 9 dB on top of the directivity
@@ -670,8 +670,8 @@ carries. Damping gives each mode a half-power bandwidth of about $2.2/T$ hertz,
 so the modes of a decaying room are overlapping resonances rather than lines;
 the number of them per hertz is the **modal density** derived in §3, which grows
 as the square of frequency, so overlap becomes inevitable above some frequency.
-Ask for roughly three modes inside one bandwidth — set
-$3 \approx (2.2/T)\,(4\pi V f^2/c_0^3)$ — and solving for $f$ gives
+Ask for roughly three modes inside one bandwidth (set
+$3 \approx (2.2/T)\,(4\pi V f^2/c_0^3)$), and solving for $f$ gives
 $f_\mathrm{s} \approx 2000\sqrt{T/V}$ at $c_0 \approx 343$ m/s. Three things follow. The
 constant encodes a *choice* of how much overlap counts as diffuse, so stricter
 authors quote 4000 for the same physics. A large room reaches the transition at
@@ -836,7 +836,7 @@ and a completely different number of *frequencies*.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/room_proportion_modes.svg" alt="Three stacked raster rows of mode ticks up to 200 hertz for three rooms of the same 105 cubic metre volume, coloured by family: a 4.72 metre cube whose ticks pile onto a few frequencies separated by wide empty gaps, a 7.49 by 3.74 by 3.74 metre room slightly better, and a Bolt-ratio room of 3.40 by 4.77 by 6.47 metres whose ticks are strewn almost evenly; a fourth panel below plots the spacing between consecutive distinct frequencies for the three rooms" width="88%" />
 
 *The same volume in three shapes. The 4.72 m cube enumerates 132 modes at only
-**26 distinct frequencies** — a five-fold pile-up — with a 15.0 Hz hole in the
+**26 distinct frequencies** (a five-fold pile-up), with a 15.0 Hz hole in the
 ladder; the 2:1:1 room manages 36 distinct frequencies out of 129 and an even
 wider 22.9 Hz hole; the Bolt-ratio room 1 : 1.4 : 1.9 gives **121 distinct
 frequencies out of 126** and its largest gap is 9.5 Hz. Piled-up frequencies are
@@ -875,7 +875,7 @@ plt.show()
 the product of cosines $\cos(n_x\pi x/l_x)\cos(n_y\pi y/l_y)\cos(n_z\pi z/l_z)$,
 and two consequences of that one formula are worth more than the whole
 frequency list. Every mode has a pressure **antinode at every corner**, because
-every cosine is at $\pm 1$ there — which is why a subwoofer and a bass trap both
+every cosine is at $\pm 1$ there, which is why a subwoofer and a bass trap both
 belong in a corner, and why a microphone in one over-reads the low bands. And an
 axis whose order is odd has a **node at its midpoint**, so a listening position
 at exactly half a room dimension sits in a null of every odd axial mode on that
@@ -883,7 +883,7 @@ axis; low-frequency measurement positions are kept off the mid-planes for the
 same reason. The source matters as much as the receiver: a source sitting on a
 mode's nodal plane cannot drive that mode at all. What the rigid-wall model
 cannot tell you is how strongly each resonance rings, since that is set by the
-damping it omits — for that, mesh the room and run the
+damping it omits; for that, mesh the room and run the
 [2D FDTD solver](/phonometry/simulation/fdtd-simulation/).
 
 ## Validation

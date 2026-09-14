@@ -108,7 +108,7 @@ radiator, beyond which the on-axis pressure stops oscillating and settles into
 its $1/r$ decay. Work it for the 75 mm-radius piston of section 2 at 4 kHz:
 $\pi (0.075)^2 / 0.0858 = 0.21$ m, so 1 m is comfortably far. A 2 m tall
 column has not finished summing its drivers at 1 m at *any* frequency, and must
-be measured at 4 m or more and referred back — which is why clause 7.1.1 allows
+be measured at 4 m or more and referred back, which is why clause 7.1.1 allows
 0.5 m or an integral number of metres with a referral to the standard 1 m
 rather than insisting on 1 m, and why a datasheet "1 m" figure for a large
 cabinet is always a referred quantity.
@@ -118,9 +118,9 @@ of the measured result, so clause 10.1 requires it to be described with the
 result and admits exactly three mountings for a drive unit: on a standard
 baffle, in a standard measuring enclosure (type A or B) or in a specified
 enclosure; in free air with no baffle at all; or flush with the reflecting
-plane in half-space free field. The three are not comparable — a unit measured
+plane in half-space free field. The three are not comparable; a unit measured
 in free air loses its whole low end to front-to-back cancellation, while the
-same unit flush in the plane gains the half-space 6 dB — and clause 11.1 notes
+same unit flush in the plane gains the half-space 6 dB, and clause 11.1 notes
 that the radiating edge has to sit substantially flush with the front surface,
 by a chamfer or a thin rigid sub-baffle. A loudspeaker *system* is usually
 measured without any additional baffle (10.2). Clause 15 then defines the three
@@ -144,8 +144,8 @@ $U_\mathrm{p}$, which for the characteristic sensitivity is numerically $\sqrt{R
 (20.3.2). Where no filter of the right bandwidth exists, clause 20.1.2.4 gives
 the practical substitute: split the band into $n$ third-octave bands per
 IEC 61260, drive each at $U_\mathrm{p}/\sqrt{n}$, and recombine as the r.m.s. of the
-band pressures. The instrument chain — generator, amplifier, loudspeaker,
-microphone amplifier — must be flat to ±0.5 dB over the range with negligible
+band pressures. The instrument chain (generator, amplifier, loudspeaker,
+microphone amplifier) must be flat to ±0.5 dB over the range with negligible
 amplitude non-linearity, and all meters must be true r.m.s. (clause 8); the
 frequency range over which the total error stays inside ±2 dB has to be stated
 with the result (clause 9).
@@ -160,8 +160,8 @@ back. Errors from wedge tips, the floor and the stands must stay under 0.5 dB
 (7.3), and the microphone distance *and the maximum capture time the
 environment allows* have to be stated with the result. The price is a hard
 low-frequency limit: a gate can only resolve a frequency whose period fits
-inside it, so a 5 ms reflection-free window — what a 1 m measurement at 1.2 m
-over a hard floor gives — is useless below roughly 200 Hz, and the low end has
+inside it, so a 5 ms reflection-free window (what a 1 m measurement at 1.2 m
+over a hard floor gives) is useless below roughly 200 Hz, and the low end has
 to come from a near-field or half-space measurement spliced in. That is also
 why a gated curve and an anechoic curve disagree below a few hundred hertz. The
 windowing machinery is the same as in
@@ -216,7 +216,7 @@ that half space it concentrates twice the power of a free-field point source,
 and $10\log_{10} 2 = 3.01$ dB is the floor it rises from. The beamwidth follows
 the first null: the $-6$ dB half-angle narrows roughly as
 $\arcsin(2.2/ka)$, so a 100 mm cone is still hemispherical at 500 Hz and down
-to about 18° at 4 kHz — which is where a crossover to a smaller radiator has
+to about 18° at 4 kHz, which is where a crossover to a smaller radiator has
 to happen.
 
 <details>
@@ -248,7 +248,7 @@ Every word of "rigid circular piston in an infinite baffle" is an assumption a
 real loudspeaker breaks, and each has a known failure. A cabinet is a **finite**
 baffle, so below the frequency whose wavelength exceeds the baffle width the
 radiation loads into $4\pi$ instead of $2\pi$ and the response falls by up to
-6 dB — the baffle step — with edge diffraction adding a few decibels of ripple
+6 dB (the baffle step) with edge diffraction adding a few decibels of ripple
 around it; none of that is in this model. A cone stops moving **as one piece**
 above its first breakup mode, typically a few times the $ka = 1$ frequency for
 a paper cone, after which the real directivity is broader and more irregular
@@ -364,7 +364,7 @@ they are inputs here rather than outputs.
 the rated impedance is a pure resistance the manufacturer *declares*, and
 constrains the declaration: the lowest modulus **in the rated frequency range**
 shall be not less than 80 % of it, and any dip below that value outside the
-range — d.c. included — shall be stated in the specification. That is the line
+range (d.c. included) shall be stated in the specification. That is the line
 drawn on the impedance panel, and `minimum_impedance` is exactly the quantity
 it is applied to. The consequence for whoever buys the loudspeaker is the
 minimum, not the rated, modulus: an "8 Ω" box dipping to 3.2 Ω is legal only if
@@ -374,8 +374,8 @@ ratings survive at all on a modulus that varies by an order of magnitude across
 the band.
 
 Clause 16.2.2 fixes how the curve itself is taken: the loudspeaker under normal
-measuring conditions, driven at constant voltage or constant current — the
-former usually preferred — at a level small enough to keep it in a linear
+measuring conditions, driven at constant voltage or constant current (the
+former usually preferred) at a level small enough to keep it in a linear
 region, with the standard's own warning that impedance is strongly influenced
 by drive level and that the data should be checked for consistency at several
 levels. The modulus is measured over at least 20 Hz to 20 kHz, and the voltage
@@ -421,7 +421,7 @@ result.report("loudspeaker.pdf", metadata=ReportMetadata(measurement_standard="I
 two normalizations of section 1 are applied. The defaults are the 1 m,
 $\sqrt{R}$ case, so a 1 m response at 2.83 V into 8 Ω returns its own band mean
 unchanged. Measured at 2 m and 1 V instead, the same curve is referred up by
-6.0 dB for the distance and 9.0 dB for the voltage — 15.1 dB in total, which is
+6.0 dB for the distance and 9.0 dB for the voltage (a total of 15.1 dB), which is
 the size of error a reader would otherwise publish. One more input constraint,
 easy to miss: the band averages weight every sample equally, so a *linearly*
 spaced frequency axis puts most of its samples in the top octave and drags the
@@ -556,9 +556,9 @@ The panel is one cut, and clause 23.1.2 says how a cut is taken:
 The loudspeaker turns and the microphone does not: the reference point sits on
 the rotation axis so the measuring distance never changes as $\theta$ is swept
 (23.1.2.2). The rule that makes the result a *pattern* rather than a family of
-responses is 23.1.2.3 — the input voltage is retrimmed at each frequency or
+responses is 23.1.2.3: the input voltage is retrimmed at each frequency or
 band so that the sound pressure at a specified point on the reference axis
-stays constant — and the preferred display is a family of polar curves at
+stays constant, and the preferred display is a family of polar curves at
 stated bands, at least 500 Hz, 1, 2, 4 and 8 kHz, with the reference-axis level
 as the zero of the diagram. The step-by-step variant of clause 13.1.2 of the
 microphone standard uses 10° or 15°; here 23.1.2.4 recommends a device giving
@@ -731,7 +731,7 @@ measurements rather than assumptions. Take them in this order.
 
 1. **Set the system once and do not touch it.** $L_{\mathrm{H}\text{-}\mathrm{M}}$ and
    $L_{\mathrm{H}\text{-}\mathrm{L}}$ are a *pair* read at one unchanged gain setting, so only
-   their difference matters and a relative reading suffices — but the setting
+   their difference matters and a relative reading suffices, but the setting
    must not move between them.
 2. **Excite with pink noise** and read the level at the microphone position
    with the microphone physically in its working place and orientation: its
@@ -743,9 +743,9 @@ measurements rather than assumptions. Take them in this order.
 4. **Measure $L_{\mathrm{T}\text{-}\mathrm{M}}$** with a talker or an artificial mouth at the
    design talker distance; that fixes $Z_\mathrm{S} = L_{\mathrm{H}\text{-}\mathrm{L}} - L_{\mathrm{T}\text{-}\mathrm{M}}$.
 5. **Read $D_\mathrm{M}(\theta)$** off the microphone's own polar data at the bearing of
-   the loudspeaker *relative to* the talker — see the
-   [pattern family](/phonometry/devices/electroacoustics/microphones/#2-directional-pattern-and-the-directivity-index-clause-13)
-   — rather than assuming it. It is zero for an omnidirectional capsule no
+   the loudspeaker *relative to* the talker (see the
+   [pattern family](/phonometry/devices/electroacoustics/microphones/#2-directional-pattern-and-the-directivity-index-clause-13))
+   rather than assuming it. It is zero for an omnidirectional capsule no
    matter where it points.
 
 The acceptance test everyone actually runs is the **ring-out**: raise the gain

@@ -53,9 +53,9 @@ ECMA-418-2 is a calculation applied to a recording, and clause 2 makes the
 recording part of conformance: measurements conform only if they are taken in
 conformity with ECMA-74 and carried out at 48 kHz, or resampled to it. That
 pulls in a test environment qualified to ISO 11201 accuracy grade 2, a declared
-operating mode, and the microphone at the ECMA-74 positions — the operator
+operating mode, and the microphone at the ECMA-74 positions (the operator
 position 0.25 m from the reference box at 1.20 m seated or 1.50 m standing, or
-at least four bystander positions 1.00 m out and 1.50 m up — with the
+at least four bystander positions 1.00 m out and 1.50 m up) with the
 background noise measured with the equipment off and a calibrator applied
 before and after. The positions are the same ones the
 [tone-prominence guide](/phonometry/perception/psychoacoustics/tone-prominence/)
@@ -77,7 +77,7 @@ seconds: its single value is the 90th percentile of $R(l_{50})$ over the blocks
 that survive the initial transient, and the trace drawn further down takes
 about 0.5 s to reach its plateau. Fluctuation strength needs the longest
 record, of the order of ten seconds, because it resolves modulation rates near
-4 Hz — its trace is still climbing at 3 s and only settles around 4 s, so a
+4 Hz. Its trace is still climbing at 3 s and only settles around 4 s, so a
 two-second excerpt contains a handful of modulation periods and reads low.
 
 Draw the consequence: values computed on short clips are biased low for $R$ and
@@ -169,7 +169,7 @@ CI verifies the Table A.2 target values (0.38 acum at 250 Hz up to
 denominator of $S$ contain $N'(z)$, so the level cancels: what the ratio
 answers is *where on the Bark axis this sound's loudness sits*. That is why
 DIN 45692 clause 6 fixes the reference sound and every one of its verification
-signals at the same loudness — 4 sone — and why comparing the sharpness of two
+signals at the same loudness, 4 sone, and why comparing the sharpness of two
 sounds of very different loudness is close to meaningless. The range is worth
 memorising: a critical band of noise at 250 Hz reads about 0.4 acum, the 1 kHz
 reference exactly 1 acum, a critical band at 4 kHz about 2.8 acum, and
@@ -429,8 +429,8 @@ plt.show()
 </details>
 
 **Reading a roughness.** Clause 7.2 gives the criterion the tonality section
-withholds: a signal has *prominent* roughness when the single value $R$ — the
-90th percentile of the time-dependent $R(l_{50})$, not its mean — exceeds
+withholds: a signal has *prominent* roughness when the single value $R$, the
+90th percentile of the time-dependent $R(l_{50})$, not its mean, exceeds
 0.2 asper. The percentile matters: short bursts of harshness are not averaged
 away, which also means the record has to be long enough for that percentile to
 settle. The figure below is the reference sound seen the two ways the result

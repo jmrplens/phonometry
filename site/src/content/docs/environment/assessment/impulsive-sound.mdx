@@ -142,7 +142,7 @@ measurement of [ISO 1996-2](/phonometry/environment/assessment/environmental-lev
 *Both inputs matter but not equally: at a fixed onset rate, going from a 5 dB to
 a 30 dB level difference moves the prominence far less than an order of magnitude
 of onset rate does. Below P = 5 the adjustment is identically zero, so an impulse
-that does not qualify costs nothing at all — which is why the qualification test
+that does not qualify costs nothing at all, which is why the qualification test
 is the part of the method to get right.*
 
 <details>
@@ -207,8 +207,8 @@ conditions that make one valid are the conditions of the whole method: a class 1
 measurement chain calibrated before and after the session, and a signal in
 pascals, because although the adjustment itself is calibration-insensitive (it
 is built from level *differences*) the reported and adjusted $L_\mathrm{Aeq}$ are not.
-The level history has to be sampled fast enough to resolve the rise — the method
-works on a 10 ms to 25 ms grid, which is the `dt` argument below — and the
+The level history has to be sampled fast enough to resolve the rise (the method
+works on a 10 ms to 25 ms grid, which is the `dt` argument below), and the
 governing impulse is the one with the highest $P$ over a **30-minute** assessment
 period. Three things invalidate a period rather than lowering its score: no onset
 qualifying at the 10 dB/s gradient at all (the adjustment is then 0 dB and the
@@ -257,8 +257,8 @@ none of them is optional in practice:
 | `onset_rate_method` | `'least_squares'` | The fit over the detected rise |
 
 `environment.sound_pressure_level_history(signal, fs, *, dt=..., calibration_offset=...)`
-is the same Clause 4 step on its own — A-weighting, F time weighting and
-resampling onto the 10-25 ms grid — for a caller who wants the history without
+is the same Clause 4 step on its own (A-weighting, F time weighting and
+resampling onto the 10-25 ms grid) for a caller who wants the history without
 the adjustment. It warm-starts the F integrator at the first window's mean
 square, so the beginning of a record does not register as an onset of the
 processing itself.
@@ -339,8 +339,8 @@ position and the assessment period; the governing impulse with its onset rate an
 level difference; the prominence $P$ and the adjustment $K_\mathrm{I}$; the source
 category the result puts the source in; and the $L_\mathrm{Aeq}$ the adjustment rides
 on, with the instrumentation and calibration behind it. The fiche below fills the
-computed half automatically — the per-impulse table, the governing $P$, $K_\mathrm{I}$ and
-the category — and takes the rest from `ReportMetadata`, which is why the
+computed half automatically (the per-impulse table, the governing $P$, $K_\mathrm{I}$ and
+the category) and takes the rest from `ReportMetadata`, which is why the
 metadata block is not decoration: without it the sheet documents an arithmetic
 result and not a measurement.
 

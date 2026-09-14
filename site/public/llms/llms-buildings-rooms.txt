@@ -20,7 +20,7 @@ One boundary runs through all of it: the **Schroeder frequency**. Above it a
 room has so many overlapping modes that a statistical description is the honest
 one, and every reverberation formula and decay parameter on these pages lives
 there. Below it the modes are discrete and separable, and no statistical model
-applies — which is why the measurement and prediction pages alike carry validity
+applies, which is why the measurement and prediction pages alike carry validity
 caveats at their lowest bands. A reader chasing a low-frequency problem should
 start from the modal treatment rather than from the decay parameters.
 
@@ -65,14 +65,14 @@ cite.
 European building-acoustics framework, when the room is an ordinary building
 space inside the clause 4.6 validity limits, and when the receiving-room
 absorption has to feed an EN 12354 insulation prediction. Use the classical
-family when the room falls outside that scope — a hall, a theatre, an
+family when the room falls outside that scope (a hall, a theatre, an
 industrial space, or a room whose absorption is concentrated on one axis so that
-an axial model is needed — or when a *band* of predictions rather than a single
+an axial model is needed) or when a *band* of predictions rather than a single
 normative value is what the situation deserves. Both share one failure mode, the
 loss of diffusivity, and they fail in the same direction: the measured
 reverberation time comes out longer than predicted, by up to a factor of two in
 the low-diffusivity rooms the standard's own accuracy clause records. And
-neither replaces a measurement — the measured counterpart is
+neither replaces a measurement: the measured counterpart is
 [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/).
 
 Related pages elsewhere: the absorption coefficient the prediction chain
@@ -125,7 +125,7 @@ carries no diffraction, no scattering off a diffuser and no finite-impedance
 boundary, and it stops when the reflection order runs out rather than when the
 sound does. Below the Schroeder frequency, where the statistical models give
 out, what this section offers is the mode *positions* of a rigid rectangular
-box — not the field of a real room at low frequency. For that, the [wave
+box, not the field of a real room at low frequency. For that, the [wave
 simulation](https://jmrplens.github.io/phonometry/simulation/) section runs an FDTD solver on the actual
 geometry.
 
@@ -134,9 +134,9 @@ importer, no material database and no renderer: the pages take dimensions,
 coefficients and impulse responses as inputs, and give back parameters. The
 absorption coefficients themselves come from [Materials and
 surfaces](https://jmrplens.github.io/phonometry/materials/absorbers/), and the model errs optimistically
-when the room is not diffuse — outside the EN 12354-6 clause 4.6 limits (no
+when the room is not diffuse (outside the EN 12354-6 clause 4.6 limits: no
 dimension more than five times another, opposite surfaces within a factor of
-three in absorption, object fraction below 0.2) the measured reverberation
+three in absorption, object fraction below 0.2), the measured reverberation
 time can reach twice the predicted one.
 
 Two coverage boundaries follow the standards. Only the normative clause 4
@@ -400,8 +400,8 @@ mistakes bias the mean itself:
   of the 63-125 Hz bands across positions is structurally larger; the cure
   is more positions, not a longer excitation.
 
-Three practical limits close the chain. Playback and recording themselves —
-sound-card I/O, level calibration of the chain — are outside the library,
+Three practical limits close the chain. Playback and recording themselves
+(sound-card I/O, level calibration of the chain) are outside the library,
 which starts at the recorded array. ISO 18233's time-variance and distortion
 diagnostics are not implemented either: the sweep separates distortion, but
 no helper here quantifies it (that reading lives in the
@@ -731,7 +731,7 @@ decay). `decay_curve(ir, fs, band=None, fraction=1, zero_phase=False)` returns
 just the `(time, level)` curve for one band or the broadband response.
 
 ISO 3382-1 Annex A defines more parameters than this: the sound strength $G$
-and the binaural/spatial parameters LF, LFC and IACC are not implemented —
+and the binaural/spatial parameters LF, LFC and IACC are not implemented:
 phonometry computes only the reverberance and clarity family above (EDT,
 T20, T30, C50, C80, D50, Ts).
 
@@ -1044,7 +1044,7 @@ STI can itself be measured with the STIPA tools in the
 [Speech Transmission Index guide](https://jmrplens.github.io/phonometry/perception/speech/speech-transmission/).
 
 Two things stay outside the function. The fourth required single number, the
-average A-weighted background noise $L_{p,\mathrm{A,B}}$, is not computed here — it is
+average A-weighted background noise $L_{p,\mathrm{A,B}}$, is not computed here. It is
 the energetic A-weighted average of the per-position octave-band background
 levels, and it belongs in the report alongside the quantities this page
 produces. And nothing checks the measurement conditions of clauses 5.1 and
@@ -1735,7 +1735,7 @@ own numeric anchors (see [CONFORMANCE.md](https://jmrplens.github.io/phonometry/
 **Covered.** Kuttruff's image-source construction (§4.1), the Eyring formula
 used for the near-cubic check and the Schroeder frequency of §3.6; Vorländer's
 mirror-source model with its reflection-factor and delay expressions
-(Chapter 11); and the Allen & Berkley reflection-order decomposition — all in
+(Chapter 11); and the Allen & Berkley reflection-order decomposition: all in
 `image_source_rir`. The Bies §6.4 steady-state field (room constant,
 directivity $Q$, critical distance) in `steady_state_field`, `room_constant`,
 `critical_distance`, `steady_state_spl` and `schroeder_frequency`. Long's
@@ -1746,14 +1746,14 @@ modal density (Eqs. 8.45, 8.46) in `room_modes`, `room_mode_frequency`,
 
 **Not covered.** Specular reflection only: no diffraction, no diffuse
 scattering. An elongated room therefore decays more slowly than the Eyring
-estimate the model is checked against — the anisotropy the Fitzroy and
+estimate the model is checked against: the anisotropy the Fitzroy and
 Arau-Puchades models of
 [reverberation-time prediction](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/) exist to correct.
 Kuttruff's reverberation distance, which uses the Sabine absorption area rather
 than the room constant, is quoted for comparison and not implemented:
 `steady_state_field` and `critical_distance` are always the Bies room-constant
 form. The mode calculator assumes rigid walls and a rectangular plan and
-returns eigen*frequencies* only — no amplitude at a listening position, no
+returns eigen*frequencies* only: no amplitude at a listening position, no
 damping, no mode shape, no other geometry; for those, mesh the room and run the
 [2D FDTD solver](https://jmrplens.github.io/phonometry/simulation/fdtd-simulation/). Bolt's preferred
 dimension ratios are discussed, not tabulated.
@@ -2267,8 +2267,8 @@ reduce exactly to Eyring for a uniform absorption distribution.
 
 The misrepresentation these two models exist for can be watched. The clip
 below simulates one flat 8 × 2.5 m section twice with the same **total**
-statistical absorption — spread over all four edges, or concentrated on the
-floor-and-ceiling pair (α ≈ 0.79) between hard ends — and races both
+statistical absorption (spread over all four edges, or concentrated on the
+floor-and-ceiling pair (α ≈ 0.79) between hard ends) and races both
 measured energy decays through the one Sabine-Eyring band the two rooms
 share. The spread room decays inside the band, a straight line at
 T = 160 ms against Sabine's 201; the concentrated room's decay has no
@@ -2407,7 +2407,7 @@ mixing is left: an 800 Hz wavefront enters a 4 m rigid-walled hall filled
 with rigid columns 10 to 17 cm across, a quarter to two fifths of the
 42.9 cm wavelength. Every column diffracts the front and sheds a scattered
 wavelet, the wavelets interfere, and within a few passes the specular front
-has become energy spread over the whole hall with no preferred direction —
+has become energy spread over the whole hall with no preferred direction,
 which is the assumption Sabine and Eyring both start from, arriving here as
 a result rather than as a hypothesis. Nothing in the hall absorbs, so what
 you are watching is *only* the redistribution; the decay at the end is the
@@ -2712,8 +2712,8 @@ scattering objects are present) and an object fraction below 0.2. Outside
 those limits the field is not diffuse and the model errs on the optimistic
 side: the standard's own accuracy clause records measured reverberation
 times up to twice the prediction in low-diffusivity rooms. The standard's own
-scope goes further: very large or irregularly shaped spaces — concert halls,
-theatres, factories — are excluded from the model itself, not just from this
+scope goes further: very large or irregularly shaped spaces (concert halls,
+theatres, factories) are excluded from the model itself, not just from this
 implementation. The classical alternatives for those cases live in
 [Reverberation-time prediction](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/).
 
@@ -2783,7 +2783,7 @@ repository. Click the preview to open the PDF:
   the measured counterpart of the reverberation time predicted here.
 - [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/):
   where the $\alpha_\mathrm{s}$ come from (ISO 354) and where $\alpha_\mathrm{w}$ is defined
-  (ISO 11654) — the rating §3 forbids as an input.
+  (ISO 11654), the rating §3 forbids as an input.
 - [Predicting Sound Insulation (EN 12354)](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/):
   the family member that consumes the $A$ computed here, through
   $D_\mathrm{nT} = D + 10\lg(T/T_0)$ and $R' = D + 10\lg(S/A)$.

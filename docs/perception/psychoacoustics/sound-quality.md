@@ -238,9 +238,9 @@ $R(l_{50})$), `specific_roughness` ($R'(z)$, 53 bands), `bark`,
 `centre_frequencies`, `time`, `roughness_vs_time` ($R(l_{50})$),
 `specific_roughness_vs_time` ((n_times, 53) array), `field`.
 
-All three ECMA-418-2 entry points on this page are monaural — the binaural
+All three ECMA-418-2 entry points on this page are monaural. The binaural
 quadratic-mean combinations of Formula 112 (clause 7.1.11) and Formula 170
-(clause 9.1.15) are not implemented — so analyse each ear channel separately.
+(clause 9.1.15) are not implemented, so analyse each ear channel separately.
 The optional entropy weighting of clause 7.1.6, which needs an external
 rotational-speed signal, is also left out.
 

@@ -218,18 +218,6 @@ jobs:
         # twelve days it took to notice.
         run: pnpm run check:structured-data
         working-directory: site
-      - name: Check the identity snapshot against its canonical document
-        # The `#person` entity every page links its author to is fetched live
-        # at build time; the committed snapshot is only the fallback for a
-        # build with no network. Nothing read it, so it froze on the day it
-        # was added: by the time this step existed the canonical document had
-        # grown its Spanish half, and the snapshot was still publishing an
-        # English-only job title and description on a site that ships both
-        # locales. A stale fallback fails nothing, renders nothing wrong and
-        # is invisible in review, which is exactly why it needs a gate rather
-        # than a habit.
-        run: pnpm run identity:check
-        working-directory: site
       - name: Check every formula rendered
         # KaTeX does not fail a build on a parse error: it emits a
         # `katex-error` span and ships the page. A display block whose `$$`
@@ -344,17 +332,3 @@ jobs:
               if r.status not in (200, 202):
                   sys.exit(f"unexpected status {r.status}: {r.read()[:300]}")
           PY
-
-  identity-snapshot:
-    name: Identity snapshot
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      # `site/identity/person.snapshot.json` is the offline fallback for the canonical `#person`
-      # node: the build fetches the live document and only falls back to this.
-      # jmrplens/jmrp.io propagates it automatically whenever the canonical
-      # changes, and this guard is what says so out loud if the two ever drift
-      # apart — a stale snapshot is invisible while the fetch works, and ships
-      # a Person missing several properties the moment it does not.
-      - name: Snapshot matches the canonical document
-        run: node site/scripts/sync-identity.mjs --check

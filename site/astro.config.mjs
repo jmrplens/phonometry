@@ -210,13 +210,17 @@ const softwareRequirements = 'Python >= 3.13 with NumPy and SciPy (matplotlib an
 const CANONICAL_IDENTITY_URL =
   'https://raw.githubusercontent.com/jmrplens/jmrp.io/main/public/identity/person.jsonld';
 
-// Committed fallback, only reached if the fetch fails — which, given the URL is
-// on the same host as the checkout, effectively means GitHub is down and there
-// is no build anyway. The warning is deliberately loud so a stale identity
-// never ships unnoticed. Refresh with `pnpm run identity:sync`.
-const identitySnapshot = JSON.parse(
-  readFileSync(new URL('./identity/person.snapshot.json', import.meta.url), 'utf8'),
-);
+// There is NO committed fallback, and that is the point (2026-09-15). The
+// snapshot that used to sit here was a second copy of the canonical document,
+// refreshed by a commit into this repository every time the original changed,
+// which is the very hand-sync this arrangement exists to remove. Fetching was
+// always the primary path; the copy only added history noise and something
+// that could drift.
+//
+// A build that cannot read the canonical document now FAILS instead of
+// publishing an identity it could not verify. That costs little: the document
+// is served by the same host the checkout came from, so unreachable means
+// there is no build to ship either way.
 
 // `@context` is stripped: the document is standalone, but here it becomes one
 // node of a graph that already declares the context once.
@@ -230,11 +234,12 @@ const { '@context': _identityContext, ...canonicalPerson } = await fetch(
       : Promise.reject(new Error(`HTTP ${response.status}`)),
   )
   .catch((error) => {
-    console.warn(
-      `\n⚠ [identity] Could not fetch the canonical Person entity (${error.message}).\n` +
-        `  Falling back to the committed snapshot — this build may ship a stale identity.\n`,
+    throw new Error(
+      `[identity] Could not read the canonical Person entity: ` +
+        `${error.message}. The build stops here on purpose, so this ` +
+        `site never publishes an identity it could not verify.`,
+      { cause: error },
     );
-    return identitySnapshot;
   });
 
 /**

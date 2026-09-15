@@ -37531,11 +37531,11 @@
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "0 of 14 outside the printed rounding with the Table 1 sum, against 9 of 14 with the printed 6,2 dB, every one of the 14 high"
+        "label": "0 of 14 outside the printed rounding with the Table 1 sum, against 9 of 14 with the printed 6,2 dB, every one of the 14 high and none by a second unit"
       },
       "computed": {
         "value": 0.0,
-        "label": "0 of 14 with the sum (worst 0.045 dB, both signs); 9 of 14 with 6,2 dB (worst 0.097 dB, 0 low)"
+        "label": "0 of 14 with the sum (worst 0.045 dB, both signs); 9 of 14 with 6,2 dB (worst 0.097 dB, 0 low, 0 past one unit)"
       },
       "tolerance": {
         "mode": "absolute",

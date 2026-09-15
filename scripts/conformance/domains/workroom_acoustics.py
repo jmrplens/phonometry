@@ -183,6 +183,12 @@ def _chk_table_c6_normalized() -> Outcome:
     )
 
 
+#: How many of the fourteen Annex C values the printed 6,2 dB of Eq. (4) puts
+#: outside their rounding, every one of them a tenth high. Recorded, not derived:
+#: it is the finding the row publishes, so a change in it has to fail the row.
+_PRINTED_OFFSET_CELLS_OUTSIDE = 9
+
+
 @register(
     _WORKROOM,
     "ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table "
@@ -232,22 +238,37 @@ def _chk_equation_four_offset_against_annex_c() -> Outcome:
         dep_print.append(
             ph.room.mean_level_excess(raw_by_print[keep], _DISTANCES_M[keep]) - want
         )
+    cells = len(dep_sum)
     outside_sum = sum(abs(d) > 0.05 for d in dep_sum)
     outside_print = sum(abs(d) > 0.05 for d in dep_print)
     low_print = sum(d < 0.0 for d in dep_print)
+    past_one_unit = sum(d > 0.15 for d in dep_print)
+    # Every claim the row states is judged, not only the first: the sum lands no
+    # cell outside the rounding, the printed constant lands the recorded number
+    # of them outside, none of its departures is low, and none reaches a second
+    # unit of the tenth. A verdict on the sum alone would go on passing the day
+    # the printed constant agreed with the annex, while the row still said not.
+    violations = (
+        outside_sum
+        + abs(outside_print - _PRINTED_OFFSET_CELLS_OUTSIDE)
+        + low_print
+        + past_one_unit
+    )
     return numeric(
         0.0,
-        float(outside_sum),
+        float(violations),
         0.0,
         expected_label=(
-            "0 of 14 outside the printed rounding with the Table 1 sum, against "
-            "9 of 14 with the printed 6,2 dB, every one of the 14 high"
+            f"0 of {cells} outside the printed rounding with the Table 1 sum, "
+            f"against {_PRINTED_OFFSET_CELLS_OUTSIDE} of {cells} with the printed "
+            f"6,2 dB, every one of the {cells} high and none by a second unit"
         ),
         computed_label=(
-            f"{outside_sum} of 14 with the sum (worst "
+            f"{outside_sum} of {cells} with the sum (worst "
             f"{max(abs(d) for d in dep_sum):.3f} dB, both signs); "
-            f"{outside_print} of 14 with 6,2 dB (worst "
-            f"{max(abs(d) for d in dep_print):.3f} dB, {low_print} low)"
+            f"{outside_print} of {cells} with 6,2 dB (worst "
+            f"{max(abs(d) for d in dep_print):.3f} dB, {low_print} low, "
+            f"{past_one_unit} past one unit)"
         ),
     )
 

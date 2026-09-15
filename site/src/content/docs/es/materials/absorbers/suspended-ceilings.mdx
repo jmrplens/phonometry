@@ -5,7 +5,7 @@ references:
   - type: standard
     organization: "European Committee for Standardization"
     year: 2014
-    title: "Acoustics — Test code for ceilings — Application of absorption products"
+    title: "Acoustics — Test code for suspended ceilings — Sound absorption"
     designation: "EN 16487:2014"
     primary: true
     note: "El código de ensayo: la geometría de muestra de 4.1.1, los montajes de 4.1.1.2, el tope de absorción del aire de 4.2.1 y la humedad de 4.2.2, y la tabla 1, la reproducibilidad del ensayo interlaboratorio del anexo A. Leída de la BS EN 16487:2014."
@@ -32,6 +32,7 @@ references:
 import Scope from '../../../../../components/Scope.astro';
 import ScopeClaim from '../../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
 
 La EN ISO 354 mide la absorción sonora de una muestra en cámara reverberante, y
 deja bastante en manos del laboratorio: cómo de grande es la muestra, cómo se
@@ -71,7 +72,7 @@ que faltan declarados como número y no como rechazo.
 ## 2. El montaje es el producto
 
 Aquí se usan cuatro montajes del anexo B de la EN ISO 354, y un techo usa
-normalmente el cuarto de ellos.
+normalmente el tercero de ellos.
 
 ```python
 print(materials.mounting_type("A"))
@@ -99,20 +100,22 @@ print(len(raised))              # 1
 
 El resto del montaje también lleva números: una subestructura de 30 mm de ancho y
 50 mm de canto como mucho, con un paso de 0,6 m; soportes de 50 mm por 50 mm
-separados 1,2 m por lo menos; un marco de montaje de material macizo de 20 kg/m² o
-más; y una muestra que no flecte más de 5 mm en ningún punto. Los tres que recibe
-la comprobación, la sección de la subestructura, la densidad del marco y la
-flecha, sí se juzgan, y salirse de uno lanza un `SuspendedCeilingWarning` que dice
-cuál. El paso de la subestructura y la sección y separación de los soportes se
-publican como `SUBSTRUCTURE_SPACING_M`, `SUPPORT_SECTION_MM` y
-`MIN_SUPPORT_SPACING_M` para construir con ellos: describen cómo se colgó la
-muestra y no una medida hecha sobre ella, así que nada en la llamada puede
-comprobarlos.
+como mucho, separados 1,2 m por lo menos; un marco de montaje de material macizo
+de 20 kg/m² o más; y una muestra que no flecte más de 5 mm en ningún punto. Los
+tres que recibe la comprobación, la sección de la subestructura, la densidad del
+marco y la flecha, sí se juzgan, y salirse de uno lanza un
+`SuspendedCeilingWarning` que dice cuál. El paso de la subestructura y la
+sección y separación de los soportes se publican como `SUBSTRUCTURE_SPACING_M`,
+`SUPPORT_SECTION_MM` y `MIN_SUPPORT_SPACING_M` para construir con ellos:
+describen cómo se colgó la muestra y no una medida hecha sobre ella, así que
+nada en la llamada puede comprobarlos.
 
 ### Cómo se hace la medida
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen.svg" alt="Cuatro vistas de un mismo montaje de ensayo. Arriba a la izquierda, el suelo de una cámara reverberante en planta: una muestra de diez coma ocho metros cuadrados hecha de treinta objetos de ensayo de sesenta por sesenta centímetros, cinco por seis, unidos a tope con las juntas sin sellar y sin perfilería vista encima, rodeada por un marco de montaje que cubre su perímetro, todo girado al menos diez grados respecto a las paredes y a setenta y cinco centímetros como mínimo de cualquier borde de la sala, un metro si es posible. Arriba a la derecha, las dos medidas de cuya diferencia sale la absorción: la sala vacía sin el marco, que da T1 y A1, y la sala con la muestra en su marco, que da T2 y A2, con la temperatura y la humedad comprobadas en cada una, sobre unas notas que piden una humedad relativa de al menos el cincuenta por ciento con el humidificador apagado al medir, la sala vacía medida al menos una vez al día en condiciones estables y otra vez el mismo día si la corrección del aire pasa de cero coma cero cinco, y ningún plano de micrófonos paralelo a una superficie de la sala. Abajo a la izquierda, una sección del montaje de tipo E apoyado cara arriba sobre el suelo, sin embutir en él, como exige el marcado CE: un marco macizo de al menos veinte kilogramos por metro cuadrado sellado al suelo, la cara vista enrasada con su borde superior y la junta cubierta con cinta, doscientos milímetros de profundidad total desde el suelo hasta la cara, perfiles de subestructura de treinta milímetros de ancho y cincuenta de alto como mucho, a unos sesenta centímetros entre ejes, sobre soportes de cincuenta por cincuenta milímetros como mucho, una cámara de aire cerrada sin tabiques y una flecha de cinco milímetros como mucho en cualquier punto, bajo una nota que advierte de que la posición cara arriba solo vale si la gravedad no cambia la absorción, y de que un relleno poroso suelto se sujeta a la placa con una malla de alambre de dos milímetros como mucho y retícula de unos cien milímetros. Abajo a la derecha, la subestructura vista desde abajo, con los perfiles en una sola dirección a unos sesenta centímetros y sus soportes a un metro veinte como mínimo entre sí. Un recuadro al pie lleva el coeficiente de absorción como A2 menos A1 entre S, con S tomada sobre los objetos de ensayo, y la corrección por absorción del aire, cuatro V por m2 menos m1 entre S, con su valor absoluto limitado a cero coma cero cinco en cada banda, y la nota de que la incertidumbre de la tabla 1 vale solo para este montaje" width="100%" />
+
 Monta la muestra hasta 10,80 m² con objetos de ensayo enteros, unidos a tope, con
-las juntas sin sellar y el perímetro cubierto por el marco de montaje. Cuélgala a
+las juntas sin sellar y el perímetro cubierto por el marco de montaje. Colócala a
 200 mm de profundidad total si el resultado va a sostener el marcado CE, sobre una
 subestructura dentro de la sección de 30 mm por 50 mm, y comprueba la flecha en el
 punto peor. Pon los bordes de la muestra en ángulo con las paredes de la sala.
@@ -150,7 +153,7 @@ print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
 ```
 
 Esa última banda pasa del tope, y la biblioteca lo dice en vez de devolverlo en
-silencio: la respuesta es volver a medir la sala vacía, que es lo que pide el 6.3.
+silencio: la respuesta es volver a medir la sala vacía, que es lo que pide el 5.2.
 
 ## 4. Qué compra todo esto
 

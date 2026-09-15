@@ -10,6 +10,7 @@ building it will end up in.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 from .parts import _accel, _exciter, _motion_arrows, _rot_arrow, _spring_v
@@ -451,8 +452,6 @@ def _d_scattering_reverb(s: SVG, th: Theme) -> None:
 
 def _d_diffusion_goniometer(s: SVG, th: Theme) -> None:
     """ISO 17497-2 directional diffusion coefficient (goniometer)."""
-    import math
-
     gy, cx, R = 430.0, 450.0, 300.0
     s.ground(gy, 90, 810)
 
@@ -527,6 +526,357 @@ def _d_diffusion_goniometer(s: SVG, th: Theme) -> None:
         15,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# Metadiffuser: from a Schroeder sequence to a diffusion coefficient
+# (Jiménez, Cox, Romero-García and Groby 2017)
+# ---------------------------------------------------------------------------
+
+
+def _d_metadiffuser_chain(s: SVG, th: Theme) -> None:
+    """From a Schroeder sequence to a diffusion coefficient, for a metadiffuser.
+
+    The chain of Jiménez, Cox, Romero-García and Groby (Sci. Rep. 7, 5389,
+    2017) drawn on the published quadratic-residue design. Band 1 is the
+    target: the N = 5 quadratic residues set the well depths of a QRD designed
+    for 500 Hz (27.4 cm deep, p. 3 of the paper; Cox and D'Antonio Eqs. (10.2)
+    and (10.3)), and those depths set the reflection phase each well has to
+    return at the 2 kHz evaluation frequency. The metadiffuser that replaces
+    it is drawn beside it at the same scale, 35 cm by 2 cm, from Table 1.
+    Band 2 is slit 1 of Table 1 enlarged, with the transfer-matrix chain of
+    the paper's Methods set out along its depth: the radiation end correction
+    at the mouth (Eq. (5)), a half lattice step either side of each resonator
+    (Eq. (3)), the resonators as shunts (Eq. (4)), and the reflection of the
+    rigidly backed slit (Eq. (6)). The loop back to band 1 is the design
+    recipe: the geometry is tuned until each slit returns its target phase.
+    Band 3 is the reduction the library runs: six periods, the Fraunhofer far
+    field of Eq. (1), the grating directions of Cox and D'Antonio Eq. (10.9)
+    with lobe lengths scaled by the aperture of one 70 mm strip, and the
+    ISO 17497-2 coefficient of Formula (5) normalised by Formula (7).
+    """
+    mm_a = 0.6  # band 1: QRD and metadiffuser at one scale, px per mm
+    mm_b = 7.0  # band 2: slit 1 enlarged, px per mm
+    pitch = 70.0 * mm_a  # the 70 mm well pitch, 350 mm over five wells
+    # Table 1 of the paper, slit by slit: h, neck length, cavity length,
+    # neck width, cavity width, all in mm; two identical resonators per slit.
+    table = (
+        (14.7, 13.0, 16.4, 6.2, 9.0),
+        (30.9, 9.1, 4.3, 3.5, 9.0),
+        (30.9, 9.1, 4.3, 3.5, 9.0),
+        (15.7, 13.3, 17.0, 6.3, 9.0),
+        (20.3, 18.0, 20.7, 3.2, 9.0),
+    )
+    residues = (1, 4, 4, 1, 0)  # s_n = n² mod 5 for n = 1..5
+
+    # ---- 1 · the target and the panel that replaces it, one scale --------
+    s.text(
+        30,
+        64,
+        "1 · Phases first: the sequence sets a target phase for each well",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+
+    # The QRD of 500 Hz, drawn as its section profile: d_n = s_n λ0/(2N)
+    # with λ0 = 686 mm, so 68.6 mm and 274.4 mm wells and one flat well.
+    xq, yq, fin = 40.0, 106.0, 2.0
+    depths = [sn * 68.6 * mm_a for sn in residues]
+    body_h = max(depths) + 6.0
+    s.text(xq + 2.5 * pitch, 92, "the target QRD, designed for 500 Hz", 12, th.muted)
+    pts = [(xq, yq + body_h), (xq, yq)]
+    for i, dpx in enumerate(depths):
+        a, b = xq + i * pitch + fin, xq + (i + 1) * pitch - fin
+        if dpx > 0:
+            pts += [(a, yq), (a, yq + dpx), (b, yq + dpx), (b, yq)]
+    pts += [(xq + 5 * pitch, yq), (xq + 5 * pitch, yq + body_h)]
+    s.path(
+        "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in pts) + " Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=1.8,
+    )
+    s.ground(yq + body_h, xq - 4, xq + 5 * pitch + 4)
+    s.dim(
+        xq + 5 * pitch + 12,
+        yq,
+        xq + 5 * pitch + 12,
+        yq + max(depths),
+        "27.4 cm",
+        size=12,
+        label_side="right",
+    )
+
+    # The targets, well by well.
+    cols = (350.0, 400.0, 462.0, 540.0)
+    for x, head in zip(cols, ("$n$", "$s_n$", "$d_n$", "$φ_n$ at 2 kHz"), strict=True):
+        s.text(x, 98, head, 13, th.fg)
+    s.line(328, 106, 590, 106, th.muted, 1.0)
+    depth_labels = ("6.9 cm", "27.4 cm", "27.4 cm", "6.9 cm", "0")
+    phase_labels = ("+72°", "−72°", "−72°", "+72°", "0°")
+    for i in range(5):
+        y = 126 + 22 * i
+        s.text(cols[0], y, str(i + 1), 13, th.fg)
+        s.text(cols[1], y, str(residues[i]), 13, th.fg)
+        s.text(cols[2], y, depth_labels[i], 13, th.fg)
+        s.text(cols[3], y, phase_labels[i], 13, th.primary, bold=True)
+    s.text(459, 238, "$s_n = n² mod N$,  $d_n = s_n λ_0/(2N)$", 13, th.fg)
+    s.text(459, 260, "$φ_n = −2k d_n$, wrapped into ±180°", 12, th.muted)
+
+    # The metadiffuser at the same scale: solid in muted, air in background,
+    # the body outlined so the 350 mm by 20 mm strip reads as one panel rather
+    # than as the blocks the slits cut it into, each mouth opened again at the
+    # face the way band 2 opens the mouth it enlarges.
+    xm, ym, depth_px = 640.0, 112.0, 20.0 * mm_a
+    s.dim(xm, 92, xm + 5 * pitch, 92, "350 mm", size=12)
+    s.rect(xm, ym, 5 * pitch, depth_px, th.muted, th.fg, sw=1.2)
+    for i, (h, ln, lc, wn, wc) in enumerate(table):
+        x0 = xm + (i + 0.12) * pitch
+        s.rect(x0, ym, h * mm_a, depth_px, th.bg, "none")
+        s.line(x0 + 0.5, ym, x0 + h * mm_a - 0.5, ym, th.bg, 2.0)
+        for m in range(2):
+            yc = ym + (m + 0.5) * 10.0 * mm_a
+            s.rect(
+                x0 + h * mm_a, yc - wn * mm_a / 2, ln * mm_a, wn * mm_a, th.bg, "none"
+            )
+            s.rect(
+                x0 + (h + ln) * mm_a,
+                yc - wc * mm_a / 2,
+                lc * mm_a,
+                wc * mm_a,
+                th.bg,
+                "none",
+            )
+        s.text(x0 + h * mm_a / 2, ym - 6, str(i + 1), 11, th.fg)
+    # The backing sits just clear of the panel back, so its line is the wall
+    # the lower cavities stop 0,5 mm short of rather than a stroke over them.
+    s.ground(ym + depth_px + 1.2, xm - 4, xm + 5 * pitch + 4)
+    s.text(xm + 5 * pitch + 8, ym + 10, "2 cm", 12, th.fg, "start")
+    s.arrow(596, 170, 640, 132, th.primary, 1.6)
+    x1 = xm + 0.12 * pitch
+    s.rect(  # slit 1 with its resonators, the part band 2 enlarges
+        x1 - 4,
+        ym - 2,
+        sum(table[0][:3]) * mm_a + 8,
+        depth_px + 14,
+        "none",
+        th.muted,
+        sw=1.0,
+        dash="3,3",
+    )
+    s.line(x1 + 4.4, ym + depth_px + 12, x1 + 4.4, 346, th.muted, 1.0, dash="3,3")
+    s.text(660, 158, "the metadiffuser at the same scale", 13, th.fg, "start")
+    s.text(660, 178, "35 cm × 2 cm, five slits", 12, th.muted, "start")
+    s.text(660, 196, "two resonators in each slit", 12, th.muted, "start")
+
+    # ---- 2 · slit 1 and its transfer-matrix chain -------------------------
+    s.text(
+        30,
+        334,
+        "2 · Geometry second: one slit, one transfer-matrix chain",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    s.rect(446, 346, 444, 204, "none", th.muted, rx=6, sw=1.0, dash="5,4")
+    face, back = 380.0, 380.0 + 20.0 * mm_b
+    h, ln, lc, wn, wc = table[0]
+    xs = 470.0
+    xn, xc, xe = xs + h * mm_b, xs + (h + ln) * mm_b, xs + (h + ln + lc) * mm_b
+    # The body takes the solid tone of band 1, so the enlargement keeps the
+    # figure and ground of the overview it is drawn out of.
+    s.rect(456, face, xe + 14 - 456, back - face, th.muted, th.fg, sw=1.6)
+    s.rect(xs, face, h * mm_b, back - face, th.bg, th.fg, sw=1.6)
+    s.line(xs + 1.2, face, xn - 1.2, face, th.bg, 3.0)  # the mouth is open
+    for m in range(2):
+        yc = face + (m + 0.5) * 10.0 * mm_b  # a/2 and 3a/2 below the face
+        s.rect(xn, yc - wn * mm_b / 2, ln * mm_b, wn * mm_b, th.bg, th.fg, sw=1.4)
+        s.rect(xc, yc - wc * mm_b / 2, lc * mm_b, wc * mm_b, th.bg, th.fg, sw=1.4)
+        for x in (xn, xc):  # open the neck into the slit and into the cavity
+            s.line(x, yc - wn * mm_b / 2 + 1.2, x, yc + wn * mm_b / 2 - 1.2, th.bg, 3.0)
+    s.text((xn + xc) / 2, face + 5 * mm_b + 4, "neck", 11, th.fg)
+    s.text((xc + xe) / 2, face + 5 * mm_b + 4, "cavity", 11, th.fg)
+    s.text(xs + h * mm_b / 2 + 14, back - 16, "slit 1", 12, th.muted)
+    s.ground(back, 452, xe + 18)
+    s.dim(xs, face - 10, xn, face - 10, "$h_1$ = 14.7 mm", size=12)
+    s.dim(
+        xs + 14,
+        face,
+        xs + 14,
+        face + 10 * mm_b,
+        "$a$ = 10 mm",
+        size=12,
+        label_side="right",
+    )
+    s.dim(xe + 26, face, xe + 26, back, "$L$ = 20 mm", size=12, label_side="right")
+    s.text(668, 544, "necks 13.0 mm × 6.2 mm, cavities 16.4 mm × 9.0 mm", 12, th.muted)
+
+    # The chain along the depth, face at the top: M_Δl, then (M_s M_HR M_s)^M.
+    lx0, lx1 = 380.0, 440.0
+    s.rect(lx0, face - 26, lx1 - lx0, 22, th.panel, th.fg, rx=3, sw=1.4)
+    s.text((lx0 + lx1) / 2, face - 10, "$M_{Δl}$", 13, th.fg)
+    for k in range(4):
+        y0 = face + k * 5 * mm_b
+        s.rect(lx0, y0, lx1 - lx0, 5 * mm_b, th.panel, th.fg, sw=1.2)
+        s.text((lx0 + lx1) / 2, y0 + 5 * mm_b / 2 + 5, "$M_s$", 13, th.fg)
+    for m in range(2):
+        yc = face + (m + 0.5) * 10.0 * mm_b
+        s.line(lx0 - 6, yc, lx1 + 6, yc, th.primary, 3.2)
+        s.line(lx1 + 6, yc, 456, yc, th.primary, 1.0, dash="3,3")
+    s.line(lx0 - 6, back, lx1 + 6, back, th.fg, 3.2)
+    for y_edge in (face, back):
+        s.line(lx1 + 6, y_edge, 456, y_edge, th.muted, 0.9, dash="2,3")
+    s.text(368, face - 11, "mouth: radiation end correction", 12, th.fg, "end")
+    s.text(
+        368,
+        face + 5 * mm_b / 2 - 3,
+        "half a lattice step of slit, $a$/2",
+        12,
+        th.fg,
+        "end",
+    )
+    s.text(
+        368,
+        face + 5 * mm_b + 5,
+        "resonator 1, a shunt $1/Z_{HR}$",
+        12,
+        th.primary,
+        "end",
+    )
+    s.text(368, face + 15 * mm_b + 5, "resonator 2", 12, th.primary, "end")
+    s.text(368, back + 5, "rigid backing", 12, th.fg, "end")
+
+    s.rect(30, 540, 406, 66, th.panel, th.primary, rx=6, sw=1.6)
+    s.text(233, 564, "$T_n = M_{Δl} · (M_s · M_{HR} · M_s)^M$", 14, th.fg, bold=True)
+    s.text(
+        233,
+        592,
+        "$R_n = (T_{11} − Z_0 T_{21}) / (T_{11} + Z_0 T_{21})$",
+        14,
+        th.primary,
+        bold=True,
+    )
+
+    # The design loop: back from the phase of R_n to the target phases.
+    s.path("M 30 578 L 14 578 L 14 300 L 459 300 L 459 272", stroke=th.primary, sw=1.6)
+    s.arrow(459, 280, 459, 266, th.primary, 1.6)
+    s.text(26, 452, "slit by slit: tune $h_n$, the necks and", 12, th.primary, "start")
+    s.text(
+        26,
+        470,
+        "the cavities until $arg R_n = φ_n$ at 2 kHz",
+        12,
+        th.primary,
+        "start",
+    )
+
+    # ---- 3 · six periods, the far field and the coefficient ---------------
+    s.text(
+        30,
+        640,
+        "3 · Then the far field: six periods, five grating lobes, one coefficient",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    cx, cy, radius = 240.0, 856.0, 176.0
+    s.path(
+        f"M {cx - radius} {cy} A {radius} {radius} 0 0 1 {cx + radius} {cy}",
+        stroke=th.muted,
+        sw=1.2,
+    )
+    for ang in range(-90, 91, 5):  # the 37 receivers of the reduction
+        a = math.radians(ang)
+        s.circle(cx + radius * math.sin(a), cy - radius * math.cos(a), 2.2, th.primary)
+
+    def polar(angle: float, r: float) -> tuple[float, float]:
+        return cx + r * math.sin(angle), cy - r * math.cos(angle)
+
+    # sin θ = mλ/(Nw) at 2 kHz, λ = 343/2000 m and Nw = 0.35 m; each lobe
+    # scaled by the aperture of one 70 mm strip, sinc(πm/N).
+    for m, half_width, label in (
+        (0, 4.5, "$m$ = 0"),
+        (1, 5.5, "+1"),
+        (-1, 5.5, "−1"),
+        (2, 11.0, "+2"),
+        (-2, 11.0, "−2"),
+    ):
+        theta = math.asin(m * (343.0 / 2000.0) / 0.35)
+        aperture = 1.0 if m == 0 else math.sin(math.pi * m / 5) / (math.pi * m / 5)
+        rho, d = 158.0 * aperture, math.radians(half_width)
+        c1, tip, c2 = (
+            polar(theta - 1.6 * d, 0.92 * rho),
+            polar(theta, rho),
+            polar(theta + 1.6 * d, 0.92 * rho),
+        )
+        s.path(
+            f"M {cx} {cy} Q {c1[0]:.1f} {c1[1]:.1f} {tip[0]:.1f} {tip[1]:.1f} "
+            f"Q {c2[0]:.1f} {c2[1]:.1f} {cx} {cy} Z",
+            fill=th.panel,
+            stroke=th.accent,
+            sw=2.0,
+        )
+        lx, ly = polar(theta, radius + 16)
+        s.text(lx, ly + 4, label, 12, th.accent)
+
+    # The 2.1 m panel: 30 strips of 70 mm, a longer tick every period.
+    x_strip = cx - 210.0
+    s.rect(x_strip, cy, 420, 7, th.panel, th.fg, sw=1.2)
+    for j in range(31):
+        x = x_strip + 14 * j
+        period_edge = j % 5 == 0
+        s.line(
+            x,
+            cy - 5 if period_edge else cy,
+            x,
+            cy + 7,
+            th.fg if period_edge else th.muted,
+            1.0,
+        )
+    s.ground(cy + 7, x_strip - 4, x_strip + 424)
+    s.dim(x_strip, cy + 40, x_strip + 420, cy + 40, "six periods: 2.1 m", size=12)
+
+    s.rect(474, 654, 416, 66, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(682, 680, "$p_{s}(θ) = ∫ R(x) exp(j k_0 x sin θ) dx$", 14, th.fg, bold=True)
+    s.text(
+        682,
+        706,
+        "$R(x)$ holds $R_n$ over each 70 mm strip, 30 strips in all",
+        12,
+        th.muted,
+    )
+    s.rect(474, 730, 416, 66, th.panel, th.accent, rx=6, sw=1.4)
+    s.text(682, 756, "$sin θ = mλ/(N w)$,  $N w$ = 350 mm", 14, th.accent, bold=True)
+    s.text(
+        682,
+        782,
+        "at 2 kHz and 343 m/s the lobes stand near 0°, ±29° and ±78.5°",
+        12,
+        th.muted,
+    )
+    s.rect(474, 806, 416, 110, th.panel, th.primary, rx=6, sw=1.6)
+    s.text(
+        682,
+        832,
+        "$d = [(Σ I_{i})² − Σ I_{i}²] / [(37 − 1) Σ I_{i}²]$",
+        14,
+        th.primary,
+        bold=True,
+    )
+    s.text(
+        682,
+        858,
+        "$d_{norm} = (d − d_{ref}) / (1 − d_{ref})$",
+        14,
+        th.primary,
+        bold=True,
+    )
+    s.text(682, 882, "$I_i = |p_{s}(θ_i)|²$ every 5° from −90° to +90°", 12, th.muted)
+    s.text(682, 902, "$d_{ref}$: the same sums over a flat panel as wide", 12, th.muted)
 
 
 # ---------------------------------------------------------------------------
@@ -1019,8 +1369,6 @@ def _d_porous_layer(s: SVG, th: Theme) -> None:
     phi = 0.98, alpha_inf = 1, Lambda = Lambda' = 87 um); the layered
     absorber solves alpha = 0.91 at 1 kHz.
     """
-    import math
-
     lay_l, lay_r = 560.0, 700.0  # 140 px for 50 mm
     top, bot = 100.0, 430.0
 
@@ -1295,14 +1643,274 @@ def _d_iso354_room(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
+# EN 16487 suspended ceiling specimen in the ISO 354 room
+# ---------------------------------------------------------------------------
+
+
+def _d_suspended_ceiling_specimen(s: SVG, th: Theme) -> None:
+    """The EN 16487 specimen: what the test code fixes before ISO 354 measures.
+
+    Three views of one arrangement. In plan, the 10,80 m2 of 4.1.1.1.1 built
+    from thirty 0,6 m test objects (4.1.1.1.2), five by six, butted with no
+    seal and no grid over the joints (4.1.1.1.3, 4.1.1.2.3.3), turned at least
+    10 degrees off the room walls together with its fixture (4.1.1.1.5), and
+    no nearer a room edge than the 0,75 m of EN ISO 354, 6.2.1.2. In section,
+    the type E mounting of 4.1.1.2.3 standing face up on the floor, which
+    EN ISO 354, B.4 allows unless gravity changes the answer and 4.1.1.2.3.7
+    then holds a loose porous backing to the tile with a wire grid: 200 mm
+    from the floor to the exposed face and not sunk into the floor, which are
+    both conditions of the data CE marking is compiled from rather than of
+    every measurement, the 200 mm recommended by 4.1.1.2.3.1 and required of
+    that data, the embedded arrangement ruled out by 4.1.1.2.3.2 for the
+    purpose of CE marking; the face flush with a solid fixture of 20 kg/m2 or
+    more whose joints are taped or sealed (4.1.1.1.4, 4.1.1.1.6, 4.1.1.1.7),
+    the substructure of 4.1.1.2.3.4 on the supports of 4.1.1.2.3.6, each named
+    by a leader because in every bay the profile stands on its support, and the
+    deflection of 4.1.1.2.3.5; seen from below, which is Figure 5, the
+    supports along each profile. Beside them the two runs the result is a
+    difference of, with the climate of 4.2 and 5.2, and at the foot
+    EN ISO 354 Formulae (8) and (9) with the cap 4.2.1 puts on the part of
+    them that is the air.
+    """
+    # --- In plan: the room floor, and the specimen turned off its walls ----
+    s.text(
+        240, 70, "The specimen on the room floor, in plan", 15, th.primary, bold=True
+    )
+    s.rect(24, 88, 432, 242, "none", th.fg, sw=2.6)
+    scale, cx, cy = 36.0, 140.0, 212.0  # px per metre, centre of the specimen
+    tilt = math.radians(12.0)  # at least the 10 degrees 4.1.1.1.5 aims at
+
+    def at(u: float, v: float) -> tuple[float, float]:
+        """A point of the specimen, in metres along its 3.6 m and 3.0 m sides."""
+        du, dv = u - 1.8, v - 1.5
+        return (
+            cx + scale * (du * math.cos(tilt) - dv * math.sin(tilt)),
+            cy + scale * (du * math.sin(tilt) + dv * math.cos(tilt)),
+        )
+
+    def outline(u0: float, v0: float, u1: float, v1: float) -> str:
+        corners = (at(u0, v0), at(u1, v0), at(u1, v1), at(u0, v1))
+        return "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in corners) + " Z"
+
+    # The fixture round the perimeter, then the thirty test objects on it.
+    s.path(outline(-0.1, -0.1, 3.7, 3.1), fill=th.fg)
+    s.path(outline(0.0, 0.0, 3.6, 3.0), fill=th.panel, stroke=th.secondary, sw=1.8)
+    for i in range(1, 6):
+        (x0, y0), (x1, y1) = at(0.6 * i, 0.0), at(0.6 * i, 3.0)
+        s.line(x0, y0, x1, y1, th.secondary, 1.0)
+    for j in range(1, 5):
+        (x0, y0), (x1, y1) = at(0.0, 0.6 * j), at(3.6, 0.6 * j)
+        s.line(x0, y0, x1, y1, th.secondary, 1.0)
+
+    # The angle to the wall and the clearance to it, read at the fixture corner.
+    fx, fy = at(-0.1, -0.1)
+    s.line(fx, fy, fx + 104, fy, th.muted, 1.1, dash="4,3")
+    r = 80.0
+    s.path(
+        f"M {fx + r:.1f} {fy:.1f} A {r} {r} 0 0 1 "
+        f"{fx + r * math.cos(tilt):.1f} {fy + r * math.sin(tilt):.1f}",
+        stroke=th.fg,
+        sw=1.6,
+    )
+    s.text(fx + 110, fy + 5, "≥ 10°", 13, th.fg, anchor="start")
+    s.dim(fx, 88, fx, fy, "≥ 0.75 m", size=12, label_side="right")
+
+    s.text(342, 152, "$S$ = 10.80 m²", 15, th.secondary, bold=True)
+    for n, line in enumerate(
+        (
+            "30 test objects, 5 by 6,",
+            "0.6 m × 0.6 m, butted together",
+            "joints unsealed, no grid over them",
+        )
+    ):
+        s.text(342, 178 + 18 * n, line, 12, th.fg)
+    s.text(342, 248, "the fixture covers the perimeter,", 12, th.muted)
+    s.text(342, 266, "its edges angled as well", 12, th.muted)
+    s.text(
+        240,
+        352,
+        "no part within 0.75 m of a room edge, and 1 m where possible",
+        12,
+        th.muted,
+    )
+
+    # --- The two runs the coefficient is a difference of --------------------
+    s.rect(474, 52, 406, 314, th.bg, th.muted, rx=8, sw=1.4)
+    s.text(677, 78, "The absorption is a difference of two runs", 14, th.fg, bold=True)
+    for top, title, symbol, colour, fitted in (
+        (
+            96.0,
+            "1 · empty room, fixture taken out",
+            "$T_1$  →  $A_1$",
+            th.primary,
+            False,
+        ),
+        (184.0, "2 · specimen in its fixture", "$T_2$  →  $A_2$", th.secondary, True),
+    ):
+        s.path(
+            f"M 494 {top + 8} L 578 {top + 4} L 582 {top + 68} L 498 {top + 72} Z",
+            fill=th.panel,
+            stroke=th.fg,
+            sw=1.6,
+        )
+        if fitted:
+            s.path(
+                f"M 522 {top + 26} L 552 {top + 32} L 548 {top + 54} L 518 {top + 48} Z",
+                fill=th.fg,
+            )
+            s.path(
+                f"M 524 {top + 28} L 550 {top + 33} L 547 {top + 52} L 520 {top + 47} Z",
+                fill=th.bg,
+                stroke=th.secondary,
+                sw=1.2,
+            )
+        s.text(600, top + 22, title, 14, colour, bold=True, anchor="start")
+        s.text(
+            600, top + 46, "temperature and humidity checked", 12, th.fg, anchor="start"
+        )
+        s.text(600, top + 70, symbol, 15, colour, anchor="start")
+    for n, note in enumerate(
+        (
+            "relative humidity ≥ 50 %, humidifier off while measuring",
+            "empty room at least once a day, in stable conditions,",
+            "and again the same day if the air correction passes 0.05",
+            "no microphone plane parallel to a room surface",
+        )
+    ):
+        s.text(677, 284 + 20 * n, note, 12, th.muted)
+
+    # --- In section: type E at 200 mm, face up on the floor -----------------
+    # 0.36 px per mm across, 0.62 px per mm up: the 200 mm is drawn 124 px tall.
+    floor, face = 612.0, 488.0
+    back = face + 12  # the back of the test objects, where the profiles sit
+    s.text(
+        300, 398, "In section: type E, 200 mm deep, face up", 15, th.primary, bold=True
+    )
+    s.text(
+        300, 418, "on the floor, not sunk into it, as CE marking requires", 12, th.muted
+    )
+    s.ground(floor, 40, 592)
+    s.rect(70, face, 16, floor - face, th.fg)  # the fixture, solid
+    s.rect(86, face, 486, 12, th.panel)
+    s.line(86, face, 572, face, th.secondary, 1.8)
+    s.line(86, back, 572, back, th.secondary, 1.8)
+    for joint in (302.0, 518.0):
+        s.line(joint, face, joint, back, th.secondary, 1.6)
+    # Three profile shapes, as Figure 4 draws them: an angle on the fixture,
+    # a box and a tee under the joints, each inside 30 mm by 50 mm.
+    s.rect(86, back, 4, 31, th.primary)
+    s.rect(86, back, 10, 4, th.primary)
+    s.rect(297, back, 10, 31, th.primary)
+    s.rect(299.5, back + 4, 5, 23, th.bg)
+    s.rect(513, back, 10, 4, th.primary)
+    s.rect(516, back + 4, 4, 27, th.primary)
+    for post in (302.0, 518.0):
+        s.rect(post - 9, back + 31, 18, floor - back - 31, th.panel, th.fg, sw=1.6)
+    s.line(572, face - 16, 572, floor + 10, th.muted, 1.2, dash="12,4,2,4")
+    # Tape over the joint at the face, lapping no further onto the specimen
+    # than Detail A allows, and the fixture sealed where it meets the floor,
+    # as Details A and B of Figure 2 draw them.
+    s.line(70, face - 1.5, 90, face - 1.5, th.accent, 3.6)
+    s.path(
+        f"M 52 {floor - 2} L 68 {floor - 2} L 68 {floor - 14}", stroke=th.accent, sw=3.2
+    )
+    s.path(
+        f"M 308 {back} Q 410 {back + 20} 512 {back}",
+        stroke=th.secondary,
+        sw=1.3,
+        dash="5,4",
+    )
+    s.text(410, back + 34, "deflection ≤ 5 mm at any point", 12, th.secondary)
+    s.text(410, floor - 18, "closed air space, no partitions", 12, th.muted)
+    s.dim(150, floor, 150, face, "200 mm", size=13, label_side="right")
+    s.text(159, (floor + face) / 2 + 24, "overall depth", 12, th.muted, anchor="start")
+    s.dim(86, face, 302, face, "≈ 0.6 m", offset=-24, size=12)
+    s.dim(302, face, 518, face, "≈ 0.6 m", offset=-24, size=12)
+    s.text(
+        44,
+        440,
+        "joint taped or sealed, the face flush with the fixture top",
+        12,
+        th.accent,
+        anchor="start",
+    )
+    s.line(60, 446, 72, face - 6, th.accent, 1.0)
+    # Leaders to the two parts that stand one above the other in every bay:
+    # the blue member is the substructure profile and the post under it the
+    # support unit, in both bays, so neither heading can be read as naming
+    # the column it sits under.
+    s.path(
+        f"M 234 {floor + 28} L 252 {floor - 56} L 296 {back + 20}",
+        stroke=th.primary,
+        sw=1.0,
+    )
+    s.line(562, floor + 28, 529, floor - 20, th.fg, 1.0)
+    for x, head, notes, colour in (
+        (78.0, "mounting fixture", ("solid, ≥ 20 kg/m²", "sealed to the floor"), th.fg),
+        (302.0, "substructure profile", ("≤ 30 mm wide, ≤ 50 mm high",), th.primary),
+        (518.0, "support unit", ("≤ 50 mm × 50 mm",), th.fg),
+    ):
+        s.text(x, floor + 32, head, 12, colour, bold=True)
+        for n, note in enumerate(notes):
+            s.text(x, floor + 50 + 18 * n, note, 12, th.muted)
+    s.text(
+        300,
+        700,
+        "face up only where gravity does not change the answer: a loose porous backing",
+        12,
+        th.muted,
+    )
+    s.text(
+        300,
+        718,
+        "is held to the tile by a wire grid, ≤ 2 mm wire, ≈ 100 mm mesh",
+        12,
+        th.muted,
+    )
+
+    # --- Seen from below: the supports along each profile (Figure 5) --------
+    s.text(752, 398, "Seen from below", 15, th.primary, bold=True)
+    top, left = 418.0, 636.0  # 0.11 px per mm: 0.6 m is 66 px, 1.2 m is 132 px
+    s.rect(left, top, 236, 10, th.fg)
+    s.rect(left, top, 10, 200, th.fg)
+    s.rect(left + 10, top + 10, 226, 4, th.primary)
+    s.rect(left + 10, top + 10, 4, 190, th.primary)
+    for profile in (712.0, 778.0):
+        s.rect(profile - 3, top + 14, 6, 186, th.primary)
+        # The support end is a symbol: 50 mm would be 5 px at this scale.
+        s.rect(profile - 5, top + 139, 10, 10, th.panel, th.fg, sw=1.4)
+    s.line(630, top + 206, 878, top + 206, th.muted, 1.2, dash="12,4,2,4")
+    s.dim(822, top + 12, 822, top + 144, "≥ 1.2 m", size=12, label_side="right")
+    s.dim(712, top + 178, 778, top + 178, "≈ 0.6 m", size=12)
+    s.text(754, floor + 32, "profiles in one direction,", 12, th.fg)
+    s.text(754, floor + 50, "supports ≥ 1.2 m apart", 12, th.muted)
+
+    # --- What the two runs give, and the cap on the air's share of it -------
+    box = 740.0
+    s.rect(40, box, 820, 92, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(245, box + 32, "$α_s = (A_2 − A_1)/S$", 17, th.primary)
+    s.text(650, box + 32, "$|Δα| = |4V(m_2 − m_1)/S|$ ≤ 0.05", 17, th.secondary)
+    s.text(245, box + 58, "the specimen, with $S$ over the test objects", 12, th.fg)
+    s.text(
+        650, box + 58, "the change in air absorption, capped in every band", 12, th.fg
+    )
+    s.text(
+        450,
+        box + 80,
+        "the uncertainty of Table 1 holds for this mounting alone: "
+        "a plane absorber, type E, 200 mm",
+        12,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
 # d25 - ISO 10534-1 standing-wave-ratio apparatus
 # ---------------------------------------------------------------------------
 
 
 def _d_standing_wave_tube(s: SVG, th: Theme) -> None:
     """ISO 10534-1 standing-wave apparatus: probe carriage and the minima."""
-    import math
-
     tube_top, tube_bot, mid = 216.0, 346.0, 281.0
     tube_l, tube_r = 156.0, 838.0
     back_w, spec_w = 22.0, 46.0
@@ -1468,3 +2076,314 @@ def _d_standing_wave_tube(s: SVG, th: Theme) -> None:
         13,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# Slow-sound slit panel: the transfer-matrix chain (Jiménez et al. 2016, 2017)
+# ---------------------------------------------------------------------------
+
+
+def _d_slit_absorber_chain(s: SVG, th: Theme) -> None:
+    """One period of the slow-sound slit panel as its transfer-matrix chain.
+
+    The panel is the product of Appl. Sci. 2017, 7, 618, page 3: a radiation
+    correction at the slit mouth (Eq. (3), with the length of Appl. Phys.
+    Lett. 2016 Eq. (A27)), half a lattice step of visco-thermal slit
+    (Eq. (2) with Eq. (6)) either side of the Helmholtz resonator, and the
+    resonator itself as a shunt point scatterer (Eq. (3)) whose impedance is
+    Eq. (A23) with the end corrections of Eqs. (A24) to (A26). The rigid
+    backing closes the chain, Eq. (4) turns it into a reflection coefficient,
+    and Eq. (9) is the critical-coupling condition in the boxes at the foot,
+    written at the normal incidence the design is solved at. Below their own
+    resonance the resonators soften the slit rather than stiffen it: Appl.
+    Phys. Lett. Eq. (2) divides the slit bulk modulus by a bracket greater
+    than one, while Eq. (3) leaves the effective density untouched, which is
+    what makes the sound slow. The mouth term carries the added-mass sign the
+    library uses (see the errata registry). The numbers are the guide's
+    300 Hz design. Along the slit the drawing keeps 20 px per mm: the 30 mm
+    step is 600 px, the neck 60 px, the cavity 540 px, the slit height and
+    the neck length 20 px each; only the cavity length is drawn short.
+    """
+    x_face, x_back, x_mid = 180.0, 780.0, 480.0
+
+    s.text(
+        450,
+        64,
+        "One period, one resonator: every piece is a 2 × 2 matrix",
+        17,
+        th.fg,
+        bold=True,
+    )
+
+    # Where each matrix acts: the slit, the resonator on its upper wall, the
+    # mouth and the backing. The resonator is square in section, so its four
+    # numbers are named side and length rather than set as a product.
+    s.text(
+        x_mid,
+        94,
+        "neck: 3 mm side, 1 mm long; cavity: 27 mm side, 44.7 mm long",
+        13,
+        th.accent,
+    )
+    s.rect(x_face, 104, x_back - x_face, 150, th.panel)
+    s.path(f"M {x_face} 214 L {x_face} 104 L {x_back} 104", stroke=th.fg, sw=2.0)
+    s.path(f"M {x_face} 234 L {x_face} 254 L {x_back} 254", stroke=th.fg, sw=2.0)
+    s.rect(210, 122, 540, 72, th.bg, th.fg, sw=1.8)
+    s.rect(x_face, 214, x_back - x_face, 20, th.bg)
+    s.rect(451, 192, 58, 24, th.bg)
+    s.line(x_face, 214, 450, 214, th.fg, 1.8)
+    s.line(510, 214, x_back, 214, th.fg, 1.8)
+    s.line(x_face, 234, x_back, 234, th.fg, 1.8)
+    s.line(450, 194, 450, 214, th.fg, 1.8)
+    s.line(510, 194, 510, 214, th.fg, 1.8)
+    s.text(
+        x_mid,
+        164,
+        "Helmholtz resonator, $M_{HR}$ at the middle of the step",
+        14,
+        th.accent,
+        bold=True,
+    )
+    s.text(315, 229, "slit, $h$ = 0.978 mm", 12, th.primary)
+    s.text(645, 229, "closed at the backing", 12, th.primary)
+    s.rect(x_back, 96, 20, 166, th.fg)
+    y = 100.0
+    while y < 256:
+        s.line(x_back + 20, y, x_back + 30, y + 8, th.muted, 1.1)
+        y += 14
+    s.arrow(40, 150, 170, 150, th.accent, 2.4)
+    s.text(100, 138, "incident, angle $θ$", 13, th.accent)
+    s.arrow(170, 186, 40, 186, th.secondary, 1.8)
+    s.text(100, 206, "reflected, $R$", 13, th.secondary)
+    s.text(100, 244, "$Z_0 = ρ_0 c_0 / S_0$", 13, th.muted)
+    s.dim(x_face, 282, x_mid, 282, "$M_s$ over $a/2$ = 15 mm", size=13)
+    s.dim(x_mid, 282, x_back, 282, "$M_s$ over $a/2$ = 15 mm", size=13)
+    s.text(x_face, 308, "$M_{Δl}$ at $x_1 = 0$", 13, th.secondary, bold=True)
+    s.text(x_mid, 308, "$L = N a$ = 30 mm, here $N$ = 1", 13, th.muted)
+    s.text(790, 308, "$v = 0$ at $x_1 = L$", 13, th.fg, bold=True)
+
+    def matrix(
+        label: str,
+        rows: list[tuple[str, str]],
+        colour: str,
+        ytop: float,
+        x0: float = 112.0,
+        x1: float = 322.0,
+    ) -> None:
+        hgt = 20 * len(rows) + 12
+        s.path(
+            f"M {x0 + 7} {ytop} L {x0} {ytop} L {x0} {ytop + hgt} "
+            f"L {x0 + 7} {ytop + hgt}",
+            stroke=colour,
+            sw=1.6,
+        )
+        s.path(
+            f"M {x1 - 7} {ytop} L {x1} {ytop} L {x1} {ytop + hgt} "
+            f"L {x1 - 7} {ytop + hgt}",
+            stroke=colour,
+            sw=1.6,
+        )
+        cw = (x1 - x0) / 2
+        for i, (left, right) in enumerate(rows):
+            yy = ytop + 21 + 20 * i
+            s.text(x0 + cw / 2, yy, left, 12, th.fg)
+            s.text(x0 + 1.5 * cw, yy, right, 12, th.fg)
+        s.text(x0 - 8, ytop + hgt / 2 + 5, label, 15, colour, "end", bold=True)
+
+    def row(
+        top: float,
+        height: float,
+        colour: str,
+        lines: list[tuple[str, int, str, bool]],
+    ) -> None:
+        s.rect(36, top, 828, height, th.panel, colour, rx=6, sw=1.8)
+        for k, (txt, size, fill, bold) in enumerate(lines):
+            fitted = s.fit_size([txt], (size, size - 1), 514, bold=bold)
+            s.text(338, top + 23 + 20 * k, txt, fitted, fill, "start", bold=bold)
+
+    # The mouth: a series radiation mass (Eq. (3), Eq. (A27)).
+    top = 326.0
+    row(
+        top,
+        80,
+        th.secondary,
+        [
+            ("The mouth of the slit radiates: a series mass", 14, th.secondary, True),
+            (
+                "$Z_{Δl} = jωρ_0 Δl_{slit} / (φ_t S_0)$,   "
+                "$Δl_{slit} = h φ_t Σ sin²(nπφ_t) / (nπφ_t)³$",
+                13,
+                th.fg,
+                False,
+            ),
+            (
+                "$φ_t = h/d$ = 0.0196 with $d$ = 50 mm, $S_0 = d a$ = 1500 mm², "
+                "so $Δl_{slit}$ = 1.12 mm",
+                12,
+                th.muted,
+                False,
+            ),
+        ],
+    )
+    matrix("$M_{Δl}$ =", [("1", "$Z_{Δl}$"), ("0", "1")], th.secondary, top + 16)
+
+    # Half a lattice step of lossy slit (Eq. (2), Eq. (6)).
+    top = 414.0
+    row(
+        top,
+        120,
+        th.primary,
+        [
+            (
+                "Half a lattice step of lossy slit, either side of the resonator",
+                14,
+                th.primary,
+                True,
+            ),
+            (
+                "$k_s = ω √(ρ_s / κ_s)$,   $Z_s = √(κ_s ρ_s) / S_s$,   $S_s = h a$",
+                13,
+                th.fg,
+                False,
+            ),
+            (
+                "$ρ_s = ρ_0 / [1 − tanh(h G_ρ/2) / (h G_ρ/2)]$,   $G_ρ = √(jωρ_0 / η)$",
+                13,
+                th.fg,
+                False,
+            ),
+            (
+                "$κ_s = κ_0 / [1 + (γ − 1) tanh(h G_κ/2) / (h G_κ/2)]$,   "
+                "$G_κ = √(jω Pr ρ_0 / η)$",
+                13,
+                th.fg,
+                False,
+            ),
+            (
+                "at 300 Hz $ρ_s = 1.355 − 0.203j$ kg/m³, "
+                "against 1.205 kg/m³ in free air",
+                12,
+                th.muted,
+                False,
+            ),
+        ],
+    )
+    matrix(
+        "$M_s$ =",
+        [
+            ("$cos(k_s a/2)$", "$j Z_s sin(k_s a/2)$"),
+            ("$j sin(k_s a/2) / Z_s$", "$cos(k_s a/2)$"),
+        ],
+        th.primary,
+        top + 37,
+    )
+
+    # The resonator as a shunt (Eq. (3), Eqs. (A23) to (A26)). Below its own
+    # resonance it lowers the effective bulk modulus of the slit and leaves
+    # the effective density alone (Appl. Phys. Lett. Eqs. (2) and (3)).
+    top = 542.0
+    row(
+        top,
+        120,
+        th.accent,
+        [
+            (
+                "The resonator in the middle of its step, as a shunt",
+                14,
+                th.accent,
+                True,
+            ),
+            (
+                "$Z_{HR}$ of a neck and a cavity, both square visco-thermal ducts, "
+                "Eq. (A23)",
+                13,
+                th.fg,
+                False,
+            ),
+            (
+                "the 1 mm neck carries $Δl = Δl_1 + Δl_2$ = 2.08 mm of end correction:",
+                13,
+                th.fg,
+                False,
+            ),
+            (
+                "$Δl_1$ = 1.18 mm into the cavity (A24), "
+                "$Δl_2$ = 0.90 mm into the slit (A25, A26)",
+                13,
+                th.fg,
+                False,
+            ),
+            (
+                "below its own resonance $Z_{HR}$ is a compliance: it softens the slit, "
+                "adding no mass",
+                12,
+                th.muted,
+                False,
+            ),
+        ],
+    )
+    matrix("$M_{HR}$ =", [("1", "0"), ("$1/Z_{HR}$", "1")], th.accent, top + 34)
+
+    # The product, the backing and the reflection (Eq. (1), Eq. (4)).
+    top = 676.0
+    s.rect(36, top, 828, 88, "none", th.fg, rx=6, sw=1.8)
+    s.text(
+        450,
+        top + 28,
+        "$T = M_{Δl} · ∏ (M_s · M_{HR} · M_s)$ over the $N$ resonators",
+        16,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        450,
+        top + 54,
+        "$R(θ) = (T_{11} cos θ − Z_0 T_{21}) / (T_{11} cos θ + Z_0 T_{21})$,   "
+        "$α = 1 − |R|^2$",
+        15,
+        th.fg,
+    )
+    s.text(
+        450,
+        top + 76,
+        "the rigid backing holds $v = 0$ at $x_1 = L$, so the face sees "
+        "$Z = T_{11} / T_{21}$",
+        12,
+        th.muted,
+    )
+
+    # Critical coupling (Eq. (9)) and the design that meets it. Eq. (9) is
+    # written for any angle; the design is solved at normal incidence, where
+    # the matched value is 1 + 0j, so the right-hand box says so.
+    top = 778.0
+    for x0, colour, lines in (
+        (
+            36.0,
+            th.primary,
+            (
+                ("Critical coupling: loss equals leakage", 14, th.primary, True),
+                ("$Re(Z) cos θ = Z_0$  and  $Im(Z) = 0$", 14, th.fg, False),
+                ("the zero of $R$ lands on the real-frequency axis,", 12, th.fg, False),
+                ("so $R = 0$ and $α = 1$ at that frequency", 12, th.fg, False),
+            ),
+        ),
+        (
+            460.0,
+            th.fg,
+            (
+                ("The 300 Hz design at normal incidence", 14, th.fg, True),
+                ("slit height $h$ = 0.978 mm sets the loss", 13, th.fg, False),
+                ("cavity length 44.7 mm sets the resonance", 13, th.fg, False),
+                (
+                    "$Z/Z_0 = 1 + 0j$ and $α = 1$, in a panel $λ/38$ deep",
+                    12,
+                    th.fg,
+                    False,
+                ),
+            ),
+        ),
+    ):
+        s.rect(x0, top, 404, 104, th.panel, colour, rx=6, sw=1.8)
+        for k, (txt, size, fill, bold) in enumerate(lines):
+            fitted = s.fit_size([txt], (size, size - 1), 380, bold=bold)
+            s.text(x0 + 202, top + 25 + 22 * k, txt, fitted, fill, bold=bold)

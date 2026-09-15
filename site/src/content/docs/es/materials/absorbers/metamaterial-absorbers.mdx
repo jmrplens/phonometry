@@ -214,6 +214,15 @@ periodo lo consume exactamente ese periodo. Ojo con el doble uso del símbolo:
 en la sección 1 $Z_0$ es la impedancia del medio $\rho_0 c_0$, y aquí es esa
 impedancia dividida por una sección.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain.svg" alt="Sección esquemática de un periodo del panel ranurado, desde la cara a la izquierda hasta el fondo rígido a la derecha. Una onda plana llega con ángulo theta y sale como la reflexión R, con el aire de delante referido a Z0 = rho0 c0 / S0. Una ranura de 0,978 mm de altura recorre los 30 mm de profundidad del panel y está cerrada en el fondo, y un resonador de Helmholtz con un cuello de 3 mm de ancho y 1 mm de largo y una cavidad de 27 mm de ancho y 44,7 mm de largo se abre en su pared superior a mitad de recorrido. Unas etiquetas sitúan cada matriz donde actúa: M delta l en la boca, x1 = 0; M s a lo largo de cada medio paso de 15 mm a cada lado del cuello; M HR en el resonador; y v = 0 en el fondo, x1 = L, con L = N a = 30 mm para un resonador. Debajo, tres paneles escriben las matrices. La boca es una masa de radiación en serie cuya corrección de extremo de la ranura vale 1,12 mm para h entre d = 0,0196. El medio paso contiene el coseno y el seno de ks a/2 con la impedancia de la ranura Zs, construida con la densidad efectiva y el módulo de compresibilidad viscotérmicos de la ranura estrecha, con una densidad de 1,355 menos 0,203j kg/m³ a 300 Hz frente a 1,205 en aire libre. El resonador es una admitancia en derivación, 1 entre ZHR, con su cuello y su cavidad tratados como conductos cuadrados viscotérmicos; el cuello de 1 mm lleva 2,08 mm de corrección de extremo, 1,18 mm hacia la cavidad y 0,90 mm hacia la ranura, y por debajo de su propia resonancia actúa como una compliancia que ablanda la ranura sin añadir masa. Un recuadro multiplica las matrices en T sobre los N resonadores, da R de theta a partir de T11 y T21 y la absorción como uno menos el cuadrado del módulo de R, y recuerda que el fondo detiene la velocidad de partícula, así que la cara ve Z = T11 / T21. Dos recuadros al pie enuncian el acoplamiento crítico, Re(Z) cos theta = Z0 e Im(Z) = 0, que pone el cero de R sobre el eje de frecuencia real de modo que R = 0 y alfa = 1, y el diseño a 300 Hz en incidencia normal: la altura de ranura fija la pérdida, la cavidad de 44,7 mm fija la resonancia, y la impedancia normalizada es 1 + 0j en un panel de lambda/38 de profundidad" width="100%" />
+
+*Un periodo del diseño a 300 Hz como la cadena que multiplica la biblioteca:
+una masa de radiación en la boca, medio paso de ranura con pérdidas a cada lado
+del resonador, el resonador en derivación y el fondo rígido que convierte el
+producto en una impedancia superficial. El acoplamiento crítico son entonces
+dos condiciones sobre esa impedancia, y el diseño cumple ambas con una ranura
+de 0,978 mm y una cavidad de 44,7 mm.*
+
 Fíjate en qué cambia realmente el cálculo de diseño. Dada una frecuencia objetivo,
 resintoniza la **longitud de cavidad** del resonador y resuelve la **altura de
 ranura**; el paso de red y el periodo se quedan como se pasaron. Para el diseño
@@ -498,9 +507,9 @@ z_hr = materials.helmholtz_resonator_impedance(
 print(np.sign(z_hr.imag))      # [-1. -1.  1.]  compliancia debajo, masa encima
 ```
 
-Por debajo de su propia resonancia la derivación es una compliancia: añade
-rigidez a la ranura sin añadir masa móvil, y eso es exactamente lo que baja la
-velocidad de fase. `materials.rectangular_duct_properties(f, side=1.0e-3)` da
+Por debajo de su propia resonancia la derivación es una compliancia: ablanda
+la ranura sin añadir masa móvil, y eso es exactamente lo que baja la velocidad
+de fase. `materials.rectangular_duct_properties(f, side=1.0e-3)` da
 la misma pareja efectiva para un conducto cuadrado cuando la geometría de
 guiado es un conducto y no una ranura, y las tres toman un estado
 `AirProperties` (velocidad del sonido, densidad, viscosidad, número de Prandtl,

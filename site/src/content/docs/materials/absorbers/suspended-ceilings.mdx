@@ -5,7 +5,7 @@ references:
   - type: standard
     organization: "European Committee for Standardization"
     year: 2014
-    title: "Acoustics — Test code for ceilings — Application of absorption products"
+    title: "Acoustics — Test code for suspended ceilings — Sound absorption"
     designation: "EN 16487:2014"
     primary: true
     note: "The test code: the specimen geometry of 4.1.1, the mountings of 4.1.1.2, the air-absorption cap of 4.2.1 and the humidity of 4.2.2, and Table 1, the reproducibility of the round robin of Annex A. Read from BS EN 16487:2014."
@@ -32,6 +32,7 @@ references:
 import Scope from '../../../../components/Scope.astro';
 import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
 
 EN ISO 354 measures the sound absorption of a specimen in a reverberation room,
 and leaves a good deal to the laboratory: how large the specimen is, how it is
@@ -71,7 +72,7 @@ shortfall reported as a number rather than as a refusal.
 ## 2. The mounting is the product
 
 Four mountings of EN ISO 354 Annex B are used here, and a ceiling normally uses
-the fourth of them.
+the third of them.
 
 ```python
 print(materials.mounting_type("A"))
@@ -98,20 +99,22 @@ print(len(raised))              # 1
 ```
 
 The rest of the arrangement carries numbers too: a substructure no more than
-30 mm wide and 50 mm deep on a 0,6 m pitch, supports of 50 mm by 50 mm at least
-1,2 m apart, a mounting fixture of solid material at 20 kg/m² or more, and a
-specimen that deflects no more than 5 mm anywhere. The three the check is given,
-the substructure section, the fixture density and the deflection, are judged,
-and leaving one raises a `SuspendedCeilingWarning` that says which. The pitch of
-the substructure and the section and spacing of the supports are published as
-`SUBSTRUCTURE_SPACING_M`, `SUPPORT_SECTION_MM` and `MIN_SUPPORT_SPACING_M` to
-build to: they describe how the specimen was hung rather than a measurement
-taken on it, so nothing in the call can check them.
+30 mm wide and 50 mm deep on a 0,6 m pitch, supports of no more than 50 mm by
+50 mm at least 1,2 m apart, a mounting fixture of solid material at 20 kg/m² or
+more, and a specimen that deflects no more than 5 mm anywhere. The three the
+check is given, the substructure section, the fixture density and the
+deflection, are judged, and leaving one raises a `SuspendedCeilingWarning` that
+says which. The pitch of the substructure and the section and spacing of the
+supports are published as `SUBSTRUCTURE_SPACING_M`, `SUPPORT_SECTION_MM` and
+`MIN_SUPPORT_SPACING_M` to build to: they describe how the specimen was hung
+rather than a measurement taken on it, so nothing in the call can check them.
 
 ### How the measurement goes
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen.svg" alt="Four views of one test arrangement. Top left, the floor of a reverberation room in plan: a specimen of ten point eight square metres made of thirty test objects of sixty by sixty centimetres, five by six, butted together with the joints unsealed and no grid over them, framed by a mounting fixture that covers its perimeter, the whole turned at least ten degrees off the walls and kept at least seventy-five centimetres from every room edge, one metre where possible. Top right, the two runs the absorption is a difference of: the empty room with the fixture taken out, giving T1 and A1, and the room with the specimen in its fixture, giving T2 and A2, with the temperature and the humidity checked for each, over notes asking for a relative humidity of at least fifty per cent with the humidifier off while measuring, the empty room measured at least once a day in stable conditions and again the same day if the air correction passes zero point zero five, and no microphone plane parallel to a room surface. Bottom left, a section through the type E mounting standing face up on the floor, not sunk into it, as CE marking requires: a solid fixture of at least twenty kilograms per square metre sealed to the floor, the exposed face flush with its top and the joint taped, two hundred millimetres of overall depth from the floor to the face, substructure profiles no more than thirty millimetres wide and fifty high at about sixty centimetre centres on support units no larger than fifty by fifty millimetres, a closed air space with no partitions, and a deflection of no more than five millimetres at any point, under a note that the face up arrangement is only for a ceiling whose absorption gravity does not change, a loosely laid porous backing being held to the tile by a wire grid of wire no thicker than two millimetres with a mesh of about one hundred millimetres. Bottom right, the substructure seen from below, the profiles running one way about sixty centimetres apart and their supports at least one metre twenty apart. A box at the foot carries the absorption coefficient as A2 minus A1 over S, with S taken over the test objects, and the air-absorption correction, four V times m2 minus m1 over S, whose magnitude is capped at zero point zero five in every band, with the note that the uncertainty of Table 1 holds for this mounting alone" width="100%" />
+
 Build the specimen to 10,80 m² out of whole test objects, butted together, with
-the joints unsealed and the perimeter covered by the mounting fixture. Hang it
+the joints unsealed and the perimeter covered by the mounting fixture. Mount it
 at 200 mm overall depth if the result is to support CE marking, on a
 substructure inside the 30 mm by 50 mm section, and check the deflection at the
 worst point. Set the specimen edges at an angle to the room walls. Measure the
@@ -149,7 +152,7 @@ print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
 ```
 
 That last band is over the cap, and the library says so rather than returning it
-quietly: the answer is a second measurement of the empty room, which is what 6.3
+quietly: the answer is a second measurement of the empty room, which is what 5.2
 asks for.
 
 ## 4. What the whole thing buys

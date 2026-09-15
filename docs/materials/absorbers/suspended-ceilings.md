@@ -36,14 +36,16 @@ and leaves the judgement to the laboratory. Of the rest it judges the three it
 is given: a substructure no more than 30 mm wide and 50 mm deep, a mounting
 fixture of at least 20 kg/m2, and a deflection of no more than 5 mm. Leaving one
 of those raises a `SuspendedCeilingWarning` that says which. The 0,6 m pitch of
-the substructure and the 50 mm by 50 mm supports at least 1,2 m apart are
-published as constants to build to, and describe how the specimen was hung
-rather than a measurement taken on it, so the call cannot check them.
+the substructure and the supports of no more than 50 mm by 50 mm at least 1,2 m
+apart are published as constants to build to, and describe how the specimen
+was hung rather than a measurement taken on it, so the call cannot check them.
 
 ## How the measurement goes
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen.svg" alt="Four views of one test arrangement. Top left, the floor of a reverberation room in plan: a specimen of ten point eight square metres made of thirty test objects of sixty by sixty centimetres, five by six, butted together with the joints unsealed and no grid over them, framed by a mounting fixture that covers its perimeter, the whole turned at least ten degrees off the walls and kept at least seventy-five centimetres from every room edge, one metre where possible. Top right, the two runs the absorption is a difference of: the empty room with the fixture taken out, giving T1 and A1, and the room with the specimen in its fixture, giving T2 and A2, with the temperature and the humidity checked for each, over notes asking for a relative humidity of at least fifty per cent with the humidifier off while measuring, the empty room measured at least once a day in stable conditions and again the same day if the air correction passes zero point zero five, and no microphone plane parallel to a room surface. Bottom left, a section through the type E mounting standing face up on the floor, not sunk into it, as CE marking requires: a solid fixture of at least twenty kilograms per square metre sealed to the floor, the exposed face flush with its top and the joint taped, two hundred millimetres of overall depth from the floor to the face, substructure profiles no more than thirty millimetres wide and fifty high at about sixty centimetre centres on support units no larger than fifty by fifty millimetres, a closed air space with no partitions, and a deflection of no more than five millimetres at any point, under a note that the face up arrangement is only for a ceiling whose absorption gravity does not change, a loosely laid porous backing being held to the tile by a wire grid of wire no thicker than two millimetres with a mesh of about one hundred millimetres. Bottom right, the substructure seen from below, the profiles running one way about sixty centimetres apart and their supports at least one metre twenty apart. A box at the foot carries the absorption coefficient as A2 minus A1 over S, with S taken over the test objects, and the air-absorption correction, four V times m2 minus m1 over S, whose magnitude is capped at zero point zero five in every band, with the note that the uncertainty of Table 1 holds for this mounting alone" width="100%"></picture>
+
 Build the specimen to 10,80 m2 out of whole test objects, butted together, with
-the joints unsealed and the perimeter covered by the mounting fixture. Hang it at
+the joints unsealed and the perimeter covered by the mounting fixture. Mount it at
 200 mm overall depth if the result is to support CE marking, on a substructure
 inside the 30 mm by 50 mm section, and check the deflection at the worst point.
 Set the specimen edges at an angle to the room walls. Measure the empty room and
@@ -71,7 +73,7 @@ print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
 ```
 
 That last band is over the cap and the library says so rather than returning it
-quietly: the answer is a second measurement of the empty room, which is what 6.3
+quietly: the answer is a second measurement of the empty room, which is what 5.2
 asks for.
 
 ## What the whole thing buys

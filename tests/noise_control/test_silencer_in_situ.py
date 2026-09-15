@@ -1,19 +1,31 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 """Tests for a silencer measured where it stands (ISO 11820:1996).
 
-The standard prints no worked example, so the oracles are its printed tables
-and thresholds, the closed forms of its own equations, and the identities the
-equations satisfy: a level shift common to both sides leaves a loss alone, the
-area term is a ratio, and the temperature correction vanishes when the two
-temperatures agree.
+The standard prints no worked example, so the first oracles are its printed
+tables and thresholds, the closed forms of its own equations, and the
+identities the equations satisfy: a level shift common to both sides leaves a
+loss alone, the area term is a ratio, and the temperature correction vanishes
+when the two temperatures agree.
+
+The second half of the file is what other people printed. Annex B of
+ISO 14163:1998 works the conversion of clause 9.1.5 through three spectra; a
+2014 master's thesis at the Universidad Politecnica de Madrid measured three
+splitter silencers to UNE-EN ISO 11820 and printed the whole reduction; and
+six textbooks and engineering guidelines print worked examples of the closed
+forms ISO 11820 shares with the rest of the field. Those numbers, with the
+document, the edition, the PDF page and the printed folio each was read on,
+are in ``tests/reference_data/silencer_in_situ.py``, which the conformance
+report reads as well so that the two can never assert different values.
 """
 
 from __future__ import annotations
 
 import math
+import warnings
 
 import numpy as np
 import pytest
+from reference_data import silencer_in_situ as oracle
 
 from phonometry import noise_control
 from phonometry.noise_control.silencer_in_situ import (
@@ -420,12 +432,382 @@ def test_a_non_finite_field_correction_is_refused() -> None:
             [70.0],
             source_area_m2=0.9,
             receiver_area_m2=9.0,
-            field_correction_difference_db=float("nan"),
+            field_correction_difference_db=math.nan,
         )
 
 
 def test_a_non_finite_temperature_is_refused() -> None:
     with pytest.raises(ValueError, match="source_temperature_c"):
         noise_control.temperature_field_correction_db(
-            receiver_temperature_c=20.0, source_temperature_c=float("nan")
+            receiver_temperature_c=20.0, source_temperature_c=math.nan
         )
+
+
+# ---------------------------------------------------------------------------
+# Printed numbers, from documents that are not ISO 11820
+# ---------------------------------------------------------------------------
+
+#: Equations (17) and (18) at one measuring point take off a correction that
+#: depends on the margin alone, so the level they are swept on cancels.
+CARRIER_DB = 90.0
+
+#: ISO 11820 3.3 reads S as a quarter of the Sabine equivalent absorption area
+#: A. Ver and Beranek and Barron both print A, so their numbers are four times
+#: what ``reverberant_surface_area_m2`` returns; the factor is theirs, printed
+#: as the 55,26 = 24 ln 10 in front of their own expression.
+SABINE_QUARTERS = 4.0
+
+
+def folded_octave_level(third_octave_db: tuple[float, ...]) -> float:
+    """One octave level out of its three one-third octaves, 9.1.5."""
+    return float(noise_control.octave_levels_from_third_octave_db(third_octave_db)[0])
+
+
+def background_correction_db(margin_db: float) -> float:
+    """What Equations (17) and (18) take off at a single measuring point."""
+    with warnings.catch_warnings():
+        # Barron's table reaches down to a 1 dB margin, where ISO 11820 caps
+        # the correction and refuses to call the level determined. The cap is
+        # tested on its own below; this helper is about the arithmetic under
+        # it, which the module returns uncapped either way.
+        warnings.simplefilter("ignore", SilencerInSituWarning)
+        corrected, _ = noise_control.extraneous_corrected_mean_level_db(
+            [CARRIER_DB], [CARRIER_DB - margin_db]
+        )
+    return CARRIER_DB - corrected
+
+
+def sabine_absorption_m2(volume_m3: float, time_s: float, speed_m_s: float) -> float:
+    """The Sabine absorption area the books print, four times our own."""
+    area = noise_control.reverberant_surface_area_m2(
+        volume_m3, [time_s], speed_of_sound=speed_m_s
+    )
+    return SABINE_QUARTERS * float(area[0])
+
+
+def test_iso14163_table_b1_folds_to_its_printed_octave_levels() -> None:
+    """ISO 14163:1998 Table B.1, the one worked example ISO prints of 9.1.5."""
+    for name, sides in oracle.ISO14163_TABLE_B1_THIRD_OCTAVE_DB.items():
+        printed = oracle.ISO14163_TABLE_B1_OCTAVE_DB[name]
+        for side, want in zip(sides, printed, strict=True):
+            assert folded_octave_level(side) == pytest.approx(want, abs=0.5)
+            assert round(folded_octave_level(side)) == want
+
+
+def test_iso14163_table_b1_octave_attenuation_follows_the_spectrum() -> None:
+    """The printed attenuation row, and why 9.1.5 forbids the other route.
+
+    The three spectra share one one-third-octave attenuation, so folding the
+    difference has nothing to vary with and answers 7 dB for every one of
+    them. Folding the levels on each side and subtracting afterwards, which is
+    what the clause permits, gives the 7, 12 and 5 dB the table prints.
+    """
+    for name, sides in oracle.ISO14163_TABLE_B1_THIRD_OCTAVE_DB.items():
+        source, attenuated = (round(folded_octave_level(side)) for side in sides)
+        assert (
+            source - attenuated
+            == (oracle.ISO14163_TABLE_B1_OCTAVE_ATTENUATION_DB[name])
+        )
+    forbidden = noise_control.octave_insertion_loss(
+        list(oracle.ISO14163_TABLE_B1_THIRD_OCTAVE_ATTENUATION_DB)
+    )
+    assert round(float(forbidden[0])) == 7.0
+    assert set(oracle.ISO14163_TABLE_B1_OCTAVE_ATTENUATION_DB.values()) == {
+        7.0,
+        12.0,
+        5.0,
+    }
+
+
+def test_the_thesis_position_means_reproduce_its_printed_column() -> None:
+    """Holgado Palacios (2014), Tabla XL: six positions, twenty-one bands."""
+    for positions, printed in oracle.HOLGADO_TABLE_XL.values():
+        mean = noise_control.mean_sound_pressure_level_db(positions)
+        assert mean == pytest.approx(printed, abs=0.05)
+        assert round(mean, 1) == printed
+
+
+def test_the_energy_mean_is_what_the_thesis_used_and_not_the_plain_one() -> None:
+    """The oracle discriminates: an arithmetic mean fails nineteen of the rows."""
+    agreeing = 0
+    worst = 0.0
+    for positions, printed in oracle.HOLGADO_TABLE_XL.values():
+        plain = float(np.mean(positions))
+        agreeing += round(plain, 1) == printed
+        worst = max(worst, abs(plain - printed))
+    assert agreeing == 2
+    assert worst > 2.5
+
+
+def test_the_thesis_insertion_loss_reproduces_its_three_printed_columns() -> None:
+    """Tablas LXIV to LXVI: three silencers, sixty-three bands of Equation (21).
+
+    Case 18 of Figure 1, a duct on the source side and a diffuse room on the
+    receiver side, so both areas are a quarter of the room absorption and both
+    move band by band with the reverberation time. The tolerance is the
+    rounding of the printed inputs, 0,1 dB on the levels and 0,01 s on the
+    times, which together reach about 0,13 dB; the printed tenth of the D_is
+    column is out of reach from these summary columns and the thesis computed
+    it from unrounded position means.
+    """
+    for table in oracle.HOLGADO_INSERTION_TESTS.values():
+        for frequency, row in table.items():
+            time_without, level_without, time_with, level_with, printed = row
+            areas = noise_control.reverberant_surface_area_m2(
+                oracle.HOLGADO_ROOM_VOLUME_M3, [time_without, time_with]
+            )
+            result = noise_control.in_situ_insertion_loss(
+                [level_without],
+                [level_with],
+                area_without_m2=float(areas[0]),
+                area_with_m2=float(areas[1]),
+                frequencies=[frequency],
+                field_correction_difference_db=0.0,
+                case=18,
+            )
+            assert float(result.loss_db[0]) == pytest.approx(printed, abs=0.15)
+
+
+def test_the_thesis_area_term_is_not_negligible_in_every_band() -> None:
+    """The area term carries its own weight, so the row is not a subtraction.
+
+    At 80 Hz of the 100-200 test the two reverberation times differ enough to
+    move the answer by more than a decibel, and dropping the term would miss
+    the printed value; at 400 Hz the two times agree and it is exactly zero.
+    """
+    table = oracle.HOLGADO_TABLE_LXIV
+    without = noise_control.reverberant_surface_area_m2(
+        oracle.HOLGADO_ROOM_VOLUME_M3, [row[0] for row in table.values()]
+    )
+    with_silencer = noise_control.reverberant_surface_area_m2(
+        oracle.HOLGADO_ROOM_VOLUME_M3, [row[2] for row in table.values()]
+    )
+    terms = 10.0 * np.log10(without / with_silencer)
+    bands = list(table)
+    assert float(terms[bands.index(80.0)]) == pytest.approx(-1.13, abs=0.01)
+    assert float(terms[bands.index(400.0)]) == pytest.approx(0.0, abs=1e-12)
+    assert float(np.max(np.abs(terms))) > 1.0
+
+
+def test_barron_table_3_4_is_the_energy_subtraction_at_one_point() -> None:
+    """Barron (2003) Table 3-4, twenty-two printed margins from 1 dB to 20 dB."""
+    for margin, printed in oracle.BARRON_TABLE_3_4_DB.items():
+        correction = background_correction_db(margin)
+        assert correction == pytest.approx(printed, abs=0.05)
+        assert round(correction, 1) == printed
+
+
+def test_the_printed_table_of_iso11820_is_not_that_subtraction() -> None:
+    """Table 1 is stepped and deliberately not the logarithmic subtraction.
+
+    Barron prints 1,7 dB at a 5 dB margin and 0,7 dB at 8 dB; ISO 11820
+    Table 1 takes off 2 dB and 1 dB at the same two margins. The two tables
+    are two rules and the library keeps them apart.
+    """
+    for margin, table_value in ((5.0, 2.0), (8.0, 1.0)):
+        stepped = noise_control.silencer_background_correction_db([margin])
+        assert float(stepped[0]) == table_value
+        assert oracle.BARRON_TABLE_3_4_DB[margin] != table_value
+
+
+def test_the_extraneous_cap_trips_at_the_lowest_margin_table_one_accepts() -> None:
+    """The two routes of the standard disagree at their shared boundary.
+
+    Table 1 accepts a 3 dB margin and hands back a 3 dB correction. The energy
+    route of 9.1.1 and 9.1.2 reaches 3,0206 dB at that same margin, which is
+    over the 3 dB cap the clauses state, so it reports the level as not
+    determined. Barron's own table prints 3,0 dB there, rounded.
+    """
+    assert oracle.BARRON_TABLE_3_4_DB[3.0] == 3.0
+    assert float(noise_control.silencer_background_correction_db([3.0])[0]) == 3.0
+    with pytest.warns(SilencerInSituWarning, match="3 dB"):
+        corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+            [CARRIER_DB], [CARRIER_DB - 3.0]
+        )
+    assert capped is True
+    assert CARRIER_DB - corrected == pytest.approx(3.0206, abs=5e-4)
+
+
+def test_two_worked_background_subtractions() -> None:
+    """Bies, Hansen and Howard (2017) Example 1.4 and Barron (2003) Example 3-6."""
+    for level, background, printed in (
+        oracle.BIES_EXAMPLE_1_4_DB,
+        oracle.BARRON_EXAMPLE_3_6_DB,
+    ):
+        corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+            [level], [background]
+        )
+        assert round(corrected, 1) == printed
+        assert capped is False
+
+
+def test_barron_example_3_6_agrees_with_its_own_tabulated_correction() -> None:
+    """The book reaches 81,7 dB twice, by subtraction and off Table 3-4.
+
+    Its second route takes 1,3 dB off the measured 83 dB at a 6 dB margin,
+    which is the same row of Table 3-4 the sweep above checks.
+    """
+    level, _, printed = oracle.BARRON_EXAMPLE_3_6_DB
+    assert round(level - oracle.BARRON_TABLE_3_4_DB[6.0], 1) == printed
+
+
+def test_barron_example_3_4_mean_and_area_term() -> None:
+    """Nine levels on a measurement surface, and the 10 lg (S/S0) of its area."""
+    mean = noise_control.mean_sound_pressure_level_db(
+        oracle.BARRON_EXAMPLE_3_4_LEVELS_DB
+    )
+    assert round(mean, 1) == oracle.BARRON_EXAMPLE_3_4_MEAN_DB
+    term = noise_control.sound_power_level_db(
+        [0.0], area_m2=[oracle.BARRON_EXAMPLE_3_4_AREA_M2]
+    )
+    assert round(float(term[0]), 2) == oracle.BARRON_EXAMPLE_3_4_AREA_TERM_DB
+    # The area itself follows from the printed 2,60 m by 2,80 m by 1,60 m high
+    # surface, which the solution writes out as 17,28 + 7,28.
+    assert 2.0 * (2.60 + 2.80) * 1.60 + 2.60 * 2.80 == pytest.approx(
+        oracle.BARRON_EXAMPLE_3_4_AREA_M2
+    )
+
+
+def test_barron_example_3_3_sound_power_needs_its_field_correction() -> None:
+    """The three terms of Equation (5) together, on a hemisphere of 9,817 m2.
+
+    The book's third term is the characteristic impedance of the room air,
+    -10 lg(rho c / 400), which is the K of Equation (5) for this measurement.
+    Left out, the answer reads 90,5 dB and misses the printed 90,4 dB, so the
+    example does exercise the term.
+    """
+    mean = noise_control.mean_sound_pressure_level_db(
+        oracle.BARRON_EXAMPLE_3_3_LEVELS_DB
+    )
+    correction = -10.0 * math.log10(oracle.BARRON_EXAMPLE_3_3_IMPEDANCE_RAYL / 400.0)
+    level = noise_control.sound_power_level_db(
+        [mean],
+        area_m2=[oracle.BARRON_EXAMPLE_3_3_AREA_M2],
+        field_correction_db=[correction],
+    )
+    assert round(float(level[0]), 1) == oracle.BARRON_EXAMPLE_3_3_SOUND_POWER_DB
+    without = noise_control.sound_power_level_db(
+        [mean], area_m2=[oracle.BARRON_EXAMPLE_3_3_AREA_M2]
+    )
+    assert round(float(without[0]), 1) != oracle.BARRON_EXAMPLE_3_3_SOUND_POWER_DB
+
+
+def test_ver_beranek_absorption_area_and_its_decibel_term() -> None:
+    """Ver and Beranek (2006) Example 4.2: a 200 m3 room at 21,4 C."""
+    absorption = sabine_absorption_m2(
+        oracle.VER_BERANEK_EXAMPLE_4_2_VOLUME_M3,
+        oracle.VER_BERANEK_EXAMPLE_4_2_REVERBERATION_TIME_S,
+        oracle.VER_BERANEK_EXAMPLE_4_2_SPEED_M_S,
+    )
+    assert round(absorption, 1) == oracle.VER_BERANEK_EXAMPLE_4_2_ABSORPTION_M2
+    term = noise_control.sound_power_level_db([0.0], area_m2=[absorption])
+    assert round(float(term[0]), 1) == oracle.VER_BERANEK_EXAMPLE_4_2_AREA_TERM_DB
+
+
+def test_the_speed_of_sound_has_to_be_the_rooms_and_not_the_default() -> None:
+    """The example is at 344 m/s, and ISO 11820 prints 340 for room temperature."""
+    at_the_default = noise_control.reverberant_surface_area_m2(
+        oracle.VER_BERANEK_EXAMPLE_4_2_VOLUME_M3,
+        [oracle.VER_BERANEK_EXAMPLE_4_2_REVERBERATION_TIME_S],
+    )
+    assert round(SABINE_QUARTERS * float(at_the_default[0]), 1) != (
+        oracle.VER_BERANEK_EXAMPLE_4_2_ABSORPTION_M2
+    )
+
+
+def test_barron_example_7_2_absorption_area() -> None:
+    """A second room, a third speed of sound, and two independent routes to it.
+
+    Barron reaches 40,41 m2 by the Eyring expression and 18,89 m2 by the
+    Fitzroy relationship, then turns each into a reverberation time. Feeding
+    the printed times back recovers the areas to within the rounding of the
+    three figures he prints them to.
+    """
+    for time_s, printed in oracle.BARRON_EXAMPLE_7_2_ABSORPTION_M2.items():
+        absorption = sabine_absorption_m2(
+            oracle.BARRON_EXAMPLE_7_2_VOLUME_M3,
+            time_s,
+            oracle.BARRON_EXAMPLE_7_2_SPEED_M_S,
+        )
+        assert absorption == pytest.approx(printed, abs=0.03)
+
+
+def test_barron_muffler_gas_densities() -> None:
+    """Examples 8-11 and 8-10, both away from the default pressure of 100 kPa."""
+    for (
+        temperature_c,
+        pressure_pa,
+        printed,
+    ) in oracle.BARRON_MUFFLER_GAS_DENSITY.values():
+        density = noise_control.gas_density_kg_m3(
+            temperature_c=temperature_c, ambient_pressure_pa=pressure_pa
+        )
+        assert round(density, 3) == printed
+
+
+def test_ntp_668_flow_velocity_coefficients() -> None:
+    """INSHT NTP 668 (2004) Ec. 2 and Ec. 3, one millimetre of water column."""
+    for density_kg_m3, printed in oracle.NTP668_VELOCITY_COEFFICIENTS.values():
+        velocity = noise_control.flow_velocity_m_s(
+            [oracle.MILLIMETRE_WATER_COLUMN_PA], density_kg_m3
+        )
+        assert round(float(velocity[0]), 2) == printed
+
+
+def test_vdi_2081_splitter_gap_velocity() -> None:
+    """VDI 2081 Blatt 2:2005-05, Tabelle 1, element 2: 14,81 m/s in the gaps.
+
+    Driven from the printed volume flow rather than from the printed face
+    velocity of 4,94 m/s, which is itself rounded and gives 14,82 m/s.
+    """
+    face_velocity = (
+        oracle.VDI2081_SPLITTER_VOLUME_FLOW_M3_H
+        / 3600.0
+        / oracle.VDI2081_SPLITTER_HOUSING_AREA_M2
+    )
+    assert round(face_velocity, 2) == 4.94
+    velocity = noise_control.silencer_flow_velocity_m_s(
+        face_velocity,
+        upstream_area_m2=oracle.VDI2081_SPLITTER_HOUSING_AREA_M2,
+        free_area_m2=oracle.VDI2081_SPLITTER_FREE_AREA_M2,
+    )
+    assert round(velocity, 2) == oracle.VDI2081_SPLITTER_GAP_VELOCITY_M_S
+
+
+def test_fuchs_table_13_4_airway_velocities() -> None:
+    """Twelve printed velocities, two splitter designs, three housing areas.
+
+    The table truncates towards zero rather than rounding, which is visible
+    where 66,67 m/s prints as 66 and 16,67 m/s as 16.
+    """
+    ratios = tuple(oracle.FUCHS_BLOCKAGE_RATIOS.values())
+    for flow_m3_h, housing_m2, *velocities in oracle.FUCHS_TABLE_13_4:
+        for printed, ratio in zip(velocities, ratios, strict=True):
+            free_m2 = housing_m2 / (1.0 + ratio)
+            velocity = noise_control.silencer_flow_velocity_m_s(
+                flow_m3_h / 3600.0 / housing_m2,
+                upstream_area_m2=housing_m2,
+                free_area_m2=free_m2,
+            )
+            assert math.floor(velocity) == printed
+
+
+def test_barron_example_5_7_equivalent_diameter() -> None:
+    """The root inside Equation (15), for a 900 mm square duct.
+
+    Half an oracle, and it says so: what Barron prints is the area-equivalent
+    diameter sqrt(4 S / pi) = 1,016 m. The 1,5 diameters in front of it are
+    ISO 11820's own coefficient, read on the printed page of Equation (15) and
+    nowhere on his, so this pins the root and not the factor. The printed
+    1,016 m carries half a millimetre of rounding, which the 1,5 scales to the
+    0,75 mm this is asserted to.
+    """
+    distance = noise_control.measurement_distance_upstream_m(
+        oracle.BARRON_EXAMPLE_5_7_AREA_M2
+    )
+    printed_upstream_diameters = 1.5
+    expected = (
+        printed_upstream_diameters * oracle.BARRON_EXAMPLE_5_7_EQUIVALENT_DIAMETER_M
+    )
+    assert distance == pytest.approx(expected, abs=printed_upstream_diameters * 5e-4)
+    assert 0.9**2 == pytest.approx(oracle.BARRON_EXAMPLE_5_7_AREA_M2)

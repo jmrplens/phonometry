@@ -6271,6 +6271,65 @@ dos ediciones con las mismas entradas y en el mismo orden.
   nombra el margen que realmente se alcanzó.
 - **Estado:** sin comunicar.
 
+## ISO 11820:1996, ecuaciones (20) y (22) (una razón de temperaturas del revés)
+
+- **Ubicación:** la ecuación (20) de 9.1.3 en la página impresa 11 (página 19
+  del PDF) y la ecuación (22) de 9.1.4 en la página impresa 12 (página 20 del
+  PDF).
+- **Lo impreso:**
+  $K_2 - K_1 = 5 \lg\!\left(\dfrac{273 + \theta_1}{273 + \theta_2}\right)$ dB,
+  con $\theta_1$ "the temperature, in degrees Celsius, on the receiver side" y
+  $\theta_2$ "on the source side"; y, para la pérdida por inserción,
+  $K_\mathrm{II} - K_\mathrm{I} = 5 \lg\!\left(\dfrac{273 + \theta_\mathrm{I}}
+  {273 + \theta_\mathrm{II}}\right)$ dB, con $\theta_\mathrm{I}$ la temperatura
+  con el silenciador y $\theta_\mathrm{II}$ sin él. La frase que sigue a la
+  ecuación (20) lo explica: "The different temperatures determine different
+  sound velocities which result in different conversion factors from squared
+  sound pressure to sound power."
+- **El problema:** la razón está invertida, y la frase dice por qué. La
+  corrección de campo $K$ es una conversión del cuadrado de la presión acústica
+  a potencia acústica, y la norma fija su signo en su propia página: las
+  ecuaciones (5) y (7) de la página impresa 3 la suman,
+  $L_{W1} = \overline{L_{p1}} + 10\lg(S_1/S_0)$ dB $+\ K_1$ y
+  $L_{W2} = \overline{L_{p2}} + 10\lg(S_2/S_0)$ dB $+\ K_2$, con el subíndice 1
+  en el lado receptor y el 2 en el lado fuente, que es el mismo reparto que
+  usa la ecuación (20). Por tanto $K = -10\lg(\rho c / (\rho c)_0)$ + const. La
+  frase sólo cuenta el cambio de $c$, que crece como $\sqrt{T}$, y olvida que
+  la densidad baja: la propia ecuación (29) de la norma, en la página impresa
+  12, da $\rho_\mathrm{u} = M\,p_\mathrm{amb}/[R(273 + \theta_\mathrm{u})]$, de
+  modo que a presión ambiente constante $\rho c$ decae como $T^{-1/2}$ y $K$
+  crece como $+5 \lg T$. El gas más caliente necesita entonces la corrección
+  *más* positiva, y la diferencia es
+  $5 \lg[(273 + \theta_2)/(273 + \theta_1)]$, la inversa de lo impreso. Las dos
+  formas impresas llevan la misma inversión, así que es la ecuación y no un
+  subíndice mal compuesto en una de ellas.
+- **Evidencia:** las tres ecuaciones y las dos leyendas leídas en la página. La
+  ecuación (20) con su leyenda y la frase explicativa, y las ecuaciones (18) y
+  (19), están en la página 19 del PDF (página impresa 11); las ecuaciones (5) y
+  (7) con sus leyendas, en la página 11 del PDF (página impresa 3); la ecuación
+  (22) con su leyenda y la ecuación (29) con $R$ = 8 314,4 N·m/(kmol·K), en la
+  página 20 del PDF (página impresa 12). Todo de la BS EN ISO 11820:1997, que
+  imprime la EN ISO 11820:1996. Otro documento ISO imprime la misma magnitud
+  del derecho: la corrección por magnitudes de referencia de la ISO 3741:2010,
+  que su propia leyenda llama "a function of the characteristic impedance of
+  the air", es $C_1 = -10\lg(p_\mathrm{s}/p_{\mathrm{s},0})$ dB
+  $+\ 5\lg[(273{,}15 + \theta)/\theta_0]$ dB, sumada a $L_W$ en la ecuación
+  (20) de la página 31 del PDF (página impresa 22) de la BS EN ISO 3741:2010, y
+  crece con la temperatura.
+- **Consecuencia para las tablas de la propia norma:** la ISO 11820 no imprime
+  ningún ejemplo resuelto, así que nada del documento queda mal a la vista. En
+  uso, el signo cuesta el doble de la corrección: con un receptor a 20 °C y una
+  fuente a 200 °C lo impreso da -1,04 dB donde la impedancia da +1,04 dB, de
+  modo que tanto la pérdida por transmisión de la ecuación (19) como la pérdida
+  por inserción de la ecuación (21) salen 2,08 dB bajas.
+- **Comportamiento de la biblioteca:**
+  [`temperature_field_correction_db`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_in_situ.py)
+  devuelve la ecuación tal como está impresa, porque quien tenga delante la
+  ISO 11820 tiene que encontrar el número de la norma, y su docstring nombra
+  esta entrada. La fila de conformidad "ISO 11820:1996 Eqs. (20) and (22)" fija
+  la forma impresa.
+- **Estado:** no reportada.
+
 ## ISO 10847:1997, tabla 1 (una clase a contraviento con el extremo inferior positivo)
 
 - **Ubicación:** la tabla 1, "Class of wind conditions", en la página impresa
@@ -6403,6 +6462,80 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $\lg 2$ donde lo imprime la ecuación (8). No hay que unificarlos.
 - **Estado:** no reportada.
 
+## ISO 14257:2001, ecuación (4) frente a la tabla 1 (una segunda constante redondeada)
+
+- **Ubicación:** la ecuación (4) de 4.2.3 y la tabla 1 justo debajo, las dos en
+  la página impresa 4 (página 14 del PDF).
+- **Lo impreso:** la ecuación (4) cierra con
+  $D_\text{Norm} = 10\lg\!\left(\sum_j 10^{(D_j + P_j)/10}\right)$ dB
+  $-\ 6,2$ dB, y la tabla 1 da los $P_j$ del espectro de referencia de ruido
+  rosa ponderado A como $-16{,}1$; $-8{,}6$; $-3{,}2$; $0$; $1{,}2$; $1$ dB de
+  125 Hz a 4 kHz.
+- **El problema:** los 6,2 dB son la suma energética de esa misma tabla
+  impresa, que es lo que normaliza el espectro ponderado a total unidad, y la
+  suma de los seis $P_j$ impresos es 6,251 dB. La constante impresa se queda
+  0,051 dB corta. Es el mismo desliz que el $\lg 2$ redondeado de la entrada
+  anterior, en la otra dirección: una constante que el documento podía haber
+  impreso exacta, redondeada a un decimal en el único sitio donde aparece.
+- **Evidencia:** la ecuación (4), su leyenda y la tabla 1 leídas en la página,
+  página 14 del PDF (página impresa 4) de la EN ISO 14257:2001.
+- **Consecuencia para las tablas de la propia norma:** 0,051 dB en cada valor
+  normalizado en frecuencia que tabula el anexo, que es medio dígito del último
+  que imprimen las tablas C.6, C.10 y C.12, así que puede mover una celda
+  impresa en una unidad del último lugar, nunca más.
+- **Comportamiento de la biblioteca:**
+  [`NORMALIZED_OFFSET_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) lleva el 6,2
+  impreso, por la misma regla que la entrada anterior: la constante impresa es
+  la que usará quien compare contra la página. La fila de conformidad
+  "ISO 14257:2001 Annex C, Table C.6 last column" juzga el resultado contra el
+  anexo con la décima que el anexo imprime.
+- **Estado:** no reportada.
+
+## ISO 14257:2001, anexo C, tablas C.11 y C.12 (resultados que la ecuación (8) no da)
+
+- **Ubicación:** las tablas C.11 y C.12 en la página impresa 24 (página 34 del
+  PDF), frente a la ecuación (8) de 6.4.3 en la página impresa 10 (página 20
+  del PDF) y a la tabla C.5 en la página impresa 21 (página 31 del PDF).
+- **Lo impreso:** la tabla C.11 da $\text{DL}'_\text{fr}$ en seis bandas de
+  octava a 4 m, 10 m y 30 m de la fuente: 6,2; 4,0; 4,4; 5,2; 5,3; 3,9 a 4 m;
+  7,8; 5,4; 6,4; 6,9; 7,7; 5,8 a 10 m; y 10,6; 7,4; 9,3; 7,2; 9,2; 6,1 a 30 m.
+  La tabla C.12 da 4,8; 6,8; 8,0 dB para el espectro de ruido rosa ponderado A
+  a esas mismas tres distancias.
+- **El problema:** la ecuación (8) es lo único del documento que define
+  $\text{DL}'_\text{fr}$, y no produce esos números. Evaluada sobre los tres
+  rangos de distancia que usa el propio anexo, 2 m a 5 m, 5 m a 24 m y 24 m a
+  48 m, con los $D$ impresos de la tabla C.5, se aparta de la tabla C.11 hasta
+  1,55 dB, y las filas impresas no son un resultado de la ecuación (8) para
+  ninguna tasa de decaimiento: despejando de la ecuación el $\text{DL}_2$ que
+  exigiría la fila intermedia salen valores de -28,9 dB a +20,7 dB por
+  duplicación de distancia. Lo que son las tres filas es una lectura de la
+  medida impresa en una posición de micrófono, por la ecuación (6) y no por la
+  (8): la fila de 4 m es la ecuación (6) en la posición de 4 m de la tabla C.5,
+  en las seis bandas; la de 10 m es la media de la ecuación (6) en las
+  posiciones de 8 m y 12 m que la flanquean, en las seis bandas; y la de 30 m
+  es la ecuación (6) en la posición de 32 m con $20\lg 32$ introducido como
+  30 dB en vez de 30,103 dB, en cinco bandas de seis.
+- **Evidencia:** las tablas C.10, C.11 y C.12 leídas en la página 34 del PDF
+  (página impresa 24), las tablas C.5 y C.6 en la página 31 del PDF (página
+  impresa 21) y las ecuaciones (6), (7) y (8) con sus leyendas en la página 20
+  del PDF (página impresa 10), todo de la EN ISO 14257:2001. Diecisiete de las
+  dieciocho celdas de la tabla C.11 vuelven de los $D$ impresos de la tabla C.5
+  con la lectura anterior, con la décima que imprime la tabla; la excepción es
+  la celda de 125 Hz de la fila de 30 m, que imprime 10,6 donde esa lectura da
+  10,7. Los mismos dígitos están impresos en la adopción española, la
+  UNE-EN ISO 14257:2002, tabla C.11 en la página impresa 30, así que es el
+  anexo y no una de sus impresiones.
+- **Consecuencia para las tablas de la propia norma:** sólo las tablas C.11 y
+  C.12. Las tasas de decaimiento y los excesos de las tablas C.7 a C.10 no
+  quedan afectados, y nada aguas abajo calcula con la C.11.
+- **Comportamiento de la biblioteca:**
+  [`level_excess_at`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) implementa la
+  ecuación (8) tal como está impresa y devuelve los valores de arriba en vez de
+  los de la tabla. La fila de conformidad "ISO 14257:2001 Annex C, Tables C.11
+  and C.12" registra la diferencia para que la tabla no se confunda con un
+  oráculo de la ecuación (8).
+- **Estado:** no reportada.
+
 ## ISO 11690-3:1998, tabla C.2 (un valor leído en el borde de su propio ábaco)
 
 - **Ubicación:** la tabla C.2 en la página impresa 20 (página 30 del PDF),
@@ -6430,6 +6563,52 @@ dos ediciones con las mismas entradas y en el mismo orden.
   evalúa la expresión y no tiene techo, así que devuelve 12,4 dB donde la tabla
   imprime 10. La fila de conformidad "ISO 11690-3:1998 Annex C, Figure C.1 (the
   eighth machine)" lo fija.
+- **Estado:** no reportada.
+
+## ISO 11690-3:1998, anexo B (dos puestos de trabajo con las posiciones y los resultados intercambiados)
+
+- **Ubicación:** las tablas B.5 y B.8 en la página impresa 18 (página 28 del
+  PDF), frente a la figura B.1 en la página impresa 16 (página 26 del PDF) y a
+  las columnas de inmisión de las tablas B.6 y B.9 en la página impresa 18.
+- **Lo impreso:** la tabla B.5 sitúa el puesto de trabajo W1 en $x$ = 3 m,
+  $y$ = 12 m, $z$ = 1,6 m y el W2 en 17 m, 4 m, 1,6 m, y la tabla B.8 repite
+  esas dos posiciones para el caso B. La tabla B.6 da luego, con las dos
+  máquinas instaladas, $L_p$ = 82,1 dB en W1 y 80,3 dB en W2; la tabla B.9 da
+  86,2 dB en W1 y 85,7 dB en W2 con la máquina de primera elección, y 83,8 dB y
+  82,8 dB con la de segunda. La figura B.1 dibuja esos dos puestos al revés: el
+  W1 junto a la máquina M2, a la derecha de la sala, y el W2 solo en la esquina
+  superior izquierda.
+- **El problema:** los resultados corresponden al reparto de la figura y no al
+  de las tablas. La máquina M2 está en 17 m, 3 m, 1 m, así que la posición que
+  la tabla B.5 llama W2 queda a un metro de ella y la que llama W1 queda a once
+  metros de la máquina más próxima. La posición lejana no puede ser la más
+  ruidosa de las dos, y los niveles impresos dicen que lo es. Al recalcular el
+  caso A con el método de categoría 1 que prescribe el anexo, en la sala de
+  20 m por 15 m por 7 m de la tabla B.2 con el coeficiente de absorción medio
+  0,15 de la tabla B.3, salen 82,09 dB en 17 m, 4 m, 1,6 m y 80,27 dB en 3 m,
+  12 m, 1,6 m: los dos niveles que imprime la tabla B.6, cada uno bajo la
+  etiqueta del otro puesto. La tabla B.8 se contradice en su propia fila, porque
+  imprime la posición lejana para W1 y a su lado 82 dB, el nivel cercano
+  redondeado.
+- **Evidencia:** la figura B.1 con las tablas B.2 y B.3 leídas en la página 26
+  del PDF (página impresa 16); la tabla B.4 con las posiciones de las máquinas
+  en la página 27 del PDF (página impresa 17); las tablas B.5 a B.9 en la
+  página 28 del PDF (página impresa 18). Todo de la EN ISO 11690-3:1998 tal
+  como la publica la BS EN ISO 11690-3:1999. Con el reparto de la figura los
+  seis niveles de la tabla B.9 vuelven dentro de 0,07 dB, y con el de las
+  tablas los cuatro de W1 y W2 fallan entre 0,48 dB y 1,04 dB (el W3 está en
+  el mismo sitio en los dos), mientras que el caso A falla 1,8 dB en las dos
+  filas.
+- **Consecuencia para las tablas de la propia norma:** las columnas de posición
+  de las tablas B.5 y B.8 frente a las etiquetas de las tablas B.6 y B.9, en
+  los dos casos del anexo. El texto del caso A sigue a las tablas, porque llama
+  al W2 "the workstation of M2", así que está del mismo lado de la
+  contradicción. Los números en sí son correctos.
+- **Comportamiento de la biblioteca:** las filas de conformidad de los dos
+  casos del anexo B leen las coordenadas impresas y nunca las etiquetas, y la
+  fila "ISO 11690-3:1998 Annex B, Figure B.1 against Tables B.5 and B.8"
+  registra que los resultados vuelven en las posiciones que dibuja la figura y
+  en ninguna otra.
 - **Estado:** no reportada.
 
 ## Propiedades de las fuentes, relacionadas, que no son erratas

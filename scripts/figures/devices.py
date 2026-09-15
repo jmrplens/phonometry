@@ -7197,3 +7197,262 @@ def generate_enclosure_cabin_insulation(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "enclosure_cabin_insulation.svg")
     plt.close()
+
+
+def generate_in_situ_noise_control(output_dir: str) -> None:
+    """ISO 11820, ISO 11821 and ISO 10847: three rules read where they apply."""
+    print("Generating in_situ_noise_control.svg...")
+    from phonometry import environment, noise_control
+
+    _fig, axes = plt.subplots(1, 3, figsize=(16.4, 5.4))
+
+    # -- Left: three standards, three answers to the same question, which is
+    # why the library keeps three implementations of it.
+    ax = axes[0]
+    # Both tables are read by flooring the margin, so a row holds from its own
+    # decibel up to the next one and the steps are post-aligned. The silencer
+    # needs one sample the grid does not carry: its last row is a point rather
+    # than an interval, since 10 dB takes off 0,5 dB and anything above it
+    # nothing, so the sample after 10 sits immediately above 10 and the drop is
+    # drawn there rather than a decibel late.
+    table_margins = np.concatenate(
+        [np.arange(3.0, 11.0, 1.0), [np.nextafter(10.0, np.inf), 12.4]]
+    )
+    silencer = np.array(
+        [noise_control.silencer_background_correction_db([m])[0] for m in table_margins]
+    )
+    barrier_margins = np.arange(4.0, 13.0, 1.0)
+    barrier = np.array(
+        [-environment.barrier_background_correction_db([m])[0] for m in barrier_margins]
+    )
+    formula_margins = np.linspace(6.0, 12.0, 400)
+    formula = np.array(
+        [
+            100.0 - noise_control.background_corrected_level_db([100.0], [100.0 - m])[0]
+            for m in formula_margins
+        ]
+    )
+    ax.step(
+        table_margins,
+        silencer,
+        where="post",
+        color=COLOR_PRIMARY,
+        lw=2.2,
+        label="ISO 11820 Table 1, taken off the measured level",
+    )
+    ax.step(
+        barrier_margins,
+        barrier,
+        where="post",
+        color=COLOR_SECONDARY,
+        lw=2.2,
+        ls="--",
+        label="ISO 10847 Table 3, printed negative and added",
+    )
+    ax.plot(
+        formula_margins,
+        formula,
+        color=COLOR_TERTIARY,
+        lw=2.0,
+        ls="-.",
+        label="ISO 11821 clause 5.7, the energy subtraction",
+    )
+    ax.axvspan(
+        2.4,
+        3.0,
+        color=theme_fill(COLOR_PRIMARY, ax),
+        lw=0.0,
+        zorder=0,
+    )
+    ax.axvspan(
+        3.0,
+        4.0,
+        color=theme_fill(COLOR_SECONDARY, ax),
+        lw=0.0,
+        zorder=0,
+    )
+    ax.plot(
+        [9.0, 9.0],
+        [0.5, 1.0],
+        color=COLOR_FG,
+        lw=1.2,
+        ls=":",
+        zorder=5,
+    )
+    ax.set_xlim(2.4, 12.4)
+    ax.set_ylim(-0.25, 3.6)
+    ax.set_xticks([3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    ax.set_xlabel("Margin over the background [dB]")
+    ax.set_ylabel("Decibels removed from the measured level")
+    ax.set_title("One correction, three standards, three answers")
+    ax.annotate(
+        "at a margin of 9 dB one table takes off 0,5 dB and the\n"
+        "other 1 dB, and under their own thresholds neither\n"
+        "corrects at all: the measurement is refused",
+        xy=(9.0, 0.75),
+        xytext=(5.4, 2.55),
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "linewidth": 1.1},
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax.legend(loc="upper right", fontsize=8, framealpha=1.0)
+    ax.grid(visible=True, which="major", color=COLOR_GRID, alpha=0.45)
+
+    # -- Middle: the microphone positions of ISO 11821, and the floor that
+    # holds the quarter-height one out below 4 m and the half-height one below
+    # 2 m, which is the only height at which two of them coincide.
+    ax2 = axes[1]
+    heights = np.linspace(1.5, 10.0, 400)
+    positions = np.array([noise_control.microphone_distances_m(h) for h in heights])
+    for index, (name, colour, style) in enumerate(
+        (
+            ("A quarter of the screen height", COLOR_PRIMARY, "-"),
+            ("Half the screen height", COLOR_SECONDARY, "--"),
+            ("The screen height itself", COLOR_TERTIARY, "-."),
+            ("Twice the screen height", COLOR_QUATERNARY, ":"),
+        )
+    ):
+        ax2.plot(
+            heights,
+            positions[:, index],
+            color=colour,
+            lw=2.0,
+            ls=style,
+        )
+        ax2.text(
+            10.25,
+            float(positions[-1, index]),
+            name,
+            fontsize=8.5,
+            color=colour,
+            ha="left",
+            va="center",
+        )
+    ax2.axvspan(
+        1.5,
+        4.0,
+        color=theme_fill(COLOR_PRIMARY, ax2),
+        lw=0.0,
+        zorder=0,
+    )
+    ax2.plot(
+        [1.5, 10.0],
+        [1.0, 1.0],
+        color=COLOR_FG,
+        lw=1.2,
+        ls=":",
+        zorder=4,
+    )
+    ax2.set_xlim(1.5, 17.2)
+    ax2.set_ylim(0.0, 21.0)
+    ax2.set_xticks([2, 4, 6, 8, 10])
+    ax2.set_xlabel("Screen height [m]")
+    ax2.set_ylabel("Distance from the screen [m]")
+    ax2.set_title("Where the microphones stand")
+    ax2.text(
+        1.75,
+        16.6,
+        "no microphone stands closer than 1 m, so a screen of 2 m\n"
+        "or less is measured at three distances rather than four:\n"
+        "its two nearest positions run together on the floor",
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        va="top",
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax2.grid(visible=True, which="major", color=COLOR_GRID, alpha=0.45)
+
+    # -- Right: the reference microphone of ISO 10847, whose whole job is to
+    # hear the source and not the barrier.
+    ax3 = axes[2]
+    barrier_height = 4.0
+    distances = np.linspace(2.0, 22.0, 400)
+    heights_ref = np.array(
+        [
+            environment.reference_microphone_height_m(
+                barrier_height, source_to_barrier_m=d
+            )
+            for d in distances
+        ]
+    )
+    near = distances < 15.0
+    ax3.plot(
+        distances[near],
+        heights_ref[near],
+        color=COLOR_PRIMARY,
+        lw=2.4,
+        zorder=5,
+        label="Reference microphone height of 7.2.2",
+    )
+    ax3.plot(
+        distances[~near],
+        heights_ref[~near],
+        color=COLOR_PRIMARY,
+        lw=2.4,
+        zorder=5,
+    )
+    ax3.axhline(
+        barrier_height + 1.5,
+        color=COLOR_SECONDARY,
+        lw=1.8,
+        ls="--",
+        zorder=3,
+        label="1,5 m above the top edge",
+    )
+    ax3.axhline(
+        barrier_height,
+        color=COLOR_TERTIARY,
+        lw=1.6,
+        ls="-.",
+        label="Top edge of the barrier, 4 m",
+    )
+    ax3.axvspan(
+        2.0,
+        15.0,
+        color=theme_fill(COLOR_PRIMARY, ax3),
+        lw=0.0,
+        zorder=0,
+    )
+    ax3.set_xlim(2.0, 22.0)
+    ax3.set_ylim(3.0, 9.0)
+    ax3.set_xlabel("Distance from the near end of the source to the barrier [m]")
+    ax3.set_ylabel("Height above the ground [m]")
+    ax3.set_title("The microphone that hears the source")
+    ax3.annotate(
+        "for a source region nearer than 15 m the microphone rises\n"
+        "until it looks over the top edge by 10 degrees, which asks\n"
+        "for more height than the clearance rule and drops back to\n"
+        "it the moment the source is far enough away",
+        xy=(6.0, float(heights_ref[np.argmin(np.abs(distances - 6.0))])),
+        xytext=(8.2, 8.5),
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        va="top",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "linewidth": 1.1},
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax3.legend(loc="lower left", fontsize=8, framealpha=1.0)
+    ax3.grid(visible=True, which="major", color=COLOR_GRID, alpha=0.45)
+
+    plt.tight_layout()
+    save_figure(output_dir, "in_situ_noise_control.svg")
+    plt.close()

@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1123/1123 conformance checks pass** across 84 domains and 418 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1145/1145 conformance checks pass** across 85 domains and 421 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -39,10 +39,10 @@
 | E DIN 4150-2:2023-08 Annex B, Table B.1 | KB_FTm,Zug of the metro north by Formula (5) | 0.0365 | -0.0005 | 100 % |
 | Long 2e Table 14.9 (worked duct-borne sheet, supply path) | Fan to room, 8 octave bands -> 52/42/30/18/9/-2/-2/-1 dB at the receiver | 1 dB | 1 dB | 100 % |
 | E DIN 45672-3:2023-02 Annex C, Table C.1 | L_v at 4 Hz by Formula (1) | 28.8 dB | -0.1 dB | 100 % |
+| ISO 11820:1996 Table 1 | The printed table is a rounded version of the logarithmic subtraction and departs from it by under 0,35 dB | largest departure 0.349 dB | 0.3491 dB | 100 % |
 | IEC 60268-16 Annex M | Step 2 printed intermediates: the measurement condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.993 | 99 % |
 | VDI 2081 Blatt 2:2005-05 Table 1, element 14 | Bend flow noise, worst octave deviation, dB | 0.0496 dB | 0.0496 dB | 99 % |
 | ISO 11691:1995 | Bounds of the octave insertion loss (Eq. (2)) | 9.744 dB | headroom 0.027 dB | 99 % |
-| IEC 60268-16 Annex M | Step 3 printed intermediates: the operational condition, row by row | worst row: amf in dB, 0.99 of its last printed place | 0.987 | 99 % |
 
 <details>
 <summary><b>Numerical validation - filters &amp; weightings</b>: class showcase (IEC 61260-1 · IEC 61672-1 · ISO 7196)</summary>
@@ -1707,6 +1707,36 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 11957:1996 7.2.1 | Source positions: at least the largest deviation of D'_p between any two positions in octave bands, three at least and six at most | 6 positions for a 9,5 dB spread, capped at six | 6 positions for 9.5 dB | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11957:1996 6.7 | The internal noise level is corrected for the background only while the margin lies between 6 dB and 10 dB | margin 8 dB = 59.2506 dB; margin 15 dB = 60 dB | margin 8 dB = 59.2506 dB; margin 15 dB = 60 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 11957:1996 clause 10 | The stated uncertainty needs a room at least 20 times the volume of the cabin, and the loudspeaker method in situ adds about 2 dB | volume ratio = 20; excess deviation = 2 | volume ratio = 20; excess deviation = 2 | exact | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>In-situ measurement of silencers, screens and barriers</b>: 100% (22/22)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 11820:1996 Table 1 | The stepped background correction, dB to subtract, over the eight printed rows | 3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB | 3 dB = 3 dB; 4 dB = 2 dB; 5 dB = 2 dB; 6 dB = 1 dB; 7 dB = 1 dB; 8 dB = 1 dB; 9 dB = 0.5 dB; 10 dB = 0.5 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Table 1 | The printed table is a rounded version of the logarithmic subtraction and departs from it by under 0,35 dB | under 0,35 dB over the eight rows | largest departure 0.349 dB | 0.3491 dB | 100 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Eq. (19) | The transmission loss is unmoved by a level shift common to both sides of the silencer | 0 dB (+/-0 dB) | max absolute difference 0.000 dB over 6 bands | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Eqs. (20) and (22) | The temperature field correction is 5 lg of the ratio of the two absolute temperatures, and vanishes when they agree | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Eqs. (6), (10) and (12) | A quarter of the Sabine absorption as an area, 6 ln 10 V / (c T), at the printed c = 340 m/s | 10.1585 m² (+/-0 m²) | 10.1585 m² | 0 m² | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Eqs. (15) and (16) | The upstream distance is 1,5 equivalent diameters and the downstream one is 12 sqrt(S_d) less 10 sqrt(S_f) | 0 m (+/-0 m) | 0 m | 0 m | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Eq. (29) | The gas density with the printed R/M = 287 for air and p_amb = 100 kPa | 1.1892 kg/m³ (+/-0 kg/m³) | 1.1892 kg/m³ | 0 kg/m³ | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Figure 1 and 9.1.3 | The twenty installations, sixteen for transmission and four for insertion, with the area rule each of them takes | 20/20 installations | 20/20 installations | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 9.1.5 | The permitted conversion folds three one-third-octave levels into their octave on the energy, and is not the fold of a level difference | the energy fold, distinct from the ISO 11691 one | 1/1 readings of 9.1.5 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11821:1997 5.7 | The background correction at the two ends of the 6 dB to 10 dB window | 1,2563 dB at 6 dB and 0,4576 dB at 10 dB | 1.2563 dB and 0.4576 dB | 0 dB | 5 % | ![Pass][cv-pass] Pass |
+| ISO 11821:1997 5.5.2 | The four microphone distances are a quarter, a half, once and twice the screen height, with a floor of 1 m | h/4 = 2 m; h/2 = 4 m; h = 8 m; 2h = 16 m | h/4 = 2 m; h/2 = 4 m; h = 8 m; 2h = 16 m | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11821:1997 3.10 and 5.2.2 | The directivity index is the logarithmic mean of twelve positions less the position, so a position under the mean reads positive | 9.6614 dB (+/-0 dB) | 9.6614 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11821:1997 5.6.2.1 and clause 6 | The impulse repeat rules and the one uncertainty number the document prints | repeats = 3; repeat again = 3; invalid = 5; deviation = 2 | repeats = 3; repeat again = 3; invalid = 5; deviation = 2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 Table 3 | The background correction to add, over the two printed rows | 4 dB = -2 dB; 5 dB = -2 dB; 6 dB = -1 dB; 7 dB = -1 dB; 8 dB = -1 dB; 9 dB = -1 dB | 4 dB = -2 dB; 5 dB = -2 dB; 6 dB = -1 dB; 7 dB = -1 dB; 8 dB = -1 dB; 9 dB = -1 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11820:1996 Table 1 / ISO 10847:1997 Table 3 | The two stepped tables disagree at a 9 dB margin, so they are two tables and not one helper | ISO 11820 subtracts = 0.5 dB; ISO 10847 adds = -1 dB | ISO 11820 subtracts = 0.5 dB; ISO 10847 adds = -1 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 8.2.1 and 8.2.2 | The indirect method returns exactly what the direct one returns when the receiver is of the same kind in both campaigns | 0 dB (+/-0 dB) | max absolute difference 0.000 dB over both receiver kinds | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 8.2.2 | Mixing a hemi-free-field receiver with a facade one moves the answer by exactly the 6 dB of the pressure doubling | 6 dB (+/-0 dB) | 6 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 8.2.1 | A source that changed output between the two campaigns is normalised away by the reference position | 0 dB (+/-0 dB) | max absolute difference 0.000 dB for a 4 dB source gain | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 Table 1 | The wind classes, with the upwind one existing only over short distances and read as negative | 4/4 readings of Table 1 | 4/4 readings of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 6.3.1 | The short-distance ratio is strict at 0,1, and the after case needs both of its two inequalities | 0,1 exactly is not short, and both halves must hold | 1/1 readings of 6.3.1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 7.2.2 and 8.1.2 a) | The reference microphone clears the barrier top by 1,5 m, or takes the 10 degree rule for a source under 15 m away | 0 m (+/-0 m) | 0 m | 0 m | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 3.10 | The far field falls 6 dB per doubling for a point source and 3 dB for an incoherent line source | 6,02 dB and 3,01 dB, printed rounded to 6 and 3 | 6 dB and 3 dB | 0.0206 dB | 98 % | ![Pass][cv-pass] Pass |
 
 </details>
 

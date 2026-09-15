@@ -75,6 +75,8 @@ from .devices import (
     _d_residual_intensity_check,
     _d_reverberation_power,
     _d_room_to_room,
+    _d_screen_in_situ,
+    _d_silencer_in_situ,
     _d_silencer_iso7235,
     _d_surfaces,
     _d_sweep_bench,
@@ -87,6 +89,7 @@ from .devices import (
 from .environment import (
     _d_atmospheric_refraction,
     _d_barrier_four_paths,
+    _d_barrier_in_situ,
     _d_cnossos_rail,
     _d_cnossos_road,
     _d_env_positions,
@@ -906,6 +909,21 @@ DIAGRAMS = {
         _d_silencer_iso7235,
         "How a silencer is measured: the ISO 7235 substitution method",
         710,
+    ),
+    "diagram_silencer_in_situ": (
+        _d_silencer_in_situ,
+        "How a silencer is measured where it stands (ISO 11820)",
+        610,
+    ),
+    "diagram_screen_in_situ": (
+        _d_screen_in_situ,
+        "How a removable screen is measured where it stands (ISO 11821)",
+        656,
+    ),
+    "diagram_barrier_in_situ": (
+        _d_barrier_in_situ,
+        "How an outdoor barrier is measured once it is built (ISO 10847)",
+        750,
     ),
     "diagram_open_end_solid_angles": (
         _d_open_end_solid_angles,

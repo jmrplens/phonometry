@@ -6232,6 +6232,70 @@ dos ediciones con las mismas entradas y en el mismo orden.
   nombra el margen que realmente se alcanzó.
 - **Estado:** sin comunicar.
 
+## ISO 10847:1997, tabla 1 (una clase a contraviento con el extremo inferior positivo)
+
+- **Ubicación:** la tabla 1, "Class of wind conditions", en la página impresa
+  6 (página 10 del PDF).
+- **Lo impreso:** el bloque de distancias cortas de la tabla enumera tres
+  clases frente a la componente vectorial de la velocidad del viento en m/s:
+  "Downwind + 1 to + 5", "Calm − 1 to + 1" y "Upwind + 1 to − 5".
+- **El problema:** "+ 1 to − 5" no es un intervalo. Sus dos extremos van al
+  revés, y el inferior es el valor en el que empieza la clase a favor del
+  viento dos filas más arriba, así que leída al pie de la letra la clase a
+  contraviento empezaría dentro de la de a favor y retrocedería a través de la
+  de calma. El carácter defectuoso es el signo del extremo inferior: la clase
+  a contraviento es − 1 a − 5, el espejo de la fila a favor, que es además lo
+  que significa "upwind" para una componente que 6.3.1 define positiva a lo
+  largo de la línea fuente-receptor.
+- **Evidencia:** las tres filas de distancias cortas leídas juntas en la
+  página impresa 6, frente al bloque de todas las distancias que tienen
+  encima, que imprime esas mismas filas a favor y en calma y ninguna a
+  contraviento. Verificado en la página 10 del PDF (página impresa 6) de la
+  ISO 10847:1997.
+- **Consecuencia para las tablas de la propia norma:** ninguna. Ninguna otra
+  cláusula calcula con el intervalo.
+- **Comportamiento de la biblioteca:**
+  [`WIND_CLASSES`](../src/phonometry/environment/propagation/barrier_in_situ.py)
+  lleva la clase a contraviento como − 5 m/s a − 1 m/s y
+  [`wind_class`](../src/phonometry/environment/propagation/barrier_in_situ.py)
+  la devuelve sólo para componentes negativas y distancia corta, que es donde
+  la tabla la imprime.
+- **Estado:** no reportada.
+
+## ISO 10847:1997, 8.2.2 (una prima a la que se le piden dos significados)
+
+- **Ubicación:** las dos ecuaciones de diferencia de niveles de 8.2.2 y la
+  lista de símbolos que las sigue, en la página impresa 11 (página 15 del
+  PDF).
+- **Lo impreso:** $\Delta L_B = L_{\mathrm{ref},B} - (L_{r,B} - C_r)$ y
+  $\Delta L_A = L_{\mathrm{ref},A} - (L_{r,A} - C'_r)$, y a continuación
+  "$C_r$ and $C'_r$ are correction factors for the type of receiver position;
+  for "hemi free-field": $C_r$ = 0 dB; for "on reflecting surfaces": $C'_r$ =
+  6 dB".
+- **El problema:** la prima carga con dos significados en la misma cláusula.
+  En las ecuaciones separa la campaña "antes" de la "después", porque todos
+  los demás símbolos que aparecen en ellas llevan el subíndice B o A. En las
+  definiciones separa un tipo de posición de receptor del otro. Tomadas al pie
+  de la letra, las dos lecturas juntas componen una regla que no dice ninguna
+  otra parte de la norma: que la campaña "antes" se hace en campo semilibre y
+  la "después" contra una superficie reflectante.
+- **Evidencia:** las dos ecuaciones y la lista de símbolos en la página
+  impresa 11, resueltas por la NOTA que cierra esa misma cláusula, "It is
+  preferable to choose receiver positions where corrections $C_r$ and $C'_r$
+  are essentially the same", que sólo es un consejo si la corrección de cada
+  campaña sigue a su propia posición de receptor en lugar de venir fijada por
+  la campaña. Verificado en la página 15 del PDF (página impresa 11) de la
+  ISO 10847:1997.
+- **Consecuencia para las tablas de la propia norma:** ninguna.
+- **Comportamiento de la biblioteca:**
+  [`measured_insertion_loss_indirect`](../src/phonometry/environment/propagation/barrier_in_situ.py)
+  toma `receiver_type_before` y `receiver_type_after`, cada uno
+  'hemi_free_field' o 'reflecting_surface' y ambos con el primero por defecto,
+  y saca su corrección de `RECEIVER_CORRECTIONS_DB`, que lleva los 0 dB y 6 dB
+  impresos. El resultado arrastra las dos correcciones para que un informe
+  muestre cuál se aplicó a cada campaña.
+- **Estado:** no reportada.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la
@@ -6416,3 +6480,27 @@ concordancia con las fuentes publicadas:
   implementa tal como está impresa y que fija
   `test_eq8_omnidirectional_shields` en
   [`tests/emission/test_sound_power_in_duct.py`](../tests/emission/test_sound_power_in_duct.py).
+
+- **Tabla 1 de la ISO 11820:1996 y tabla 3 de la ISO 10847:1997, dos
+  correcciones de fondo que no coinciden:** las dos tablas toman el margen
+  entre el nivel con la fuente y el nivel sin ella y responden con una
+  corrección en decibelios, y responden distinto. La ISO 11820 rechaza por
+  debajo de 3 dB y luego quita 3, 2, 2, 1, 1, 1, 0,5 y 0,5 dB hasta un margen
+  de 10 dB; la ISO 10847 rechaza por debajo de 4 dB y luego quita 2, 2, 1, 1,
+  1 y 1 dB hasta ese mismo margen. Con un margen de 9 dB la primera quita
+  0,5 dB y la segunda 1 dB. También difieren los signos, porque la columna de
+  la ISO 11820 dice "corrections to be subtracted from sound pressure level
+  measured with sound source operating" e imprime sus valores en positivo,
+  mientras que la de la ISO 10847 dice "correction to be made to the measured
+  sound pressure level" y los imprime en negativo. Ninguna de las dos es una
+  errata: son dos tabulaciones, de dos comités, de la misma resta física,
+  redondeadas de distinta manera y escritas desde extremos opuestos. Leídas en
+  la página 13 del PDF (página impresa 5) de la EN ISO 11820:1996 y en la
+  página 11 del PDF (página impresa 7) de la ISO 10847:1997. La biblioteca las
+  mantiene separadas como
+  [`silencer_background_correction_db`](../src/phonometry/noise_control/silencer_in_situ.py)
+  y
+  [`barrier_background_correction_db`](../src/phonometry/environment/propagation/barrier_in_situ.py),
+  cada una con su convenio de signo y su propio rechazo, y una comprobación de
+  conformidad las enfrenta en el margen en el que se separan. No hay que
+  fundirlas en un único auxiliar.

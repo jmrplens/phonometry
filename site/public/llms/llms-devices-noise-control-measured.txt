@@ -1,0 +1,1066 @@
+# phonometry: Measuring a device that is already built
+
+Part of https://jmrplens.github.io/phonometry/llms.txt. Full text of the pages in this area.
+
+---
+
+<!-- source: docs/devices/noise-control/silencer-measurement.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/ -->
+Source: https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/
+
+# Measuring a silencer (ISO 7235 and ISO 11691)
+
+Everything a silencer model computes comes from geometry. The figure a
+supplier publishes does not. It is an **insertion loss measured by
+substitution**: the same rig run twice, once with a plain duct where the
+silencer will go and once with the silencer in it, and the difference between
+the two receiving-side levels, band by band. Reading a catalogue without
+knowing that is how a computed 8,9 dB and a published "25 dB" end up in the
+same sentence.
+
+Two standards describe the measurement, and they differ in scope as much as
+in what they ask of the laboratory. **ISO 7235:2003** is the full procedure,
+with a modal filter decoupling the source, a qualified receiving side and a
+stated measurement uncertainty, and it covers silencers, air-terminal units
+and other duct elements, with flow and without. **ISO 11691:1995** is six
+printed pages carrying two equations, and it measures silencers and nothing
+else, without flow and with none in the answer, up to a design velocity of
+15 m/s. A measurement that needs flow, or an object that is not a silencer,
+is outside ISO 11691 and belongs to ISO 7235.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_measurement.svg" alt="Three panels. Left: two groups of bars, one for a silencer that is flat across an octave and one whose worst third leaks, each showing the three one-third-octave insertion losses as pale bars, the octave that Equation (2) gives as a filled bar and the plain mean of the decibels as a dashed line; in the flat group the two agree and in the leaky one the octave sits twelve decibels under the mean. Middle: the open-end transmission loss of a 350 mm duct against frequency on a logarithmic axis, drawn for the three distinct solid angles of Table B.1 and for Long's rival closed form, all falling from about fifteen decibels at 50 Hz to nothing above 2 kHz, with the free-space curve the highest of the three. Right: the reproducibility standard deviations of both standards as step functions of frequency, the insertion-loss column dipping to one decibel in the middle of the range, the transmission-loss column flat at three, the sound-intensity column falling to one and stopping at 5 kHz, and the survey method stepping from two to three" width="100%"></picture>
+
+*The three things a measurement report carries beyond the numbers themselves:
+how its octaves were folded, what its duct mouth was keeping in, and how far
+any of it can be trusted.*
+
+## 1. One subtraction, two numberings
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_iso7235.svg" alt="Two stacked runs on one duct axis. In the upper run, series one, a sealed and lined loudspeaker box feeds a modal filter, then a transition, then the test object, then a test duct with an anechoic wedge termination carrying three microphone positions on a line inclined to the duct axis. The lower run, series two, is identical except that the test object is replaced by an empty substitution duct. Dashed qualification planes are marked at the test object and at the receiving duct. Below, the insertion loss is given as the difference of the two receiving-side levels, third octave by third octave, with the modal-filter attenuation, the reflection-coefficient limit, the substitution-duct tolerance and the signal-to-background rule listed as the standard's own clause numbers" width="92%"></picture>
+
+*The two series are the whole method: everything else in both standards is
+about making sure nothing but the test object changed between them.*
+
+The measurement is the same in both:
+
+$$
+D_\mathrm{i} = L_{W\mathrm{II}} - L_{W\mathrm{I}}
+$$
+
+with $\mathrm{I}$ the series that had the test object and $\mathrm{II}$ the
+series that had the substitution duct. ISO 11691 writes the identical thing
+as $D = L_{p1} - L_{p2}$, and numbers the two series **the other way round**:
+its 1 is the substitution duct. Two standards for one measurement, with
+opposite subscripts, is exactly the sort of thing that gets entered backwards,
+so the arguments here are named for what was in the duct rather than for
+either numbering.
+
+```python
+from phonometry import noise_control
+
+substitution = [88.0, 90.0, 91.0, 92.0, 92.0, 91.0]   # dB, empty duct
+with_silencer = [84.0, 83.0, 79.0, 72.0, 66.0, 63.0]  # dB, silencer fitted
+
+d_i = noise_control.substitution_insertion_loss(substitution, with_silencer)
+print(d_i)                        # [ 4.  7. 12. 20. 26. 28.] dB
+```
+
+If the receiving room's absorption moved between the two series, that
+difference is not yet the insertion loss. Clause 6.3 puts it right with
+$10\lg(T_2/T_1)$, where $T_2$ is the reverberation time measured with the
+test object installed. A room that got **deader** while the silencer was in it
+was flattering the silencer, and the correction takes that back:
+
+```python
+corrected = noise_control.substitution_insertion_loss(
+    substitution, with_silencer, reverberation_times=(2.1, 1.8),
+)
+print(corrected.round(2))         # [ 3.33  6.33 11.33 19.33 25.33 27.33] dB
+```
+
+Clause 6.3 also allows $T_2 = T_1$ outright when the test object sits outside
+the room, and then the pair can be left out.
+
+## 2. What the number is not
+
+It is not a transmission loss. It is measured against a particular
+substitution duct in a particular rig, and it carries that rig with it in two
+ways worth naming.
+
+The first is the **limiting insertion loss**: sound flanks along the duct
+walls rather than through the silencer, and no arrangement can measure past
+what its own flanking lets round. ISO 7235 has the laboratory measure that
+ceiling with the substitution duct acoustically blocked and record it as a
+function of frequency (7.4). A very large catalogue figure is a claim about
+the test arrangement as much as about the device.
+
+The second is the receiving side, which decides how much of the sound the
+microphones see at all. ISO 7235 allows three (5.2.4): a reverberation room
+to ISO 3741 qualified at least down to the 125 Hz one-third octave, which is
+preferred; a test duct with an anechoic termination whose reflection
+coefficient is no greater than 0,3; or essentially free-field conditions at
+the open end. ISO 11691 keeps only the reverberation room and the free-field
+alternatives, and asks for 3,5 m of duct on each side of the silencer.
+
+None of that is arithmetic, which is why the rest of this page is short. The
+arithmetic that remains is the part a reader can get wrong on paper.
+
+## 3. Octaves are folded on the energy, not on the decibels
+
+A measurement is made in one-third octaves and often reported in octaves.
+ISO 11691 Equation (2) says how, and it is not an average of the three
+numbers:
+
+$$
+D_\mathrm{oct} = -10 \lg\left[\frac{1}{3}\left(
+   10^{-D_1/10} + 10^{-D_2/10} + 10^{-D_3/10}
+\right)\right]\ \text{dB}
+$$
+
+The average is taken on what the silencer **lets through**. That matters
+because a silencer is rarely flat across an octave, and the band that leaks
+decides the answer:
+
+```python
+thirds = [4.0, 7.0, 12.0, 20.0, 26.0, 28.0]
+print(noise_control.octave_insertion_loss(thirds).round(2))
+#                                 # [ 6.57 23.28] dB
+```
+
+The plain arithmetic means of the same two groups are 7,67 and 24,67 dB, so
+reading the decibels rather than the energy would have overstated both
+octaves by about a decibel. On a steeper silencer the gap is larger: three
+thirds of 30, 30 and 5 dB give **9,7 dB** over the octave, not 21,7. Almost
+all the transmitted sound is coming through the one band that does not work,
+and Equation (2) is written out rather than described precisely so that this
+cannot be got wrong.
+
+ISO 11691 states the assumption it rests on: the sound pressure levels of the
+three one-third octaves are taken to be equal in the series run with the
+substitution duct, which is what lets their energies be weighted equally.
+
+## 4. Three microphone positions, or five
+
+In a test duct the spatial average comes from at least three microphone
+positions equally spaced on a line across the duct, spanning at least a
+quarter wavelength of the band, about half way along the duct. Three is
+enough only if the three agree. ISO 7235 Table 6 says how closely, and if the
+highest and lowest differ by more than that, five positions shall be used:
+
+```python
+levels = [70.0, 74.0, 79.0]       # dB at the three key positions
+print(noise_control.microphone_spread_limit(125.0))     # 7.0 dB
+print(noise_control.microphone_positions_required(levels, 50.0))    # 3
+print(noise_control.microphone_positions_required(levels, 125.0))   # 5
+```
+
+The same three levels are acceptable at 50 Hz, where the limit is 10 dB, and
+not at 125 Hz, where it is 7. The limit falls with frequency because a duct
+at low frequency has a standing-wave pattern that three points sample badly,
+and at high frequency does not.
+
+One thing to know about Table 6: its rows read 50, 63, 80, 100, 125 and then
+`> 160` Hz, so the **160 Hz one-third octave belongs to no row** and is given
+no limit at all. Every other row names a single band, and 160 Hz is a
+one-third-octave centre like the rest, so it is read here as belonging to the
+last row. The gap is in the [errata
+register](https://jmrplens.github.io/phonometry/reference/errata/).
+
+## 5. How repeatable any of this is
+
+Both standards answer, and neither answer is flattering.
+
+ISO 11691 says outright that exact information on the precision of its method
+cannot be given, that interlaboratory tests would be needed for a real
+reproducibility standard deviation, and that this is what makes it a survey
+standard. Its Table 1 offers an estimate only: 2 dB up to the 1,25 kHz
+one-third octave and 3 dB above it.
+
+ISO 7235 Table 7 has three columns, and the disagreement between them is the
+useful part:
+
+```python
+for band in (50.0, 250.0, 1000.0, 4000.0):
+    print(band, [
+        noise_control.measurement_reproducibility(band, quantity=q)
+        for q in ("insertion_loss", "transmission_loss", "intensity")
+    ])
+# 50.0   [1.5, 3.0, 3.0]
+# 250.0  [1.0, 3.0, 1.5]
+# 1000.0 [2.0, 3.0, 1.0]
+# 4000.0 [3.0, 3.0, 1.0]
+```
+
+Insertion loss is measured best in the middle of the range and worst at the
+top; the sound-intensity route runs the other way; transmission loss is a
+flat 3 dB everywhere. Clause 7.9 explains why: only the insertion-loss column
+came from tests, on 1 m long parallel-baffle silencers, and the other two rest
+on experience. A column that does not move with frequency is the shape of an
+estimate, not of a measurement.
+
+What goes on the report is twice the table value, for a coverage probability
+of 95 %:
+
+```python
+print(noise_control.measurement_expanded_uncertainty(250.0))    # 2.0 dB
+print(noise_control.measurement_expanded_uncertainty(4000.0))   # 6.0 dB
+```
+
+A silencer quoted at 25 dB in the 4 kHz band is being quoted to within 6 dB.
+
+## 6. The scope ISO 11691 draws round itself
+
+The survey method is deliberately narrow, and its limits are published rather
+than implied. The design velocity may not exceed 15 m/s, because the method
+runs the rig with no flow at all and so includes none of the self-generated
+noise. It is written for circular silencers from 80 mm to 2 m in diameter, or
+rectangular ones of comparable area. And the test ducts have to be close in
+cross section to what they feed, between 0,6 and 1,7 times the area of the
+silencer or the substitution duct (4.5). Outside that, the joints reflect more
+than the method allows for, and the library says so:
+
+```python
+print(noise_control.substitution_area_ratio(0.0962, 0.0962))    # 1.0
+print(noise_control.SURVEY_MAX_VELOCITY_M_S)                    # 15.0
+print(noise_control.SURVEY_AREA_RATIO_RANGE)                    # (0.6, 1.7)
+```
+
+## 7. The open end, and the two quantities that need it
+
+A duct radiating into a room does not hand the room everything that reaches
+its mouth. Well below the frequency at which the mouth is a wavelength across
+it is a poor radiator, and most of the energy turns round and travels back up
+the duct. Annex B.3 puts a number on it:
+
+$$
+D_\mathrm{td} = 10 \lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f \sqrt{S}}{c}\right)^{2}}\right]\ \text{dB}
+$$
+
+The group $4\pi f \sqrt{S} / c$ is the mouth measured in wavelengths, and
+$\Omega$ is the solid angle it radiates into. A 350 mm duct flush with a wall
+holds back 11 dB at 63 Hz and 0,05 dB at 2 kHz, which is nothing:
+
+```python
+import numpy as np
+
+bands = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0])
+area = 0.0962                     # m2, a 350 mm circular duct
+
+d_td = noise_control.open_end_transmission_loss(bands, area)
+print(d_td.round(2))              # [11.23  6.14  2.5   0.77  0.21  0.05] dB
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_open_end_solid_angles.svg" alt="Five cells in a row, one for each mounting configuration of ISO 7235 Table B.1. In each, a small square terminal sits at the origin of a shaded wedge that is the solid angle read in section: a half circle against a wall for A, a quarter circle in the corner of a wall and a floor for B, a full circle standing free for C, a half circle above a floor for D, and a full circle again for E. Below each, the solid angle: two pi, pi, four pi, two pi and four pi. Under the row, the formula written both as ISO 7235 prints it and as ISO 5135 prints it, a note that the two are one formula with the same five values, and the conclusion that the bigger the solid angle the more the mouth keeps in" width="100%"></picture>
+
+*The solid angle is the only term of Equation (B.3) a laboratory chooses
+rather than measures, and the five choices are the same in both standards.*
+
+The solid angle is Table B.1, and the same five values are Table 1 of
+ISO 5135. It works the way round that surprises people: $\Omega$ sits in the
+numerator, so a duct ending in the middle of the room keeps **more** sound in
+than one flush with a wall, not less. A baffle is what makes an opening a good
+radiator, because it stops the pressure relieving round the rim of the mouth,
+and an unbaffled end of the same size sends more of the sound back up the
+duct:
+
+```python
+free = noise_control.open_end_transmission_loss(
+    bands, area, solid_angle_sr=noise_control.RADIATION_SOLID_ANGLES["C"],
+)
+print(free.round(2))              # [14.07  8.59  4.08  1.43  0.4   0.1 ] dB
+```
+
+Three more decibels at 63 Hz, and the reflection coefficient rises with it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.gif" alt="Animation: a 0.20 m duct flush in a rigid screen, radiating into the half space beyond it, driven at 100 Hz and at 800 Hz one above the other. At 100 Hz the duct fills with a standing wave and only a faint field escapes past the screen; the envelope beside it swings between a maximum and a minimum that give a reflection coefficient of 0.71. At 800 Hz the duct carries a nearly travelling wave and strong circular fronts leave the mouth into the half space, with an envelope that ripples only slightly and gives 0.19" width="640" height="360" loading="lazy"></picture>
+
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_open_end.webm)
+
+*Both carriers are below the 857 Hz cut-on of a duct that wide, so the field
+inside it is the plane wave the whole of ISO 7235's duct arithmetic assumes.
+The reflection coefficients read off the standing wave are the simulated
+geometry's own, and not Equation (B.4): that closed form is a piston
+approximation for a circular mouth, where this is a slit in a screen. What
+the two share is the mechanism, and it is the mechanism that decides whether
+a level measured in a room is the level in the duct behind it.*
+
+Equation (B.4) says the same fact the other way round, as a pressure
+reflection coefficient, and the two close exactly on the energy:
+$D_\mathrm{td} = -10\lg(1 - r^2)$ at every frequency, area and solid angle.
+That identity is the conformance anchor for both, because neither is printed
+with a worked value. It also has a use of its own: 5.2.4 qualifies a test
+duct as anechoic only below $r = 0{,}3$, which this bare open end reaches
+somewhere between 500 Hz and 1 kHz.
+
+```python
+r = noise_control.open_end_reflection_coefficient(bands, area)
+print(r.round(3))                 # [0.962 0.87  0.662 0.404 0.215 0.11 ]
+```
+
+The library carries a second closed form for the same physics, Reynolds' as
+given by Long, in
+[`end_reflection_loss_closed_form`](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/).
+It raises the same argument to 1,88 rather than to 2, and for a circular duct
+in free space the two read $10\lg[1 + (c/\pi f d)^2]$ against
+$10\lg[1 + (c/\pi f d)^{1,88}]$. They agree closely where the argument is
+near 1 and part company at the ends of the range.
+
+Two quantities need it. Equation (6) turns the measured insertion loss of an
+air-terminal unit into its transmission loss by putting back what the mouth
+was keeping in anyway, so the two are the same number at the top of the range
+and eleven decibels apart at the bottom:
+
+```python
+d_i = np.array([4.0, 7.0, 12.0, 20.0, 26.0, 28.0])
+print(noise_control.measured_transmission_loss(d_i, d_td).round(2))
+#                                 # [15.23 13.14 14.5  20.77 26.21 28.05] dB
+```
+
+And Equation (7) makes the flow noise a sound power,
+$L_W = \overline{L_p} + D_\mathrm{td} + C$, where $C$ is the ISO 3741 level
+difference between the power radiated into the room and the average pressure
+in it. Clause 6.4 is explicit that $\overline{L_p}$ goes in **without** a
+background correction: the two series are reported separately and the reader
+subtracts them.
+
+## 8. Where higher-order modes start
+
+The modal filter between the source and the test object exists to stop
+higher-order modes reaching the silencer, and its requirement steps at the
+frequency where those modes can propagate in the connected ducts: at least
+3 dB of longitudinal attenuation of the fundamental at the low-frequency end,
+and at least 5 dB above that frequency (5.2.2.3). NOTE 2 prints where it is:
+
+```python
+print(round(noise_control.modal_filter_cut_on(diameter_m=0.4), 1))          # 505.9 Hz
+print(round(noise_control.modal_filter_cut_on(larger_dimension=0.5), 1))  # 343.0 Hz
+```
+
+The rectangular form, $0{,}5\,c/H$, is exact: the first mode of a rigid
+rectangular duct is a half wavelength across the larger dimension. The
+circular one, $0{,}59\,c/d$, is rounded. The exact coefficient is the first
+zero of $J_1'$ over $\pi$, which is 0,58607, so Equation (4) sits 0,67 %
+high: on the 0,4 m duct of the ISO 11691 sound source that is 505,9 Hz where
+[`circular_duct_cut_on`](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/) gives
+502,6 Hz. Three and a half hertz does not matter for choosing a modal filter,
+and it is worth knowing which of the two numbers is the physics.
+
+## 9. What the object costs to push air through
+
+The third thing ISO 7235 measures has nothing to do with sound. A silencer
+that works and costs a fan half its pressure is not a good silencer, so 6.5
+measures the **total pressure loss coefficient**, and the whole point of the
+coefficient rather than the loss is that a loss means nothing without the flow
+it was measured at.
+
+Start with the air. Equation (10) is the ideal gas law with the standard's own
+constants, and the static pressure it takes is a gauge pressure against the
+ambient, so the two add:
+
+```python
+rho = noise_control.normal_air_density(200.0, 101325.0, 20.0)
+print(round(rho, 4))              # 1.2073 kg/m3
+
+q_v = noise_control.volume_flow_rate(1.2, rho)
+print(round(q_v, 4))              # 0.9939 m3/s
+```
+
+ISO 7235 prints $R = 287$ and writes the absolute temperature as
+$\theta + 273\ ^\circ\text{C}$, neither of which is the accurate figure. The
+offset alone puts the density 0,051 % high at 20 °C, and the gas constant adds
+0,017 % to that, for 0,069 % in all. It does not cancel: the same density is
+in the dynamic pressure of both test series, so the coefficient is **scaled**
+by that one factor rather than shifted, and comes out 0,069 % low. That is far
+under the uncertainty of a pressure-loss test, and using the printed constants
+is what reproduces a result computed to the standard, so the library keeps
+both. It is recorded in the [errata
+register](https://jmrplens.github.io/phonometry/reference/errata/) as
+a property of the source rather than as a defect.
+
+Equation (9) rather than (8) is used when the flow meter and the test object
+are far enough apart in temperature or pressure that their density ratio
+leaves 0,98 to 1,02: outside that window the meter is not measuring the flow
+the test object sees.
+
+The velocity head is Equation (13), and the coefficient is the loss divided by
+it:
+
+```python
+p_d1 = noise_control.dynamic_pressure(q_v, 0.0962, rho)
+print(round(p_d1, 2))             # 64.44 Pa
+
+delta_p_t = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 0.0962)
+print(round(noise_control.pressure_loss_coefficient(delta_p_t, p_d1), 3))
+#                                 # 0.698
+```
+
+That number belongs to the object rather than to the test point, at least to
+the extent the flow is dynamically similar: a loss grows as the square of the
+velocity and so does the head it is divided by, so the algebra returns the
+same coefficient at twice the flow. Real flow is not exactly similar, because
+doubling the rate doubles the Reynolds number too, and that is the reason
+6.5.2 measures at five rates and averages rather than trusting one. The drift
+over a test range is small, and it is not zero.
+
+Equation (12) is the part worth reading twice. Measuring static pressures on
+both sides is not enough when the two sides are different sizes, because an
+object that widens the duct converts velocity head back into static pressure
+and a static difference alone would credit it with a recovery that is only
+bookkeeping. The bracket $1 - (S_1/S_2)^2$ puts it back, and the NOTE to
+Equation (14) says what usually happens to it: as a rule $S_1 = S_2$, and it
+vanishes. Where it does not, it is not small:
+
+```python
+widening = noise_control.total_pressure_loss(45.0, p_d1, 0.0962, 2 * 0.0962)
+print(round(noise_control.pressure_loss_coefficient(widening, p_d1), 3))
+#                                 # 1.448, from the same 45 Pa of static loss
+```
+
+## 10. The substitution trick, again
+
+The fundamental method of 6.5.2.2 measures the coefficient the way the
+acoustic half measures insertion loss: run the rig with the test object, run
+it again with the substitution duct, and the difference belongs to the object.
+The computational route of 6.5.2.2.3 does the subtraction on the coefficients
+rather than on the pressures, which means the two series need share neither
+their flow rates nor even their number of points:
+
+```python
+import numpy as np
+
+heads = np.array([20.0, 40.0, 60.0, 80.0, 100.0])   # Pa, five airflow rates
+with_object = 2.5 * heads
+without = 0.6 * heads
+
+zeta = noise_control.average_pressure_loss_coefficient(
+    with_object, heads, without, heads,
+)
+print(round(zeta, 3))             # 1.9
+```
+
+Five rates per series, spread evenly over the range, and the lowest has to
+produce more than 10 Pa so that the smallest number in the average is still a
+measurement rather than the resolution of the manometer. The library says so
+on both counts: `average_pressure_loss_coefficient` warns below five points,
+and `pressure_loss_coefficient` warns on a loss of 10 Pa or less, the
+boundary included, because the clause reads *greater than*.
+
+What the flow has to be before any of that counts is a matter of geometry.
+The upstream duct is straight for five equivalent diameters or two metres,
+whichever is greater, so that the velocity profile has settled; it must be
+uniform to ±10 % of the mean over the section, excluding the 15 mm nearest the
+walls, surveyed ten points along each of two perpendicular axes about
+$1{,}5\,d_e$ upstream. The two length rules cross at a 0,4 m equivalent
+diameter:
+
+```python
+print(round(noise_control.upstream_straight_length(0.0962), 2))   # 2.0 m
+print(round(noise_control.upstream_straight_length(0.5), 2))      # 3.99 m
+```
+
+## 11. The third standard, and the formula it shares
+
+ISO 5135:1999 measures something else again: the sound power an air-terminal
+device, air-terminal unit, damper or valve radiates, determined in a
+reverberation room to ISO 3741. What a designer needs is not that but what
+the device puts into the duct behind it, and Equation (1) is the step between
+them:
+
+$$
+L_{W\mathrm{duct}} = L_W + \Delta L_\mathrm{r}
+$$
+
+The correction $\Delta L_\mathrm{r}$ is Equation (2) of ISO 5135, and it is
+worth writing both printings side by side:
+
+$$
+\Delta L_\mathrm{r} = 10\lg\left[1 +
+   \left(\frac{c}{4\pi f}\right)^{2}\frac{\Omega}{S}\right]
+\qquad
+D_\mathrm{td} = 10\lg\left[1 +
+   \frac{\Omega}{\left(\dfrac{4\pi f\sqrt{S}}{c}\right)^{2}}\right]
+$$
+
+Expand either and both become $10\lg[1 + \Omega c^2 / (16\pi^2 f^2 S)]$.
+They are one formula, their two solid-angle tables agree entry for entry, and
+`open_end_transmission_loss` is both. That is why nothing new appears here for
+the correction itself:
+
+```python
+d_lr = noise_control.open_end_transmission_loss(bands, area)
+lw_room = np.array([58.0, 60.0, 61.0, 59.0, 55.0, 50.0])
+print(noise_control.duct_sound_power_level(lw_room, d_lr).round(2))
+#                                 # [69.23 66.14 63.5  59.77 55.21 50.05] dB
+```
+
+A device measured in a room is understated in the duct by eleven decibels at
+the bottom of the range and by nothing at the top. The NOTE to Table 1 offers
+a way round the correction rather than a second formula for it: fit a
+transmission element to ISO 7235 and no correction is applied at all.
+
+## 12. Reading a level at a duty nobody measured
+
+A device is not tested at the one operating point a designer will use it at.
+ISO 5135 5.5.2 fits a straight line by least squares through the levels
+against $\lg q_V$ when the tests were made at a constant pressure loss
+coefficient, or against $\lg \Delta p_\mathrm{t}$ when they were made at a
+constant flow rate. The same fit serves the band levels and the A-weighted
+one:
+
+```python
+duty = np.array([0.05, 0.1, 0.2, 0.4, 0.8])          # m3/s
+levels = np.array([38.0, 44.5, 50.0, 56.5, 62.0])    # dB(A)
+
+line = noise_control.fit_operating_line(duty, levels)
+print(round(line.slope, 2))               # 19.93 dB per decade
+print(round(line.maximum_deviation, 2))   # 0.3 dB
+print(round(line.level_at(0.3), 1))       # 53.7 dB(A)
+```
+
+Two rules keep that honest, and the library says so on both rather than
+refusing: a fit that is not a straight line is still a fit, and a level read
+past the range is still a number, and what the standard asks is that a report
+be honest about them. The measured points have to sit within 3 dB of the line,
+because past that the levels are not a straight line in this variable and
+reading the line off means nothing. And the line may be extended down to half
+the smallest duty measured and up to twice the largest, and no further, which
+for these five points is 0.025 to 1.6 m³/s. Either one out of range raises a
+`SilencerMeasurementWarning`:
+
+```python
+print(line.valid_range)           # (0.025, 1.6)
+```
+
+Clause 8 k) closes the loop: a report gives the fully corrected levels to the
+nearest half decibel and has to state which of them were extrapolated rather
+than measured directly. `.plot()` draws that distinction, shading the two ends
+of the range that are extrapolation.
+
+## Standards
+
+ISO 7235:2003, ISO 11691:1995 and ISO 5135:1999, read from BS EN ISO 7235:2009,
+BS EN ISO 11691:2009 and BS EN ISO 5135:1999, which endorse them without
+modification. Implemented, from ISO 7235 and ISO 11691: Equation (1) of both
+with the reverberation-time correction of ISO 7235 6.3; the octave fold of
+ISO 11691 Equation (2); ISO 7235 Table 6 and the three-or-five rule of 6.2.1;
+ISO 11691 Table 1 and all three columns of ISO 7235 Table 7, with the coverage
+factor of 7.9; the scope of ISO 11691 1.1 and 4.5; the open-end transmission
+loss and reflection coefficient of Equations (B.3) and (B.4) with the solid
+angles of Table B.1; the transmission loss of Equation (6) and the flow-noise
+sound power of Equation (7); the cut-on frequencies of Equations (4) and (5);
+and the flow half of 6.5, from the gas law of Equations (10), (21) and (22) to
+the substitution average of Equation (18) and the settling length of
+6.5.2.2.1. From ISO 5135: the duct sound power level of Equation (1),
+Equation (2), which is ISO 7235 (B.3) written out again, and the least-squares
+operating line of 5.5.2 with its 3 dB fit limit and its half-to-twice reading
+range. Checked in the [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the gap
+Table 6 leaves at 160 Hz and the two printed gas-law constants are in the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/). Not implemented: the facility requirements
+themselves, the flow measurement of ISO 5167-1, the ISO 3741 determination the
+receiving side is handed to, and ISO 11820, which measures a silencer in situ.
+
+## See also
+
+- [Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/): the reactive
+  four-pole models this measurement is the counterpart of, and the rig it is
+  made on, described in full.
+- [Duct-Borne Noise: Fan to Room](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/):
+  where a measured insertion loss goes once it has been bought.
+- [HVAC Noise the German Way (VDI 2081)](https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/):
+  the splitter-silencer insertion loss predicted from geometry, for comparison
+  with what a laboratory would measure.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the gap Table 6 of ISO 7235
+  leaves at 160 Hz, and the two printed gas-law constants.
+- API reference: [`noise_control.silencer_measurement`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-measurement/).
+- [Industrial noise control](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/):
+  the rival closed form for the end reflection, and the air-terminal
+  corrections a diffuser is selected with.
+
+---
+
+
+<!-- source: docs/devices/noise-control/enclosure-cabin-insulation.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/enclosure-cabin-insulation/ -->
+Source: https://jmrplens.github.io/phonometry/devices/noise-control/enclosure-cabin-insulation/
+
+# Enclosures and cabins measured (ISO 11546, ISO 11957)
+
+A model says what an enclosure should be worth. It takes the transmission loss
+of the panels, subtracts a penalty for the reverberant build-up in the cavity
+and returns an insertion loss. It is a good number and it is not the one a
+buyer can hold anybody to, because it knows nothing about the gap under the
+door, the conduit that was run through the wall afterwards, or the fan that was
+fitted to keep the machine cool.
+
+These three standards measure what was built. The quantity is a **difference of
+two runs**: determine the machine's sound power without the enclosure,
+determine it again with the enclosure in place, and subtract band by band. That
+is Equation (1) of both parts of ISO 11546, and nothing else in either document
+is more complicated than it. The care is all in what "the same determination
+twice" means.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_cabin_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_cabin_insulation.svg" alt="Three panels. Left: two octave-band sound power spectra of the same machine, one measured without the enclosure and falling from ninety-six to eighty-nine decibels, one measured with it and falling from eighty-eight to sixty-three, with the area between them shaded and the insertion loss drawn against a second axis rising from eight decibels at 125 Hz to twenty-six at 2 kHz, annotated with the A-weighted insertion loss of nineteen point three decibels. Middle: the area ratio a room must reach against its mean absorption coefficient, on logarithmic axes, drawn as two straight falling lines, one for the two-decibel environmental correction limit of the precision and engineering methods and one for the seven-decibel limit of the survey methods, with the seven room descriptions of Table C.2 marked on the upper line. Right: a staircase of the loudspeaker positions an in-situ cabin measurement requires against the largest deviation of the apparent insulation between any two of them, flat at three up to three decibels, stepping to four, five and six, and flat at six thereafter, with the region past six decibels shaded to mark where the excess is reported instead" width="100%"></picture>
+
+*The insertion loss is the gap between two runs; the room has to be
+good enough for the method that measured them; and in situ the number of
+source positions is decided by the answer.*
+
+## Two parts, one procedure
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_enclosure_cabin_measurement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_enclosure_cabin_measurement.svg" alt="Two arrangements side by side. On the left, the same machine measured twice on the same dashed measurement surface, once standing free and once inside the enclosure, and the insertion loss is the difference of the two sound powers. On the right, a room driven by a loudspeaker with three microphones in it and an empty cabin inside it with two more, and the insulation is the difference of the two sound pressure levels. A box at the foot carries both equations" width="100%"></picture>
+
+**How the measurement goes.** Pick the base standard first, because Table 1
+decides what the result may be called. Fix the measurement surface and keep it
+for both runs: determine the sound power without the enclosure, fit it without
+moving the machine or the microphones, and determine it again. Where the machine
+cannot be run twice, use the reciprocity method or the artificial source of
+Annex A and say which. For the cabin, drive the room, take the level in it and
+the level inside the empty cabin, and in situ add loudspeaker positions until
+the spread of the answer stops asking for more.
+
+**ISO 11546-1** measures in a laboratory, for a **declaration**: the
+manufacturer's figure, obtained under conditions a buyer can compare across
+suppliers. **ISO 11546-2** measures the same thing **in situ**, for an
+**acceptance**: the enclosure as installed, in the room it was installed in,
+with the machine it was built for. The two share their definitions, their
+equations, their reporting rules and their artificial source word for word.
+What changes is the environment, the base standard the levels come from, and,
+in part 2, an annex that asks whether the room is good enough at all.
+
+```python
+from phonometry import noise_control
+
+bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+without = [96.0, 98.0, 99.0, 97.0, 94.0, 89.0]   # dB, machine alone
+with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, enclosure fitted
+
+res = noise_control.sound_power_insulation(
+    without, with_box, frequencies=bands, band_fraction=1,
+)
+print(res.rounded())                    # [ 8 12 18 23 26 26] dB
+print(round(res.a_weighted_insulation, 1))   # 19.3 dB
+```
+
+The A-weighted number is the single figure a declaration carries. Clause 9.4
+reports every band value rounded to the nearest decibel. Both parts also
+measure a sound pressure insulation at a stated position, Equations (3) and
+(4), through `sound_pressure_insulation`: a different quantity with the same
+arithmetic, belonging to one microphone position, which is why the standard
+makes the position reportable.
+
+## What the method may declare
+
+Table 1 of both parts decides what may be written on the data sheet. Not every
+way of determining a sound power gives a spectrum: a survey-grade determination
+hands back an A-weighted value and nothing per band, so the band insulation
+cannot be declared from it at all.
+
+```python
+for entry in noise_control.applicable_methods(condition="in-situ"):
+    if not entry.band_values:
+        print(entry.base_standard, entry.quantities)
+# ISO 3746 ('D_WA',)
+# ISO 11202 ('D_pA',)
+```
+
+Those two rows exist only in part 2. The laboratory table of part 1 admits no
+survey-grade determination at all, and its own footnote goes further: where a
+standard has a grade 3 variant, ISO 9614-1 and ISO 11204, that variant is
+excluded. A declaration is the one place where the measurement has to be at
+least an engineering one, and Table 1 is where the document says so.
+
+The table also decides which substitute source is available where the machine
+cannot be run. Clause 1 draws the scope around the actual source rather than
+around the substitutes: the part applies to a free-standing enclosure smaller
+than 2 m³ without any restriction, and a larger one may still be measured with
+its actual source while the base standard's own limit on volume is met. The two
+substitutes are the reciprocity method of part 1, 7.2, which puts the enclosure
+in a diffuse field and measures inside it and exists in part 1 only; and an
+artificial source, the tapping machine of Annex A dropped on an undamped steel
+plate, used at several positions and averaged arithmetically, which is the
+standard's own word and not the energy mean used almost everywhere else in this
+library.
+
+## Is the room good enough?
+
+Annex C of part 2 asks the question the emission standards ask backwards. They
+ask what the environmental correction of a room is; the annex asks how much
+room a method needs. Holding the correction at the limit Table C.1 sets and
+solving for the room gives the ratio of the room's boundary surface to the
+measurement surface, which is Figure C.1 in closed form: the curve the annex
+asks the reader to read off by eye.
+
+```python
+verdict = noise_control.test_environment_applicability(
+    base_standard="ISO 3744",
+    mean_absorption_coefficient=0.15,
+    room_surface_area_m2=520.0,
+    measurement_surface_area_m2=14.1,
+)
+print(round(verdict.required_area_ratio, 1))  # 45.6
+print(round(verdict.actual_area_ratio, 1))    # 36.9
+print(verdict.applicable)                     # False
+```
+
+That room cannot carry a precision determination. It can carry a survey one,
+which asks 6,6 rather than 45,6, and the answer that comes back from it is an
+A-weighted value with no spectrum behind it. Reading Table 1 after Annex C is
+how those two facts stay together. Where nobody measured the absorption, Table
+C.2 gives seven room descriptions and their coefficients, from 0,05 for an
+empty room with smooth hard walls to 0,5 for a room with a highly absorptive
+ceiling and floor; they are `ROOM_ABSORPTION_ESTIMATES`, the same seven rows
+ISO 3744 prints in its own Table F.1.
+
+## The cabin is the inverse problem
+
+An enclosure keeps noise **in**. A **cabin** keeps it **out**, and ISO 11957
+measures that as the difference between the level in the room and the level
+inside the empty cabin. Equation (1) is the laboratory quantity, measured in a
+reverberation room to ISO 3741. Equation (2) is the same arithmetic in situ,
+where no requirement is placed on the room at all, and the answer carries a
+prime to say so. The prime is not decoration: definition 3.6 exists because a
+number measured in a room that was never qualified cannot be compared with one
+that was, and clause 4 says outright that only data from the same method may be
+used when comparing cabins.
+
+```python
+room = [88.0, 90.0, 91.0, 89.0, 86.0, 82.0]    # dB, level in the room
+inside = [76.0, 72.0, 66.0, 59.0, 52.0, 47.0]  # dB, level in the cabin
+
+cab = noise_control.cabin_insulation(
+    room, inside, frequencies=bands, band_fraction=1,
+    method="in-situ-loudspeaker",
+)
+print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
+```
+
+There is a third method, and it is the one a workplace usually wants: drive the
+room with the noise that is actually there. That is the only method for which
+the standard defines an A-weighted difference, Equation (3), and
+`cabin_insulation` refuses to compute one under any other, because a figure
+carrying that symbol which came from a loudspeaker is a claim the document does
+not make.
+
+## The count that is read off the answer
+
+Almost every number in a measurement standard is fixed before the measurement:
+six microphone positions, 2 m from the cabin, 3 m apart. Clause 7.2.1 of
+ISO 11957 has one that is not. The number of loudspeaker positions shall be at
+least the largest deviation, in decibels, of the apparent insulation between
+any two of them, read in octave bands, starting at three and stopping at six.
+It is a criterion that judges the measurement by how much it disagreed with
+itself.
+
+```python
+by_position = [
+    [12.0, 16.0, 25.0, 30.0, 34.0, 35.0],
+    [13.5, 18.0, 27.5, 32.0, 36.5, 36.0],
+    [11.0, 14.5, 23.0, 28.5, 33.0, 34.0],
+]
+check = noise_control.check_source_positions(by_position)
+print(check.max_octave_spread_db)   # 4.5
+print(check.required_positions)     # 5
+print(check.satisfied)              # False
+```
+
+Two more positions, and the clause adds that the three used first should not be
+used again. Past six decibels the excess is stated in the report instead, which
+`exceeds_maximum` marks. The other numeric rules are here too:
+`check_band_flatness` is the requirement that the three one-third-octave levels
+inside an octave differ by at most 6 dB at 125 Hz, 5 dB at 250 Hz and 4 dB
+above; `minimum_cabin_clearance_m` is the clearance of 6.2, written exactly as
+printed including the low-frequency sentence that relaxes it rather than
+tightening it; and `internal_noise_level` is the noise the cabin's own fans
+make, corrected for the background only while the margin stays between 6 dB and
+10 dB, which is a different rule from the one 6.4 applies to the insulation.
+
+## One number, and what it is worth
+
+All three documents delegate their single number to ISO 717-1, putting their
+own quantity where that standard writes the sound reduction index.
+
+```python
+rating = noise_control.weighted_cabin_insulation(
+    cab.insulation[:5], apparent=True, band_fraction=1,
+)
+print(rating.rating, rating.c, rating.ctr)   # 28 -1 -5
+```
+
+Clause 4 of ISO 11957 calls that the preferred single number and then warns, in
+the same paragraph, against reading too much into it: what a cabin is worth
+depends on the spectrum it stands in. The annexes answer that objection
+directly, estimating the A-weighted insulation against a stated spectrum. The
+sign of the A-weighting term is the trap: the annex prints an attenuation,
+positive where the weighting takes level away, while a library's band
+corrections are the correction itself. Both terms are built from the same table
+here, so the answer cannot disagree with its own inputs, and an insulation of
+zero returns exactly zero.
+
+```python
+spectrum = [92.0, 94.0, 95.0, 93.0, 90.0, 85.0]   # dB, the actual noise
+print(round(noise_control.estimated_cabin_noise_insulation(
+    spectrum, cab.insulation, frequencies=bands,
+), 1))                                             # 25.6 dB
+```
+
+Against that spectrum the cabin is worth 25,6 dB(A), where its rating is 28. The
+two numbers answer different questions, and the rating is not the one to put in
+a hearing-conservation calculation.
+
+## What the report has to say, and what it cannot
+
+Clause 10 of ISO 11957 is unusually candid. In the laboratory the uncertainty of
+ISO 3741 carries over from 250 Hz to 10 kHz, and only while the room is at least
+twenty times the volume of the cabin. The loudspeaker method in situ adds about
+2 dB to the standard deviation. For the actual-noise method the clause states
+nothing at all and sends a declared value to ISO 4871.
+
+```python
+u = noise_control.uncertainty_conditions(
+    room_volume_m3=520.0, cabin_volume_m3=18.0, method="in-situ-loudspeaker",
+)
+print(round(u.volume_ratio, 1), u.ratio_satisfied)   # 28.9 True
+print(u.excess_standard_deviation_db)                # 2.0
+```
+
+A measurement whose room is too small for the cabin still returns a number.
+What it does not return is the uncertainty statement, and a report that quotes
+one anyway is quoting a clause that excluded it.
+
+## What this guide covers
+
+Covered: the arithmetic of all three documents. Equations (1) to (5) of
+ISO 11546, Table 1 as data, the ISO 717-1 rating, the estimate of Annex C and
+Annex D, the leak, seal and fill ratios, the source clearance, and the whole of
+Annex C of part 2 with Table C.1, Table C.2 and Figure C.1 in closed form,
+cross-checked against the environmental correction of ISO 3744. Equations (1),
+(2) and (3) of ISO 11957 with the prime of definition 3.6, its ISO 717-1
+rating, the estimate of Annex A, the source-position criterion of 7.2.1, the
+flatness rule of 6.4, the clearance of 6.2, the internal noise level of 6.7 and
+the conditions clause 10 attaches its uncertainty to. Ten defects in the
+print of the three documents are recorded in the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/). Not implemented: the prediction of an
+insulation, which is a separate page; the test environments themselves; the
+artificial source as hardware; and the mounting, instrumentation and reporting
+procedure, of which only the rounding computes.
+
+## See also
+
+- [Industrial noise control](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/): the predicted insertion loss of
+  a machine enclosure, which is the quantity this page measures rather than
+  computes.
+- [Measuring a silencer](https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/): the same distinction for a
+  ducted silencer, and the substitution measurement behind a catalogue figure.
+- [Sound power in a reverberation room](https://jmrplens.github.io/phonometry/devices/emission/sound-power-reverberation/):
+  the determination the cabin laboratory method is carried out in, and the
+  background correction all three documents delegate to.
+- [Airborne sound insulation ratings](https://jmrplens.github.io/phonometry/buildings/insulation/insulation-ratings/):
+  the ISO 717-1 machinery all three documents borrow for their single number.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): a column headed with a
+  standard that does not exist, a definition that points at the wrong annex,
+  and a clearance rule that relaxes the one above it.
+- API reference: [`noise_control.enclosure_insulation`](https://jmrplens.github.io/phonometry/reference/api/noise_control/enclosure-insulation/)
+  and [`noise_control.cabin_insulation`](https://jmrplens.github.io/phonometry/reference/api/noise_control/cabin-insulation/).
+
+---
+
+
+<!-- source: docs/devices/noise-control/in-situ-noise-control.md | canonical: https://jmrplens.github.io/phonometry/devices/noise-control/in-situ-noise-control/ -->
+Source: https://jmrplens.github.io/phonometry/devices/noise-control/in-situ-noise-control/
+
+# Silencers, screens and barriers in situ (ISO 11820, ISO 11821, ISO 10847)
+
+A laboratory measurement of a noise control device answers one question: what is
+this product worth, under conditions chosen so that two products can be
+compared. It is the right question when there is a catalogue to write. It is the
+wrong one when the silencer is already welded into the duct, the screen has been
+standing between the press and the bench for a year, and the barrier was built
+before anyone thought of measuring it. These three standards ask the other
+question. Each of them measures a device where it already stands, in the
+installation it belongs to, with whatever is around it.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_noise_control_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_noise_control.svg" alt="Three panels: the decibels three standards remove from a measured level against the margin over the background, the four microphone distances of a screen measurement against the screen height, and the reference microphone height of a barrier measurement against the distance from the source to the barrier" width="88%"></picture>
+
+## What in situ costs, and what it buys
+
+The laboratory buys a controlled environment and a substitution measurement:
+ISO 7235 runs a source into a test duct with the silencer in place, then with a
+straight replacement section of the same length, so the two runs differ by the
+silencer alone. In situ neither is available. What is left is the pair of levels
+the installation allows, the ratio of the two measurement areas and the
+difference of the two field corrections, which is Equation (19) of ISO 11820:
+`D_ts = D_tps + 10 lg(S_2/S_1) + K_2 - K_1`.
+
+```python
+from phonometry import noise_control
+
+bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+source = [98.0, 99.0, 97.0, 95.0, 92.0, 88.0]     # dB, in the duct
+receiver = [72.0, 68.0, 60.0, 54.0, 50.0, 49.0]   # dB, in the room it feeds
+
+res = noise_control.in_situ_transmission_loss(
+    source, receiver,
+    source_area_m2=0.9,      # the duct cross-section
+    receiver_area_m2=10.8,   # a quarter of the room absorption at 500 Hz
+    frequencies=bands, case=2,
+)
+print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
+print(round(res.area_term_db, 1))  # -10.8 dB
+```
+
+The area term is negative and that is not a mistake: a duct of 0,9 m² discharging
+into a room whose quarter-absorption is 10,8 m² spreads the same power over
+twelve times the area, and subtracting that is what stops the room being credited
+to the silencer.
+
+## The twenty installations
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_in_situ_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_in_situ.svg" alt="Section through a duct run with the silencer in place, the two measurement surfaces marked as dashed planes with their microphone positions, and the upstream and downstream distances" width="88%"></picture>
+
+**How the measurement goes.** Choose the installation from Figure 1 and read off
+which area rule each side takes. Place the source-side surface one and a half
+equivalent diameters upstream and the receiver-side one at the distance Equation
+(16) gives, or agree on one when that expression falls to zero. Measure the mean
+level on each surface, take the extraneous sound off by the energy route where
+the sources can be switched, record the temperature on both sides, and measure
+the flow: the pressure loss and a velocity profile uniform within 10 %.
+
+A silencer sits between two of four things: a duct, a room with a diffuse field,
+a room without one, and open space. Sixteen pairs are transmission measurements
+and four more are insertion measurements, and Figure 1 draws all twenty.
+`installation_case` carries the area rule clause 9 gives each side, and the two
+loss functions refuse a case that belongs to the other quantity. The room area
+itself comes from the reverberation time through Equations (6), (10) and (12),
+as a quarter of the Sabine equivalent absorption area.
+
+A silencer is not measured until the flow is measured too. Clause 9 is here in
+full: the total pressure loss of Equation (13), the static difference behind a
+change of area of Equation (14), the velocity pressure and the velocity it stands
+for, the gas density of Equation (29) and the velocity inside the silencer of
+Equation (31), which is the one the regenerated noise answers to.
+
+## The screen you can take away
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_screen_in_situ_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_screen_in_situ.svg" alt="Section through a workshop with the screen, the four microphone distances behind it and the one-metre floor that merges the two nearest ones" width="88%"></picture>
+
+**How the measurement goes.** Microphones on the perpendicular line at a
+quarter, a half, once and twice the height, pushed out to 1 m where they fall
+inside it, at the operator height. Run with the screen, wheel it away without
+touching anything else, run again. Background with the machine off at the same
+positions: nothing to correct over 10 dB, the boxed formula between 6 dB and
+10 dB, and a refusal under 6 dB.
+
+ISO 11821 has the one thing the other two lack: the device can be removed for a
+run. `screen_attenuation` is the difference between the two runs, and the
+A-weighted pair of 5.9 is refused with an artificial source, because then the
+spectrum weighted is the loudspeaker's. An artificial source has its own test to
+pass first, the twelve-position directivity index of definition 3.10 with the
+8 dB limit of 5.2.2.
+
+```python
+print(noise_control.microphone_distances_m(3.0))   # [1.  1.5 3.  6. ] m
+```
+
+A quarter, a half, once and twice the screen height, never closer than 1 m, so
+under 4 m the quarter-height position is held out to the floor and under 2 m the
+half-height one joins it, which is the only case where two positions coincide. NOTE 2 reads the
+spread: the smallest attenuation at the most remote position, the largest at the
+nearest, which is why all four are asked for rather than an average.
+
+## The barrier that was built years ago
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_in_situ_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_in_situ.svg" alt="Two sections of the same site, before and after the barrier, each with the reference microphone above the top edge and the receiver position" width="88%"></picture>
+
+**How the measurement goes.** Fix the receiver and reference positions first and
+keep them for both campaigns. Reference microphone at least 1,5 m above the top
+edge on a vertical plane through it, or the elevation rule of the NOTE for a
+source region closer than 15 m. Record the wind component, the temperature and
+the cloud cover for every run, stop above 5 m/s, repeat at least three times,
+and check before the second campaign that the weather still matches within
+2 m/s and 10 °C.
+
+The direct method of 8.2.1 needs the site before the barrier was built and
+normalises the source with a reference microphone above the top edge, so that a
+source that ran differently on the second day does not read as barrier
+performance.
+
+```python
+from phonometry import environment
+
+res = environment.measured_insertion_loss_direct(
+    [76.0, 74.0, 71.0, 67.0, 62.0, 56.0],   # reference, before
+    [78.0, 76.0, 73.0, 69.0, 64.0, 58.0],   # reference, after
+    [63.0, 61.0, 58.0, 54.0, 49.0, 43.0],   # receiver, before
+    [58.0, 53.0, 47.0, 41.0, 35.0, 29.0],   # receiver, after
+    frequencies=bands,
+)
+print(res.insertion_loss_db)   # [ 7. 10. 13. 15. 16. 16.] dB
+```
+
+The source was 2 dB louder on the second day in every band and the answer does
+not contain those 2 dB. The indirect method of 8.2.2 borrows the "before"
+campaign from an equivalent site, which makes it an estimate, and each campaign
+carries its own receiver correction: 0 dB in a hemi free field, 6 dB against a
+facade.
+
+The weather is part of the measurement. `wind_class` is Table 1, with a downwind
+class and a calm one over any distance and an upwind class over short distances
+alone; `is_short_distance` is the geometry test of 6.3.1 that decides whether
+that class exists at all, and the two campaigns can disagree about it. Past 5 m/s
+no measurement is made, the two campaigns must agree within 2 m/s and 10 °C, and
+the cloud cover is recorded in the four classes of Table 2.
+
+## One correction, three standards, three answers
+
+ISO 11820 prints a stepped table, positive, to be subtracted, and refuses under
+3 dB. ISO 10847 prints a stepped table, negative, to be added, and refuses under
+4 dB. ISO 11821 prints no table and boxes the energy subtraction, correcting only
+between 6 dB and 10 dB of margin.
+
+```python
+print(noise_control.silencer_background_correction_db([9.0]))   # [0.5] dB off
+print(environment.barrier_background_correction_db([9.0]))      # [-1.] dB added
+print(round(80.0 - noise_control.background_corrected_level_db(
+    [80.0], [71.0])[0], 2))                                     # 0.58 dB off
+```
+
+Three standards, one margin of 9 dB, three answers. They are three
+implementations for that reason, and a conformance check holds them against each
+other at the margin where they part. ISO 11820 offers a second route for
+switchable extraneous sources, the energy subtraction of Equations (17) and (18),
+capped at 3 dB; past the cap the quantity is not determined and only the
+inequality of clause 4 may be stated.
+
+## What this guide covers
+
+Implemented: the whole arithmetic of ISO 11820, from the level differences of
+Equations (1) to (3) to the flow quantities of Equations (27) to (31), with the
+twenty installations of Figure 1; the attenuation, background window, directivity
+test, microphone geometry and impulse rule of ISO 11821; and the direct and
+indirect methods, background table, wind and cloud classes, short-distance test,
+reference microphone height and hemi-free-field clearance of ISO 10847. Two
+defects in the print of ISO 10847 are recorded in the
+[errata register](https://jmrplens.github.io/phonometry/reference/errata/), along with a note that the two stepped
+background tables are a difference and not an erratum. Not implemented: the
+prediction of a barrier insertion loss or a silencer attenuation, which are
+separate pages; the instrument and windscreen requirements; the judgement of site
+equivalence; and the report templates.
+
+## See also
+
+- [Enclosures and cabins measured](https://jmrplens.github.io/phonometry/devices/noise-control/enclosure-cabin-insulation/): the same
+  in-situ habit of mind applied to a box around a machine and a cabin around an
+  operator.
+- [Measuring a silencer](https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/): the laboratory method of
+  ISO 7235, with the test duct and the substitution run ISO 11820 does without.
+- [Industrial noise control](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/): the predicted insertion loss of a
+  screen or an enclosure, which these standards measure rather than compute.
+- [Outdoor sound propagation](https://jmrplens.github.io/phonometry/environment/propagation/outdoor-propagation/):
+  the ISO 9613-2 barrier attenuation term a prediction computes for the barrier
+  ISO 10847 measures.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): an upwind wind class printed
+  with a positive lower bound, and one prime asked to mean two different things.
+- API reference: [`noise_control.silencer_in_situ`](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-in-situ/),
+  [`noise_control.screen_in_situ`](https://jmrplens.github.io/phonometry/reference/api/noise_control/screen-in-situ/)
+  and [`environment.propagation.barrier_in_situ`](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-in-situ/).
+
+---

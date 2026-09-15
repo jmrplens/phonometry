@@ -283,3 +283,70 @@ def test_time_axis_english_default_unchanged() -> None:
     assert xlabel == "Time [s]"
     _, xlabel_no_fs = _time_axis(100, None)
     assert xlabel_no_fs == "Sample"
+
+
+def _two_run_axes(language: str) -> Axes:
+    """A continuous two-run figure, which is where the twin axis is built."""
+    from phonometry import noise_control
+
+    # The range has to reach down to 31,5 Hz: it is the lowest octave centre
+    # whose label carries a decimal, and a label without one proves nothing.
+    freqs = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    result = noise_control.screen_attenuation(
+        [78.0, 80.0, 81.0, 79.0, 76.0, 74.0, 72.0, 70.0],
+        [74.0, 74.0, 72.0, 68.0, 63.0, 61.0, 59.0, 58.0],
+        frequencies=freqs,
+    )
+    return result.plot(language=language)
+
+
+def test_the_twin_frequency_axis_reaches_spanish() -> None:
+    """``localize_axes`` skips a logarithmic axis, so the formatter must be told.
+
+    The frequency ticks are written by ``format_frequency_axis`` and by nothing
+    else, so a Spanish figure keeps 31.5 for 31,5 unless the caller forwards
+    its language. The twin axis is the one that is easy to forget: it is built
+    after the first and resets the shared x-axis.
+    """
+    ax = _two_run_axes("es")
+    labels = [t.get_text() for t in ax.get_xticklabels() if t.get_text()]
+    assert any("," in label for label in labels), labels
+    assert all("." not in label for label in labels), labels
+    plt.close("all")
+
+
+def test_the_twin_frequency_axis_is_unchanged_in_english() -> None:
+    ax = _two_run_axes("en")
+    labels = [t.get_text() for t in ax.get_xticklabels() if t.get_text()]
+    assert any("." in label for label in labels), labels
+    plt.close("all")
+
+
+def _silencer_axes(language: str) -> Axes:
+    from phonometry import noise_control
+
+    freqs = np.array([31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    result = noise_control.in_situ_transmission_loss(
+        [98.0, 99.0, 97.0, 95.0, 92.0, 90.0, 89.0, 88.0],
+        [72.0, 68.0, 60.0, 54.0, 50.0, 49.0, 48.0, 47.0],
+        source_area_m2=0.9,
+        receiver_area_m2=10.8,
+        frequencies=freqs,
+        case=2,
+    )
+    return result.plot(language=language)
+
+
+def test_the_silencer_frequency_axis_reaches_spanish() -> None:
+    ax = _silencer_axes("es")
+    labels = [t.get_text() for t in ax.get_xticklabels() if t.get_text()]
+    assert any("," in label for label in labels), labels
+    assert all("." not in label for label in labels), labels
+    plt.close("all")
+
+
+def test_the_silencer_frequency_axis_is_unchanged_in_english() -> None:
+    ax = _silencer_axes("en")
+    labels = [t.get_text() for t in ax.get_xticklabels() if t.get_text()]
+    assert any("." in label for label in labels), labels
+    plt.close("all")

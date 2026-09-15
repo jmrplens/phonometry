@@ -247,7 +247,7 @@ def air_absorption_correction(
         msg = (
             f"The air-absorption correction reaches {worst:.3f} at one band, "
             f"over the {AIR_CORRECTION_LIMIT:g} of 4.2.1: the test conditions "
-            "are not the ones the clause asks for, and 6.3 asks for the empty "
+            "are not the ones the clause asks for, and 5.2 asks for the empty "
             "room to be measured again rather than for the result to be "
             "reported."
         )

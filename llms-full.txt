@@ -32333,6 +32333,15 @@ Stinson (1991). `critical_coupling_design` inverts the model, tuning
 the cavity length and the slit height so both matching conditions
 $\mathrm{Re}(Z)\cos\theta = Z_0$ and $\mathrm{Im}(Z) = 0$ hold.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain.svg" alt="Schematic section of one period of the slit panel, from the face on the left to the rigid backing on the right. A plane wave arrives at angle theta and leaves as the reflection R, with the air in front referred to Z0 = rho0 c0 / S0. A slit 0.978 mm high runs the 30 mm depth of the panel and is closed at the backing, and a Helmholtz resonator with a neck 3 mm wide and 1 mm long and a cavity 27 mm wide and 44.7 mm long opens into its upper wall halfway along. Labels place each matrix where it acts: M delta l at the mouth, x1 = 0; M s over each 15 mm half step either side of the neck; M HR at the resonator; and v = 0 at the backing, x1 = L, with L = N a = 30 mm for one resonator. Three panels below write the matrices out. The mouth is a series radiation mass whose slit end correction is 1.12 mm for h over d = 0.0196. The half step holds the cosine and sine of ks a/2 with the slit impedance Zs, built from the visco-thermal effective density and bulk modulus of the narrow slit, the density being 1.355 minus 0.203j kg/m³ at 300 Hz against 1.205 in free air. The resonator is a shunt admittance, 1 over ZHR, its neck and cavity treated as square visco-thermal ducts, the 1 mm neck carrying 2.08 mm of end correction, 1.18 mm towards the cavity and 0.90 mm towards the slit, and acting below its own resonance as a compliance that softens the slit without adding mass. A box multiplies the matrices into T over the N resonators, gives R of theta from T11 and T21 and the absorption as one minus the squared magnitude of R, and notes that the backing stops the particle velocity, so the face sees Z = T11 / T21. Two boxes at the foot state critical coupling, Re(Z) cos theta = Z0 and Im(Z) = 0, which puts the zero of R on the real-frequency axis so that R = 0 and alpha = 1, and the 300 Hz design at normal incidence: the slit height sets the loss, the 44.7 mm cavity sets the resonance, and the normalised impedance is 1 + 0j in a panel lambda/38 deep" width="100%"></picture>
+
+*One period of the 300 Hz design as the chain the library multiplies: a
+radiation mass at the mouth, a lossy half step of slit either side of the
+resonator, the resonator as a shunt, and the rigid backing that turns the
+product into a surface impedance. Critical coupling is then two conditions on
+that impedance, and the design meets both with a 0.978 mm slit and a 44.7 mm
+cavity.*
+
 ```python
 import numpy as np
 from phonometry import materials
@@ -33505,14 +33514,16 @@ and leaves the judgement to the laboratory. Of the rest it judges the three it
 is given: a substructure no more than 30 mm wide and 50 mm deep, a mounting
 fixture of at least 20 kg/m2, and a deflection of no more than 5 mm. Leaving one
 of those raises a `SuspendedCeilingWarning` that says which. The 0,6 m pitch of
-the substructure and the 50 mm by 50 mm supports at least 1,2 m apart are
-published as constants to build to, and describe how the specimen was hung
-rather than a measurement taken on it, so the call cannot check them.
+the substructure and the supports of no more than 50 mm by 50 mm at least 1,2 m
+apart are published as constants to build to, and describe how the specimen
+was hung rather than a measurement taken on it, so the call cannot check them.
 
 ## How the measurement goes
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen.svg" alt="Four views of one test arrangement. Top left, the floor of a reverberation room in plan: a specimen of ten point eight square metres made of thirty test objects of sixty by sixty centimetres, five by six, butted together with the joints unsealed and no grid over them, framed by a mounting fixture that covers its perimeter, the whole turned at least ten degrees off the walls and kept at least seventy-five centimetres from every room edge, one metre where possible. Top right, the two runs the absorption is a difference of: the empty room with the fixture taken out, giving T1 and A1, and the room with the specimen in its fixture, giving T2 and A2, with the temperature and the humidity checked for each, over notes asking for a relative humidity of at least fifty per cent with the humidifier off while measuring, the empty room measured at least once a day in stable conditions and again the same day if the air correction passes zero point zero five, and no microphone plane parallel to a room surface. Bottom left, a section through the type E mounting standing face up on the floor, not sunk into it, as CE marking requires: a solid fixture of at least twenty kilograms per square metre sealed to the floor, the exposed face flush with its top and the joint taped, two hundred millimetres of overall depth from the floor to the face, substructure profiles no more than thirty millimetres wide and fifty high at about sixty centimetre centres on support units no larger than fifty by fifty millimetres, a closed air space with no partitions, and a deflection of no more than five millimetres at any point, under a note that the face up arrangement is only for a ceiling whose absorption gravity does not change, a loosely laid porous backing being held to the tile by a wire grid of wire no thicker than two millimetres with a mesh of about one hundred millimetres. Bottom right, the substructure seen from below, the profiles running one way about sixty centimetres apart and their supports at least one metre twenty apart. A box at the foot carries the absorption coefficient as A2 minus A1 over S, with S taken over the test objects, and the air-absorption correction, four V times m2 minus m1 over S, whose magnitude is capped at zero point zero five in every band, with the note that the uncertainty of Table 1 holds for this mounting alone" width="100%"></picture>
+
 Build the specimen to 10,80 m2 out of whole test objects, butted together, with
-the joints unsealed and the perimeter covered by the mounting fixture. Hang it at
+the joints unsealed and the perimeter covered by the mounting fixture. Mount it at
 200 mm overall depth if the result is to support CE marking, on a substructure
 inside the 30 mm by 50 mm section, and check the deflection at the worst point.
 Set the specimen edges at an angle to the room walls. Measure the empty room and
@@ -33540,7 +33551,7 @@ print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
 ```
 
 That last band is over the cap and the library says so rather than returning it
-quietly: the answer is a second measurement of the empty room, which is what 6.3
+quietly: the answer is a second measurement of the empty room, which is what 5.2
 asks for.
 
 ## What the whole thing buys
@@ -34492,6 +34503,11 @@ necks and cavities included) and lets the same 2 kHz wavefront hit them: the
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_metadiffuser.webm)
 
 ## 3. The design recipe: phases first, geometry second
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain.svg" alt="The metadiffuser prediction in three bands: the target quadratic residue diffuser beside the 2 cm panel at the same scale with the phase each well has to return, slit 1 enlarged with its transfer-matrix chain along the depth and the loop that tunes it, and six periods with their five grating lobes and the diffusion coefficient" width="100%"></picture>
+
+*Phases first, geometry second, the far field last. The two panels at the top
+share one scale: 27.4 cm of wells against 2 cm of slits.*
 
 Designing a metadiffuser is a two-step translation. First pick the Schroeder
 sequence exactly as for a [classical design](https://jmrplens.github.io/phonometry/materials/diffusers/diffusers/): the quadratic

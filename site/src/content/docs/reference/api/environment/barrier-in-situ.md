@@ -548,21 +548,34 @@ At least [`REFERENCE_MICROPHONE_CLEARANCE_M`](/phonometry/reference/api/environm
 the barrier, on a vertical plane through it, so that what it hears is the
 source and not the barrier. For a barrier whose top is not a straight
 edge, a berm or a cupped profile, the clearance is measured from its
-highest point.
+highest point. The clause words the clearance with "shall" (printed folio
+9, PDF page 13), and no geometry takes the microphone under it.
 
-The NOTE adds an alternative for a source that stands close. Where the
-near end of the source region is under
-[`CLOSE_SOURCE_DISTANCE_M`](/phonometry/reference/api/environment/barrier-in-situ/#close_source_distance_m) from the barrier, the microphone may be
-raised until the elevation angle from that end exceeds the angle to the
-barrier top by [`REFERENCE_ELEVATION_INCREMENT_DEG`](/phonometry/reference/api/environment/barrier-in-situ/#reference_elevation_increment_deg):
+The NOTE adds a preference for a source that stands close. Where the near
+end of the source region is under [`CLOSE_SOURCE_DISTANCE_M`](/phonometry/reference/api/environment/barrier-in-situ/#close_source_distance_m) from
+the barrier, the microphone "may be raised as high as possible" until the
+elevation angle from that end exceeds the angle to the barrier top by
+[`REFERENCE_ELEVATION_INCREMENT_DEG`](/phonometry/reference/api/environment/barrier-in-situ/#reference_elevation_increment_deg):
 
 $$
-h = d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)
+h = \max\left(H + 1{,}5\ \mathrm{m},\; d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)\right)
 $$
 
-which is what this returns when the distance is given and falls inside
-that range. The angle form is the NOTE's own words; the height it implies
-is derived here rather than printed.
+The NOTE only ever raises the microphone, so the height is the higher of
+the two. Which one governs depends on the geometry: a 4 m barrier 10 m
+from the source takes the angle, 6,20 m against 5,5 m, while a 3 m barrier
+5 m from the source takes the clearance, because its 10 degrees are
+reached at 4,34 m and the clause asks for 4,5 m. The angle form is the
+NOTE's own words; the height it implies is derived here rather than
+printed.
+
+Once the barrier top stands 80 degrees or more above the near end of the
+source region, no height reaches the increment at all, and the tangent
+would turn negative. The microphone then keeps the clearance and a
+[`BarrierInSituWarning`](/phonometry/reference/api/environment/barrier-in-situ/#barrierinsituwarning) says that the NOTE could not be followed.
+That is how this module treats a NOTE, as with the one to 8.2.2: a
+preference it cannot meet is reported, and the clause it hangs from is
+enforced.
 
 **Parameters**
 

@@ -51,6 +51,7 @@ import math
 import warnings
 
 import numpy as np
+from reference_data import suspended_ceilings as oracle
 
 import phonometry as ph
 from phonometry.materials.absorbers.suspended_ceilings import (
@@ -72,114 +73,9 @@ _CEILINGS = "Suspended ceilings in a reverberation room (EN 16487)"
 #: so that the two rows below judge the library's own limit against the page.
 _PRINTED_CAP = 0.05
 
-#: ISO 9613-1:1993, Table 1, printed folio 9 (PDF page 12), in decibels per
-#: kilometre: the caption on printed folio 5 gives the unit and the standard
-#: atmosphere of 101,325 kPa. Keyed by (air temperature in degrees Celsius,
-#: relative humidity in percent), which are the sub-table and the column. Only
-#: the cells the two air-correction cases below consume are transcribed.
-#: Note 5 of 6.4 says the table was evaluated at the exact one-third-octave
-#: midbands, which is why every row here passes ``exact_midband=True``.
-_ISO9613_TABLE1_DB_PER_KM: dict[tuple[float, float], dict[float, float]] = {
-    # Sub-table (i), "Air temperature: 20 degC".
-    (20.0, 50.0): {500.0: 2.73, 1000.0: 4.66, 2000.0: 9.86, 4000.0: 2.94e1},
-    (20.0, 60.0): {500.0: 2.79, 1000.0: 4.80, 2000.0: 9.25, 4000.0: 2.54e1},
-    (20.0, 90.0): {
-        125.0: 2.72e-1,
-        250.0: 9.66e-1,
-        500.0: 2.71,
-        1000.0: 5.30,
-        2000.0: 9.06,
-        4000.0: 2.02e1,
-    },
-    # Sub-table (j), "Air temperature: 25 degC", on the same printed folio.
-    (25.0, 90.0): {
-        125.0: 2.35e-1,
-        250.0: 8.76e-1,
-        500.0: 2.80,
-        1000.0: 6.44,
-        2000.0: 1.10e1,
-        4000.0: 2.08e1,
-    },
-}
-
-#: Cox, T. J. and D'Antonio, P., *Acoustic Absorbers and Diffusers*, 3rd ed.,
-#: CRC Press 2017, Table 4.2 on printed page 104 (PDF page 161): "Air
-#: absorption constant m1 at 20 degC and normal atmospheric pressure in
-#: 10-3 m-1", at the nominal octave centres the book uses verbatim. Only the
-#: three humidity rows at or above the 50 % of 4.2.2 are carried, because the
-#: drier ones describe conditions this test code does not allow. The 40 % row
-#: is also the one cell of the printed table that is a rounding of a rounding:
-#: at 63 Hz the book prints 0.035, which is ISO 9613-1's already-rounded
-#: 1,50 x 10-1 dB/km converted, against 0.03447 from the model itself.
-_COX_TABLE_4_2_BANDS_HZ: tuple[float, ...] = (
-    63.0,
-    125.0,
-    250.0,
-    500.0,
-    1000.0,
-    2000.0,
-    4000.0,
-    8000.0,
-)
-_COX_TABLE_4_2_M_MILLI: dict[float, tuple[float, ...]] = {
-    50.0: (0.028, 0.1, 0.3, 0.63, 1.07, 2.28, 6.83, 24.24),
-    60.0: (0.024, 0.088, 0.28, 0.64, 1.11, 2.14, 5.9, 20.48),
-    70.0: (0.021, 0.077, 0.26, 0.64, 1.15, 2.08, 5.32, 17.88),
-}
-
-#: Sound Research Laboratories Ltd (UKAS testing laboratory 0444), Test
-#: Certificate No. 13441, contract C/24570, 4 March 2020, page 1 of 1: a
-#: Combison dB42 ceiling on an E-200 mounting, measured to BS EN ISO 354:2003.
-#: The conditions block prints the room, the specimen and both climates; the
-#: "Test 9" table prints T1, T2 and alpha_s per band. The six octave centres
-#: Table 1 of EN 16487 covers are the ones carried here.
-_SRL_BANDS_HZ: tuple[float, ...] = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
-_SRL_T1_S: tuple[float, ...] = (7.66, 6.79, 5.34, 5.39, 4.15, 2.09)
-_SRL_T2_S: tuple[float, ...] = (3.94, 3.44, 2.63, 2.53, 2.15, 1.46)
-_SRL_ALPHA_S: tuple[float, ...] = (0.56, 0.66, 0.88, 0.96, 1.03, 0.96)
-_SRL_VOLUME_M3 = 300.0
-_SRL_AREA_M2 = 10.7
-#: Empty room and room with sample, as the certificate prints them: degrees
-#: Celsius, percent relative humidity, millibars.
-_SRL_EMPTY = (17.5, 41.0, 1005.0)
-_SRL_WITH_SPECIMEN = (16.2, 44.0, 996.0)
-#: The same certificate, lower on the page: the fifteen one-third-octave
-#: alpha_s from 200 Hz to 5000 Hz that EN ISO 11654 rates, and the rating it
-#: prints from them.
-_SRL_THIRD_OCTAVE_ALPHA_S: tuple[float, ...] = (
-    0.61,
-    0.66,
-    0.84,
-    0.87,
-    0.88,
-    0.93,
-    0.93,
-    0.96,
-    1.02,
-    1.02,
-    1.03,
-    1.04,
-    1.06,
-    0.96,
-    0.98,
-)
-_SRL_ALPHA_P: tuple[float, ...] = (0.70, 0.90, 0.95, 1.00, 1.00)
-
-#: SP Swedish National Testing and Research Institute, report P302808,
-#: Enclosure 24, 14 July 2003, single page: an Acces C ceiling at a mounting
-#: depth of 200 mm, surface area 10,8 m2, room volume 200 m3, measured at
-#: 24 degC / 89 % on the object and 20 degC / 90 % in the empty room, rated
-#: alpha_w = 0,9, class A.
-_SP_VOLUME_M3 = 200.0
-_SP_AREA_M2 = 10.8
-
-#: CSTB (COFRAC accreditation 1-0305), Test Report No. AC14-26051052/10,
-#: ref. 93/149, Test 21, 14 May 2014, single page. Its STANDARDS line reads
-#: "EN ISO 354, EN ISO 11654, prEN 16487", so it is a suspended-ceiling report
-#: that names this test code while it was still a draft. Hygiene Meditec A on
-#: an E-50 mounting, 10,5 m2, 18,0 degC / 62 % empty and 19,0 degC / 58 % with
-#: the sample, rated alpha_w = 0,70(MH), class C.
-_CSTB_AREA_M2 = 10.5
+# The printed tables and the three laboratory reports are in
+# ``tests/reference_data/suspended_ceilings.py``, each with its document, its
+# edition and the page it was read on, and the test suite reads them there too.
 
 
 def _half_last_digit(printed: float) -> float:
@@ -223,8 +119,9 @@ def _library_correction(
     :return: The correction per band and whether the clause's cap was reported
         as exceeded, which is the verdict the rows check.
     """
-    alpha_1 = tuple(_ISO9613_TABLE1_DB_PER_KM[empty][band] for band in bands_hz)
-    alpha_2 = tuple(_ISO9613_TABLE1_DB_PER_KM[with_specimen][band] for band in bands_hz)
+    table = oracle.ISO9613_1_TABLE_1_DB_PER_KM
+    alpha_1 = tuple(table[empty][band] for band in bands_hz)
+    alpha_2 = tuple(table[with_specimen][band] for band in bands_hz)
     # dB/km to dB/m, then the library's own EN ISO 354 8.1.2.1 conversion.
     m_1 = ph.materials.attenuation_from_alpha(np.asarray(alpha_1) / 1000.0)
     m_2 = ph.materials.attenuation_from_alpha(np.asarray(alpha_2) / 1000.0)
@@ -257,13 +154,8 @@ def _chk_table_one() -> Outcome:
     the library's docstrings rather than here, because neither changes a value.
     """
     printed = {
-        "125 Hz": 0.23,
-        "250 Hz": 0.23,
-        "500 Hz": 0.11,
-        "1 kHz": 0.10,
-        "2 kHz": 0.10,
-        "4 kHz": 0.13,
-        "alpha_w": 0.08,
+        **oracle.EN16487_TABLE_1_UNCERTAINTY,
+        "alpha_w": oracle.EN16487_TABLE_1_WEIGHTED_UNCERTAINTY,
     }
     bands = ph.materials.reproducibility_uncertainty().tolist()
     computed = dict(zip(printed, [*bands, WEIGHTED_UNCERTAINTY], strict=True))
@@ -287,7 +179,10 @@ def _chk_coverage_factors() -> Outcome:
     that are printed, in the two documents that print them, and that neither
     has been used for the other's table.
     """
-    printed = {"EN 16487 NOTE": 2.8, "ISO 12999-2 Table 3 at 95 %": 2.0}
+    printed = {
+        "EN 16487 NOTE": oracle.EN16487_TABLE_1_COVERAGE_FACTOR,
+        "ISO 12999-2 Table 3 at 95 %": oracle.ISO12999_2_TABLE_3_COVERAGE_FACTOR_95,
+    }
     computed = {
         "EN 16487 NOTE": EN16487_COVERAGE_FACTOR,
         "ISO 12999-2 Table 3 at 95 %": ph.materials.absorption_coverage_factor(0.95),
@@ -313,7 +208,7 @@ def _chk_iso9613_table1_climates() -> Outcome:
     matching = 0
     total = 0
     worst = 0.0
-    for (temperature_c, humidity), row in _ISO9613_TABLE1_DB_PER_KM.items():
+    for (temperature_c, humidity), row in oracle.ISO9613_1_TABLE_1_DB_PER_KM.items():
         bands = list(row)
         computed = (
             ph.environment.air_attenuation(
@@ -353,7 +248,7 @@ def _chk_ten_lg_e() -> Outcome:
     ``alpha = 10 lg(e) m`` with the factor worked out to four figures, which is
     a number this library can be held to.
     """
-    printed = 4.343
+    printed = oracle.VIGRAN_EQ_4_41_TEN_LG_E
     unity = float(ph.materials.attenuation_from_alpha(1.0))
     return numeric(
         printed,
@@ -386,13 +281,13 @@ def _chk_four_m_v() -> Outcome:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", SuspendedCeilingWarning)
         correction = ph.materials.air_absorption_correction(
-            volume_m3=100.0,
+            volume_m3=oracle.VIGRAN_EXAMPLE_VOLUME_M3,
             specimen_area_m2=TARGET_SPECIMEN_AREA_M2,
-            attenuation_with=[0.05],
+            attenuation_with=[oracle.VIGRAN_EXAMPLE_M_PER_M],
             attenuation_empty=[0.0],
         )
     return numeric(
-        20.0,
+        oracle.VIGRAN_EXAMPLE_AIR_ABSORPTION_M2,
         float(correction[0]) * TARGET_SPECIMEN_AREA_M2,
         5e-9,
         unit="m2",
@@ -421,10 +316,10 @@ def _chk_cox_table_4_2() -> Outcome:
     matching = 0
     total = 0
     worst = 0.0
-    for humidity, row in _COX_TABLE_4_2_M_MILLI.items():
+    for humidity, row in oracle.COX_TABLE_4_2_M_MILLI.items():
         computed = (
             ph.environment.air_attenuation_m(
-                _COX_TABLE_4_2_BANDS_HZ,
+                oracle.COX_TABLE_4_2_BANDS_HZ,
                 temperature_c=20.0,
                 relative_humidity_percent=humidity,
                 atmospheric_pressure_kpa=101.325,
@@ -466,8 +361,8 @@ def _chk_air_correction_over_the_cap() -> Outcome:
     """
     bands = (500.0, 1000.0, 2000.0, 4000.0)
     computed, warned = _library_correction(
-        volume_m3=_SRL_VOLUME_M3,
-        specimen_area_m2=_SRL_AREA_M2,
+        volume_m3=oracle.SRL_13441_VOLUME_M3,
+        specimen_area_m2=oracle.SRL_13441_AREA_M2,
         empty=(20.0, 50.0),
         with_specimen=(20.0, 60.0),
         bands_hz=bands,
@@ -499,8 +394,8 @@ def _chk_air_correction_inside_the_cap() -> Outcome:
     """
     bands = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
     computed, warned = _library_correction(
-        volume_m3=_SP_VOLUME_M3,
-        specimen_area_m2=_SP_AREA_M2,
+        volume_m3=oracle.SP_P302808_VOLUME_M3,
+        specimen_area_m2=oracle.SP_P302808_AREA_M2,
         empty=(20.0, 90.0),
         with_specimen=(25.0, 90.0),
         bands_hz=bands,
@@ -553,25 +448,25 @@ def _chk_srl_absorption_coefficient() -> Outcome:
     The air term is what makes this a check rather than a formality: dropped,
     the same call misses three of the six bands, by 0,016 at 4 kHz.
     """
-    empty_temperature_c, empty_humidity, empty_pressure_mbar = _SRL_EMPTY
-    temperature_c, humidity, pressure_mbar = _SRL_WITH_SPECIMEN
+    empty_temperature_c, empty_humidity, empty_pressure_mbar = oracle.SRL_13441_EMPTY
+    temperature_c, humidity, pressure_mbar = oracle.SRL_13441_WITH_SPECIMEN
     m_1 = ph.environment.air_attenuation_m(
-        _SRL_BANDS_HZ,
+        oracle.SRL_13441_BANDS_HZ,
         temperature_c=empty_temperature_c,
         relative_humidity_percent=empty_humidity,
         atmospheric_pressure_kpa=empty_pressure_mbar / 10.0,
     )
     m_2 = ph.environment.air_attenuation_m(
-        _SRL_BANDS_HZ,
+        oracle.SRL_13441_BANDS_HZ,
         temperature_c=temperature_c,
         relative_humidity_percent=humidity,
         atmospheric_pressure_kpa=pressure_mbar / 10.0,
     )
     got = ph.materials.absorption_coefficient(
-        _SRL_T1_S,
-        _SRL_T2_S,
-        _SRL_VOLUME_M3,
-        _SRL_AREA_M2,
+        oracle.SRL_13441_T1_S,
+        oracle.SRL_13441_T2_S,
+        oracle.SRL_13441_VOLUME_M3,
+        oracle.SRL_13441_AREA_M2,
         temperature1_c=empty_temperature_c,
         temperature2_c=temperature_c,
         m1=m_1,
@@ -579,12 +474,12 @@ def _chk_srl_absorption_coefficient() -> Outcome:
     )
     worst = 0.0
     matching = 0
-    for value, printed in zip(got.tolist(), _SRL_ALPHA_S, strict=True):
+    for value, printed in zip(got.tolist(), oracle.SRL_13441_ALPHA_S, strict=True):
         matching += int(abs(value - printed) <= 0.005)
         worst = max(worst, abs(value - printed))
     return count(
         matching,
-        len(_SRL_ALPHA_S),
+        len(oracle.SRL_13441_ALPHA_S),
         subject="printed coefficients within the rounding of the certificate",
         expected_label=f"6/6 (worst departure {worst:.4f})",
     )
@@ -612,10 +507,22 @@ def _chk_real_arrangements() -> Outcome:
     """
     cases = {
         # (area in m2, overall depth in mm), then the printed consequences.
-        "SRL 13441, E-200": ((10.7, 200.0), (-0.10, True)),
-        "SP P302808, 200 mm": ((10.8, 200.0), (0.00, True)),
-        "CSTB AC14-26051052/10, E-50": ((10.5, 50.0), (-0.30, False)),
-        "van Hout 2016, E-400": ((10.8, 400.0), (0.00, False)),
+        "SRL 13441, E-200": (
+            (oracle.SRL_13441_AREA_M2, oracle.SRL_13441_DEPTH_MM),
+            (-0.10, True),
+        ),
+        "SP P302808, 200 mm": (
+            (oracle.SP_P302808_AREA_M2, oracle.SP_P302808_DEPTH_MM),
+            (0.00, True),
+        ),
+        "CSTB AC14-26051052/10, E-50": (
+            (oracle.CSTB_AC14_AREA_M2, oracle.CSTB_AC14_DEPTH_MM),
+            (-0.30, False),
+        ),
+        "van Hout 2016, E-400": (
+            (oracle.VAN_HOUT_AREA_M2, oracle.VAN_HOUT_DEPTH_MM),
+            (0.00, False),
+        ),
     }
     matching = 0
     for (area_m2, depth_mm), (error_m2, ce_marking) in cases.values():
@@ -658,17 +565,44 @@ def _chk_humidity_floor() -> Outcome:
     the clause rather than a defect anyone reported, and it is the reason this
     floor is worth carrying: a real accredited laboratory measured a suspended
     ceiling under conditions this test code would not accept.
+
+    Each climate goes to the library with the arrangement the same report
+    prints, and the row reads back the humidity verdict and the overall one:
+    the humidity is the only limit any of the three leaves, so the dry room
+    fails on it and the other two pass, the CSTB E-50 included, whose depth is
+    reported against CE marking and not failed.
     """
     printed = {
-        "SRL 13441": (41.0, 44.0),
-        "CSTB AC14-26051052/10": (62.0, 58.0),
-        "SP P302808": (89.0, 90.0),
+        # (area in m2, overall depth in mm), then the two climates in percent,
+        # the empty room first.
+        "SRL 13441": (
+            (oracle.SRL_13441_AREA_M2, oracle.SRL_13441_DEPTH_MM),
+            (oracle.SRL_13441_EMPTY[1], oracle.SRL_13441_WITH_SPECIMEN[1]),
+        ),
+        "CSTB AC14-26051052/10": (
+            (oracle.CSTB_AC14_AREA_M2, oracle.CSTB_AC14_DEPTH_MM),
+            (oracle.CSTB_AC14_EMPTY[1], oracle.CSTB_AC14_WITH_SPECIMEN[1]),
+        ),
+        "SP P302808": (
+            (oracle.SP_P302808_AREA_M2, oracle.SP_P302808_DEPTH_MM),
+            (oracle.SP_P302808_EMPTY[1], oracle.SP_P302808_WITH_SPECIMEN[1]),
+        ),
     }
     below_the_floor = {"SRL 13441"}
     matching = 0
-    for report, climates in printed.items():
-        satisfied = min(climates) >= MIN_RELATIVE_HUMIDITY_PERCENT
-        matching += int(satisfied is (report not in below_the_floor))
+    for report, ((area_m2, depth_mm), climates) in printed.items():
+        with warnings.catch_warnings():
+            # The dry room, and the depth of the E-50, are reported by the
+            # clause, which is the verdict being checked rather than a surprise.
+            warnings.simplefilter("ignore", SuspendedCeilingWarning)
+            got = ph.materials.check_ceiling_specimen(
+                area_m2=area_m2,
+                mounting="E",
+                depth_mm=depth_mm,
+                relative_humidity_percent=climates,
+            )
+        expected = report not in below_the_floor
+        matching += int(got.humidity_ok is expected and got.satisfied is expected)
     return count(
         matching,
         len(printed),
@@ -705,16 +639,18 @@ def _chk_printed_ratings() -> Outcome:
     prints 0,70.
     """
     from_third_octave = ph.materials.weighted_absorption_from_third_octave(
-        _SRL_THIRD_OCTAVE_ALPHA_S
+        oracle.SRL_13441_THIRD_OCTAVE_ALPHA_S
     )
-    alpha_p = ph.materials.practical_absorption_coefficient(_SRL_THIRD_OCTAVE_ALPHA_S)
-    sp = ph.materials.weighted_absorption([0.80, 0.85, 0.85, 0.95, 0.95])
-    cstb = ph.materials.weighted_absorption([0.40, 0.85, 1.00, 0.95, 0.85])
+    alpha_p = ph.materials.practical_absorption_coefficient(
+        oracle.SRL_13441_THIRD_OCTAVE_ALPHA_S
+    )
+    sp = ph.materials.weighted_absorption(list(oracle.SP_P302808_ALPHA_P))
+    cstb = ph.materials.weighted_absorption(list(oracle.CSTB_AC14_ALPHA_P))
     results = {
         # printed rating, printed indicator, printed class
-        "SRL 13441": ((0.95, "", "A"), from_third_octave),
-        "SP P302808": ((0.90, "", "A"), sp),
-        "CSTB AC14-26051052/10": ((0.70, "MH", "C"), cstb),
+        "SRL 13441": (oracle.SRL_13441_RATING, from_third_octave),
+        "SP P302808": (oracle.SP_P302808_RATING, sp),
+        "CSTB AC14-26051052/10": (oracle.CSTB_AC14_RATING, cstb),
     }
     matching = sum(
         int(
@@ -729,11 +665,13 @@ def _chk_printed_ratings() -> Outcome:
     # shifting of 4.2.
     octaves = sum(
         int(abs(value - printed) <= 5e-4)
-        for value, printed in zip(alpha_p.tolist(), _SRL_ALPHA_P, strict=True)
+        for value, printed in zip(
+            alpha_p.tolist(), oracle.SRL_13441_ALPHA_P, strict=True
+        )
     )
     return count(
         matching + octaves,
-        len(results) + len(_SRL_ALPHA_P),
+        len(results) + len(oracle.SRL_13441_ALPHA_P),
         subject="printed ratings and practical coefficients reproduced",
         expected_label="3/3 printed alpha_w with class and indicator, and "
         "5/5 printed alpha_p",

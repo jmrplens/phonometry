@@ -100,13 +100,32 @@ $$
 
 The energy route 9.1.1 and 9.1.2 offer instead of Table 1, for the case
 where the sources the silencer works on can be switched off and the
-extraneous sound measured at the same positions.
+extraneous sound measured at the same positions: corrections are made
+"using table 1 or the relationship" (9.1.1, printed folio 10, PDF page 18
+of BS EN ISO 11820:1997).
 
 The clause caps it: **the maximum correction is 3 dB**. Past that the
 quantity is not determined, and what may be stated instead is the
-inequality of clause 4. The second return value says whether the cap was
-reached, so that a capped number cannot be written down as a
-determination.
+inequality of clause 4. Clause 4.1 (folio 4, PDF page 12) ties that to a
+correction of 3 dB that "is not sufficient", and Table 1 (folio 5, PDF
+page 13) prints where that starts: a margin under 3 dB is invalid, and a
+margin of 3 dB takes off 3 dB. The subtraction reaches 3,0206 dB at that
+same margin, which is the printed 3 dB unrounded, so the cap is judged on
+the margin of the two energy means:
+
+$$
+\overline{L_p} - \overline{L_e} \ge 3\ \mathrm{dB}
+$$
+
+That is the same condition as a correction of at most
+$-10 \lg(1 - 10^{-0,3})$ dB, and it keeps the two routes of the
+standard in agreement at their shared boundary. A margin that floating
+point leaves a few parts in $10^{14}$ under 3 dB counts as 3 dB.
+
+The second return value says whether the cap was reached, so that a
+capped number cannot be written down as a determination, and a capped
+measurement also emits a [`SilencerInSituWarning`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituwarning). The corrected
+level itself is returned either way.
 
 **Parameters**
 
@@ -115,7 +134,7 @@ determination.
 | `levels_db` | The levels with everything running, in decibels. |
 | `extraneous_levels_db` | The extraneous levels at the same positions, in decibels. |
 
-**Returns:** The corrected mean level in decibels, and whether the correction reached the cap.
+**Returns:** The corrected mean level in decibels, and whether the correction reached the cap, which is a margin under 3 dB.
 
 **Raises**
 
@@ -201,10 +220,10 @@ in_situ_insertion_loss(
     levels_without_db: ArrayLike,
     levels_with_db: ArrayLike,
     *,
-    area_without_m2: float,
-    area_with_m2: float,
+    area_without_m2: ArrayLike,
+    area_with_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
-    field_correction_difference_db: float = 0.0,
+    field_correction_difference_db: ArrayLike = 0.0,
     case: int | None = None,
 ) -> SilencerInSituResult
 ```
@@ -225,16 +244,24 @@ it fails.
 A blowdown silencer can only be measured this way: there is no duct to
 measure through.
 
+As in Equation (19), the terms are band quantities (3.4, printed folio 3,
+PDF page 11). Where the receiver side is a diffuse room, case 18 of
+Figure 1, both areas are a quarter of the room absorption, Equations (10)
+and (12), and move band by band with the reverberation time of each run:
+pass the two arrays [`reverberant_surface_area_m2`](/phonometry/reference/api/noise_control/silencer-in-situ/#reverberant_surface_area_m2) returns. Each area
+and the field correction may be one value, applied to every band, or one
+value per band.
+
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `levels_without_db` | $\overline{L_{pII}}$ per band, in decibels. |
 | `levels_with_db` | $\overline{L_{pI}}$ per band, in decibels. |
-| `area_without_m2` | $S_{II}$, in square metres. |
-| `area_with_m2` | $S_I$, in square metres. |
+| `area_without_m2` | $S_{II}$, one value or one per band, in square metres. |
+| `area_with_m2` | $S_I$, one value or one per band, in square metres. |
 | `frequencies` | Nominal band centres, in hertz. |
-| `field_correction_difference_db` | $K_{II} - K_I$, in decibels. |
+| `field_correction_difference_db` | $K_{II} - K_I$, one value or one per band, in decibels. |
 | `case` | The installation of Figure 1, 17 to 20, carried into the result. |
 
 **Returns:** The loss, as a [`SilencerInSituResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
@@ -243,7 +270,7 @@ measure through.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For spectra that do not match, a non-positive area or band centre, a field correction that is not finite, or a case that is not an insertion one. |
+| ValueError | For spectra that do not match, an area or a field correction that is neither one value nor one per band, a non-positive area or band centre, a field correction that is not finite, or a case that is not an insertion one. |
 
 ## in_situ_transmission_loss
 
@@ -252,10 +279,10 @@ in_situ_transmission_loss(
     source_levels_db: ArrayLike,
     receiver_levels_db: ArrayLike,
     *,
-    source_area_m2: float,
-    receiver_area_m2: float,
+    source_area_m2: ArrayLike,
+    receiver_area_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
-    field_correction_difference_db: float = 0.0,
+    field_correction_difference_db: ArrayLike = 0.0,
     case: int | None = None,
 ) -> SilencerInSituResult
 ```
@@ -272,16 +299,24 @@ areas, and the difference of the two field corrections.
 [`temperature_field_correction_db`](/phonometry/reference/api/noise_control/silencer-in-situ/#temperature_field_correction_db) is the correction difference two
 temperatures make.
 
+Every term is a band quantity (3.3, printed folio 3, PDF page 11). A
+measurement surface in a duct is one area for all bands, but where a side
+is a room with a diffuse field its area is a quarter of the absorption,
+$(6 \ln 10) V / (c T)$, and moves with the reverberation time from
+band to band: pass the array [`reverberant_surface_area_m2`](/phonometry/reference/api/noise_control/silencer-in-situ/#reverberant_surface_area_m2) returns.
+Each area and the field correction may be one value, applied to every
+band, or one value per band.
+
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `source_levels_db` | $\overline{L_{p2}}$ per band, in decibels. |
 | `receiver_levels_db` | $\overline{L_{p1}}$ per band, in decibels. |
-| `source_area_m2` | $S_2$, in square metres. |
-| `receiver_area_m2` | $S_1$, in square metres. |
+| `source_area_m2` | $S_2$, one value or one per band, in square metres. |
+| `receiver_area_m2` | $S_1$, one value or one per band, in square metres. |
 | `frequencies` | Nominal band centres, in hertz. |
-| `field_correction_difference_db` | $K_2 - K_1$, in decibels. |
+| `field_correction_difference_db` | $K_2 - K_1$, one value or one per band, in decibels. |
 | `case` | The installation of Figure 1, 1 to 16, carried into the result. |
 
 **Returns:** The loss, as a [`SilencerInSituResult`](/phonometry/reference/api/noise_control/silencer-in-situ/#silencerinsituresult).
@@ -290,7 +325,7 @@ temperatures make.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For spectra that do not match, a non-positive area or band centre, a field correction that is not finite, or a case that is not a transmission one. |
+| ValueError | For spectra that do not match, an area or a field correction that is neither one value nor one per band, a non-positive area or band centre, a field correction that is not finite, or a case that is not a transmission one. |
 
 ## insertion_level_difference_db
 
@@ -733,8 +768,8 @@ why 9.2 asks for it rather than for the duct velocity.
 SilencerInSituResult(
     frequencies: NDArray[np.float64] | None,
     level_difference_db: NDArray[np.float64],
-    area_term_db: float,
-    field_correction_difference_db: float,
+    area_term_db: NDArray[np.float64],
+    field_correction_difference_db: NDArray[np.float64],
     loss_db: NDArray[np.float64],
     quantity: str,
     case: InstallationCase | None,
@@ -749,8 +784,8 @@ A silencer measured where it stands, ISO 11820 Equation (19) or (21).
 | :--- | :--- |
 | `frequencies` | Nominal band centres, in hertz, or `None`. |
 | `level_difference_db` | $D_{tps}$ or $D_{ips}$, the sound pressure level difference the loss is built on, per band. |
-| `area_term_db` | $10 \lg(S_2/S_1)$ or $10 \lg(S_{II}/S_I)$, in decibels. |
-| `field_correction_difference_db` | $K_2 - K_1$ or $K_{II} - K_I$, in decibels. |
+| `area_term_db` | $10 \lg(S_2/S_1)$ or $10 \lg(S_{II}/S_I)$ per band, in decibels. Always one value per band, even where both areas were given as single values, because the area of a diffuse room moves with the reverberation time from band to band. |
+| `field_correction_difference_db` | $K_2 - K_1$ or $K_{II} - K_I$ per band, in decibels, on the same shape. |
 | `loss_db` | $D_{ts}$ or $D_{is}$ per band, in decibels. |
 | `quantity` | `"transmission"` or `"insertion"`. |
 | `case` | The installation of Figure 1 the measurement was made in, or `None` where the caller did not name one. |

@@ -45,6 +45,9 @@ with.
 from __future__ import annotations
 
 import numpy as np
+from reference_data import enclosure_cabin_insulation as enclosure
+from reference_data import spatial_decay as spatial
+from reference_data import workroom_prediction as prediction
 
 import phonometry as ph
 from phonometry.room.spatial_decay import (
@@ -64,94 +67,26 @@ from ..registry import Outcome, count, numeric, record, register
 
 _WORKROOM = "Spatial sound decay and prediction in workrooms"
 
-#: Table C.1: the eleven microphone positions, in metres.
-_DISTANCES_M = np.array([2, 3, 4, 5, 6, 8, 12, 16, 24, 32, 48], dtype=float)
+#: The printed tables of ISO 14257 Annex C, ISO 11690-3 Annexes B and C and the
+#: documents that stand beside them are in ``tests/reference_data/``
+#: ``spatial_decay.py``, ``workroom_prediction.py`` and
+#: ``enclosure_cabin_insulation.py``, each with its folio and page, and the
+#: test suite reads them there too.
 
-#: Table C.2: the sound power level of the source used for the test, in
-#: decibels, by nominal octave centre in hertz.
-_SOURCE_POWER_DB = {
-    125: 97.6,
-    250: 98.6,
-    500: 102.2,
-    1000: 110.8,
-    2000: 111.2,
-    4000: 107.4,
-}
-
-#: Table C.4: the levels measured in the workroom, in decibels.
-_ROOM_LEVELS_DB = {
-    125: [85.7, 82.5, 80.8, 78.3, 77.1, 75.4, 73.7, 71.3, 70.4, 67.3, 65.7],
-    250: [84.9, 81.9, 79.6, 77.8, 77.9, 74.3, 72.1, 70.3, 69.8, 65.0, 63.5],
-    500: [89.8, 85.7, 83.6, 81.8, 80.5, 78.8, 76.8, 76.3, 72.0, 70.5, 69.1],
-    1000: [98.9, 95.1, 93.0, 92.0, 91.0, 87.9, 85.8, 83.5, 81.5, 77.0, 75.6],
-    2000: [99.7, 96.0, 93.5, 92.2, 91.0, 89.6, 86.6, 85.0, 81.1, 79.4, 76.7],
-    4000: [93.8, 91.2, 88.3, 86.8, 85.7, 84.3, 80.4, 78.1, 74.9, 72.5, 70.5],
-}
-
-#: Table C.3: the same source in a free field over a reflecting plane, in
-#: decibels, which Annex B takes back out of the measurement.
-_FREE_FIELD_LEVELS_DB = {
-    125: [83.4, 79.8, 76.9, 74.9, 73.2, 70.7, 67.3, 65.1, 61.5, 59.1, 55.6],
-    250: [84.8, 80.9, 78.8, 76.4, 75.1, 72.5, 69.1, 66.6, 62.8, 60.5, 56.5],
-    500: [89.7, 85.5, 83.2, 81.4, 80.0, 77.5, 74.1, 71.2, 67.4, 65.3, 60.4],
-    1000: [98.8, 94.7, 92.3, 90.3, 88.7, 86.1, 82.6, 79.8, 75.7, 73.7, 67.8],
-    2000: [99.2, 94.8, 92.2, 90.1, 88.6, 85.9, 82.6, 80.1, 75.3, 73.4, 65.7],
-    4000: [92.8, 90.2, 87.3, 85.0, 83.2, 80.4, 76.8, 75.2, 71.0, 68.0, 57.3],
-}
-
-#: Table C.6: the curve after the Annex B correction, in decibels.
-_CORRECTED_DB = {
-    125: [-11.8, -14.9, -16.5, -19.0, -20.1, -21.9, -23.7, -26.2, -27.1, -30.2, -31.9],
-    250: [-13.9, -16.5, -19.2, -20.7, -20.7, -24.3, -26.5, -28.3, -28.7, -33.6, -35.0],
-    500: [-13.9, -17.3, -19.6, -21.4, -22.8, -24.4, -26.1, -26.2, -30.4, -32.0, -33.1],
-    1000: [-13.8, -16.9, -19.1, -19.8, -20.6, -23.8, -25.6, -27.7, -29.4, -34.2, -34.9],
-    2000: [-13.3, -16.1, -18.4, -19.5, -20.7, -21.9, -25.0, -26.5, -30.0, -31.9, -34.0],
-    4000: [-13.1, -16.4, -19.0, -20.3, -21.3, -22.7, -26.5, -29.2, -32.2, -34.4, -35.8],
-}
-
-#: Table C.6, last column: the same curve collapsed onto A-weighted pink
-#: noise by Eq. (4), in decibels.
-_CORRECTED_NORMALIZED_DB = [
-    -13.4,
-    -16.5,
-    -18.9,
-    -20.0,
-    -21.1,
-    -22.8,
-    -25.7,
-    -27.5,
-    -30.4,
-    -33.1,
-    -34.6,
-]
-
-#: Table C.7: the printed decay rate, in decibels per distance doubling.
-_PRINTED_DECAY_DB = {
-    "near": {125: 5.2, 250: 5.2, 500: 5.7, 1000: 4.6, 2000: 4.8, 4000: 5.5},
-    "middle": {125: 3.7, 250: 4.0, 500: 3.5, 1000: 4.4, 2000: 4.5, 4000: 5.4},
-    "far": {125: 4.6, 250: 6.0, 500: 2.6, 1000: 5.2, 2000: 4.0, 4000: 3.6},
-}
-
-#: Table C.9: the printed excess of sound pressure level, in decibels.
-_PRINTED_EXCESS_DB = {
-    "near": {125: 5.6, 250: 3.8, 500: 4.3, 1000: 5.2, 2000: 5.4, 4000: 4.0},
-    "middle": {125: 8.1, 250: 6.3, 500: 6.9, 1000: 7.3, 2000: 7.8, 4000: 5.6},
-    "far": {125: 11.5, 250: 8.6, 500: 9.8, 1000: 8.3, 2000: 9.4, 4000: 6.6},
-}
-
-#: The ranges the annex evaluates over, in metres.
-_RANGES_M = {"near": (2.0, 5.0), "middle": (5.0, 24.0), "far": (24.0, 48.0)}
+#: Table C.1: the eleven microphone positions, as an array to select from.
+_DISTANCES_M = np.array(spatial.ANNEX_C_DISTANCES_M, dtype=float)
 
 
 def _raw(band: int) -> np.ndarray:
     return ph.room.sound_distribution_value(
-        _ROOM_LEVELS_DB[band], _SOURCE_POWER_DB[band]
+        spatial.ANNEX_C_ROOM_LEVELS_DB[band], spatial.ANNEX_C_SOURCE_POWER_DB[band]
     )
 
 
 def _corrected(band: int) -> np.ndarray:
     measured = ph.room.sound_distribution_value(
-        _FREE_FIELD_LEVELS_DB[band], _SOURCE_POWER_DB[band]
+        spatial.ANNEX_C_FREE_FIELD_LEVELS_DB[band],
+        spatial.ANNEX_C_SOURCE_POWER_DB[band],
     )
     return ph.room.corrected_distribution_value(
         _raw(band), measured, _DISTANCES_M, source_height_m=0.0
@@ -159,8 +94,8 @@ def _corrected(band: int) -> np.ndarray:
 
 
 def _keep(region: str) -> np.ndarray:
-    low, high = _RANGES_M[region]
-    return (_DISTANCES_M >= low) & (_DISTANCES_M <= high)
+    low, high = spatial.ANNEX_C_RANGES_M[region]
+    return np.asarray((_DISTANCES_M >= low) & (_DISTANCES_M <= high), dtype=bool)
 
 
 @register(
@@ -191,7 +126,7 @@ def _chk_table_c6() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    for band, printed in _CORRECTED_DB.items():
+    for band, printed in spatial.ANNEX_C_TABLE_C6_DB.items():
         got = _corrected(band)
         for value, want in zip(got.tolist(), printed, strict=True):
             total += 1
@@ -209,26 +144,132 @@ def _chk_table_c6() -> Outcome:
 @register(
     _WORKROOM,
     "ISO 14257:2001 Annex C, Table C.6 last column",
-    "The A-weighted pink-noise normalisation of Eq. (4) reproduces the "
-    "eleven printed values",
+    "The A-weighted pink-noise normalisation of Eq. (4), with the printed "
+    "6,2 dB, reproduces the eleven printed values to within 0,1 dB",
 )
 def _chk_table_c6_normalized() -> Outcome:
-    printed = _CORRECTED_NORMALIZED_DB
-    corrected = {band: _corrected(band) for band in _SOURCE_POWER_DB}
+    # 0,1 dB and not the printed 0,05: the 6,2 dB Eq. (4) prints is the
+    # A-weighting curve's energy sum rounded to one decimal, the six weights
+    # Table 1 prints, rounded on their own, sum to 6,2515 dB, and the annex was
+    # normalised exactly, so the printed constant returns every value 0,05 dB
+    # high on top of the rounding. The next row holds the split; the errata
+    # records it.
+    printed = spatial.ANNEX_C_TABLE_C6_NORMALIZED_DB
+    corrected = {band: _corrected(band) for band in spatial.ANNEX_C_SOURCE_POWER_DB}
     got = [
         ph.room.normalized_distribution_value(
-            [corrected[band][i] for band in _SOURCE_POWER_DB]
+            [corrected[band][i] for band in spatial.ANNEX_C_SOURCE_POWER_DB]
         )
         for i in range(_DISTANCES_M.size)
     ]
-    worst = max(abs(a - b) for a, b in zip(got, printed, strict=True))
+    departures = [a - b for a, b in zip(got, printed, strict=True)]
+    worst = max(abs(d) for d in departures)
+    high = sum(d > 0.05 for d in departures)
     return numeric(
         0.0,
         worst,
         0.1,
         unit="dB",
-        expected_label="every value within the printed rounding",
-        computed_label=f"worst departure {worst:.2f} dB over 11 positions",
+        expected_label=(
+            "every value within 0,1 dB: the printed 6,2 dB is 0,05 dB short of "
+            "the sum of the printed Table 1 weights, which is what the annex "
+            "normalised with, so a cell can come out one unit high in the last "
+            "place and never low"
+        ),
+        computed_label=(
+            f"worst departure {worst:.2f} dB over 11 positions, {high} of them "
+            "beyond the printed rounding and all of those high"
+        ),
+    )
+
+
+#: How many of the fourteen Annex C values the printed 6,2 dB of Eq. (4) puts
+#: outside their rounding, every one of them a tenth high. Recorded, not derived:
+#: it is the finding the row publishes, so a change in it has to fail the row.
+_PRINTED_OFFSET_CELLS_OUTSIDE = 9
+
+
+@register(
+    _WORKROOM,
+    "ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table "
+    "C.10 (ISO 14257:2001, PDF page 10, printed folio 4; BS EN ISO 14257:2001, "
+    "PDF page 14, printed folio 4)",
+    "The 6,2 dB Eq. (4) prints is the A-weighting curve's energy sum rounded, "
+    "the six weights Table 1 prints sum to 6,2515 dB, and the annex was "
+    "normalised exactly: Eq. (3) under the Table 1 weights lands all fourteen "
+    "printed values inside their rounding where the printed constant lands "
+    "nine of them one unit high",
+)
+def _chk_equation_four_offset_against_annex_c() -> Outcome:
+    # Eq. (3) with the Table 1 weights as the machine spectrum is Eq. (4) with
+    # the sum of those weights in place of the printed 6,2 dB. Both readings run
+    # over the unrounded Annex B chain from the printed Tables C.2 to C.4, and
+    # the count of cells outside +/-0,05 dB is taken for each: the sum must
+    # land none outside, and the printed constant must land some, every one of
+    # them high.
+    weights = [
+        PINK_NOISE_WEIGHTS_DB[float(band)] for band in spatial.ANNEX_C_SOURCE_POWER_DB
+    ]
+    corrected = {band: _corrected(band) for band in spatial.ANNEX_C_SOURCE_POWER_DB}
+    raw = {band: _raw(band) for band in spatial.ANNEX_C_SOURCE_POWER_DB}
+
+    def _both(curve: dict[int, np.ndarray]) -> tuple[np.ndarray, np.ndarray]:
+        rows = [
+            [curve[band][i] for band in spatial.ANNEX_C_SOURCE_POWER_DB]
+            for i in range(_DISTANCES_M.size)
+        ]
+        by_sum = np.array(
+            [ph.room.spectrum_distribution_value(row, weights) for row in rows]
+        )
+        by_print = np.array(
+            [ph.room.normalized_distribution_value(row) for row in rows]
+        )
+        return by_sum, by_print
+
+    by_sum, by_print = _both(corrected)
+    dep_sum = (by_sum - np.asarray(spatial.ANNEX_C_TABLE_C6_NORMALIZED_DB)).tolist()
+    dep_print = (by_print - np.asarray(spatial.ANNEX_C_TABLE_C6_NORMALIZED_DB)).tolist()
+    raw_by_sum, raw_by_print = _both(raw)
+    for region, want in spatial.ANNEX_C_TABLE_C10_DB.items():
+        keep = _keep(region)
+        dep_sum.append(
+            ph.room.mean_level_excess(raw_by_sum[keep], _DISTANCES_M[keep]) - want
+        )
+        dep_print.append(
+            ph.room.mean_level_excess(raw_by_print[keep], _DISTANCES_M[keep]) - want
+        )
+    cells = len(dep_sum)
+    outside_sum = sum(abs(d) > 0.05 for d in dep_sum)
+    outside_print = sum(abs(d) > 0.05 for d in dep_print)
+    low_print = sum(d < 0.0 for d in dep_print)
+    past_one_unit = sum(d > 0.15 for d in dep_print)
+    # Every claim the row states is judged, not only the first: the sum lands no
+    # cell outside the rounding, the printed constant lands the recorded number
+    # of them outside, none of its departures is low, and none reaches a second
+    # unit of the tenth. A verdict on the sum alone would go on passing the day
+    # the printed constant agreed with the annex, while the row still said not.
+    violations = (
+        outside_sum
+        + abs(outside_print - _PRINTED_OFFSET_CELLS_OUTSIDE)
+        + low_print
+        + past_one_unit
+    )
+    return numeric(
+        0.0,
+        float(violations),
+        0.0,
+        expected_label=(
+            f"0 of {cells} outside the printed rounding with the Table 1 sum, "
+            f"against {_PRINTED_OFFSET_CELLS_OUTSIDE} of {cells} with the printed "
+            f"6,2 dB, every one of the {cells} high and none by a second unit"
+        ),
+        computed_label=(
+            f"{outside_sum} of {cells} with the sum (worst "
+            f"{max(abs(d) for d in dep_sum):.3f} dB, both signs); "
+            f"{outside_print} of {cells} with 6,2 dB (worst "
+            f"{max(abs(d) for d in dep_print):.3f} dB, {low_print} low, "
+            f"{past_one_unit} past one unit)"
+        ),
     )
 
 
@@ -242,7 +283,7 @@ def _chk_table_c7() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    for region, row in _PRINTED_DECAY_DB.items():
+    for region, row in spatial.ANNEX_C_TABLE_C7_DB.items():
         keep = _keep(region)
         for band, want in row.items():
             total += 1
@@ -268,7 +309,7 @@ def _chk_table_c9() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    for region, row in _PRINTED_EXCESS_DB.items():
+    for region, row in spatial.ANNEX_C_TABLE_C9_DB.items():
         keep = _keep(region)
         for band, want in row.items():
             total += 1
@@ -292,12 +333,12 @@ def _chk_table_c9() -> Outcome:
 )
 def _chk_annex_c_is_inconsistent() -> Outcome:
     swapped = 0
-    for region, row in _PRINTED_DECAY_DB.items():
+    for region, row in spatial.ANNEX_C_TABLE_C7_DB.items():
         keep = _keep(region)
         for band, want in row.items():
             got = ph.room.spatial_decay_rate(_raw(band)[keep], _DISTANCES_M[keep])
             swapped += int(abs(got - want) > 0.06)
-    for region, row in _PRINTED_EXCESS_DB.items():
+    for region, row in spatial.ANNEX_C_TABLE_C9_DB.items():
         keep = _keep(region)
         for band, want in row.items():
             got = ph.room.mean_level_excess(_corrected(band)[keep], _DISTANCES_M[keep])
@@ -337,14 +378,10 @@ def _chk_printed_factor() -> Outcome:
     "way Table 1 prints them",
 )
 def _chk_table_one() -> Outcome:
-    printed = {
-        "125 Hz": -16.1,
-        "250 Hz": -8.6,
-        "500 Hz": -3.2,
-        "1 kHz": 0.0,
-        "2 kHz": 1.2,
-        "4 kHz": 1.0,
-    }
+    labels = ("125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz")
+    printed = dict(
+        zip(labels, spatial.TABLE_1_PINK_NOISE_WEIGHTS_DB.values(), strict=True)
+    )
     computed = dict(zip(printed, PINK_NOISE_WEIGHTS_DB.values(), strict=True))
     return record(printed, computed, unit="dB")
 
@@ -413,7 +450,7 @@ def _chk_annex_c_source_qualifies() -> Outcome:
     # level difference of adjacent one-third-octave bands: 6,5 dB ... OK". It
     # prints no band for the directivity index, so it cannot say anything about
     # the ramp of A.1, only about the 8 dB cap.
-    declared = {"directivity index": 4.4, "adjacent band step": 6.5}
+    declared = spatial.ANNEX_C_SOURCE_DECLARATION_DB
     limits = {
         "directivity index": MAX_DIRECTIVITY_INDEX_DB,
         "adjacent band step": ADJACENT_BAND_LIMIT_DB,
@@ -439,39 +476,19 @@ def _chk_table_c2_a_weighted() -> Outcome:
     # This is the one printed number of Annex C that the Table C.6 chain never
     # touches, so it checks the weights and the summation on their own.
     total = (
-        ph.room.normalized_distribution_value(list(_SOURCE_POWER_DB.values()))
+        ph.room.normalized_distribution_value(
+            list(spatial.ANNEX_C_SOURCE_POWER_DB.values())
+        )
         + NORMALIZED_OFFSET_DB
     )
-    return numeric(115.7, float(total), 0.05, unit="dB")
+    return numeric(
+        spatial.ANNEX_C_SOURCE_POWER_A_WEIGHTED_DB, float(total), 0.05, unit="dB"
+    )
 
 
 # ---------------------------------------------------------------------------
 # Equation (8), which the annex prints results for that it does not produce
 # ---------------------------------------------------------------------------
-
-#: Table C.11: the excess read off the fitted line at the conventional distance
-#: of each region, in decibels, by nominal octave centre in hertz.
-_PRINTED_EXCESS_AT_DB = {
-    "near": {125: 6.2, 250: 4.0, 500: 4.4, 1000: 5.2, 2000: 5.3, 4000: 3.9},
-    "middle": {125: 7.8, 250: 5.4, 500: 6.4, 1000: 6.9, 2000: 7.7, 4000: 5.8},
-    "far": {125: 10.6, 250: 7.4, 500: 9.3, 1000: 7.2, 2000: 9.2, 4000: 6.1},
-}
-
-#: Table C.12: the same three figures for A-weighted pink noise, in decibels.
-_PRINTED_EXCESS_AT_NORMALIZED_DB = {"near": 4.8, "middle": 6.8, "far": 8.0}
-
-#: Table C.5 on printed folio 21 (PDF page 31): the uncorrected curve
-#: D = L_p - L_W as printed, in decibels, by nominal octave centre in hertz.
-#: The excess family of the annex, Table C.9, is computed on this curve and not
-#: on the corrected one, so it is the curve Equation (8) is read over here.
-_PRINTED_D_TABLE_C5 = {
-    125: [-11.9, -15.1, -16.8, -19.3, -20.5, -22.2, -23.9, -26.3, -27.2, -30.3, -31.9],
-    250: [-13.7, -16.7, -19.0, -20.8, -20.7, -24.3, -26.5, -28.3, -28.8, -33.6, -35.1],
-    500: [-12.4, -16.5, -18.6, -20.4, -21.7, -23.4, -25.4, -25.9, -30.2, -31.7, -33.1],
-    1000: [-11.9, -15.7, -17.8, -18.8, -19.8, -22.9, -25.0, -27.3, -29.3, -33.8, -35.2],
-    2000: [-11.5, -15.2, -17.7, -19.0, -20.2, -21.6, -24.6, -26.2, -30.1, -31.8, -34.5],
-    4000: [-13.6, -16.2, -19.1, -20.6, -21.7, -23.1, -27.0, -29.3, -32.5, -34.9, -36.9],
-}
 
 
 @register(
@@ -491,19 +508,19 @@ def _chk_equation_eight_leaves_table_c11() -> Outcome:
     # printed A-weighted curve there is, the last column of Table C.6.
     outside = 0
     low = high = 0.0
-    for region, row in _PRINTED_EXCESS_AT_DB.items():
+    for region, row in spatial.ANNEX_C_TABLE_C11_DB.items():
         keep = _keep(region)
         distance = EVALUATION_DISTANCES_M[region]
         for band, want in row.items():
             got = ph.room.level_excess_at(
-                np.asarray(_PRINTED_D_TABLE_C5[band])[keep],
+                np.asarray(spatial.ANNEX_C_TABLE_C5_DB[band])[keep],
                 _DISTANCES_M[keep],
                 distance,
             )
             outside += int(abs(got - want) > 0.05)
             low, high = min(low, got - want), max(high, got - want)
-    normalized = np.asarray(_CORRECTED_NORMALIZED_DB)
-    for region, want in _PRINTED_EXCESS_AT_NORMALIZED_DB.items():
+    normalized = np.asarray(spatial.ANNEX_C_TABLE_C6_NORMALIZED_DB)
+    for region, want in spatial.ANNEX_C_TABLE_C12_DB.items():
         keep = _keep(region)
         got = ph.room.level_excess_at(
             normalized[keep], _DISTANCES_M[keep], EVALUATION_DISTANCES_M[region]
@@ -553,75 +570,13 @@ def _chk_equation_eight_leaves_table_c11() -> Outcome:
 #   metallverarbeitenden Betrieben", BAuA Schriftenreihe Forschung Fb 1083,
 #   Dortmund/Berlin/Dresden 2006, whose PDF page numbers equal its folios.
 
-#: Suva 66008.f, Tableau 2 and the Figure 7 summary: the seven columns both
-#: tables are printed in. The last is the total the instrument printed rather
-#: than Equation (4) over the other six: collapsing the six with the Table 1
-#: weights runs 0,02 dB to 0,57 dB above it, so the total is carried here as a
-#: seventh measured column and never computed.
-_SUVA_COLUMNS = ("125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "total")
-
-#: Suva 66008.f, Tableau 2: the sound distribution curve, printed as "SAK en
-#: dB", which is D = Lp - Lw of Equation (1), in decibels. One entry per
-#: printed row: the distance in metres against the seven columns above.
-_SUVA_CURVE_DB: dict[float, tuple[float, ...]] = {
-    1.0: (-9.9, -10.2, -8.0, -10.5, -8.1, -9.1, -8.9),
-    2.0: (-15.0, -11.7, -13.1, -15.0, -12.2, -11.3, -13.0),
-    3.0: (-21.7, -12.1, -15.0, -16.2, -12.6, -14.0, -14.2),
-    4.0: (-19.2, -14.6, -15.4, -16.3, -13.3, -15.1, -14.9),
-    5.0: (-19.4, -15.9, -15.9, -17.9, -13.8, -15.3, -15.6),
-    6.0: (-20.5, -16.1, -14.9, -17.8, -14.1, -16.0, -15.6),
-    7.0: (-20.0, -15.3, -16.4, -18.3, -15.3, -16.1, -16.4),
-    8.0: (-19.5, -16.4, -17.3, -19.1, -15.5, -16.7, -17.0),
-    9.0: (-20.3, -15.3, -18.2, -19.6, -15.8, -16.9, -17.4),
-    10.0: (-22.1, -17.4, -18.1, -19.7, -16.0, -17.0, -17.6),
-    12.0: (-21.0, -16.3, -18.9, -19.9, -16.7, -18.3, -18.2),
-    14.0: (-23.3, -18.1, -19.7, -20.5, -16.3, -18.3, -18.4),
-    16.0: (-23.1, -18.0, -20.4, -20.3, -17.4, -19.0, -19.0),
-    18.0: (-22.4, -19.2, -18.6, -20.6, -16.9, -19.3, -18.7),
-    20.0: (-22.3, -17.8, -21.5, -22.7, -18.4, -20.5, -20.3),
-    24.0: (-24.5, -21.4, -21.6, -23.6, -19.2, -21.6, -21.2),
-    28.0: (-25.0, -20.3, -21.3, -24.2, -19.7, -22.6, -21.5),
-    32.0: (-24.7, -22.6, -23.7, -24.4, -20.7, -23.4, -22.7),
-    36.0: (-24.9, -22.9, -22.7, -24.7, -21.5, -23.9, -23.0),
-    40.0: (-26.4, -24.4, -23.0, -25.5, -21.1, -24.4, -23.2),
-    48.0: (-26.5, -25.1, -24.7, -25.7, -22.3, -25.3, -24.2),
-}
-
-#: Suva 66008.f, the summary inside Figure 7: the decay rate its own program
-#: read off that curve, in decibels per distance doubling. The rows are
-#: labelled "pres", "moyen" and "loin" on the page.
-_SUVA_DECAY_DB: dict[str, tuple[float, ...]] = {
-    "near": (4.5, 2.3, 3.4, 3.0, 2.4, 2.9, 2.8),
-    "middle": (2.2, 1.4, 3.1, 1.7, 2.0, 2.2, 2.1),
-    "far": (2.6, 4.7, 2.9, 3.4, 3.4, 4.1, 3.5),
-}
-
-#: The same summary: the excess of sound pressure level, in decibels.
-_SUVA_EXCESS_DB: dict[str, tuple[float, ...]] = {
-    "near": (1.7, 5.8, 5.0, 3.3, 6.3, 5.7, 5.1),
-    "middle": (9.0, 13.5, 12.4, 10.8, 14.4, 13.0, 12.8),
-    "far": (15.4, 18.5, 17.9, 16.1, 20.1, 17.5, 18.2),
-}
-
-#: Suva 66008.f, 2.6.2: the three distance ranges, printed with both bounds,
-#: in metres. The path stops at 48 m, so the far range is evaluated over 16 m
-#: to 48 m.
-_SUVA_RANGES_M = {"near": (1.0, 5.0), "middle": (5.0, 16.0), "far": (16.0, 64.0)}
-
-#: Suva 66008.f, 2.6.3: the radii the same page tells a surveyor to stand at,
-#: in metres.
-_SUVA_RADII_M = (
-    1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0,
-    20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 48.0, 56.0, 64.0,
-)  # fmt: skip
-
 
 def _suva_range(column: str, region: str) -> tuple[np.ndarray, np.ndarray]:
     """One printed column over one printed range, as values and distances."""
-    index = _SUVA_COLUMNS.index(column)
-    low, high = _SUVA_RANGES_M[region]
-    radii = [radius for radius in _SUVA_CURVE_DB if low <= radius <= high]
-    values = [_SUVA_CURVE_DB[radius][index] for radius in radii]
+    index = spatial.SUVA_COLUMNS.index(column)
+    low, high = spatial.SUVA_RANGES_M[region]
+    radii = [radius for radius in spatial.SUVA_CURVE_DB if low <= radius <= high]
+    values = [spatial.SUVA_CURVE_DB[radius][index] for radius in radii]
     return np.array(values, dtype=float), np.array(radii, dtype=float)
 
 
@@ -635,8 +590,8 @@ def _chk_suva_decay() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    for region, printed in _SUVA_DECAY_DB.items():
-        for column, want in zip(_SUVA_COLUMNS, printed, strict=True):
+    for region, printed in spatial.SUVA_DECAY_DB.items():
+        for column, want in zip(spatial.SUVA_COLUMNS, printed, strict=True):
             total += 1
             got = ph.room.spatial_decay_rate(*_suva_range(column, region))
             if abs(got - want) <= 0.06:
@@ -660,8 +615,8 @@ def _chk_suva_excess() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    for region, printed in _SUVA_EXCESS_DB.items():
-        for column, want in zip(_SUVA_COLUMNS, printed, strict=True):
+    for region, printed in spatial.SUVA_EXCESS_DB.items():
+        for column, want in zip(spatial.SUVA_COLUMNS, printed, strict=True):
             total += 1
             got = ph.room.mean_level_excess(*_suva_range(column, region))
             if abs(got - want) <= 0.05:
@@ -688,8 +643,8 @@ def _chk_suva_reference_offset() -> Outcome:
     # not the 8 dB of a hemisphere and not an Annex B floor correction.
     residuals = [
         ph.room.mean_level_excess(*_suva_range(column, region)) - want
-        for region, printed in _SUVA_EXCESS_DB.items()
-        for column, want in zip(_SUVA_COLUMNS, printed, strict=True)
+        for region, printed in spatial.SUVA_EXCESS_DB.items()
+        for column, want in zip(spatial.SUVA_COLUMNS, printed, strict=True)
     ]
     implied = FREE_FIELD_OFFSET_DB - float(np.mean(residuals))
     return numeric(
@@ -716,40 +671,23 @@ def _chk_suva_regions() -> Outcome:
     # The row therefore asks that every radius land in a range that admits it,
     # which is all either page pins.
     matching = 0
-    for radius in _SUVA_RADII_M:
+    for radius in spatial.SUVA_RADII_M:
         region = ph.room.distance_region(float(radius))
         admitted = [
             name
-            for name, (low, high) in _SUVA_RANGES_M.items()
+            for name, (low, high) in spatial.SUVA_RANGES_M.items()
             if low <= radius <= high
         ]
         matching += int(region in admitted)
     return count(
         matching,
-        len(_SUVA_RADII_M),
+        len(spatial.SUVA_RADII_M),
         subject="radii put in a range the printed bounds admit",
     )
 
 
-#: IFA-LSA 01-234, Tab. 4.4: the four positions of the path, in metres, which
-#: are the distances the German technical rules for noise at work ask for.
-_IFA_DISTANCES_M = np.array([0.75, 1.50, 3.00, 6.00])
-
-#: IFA-LSA 01-234, Tab. 4.4: the sound pressure levels measured there, in
-#: decibels. They are bare Lp rather than D = Lp - Lw, which Equation (5) does
-#: not mind, because a constant offset cancels in a least-squares slope; the
-#: sheet applies its own printed formula to the same bare levels for the same
-#: reason.
-_IFA_LEVELS_DB = {
-    "500 Hz": [79.2, 74.4, 70.2, 67.1],
-    "1 kHz": [81.9, 77.1, 73.0, 69.8],
-    "2 kHz": [80.4, 75.3, 71.0, 67.4],
-    "4 kHz": [84.3, 78.5, 73.2, 69.3],
-}
-
-#: IFA-LSA 01-234, Tab. 4.5: the decay rate the sheet prints for each band, in
-#: decibels per distance doubling.
-_IFA_DECAY_DB = {"500 Hz": 4.0, "1 kHz": 4.0, "2 kHz": 4.3, "4 kHz": 5.0}
+#: IFA-LSA 01-234, Tab. 4.4: the four positions of the path, as an array.
+_IFA_DISTANCES_M = np.array(spatial.IFA_LSA_01_234_DISTANCES_M)
 
 
 @register(
@@ -762,14 +700,16 @@ _IFA_DECAY_DB = {"500 Hz": 4.0, "1 kHz": 4.0, "2 kHz": 4.3, "4 kHz": 5.0}
 def _chk_ifa_decay() -> Outcome:
     worst = 0.0
     matching = 0
-    for band, want in _IFA_DECAY_DB.items():
-        got = ph.room.spatial_decay_rate(_IFA_LEVELS_DB[band], _IFA_DISTANCES_M)
+    for band, want in spatial.IFA_LSA_01_234_DECAY_DB.items():
+        got = ph.room.spatial_decay_rate(
+            spatial.IFA_LSA_01_234_LEVELS_DB[band], _IFA_DISTANCES_M
+        )
         if abs(got - want) <= 0.05:
             matching += 1
         worst = max(worst, abs(got - want))
     return count(
         matching,
-        len(_IFA_DECAY_DB),
+        len(spatial.IFA_LSA_01_234_DECAY_DB),
         subject="printed values of DL2 within the rounding of the table",
         expected_label=f"4/4 (worst departure {worst:.3f} dB)",
     )
@@ -787,13 +727,12 @@ def _chk_ifa_defective_difference() -> Outcome:
     # difference of 4,3 dB; Tab. 4.5 prints that difference as 4,7 dB. The
     # regression says which of the two cells is right: only the printed level
     # gives the printed decay rate.
-    printed_level = ph.room.spatial_decay_rate(
-        _IFA_LEVELS_DB["2 kHz"], _IFA_DISTANCES_M
-    )
-    implied = list(_IFA_LEVELS_DB["2 kHz"])
-    implied[2] = implied[1] - 4.7
+    levels = spatial.IFA_LSA_01_234_LEVELS_DB[2000]
+    printed_level = ph.room.spatial_decay_rate(levels, _IFA_DISTANCES_M)
+    implied = list(levels)
+    implied[2] = implied[1] - spatial.IFA_LSA_01_234_DIFFERENCES_DB["Lp2 - Lp3"][2]
     implied_level = ph.room.spatial_decay_rate(implied, _IFA_DISTANCES_M)
-    want = _IFA_DECAY_DB["2 kHz"]
+    want = spatial.IFA_LSA_01_234_DECAY_DB[2000]
     agreeing = int(abs(printed_level - want) <= 0.05) + int(
         abs(implied_level - want) > 0.05
     )
@@ -806,20 +745,6 @@ def _chk_ifa_defective_difference() -> Outcome:
             "printed difference would need gives 4,4 dB"
         ),
     )
-
-
-#: Probst, BAuA Fb 1083, Anh. 1: the volume of the room and the cumulative
-#: fitting surface each of four surveyed workrooms prints, in cubic and square
-#: metres, against the density printed under them, in reciprocal metres. These
-#: four rooms are plain boxes whose printed volume is the product of their
-#: printed dimensions; other tables in the annex carry a footnote on a
-#: dimension and a volume that is not that product, and are left out.
-_PROBST_FITTINGS = {
-    "Tab. 3, folio 79": (1260.0, 321.9, 0.064),
-    "Tab. 6, folio 82": (1848.0, 140.0, 0.019),
-    "Tab. 13, folio 93": (2760.0, 160.0, 0.014),
-    "Tab. 22, folio 105": (693.0, 54.0, 0.019),
-}
 
 
 @register(
@@ -836,14 +761,14 @@ def _chk_probst_fitting_density() -> Outcome:
     # than a tight tolerance.
     worst = 0.0
     matching = 0
-    for volume, surface, want in _PROBST_FITTINGS.values():
+    for (*_, volume), _, surface, want in spatial.PROBST_ROOMS.values():
         got = ph.room.fitting_density(surface_area_m2=surface, volume_m3=volume)
         if abs(got - want) <= 0.0005:
             matching += 1
         worst = max(worst, abs(got - want))
     return count(
         matching,
-        len(_PROBST_FITTINGS),
+        len(spatial.PROBST_ROOMS),
         subject="printed densities within half of their last printed figure",
         expected_label=f"4/4 (worst departure {worst:.5f} 1/m)",
     )
@@ -856,22 +781,14 @@ def _chk_probst_fitting_density() -> Outcome:
     "environmental correction, which reproduces seven of the eight rows",
 )
 def _chk_annex_c_of_11690() -> Outcome:
-    printed = {
-        "M1": (105.0, 79.0, 9.5),
-        "M2": (98.0, 81.0, 3.0),
-        "M3": (107.0, 87.0, 5.0),
-        "M4": (94.0, 82.0, 1.0),
-        "M5": (102.0, 84.0, 4.0),
-        "M6": (96.0, 82.0, 2.0),
-        "M7": (101.0, 84.0, 3.0),
-    }
+    printed = prediction.ANNEX_C_MACHINES_DB
     worst = 0.0
     matching = 0
-    for power, emission, want in printed.values():
+    for power, emission, want, _ in printed.values():
         got = ph.room.workstation_level_increase(
             sound_power_level_db=power,
             emission_level_db=emission,
-            absorption_area_m2=195.0,
+            absorption_area_m2=prediction.ANNEX_C_ABSORPTION_M2,
         )
         if abs(got - want) <= 0.45:
             matching += 1
@@ -891,8 +808,11 @@ def _chk_annex_c_of_11690() -> Outcome:
     "prints the edge of the diagram instead",
 )
 def _chk_m8_off_the_chart() -> Outcome:
+    power, emission, _, _ = prediction.ANNEX_C_M8_DB
     got = ph.room.workstation_level_increase(
-        sound_power_level_db=107.0, emission_level_db=78.0, absorption_area_m2=195.0
+        sound_power_level_db=power,
+        emission_level_db=emission,
+        absorption_area_m2=prediction.ANNEX_C_ABSORPTION_M2,
     )
     return numeric(
         12.4,
@@ -940,7 +860,7 @@ def _chk_typical_range() -> Outcome:
     low, high = ph.room.typical_decay_range("middle")
     keep = _keep("middle")
     inside = 0
-    for band in _SOURCE_POWER_DB:
+    for band in spatial.ANNEX_C_SOURCE_POWER_DB:
         got = ph.room.spatial_decay_rate(_corrected(band)[keep], _DISTANCES_M[keep])
         above = low is None or got >= low
         below = high is None or got <= high
@@ -966,38 +886,16 @@ _Machine = tuple[
     float, float, tuple[float, float, float], tuple[float, float, float] | None
 ]
 
-#: Tables B.2 and B.3 (printed folio 16): the box-shaped workroom, in metres,
-#: and the one mean absorption coefficient every surface of it is given.
-_B_ROOM_M = (20.0, 15.0, 7.0)
-_B_MEAN_ABSORPTION = 0.15
-
 #: C.1 (printed folio 18) reads the emission sound pressure level of a machine
 #: as a free-field value measured with the machine on a reflecting floor, and
 #: that half space is what the direct term of Annex B radiates into.
 _B_DIRECTIVITY = 2.0
 
-#: Tables B.5 and B.8 (printed folio 18): the three workstation positions, in
-#: metres. They are named here by where they stand and not by the labels the
-#: annex prints, because those labels contradict its own results.
-_B_BESIDE_M2 = (17.0, 4.0, 1.6)
-_B_FAR_CORNER = (3.0, 12.0, 1.6)
-_B_BESIDE_THE_NEW_MACHINE = (3.0, 4.0, 1.6)
-
-#: Tables B.4 and B.7 (printed folios 17 and 18). The emission level of M1 is
-#: printed in brackets and the footnote of both tables says a bracketed value
-#: is not used in the calculation; M1 is the machine of no workstation, so
-#: nothing here reads it.
-_B_M1: _Machine = (95.0, 80.0, (10.0, 3.0, 1.0), None)
-_B_M2: _Machine = (90.0, 77.0, (17.0, 3.0, 1.0), _B_BESIDE_M2)
-_B_M3: _Machine = (100.0, 87.0, (3.0, 3.0, 1.0), _B_BESIDE_THE_NEW_MACHINE)
-_B_M4: _Machine = (95.0, 82.0, (3.0, 3.0, 1.0), _B_BESIDE_THE_NEW_MACHINE)
-
-#: Table B.5: what the existing workstation already hears, in decibels.
-_B_BACKGROUND_DB = 50.0
-
-#: Table B.6 (printed folio 18), the "after" column of case A, and the "before"
-#: column of Table B.9, in decibels, by position.
-_B_PRINTED_CASE_A = {"beside M2": 82.1, "far corner": 80.3}
+#: Tables B.4 and B.7 (printed folios 17 and 18), the four machines, by name.
+_B_M1: _Machine = prediction.ANNEX_B_MACHINES["M1"]
+_B_M2: _Machine = prediction.ANNEX_B_MACHINES["M2"]
+_B_M3: _Machine = prediction.ANNEX_B_MACHINES["M3"]
+_B_M4: _Machine = prediction.ANNEX_B_MACHINES["M4"]
 
 #: The departure of the one cell of Table B.9 the model does not bring inside
 #: the half step of its printed tenth: beside the new machine with the first
@@ -1005,21 +903,6 @@ _B_PRINTED_CASE_A = {"beside M2": 82.1, "far corner": 80.3}
 #: contribution that would locate the difference, so it is recorded here as it
 #: is and not attributed to anything.
 _B_CASE_B_EXCEPTION_DB = -0.063
-
-#: Table B.9 (printed folio 18), the two "after" columns, in decibels, by
-#: position.
-_B_PRINTED_CASE_B = {
-    "first choice, M3 at 100 dB": {
-        "beside M2": 86.2,
-        "far corner": 85.7,
-        "beside the new machine": 89.4,
-    },
-    "second choice, M4 at 95 dB": {
-        "beside M2": 83.8,
-        "far corner": 82.8,
-        "beside the new machine": 85.4,
-    },
-}
 
 
 def _distance_m(source: tuple[float, ...], station: tuple[float, ...]) -> float:
@@ -1029,7 +912,7 @@ def _distance_m(source: tuple[float, ...], station: tuple[float, ...]) -> float:
 
 def _annex_b_absorption_m2() -> float:
     """``A`` of the workroom, from the dimensions and the coefficient printed."""
-    length, width, height = _B_ROOM_M
+    length, width, height = prediction.ANNEX_B_ROOM_M
     faces = (
         length * width,
         length * width,
@@ -1040,7 +923,7 @@ def _annex_b_absorption_m2() -> float:
     )
     return float(
         ph.room.equivalent_absorption_area(
-            [(area, _B_MEAN_ABSORPTION) for area in faces]
+            [(area, prediction.ANNEX_B_MEAN_ABSORPTION) for area in faces]
         )
     )
 
@@ -1087,10 +970,19 @@ def _annex_b_level(
 def _annex_b_case_a() -> dict[str, float]:
     """The two levels of case A, by position."""
     return {
-        "beside M2": _annex_b_level(_B_BESIDE_M2, (_B_M1, _B_M2)),
-        "far corner": _annex_b_level(
-            _B_FAR_CORNER, (_B_M1, _B_M2), background_db=_B_BACKGROUND_DB
+        # Table B.5 prints the 50 dB of background against the label W1, and the
+        # label is the half of that table this annex gets right: Figure B.1 puts
+        # W1 beside M2, and the levels of Table B.6 come back there. So the
+        # background is heard beside M2 and not in the far corner, which is
+        # where the label W2 belongs. It is worth 0,004 dB either way, and both
+        # readings round to the printed tenth; this one is the one that agrees
+        # with the rest of the row.
+        "beside M2": _annex_b_level(
+            prediction.ANNEX_B_BESIDE_M2,
+            (_B_M1, _B_M2),
+            background_db=prediction.ANNEX_B_BACKGROUND_DB,
         ),
+        "far corner": _annex_b_level(prediction.ANNEX_B_FAR_CORNER, (_B_M1, _B_M2)),
     }
 
 
@@ -1098,11 +990,15 @@ def _annex_b_case_b(new_machine: _Machine) -> dict[str, float]:
     """The three levels of case B for one of the two machines on offer."""
     machines = (_B_M1, _B_M2, new_machine)
     return {
-        "beside M2": _annex_b_level(_B_BESIDE_M2, machines),
-        "far corner": _annex_b_level(
-            _B_FAR_CORNER, machines, background_db=_B_BACKGROUND_DB
+        "beside M2": _annex_b_level(
+            prediction.ANNEX_B_BESIDE_M2,
+            machines,
+            background_db=prediction.ANNEX_B_BACKGROUND_DB,
         ),
-        "beside the new machine": _annex_b_level(_B_BESIDE_THE_NEW_MACHINE, machines),
+        "far corner": _annex_b_level(prediction.ANNEX_B_FAR_CORNER, machines),
+        "beside the new machine": _annex_b_level(
+            prediction.ANNEX_B_BESIDE_THE_NEW_MACHINE, machines
+        ),
     }
 
 
@@ -1115,7 +1011,7 @@ def _annex_b_case_b(new_machine: _Machine) -> dict[str, float]:
 )
 def _chk_annex_b_case_a() -> Outcome:
     computed = {where: round(level, 1) for where, level in _annex_b_case_a().items()}
-    return record(_B_PRINTED_CASE_A, computed, unit="dB")
+    return record(prediction.ANNEX_B_PRINTED_CASE_A_DB, computed, unit="dB")
 
 
 @register(
@@ -1130,7 +1026,9 @@ def _chk_annex_b_case_b() -> Outcome:
     exception = 0.0
     matching = 0
     total = 0
-    for machine, row in zip((_B_M3, _B_M4), _B_PRINTED_CASE_B.values(), strict=True):
+    for machine, row in zip(
+        (_B_M3, _B_M4), prediction.ANNEX_B_PRINTED_CASE_B_DB.values(), strict=True
+    ):
         computed = _annex_b_case_b(machine)
         for where, want in row.items():
             total += 1
@@ -1148,10 +1046,10 @@ def _chk_annex_b_case_b() -> Outcome:
         total,
         subject="printed levels of Table B.9",
         expected_label=(
-            f"6/6: five within the 0,05 dB half step of the printed tenth "
-            f"(worst {worst:.3f} dB), and the cell beside the new machine with "
-            f"the first choice at its recorded {_B_CASE_B_EXCEPTION_DB:+.3f} dB "
-            f"(computed {exception:+.4f} dB)"
+            f"{total}/{total}: all but one within the 0,05 dB half step of "
+            f"the printed tenth (worst {worst:.3f} dB), and the cell beside the "
+            f"new machine with the first choice at its recorded "
+            f"{_B_CASE_B_EXCEPTION_DB:+.3f} dB (computed {exception:+.4f} dB)"
         ),
     )
 
@@ -1169,7 +1067,10 @@ def _chk_annex_b_labels() -> Outcome:
         "first choice, M3 at 100 dB": _annex_b_case_b(_B_M3),
         "second choice, M4 at 95 dB": _annex_b_case_b(_B_M4),
     }
-    printed = {"before": _B_PRINTED_CASE_A, **_B_PRINTED_CASE_B}
+    printed = {
+        "before": prediction.ANNEX_B_PRINTED_CASE_A_DB,
+        **prediction.ANNEX_B_PRINTED_CASE_B_DB,
+    }
     # Figure B.1 draws W1 immediately above M2 and W2 alone in the far corner,
     # which is how the cells of Tables B.6 and B.9 are keyed above; Tables B.5
     # and B.8 tabulate coordinates for the same two labels the other way round.
@@ -1192,15 +1093,15 @@ def _chk_annex_b_labels() -> Outcome:
         reproduced + rejected,
         2 * cells,
         subject=(
-            "readings of the six printed cells, reproduced at the positions "
-            "Figure B.1 draws and rejected at the positions Tables B.5 and B.8 "
-            "tabulate"
+            f"readings of the {cells} printed cells, reproduced at the "
+            "positions Figure B.1 draws and rejected at the positions Tables "
+            "B.5 and B.8 tabulate"
         ),
         expected_label=(
-            "12/12: the six cells within 0,1 dB at the positions Figure B.1 "
-            "draws, and the same six more than 0,1 dB out at the positions "
-            f"Tables B.5 and B.8 tabulate (nearest {min(misses):.3f} dB, "
-            f"farthest {max(misses):.3f} dB)"
+            f"{2 * cells}/{2 * cells}: the {cells} cells within 0,1 dB at the "
+            f"positions Figure B.1 draws, and the same {cells} more than 0,1 dB "
+            f"out at the positions Tables B.5 and B.8 tabulate (nearest "
+            f"{min(misses):.3f} dB, farthest {max(misses):.3f} dB)"
         ),
     )
 
@@ -1216,31 +1117,18 @@ def _chk_annex_c_level_of_11690() -> Outcome:
     # Table C.1 (printed folio 19), as sound power level and emission level in
     # decibels, against the L'pA of Table C.2. The eighth machine is the one
     # the diagram cannot show, and the Figure C.1 row of this domain has it.
+    machines = prediction.ANNEX_C_MACHINES_DB
     declared = {
-        "M1": (105.0, 79.0),
-        "M2": (98.0, 81.0),
-        "M3": (107.0, 87.0),
-        "M4": (94.0, 82.0),
-        "M5": (102.0, 84.0),
-        "M6": (96.0, 82.0),
-        "M7": (101.0, 84.0),
+        name: (power, emission) for name, (power, emission, _, _) in machines.items()
     }
-    printed = {
-        "M1": 89.0,
-        "M2": 84.0,
-        "M3": 92.0,
-        "M4": 83.0,
-        "M5": 88.0,
-        "M6": 84.0,
-        "M7": 87.0,
-    }
+    printed = {name: level for name, (_, _, _, level) in machines.items()}
     computed = {
         name: float(
             round(
                 ph.room.workstation_level(
                     sound_power_level_db=power,
                     emission_level_db=emission,
-                    absorption_area_m2=195.0,
+                    absorption_area_m2=prediction.ANNEX_C_ABSORPTION_M2,
                 )
             )
         )
@@ -1281,19 +1169,15 @@ def _chk_clause_43_ranges() -> Outcome:
 
 # --- The worked examples that stand in where a standard prints none ---------
 
-#: IFA-LSA 01-234, Tab. 4.2 (printed folio 14): two-measurement means of T20 in
-#: a production hall, in seconds, by octave centre.
-_IFA_REVERBERATION_S = (3.5, 3.8, 3.3, 2.5)
-
-#: The same page prints "V = 30 . 20 . 10 m3 = 6000 m3" and
-#: "S = 2 . 20 . 30 m2 + 2 . 10 . 30 m2 + 2 . 10 . 20 m2 = 2200 m2".
-_IFA_VOLUME_M3 = 30.0 * 20.0 * 10.0
-_IFA_SURFACE_M2 = 2.0 * (20.0 * 30.0 + 10.0 * 30.0 + 10.0 * 20.0)
-
-#: Eq. (4.1) of the same sheet is printed with the 0,163 form of the Sabine
-#: constant, which is 24 ln 10 / c at c = 339 m/s; the library defaults to
-#: 343 m/s, which is the 0,161 form and about 1 % of absorption area away.
-_IFA_SPEED_M_S = 339.0
+#: IFA-LSA 01-234, Tab. 4.2 (printed folio 14): the volume and the boundary area
+#: the same page works out of the dimensions of the hall it prints.
+_IFA_LENGTH_M, _IFA_BREADTH_M, _IFA_HEIGHT_M = prediction.IFA_LSA_01_234_HALL_M
+_IFA_VOLUME_M3 = _IFA_LENGTH_M * _IFA_BREADTH_M * _IFA_HEIGHT_M
+_IFA_SURFACE_M2 = 2.0 * (
+    _IFA_BREADTH_M * _IFA_LENGTH_M
+    + _IFA_HEIGHT_M * _IFA_LENGTH_M
+    + _IFA_HEIGHT_M * _IFA_BREADTH_M
+)
 
 
 def _ifa_absorption_area_m2() -> list[float]:
@@ -1302,7 +1186,9 @@ def _ifa_absorption_area_m2() -> list[float]:
         float(area)
         for area in np.asarray(
             ph.room.sabine_absorption_area(
-                _IFA_VOLUME_M3, _IFA_REVERBERATION_S, speed_of_sound=_IFA_SPEED_M_S
+                _IFA_VOLUME_M3,
+                prediction.IFA_LSA_01_234_REVERBERATION_S,
+                speed_of_sound=prediction.IFA_LSA_01_234_SPEED_M_S,
             )
         ).tolist()
     ]
@@ -1315,7 +1201,8 @@ def _ifa_absorption_area_m2() -> list[float]:
     "reverberation times measured in it",
 )
 def _chk_ifa_absorption_area() -> Outcome:
-    printed = {"500 Hz": 279.0, "1 kHz": 257.0, "2 kHz": 296.0, "4 kHz": 391.0}
+    labels = ("500 Hz", "1 kHz", "2 kHz", "4 kHz")
+    printed = dict(zip(labels, prediction.IFA_LSA_01_234_PRINTED_AREA_M2, strict=True))
     computed = dict(
         zip(
             printed,
@@ -1333,7 +1220,10 @@ def _chk_ifa_absorption_area() -> Outcome:
     "over the 2 200 m2 of boundary the sheet works out from its dimensions",
 )
 def _chk_ifa_mean_absorption() -> Outcome:
-    printed = {"500 Hz": 0.13, "1 kHz": 0.12, "2 kHz": 0.13, "4 kHz": 0.18}
+    labels = ("500 Hz", "1 kHz", "2 kHz", "4 kHz")
+    printed = dict(
+        zip(labels, prediction.IFA_LSA_01_234_PRINTED_ABSORPTION, strict=True)
+    )
     computed = dict(
         zip(
             printed,
@@ -1357,12 +1247,17 @@ def _chk_energy_addition_at_a_workstation() -> Outcome:
     # prints the nine contributions and the two totals; the 3,7 dB benefit is
     # printed in the text on folio 199, as the difference of those two totals.
     before = ph.room.total_workstation_level(
-        [70.7, 79.1, 71.1, 75.6, 64.2, 69.1, 69.6, 67.6, 69.0]
+        list(prediction.VER_BERANEK_TABLE_7_4_BEFORE_DB)
     )
     after = ph.room.total_workstation_level(
-        [65.3, 74.8, 67.5, 73.5, 60.0, 65.5, 65.6, 63.8, 63.2]
+        list(prediction.VER_BERANEK_TABLE_7_4_AFTER_DB)
     )
-    printed = {"before treatment": 82.4, "after treatment": 78.7, "the benefit": 3.7}
+    total_before, total_after = prediction.VER_BERANEK_TABLE_7_4_TOTALS_DB
+    printed = {
+        "before treatment": total_before,
+        "after treatment": total_after,
+        "the benefit": prediction.VER_BERANEK_TREATMENT_BENEFIT_DB,
+    }
     computed = {
         "before treatment": before,
         "after treatment": after,
@@ -1384,20 +1279,6 @@ def _chk_energy_addition_at_a_workstation() -> Outcome:
 
 # --- Barron (2003), the direct-plus-reverberant field of a category 1 method -
 
-#: Example 7-8 and Table 7-5 (printed folios 307 and 308): a production machine
-#: in a 20 m by 20 m by 4 m room of 1 120 m2 of boundary, with the operator 3 m
-#: away and a directivity factor of unity. The sound power level and the room
-#: constant are printed by octave band; the room constant is the column to
-#: feed, because the absorption coefficient printed at 2 kHz does not give it.
-_BARRON_SURFACE_M2 = 1120.0
-_BARRON_DISTANCE_M = 3.0
-_BARRON_POWER_DB = (103.0, 109.0, 114.0, 117.0, 113.0, 107.0)
-_BARRON_ROOM_CONSTANT_M2 = (40.62, 51.55, 60.19, 84.30, 47.88, 66.44)
-
-#: Eqs. (7-18) and (7-73) carry 10 lg(rho c / 400) as the literal +0,1 dB the
-#: book rounds it to, and the worked lines add exactly that.
-_BARRON_IMPEDANCE_TERM_DB = 0.1
-
 
 @register(
     _WORKROOM,
@@ -1407,26 +1288,23 @@ _BARRON_IMPEDANCE_TERM_DB = 0.1
     "the statement and the worked line write it, Q/(4 pi r^2)",
 )
 def _chk_barron_example_7_8() -> Outcome:
-    printed = {
-        "125 Hz": 93.4,
-        "250 Hz": 98.5,
-        "500 Hz": 102.9,
-        "1 kHz": 104.6,
-        "2 kHz": 102.8,
-        "4 kHz": 95.5,
-    }
+    labels = ("125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz")
+    printed = dict(zip(labels, enclosure.BARRON_TABLE_7_5_LP_WITHOUT_DB, strict=True))
     levels = np.asarray(
         ph.room.steady_state_spl(
-            _BARRON_POWER_DB,
-            _BARRON_DISTANCE_M,
-            _BARRON_ROOM_CONSTANT_M2,
+            enclosure.BARRON_TABLE_7_5_LW_DB,
+            enclosure.BARRON_EXAMPLE_7_8_OPERATOR_DISTANCE_M,
+            enclosure.BARRON_TABLE_7_5_ROOM_CONSTANT_M2,
             directivity=1.0,
         )
     )
     computed = dict(
         zip(
             printed,
-            (round(level + _BARRON_IMPEDANCE_TERM_DB, 1) for level in levels.tolist()),
+            (
+                round(level + prediction.BARRON_IMPEDANCE_TERM_DB, 1)
+                for level in levels.tolist()
+            ),
             strict=True,
         )
     )
@@ -1440,10 +1318,13 @@ def _chk_barron_example_7_8() -> Outcome:
     "0,041 gives, and not the 0,043 the row above it prints",
 )
 def _chk_barron_table_7_5_absorption_row() -> Outcome:
-    implied = float(ph.room.room_constant(_BARRON_SURFACE_M2, 0.041))
-    printed_absorption = float(ph.room.room_constant(_BARRON_SURFACE_M2, 0.043))
+    surface = enclosure.BARRON_EXAMPLE_7_8_SURFACE_M2
+    implied = float(ph.room.room_constant(surface, 0.041))
+    printed_absorption = float(
+        ph.room.room_constant(surface, enclosure.BARRON_TABLE_7_5_ABSORPTION_AT_2_KHZ)
+    )
     return numeric(
-        47.88,
+        enclosure.BARRON_TABLE_7_5_ROOM_CONSTANT_M2[4],
         implied,
         0.005,
         unit="m²",
@@ -1462,13 +1343,25 @@ def _chk_barron_table_7_5_absorption_row() -> Outcome:
     "example works out and a directivity factor of 2",
 )
 def _chk_barron_example_7_6() -> Outcome:
-    room_constant = float(ph.room.room_constant(900.0, 0.05))
+    room_constant = float(
+        ph.room.room_constant(
+            prediction.BARRON_EXAMPLE_7_6_SOURCE_SURFACE_M2,
+            prediction.BARRON_EXAMPLE_7_6_SOURCE_ABSORPTION,
+        )
+    )
     level = (
-        float(ph.room.steady_state_spl(105.0, 4.0, room_constant, directivity=2.0))
-        + _BARRON_IMPEDANCE_TERM_DB
+        float(
+            ph.room.steady_state_spl(
+                prediction.BARRON_EXAMPLE_7_6_POWER_LEVEL_DB,
+                prediction.BARRON_EXAMPLE_7_6_SOURCE_DISTANCE_M,
+                room_constant,
+                directivity=prediction.BARRON_EXAMPLE_7_6_DIRECTIVITY,
+            )
+        )
+        + prediction.BARRON_IMPEDANCE_TERM_DB
     )
     return numeric(
-        94.8,
+        prediction.BARRON_EXAMPLE_7_6_SOURCE_ROOM_LEVEL_DB,
         level,
         0.06,
         unit="dB",

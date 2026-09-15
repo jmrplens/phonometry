@@ -32,9 +32,9 @@ The five sources, with the page each value was read on:
   Springer Vieweg, 2023, chapter 10, 10.8.1, PDF pages 517 and 518, printed
   folios 499 and 500.
 
-The values are written out here, where the citation is, and the last test pins
-them to the copies the conformance rows read. One transcription can be wrong;
-two that must agree cannot drift apart unnoticed.
+The values themselves are in ``tests/reference_data/enclosure_cabin_insulation.py``
+and ``tests/reference_data/rounding.py``, each beside its citation, and the
+conformance rows read the same objects; the last test pins that they do.
 """
 
 from __future__ import annotations
@@ -45,6 +45,9 @@ import sys
 
 import numpy as np
 import pytest
+import reference_data as ref
+from reference_data import enclosure_cabin_insulation as oracle
+from reference_data import rounding
 
 from phonometry import noise_control
 from phonometry.noise_control.enclosure_insulation import _a_weighted_total
@@ -57,79 +60,47 @@ from conformance.domains import enclosure_cabin_insulation as rows
 
 #: The six octave bands both enclosure examples are worked in, in hertz, which
 #: are exactly the mandatory octave range of clause 6.2 of ISO 11546-1.
-OCTAVES_HZ = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+OCTAVES_HZ = np.array(oracle.BARRON_TABLE_7_5_OCTAVES_HZ)
 
 # Barron, Table 7-5, printed folio 308. Machine sound power, the power
 # radiated once the enclosure is in place, the insertion loss, and the sound
 # pressure levels at the operator 3 m away with and without the enclosure.
-BARRON_LW_DB = np.array([103.0, 109.0, 114.0, 117.0, 113.0, 107.0])
-BARRON_LW_OUT_DB = np.array([92.0, 95.4, 97.0, 98.2, 94.2, 82.7])
-BARRON_IL_DB = np.array([11.0, 13.6, 17.0, 18.8, 18.9, 24.3])
-BARRON_POWER_RATIO = np.array([12.70, 22.78, 50.29, 76.10, 77.81, 267.6])
-BARRON_LP_WITHOUT_DB = np.array([93.4, 98.5, 102.9, 104.6, 102.8, 95.5])
-BARRON_LP_WITH_DB = np.array([82.4, 84.9, 85.9, 85.8, 83.9, 71.2])
+BARRON_LW_DB = np.array(oracle.BARRON_TABLE_7_5_LW_DB)
+BARRON_LW_OUT_DB = np.array(oracle.BARRON_TABLE_7_5_LW_OUT_DB)
+BARRON_IL_DB = np.array(oracle.BARRON_TABLE_7_5_IL_DB)
+BARRON_POWER_RATIO = np.array(oracle.BARRON_TABLE_7_5_POWER_RATIO)
+BARRON_LP_WITHOUT_DB = np.array(oracle.BARRON_TABLE_7_5_LP_WITHOUT_DB)
+BARRON_LP_WITH_DB = np.array(oracle.BARRON_TABLE_7_5_LP_WITH_DB)
 
 # Folio 309: "L_A = 108.4 dBA (without the enclosure)". Folio 311: "L_A = 89.8
 # dBA (with the enclosure)". Their difference is D_pA; the book never prints
 # it, and it is formed here from the two printed totals.
-BARRON_LPA_WITHOUT_DBA = 108.4
-BARRON_LPA_WITH_DBA = 89.8
+BARRON_LPA_WITHOUT_DBA = oracle.BARRON_EXAMPLE_7_8_LPA_WITHOUT_DBA
+BARRON_LPA_WITH_DBA = oracle.BARRON_EXAMPLE_7_8_LPA_WITH_DBA
 
-# Harris, Figures A3-2 and A3-8: the same octave levels at the worker's
-# station before any treatment, and the A-weighted level the figures print for
-# them.
-HARRIS_BEFORE_DB = np.array([108.0, 103.0, 99.0, 104.0, 101.0, 85.0])
-HARRIS_BEFORE_DBA = 107.0
-
-#: The four cases of those two figures: the per-band reduction of each and the
-#: A-weighted level the figure prints once it is applied. Example 1 prints its
-#: insertion loss as one row; Example 3 prints a room adjustment and a
-#: transmission loss, added here, which is exact arithmetic on the printed
-#: lines but a construction rather than a quotation.
-HARRIS_CASES: dict[str, tuple[list[float], float]] = {
-    "Example 1(a), plywood": ([13.0, 11.0, 12.0, 12.0, 13.0, 15.0], 94.0),
-    "Example 1(b), plywood and insulation": (
-        [18.0, 17.0, 23.0, 30.0, 38.0, 40.0],
-        81.0,
-    ),
-    "Example 3(a), plain wall": ([16.0, 24.0, 40.0, 49.0, 50.0, 41.0], 77.0),
-    "Example 3(b), insulated wall": ([24.0, 36.0, 50.0, 58.0, 61.0, 46.0], 68.0),
-}
+# Harris, Figures A3-2 and A3-8: the octave levels at the worker's station
+# before any treatment, the A-weighted level the figures print for them, and
+# the four cases of the two figures.
+HARRIS_BEFORE_DB = np.array(oracle.HARRIS_BEFORE_DB)
+HARRIS_BEFORE_DBA = oracle.HARRIS_BEFORE_DBA
+HARRIS_CASES = oracle.HARRIS_CASES
 
 # ISO 717-1:2020 Table C.1, the sound reduction index column over the sixteen
 # one-third-octave rating bands, read as an insulation spectrum because
 # clause 7.4 of ISO 11546-1 rates D_W exactly the way ISO 717-1 rates R.
-ISO717_TABLE_C1_DB = [
-    20.4,
-    16.3,
-    17.7,
-    22.6,
-    22.4,
-    22.7,
-    24.8,
-    26.6,
-    28.0,
-    30.5,
-    31.8,
-    32.5,
-    33.4,
-    33.0,
-    31.0,
-    25.5,
-]
+ISO717_TABLE_C1_DB = ref.ISO717_1_ANNEX_C_R
 
 # Suva 6.2.1: the manufacturer's octave sound power levels of a converter set,
 # of which the guide says "Diese Werte ergeben L_WA = 104 dB".
-SUVA_OCTAVES_HZ = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
-SUVA_LW_DB = np.array([91.0, 98.0, 102.0, 101.0, 99.0, 98.0, 91.0, 85.0])
-SUVA_LWA_DB = 104.0
+SUVA_OCTAVES_HZ = np.array(oracle.SUVA_OCTAVES_HZ)
+SUVA_LW_DB = np.array(oracle.SUVA_LW_DB)
+SUVA_LWA_DB = oracle.SUVA_LWA_DB
 
-# Schirmer, 10.8.1: an enclosure 6 m by 5 m by 3 m high with a 0,25 m² exhaust
-# opening, whose walls and roof come to 96 m² with the opening counted in and
-# the floor left out, and the opening fraction q the book prints for it.
-SCHIRMER_OPENING_M2 = 0.25
-SCHIRMER_SURFACE_M2 = 96.0
-SCHIRMER_LEAK_RATIO = 2.6e-3
+# Schirmer, 10.8.1: the opening, the 96 m2 of walls and roof with the opening
+# counted in and the floor left out, and the opening fraction q it prints.
+SCHIRMER_OPENING_M2 = oracle.SCHIRMER_OPENING_M2
+SCHIRMER_SURFACE_M2 = oracle.SCHIRMER_SURFACE_M2
+SCHIRMER_LEAK_RATIO = oracle.SCHIRMER_LEAK_RATIO
 
 
 def _barron_pressure() -> noise_control.EnclosureInsulationResult:
@@ -197,7 +168,7 @@ def test_barron_example_7_8_sound_power_insulation() -> None:
     bands reproduce the printed insertion loss exactly; the sixth is the band
     the table itself is inconsistent in, and the test below says how.
     """
-    keep = OCTAVES_HZ != 2000.0
+    keep = OCTAVES_HZ != oracle.BARRON_TABLE_7_5_INCONSISTENT_BAND_HZ
     result = noise_control.sound_power_insulation(
         BARRON_LW_DB[keep],
         BARRON_LW_OUT_DB[keep],
@@ -223,7 +194,9 @@ def test_barron_table_7_5_is_a_tenth_out_at_2_khz() -> None:
     from_ratio = 10.0 * np.log10(BARRON_POWER_RATIO)
     assert np.round(from_ratio, 1) == pytest.approx(BARRON_IL_DB)
 
-    band = int(np.flatnonzero(OCTAVES_HZ == 2000.0)[0])
+    band = int(
+        np.flatnonzero(OCTAVES_HZ == oracle.BARRON_TABLE_7_5_INCONSISTENT_BAND_HZ)[0]
+    )
     printed = BARRON_LW_DB[band] - BARRON_LW_OUT_DB[band]
     assert printed == pytest.approx(18.8, abs=1e-9)
     assert BARRON_IL_DB[band] == 18.9
@@ -312,14 +285,10 @@ def test_clause_9_4_rounding_is_rule_a_of_iso_80000_1() -> None:
     two ties at rounding range 10 are exact and are the pair that decides.
     """
     printed = {
-        "B.2, 12,223 at range 0,1": (12.223 / 0.1, 122),
-        "B.2, 12,251 at range 0,1": (12.251 / 0.1, 123),
-        "B.2, 12,275 at range 0,1": (12.275 / 0.1, 123),
-        "B.2, 1 223,3 at range 10": (1223.3 / 10.0, 122),
-        "B.2, 1 225,1 at range 10": (1225.1 / 10.0, 123),
-        "B.2, 1 227,5 at range 10": (1227.5 / 10.0, 123),
-        "B.3 Rule A, 1 225,0 at range 10": (1225.0 / 10.0, 122),
-        "B.3 Rule A, 1 235,0 at range 10": (1235.0 / 10.0, 124),
+        name: (number / scale, multiples)
+        for name, (number, scale, multiples) in (
+            rounding.ISO80000_1_ANNEX_B_ROUNDINGS.items()
+        )
     }
     given = [multiple for multiple, _ in printed.values()]
     rounded = noise_control.sound_power_insulation(given, [0.0] * len(given)).rounded()
@@ -390,28 +359,19 @@ def test_schirmer_leak_ratio() -> None:
 
 
 def test_the_conformance_rows_read_the_same_printed_values() -> None:
-    """One transcription can be wrong; two that must agree cannot drift.
+    """One transcription, read by the tests and by the conformance rows alike.
 
-    The conformance rows carry their own copy of these tables, because a row
-    is read as evidence beside its citation. This pins the two copies to each
-    other, so a correction to either one fails here until both are made.
+    The rows used to carry a copy of these tables of their own. They read
+    ``tests/reference_data`` now, so a correction lands in both at once; this
+    pins that they still do, and that the band they drop from the sound power
+    comparison is the one the table is inconsistent in.
     """
+    assert rows.oracle is oracle
+    assert rows.rounding is rounding
     assert rows._BOOK_OCTAVES_HZ.tolist() == OCTAVES_HZ.tolist()
     assert rows._BARRON_LW_DB.tolist() == BARRON_LW_DB.tolist()
     assert rows._BARRON_LW_OUT_DB.tolist() == BARRON_LW_OUT_DB.tolist()
     assert rows._BARRON_IL_DB.tolist() == BARRON_IL_DB.tolist()
     assert rows._BARRON_LP_WITHOUT_DB.tolist() == BARRON_LP_WITHOUT_DB.tolist()
     assert rows._BARRON_LP_WITH_DB.tolist() == BARRON_LP_WITH_DB.tolist()
-    assert rows._BARRON_LPA_WITHOUT_DBA == BARRON_LPA_WITHOUT_DBA
-    assert rows._BARRON_LPA_WITH_DBA == BARRON_LPA_WITH_DBA
     assert rows._BARRON_POWER_BANDS.tolist() == (OCTAVES_HZ != 2000.0).tolist()
-    assert rows._HARRIS_BEFORE_DB.tolist() == HARRIS_BEFORE_DB.tolist()
-    assert set(rows._HARRIS_CASES) == set(HARRIS_CASES)
-    for case, (reduction, printed_reduction) in rows._HARRIS_CASES.items():
-        want_reduction, want_total = HARRIS_CASES[case]
-        assert reduction == want_reduction, case
-        assert printed_reduction == pytest.approx(HARRIS_BEFORE_DBA - want_total), case
-    assert rows._ISO717_TABLE_C1_DB == ISO717_TABLE_C1_DB
-    assert rows._SUVA_OCTAVES_HZ.tolist() == SUVA_OCTAVES_HZ.tolist()
-    assert rows._SUVA_LW_DB.tolist() == SUVA_LW_DB.tolist()
-    assert rows._SUVA_LWA_DB == SUVA_LWA_DB

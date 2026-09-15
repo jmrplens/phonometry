@@ -16,7 +16,9 @@ published worked examples stand where neither annex reaches: a German data
 sheet for the step from a reverberation time to an absorption area, Ver &
 Beranek for the energy addition at a workstation with nine machines around it,
 and Barron for the direct-plus-reverberant field each contribution is read
-from.
+from. Every printed number is in ``tests/reference_data/workroom_prediction.py``
+(Barron's Table 7-5 in ``enclosure_cabin_insulation.py``), with its folio and
+page, and the conformance rows read it there too.
 """
 
 from __future__ import annotations
@@ -24,6 +26,8 @@ from __future__ import annotations
 import math
 
 import pytest
+from reference_data import enclosure_cabin_insulation as enclosure
+from reference_data import workroom_prediction as oracle
 
 from phonometry import room
 from phonometry.room.workroom_prediction import (
@@ -33,33 +37,21 @@ from phonometry.room.workroom_prediction import (
     SOURCE_DETAIL_LEVELS,
 )
 
-#: Table C.1 and Table C.2: the machines, and what the annex reads for them.
-ANNEX_C = {
-    "M1": (105.0, 79.0, 9.5, 89.0),
-    "M2": (98.0, 81.0, 3.0, 84.0),
-    "M3": (107.0, 87.0, 5.0, 92.0),
-    "M4": (94.0, 82.0, 1.0, 83.0),
-    "M5": (102.0, 84.0, 4.0, 88.0),
-    "M6": (96.0, 82.0, 2.0, 84.0),
-    "M7": (101.0, 84.0, 3.0, 87.0),
-}
 
-#: C.2.2: the absorption area of the example room, in square metres.
-ANNEX_C_ABSORPTION_M2 = 195.0
-
-
-@pytest.mark.parametrize("machine", sorted(ANNEX_C))
+@pytest.mark.parametrize("machine", sorted(oracle.ANNEX_C_MACHINES_DB))
 def test_the_increase_reproduces_table_c2(machine: str) -> None:
-    power, emission, printed_increase, printed_level = ANNEX_C[machine]
+    power, emission, printed_increase, printed_level = oracle.ANNEX_C_MACHINES_DB[
+        machine
+    ]
     increase = room.workstation_level_increase(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=ANNEX_C_ABSORPTION_M2,
+        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
     )
     level = room.workstation_level(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=ANNEX_C_ABSORPTION_M2,
+        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
     )
     assert increase == pytest.approx(printed_increase, abs=0.45)
     assert level == pytest.approx(printed_level, abs=0.45)
@@ -67,13 +59,14 @@ def test_the_increase_reproduces_table_c2(machine: str) -> None:
 
 def test_the_eighth_machine_runs_off_the_top_of_figure_c1() -> None:
     """Table C.2 prints the edge of the diagram for M8 (see the errata)."""
+    power, emission, printed_increase, _ = oracle.ANNEX_C_M8_DB
     increase = room.workstation_level_increase(
-        sound_power_level_db=107.0,
-        emission_level_db=78.0,
-        absorption_area_m2=ANNEX_C_ABSORPTION_M2,
+        sound_power_level_db=power,
+        emission_level_db=emission,
+        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
     )
     assert increase == pytest.approx(12.4, abs=0.1)
-    assert increase > 10.0
+    assert increase > printed_increase
 
 
 def test_a_bigger_room_adds_less() -> None:
@@ -176,18 +169,18 @@ def test_the_regions_the_clause_leaves_open_stay_open() -> None:
     assert room.typical_excess_range("far") == (None, None)
 
 
-@pytest.mark.parametrize("machine", sorted(ANNEX_C))
+@pytest.mark.parametrize("machine", sorted(oracle.ANNEX_C_MACHINES_DB))
 def test_the_workstation_level_rounds_to_the_printed_integer(machine: str) -> None:
     """Table C.2 prints L'pA as a whole number, and all seven of them land.
 
     BS EN ISO 11690-3:1999, Table C.1 on printed folio 19 (PDF page 29) and
     Table C.2 on printed folio 20 (PDF page 30).
     """
-    power, emission, _, printed_level = ANNEX_C[machine]
+    power, emission, _, printed_level = oracle.ANNEX_C_MACHINES_DB[machine]
     level = room.workstation_level(
         sound_power_level_db=power,
         emission_level_db=emission,
-        absorption_area_m2=ANNEX_C_ABSORPTION_M2,
+        absorption_area_m2=oracle.ANNEX_C_ABSORPTION_M2,
     )
     assert round(level) == printed_level
 
@@ -199,56 +192,30 @@ def test_the_workstation_level_rounds_to_the_printed_integer(machine: str) -> No
 # printed folio 17 (PDF page 27), and Tables B.5 to B.9 on printed folio 18
 # (PDF page 28).
 
-#: Tables B.2 and B.3: the box-shaped workroom, in metres, and the one mean
-#: absorption coefficient every surface of it is given.
-ANNEX_B_ROOM_M = (20.0, 15.0, 7.0)
-ANNEX_B_MEAN_ABSORPTION = 0.15
-
 #: C.1 reads a declared emission level as a free-field value measured with the
 #: machine on a reflecting floor, and that half space is what the direct term
 #: of Annex B radiates into.
 ANNEX_B_DIRECTIVITY = 2.0
 
-#: Tables B.5 and B.8: the three workstation positions, in metres. They are
-#: named here by where they stand, because the labels the annex attaches to the
-#: first two contradict the results it prints for them.
-BESIDE_M2 = (17.0, 4.0, 1.6)
-FAR_CORNER = (3.0, 12.0, 1.6)
-BESIDE_THE_NEW_MACHINE = (3.0, 4.0, 1.6)
+#: The three workstation positions and the four machines of Tables B.4 to B.8,
+#: named by where they stand.
+BESIDE_M2 = oracle.ANNEX_B_BESIDE_M2
+FAR_CORNER = oracle.ANNEX_B_FAR_CORNER
+BESIDE_THE_NEW_MACHINE = oracle.ANNEX_B_BESIDE_THE_NEW_MACHINE
+ANNEX_B_M1 = oracle.ANNEX_B_MACHINES["M1"]
+ANNEX_B_M2 = oracle.ANNEX_B_MACHINES["M2"]
+ANNEX_B_M3 = oracle.ANNEX_B_MACHINES["M3"]
+ANNEX_B_M4 = oracle.ANNEX_B_MACHINES["M4"]
 
-#: Tables B.4 and B.7: sound power level and emission level in decibels,
-#: position in metres, and the workstation the machine is the machine of. The
-#: emission level of M1 is printed in brackets, which its footnote says means
-#: it is not used in the calculation; M1 is the machine of no workstation.
-ANNEX_B_M1 = (95.0, 80.0, (10.0, 3.0, 1.0), None)
-ANNEX_B_M2 = (90.0, 77.0, (17.0, 3.0, 1.0), BESIDE_M2)
-ANNEX_B_M3 = (100.0, 87.0, (3.0, 3.0, 1.0), BESIDE_THE_NEW_MACHINE)
-ANNEX_B_M4 = (95.0, 82.0, (3.0, 3.0, 1.0), BESIDE_THE_NEW_MACHINE)
-
-#: Table B.5: what the existing workstation already hears, in decibels.
-ANNEX_B_BACKGROUND_DB = 50.0
-
-#: Table B.6, and the "before" column of Table B.9, in decibels, by position.
-PRINTED_CASE_A = {"beside M2": 82.1, "far corner": 80.3}
-
-#: Table B.9, the two "after" columns, in decibels, by position.
-PRINTED_CASE_B = {
-    "first": {
-        "beside M2": 86.2,
-        "far corner": 85.7,
-        "beside the new machine": 89.4,
-    },
-    "second": {
-        "beside M2": 83.8,
-        "far corner": 82.8,
-        "beside the new machine": 85.4,
-    },
-}
+#: Table B.9, the two "after" columns, keyed by the choice.
+PRINTED_CASE_B = dict(
+    zip(("first", "second"), oracle.ANNEX_B_PRINTED_CASE_B_DB.values(), strict=True)
+)
 
 
 def annex_b_absorption_m2() -> float:
     """A of the workroom, from the printed dimensions and coefficient."""
-    length, width, height = ANNEX_B_ROOM_M
+    length, width, height = oracle.ANNEX_B_ROOM_M
     faces = (
         length * width,
         length * width,
@@ -259,7 +226,7 @@ def annex_b_absorption_m2() -> float:
     )
     return float(
         room.equivalent_absorption_area(
-            [(area, ANNEX_B_MEAN_ABSORPTION) for area in faces]
+            [(area, oracle.ANNEX_B_MEAN_ABSORPTION) for area in faces]
         )
     )
 
@@ -303,7 +270,7 @@ def annex_b_case_a() -> dict[str, float]:
         "far corner": annex_b_level(
             FAR_CORNER,
             (ANNEX_B_M1, ANNEX_B_M2),
-            existing_level_db=ANNEX_B_BACKGROUND_DB,
+            existing_level_db=oracle.ANNEX_B_BACKGROUND_DB,
         ),
     }
 
@@ -316,7 +283,7 @@ def annex_b_case_b(
     return {
         "beside M2": annex_b_level(BESIDE_M2, machines),
         "far corner": annex_b_level(
-            FAR_CORNER, machines, existing_level_db=ANNEX_B_BACKGROUND_DB
+            FAR_CORNER, machines, existing_level_db=oracle.ANNEX_B_BACKGROUND_DB
         ),
         "beside the new machine": annex_b_level(BESIDE_THE_NEW_MACHINE, machines),
     }
@@ -346,10 +313,12 @@ def test_the_two_kinds_of_contribution_of_annex_b() -> None:
     assert own == pytest.approx(78.726, abs=1e-3)
 
 
-@pytest.mark.parametrize("where", sorted(PRINTED_CASE_A))
+@pytest.mark.parametrize("where", sorted(oracle.ANNEX_B_PRINTED_CASE_A_DB))
 def test_case_a_reproduces_table_b6(where: str) -> None:
     """Table B.6: 82,1 dB beside M2 and 80,3 dB in the far corner."""
-    assert annex_b_case_a()[where] == pytest.approx(PRINTED_CASE_A[where], abs=0.05)
+    assert annex_b_case_a()[where] == pytest.approx(
+        oracle.ANNEX_B_PRINTED_CASE_A_DB[where], abs=0.05
+    )
 
 
 @pytest.mark.parametrize("choice", sorted(PRINTED_CASE_B))
@@ -391,23 +360,15 @@ def test_the_annex_b_results_belong_to_the_positions_not_to_the_labels() -> None
 
 # --- The worked examples that stand where neither annex prints one ----------
 
-#: IFA-LSA 01-234, Raumakustik in industriellen Arbeitsraeumen, IFA and DGUV,
-#: 2. aktualisierte Ausgabe April 2020, Tab. 4.2 on printed folio 14 (PDF page
-#: 14): two-measurement means of T20 in a 6 000 m3 production hall, in seconds,
-#: from 500 Hz to 4 kHz.
-IFA_REVERBERATION_S = (3.5, 3.8, 3.3, 2.5)
-
-#: The same page prints the volume and the boundary area it works them out of.
-IFA_VOLUME_M3 = 30.0 * 20.0 * 10.0
-IFA_SURFACE_M2 = 2.0 * (20.0 * 30.0 + 10.0 * 30.0 + 10.0 * 20.0)
-
-#: Eq. (4.1) of the sheet carries the 0,163 form of the Sabine constant, which
-#: is the one a speed of sound of 339 m/s gives.
-IFA_SPEED_M_S = 339.0
-
-#: Tab. 4.2: the absorption area and the mean absorption coefficient printed.
-IFA_PRINTED_AREA_M2 = (279.0, 257.0, 296.0, 391.0)
-IFA_PRINTED_ABSORPTION = (0.13, 0.12, 0.13, 0.18)
+#: IFA-LSA 01-234 (2020), Tab. 4.2: the volume and the boundary area the page
+#: works out of the hall it prints.
+IFA_LENGTH_M, IFA_BREADTH_M, IFA_HEIGHT_M = oracle.IFA_LSA_01_234_HALL_M
+IFA_VOLUME_M3 = IFA_LENGTH_M * IFA_BREADTH_M * IFA_HEIGHT_M
+IFA_SURFACE_M2 = 2.0 * (
+    IFA_BREADTH_M * IFA_LENGTH_M
+    + IFA_HEIGHT_M * IFA_LENGTH_M
+    + IFA_HEIGHT_M * IFA_BREADTH_M
+)
 
 
 def test_the_printed_geometry_of_the_ifa_hall() -> None:
@@ -419,18 +380,24 @@ def test_the_printed_geometry_of_the_ifa_hall() -> None:
 def test_the_ifa_hall_reproduces_tab_4_2() -> None:
     """Tab. 4.2: 279, 257, 296 and 391 m2, and 0,13, 0,12, 0,13 and 0,18."""
     areas = room.sabine_absorption_area(
-        IFA_VOLUME_M3, IFA_REVERBERATION_S, speed_of_sound=IFA_SPEED_M_S
+        IFA_VOLUME_M3,
+        oracle.IFA_LSA_01_234_REVERBERATION_S,
+        speed_of_sound=oracle.IFA_LSA_01_234_SPEED_M_S,
     )
-    assert [round(float(area)) for area in areas] == list(IFA_PRINTED_AREA_M2)
+    assert [round(float(area)) for area in areas] == list(
+        oracle.IFA_LSA_01_234_PRINTED_AREA_M2
+    )
     assert [round(float(area) / IFA_SURFACE_M2, 2) for area in areas] == list(
-        IFA_PRINTED_ABSORPTION
+        oracle.IFA_LSA_01_234_PRINTED_ABSORPTION
     )
 
 
 def test_the_worked_500_hz_step_of_the_ifa_sheet() -> None:
     """A = 0,163 . 6000 / 3,5 m2, printed as approximately 279 m2."""
     area = float(
-        room.sabine_absorption_area(IFA_VOLUME_M3, 3.5, speed_of_sound=IFA_SPEED_M_S)
+        room.sabine_absorption_area(
+            IFA_VOLUME_M3, 3.5, speed_of_sound=oracle.IFA_LSA_01_234_SPEED_M_S
+        )
     )
     assert area == pytest.approx(279.454, abs=1e-3)
     assert area / IFA_SURFACE_M2 == pytest.approx(0.127, abs=1e-3)
@@ -449,17 +416,16 @@ def test_the_energy_addition_reproduces_table_7_4() -> None:
     82,4 dB before the ceiling treatment. The total after it, and the 3,7 dB
     benefit the text draws from the pair, both round as printed.
     """
-    before = room.total_workstation_level(
-        [70.7, 79.1, 71.1, 75.6, 64.2, 69.1, 69.6, 67.6, 69.0]
-    )
-    after = room.total_workstation_level(
-        [65.3, 74.8, 67.5, 73.5, 60.0, 65.5, 65.6, 63.8, 63.2]
-    )
+    before = room.total_workstation_level(list(oracle.VER_BERANEK_TABLE_7_4_BEFORE_DB))
+    after = room.total_workstation_level(list(oracle.VER_BERANEK_TABLE_7_4_AFTER_DB))
+    printed_before, printed_after = oracle.VER_BERANEK_TABLE_7_4_TOTALS_DB
     assert before == pytest.approx(82.450, abs=5e-3)
     assert after == pytest.approx(78.708, abs=5e-3)
-    assert before - after == pytest.approx(3.7, abs=0.05)
-    assert round(after, 1) == 78.7
-    assert abs(before - 82.4) <= 0.06
+    assert before - after == pytest.approx(
+        oracle.VER_BERANEK_TREATMENT_BENEFIT_DB, abs=0.05
+    )
+    assert round(after, 1) == printed_after
+    assert abs(before - printed_before) <= 0.06
 
 
 # --- Barron (2003), the field each contribution is read from ----------------
@@ -470,70 +436,86 @@ def test_the_energy_addition_reproduces_table_7_4() -> None:
 # 310). The book prints its folios only in the text layer of the electronic
 # edition, so these are its own pagination.
 
-#: Example 7-8: the room, the operator and the machine, all printed.
-BARRON_SURFACE_M2 = 1120.0
-BARRON_DISTANCE_M = 3.0
-BARRON_POWER_DB = (103.0, 109.0, 114.0, 117.0, 113.0, 107.0)
-
-#: Table 7-5: the room constant by octave band. It is the column to feed,
-#: because the absorption coefficient printed at 2 kHz does not give it.
-BARRON_ROOM_CONSTANT_M2 = (40.62, 51.55, 60.19, 84.30, 47.88, 66.44)
-
-#: Table 7-5: the level at the operator, without the enclosure in place.
-BARRON_PRINTED_LEVEL_DB = (93.4, 98.5, 102.9, 104.6, 102.8, 95.5)
-
-#: Eqs. (7-18) and (7-73) carry 10 lg(rho c / 400) as the literal +0,1 dB the
-#: book rounds it to, and the worked lines add exactly that.
-BARRON_IMPEDANCE_TERM_DB = 0.1
-
 
 def test_barron_example_7_8_reproduces_table_7_5() -> None:
     """The six printed octave-band levels, from the printed room constants."""
     levels = room.steady_state_spl(
-        BARRON_POWER_DB,
-        BARRON_DISTANCE_M,
-        BARRON_ROOM_CONSTANT_M2,
+        enclosure.BARRON_TABLE_7_5_LW_DB,
+        enclosure.BARRON_EXAMPLE_7_8_OPERATOR_DISTANCE_M,
+        enclosure.BARRON_TABLE_7_5_ROOM_CONSTANT_M2,
         directivity=1.0,
     )
-    got = [round(float(level) + BARRON_IMPEDANCE_TERM_DB, 1) for level in levels]
-    assert got == list(BARRON_PRINTED_LEVEL_DB)
+    got = [round(float(level) + oracle.BARRON_IMPEDANCE_TERM_DB, 1) for level in levels]
+    assert got == list(enclosure.BARRON_TABLE_7_5_LP_WITHOUT_DB)
 
 
 def test_the_worked_500_hz_line_of_barron_example_7_8() -> None:
     """The book prints 114 + (-11,2) + 0,1 = 102,9 dB."""
-    level = float(room.steady_state_spl(114.0, 3.0, 60.19, directivity=1.0))
-    assert level - 114.0 == pytest.approx(-11.2, abs=0.05)
-    assert level + BARRON_IMPEDANCE_TERM_DB == pytest.approx(102.9, abs=0.05)
+    band = 2
+    power = enclosure.BARRON_TABLE_7_5_LW_DB[band]
+    level = float(
+        room.steady_state_spl(
+            power,
+            enclosure.BARRON_EXAMPLE_7_8_OPERATOR_DISTANCE_M,
+            enclosure.BARRON_TABLE_7_5_ROOM_CONSTANT_M2[band],
+            directivity=1.0,
+        )
+    )
+    assert level - power == pytest.approx(-11.2, abs=0.05)
+    assert level + oracle.BARRON_IMPEDANCE_TERM_DB == pytest.approx(
+        enclosure.BARRON_TABLE_7_5_LP_WITHOUT_DB[band], abs=0.05
+    )
 
 
 def test_the_2_khz_absorption_coefficient_of_table_7_5_is_not_its_room_constant() -> (
     None
 ):
     """The room constant row prints 47,88 m2, which is 0,041 and not 0,043."""
-    assert float(room.room_constant(BARRON_SURFACE_M2, 0.041)) == pytest.approx(
-        47.88, abs=5e-3
-    )
-    assert float(room.room_constant(BARRON_SURFACE_M2, 0.043)) == pytest.approx(
-        50.32, abs=5e-3
-    )
+    assert float(
+        room.room_constant(enclosure.BARRON_EXAMPLE_7_8_SURFACE_M2, 0.041)
+    ) == pytest.approx(enclosure.BARRON_TABLE_7_5_ROOM_CONSTANT_M2[4], abs=5e-3)
+    assert float(
+        room.room_constant(
+            enclosure.BARRON_EXAMPLE_7_8_SURFACE_M2,
+            enclosure.BARRON_TABLE_7_5_ABSORPTION_AT_2_KHZ,
+        )
+    ) == pytest.approx(50.32, abs=5e-3)
     from_the_printed_coefficient = float(
         room.steady_state_spl(
             113.0,
-            BARRON_DISTANCE_M,
-            room.room_constant(BARRON_SURFACE_M2, 0.043),
+            enclosure.BARRON_EXAMPLE_7_8_OPERATOR_DISTANCE_M,
+            room.room_constant(
+                enclosure.BARRON_EXAMPLE_7_8_SURFACE_M2,
+                enclosure.BARRON_TABLE_7_5_ABSORPTION_AT_2_KHZ,
+            ),
             directivity=1.0,
         )
     )
-    assert round(from_the_printed_coefficient + BARRON_IMPEDANCE_TERM_DB, 1) != 102.8
+    assert (
+        round(from_the_printed_coefficient + oracle.BARRON_IMPEDANCE_TERM_DB, 1)
+        != 102.8
+    )
 
 
 def test_barron_example_7_6() -> None:
     """A Jordan refiner 4 m away in a room of 900 m2 at 0,05, printed 94,8 dB."""
-    room_constant = float(room.room_constant(900.0, 0.05))
-    assert round(room_constant, 2) == 47.37
+    room_constant = float(
+        room.room_constant(
+            oracle.BARRON_EXAMPLE_7_6_SOURCE_SURFACE_M2,
+            oracle.BARRON_EXAMPLE_7_6_SOURCE_ABSORPTION,
+        )
+    )
+    assert round(room_constant, 2) == oracle.BARRON_EXAMPLE_7_6_SOURCE_ROOM_CONSTANT_M2
     level = (
-        float(room.steady_state_spl(105.0, 4.0, room_constant, directivity=2.0))
-        + BARRON_IMPEDANCE_TERM_DB
+        float(
+            room.steady_state_spl(
+                oracle.BARRON_EXAMPLE_7_6_POWER_LEVEL_DB,
+                oracle.BARRON_EXAMPLE_7_6_SOURCE_DISTANCE_M,
+                room_constant,
+                directivity=oracle.BARRON_EXAMPLE_7_6_DIRECTIVITY,
+            )
+        )
+        + oracle.BARRON_IMPEDANCE_TERM_DB
     )
     assert level == pytest.approx(94.849, abs=1e-3)
-    assert round(level, 1) == 94.8
+    assert round(level, 1) == oracle.BARRON_EXAMPLE_7_6_SOURCE_ROOM_LEVEL_DB

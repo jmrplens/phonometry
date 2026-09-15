@@ -3,12 +3,12 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1259,
-    "passing": 1259,
+    "checks": 1261,
+    "passing": 1261,
     "failing": 0,
     "domains": 87,
-    "standards": 460,
-    "citations": 860,
+    "standards": 461,
+    "citations": 862,
     "designations": 179,
     "sources": 114
   },
@@ -545,8 +545,8 @@
     {
       "id": "industrial-noise-control",
       "title": "Industrial noise control",
-      "checks": 22,
-      "passing": 22
+      "checks": 23,
+      "passing": 23
     },
     {
       "id": "enclosure-and-cabin-insulation",
@@ -563,8 +563,8 @@
     {
       "id": "spatial-sound-decay-and-prediction-in-workrooms",
       "title": "Spatial sound decay and prediction in workrooms",
-      "checks": 35,
-      "passing": 35
+      "checks": 36,
+      "passing": 36
     },
     {
       "id": "suspended-ceilings-in-a-reverberation-room-en-16487",
@@ -33175,6 +33175,39 @@
       "verdict": "pass"
     },
     {
+      "id": "industrial-noise-control/barron-2003-example-7-6-with-eqs-7-71-and-7-72-printed-folios-297-and-298-pdf-pages-309-and-310/refiner-room-to-an-operator-1-5-m-from-a-16-m2-wall-inside-r-1-596-m-l-p2-61-7-db",
+      "domain": "industrial-noise-control",
+      "reference": {
+        "cite": "Barron (2003) Example 7-6 with Eqs. (7-71) and (7-72), printed folios 297 and 298, PDF pages 309 and 310",
+        "documents": [
+          {
+            "kind": "book",
+            "designation": "Barron",
+            "edition": "(2003)",
+            "clause": "Example 7-6 with Eqs. (7-71) and (7-72), printed folios 297 and 298, PDF pages 309 and 310"
+          }
+        ]
+      },
+      "quantity": "Refiner room to an operator 1.5 m from a 16 m2 wall (inside r* = 1.596 m) -> L_p2 = 61.7 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 61.7
+      },
+      "computed": {
+        "value": 61.75
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.047
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
       "id": "industrial-noise-control/norton-karczub-2e-eq-4-115-problem-4-16-answer/lined-compressor-enclosure-against-nc-45-required-tl-14-4-25-2-28-9-34-4-35-2-34-7-34-7-31-6-db",
       "domain": "industrial-noise-control",
       "reference": {
@@ -35594,7 +35627,7 @@
       "verdict": "pass"
     },
     {
-      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-6-10-and-12-ver-and-beranek-2006-example-4-2-pdf-pages-95-and-96-folios-90-and-91/a-quarter-of-the-printed-sabine-absorption-area-of-a-200-m3-room-at-21-4-c-where-the-speed-of-sound-is-344-m-s",
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-6-10-and-12-ver-and-beranek-2006-example-4-2-pdf-pages-95-and-96-folios-90-and-91/the-printed-sabine-absorption-area-of-a-200-m3-room-at-21-4-c-where-the-speed-of-sound-is-344-m-s",
       "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
       "reference": {
         "cite": "ISO 11820:1996 Eqs. (6), (10) and (12) / Ver and Beranek (2006) Example 4.2, PDF pages 95 and 96, folios 90 and 91",
@@ -35615,7 +35648,7 @@
           }
         ]
       },
-      "quantity": "A quarter of the printed Sabine absorption area of a 200 m3 room at 21,4 C, where the speed of sound is 344 m/s",
+      "quantity": "The printed Sabine absorption area of a 200 m3 room at 21,4 C, where the speed of sound is 344 m/s",
       "kind": "scalar",
       "expected": {
         "value": 10.7
@@ -36744,10 +36777,12 @@
       "quantity": "Mixing a hemi-free-field receiver with a facade one moves the answer by exactly the 6 dB of the pressure doubling",
       "kind": "scalar",
       "expected": {
-        "value": 6.0
+        "value": 0.0,
+        "label": "6 dB in every band"
       },
       "computed": {
-        "value": 6.0
+        "value": 0.0,
+        "label": "max absolute departure 0.000 dB over the three bands"
       },
       "unit": "dB",
       "tolerance": {
@@ -36863,7 +36898,7 @@
       "verdict": "pass"
     },
     {
-      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-10847-1997-7-2-2-and-8-1-2-a/the-reference-microphone-clears-the-barrier-top-by-1-5-m-or-takes-the-10-degree-rule-for-a-source-under-15-m-away",
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-10847-1997-7-2-2-and-8-1-2-a/the-reference-microphone-stands-at-least-1-5-m-above-the-top-edge-and-higher-where-the-10-degree-rule-of-the-note-asks-for-more",
       "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
       "reference": {
         "cite": "ISO 10847:1997 7.2.2 and 8.1.2 a)",
@@ -36876,7 +36911,7 @@
           }
         ]
       },
-      "quantity": "The reference microphone clears the barrier top by 1,5 m, or takes the 10 degree rule for a source under 15 m away",
+      "quantity": "The reference microphone stands at least 1,5 m above the top edge, and higher where the 10 degree rule of the NOTE asks for more",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -37298,11 +37333,12 @@
       "quantity": "The 6 dB of C'_r read off a page outside the standard: the pressure doubling at a receiver held against a reflecting surface",
       "kind": "scalar",
       "expected": {
-        "value": 6.0,
-        "label": "6 dB, the 20 lg 2 of a pressure doubling as the page prints it"
+        "value": 0.0,
+        "label": "6 dB in every band, the 20 lg 2 of a pressure doubling as the page prints it"
       },
       "computed": {
-        "value": 6.0
+        "value": 0.0,
+        "label": "max absolute departure 0.000 dB over the three bands"
       },
       "unit": "dB",
       "tolerance": {
@@ -37426,7 +37462,7 @@
       "verdict": "pass"
     },
     {
-      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-c-table-c-6-last-column/the-a-weighted-pink-noise-normalisation-of-eq-4-reproduces-the-eleven-printed-values",
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-c-table-c-6-last-column/the-a-weighted-pink-noise-normalisation-of-eq-4-with-the-printed-6-2-db-reproduces-the-eleven-printed-values-to-within-0-1-db",
       "domain": "spatial-sound-decay-and-prediction-in-workrooms",
       "reference": {
         "cite": "ISO 14257:2001 Annex C, Table C.6 last column",
@@ -37439,15 +37475,15 @@
           }
         ]
       },
-      "quantity": "The A-weighted pink-noise normalisation of Eq. (4) reproduces the eleven printed values",
+      "quantity": "The A-weighted pink-noise normalisation of Eq. (4), with the printed 6,2 dB, reproduces the eleven printed values to within 0,1 dB",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
-        "label": "every value within the printed rounding"
+        "label": "every value within 0,1 dB: the printed 6,2 dB is 0,05 dB short of the sum of the printed Table 1 weights, which is what the annex normalised with, so a cell can come out one unit high in the last place and never low"
       },
       "computed": {
         "value": 0.092,
-        "label": "worst departure 0.09 dB over 11 positions"
+        "label": "worst departure 0.09 dB over 11 positions, 6 of them beyond the printed rounding and all of those high"
       },
       "unit": "dB",
       "tolerance": {
@@ -37456,6 +37492,57 @@
       },
       "deviation": {
         "value": 0.092
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-eq-4-against-annex-c-table-c-6-last-column-and-table-c-10-iso-14257-2001-pdf-page-10-printed-folio-4-bs-en-iso-14257-2001-pdf-page-14-printed-folio-4/the-6-2-db-eq-4-prints-is-the-a-weighting-curve-s-energy-sum-rounded-the-six-weights-table-1-prints-sum-to-6-2515-db-and-the-annex-was-normalised-exactly-eq-3-under-the-table-1-weights-lands-all-fourteen-printed-values-inside-their-rounding-where-the-printed-constant-lands-nine-of-them-one-unit-high",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "cite": "ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table C.10 (ISO 14257:2001, PDF page 10, printed folio 4; BS EN ISO 14257:2001, PDF page 14, printed folio 4)",
+        "tail": ")",
+        "documents": [
+          {
+            "kind": "standard",
+            "designation": "ISO 14257",
+            "edition": "2001",
+            "clause": "Eq. (4) against Annex C, Table C.6 last column and Table C.10"
+          },
+          {
+            "kind": "standard",
+            "designation": "ISO 14257",
+            "edition": "2001",
+            "clause": "PDF page 10, printed folio 4",
+            "lead": " (",
+            "relation": "mentions"
+          },
+          {
+            "kind": "standard",
+            "designation": "BS EN ISO 14257",
+            "edition": "2001",
+            "clause": "PDF page 14, printed folio 4",
+            "lead": "; ",
+            "relation": "mentions"
+          }
+        ]
+      },
+      "quantity": "The 6,2 dB Eq. (4) prints is the A-weighting curve's energy sum rounded, the six weights Table 1 prints sum to 6,2515 dB, and the annex was normalised exactly: Eq. (3) under the Table 1 weights lands all fourteen printed values inside their rounding where the printed constant lands nine of them one unit high",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "0 of 14 outside the printed rounding with the Table 1 sum, against 9 of 14 with the printed 6,2 dB, every one of the 14 high and none by a second unit"
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "0 of 14 with the sum (worst 0.045 dB, both signs); 9 of 14 with 6,2 dB (worst 0.097 dB, 0 low, 0 past one unit)"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
       },
       "precision": 4,
       "verdict": "pass"
@@ -38306,7 +38393,7 @@
       "kind": "count",
       "expected": {
         "value": 6.0,
-        "label": "6/6: five within the 0,05 dB half step of the printed tenth (worst 0.036 dB), and the cell beside the new machine with the first choice at its recorded -0.063 dB (computed -0.0628 dB)"
+        "label": "6/6: all but one within the 0,05 dB half step of the printed tenth (worst 0.037 dB), and the cell beside the new machine with the first choice at its recorded -0.063 dB (computed -0.0628 dB)"
       },
       "computed": {
         "value": 6.0,
@@ -38340,11 +38427,11 @@
       "kind": "count",
       "expected": {
         "value": 12.0,
-        "label": "12/12: the six cells within 0,1 dB at the positions Figure B.1 draws, and the same six more than 0,1 dB out at the positions Tables B.5 and B.8 tabulate (nearest 0.477 dB, farthest 1.832 dB)"
+        "label": "12/12: the 6 cells within 0,1 dB at the positions Figure B.1 draws, and the same 6 more than 0,1 dB out at the positions Tables B.5 and B.8 tabulate (nearest 0.478 dB, farthest 1.836 dB)"
       },
       "computed": {
         "value": 12.0,
-        "label": "12/12 readings of the six printed cells, reproduced at the positions Figure B.1 draws and rejected at the positions Tables B.5 and B.8 tabulate"
+        "label": "12/12 readings of the 6 printed cells, reproduced at the positions Figure B.1 draws and rejected at the positions Tables B.5 and B.8 tabulate"
       },
       "tolerance": {
         "mode": "absolute",

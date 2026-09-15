@@ -343,6 +343,11 @@ _CARRIER_DB = 90.0
 #: comparison with them is against four times what this library returns.
 _SABINE_QUARTERS = 4.0
 
+#: The 20 lg 2 a receiver held against a reflecting surface sees, in decibels,
+#: as Bies 5e 4.9.2 prints it (folio 201). Re-typed rather than imported, so
+#: the row is checked against the page and not against the table it exercises.
+_PRESSURE_DOUBLING_DB = 6.0
+
 #: Equation (15) as printed: the upstream measurement surface stands one and a
 #: half equivalent diameters away. Re-typed here rather than imported from the
 #: library, because the library's own constant is half of what the row is
@@ -616,8 +621,8 @@ def _chk_barron_sound_power() -> Outcome:
     _IN_SITU,
     "ISO 11820:1996 Eqs. (6), (10) and (12) / Ver and Beranek (2006) "
     "Example 4.2, PDF pages 95 and 96, folios 90 and 91",
-    "A quarter of the printed Sabine absorption area of a 200 m3 room at "
-    "21,4 C, where the speed of sound is 344 m/s",
+    "The printed Sabine absorption area of a 200 m3 room at 21,4 C, where "
+    "the speed of sound is 344 m/s",
 )
 def _chk_ver_beranek_absorption_area() -> Outcome:
     absorption = _sabine_absorption_m2(
@@ -1268,9 +1273,19 @@ def _chk_iso10847_receiver_correction() -> Outcome:
         receiver_after,
         receiver_type_after="reflecting_surface",
     )
-    shift = float(np.max(mixed.insertion_loss_db - direct.insertion_loss_db))
+    # The departure from the correction, band by band, and not the largest
+    # shift: a maximum passes on one band alone, and a correction that reached
+    # only the first of the three would read as the whole spectrum moving.
+    correction = RECEIVER_CORRECTIONS_DB["reflecting_surface"]
+    shifts = mixed.insertion_loss_db - direct.insertion_loss_db
+    worst = float(np.max(np.abs(shifts - correction)))
     return numeric(
-        RECEIVER_CORRECTIONS_DB["reflecting_surface"], shift, 1e-12, unit="dB"
+        0.0,
+        worst,
+        1e-12,
+        unit="dB",
+        expected_label=f"{correction:g} dB in every band",
+        computed_label=f"max absolute departure {worst:.3f} dB over the three bands",
     )
 
 
@@ -1759,13 +1774,20 @@ def _chk_iso10847_receiver_correction_is_a_pressure_doubling() -> Outcome:
             receiver - 10.0,
             receiver_type_after="reflecting_surface",
         )
-    shift = float(np.max(facade.insertion_loss_db - open_field.insertion_loss_db))
+    # As above: the departure from 6 dB in every band, so that a correction
+    # reaching one band and not the other two cannot be read as the doubling.
+    shifts = facade.insertion_loss_db - open_field.insertion_loss_db
+    worst = float(np.max(np.abs(shifts - _PRESSURE_DOUBLING_DB)))
     return numeric(
-        6.0,
-        shift,
+        0.0,
+        worst,
         1e-12,
         unit="dB",
-        expected_label="6 dB, the 20 lg 2 of a pressure doubling as the page prints it",
+        expected_label=(
+            "6 dB in every band, the 20 lg 2 of a pressure doubling as the "
+            "page prints it"
+        ),
+        computed_label=f"max absolute departure {worst:.3f} dB over the three bands",
     )
 
 

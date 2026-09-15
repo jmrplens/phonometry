@@ -106,7 +106,7 @@ lo que impide apuntarle la sala al silenciador.
 
 ## 2. Las veinte instalaciones
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_in_situ.svg" alt="Sección de un tramo de conducto: la máquina, el conducto, el silenciador con sus bafles y la sala a la que descarga el conducto. Un plano de trazos aguas arriba del silenciador marca la superficie de medida del lado fuente, la sección del conducto, con tres posiciones de micrófono repartidas por ella; un segundo plano de trazos aguas abajo marca la del lado receptor, un cuarto de la absorción de la sala, con tres posiciones de micrófono en la sala. La distancia aguas arriba es un diámetro equivalente y medio y la de aguas abajo doce veces la raíz de la sección aguas abajo menos diez veces la raíz de la sección libre. Un recuadro al pie lleva la pérdida por transmisión como la diferencia de niveles más el cociente de las dos superficies más la diferencia de las dos correcciones de campo" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_in_situ.svg" alt="Sección de un tramo de conducto: la máquina, el conducto, el silenciador con sus láminas y la sala a la que descarga el conducto. Un plano de trazos aguas arriba del silenciador marca la superficie de medida del lado fuente, la sección del conducto, con tres posiciones de micrófono repartidas por ella; un segundo plano de trazos aguas abajo marca la del lado receptor, un cuarto de la absorción de la sala, con tres posiciones de micrófono en la sala. La distancia aguas arriba es un diámetro equivalente y medio y la de aguas abajo doce veces la raíz de la sección aguas abajo menos diez veces la raíz de la sección libre. Un recuadro al pie lleva la pérdida por transmisión como la diferencia de niveles más el cociente de las dos superficies más la diferencia de las dos correcciones de campo" width="100%" />
 
 Un silenciador está entre dos de cuatro cosas: un conducto, una sala con campo
 difuso, una sala sin él y espacio abierto. Dieciséis parejas de esas son medidas
@@ -148,7 +148,10 @@ completa: la pérdida de presión total de la ecuación (13), la diferencia
 estática detrás de un cambio de sección de la ecuación (14), la presión dinámica
 y la velocidad que representa, la densidad del gas de la ecuación (29) y la
 velocidad dentro del silenciador de la ecuación (31), que es a la que responde
-el ruido regenerado.
+el ruido regenerado. La versión española de la ISO 11820 llama «silenciador a
+bafles» al de láminas paralelas; aquí se dice «láminas», que es el término de la
+UNE-EN ISO 7235:2010, la norma de laboratorio como alternativa a la cual existe
+esta.
 
 ```python
 print(round(noise_control.gas_density_kg_m3(temperature_c=120.0), 3))   # 0.887

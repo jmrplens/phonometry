@@ -850,15 +850,18 @@ por debajo de $f_\mathrm{c}$** la longitud de onda de flexión es más corta que
 acústica, las semiondas contiguas se cancelan mutuamente el caudal volumétrico y
 solo radian las franjas sin cancelar de los bordes y las esquinas. Por eso el
 cálculo necesita las dos dimensiones de la placa y su condición de borde: un
-borde empotrado radia más que uno simplemente apoyado, y una placa con bafles
-perpendiculares a sus bordes más que una enrasada en un bafle infinito: los
+borde empotrado radia más que uno simplemente apoyado, y una placa con pantallas
+perpendiculares a sus bordes más que una enrasada en una pantalla infinita: los
 argumentos `boundary` y `baffle` eligen entre ellos. **Alrededor de $f_\mathrm{c}$** la
 longitud de onda de traza de la onda de flexión coincide con la acústica, la
 forma de Leppington $(1 - f_\mathrm{c}/f)^{-1/2}$ diverge y queda limitada por la
 expresión en coincidencia; el panel de abajo alcanza un máximo de
 $\sigma = 2,6$ en la banda de 2 kHz. **Solo muy por encima de $f_\mathrm{c}$** se asienta
 $\sigma$ hacia 1: un tercio de octava pasada la coincidencia este panel sigue en
-1,74.
+1,74. La versión española vigente de la ISO 12354-1 llama «bafle infinito» a esa
+pantalla infinita; aquí se dice «pantalla», que es el término del vocabulario
+UNE 21302-801:2001 en su entrada 801-27-16 y el que usaba la adopción anterior
+de la misma norma europea.
 
 $$
 \sigma = \frac{1}{\sqrt{1 - f_\mathrm{c}/f}} \quad (f > f_\mathrm{c}), \qquad
@@ -874,7 +877,7 @@ coincidencia de $\sigma$ son el mismo suceso visto por los dos lados: la misma
 $\sigma$ reaparece en el factor de transmisión del modelo detallado de
 EN 12354 y como el factor de radiación que mide ISO 7849.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/radiation_efficiency_panels.svg" alt="Izquierda: eficiencia de radiación frente a la frecuencia para un vidrio de 1,5 por 1,25 metros y otro de 0,5 por 0,4 metros del mismo vidrio, los dos con la frecuencia crítica y la línea de la unidad marcadas, que muestra que el vidrio pequeño radia tres veces mejor por debajo de la coincidencia. Derecha: la placa simplemente apoyada y con bafle que supone el modelo, dibujada a escala" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/radiation_efficiency_panels.svg" alt="Izquierda: eficiencia de radiación frente a la frecuencia para un vidrio de 1,5 por 1,25 metros y otro de 0,5 por 0,4 metros del mismo vidrio, los dos con la frecuencia crítica y la línea de la unidad marcadas, que muestra que el vidrio pequeño radia tres veces mejor por debajo de la coincidencia. Derecha: la placa simplemente apoyada en su pantalla que supone el modelo, dibujada a escala" width="92%" />
 
 *Tres regímenes en un mismo eje. Por debajo de $f_\mathrm{c}$ los dos vidrios se
 diferencian en un factor de tres en $\sigma$ aunque son el mismo vidrio — el más
@@ -903,7 +906,7 @@ ax_l.axvline(fc, ls=":", color="r")
 ax_l.set(xlabel="Frecuencia [Hz]", ylabel=r"Eficiencia de radiación $\sigma$")
 ax_l.legend()
 
-# Una línea — la placa con bafle que supone el modelo:
+# Una línea — la placa en pantalla que supone el modelo:
 sig_big.plot_geometry(ax=ax_r)
 plt.show()
 ```
@@ -969,7 +972,7 @@ print(round(float(w) * 1e3, 3), "mW")                 # W = |F|^2 / (16 sqrt(B' 
 | `radius` / `depth` (orificio) | float | m | > 0 | Radio $a$ / fondo $d$ del orificio |
 | `areas` / `reduction_indices` | seq | m² / dB | longitud $N$ | Elementos de la composición (1-D o (N, bandas)) |
 | `length_x` / `length_y` | float | m | > 0 | Dimensiones de la placa (radiación) |
-| `boundary` / `baffle` | str | — | `'simply_supported'`/`'clamped'`, `'infinite'`/`'perpendicular'` | Constantes de borde y bafle |
+| `boundary` / `baffle` | str | — | `'simply_supported'`/`'clamped'`, `'infinite'`/`'perpendicular'` | Constantes de borde y pantalla |
 
 `single_panel_transmission_loss` y `double_wall_transmission_loss` devuelven un
 `SoundReductionResult` (`transmission_loss`, `transmission_coefficient`,

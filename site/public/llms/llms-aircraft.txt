@@ -753,6 +753,19 @@ Doc 29 functions: how to open it, what one aircraft record holds, and how to go
 from an aircraft identifier to an event level or a contour without writing a
 table yourself.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records.svg" alt="How one ANP aircraft record feeds the Doc 29 chain: the substitution route into the A320-211 record, its NPD table with the four cells one lookup reads, the fixed-point or procedural trajectory tables, one profile segment of the flown departure seen from a receiver, and the chain from the 89.3 dB the lookup returns to 89.0 dB at the receiver" width="100%">
+</picture>
+
+One aircraft, from its record to one number. A type the database lacks enters
+at the top, through a proxy the ANP website recommends and an adjustment you
+apply yourself. The A320-211 ships no fixed-point departure, so its published
+steps are flown at a sea-level aerodrome; the third of the ten profile segments
+that result passes 612 m from a receiver 3 km down the track and 500 m to the
+side, reads the four NPD cells that surround 20 159 lb and 612 m, and at 88.0 dB
+carries about four fifths of the sound energy of the 89.0 dB event.
+
 ## Opening the database
 
 `load_anp_database()` with no argument reads the copy shipped with the package.

@@ -35,6 +35,17 @@ funciones de Doc 29: cómo abrirla, qué contiene el registro de una aeronave, y
 cómo pasar de un identificador a un nivel de evento o un contorno sin escribir
 tú ninguna tabla.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records.svg" alt="Tres franjas. Arriba, una aeronave en las tablas ANP. Un recuadro discontinuo de la tabla de sustituciones que mantiene la web de ANP indica que el A320neo, que la base no tiene, se modela con el A320-211 restando 6,7 dB a los niveles NPD de despegue del A320-211 o contando cada despegue del A320neo como 0,21 de uno, y apunta al registro de Aircraft.csv del A320-211: un reactor bimotor de clase de peso grande, NPD_ID CFM565, con el empuje neto corregido en libras como parámetro de potencia, motores montados en el ala. Desde NPD_ID una flecha lleva a la tabla NPD, dibujada como una malla de cuatro reglajes de potencia de 12 000 a 22 500 lb por diez distancias oblicuas, con las cuatro celdas de 19 000 y 22 500 lb a 2 000 y 4 000 ft recuadradas y rellenas con sus niveles. Desde el identificador de la aeronave otra flecha lleva a las tablas de trayectoria: una tabla discontinua de perfiles de punto fijo sin filas para esta aeronave, o los pasos de procedimiento de despegue del perfil DEFAULT en la etapa 1, con el peso por defecto y los coeficientes de motor y aerodinámicos. En medio, a la izquierda, el tercero de los diez segmentos del perfil en su plano con un receptor O: el segmento mide 1 236 m, el pie de la perpendicular cae a 676 m de su inicio y O está a 612 m de él. En medio, a la derecha, los primeros 5 km del despegue volado a nivel del mar, con la carrera de despegue, el segmento que sube de 305 m a 392 m, el cambio de empuje de despegue a empuje de ascenso y el receptor a 3 000 m a lo largo de la traza y 500 m a un costado. Abajo, tres recuadros encadenan la consulta NPD de 89,3 dB, las correcciones del segmento que la dejan en 88,0 dB y la suma energética de los diez segmentos del perfil, 89,0 dB en O, sobre las ecuaciones del nivel de segmento y del nivel de evento" width="100%" />
+
+*Una aeronave, de su registro a un solo número. Un tipo que la base no tiene
+entra por arriba, con un sustituto que recomienda la web de ANP y un ajuste que
+aplicas tú. El A320-211 no trae ningún despegue de punto fijo, así que sus pasos
+publicados se vuelan en un aeródromo a nivel del mar; el tercero de los diez
+segmentos del perfil que resultan pasa a 612 m de un receptor situado 3 km traza
+abajo y 500 m a un costado, lee las cuatro celdas de la tabla NPD que rodean
+20 159 lb y 612 m, y con 88,0 dB aporta cerca de cuatro quintos de la energía
+sonora del suceso de 89,0 dB.*
+
 ## 1. Abrir la base de datos
 
 `load_anp_database()` sin argumentos lee la copia que viene con el paquete.

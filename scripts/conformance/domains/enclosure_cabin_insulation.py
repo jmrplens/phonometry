@@ -50,6 +50,8 @@ from __future__ import annotations
 
 import numpy as np
 import reference_data as ref
+from reference_data import enclosure_cabin_insulation as oracle
+from reference_data import rounding
 
 import phonometry as ph
 from phonometry.noise_control.enclosure_insulation import (
@@ -186,20 +188,12 @@ def _chk_figure_c1_closed_form() -> Outcome:
     "Environmental correction ceiling K_2 and background margin dL of the nine columns",
 )
 def _chk_table_c1() -> Outcome:
-    printed = {
-        "ISO 3743-1 dL": 6.0,
-        "ISO 3744 K2": 2.0,
-        "ISO 3744 dL": 6.0,
-        "ISO 3746 K2": 7.0,
-        "ISO 3746 dL": 3.0,
-        "ISO 3747 dL": 3.0,
-        "ISO 11201 K2": 2.0,
-        "ISO 11201 dL": 6.0,
-        "ISO 11202 K2": 7.0,
-        "ISO 11202 dL": 3.0,
-        "ISO 11204 K2": 7.0,
-        "ISO 11204 dL": 6.0,
-    }
+    printed: dict[str, float] = {}
+    for name, (ceiling, margin) in oracle.ISO11546_2_TABLE_C1_DB.items():
+        if ceiling is not None:
+            printed[f"{name} K2"] = ceiling
+        if margin is not None:
+            printed[f"{name} dL"] = margin
     computed: dict[str, float] = {}
     for name, (ceiling, margin) in TEST_ENVIRONMENT_REQUIREMENTS.items():
         if ceiling is not None:
@@ -207,39 +201,6 @@ def _chk_table_c1() -> Outcome:
         if margin is not None:
             computed[f"{name} dL"] = margin
     return record(printed, computed, unit="dB")
-
-
-#: ISO 11546-2:1995, Annex C, Table C.2, "Approximate values of the mean sound
-#: absorption coefficient, alpha, for different room configurations", printed
-#: folio 13 (PDF page 17), read on the printed page. Both columns are
-#: transcribed, because the description is the whole of what this table says:
-#: the coefficient is only its key. The same seven rows and the same wording
-#: are printed in BS EN ISO 11546-2:2009, printed folio 13 (PDF page 19).
-#:
-#: The 2010 editions of the sound power standards print a longer table under
-#: the same title and it is not this one, so it cannot stand in for it: ISO
-#: 3744:2010 Table A.1 (printed folio 36) and ISO 3746:2010 Table A.1 (printed
-#: folio 24) carry eight rows, adding 0,30 for a room with an absorbing ceiling
-#: and bare walls, and reword two of the seven below.
-_TABLE_C2: dict[float, str] = {
-    0.05: (
-        "Nearly empty room with smooth hard walls made of concrete, brick, "
-        "plaster or tile"
-    ),
-    0.1: "Partly empty room; room with smooth walls",
-    0.15: "Room with furniture; rectangular machinery room; rectangular industrial room",
-    0.2: (
-        "Irregularly shaped room with furniture; irregularly shaped machinery "
-        "room or industrial room"
-    ),
-    0.25: (
-        "Room with upholstered furniture; machinery or industrial room with a "
-        "small amount of sound-absorbing material on ceiling or walls "
-        "(e.g. partially absorptive ceiling)"
-    ),
-    0.35: "Room with sound-absorbing materials on both ceiling and walls",
-    0.5: "Room with large amounts of sound-absorbing materials on ceiling and walls",
-}
 
 
 @register(
@@ -251,10 +212,10 @@ _TABLE_C2: dict[float, str] = {
 def _chk_table_c2() -> Outcome:
     matching = sum(
         1
-        for alpha, description in _TABLE_C2.items()
+        for alpha, description in oracle.ISO11546_2_TABLE_C2.items()
         if ROOM_ABSORPTION_ESTIMATES.get(alpha) == description
     )
-    return count(matching, len(_TABLE_C2), subject="rows of Table C.2")
+    return count(matching, len(oracle.ISO11546_2_TABLE_C2), subject="rows of Table C.2")
 
 
 @register(
@@ -462,129 +423,9 @@ def _chk_uncertainty_conditions() -> Outcome:
 # Each row names the document, its edition, the PDF page and the printed folio.
 # ---------------------------------------------------------------------------
 
-#: Table 8 of the NPL study, printed folio 15: the area of each measurement
-#: surface the reference sound source was measured over, in square metres.
-#: Surfaces 1 and 2 have the same area, so every quantity computed from area
-#: alone comes out the same for both, which the printed tables confirm.
-_NPL_SURFACE_M2: dict[int, float] = {1: 14.1, 2: 14.1, 3: 28.2, 4: 49.6}
-
-#: Table 9, printed folio 16: for each of the five rooms, the area of its
-#: boundary surfaces, its volume, the A-weighted reverberation time and the two
-#: ends of the range of mean absorption coefficients the report reads off the
-#: table of room descriptions in Annex A of ISO 3744:1994 and ISO 3746:1995,
-#: the editions its references 4 and 5 name. The report reproduces that table
-#: as its Table 1, seven rows that are Table C.2 of ISO 11546-2 under another
-#: name; the 2010 editions print a different one, as the comment on
-#: ``_TABLE_C2`` says. Rooms A and E are given a single coefficient rather
-#: than a range.
-_NPL_ROOMS: dict[str, tuple[float, float, float, float, float]] = {
-    # S_V in m2, V in m3, T (A-weighted) in s, alpha from, alpha to
-    "A": (134.0, 91.5, 0.2, 0.5, 0.5),
-    "B": (168.0, 116.0, 0.5, 0.1, 0.25),
-    "C": (373.0, 428.0, 1.3, 0.1, 0.25),
-    "D": (834.0, 1188.0, 1.0, 0.2, 0.5),
-    "E": (358.0, 274.0, 2.3, 0.05, 0.05),
-}
-
-#: Tables 10 to 14, printed folios 18 to 20, ``absolute`` row: the measured
-#: K_2A of each room and measurement surface, in decibels, against the 90,9 dB
-#: re 1 pW the reference sound source was calibrated to under ISO 6926. This is
-#: a measurement, not an evaluation of a formula, and it is the ground truth
-#: the applicability rows below are judged against.
-_NPL_MEASURED_K2A: dict[str, dict[int, float]] = {
-    "A": {1: 0.0, 2: 0.6, 3: 1.0, 4: 1.1},
-    "B": {1: 3.3, 2: 3.4, 3: 4.3},
-    "C": {1: 3.4, 2: 3.5, 3: 5.1},
-    "D": {1: 0.3, 2: 0.9, 3: 1.3, 4: 1.9},
-    "E": {1: 5.2, 2: 5.5, 3: 7.7},
-}
-
-#: The same tables, ``reverberation (A-wt)`` row: K_2A as the authors computed
-#: it from their Eq. (3), K_2 = 10 lg (1 + 4 S/A), with the room absorption of
-#: their Eq. (5), A = 0,16 V/T. That is the pair ISO 3744 prints as Eq. (A.2)
-#: and Eq. (A.3), and the pair ISO 11546-2 leans on through Annex C.
-_NPL_REVERBERATION_K2A: dict[str, dict[int, float]] = {
-    "A": {1: 2.5, 2: 2.5, 3: 4.0, 4: 5.7},
-    "B": {1: 4.0, 2: 4.0, 3: 6.0},
-    "C": {1: 3.2, 2: 3.2, 3: 5.0},
-    "D": {1: 1.1, 2: 1.1, 3: 2.0, 4: 3.1},
-    "E": {1: 5.9, 2: 5.9, 3: 8.4},
-}
-
-#: The same tables, ``estimated room absorption`` row, as the two bounds each
-#: cell prints; the lower bound goes with the upper end of the absorption
-#: range. These are printed values, and they are deliberately **not** used to
-#: check anything here: they do not follow the report's own Eq. (3), which is
-#: what :func:`_chk_npl_estimated_absorption_drops_the_factor_four` records so
-#: that the exclusion is not quietly reversed later.
-_NPL_ESTIMATED_K2A: dict[str, dict[int, tuple[float, float]]] = {
-    "A": {1: (0.8, 0.8), 2: (0.8, 0.8), 3: (1.5, 1.5), 4: (2.4, 2.4)},
-    "B": {1: (1.3, 2.6), 2: (1.3, 2.6), 3: (2.2, 4.3)},
-    "C": {1: (0.6, 1.3), 2: (0.6, 1.3), 3: (1.1, 2.3)},
-    "D": {1: (0.1, 0.4), 2: (0.1, 0.4), 3: (0.3, 0.7), 4: (0.1, 1.1)},
-    "E": {1: (2.7, 2.7), 2: (2.7, 2.7), 3: (4.3, 4.3)},
-}
-
-#: Table 3 of the BAuA study, printed folio 186: what three test engineers of
-#: different experience assessed for one and the same workroom, as mean
-#: absorption coefficient and boundary surface area in square metres, followed
-#: by the K_2A each assessment yields on the two reference measurement surfaces
-#: the same folio defines. The table's fourth column holds column means rather
-#: than a fourth assessment, so it is not a case and is not listed here.
-_BAUA_ENGINEERS: dict[str, tuple[float, float, float, float]] = {
-    # alpha, S_V in m2, K_2A at 0,5 m, K_2A at 1 m
-    "Test Eng. 1": (0.15, 174.0, 7.1, 9.2),
-    "Test Eng. 2": (0.15, 173.0, 7.1, 9.3),
-    "Test Eng. 3": (0.30, 174.3, 4.9, 6.7),
-}
-
-#: Folio 186 again: the reference measurement surface for a workstation 0,5 m
-#: from the machine, and for one at 1 m, in square metres.
-_BAUA_SURFACES_M2: tuple[float, float] = (26.9, 48.3)
-
-#: Table 4, printed folio 187: the equivalent absorption area each of the two
-#: rooms was measured to have with a reference sound source, in square metres,
-#: then the K_2A computed from it at 0,5 m, at 1 m and on the 25,1 m2
-#: measurement surface the source itself stood on. Only these rows of the
-#: table are used: its L_pA(in situ) cell for the former reverberation room,
-#: 81,08 dB, does not fit the 97,7 m2 beside it through the author's own
-#: Eq. (9), which would need 79,74 dB, so that cell is left alone.
-_BAUA_DIRECT: dict[str, tuple[float, float, float, float]] = {
-    # A in m2, K_2A at 0,5 m, K_2A at 1 m, K_2A on the 25,1 m2 surface
-    "workroom": (55.2, 4.7, 6.5, 4.5),
-    "former reverberation room": (97.7, 3.2, 4.7, 3.1),
-}
-
-#: Folio 187: the measurement surface the direct method used, in square metres,
-#: printed rounded from the 2 m hemisphere the text defines.
-_BAUA_DIRECT_SURFACE_M2 = 25.1
-
-#: Example 1.13 of Peters, Smith and Hollins, printed p. 16: two machines
-#: measured at one reception point in octave bands, and the attenuation of one
-#: enclosure, all in decibels. The example carries its own A-weighting, the
-#: ISO 3744 Annex E values rounded to whole decibels; this library uses the
-#: unrounded table, and both reach the printed integer answers.
-_SMITH_BANDS_HZ = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
-_SMITH_ATTENUATION_DB = np.array([4.0, 9.0, 15.0, 21.0, 24.0, 30.0, 27.0, 26.0])
-
-#: The two source spectra of that example and the A-weighted attenuation the
-#: answer box on printed p. 17 gives for each, in decibels.
-_SMITH_MACHINES: dict[str, tuple[list[float], float]] = {
-    "machine A": ([105.0, 107.0, 99.0, 94.0, 91.0, 87.0, 82.0, 79.0], 14.0),
-    "machine B": ([68.0, 79.0, 82.0, 87.0, 92.0, 96.0, 89.0, 81.0], 27.0),
-}
-
-#: The two installed enclosures of the IFA guidance sheet whose A-weighted
-#: level is printed both before and after, in decibels: Beispiel 1 on printed
-#: folio 22, and Beispiel 3 with its level before on folio 23 and after on
-#: folio 25. Its second example is left out: the level with the enclosure in
-#: place is never printed there, so the only way to feed it is to subtract the
-#: printed 21 dB from the printed 95 dB, which is the answer run backwards.
-_IFA_ENCLOSURES: dict[str, tuple[float, float, float]] = {
-    # without, with, the printed reduction, all in dB(A)
-    "punching machine, Beispiel 1": (100.0, 80.0, 20.0),
-    "emery machine, Beispiel 3": (104.0, 84.0, 20.0),
-}
+# The numbers themselves, with the document, the edition, the PDF page and the
+# folio of each, are in ``tests/reference_data/enclosure_cabin_insulation.py``,
+# which the test suite reads too.
 
 
 @register(
@@ -602,13 +443,13 @@ def _chk_npl_reverberation_k2a() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    for room, printed in _NPL_REVERBERATION_K2A.items():
-        _, volume_m3, time_s, _, _ = _NPL_ROOMS[room]
+    for room, printed in oracle.NPL_REVERBERATION_K2A.items():
+        _, volume_m3, time_s, _, _ = oracle.NPL_ROOMS[room]
         for surface, want in printed.items():
             total += 1
             got = float(
                 ph.emission.environmental_correction(
-                    _NPL_SURFACE_M2[surface],
+                    oracle.NPL_SURFACE_M2[surface],
                     reverberation_time=time_s,
                     volume=volume_m3,
                 )
@@ -637,15 +478,15 @@ def _chk_npl_annex_c_against_the_measurement() -> Outcome:
     assert ceiling is not None
     matching = 0
     total = 0
-    for room, printed in _NPL_MEASURED_K2A.items():
-        room_surface_m2, _, _, _, alpha = _NPL_ROOMS[room]
+    for room, printed in oracle.NPL_MEASURED_K2A.items():
+        room_surface_m2, _, _, _, alpha = oracle.NPL_ROOMS[room]
         for surface, measured in printed.items():
             total += 1
             verdict = ph.noise_control.test_environment_applicability(
                 base_standard="ISO 3746",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
-                measurement_surface_area_m2=_NPL_SURFACE_M2[surface],
+                measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
             )
             matching += int(verdict.applicable is (measured <= ceiling))
     return count(
@@ -670,14 +511,14 @@ def _chk_npl_annex_c_at_the_precision_ceiling() -> Outcome:
     assert ceiling is not None
     matching = 0
     differing: list[str] = []
-    for room, printed in _NPL_MEASURED_K2A.items():
-        room_surface_m2, _, _, _, alpha = _NPL_ROOMS[room]
+    for room, printed in oracle.NPL_MEASURED_K2A.items():
+        room_surface_m2, _, _, _, alpha = oracle.NPL_ROOMS[room]
         for surface, measured in printed.items():
             verdict = ph.noise_control.test_environment_applicability(
                 base_standard="ISO 3744",
                 mean_absorption_coefficient=alpha,
                 room_surface_area_m2=room_surface_m2,
-                measurement_surface_area_m2=_NPL_SURFACE_M2[surface],
+                measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
             )
             if verdict.applicable is (measured <= ceiling):
                 matching += 1
@@ -702,18 +543,20 @@ def _chk_npl_annex_c_at_the_precision_ceiling() -> Outcome:
     "back on the measurement",
 )
 def _chk_npl_room_e_area_conflict() -> Outcome:
-    measured = _NPL_MEASURED_K2A["E"]
+    measured = oracle.NPL_MEASURED_K2A["E"]
     ceiling = TEST_ENVIRONMENT_REQUIREMENTS["ISO 3746"][0]
     assert ceiling is not None
     agreeing: dict[float, int] = {}
-    for room_surface_m2 in (358.0, 258.0):
+    table_nine_m2 = oracle.NPL_ROOMS["E"][0]
+    table_six_m2 = oracle.NPL_TABLE_6_ROOM_E_SURFACE_M2
+    for room_surface_m2 in (table_nine_m2, table_six_m2):
         agreeing[room_surface_m2] = sum(
             int(
                 ph.noise_control.test_environment_applicability(
                     base_standard="ISO 3746",
-                    mean_absorption_coefficient=_NPL_ROOMS["E"][4],
+                    mean_absorption_coefficient=oracle.NPL_ROOMS["E"][4],
                     room_surface_area_m2=room_surface_m2,
-                    measurement_surface_area_m2=_NPL_SURFACE_M2[surface],
+                    measurement_surface_area_m2=oracle.NPL_SURFACE_M2[surface],
                 ).applicable
                 is (value <= ceiling)
             )
@@ -721,12 +564,12 @@ def _chk_npl_room_e_area_conflict() -> Outcome:
         )
     return numeric(
         3.0,
-        float(agreeing[358.0]),
+        float(agreeing[table_nine_m2]),
         0.0,
         expected_label="all three surfaces judged as measured, from the 358 m2 "
         "of Table 9",
-        computed_label=f"{agreeing[358.0]} of 3 with Table 9, and "
-        f"{agreeing[258.0]} of 3 with the 258 m2 Table 6 prints for the same "
+        computed_label=f"{agreeing[table_nine_m2]} of 3 with Table 9, and "
+        f"{agreeing[table_six_m2]} of 3 with the 258 m2 Table 6 prints for the same "
         "room",
     )
 
@@ -749,8 +592,8 @@ def _chk_npl_estimated_absorption_drops_the_factor_four() -> Outcome:
     far = 0
     total = 0
     closest = float("inf")
-    for room, printed in _NPL_ESTIMATED_K2A.items():
-        room_surface_m2, _, _, alpha_from, alpha_to = _NPL_ROOMS[room]
+    for room, printed in oracle.NPL_ESTIMATED_K2A.items():
+        room_surface_m2, _, _, alpha_from, alpha_to = oracle.NPL_ROOMS[room]
         for surface, bounds in printed.items():
             total += 1
             gaps = [
@@ -758,7 +601,7 @@ def _chk_npl_estimated_absorption_drops_the_factor_four() -> Outcome:
                     bound
                     - float(
                         ph.emission.environmental_correction(
-                            _NPL_SURFACE_M2[surface],
+                            oracle.NPL_SURFACE_M2[surface],
                             mean_absorption_coefficient=alpha,
                             room_surface=room_surface_m2,
                         )
@@ -787,9 +630,15 @@ def _chk_baua_estimated_environment() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    for alpha, room_surface_m2, at_half_metre, at_one_metre in _BAUA_ENGINEERS.values():
+    for (
+        alpha,
+        room_surface_m2,
+        _,
+        at_half_metre,
+        at_one_metre,
+    ) in oracle.BAUA_ENGINEERS.values():
         for surface_m2, want in zip(
-            _BAUA_SURFACES_M2, (at_half_metre, at_one_metre), strict=True
+            oracle.BAUA_SURFACES_M2, (at_half_metre, at_one_metre), strict=True
         ):
             total += 1
             got = float(
@@ -822,9 +671,15 @@ def _chk_baua_applicability_verdict() -> Outcome:
     assert ceiling is not None
     matching = 0
     total = 0
-    for alpha, room_surface_m2, at_half_metre, at_one_metre in _BAUA_ENGINEERS.values():
+    for (
+        alpha,
+        room_surface_m2,
+        _,
+        at_half_metre,
+        at_one_metre,
+    ) in oracle.BAUA_ENGINEERS.values():
         for surface_m2, printed in zip(
-            _BAUA_SURFACES_M2, (at_half_metre, at_one_metre), strict=True
+            oracle.BAUA_SURFACES_M2, (at_half_metre, at_one_metre), strict=True
         ):
             total += 1
             verdict = ph.noise_control.test_environment_applicability(
@@ -854,8 +709,8 @@ def _chk_baua_measured_absorption_area() -> Outcome:
     worst = 0.0
     matching = 0
     total = 0
-    surfaces = (*_BAUA_SURFACES_M2, _BAUA_DIRECT_SURFACE_M2)
-    for absorption_m2, *printed in _BAUA_DIRECT.values():
+    surfaces = (*oracle.BAUA_SURFACES_M2, oracle.BAUA_DIRECT_SURFACE_M2)
+    for absorption_m2, *printed in oracle.BAUA_DIRECT.values():
         for surface_m2, want in zip(surfaces, printed, strict=True):
             total += 1
             got = float(
@@ -892,8 +747,8 @@ def _chk_barron_a_weighted_totals() -> Outcome:
     from phonometry.noise_control.enclosure_insulation import _a_weighted_total
 
     printed = {
-        "without the enclosure": _BARRON_LPA_WITHOUT_DBA,
-        "with the enclosure": _BARRON_LPA_WITH_DBA,
+        "without the enclosure": oracle.BARRON_EXAMPLE_7_8_LPA_WITHOUT_DBA,
+        "with the enclosure": oracle.BARRON_EXAMPLE_7_8_LPA_WITH_DBA,
     }
     computed = {
         "without the enclosure": _a_weighted_total(
@@ -926,11 +781,15 @@ def _chk_barron_a_weighted_totals() -> Outcome:
 def _chk_smith_estimate_follows_the_spectrum() -> Outcome:
     computed = {
         name: ph.noise_control.estimated_a_weighted_insulation(
-            spectrum, _SMITH_ATTENUATION_DB, frequencies=_SMITH_BANDS_HZ
+            list(spectrum),
+            np.array(oracle.SMITH_EXAMPLE_1_13_ATTENUATION_DB),
+            frequencies=np.array(oracle.SMITH_EXAMPLE_1_13_OCTAVES_HZ),
         )
-        for name, (spectrum, _) in _SMITH_MACHINES.items()
+        for name, (spectrum, _) in oracle.SMITH_EXAMPLE_1_13_MACHINES.items()
     }
-    printed = {name: want for name, (_, want) in _SMITH_MACHINES.items()}
+    printed = {
+        name: want for name, (_, want) in oracle.SMITH_EXAMPLE_1_13_MACHINES.items()
+    }
     return record(
         printed,
         {name: float(round(value)) for name, value in computed.items()},
@@ -940,18 +799,6 @@ def _chk_smith_estimate_follows_the_spectrum() -> Outcome:
         )
         + f", a spread of {computed['machine B'] - computed['machine A']:.1f} dB",
     )
-
-
-#: W. Schirmer (ed.), Technischer Laermschutz, 2nd edition, Springer 2006,
-#: 10.8.1 "Akustische Dimensionierung": an enclosure 6 m by 5 m by 3 m high
-#: with a 0,25 m2 exhaust opening, whose walls and roof the book prints as
-#: S_K = 96 m2 - 0,25 m2 = 95,75 m2 on PDF page 323, printed folio 303, and
-#: the opening fraction q = S_O/(S_K + S_O) = 2,6e-3 it prints for it on PDF
-#: page 324, printed folio 304. The third edition of 2023 prints the same
-#: numbers at the same clause.
-_SCHIRMER_OPENING_M2 = 0.25
-_SCHIRMER_WALLS_M2 = 95.75
-_SCHIRMER_LEAK_RATIO = 2.6e-3
 
 
 @register(
@@ -967,10 +814,11 @@ def _chk_schirmer_leak_ratio() -> Outcome:
     # this one row serves both parts. The book prints q to two significant
     # figures, so the tolerance is half of its last digit.
     ratio = ph.noise_control.leak_ratio(
-        _SCHIRMER_OPENING_M2, _SCHIRMER_WALLS_M2 + _SCHIRMER_OPENING_M2
+        oracle.SCHIRMER_OPENING_M2,
+        oracle.SCHIRMER_WALLS_M2 + oracle.SCHIRMER_OPENING_M2,
     )
     return numeric(
-        _SCHIRMER_LEAK_RATIO,
+        oracle.SCHIRMER_LEAK_RATIO,
         ratio,
         5e-5,
         places=6,
@@ -990,7 +838,7 @@ def _chk_schirmer_leak_ratio() -> Outcome:
 def _chk_ifa_installed_enclosures() -> Outcome:
     computed: dict[str, float] = {}
     printed: dict[str, float] = {}
-    for name, (without, with_, reduction) in _IFA_ENCLOSURES.items():
+    for name, (without, with_, reduction) in oracle.IFA_LSA_01_243_ENCLOSURES.items():
         result = ph.noise_control.sound_pressure_insulation(
             [without],
             [with_],
@@ -1049,87 +897,25 @@ _K1_CLAMP_BANDS_HZ = np.array([100.0, 1000.0, 6300.0])
 #: is exercised there rather than Equation (14).
 _K1_CLAMP_MARGIN_DB = np.array([6.0, 8.0, 6.0])
 
-#: The two values ISO 3741:2010 prints on folio 20 (PDF p. 29), in decibels,
-#: after Equation (14) on folio 19 (PDF p. 28):
-#: "K1i shall be set to 1,26 dB (the value for dLpi = 6 dB)" and "to 0,46 dB
-#: (the value for dLpi = 10 dB)".
-_PRINTED_K1_DB = np.array([1.26, 0.46, 1.26])
+#: The two values ISO 3741:2010 prints on folio 20 (PDF p. 29) after
+#: Equation (14) on folio 19 (PDF p. 28), in decibels, band by band: the 6 dB
+#: value at 100 Hz and 6 300 Hz, the 10 dB value at 1 000 Hz.
+_PRINTED_K1_DB = np.array(
+    [
+        oracle.ISO3741_K1_PRINTED_DB[6.0],
+        oracle.ISO3741_K1_PRINTED_DB[10.0],
+        oracle.ISO3741_K1_PRINTED_DB[6.0],
+    ]
+)
 
 #: A flat level to put those margins under, in decibels.
 _K1_SIGNAL_DB = 80.0
 
-#: ISO 717-1:2013 Table C.1, the two A-weighted spectra the adaptation terms
-#: are formed against, in decibels, over the rating bands.
-_SPECTRUM_ONE_DB = np.array(
-    [-29.0, -26.0, -23.0, -21.0, -19.0, -17.0, -15.0, -13.0]
-    + [-12.0, -11.0, -10.0, -9.0, -9.0, -9.0, -9.0, -9.0]
-)
-_SPECTRUM_TWO_DB = np.array(
-    [-20.0, -20.0, -18.0, -16.0, -15.0, -14.0, -13.0, -12.0]
-    + [-11.0, -9.0, -8.0, -9.0, -10.0, -11.0, -13.0, -15.0]
-)
-
-#: ISO 3744:2010 Annex E, Table E.1 (PDF p. 69, printed folio 60): the
-#: one-third-octave C_k over the same bands. Annex A of ISO 11957 takes the
-#: spectrum unweighted and an attenuation A_i that is positive where the
-#: weighting takes level away, so A_i = -C_k and the printed A-weighted
-#: spectra are de-weighted with these before they are handed over.
-_CK_THIRD_DB = np.array(
-    [-19.1, -16.1, -13.4, -10.9, -8.6, -6.6, -4.8, -3.2]
-    + [-1.9, -0.8, 0.0, 0.6, 1.0, 1.2, 1.3, 1.2]
-)
-
-#: The "-10 lg sum" Table C.1 prints under each spectrum, in decibels. Both are
-#: truncated rather than rounded, which the table marks with its ellipsis.
-_PRINTED_SUM_TERM_DB = (28.308, 26.859)
-
-#: SGS-CSTC Standards Technical Services, Shunde Branch, test report
-#: SDHL260400706101HI of 7 May 2026, folio "Page 3 of 4": D_p of a meeting pod
-#: measured in a 200 m3 reverberation room, in decibels, over the rating bands.
-#: The report also prints 36,2 dB at 4 000 Hz and 36,4 dB at 5 000 Hz, which
-#: the rating does not read.
-_SGS_POD_DB = np.array(
-    [11.0, 22.5, 24.0, 26.0, 29.3, 32.1, 28.3, 30.6]
-    + [31.9, 34.9, 34.5, 33.2, 32.1, 33.7, 32.6, 33.2]
-)
-
-#: AGH University, Department of Mechanics and Vibroacoustics, report 5.5.130.
-#: of August 2023, folio "Strona 10 z 10": D of an acoustic booth measured in a
-#: 180,4 m3 reverberation room, in decibels, over the rating bands. The printed
-#: table runs from 50 Hz to 10 kHz; the eight bands outside the rating range
-#: play no part in it.
-_AGH_BOOTH_DB = np.array(
-    [10.0, 20.1, 14.7, 19.3, 20.6, 19.9, 23.2, 20.4]
-    + [17.6, 19.1, 18.8, 20.2, 21.8, 24.4, 26.8, 28.3]
-)
-
-#: AGH University, Laboratorium Akustyki Technicznej, report 5.5.130.680 of
-#: October 2017, folio "Strona 11 z 12": D_p of a telephone booth measured in
-#: the same room, tabulated to whole decibels.
-_EURONOVA_BOOTH_DB = np.array(
-    [12.0, 18.0, 14.0, 15.0, 20.0, 25.0, 28.0, 31.0]
-    + [31.0, 33.0, 34.0, 34.0, 31.0, 30.0, 32.0, 33.0]
-)
-
-#: Barron, Industrial Noise Control and Acoustics, Table 7-5 (printed folio
-#: 308): the octave centres of Example 7-8, in hertz.
-_BARRON_BANDS_HZ = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
-
-#: The same table, row "L_p^o(OB)": the level at the operator with no
-#: enclosure, in decibels.
-_BARRON_OPEN_DB = np.array([93.4, 98.5, 102.9, 104.6, 102.8, 95.5])
-
-#: The same table, row "IL": the insertion loss the enclosure buys, in
-#: decibels, which is the printed L_p^o(OB) less the printed L_p(OB) band for
-#: band.
-_BARRON_INSERTION_LOSS_DB = np.array([11.0, 13.6, 17.0, 18.8, 18.9, 24.3])
-
-#: The two A-weighted totals the example prints, on folios 309 and 311, in
-#: decibels: "L_A^o = 108.4 dBA (without the enclosure)" and "L_A = 89.8 dBA
-#: (with the enclosure)". Each is printed to a tenth, so their difference
-#: carries a tenth of uncertainty of its own.
-_BARRON_OPEN_TOTAL_DB = 108.4
-_BARRON_ENCLOSED_TOTAL_DB = 89.8
+#: ISO 717-1:2013 Table C.1, ISO 3744:2010 Table E.1, the three laboratory
+#: reports and Barron's Example 7-8, as ``tests/reference_data`` carries them.
+_SPECTRUM_ONE_DB = np.array(oracle.ISO717_1_SPECTRUM_ONE_DB)
+_SPECTRUM_TWO_DB = np.array(oracle.ISO717_1_SPECTRUM_TWO_DB)
+_CK_THIRD_DB = np.array(oracle.ISO3744_TABLE_E1_CK_DB)
 
 
 @register(
@@ -1187,7 +973,10 @@ def _chk_printed_k1_reaches_both_clauses() -> Outcome:
         cabin_background_levels=cabin - _K1_CLAMP_MARGIN_DB,
     ).insulation
     computed = np.concatenate([np.asarray(edges), insulation])
-    printed = np.array([78.74, 79.54, 31.26, 30.46, 31.26])
+    k1 = oracle.ISO3741_K1_PRINTED_DB
+    printed = np.array(
+        [_K1_SIGNAL_DB - k1[6.0], _K1_SIGNAL_DB - k1[10.0], *(30.0 + _PRINTED_K1_DB)]
+    )
     worst = float(np.max(np.abs(computed - printed)))
     return numeric(
         0.0,
@@ -1242,7 +1031,9 @@ def _chk_annex_a_on_the_printed_sums() -> Outcome:
     # it, never under. The departure reported is the one nearest an edge.
     departures: list[float] = []
     for spectrum, printed in zip(
-        (_SPECTRUM_ONE_DB, _SPECTRUM_TWO_DB), _PRINTED_SUM_TERM_DB, strict=True
+        (_SPECTRUM_ONE_DB, _SPECTRUM_TWO_DB),
+        oracle.ISO717_1_PRINTED_SUM_TERM_DB,
+        strict=True,
     ):
         estimate = ph.noise_control.estimated_cabin_noise_insulation(
             spectrum - _CK_THIRD_DB,
@@ -1285,9 +1076,9 @@ def _chk_annex_a_on_the_printed_sums() -> Outcome:
 def _chk_sgs_pod_rating() -> Outcome:
     # The report prints the rating and nothing else of the single-number set,
     # so C and Ctr travel here as computed values and are not anchored on it.
-    rating = ph.noise_control.weighted_cabin_insulation(_SGS_POD_DB)
+    rating = ph.noise_control.weighted_cabin_insulation(np.array(oracle.SGS_POD_DP_DB))
     return numeric(
-        32.0,
+        float(oracle.SGS_POD_RATING_DB),
         float(rating.rating),
         0.0,
         unit="dB",
@@ -1306,9 +1097,11 @@ def _chk_sgs_pod_rating() -> Outcome:
     "by the issuing laboratory at D_p,w = 22 dB",
 )
 def _chk_agh_booth_rating() -> Outcome:
-    rating = ph.noise_control.weighted_cabin_insulation(_AGH_BOOTH_DB)
+    rating = ph.noise_control.weighted_cabin_insulation(
+        np.array(oracle.AGH_BOOTH_DP_DB)
+    )
     return numeric(
-        22.0,
+        float(oracle.AGH_BOOTH_RATING_DB),
         float(rating.rating),
         0.0,
         unit="dB",
@@ -1332,9 +1125,11 @@ def _chk_euronova_booth_rating() -> Outcome:
     # so the laboratory rated unrounded data. Rating the printed integers
     # reaches the same 30 dB with 9,0 dB of the 32,0 dB budget to spare, which
     # is the margin this row is worth and no more.
-    rating = ph.noise_control.weighted_cabin_insulation(_EURONOVA_BOOTH_DB)
+    rating = ph.noise_control.weighted_cabin_insulation(
+        np.array(oracle.EURONOVA_BOOTH_DP_DB)
+    )
     return numeric(
-        30.0,
+        float(oracle.EURONOVA_BOOTH_RATING_DB),
         float(rating.rating),
         0.0,
         unit="dB",
@@ -1358,12 +1153,13 @@ def _chk_annex_a_on_barron_example() -> Outcome:
     # measured to ISO 11957, so what this anchors is the arithmetic of the
     # annex: the A-weighted sum with the insulation in and the one without.
     estimate = ph.noise_control.estimated_cabin_noise_insulation(
-        _BARRON_OPEN_DB,
-        _BARRON_INSERTION_LOSS_DB,
-        frequencies=_BARRON_BANDS_HZ,
+        _BARRON_LP_WITHOUT_DB,
+        _BARRON_IL_DB,
+        frequencies=_BOOK_OCTAVES_HZ,
     )
     return numeric(
-        _BARRON_OPEN_TOTAL_DB - _BARRON_ENCLOSED_TOTAL_DB,
+        oracle.BARRON_EXAMPLE_7_8_LPA_WITHOUT_DBA
+        - oracle.BARRON_EXAMPLE_7_8_LPA_WITH_DBA,
         estimate,
         0.1,
         unit="dB",
@@ -1388,141 +1184,26 @@ def _chk_annex_a_on_barron_example() -> Outcome:
 
 #: The six octave bands both enclosure examples are worked in, in hertz. They
 #: are exactly the mandatory octave range of clause 6.2.
-_BOOK_OCTAVES_HZ = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+_BOOK_OCTAVES_HZ = np.array(oracle.BARRON_TABLE_7_5_OCTAVES_HZ)
 
-#: Barron, Industrial Noise Control and Acoustics, Marcel Dekker, New York,
-#: 2003 (ISBN 0-8247-0701-X), 7.6.2, Example 7-8, Table 7-5 "Solution for
-#: Example 7-8" on PDF page 320, printed folio 308: a machine in a 1.80 m by
-#: 1.20 m by 1.00 m plywood enclosure, with the operator 3 m away in a room 20
-#: m by 20 m by 4 m. The rows are printed to 0.1 dB. The example is a
-#: prediction, not an ISO 11546-1 measurement: the insertion loss is computed
-#: from the sound power balance of the book's Equation (7-85), and only the
-#: arithmetic that follows is shared with this standard.
-_BARRON_LW_DB = np.array([103.0, 109.0, 114.0, 117.0, 113.0, 107.0])
-_BARRON_LW_OUT_DB = np.array([92.0, 95.4, 97.0, 98.2, 94.2, 82.7])
-_BARRON_IL_DB = np.array([11.0, 13.6, 17.0, 18.8, 18.9, 24.3])
-_BARRON_LP_WITHOUT_DB = np.array([93.4, 98.5, 102.9, 104.6, 102.8, 95.5])
-_BARRON_LP_WITH_DB = np.array([82.4, 84.9, 85.9, 85.8, 83.9, 71.2])
+#: Barron (2003) Example 7-8, Table 7-5, as ``tests/reference_data`` carries it.
+_BARRON_LW_DB = np.array(oracle.BARRON_TABLE_7_5_LW_DB)
+_BARRON_LW_OUT_DB = np.array(oracle.BARRON_TABLE_7_5_LW_OUT_DB)
+_BARRON_IL_DB = np.array(oracle.BARRON_TABLE_7_5_IL_DB)
+_BARRON_LP_WITHOUT_DB = np.array(oracle.BARRON_TABLE_7_5_LP_WITHOUT_DB)
+_BARRON_LP_WITH_DB = np.array(oracle.BARRON_TABLE_7_5_LP_WITH_DB)
 
-#: The two A-weighted sound pressure levels of the same example, in decibels,
-#: printed in the running text rather than in the table: PDF page 321, printed
-#: folio 309, "L_A = 108.4 dBA (without the enclosure)", and PDF page 323,
-#: printed folio 311, "L_A = 89.8 dBA (with the enclosure)". Their difference
-#: is D_pA; the book never prints it.
-_BARRON_LPA_WITHOUT_DBA = 108.4
-_BARRON_LPA_WITH_DBA = 89.8
-
-#: The five bands of Table 7-5 where the sound power rows close on themselves.
-#: At 2 000 Hz the table prints L_W,out = 94.2 dB while 113 - 18.9 = 94.1, and
-#: the table's own L_p(OB) of 83.9 dB follows 94.1 rather than 94.2, so it is
-#: the printed L_W,out that is 0.1 dB high there. The printed insertion loss is
-#: the figure that is right, which is why the Equation (3) row keeps all six
-#: bands and only the Equation (1) row, which reads L_W,out, drops one. This is
-#: a slip in a textbook, not in a standard, so it is recorded here and not in
-#: docs/ERRATA.md.
-_BARRON_POWER_BANDS = np.array([True, True, True, True, False, True])
-
-#: Harris (ed.), Noise Control Manual: Guidelines for Problem-Solving in the
-#: Industrial/Commercial Acoustical Environment, Noise Control Association,
-#: Van Nostrand Reinhold, 1991 (Springer softcover reprint, ISBN
-#: 978-1-4757-6011-8), Appendix 3. The octave levels at the worker's station
-#: before any treatment, in decibels, from Figure A3-2 on PDF page 135,
-#: printed folio 125, and Figure A3-8 on PDF page 141, printed folio 131. Both
-#: figures start from the same spectrum.
-_HARRIS_BEFORE_DB = np.array([108.0, 103.0, 99.0, 104.0, 101.0, 85.0])
-
-#: The four cases of the same two figures: the per-band reduction of each, in
-#: decibels, against the A-weighted level the figure prints for it. Example 1
-#: prints its insertion loss as one row; Example 3 prints a room adjustment and
-#: a transmission loss which are added here, which is exact arithmetic on the
-#: printed lines but is a construction rather than a quotation. Example 3 is a
-#: personnel enclosure, nearer ISO 11957 in subject, and is kept because the
-#: estimator is the same formula.
-#:
-#: The comparison is on the reduction, 107 dBA minus the figure's own total,
-#: never on the rounded total itself: Example 1(a) prints 94 dBA where its own
-#: pairwise addition lands on 94.5 and an energy sum gives 94.7, so a row
-#: phrased on the rounded total would be red for a correct implementation. The
-#: book adds bands pairwise from a difference table (Figure A3-1, PDF page 130,
-#: printed folio 120), which costs about 0.7 dB at worst.
-_HARRIS_CASES: dict[str, tuple[list[float], float]] = {
-    "Example 1(a), plywood": ([13.0, 11.0, 12.0, 12.0, 13.0, 15.0], 107.0 - 94.0),
-    "Example 1(b), plywood and insulation": (
-        [18.0, 17.0, 23.0, 30.0, 38.0, 40.0],
-        107.0 - 81.0,
-    ),
-    "Example 3(a), plain wall": ([16.0, 24.0, 40.0, 49.0, 50.0, 41.0], 107.0 - 77.0),
-    "Example 3(b), insulated wall": (
-        [24.0, 36.0, 50.0, 58.0, 61.0, 46.0],
-        107.0 - 68.0,
-    ),
-}
-
-#: ISO 717-1:2020, Annex C, Table C.1 "Calculation example: Measurements in
-#: the specified frequency range 100 Hz to 3 150 Hz", PDF page 23, printed
-#: folio 17: the sound reduction index of the example, in decibels, over the
-#: sixteen one-third-octave rating bands. Clause 7.4 of ISO 11546-1 rates
-#: D_W the same way with D_W in place of R, which is what lets this column be
-#: read as an insertion loss spectrum.
-_ISO717_TABLE_C1_DB = [
-    20.4,
-    16.3,
-    17.7,
-    22.6,
-    22.4,
-    22.7,
-    24.8,
-    26.6,
-    28.0,
-    30.5,
-    31.8,
-    32.5,
-    33.4,
-    33.0,
-    31.0,
-    25.5,
-]
-
-#: ISO 80000-1:2009, Annex B "Rounding of numbers": B.2 and B.3 Rule A with
-#: both its examples on PDF page 43, printed folio 35, and Rule B with the
-#: remark that Rule A is generally preferable on PDF page 44, printed folio
-#: 36. Each
-#: entry is a printed number over its printed rounding range, which B.1
-#: defines as the interval between the integral multiples being rounded to, so
-#: the quotient is what a rounding to the nearest integer is asked for.
-#:
-#: The two ties of Rule A at rounding range 10 are the pair that decides the
-#: rule: 1 225,0 goes to 1 220 and 1 235,0 to 1 240, the even multiple in both
-#: cases, where Rule B would give 1 230 and 1 240. The ties printed at
-#: rounding range 0,1 are deliberately left out: 12,35 has no exact double, so
-#: the tie is gone before any code sees it and the comparison would test the
-#: binary representation rather than the rule.
-_ISO80000_ROUNDING: tuple[tuple[str, float, int], ...] = (
-    ("B.2, 12,223 at range 0,1", 12.223 / 0.1, 122),
-    ("B.2, 12,251 at range 0,1", 12.251 / 0.1, 123),
-    ("B.2, 12,275 at range 0,1", 12.275 / 0.1, 123),
-    ("B.2, 1 223,3 at range 10", 1223.3 / 10.0, 122),
-    ("B.2, 1 225,1 at range 10", 1225.1 / 10.0, 123),
-    ("B.2, 1 227,5 at range 10", 1227.5 / 10.0, 123),
-    ("B.3 Rule A, 1 225,0 at range 10", 1225.0 / 10.0, 122),
-    ("B.3 Rule A, 1 235,0 at range 10", 1235.0 / 10.0, 124),
-)
-
-#: Suva, W. Lips, "Lärmbekämpfung durch Kapselungen", Bestellnummer 66026.d,
-#: revised edition March 2010, clause 6.2.1 on PDF page 17, printed folio 15:
-#: the manufacturer's octave sound power levels of a converter set, in
-#: decibels, of which the guide says "Diese Werte ergeben L_WA = 104 dB".
-_SUVA_OCTAVES_HZ = np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
-_SUVA_LW_DB = np.array([91.0, 98.0, 102.0, 101.0, 99.0, 98.0, 91.0, 85.0])
-_SUVA_LWA_DB = 104.0
+#: The five bands of Table 7-5 where the sound power rows close on themselves:
+#: the printed insertion loss is the figure that is right at 2 000 Hz, which is
+#: why the Equation (3) row keeps all six bands and only the Equation (1) row,
+#: which reads L_W,out, drops one.
+_BARRON_POWER_BANDS = _BOOK_OCTAVES_HZ != oracle.BARRON_TABLE_7_5_INCONSISTENT_BAND_HZ
 
 # The same Rechenbeispiel of Schirmer's chapter 10 anchors the leak ratio of
 # definition 3.16, which part 1 and part 2 word identically, and the row for it
 # is registered above, _chk_schirmer_leak_ratio, under the second edition. It
 # is not repeated here: the same division printed in two editions of one book
-# is one oracle, not two. The third edition prints it at 10.8.1, PDF page 517,
-# printed folio 499 for the geometry and PDF page 518, printed folio 500 for
-# q = 2,6e-3.
+# is one oracle, not two.
 
 
 @register(
@@ -1567,7 +1248,8 @@ def _chk_barron_a_weighted_insulation() -> Outcome:
     # Each total is printed to a tenth, so their difference is good to a tenth
     # and no more, which is the tolerance.
     return numeric(
-        _BARRON_LPA_WITHOUT_DBA - _BARRON_LPA_WITH_DBA,
+        oracle.BARRON_EXAMPLE_7_8_LPA_WITHOUT_DBA
+        - oracle.BARRON_EXAMPLE_7_8_LPA_WITH_DBA,
         result.a_weighted_insulation,
         0.1,
         unit="dB",
@@ -1589,7 +1271,8 @@ def _chk_barron_annex_c_estimate() -> Outcome:
         frequencies=_BOOK_OCTAVES_HZ,
     )
     return numeric(
-        _BARRON_LPA_WITHOUT_DBA - _BARRON_LPA_WITH_DBA,
+        oracle.BARRON_EXAMPLE_7_8_LPA_WITHOUT_DBA
+        - oracle.BARRON_EXAMPLE_7_8_LPA_WITH_DBA,
         estimate,
         0.1,
         unit="dB",
@@ -1633,18 +1316,18 @@ def _chk_barron_power_bands() -> Outcome:
 def _chk_harris_estimated_reduction() -> Outcome:
     worst = 0.0
     matching = 0
-    for reduction, printed in _HARRIS_CASES.values():
+    for reduction, printed_dba in oracle.HARRIS_CASES.values():
         estimate = ph.noise_control.estimated_a_weighted_insulation(
-            _HARRIS_BEFORE_DB,
-            reduction,
+            np.array(oracle.HARRIS_BEFORE_DB),
+            list(reduction),
             frequencies=_BOOK_OCTAVES_HZ,
         )
-        departure = abs(estimate - printed)
+        departure = abs(estimate - (oracle.HARRIS_BEFORE_DBA - printed_dba))
         worst = max(worst, departure)
         matching += int(departure <= 1.0)
     return count(
         matching,
-        len(_HARRIS_CASES),
+        len(oracle.HARRIS_CASES),
         subject="printed A-weighted reductions",
         expected_label=f"4/4 (worst departure {worst:.2f} dB)",
     )
@@ -1658,7 +1341,7 @@ def _chk_harris_estimated_reduction() -> Outcome:
 )
 def _chk_iso717_pass_through() -> Outcome:
     rated = ph.noise_control.weighted_insulation(
-        _ISO717_TABLE_C1_DB,
+        ref.ISO717_1_ANNEX_C_R,
         quantity="sound_power",
         band_fraction=3,
     )
@@ -1680,11 +1363,12 @@ def _chk_iso717_pass_through() -> Outcome:
     "multiple, which the annex calls generally preferable",
 )
 def _chk_iso80000_rounding() -> Outcome:
-    given = [multiple for _, multiple, _ in _ISO80000_ROUNDING]
+    examples = rounding.ISO80000_1_ANNEX_B_ROUNDINGS.values()
+    given = [number / scale for number, scale, _ in examples]
     rounded = ph.noise_control.sound_power_insulation(
         given, [0.0] * len(given)
     ).rounded()
-    printed = [want for _, _, want in _ISO80000_ROUNDING]
+    printed = [want for _, _, want in examples]
     matching = sum(
         int(got == want) for got, want in zip(rounded.tolist(), printed, strict=True)
     )
@@ -1709,18 +1393,20 @@ def _chk_suva_a_weighted_total() -> Outcome:
     # return the A-weighted total of the other spectrum, which is the only
     # quantity this guide prints. The remaining bands are 300 dB down, which
     # is thirty orders of magnitude below the one that carries the energy.
-    reference = np.full(_SUVA_LW_DB.size, -300.0)
-    reference[_SUVA_OCTAVES_HZ == 1000.0] = 0.0
+    levels = np.array(oracle.SUVA_LW_DB)
+    octaves = np.array(oracle.SUVA_OCTAVES_HZ)
+    reference = np.full(levels.size, -300.0)
+    reference[octaves == 1000.0] = 0.0
     result = ph.noise_control.sound_power_insulation(
-        _SUVA_LW_DB,
+        levels,
         reference,
-        frequencies=_SUVA_OCTAVES_HZ,
+        frequencies=octaves,
         base_standard="ISO 3744",
         band_fraction=1,
     )
     assert result.a_weighted_insulation is not None
     return numeric(
-        _SUVA_LWA_DB,
+        oracle.SUVA_LWA_DB,
         result.a_weighted_insulation,
         0.5,
         unit="dB",

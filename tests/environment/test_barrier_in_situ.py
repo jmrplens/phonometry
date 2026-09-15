@@ -12,9 +12,12 @@ pieces of geometry.
 from __future__ import annotations
 
 import math
+import warnings
 
 import numpy as np
 import pytest
+from reference_data import barrier_in_situ as oracle
+from reference_data import rounding
 
 from phonometry import environment
 from phonometry.environment.propagation.barrier_in_situ import (
@@ -257,15 +260,78 @@ def test_a_close_source_takes_the_ten_degree_rule() -> None:
     # Restating the formula here would pass whatever the increment were
     # applied to. CEN/TS 16272-7:2015 8.2.3, printed folio 16 (PDF page 17),
     # words the same rule the same way, "10 degrees greater than to the top of
-    # the barrier", which is what fixes this reading.
-    for distance, barrier in ((5.0, 3.0), (10.0, 4.0), (12.0, 2.5), (14.999, 5.0)):
+    # the barrier", which is what fixes this reading. All four geometries are
+    # ones where the angle asks for more than the 1,5 m clearance, so the NOTE
+    # is what sets the height.
+    for distance, barrier in ((5.0, 4.0), (10.0, 4.0), (12.0, 2.5), (14.999, 5.0)):
         height = environment.reference_microphone_height_m(
             barrier, source_to_barrier_m=distance
         )
         to_the_top = math.degrees(math.atan(barrier / distance))
         to_the_microphone = math.degrees(math.atan(height / distance))
+        assert height > barrier + REFERENCE_MICROPHONE_CLEARANCE_M
         assert to_the_microphone - to_the_top == pytest.approx(10.0, abs=1e-9)
     assert REFERENCE_ELEVATION_INCREMENT_DEG == 10.0
+
+
+def test_the_clearance_governs_where_the_angle_asks_for_less() -> None:
+    # ISO 10847:1997 7.2.2, printed folio 9 (PDF page 13): the height "shall be
+    # at least 1,5 m above the top edge of the barriers". The NOTE under it
+    # only ever raises the microphone, so it cannot take it under that. A 3 m
+    # barrier 5 m from the source reaches its 10 degrees at 4,34 m, which is
+    # under the 4,5 m the clause requires.
+    angle = 5.0 * math.tan(math.atan(3.0 / 5.0) + math.radians(10.0))
+    assert angle == pytest.approx(4.341, abs=1e-3)
+    height = environment.reference_microphone_height_m(3.0, source_to_barrier_m=5.0)
+    assert height == 4.5
+
+
+def test_no_close_geometry_puts_the_microphone_under_the_clearance() -> None:
+    # Every geometry of the NOTE's range on a 0,1 m grid whose barrier top
+    # stands under 80 degrees from the source, where a finite height reaches
+    # the increment. The result never falls under the clearance of 7.2.2, and
+    # wherever it stands above it the 10 degrees of the NOTE hold exactly.
+    limit = math.tan(math.radians(90.0 - REFERENCE_ELEVATION_INCREMENT_DEG))
+    distances = [round(0.5 + 0.1 * step, 10) for step in range(145)]
+    barriers = [round(0.1 + 0.1 * step, 10) for step in range(80)]
+    governed = {"clearance": 0, "angle": 0}
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", BarrierInSituWarning)
+        for distance in distances:
+            for barrier in barriers:
+                if barrier / distance >= limit:
+                    continue
+                height = environment.reference_microphone_height_m(
+                    barrier, source_to_barrier_m=distance
+                )
+                clearance = barrier + REFERENCE_MICROPHONE_CLEARANCE_M
+                assert height >= clearance
+                if height == clearance:
+                    governed["clearance"] += 1
+                else:
+                    governed["angle"] += 1
+                    to_the_top = math.degrees(math.atan(barrier / distance))
+                    to_the_microphone = math.degrees(math.atan(height / distance))
+                    assert to_the_microphone - to_the_top == pytest.approx(
+                        REFERENCE_ELEVATION_INCREMENT_DEG, abs=1e-9
+                    )
+    # The sweep exercises both branches, not one of them.
+    assert governed["clearance"] > 0
+    assert governed["angle"] > 0
+
+
+def test_a_barrier_top_past_eighty_degrees_keeps_the_clearance() -> None:
+    # Once the top of the barrier stands 80 degrees or more above the near end
+    # of the source region, no height puts the microphone 10 degrees higher
+    # still, and the tangent of the NOTE's angle turns negative. The NOTE is a
+    # preference and 7.2.2 a requirement, so the microphone keeps the 1,5 m
+    # and the unreachable preference is reported.
+    for distance, barrier, expected in ((1.0, 6.0, 7.5), (1.0, 10.0, 11.5)):
+        with pytest.warns(BarrierInSituWarning, match="10 degrees"):
+            height = environment.reference_microphone_height_m(
+                barrier, source_to_barrier_m=distance
+            )
+        assert height == expected
 
 
 def test_the_ten_degrees_are_not_measured_from_the_ground_plane() -> None:
@@ -375,9 +441,11 @@ def test_a_non_finite_wind_component_is_refused() -> None:
 
 
 # The campaigns other people published against ISO 10847, which prints no
-# worked example of its own. Every level below was read on the printed page,
-# and every expected value is the one that page prints beside those levels.
-# They report to 0,1 dB, so agreement is asserted to half of that.
+# worked example of its own. Every level was read on the printed page, and
+# every expected value is the one that page prints beside those levels; both
+# are in ``tests/reference_data/barrier_in_situ.py`` with the document, the
+# folio and the PDF page. They report to 0,1 dB, so agreement is asserted to
+# half of that.
 
 PRINTED_TENTH_DB = 0.05
 
@@ -391,21 +459,20 @@ def test_the_cordero_campaign_reports_its_two_insertion_losses() -> None:
     # and "9,5 dBA". The screened object is a window rather than a barrier, so
     # what this anchors is the subtraction of 8.2.1 and the reporting rule of
     # 10 c), not the procedure around them.
-    quiet = environment.measured_insertion_loss_direct(
-        reference_before_db=[61.0],
-        reference_after_db=[64.3],
-        receiver_before_db=[55.6],
-        receiver_after_db=[46.1],
+    results = {}
+    for case, levels in oracle.CORDERO_TABLA_1_DBA.items():
+        reference_before, reference_after, receiver_before, receiver_after = levels
+        results[case] = environment.measured_insertion_loss_direct(
+            reference_before_db=[reference_before],
+            reference_after_db=[reference_after],
+            receiver_before_db=[receiver_before],
+            receiver_after_db=[receiver_after],
+        )
+    for case, reported in oracle.CORDERO_TABLA_2_DBA.items():
+        assert results[case].rounded().tolist() == [reported]
+    assert float(results["con ruido"].insertion_loss_db[0]) == pytest.approx(
+        oracle.CORDERO_UNROUNDED_CON_RUIDO_DBA, abs=PRINTED_TENTH_DB
     )
-    noisy = environment.measured_insertion_loss_direct(
-        reference_before_db=[61.2],
-        reference_after_db=[63.7],
-        receiver_before_db=[56.0],
-        receiver_after_db=[49.0],
-    )
-    assert quiet.rounded().tolist() == [13]
-    assert noisy.rounded().tolist() == [10]
-    assert float(noisy.insertion_loss_db[0]) == pytest.approx(9.5, abs=PRINTED_TENTH_DB)
 
 
 def test_the_lindeman_direct_runs_reproduce_their_printed_losses() -> None:
@@ -413,13 +480,19 @@ def test_the_lindeman_direct_runs_reproduce_their_printed_losses() -> None:
     # Methodologies", Transportation Research Record 1033, 1985. TABLE 8 on
     # printed folio 39 (PDF page 7), runs 2 and 3, the only ones whose four
     # levels are all printed and whose insertion loss the table gives.
-    res = environment.measured_insertion_loss_direct(
-        reference_before_db=[64.5, 63.1],
-        reference_after_db=[67.1, 65.5],
-        receiver_before_db=[58.5, 57.3],
-        receiver_after_db=[53.6, 51.0],
+    reference_before, reference_after, receiver_before, receiver_after = zip(
+        *oracle.LINDEMAN_TABLE_8_DBA.values(), strict=True
     )
-    assert res.insertion_loss_db == pytest.approx([7.5, 8.7], abs=PRINTED_TENTH_DB)
+    res = environment.measured_insertion_loss_direct(
+        reference_before_db=list(reference_before),
+        reference_after_db=list(reference_after),
+        receiver_before_db=list(receiver_before),
+        receiver_after_db=list(receiver_after),
+    )
+    assert res.insertion_loss_db == pytest.approx(
+        list(oracle.LINDEMAN_TABLE_8_INSERTION_LOSS_DBA.values()),
+        abs=PRINTED_TENTH_DB,
+    )
 
 
 def test_the_lindeman_first_run_is_a_defect_of_the_source() -> None:
@@ -429,13 +502,19 @@ def test_the_lindeman_first_run_is_a_defect_of_the_source() -> None:
     # and column (3) of TABLE 8 prints their difference as 6,6 dB, so the
     # levels are corroborated and the printed insertion loss is not. Neither
     # it nor the note's mean of 7,5 dBA is used as an expected value.
+    reference_before, reference_after, receiver_before, receiver_after = (
+        oracle.LINDEMAN_TABLE_8_RUN_1_DBA
+    )
     res = environment.measured_insertion_loss_direct(
-        reference_before_db=[64.2],
-        reference_after_db=[65.4],
-        receiver_before_db=[57.6],
-        receiver_after_db=[53.0],
+        reference_before_db=[reference_before],
+        reference_after_db=[reference_after],
+        receiver_before_db=[receiver_before],
+        receiver_after_db=[receiver_after],
     )
     assert float(res.insertion_loss_db[0]) == pytest.approx(5.8, abs=PRINTED_TENTH_DB)
+    assert float(res.insertion_loss_db[0]) != pytest.approx(
+        oracle.LINDEMAN_TABLE_8_RUN_1_PRINTED_DBA, abs=PRINTED_TENTH_DB
+    )
 
 
 def test_the_lindeman_indirect_runs_and_their_mean() -> None:
@@ -443,17 +522,18 @@ def test_the_lindeman_indirect_runs_and_their_mean() -> None:
     # "before" pair and the barrier site the "after" one. Both receivers stand
     # in the open, so C_r and C'_r cancel and this exercises the site pairing
     # of 8.2.2 rather than the facade branch.
+    levels = oracle.LINDEMAN_TABLE_13_DBA
     res = environment.measured_insertion_loss_indirect(
-        reference_before_db=[66.7, 72.2, 66.1, 68.8, 67.4],
-        reference_after_db=[65.4, 67.1, 65.5, 65.9, 66.9],
-        receiver_before_db=[61.2, 65.3, 60.2, 61.1, 62.4],
-        receiver_after_db=[53.0, 53.6, 51.0, 54.6, 52.7],
+        reference_before_db=list(levels["reference before"]),
+        reference_after_db=list(levels["reference after"]),
+        receiver_before_db=list(levels["receiver before"]),
+        receiver_after_db=list(levels["receiver after"]),
     )
     assert res.insertion_loss_db == pytest.approx(
-        [6.9, 6.6, 8.6, 3.6, 9.2], abs=PRINTED_TENTH_DB
+        list(oracle.LINDEMAN_TABLE_13_INSERTION_LOSS_DBA), abs=PRINTED_TENTH_DB
     )
     assert float(np.mean(res.insertion_loss_db)) == pytest.approx(
-        7.0, abs=PRINTED_TENTH_DB
+        oracle.LINDEMAN_TABLE_13_MEAN_DBA, abs=PRINTED_TENTH_DB
     )
     assert res.symbol == "D'_IL"
 
@@ -464,14 +544,21 @@ def test_the_lindeman_fourth_run_takes_its_level_from_the_table_above() -> None:
     # column (3) prints 7,7 dBA for that run and 68,8 - 60,2 is 8,6. TABLE 12,
     # directly above on the same folio and covering the same microphone and
     # the same five runs, prints 61,1 dBA, which restores both columns.
+    levels = oracle.LINDEMAN_TABLE_13_DBA
+    run = 3
     res = environment.measured_insertion_loss_indirect(
-        reference_before_db=[68.8, 68.8],
-        reference_after_db=[65.9, 65.9],
-        receiver_before_db=[61.1, 60.2],
-        receiver_after_db=[54.6, 54.6],
+        reference_before_db=[levels["reference before"][run]] * 2,
+        reference_after_db=[levels["reference after"][run]] * 2,
+        receiver_before_db=[
+            levels["receiver before"][run],
+            oracle.LINDEMAN_TABLE_13_RUN_4_MISPRINT_DBA,
+        ],
+        receiver_after_db=[levels["receiver after"][run]] * 2,
     )
     from_table_twelve, from_the_misprint = res.insertion_loss_db.tolist()
-    assert from_table_twelve == pytest.approx(3.6, abs=PRINTED_TENTH_DB)
+    assert from_table_twelve == pytest.approx(
+        oracle.LINDEMAN_TABLE_13_INSERTION_LOSS_DBA[run], abs=PRINTED_TENTH_DB
+    )
     assert from_the_misprint == pytest.approx(2.7, abs=1e-9)
 
 
@@ -485,12 +572,12 @@ def test_the_fhwa_worked_example_reaches_both_of_its_printed_answers() -> None:
     # expression, which is the whole of the difference between the 8,7 dB the
     # FHWA Noise Barrier Design Handbook prints for it in clause 15.1.2.1 and
     # the 8,8 dB the two manuals print.
-    edge_db = -0.5
-    for receiver_after, printed in ((56.2, 8.8), (56.3, 8.7)):
+    edge_db = oracle.FHWA_6_6_3_EDGE_DB
+    for receiver_after, printed in oracle.FHWA_6_6_3_PRINTED_DB.values():
         res = environment.measured_insertion_loss_direct(
-            reference_before_db=[77.7],
-            reference_after_db=[78.2],
-            receiver_before_db=[65.0],
+            reference_before_db=[oracle.FHWA_6_6_3_REFERENCE_BEFORE_DB],
+            reference_after_db=[oracle.FHWA_6_6_3_REFERENCE_AFTER_DB],
+            receiver_before_db=[oracle.FHWA_6_6_3_RECEIVER_BEFORE_DB],
             receiver_after_db=[receiver_after],
         )
         assert float(res.insertion_loss_db[0]) + edge_db == pytest.approx(
@@ -508,10 +595,19 @@ def test_an_exact_half_is_reported_as_the_even_whole_decibel() -> None:
     # binary-exact, which the ties of the printed 0,1 range are not. Rule B,
     # printed on folio 36, would give 1 230 for the first, so the pair
     # discriminates.
+    ties = [
+        rounding.ISO80000_1_ANNEX_B_ROUNDINGS[key]
+        for key in rounding.ISO80000_1_RULE_A_TIES
+    ]
     res = environment.measured_insertion_loss_direct(
-        [0.0, 0.0], [122.5, 123.5], [0.0, 0.0], [0.0, 0.0]
+        [0.0, 0.0],
+        [number / scale for number, scale, _ in ties],
+        [0.0, 0.0],
+        [0.0, 0.0],
     )
-    assert (res.rounded() * 10).tolist() == [1220, 1240]
+    assert (res.rounded() * 10).tolist() == [
+        multiples * scale for _, scale, multiples in ties
+    ]
     ties = environment.measured_insertion_loss_direct(
         [0.0] * 6, [0.5, 1.5, 2.5, 3.5, 4.5, 5.5], [0.0] * 6, [0.0] * 6
     )
@@ -527,8 +623,7 @@ def test_the_upwind_class_is_printed_as_an_interval_by_the_fhwa_manual() -> None
     # split, so it is read against the short-distance table, the only one of
     # the two in ISO 10847 with an upwind class at all. The shared endpoints
     # are left alone: neither document says which class -1 m/s belongs to.
-    printed = {"upwind": (-5.0, -1.0), "calm": (-1.0, 1.0), "downwind": (1.0, 5.0)}
-    for name, (low, high) in printed.items():
+    for name, (low, high) in oracle.FHWA_TABLE_3_WIND_CLASSES_M_S.items():
         for fraction in (0.25, 0.5, 0.75):
             component = low + fraction * (high - low)
             assert environment.wind_class(component, short_distance=True) == name
@@ -539,13 +634,16 @@ def test_the_background_table_is_reprinted_by_a_second_committee() -> None:
     # page 15): the same correction in two grouped rows, "4 and 5" against
     # -2 dB and "6, 7, 8, 9" against -1 dB, with the same prose asking for a
     # 10 dB margin and calling a margin under 4 dB invalid.
-    corrections = environment.barrier_background_correction_db(
-        [4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    for margins, printed in oracle.CEN_TS_16272_7_TABLE_4_DB:
+        corrections = environment.barrier_background_correction_db(list(margins))
+        assert corrections.tolist() == [printed] * len(margins)
+    assert (
+        ISO10847_MINIMUM_BACKGROUND_MARGIN_DB == oracle.CEN_TS_16272_7_MINIMUM_MARGIN_DB
     )
-    assert corrections[:2].tolist() == [-2.0, -2.0]
-    assert corrections[2:].tolist() == [-1.0, -1.0, -1.0, -1.0]
-    assert ISO10847_MINIMUM_BACKGROUND_MARGIN_DB == 4.0
-    assert ISO10847_PREFERRED_BACKGROUND_MARGIN_DB == 10.0
+    assert (
+        ISO10847_PREFERRED_BACKGROUND_MARGIN_DB
+        == oracle.CEN_TS_16272_7_PREFERRED_MARGIN_DB
+    )
     with pytest.raises(ValueError, match="invalid"):
         environment.barrier_background_correction_db([3.9])
 
@@ -563,11 +661,7 @@ def test_the_jagniatinskis_campaign_uses_only_the_printed_difference() -> None:
     # total level, printed on folio 294. The residual levels came from an ISO
     # 1996 extraction, which is not the background treatment of 6.4 and is not
     # exercised here.
-    printed = (
-        (76.0, 56.3, -9.1, 10.6),
-        (75.4, 55.0, -6.9, 13.5),
-        (76.0, 58.9, -9.1, 8.0),
-    )
+    printed = oracle.JAGNIATINSKIS_TABLE_1_DBA.values()
     for reference_after, receiver_after, correction, insertion_loss in printed:
         for offset in (0.0, 6.0, -13.25):
             reference_before = reference_after + offset
@@ -593,18 +687,22 @@ def test_a_campaign_with_no_reference_microphone_is_the_plain_difference() -> No
     # measurement. What that anchors is the sign, positive for a screen that
     # works, and the degenerate reduction; the paper cites ISO 14509, not
     # ISO 10847, and the screen sits in the near field of the source.
-    unweighted = environment.measured_insertion_loss_direct(
-        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [117.6, 106.5, 73.8], [111.9, 104.0, 73.3]
-    )
-    a_weighted = environment.measured_insertion_loss_direct(
-        [0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [89.0, 81.5, 55.4], [87.9, 80.0, 53.7]
-    )
-    assert unweighted.insertion_loss_db == pytest.approx(
-        [5.7, 2.5, 0.5], abs=PRINTED_TENTH_DB
-    )
-    assert a_weighted.insertion_loss_db == pytest.approx(
-        [1.1, 1.5, 1.7], abs=PRINTED_TENTH_DB
-    )
+    for weighting in ("Z", "A"):
+        rows = [
+            row
+            for setting, row in oracle.RODINO_TABLA_2_DB.items()
+            if setting.startswith(f"{weighting},")
+        ]
+        assert len(rows) == 3
+        res = environment.measured_insertion_loss_direct(
+            [0.0] * len(rows),
+            [0.0] * len(rows),
+            [without for without, _, _ in rows],
+            [with_screen for _, with_screen, _ in rows],
+        )
+        assert res.insertion_loss_db == pytest.approx(
+            [printed for _, _, printed in rows], abs=PRINTED_TENTH_DB
+        )
 
 
 def test_the_six_decibels_are_a_pressure_doubling() -> None:

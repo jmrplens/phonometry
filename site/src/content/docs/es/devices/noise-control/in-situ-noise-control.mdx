@@ -95,14 +95,17 @@ res = noise_control.in_situ_transmission_loss(
     frequencies=bands, case=2,
 )
 print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
-print(round(res.area_term_db, 1))  # -10.8 dB
+print(res.area_term_db.round(1))   # [-10.8 -10.8 -10.8 -10.8 -10.8 -10.8] dB
 ```
 
 El término de superficies sale negativo, y no es un error. Un conducto de 0,9 m²
 que descarga en una sala cuya cuarta parte de absorción es 10,8 m² reparte la
 misma potencia sobre doce veces más superficie, así que la sala ya es más
 silenciosa que el conducto antes de que el silenciador haga nada. Restar eso es
-lo que impide apuntarle la sala al silenciador.
+lo que impide apuntarle la sala al silenciador. El término sale banda a banda
+incluso aquí, donde las dos superficies se escribieron como un solo número,
+porque la superficie de una sala no es un solo número: la sección siguiente
+explica por qué.
 
 ## 2. Las veinte instalaciones
 
@@ -138,7 +141,26 @@ print(area.round(1))   # [ 8.1  9.3 10.8 11.8 13.  14.4] m^2
 ```
 
 Es un cuarto del área de absorción equivalente de Sabine, que es el factor que
-convierte un nivel reverberante en una potencia acústica.
+convierte un nivel reverberante en una potencia acústica. Un tiempo de
+reverberación es una magnitud por bandas, así que la superficie también lo es, y
+los 10,8 m² de la sección 1 eran sólo su valor a 500 Hz. Las dos funciones de
+pérdida aceptan cada superficie, y la corrección de campo, como un valor para
+todas las bandas o como un valor por banda, así que el array entra tal como sale:
+
+```python
+res = noise_control.in_situ_transmission_loss(
+    source, receiver,
+    source_area_m2=0.9, receiver_area_m2=area,
+    frequencies=bands, case=2,
+)
+print(res.area_term_db.round(1))   # [ -9.6 -10.1 -10.8 -11.2 -11.6 -12.1] dB
+print(res.loss_db.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
+```
+
+A 500 Hz no se mueve nada. Por debajo, la sala es más reverberante, su superficie
+más pequeña y al silenciador se le apunta más, 1,2 dB a 125 Hz; por encima, al
+revés, 1,3 dB a 4 kHz. La sección del conducto sigue siendo un solo número,
+porque lo es.
 
 ## 3. El silenciador que es silencioso y tapona el conducto
 
@@ -199,7 +221,15 @@ res = noise_control.screen_attenuation(
 )
 print(res.attenuation_db)                   # [ 4.  6.  9. 11. 13. 14.] dB
 print(res.a_weighted_attenuation_db)        # 9.5 dB
+print(res.rounded())                        # [ 4  6  9 11 13 14] dB
+print(res.rounded_a_weighted())             # 10 dB
 ```
+
+El apartado 7.4 c) informa de las dos al decibelio entero más próximo.
+`rounded()` y `rounded_a_weighted()` las dan así, como enteros, mientras que
+`attenuation_db` conserva la diferencia sin redondear para seguir calculando. Un
+medio exacto va al decibelio par, como en los demás resultados in situ de la
+biblioteca, así que los 9,5 dB de arriba se informan como 10 dB.
 
 El par ponderado A es el apartado 5.9, y viene con una condición que la
 biblioteca hace cumplir en vez de mencionar: no se puede obtener con una fuente
@@ -285,15 +315,25 @@ y 6 dB contra una fachada, donde la presión se duplica.
 
 El micrófono de referencia se pone al menos 1,5 m por encima del borde superior
 de la barrera, medidos desde su punto más alto cuando el remate no es un borde
-recto. Cuando el extremo cercano de la zona de fuente está a menos de 15 m, la
-NOTA de 7.2.2 permite subirlo hasta que mire por encima del borde superior 10
-grados:
+recto, y 7.2.2 lo formula como requisito. Cuando el extremo cercano de la zona
+de fuente está a menos de 15 m, la NOTA de 7.2.2 deja subir más el micrófono,
+hasta que mire por encima del borde superior 10 grados. La NOTA sólo lo sube,
+nunca lo baja, así que la altura es la mayor de las dos. Una barrera de 4 m a
+8 m de la fuente se queda con el ángulo; una de 3 m a 5 m de la fuente alcanza
+sus 10 grados a 4,34 m y conserva los 4,5 m que exige el apartado:
 
 ```python
 print(round(environment.reference_microphone_height_m(
     4.0, source_to_barrier_m=8.0), 2))            # 5.93 m
+print(environment.reference_microphone_height_m(
+    3.0, source_to_barrier_m=5.0))                # 4.5 m
 print(environment.reference_microphone_height_m(4.0))   # 5.5 m
 ```
+
+Cuando el borde superior de la barrera ya está a 80 grados o más por encima del
+extremo cercano de la zona de fuente, ninguna altura alcanza los 10 grados. El
+micrófono conserva entonces el metro y medio, y un `BarrierInSituWarning` avisa
+de que no se ha podido seguir la NOTA.
 
 ## 6. El tiempo que hace es parte de la medida
 
@@ -332,8 +372,8 @@ Fije primero las posiciones de receptor y la de referencia, y consérvelas para
 las dos campañas: si no, la resta no significa nada. Ponga el micrófono de
 referencia al menos 1,5 m por encima del borde superior de la barrera, en un
 plano vertical que pase por ella, medidos desde su punto más alto cuando el
-remate no es un borde recto, o use la regla angular de la NOTA cuando la zona de
-fuente esté a menos de 15 m. Anote en cada medida la componente de viento sobre
+remate no es un borde recto, y más alto cuando la zona de fuente esté a menos de
+15 m y la regla angular de la NOTA pida más. Anote en cada medida la componente de viento sobre
 la línea fuente-receptor, la temperatura y la nubosidad, y pare cuando el viento
 pase de 5 m/s. Repita al menos tres veces. Cuando llegue la segunda campaña,
 compruebe antes que nada que el tiempo sigue coincidiendo dentro de 2 m/s y
@@ -374,7 +414,10 @@ aparte: la resta energética de las ecuaciones (17) y (18), con un tope de 3 dB.
 Pasado el tope la magnitud no queda determinada, y lo que se puede enunciar en su
 lugar es la desigualdad del apartado 4. `extraneous_corrected_mean_level_db`
 devuelve el nivel corregido y si se llegó al tope, para que un número topado no
-se pueda escribir como una determinación.
+se pueda escribir como una determinación. El tope se juzga sobre el margen, que
+es donde lo pone la tabla 1. Con un margen de exactamente 3 dB la resta quita
+3,02 dB, que son los 3 dB impresos sin redondear y la corrección que la tabla 1
+aplica en esa fila, así que el nivel sigue determinado; por debajo de 3 dB, no.
 
 ## Qué cubre esta guía
 
@@ -384,10 +427,11 @@ La **ISO 11820:1996** con toda su aritmética: las diferencias de niveles de las
 ecuaciones (1), (2) y (3); la potencia acústica de las ecuaciones (5), (7), (9) y
 (11) con la superficie reverberante de las ecuaciones (6), (10) y (12); la
 pérdida por transmisión de la ecuación (19) y la pérdida por inserción de la
-ecuación (21) con la corrección de campo por temperatura de las ecuaciones (20) y
-(22); las veinte instalaciones de la figura 1 con las reglas de superficie del
+ecuación (21), con superficies y correcciones de campo de un valor o de uno por
+banda, y la corrección de campo por temperatura de las ecuaciones (20) y (22); las veinte instalaciones de la figura 1 con las reglas de superficie del
 apartado 9; la tabla de fondo del apartado 4 y la resta energética de sonido
-ajeno de las ecuaciones (17) y (18) con su tope de 3 dB; el plegado a octavas de
+ajeno de las ecuaciones (17) y (18) con su tope de 3 dB, juzgado sobre el
+margen; el plegado a octavas de
 9.1.5; las distancias de medida de las ecuaciones (15) y (16); y las magnitudes
 de flujo de las ecuaciones (13), (14) y (27) a (31).
 
@@ -395,15 +439,16 @@ La **ISO 11821:1997**: la atenuación de 5.8 y la atenuación ponderada A de 5.9
 rechazada con fuente artificial; la corrección de fondo enmarcada de 5.7 con su
 propia ventana; el índice de directividad de la definición 3.10 y el límite de
 aceptación de 5.2.2; la geometría de micrófonos de 5.5.2 con su suelo; la regla
-de repeticiones de 5.6.2.1 para una fuente impulsiva; y los umbrales impresos de
+de repeticiones de 5.6.2.1 para una fuente impulsiva; el redondeo al decibelio
+entero de 7.4 c); y los umbrales impresos de
 la esfera del operario, el alcance al aire libre y la desviación típica de
 reproducibilidad.
 
 La **ISO 10847:1997**: el método directo de 8.2.1 y el indirecto de 8.2.2 con sus
 dos correcciones de receptor; la tabla de fondo de 6.4; las clases de viento de
 la tabla 1 y las de nubosidad de la tabla 2; el ensayo de distancia corta de
-6.3.1; la altura del micrófono de referencia de 7.2.2 con la alternativa angular
-de su NOTA; la distancia de campo semilibre de 8.1.2; y la geometría del
+6.3.1; la altura del micrófono de referencia de 7.2.2, subida donde la regla
+angular de su NOTA pide más; la distancia de campo semilibre de 8.1.2; y la geometría del
 emplazamiento equivalente de 6.1.
 </ScopeClaim>
 

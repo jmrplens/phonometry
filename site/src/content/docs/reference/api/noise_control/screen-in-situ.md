@@ -447,6 +447,29 @@ Requires matplotlib (`pip install phonometry[plot]`).
 
 **Returns:** The `Axes`.
 
+### ScreenInSituResult.rounded()
+
+```python
+ScreenInSituResult.rounded() -> NDArray[np.int_]
+```
+
+The band values as 7.4 c) reports them, to the nearest integer.
+
+`attenuation_db` keeps the unrounded difference. A tie goes to
+the even decibel, Rule A of ISO 80000-1:2009 Annex B, as in the other
+in-situ standards of this library.
+
+### ScreenInSituResult.rounded_a_weighted()
+
+```python
+ScreenInSituResult.rounded_a_weighted() -> int | None
+```
+
+$D_{pA}$ as 7.4 c) reports it, to the nearest integer.
+
+The clause gives the A-weighted attenuation the same rounding as the
+band values. `None` where no A-weighted pair was given.
+
 ## ScreenInSituWarning
 
 The measurement is outside a condition ISO 11821 states.

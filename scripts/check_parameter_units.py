@@ -15,7 +15,9 @@ this tree has written in two units (:data:`QUANTITIES` and
 :data:`WORD_QUANTITIES`) ends either in a unit (:data:`UNITS`) or in a suffix
 that says the quantity carries no unit of its own (:data:`DIMENSIONLESS`, which
 covers the decibel levels, the ratios and the indicators). Anything else keeps
-its unit in the docstring, which is not where the mistake is made.
+its unit in the docstring, which is not where the mistake is made. A parameter
+typed ``bool`` is outside the rule whatever its name says: a verdict such as
+``humidity_ok`` holds no number of the quantity it names.
 
 The surface is the one a caller reaches: every name in the ``__all__`` of every
 public module, the public methods and properties of the classes among them, and
@@ -330,6 +332,20 @@ def names_a_quantity(name: str) -> bool:
     return any(quantity in lowered for quantity in QUANTITIES)
 
 
+def holds_a_truth_value(annotation: str) -> bool:
+    """Whether the annotation is ``bool``, alone or beside ``None``.
+
+    A verdict such as ``humidity_ok`` or a switch such as a
+    ``temperature_corrected`` flag names a quantity and holds no number of it,
+    so there is no unit to lose and none to put in the name.
+    """
+    parts = {
+        part.strip().strip("'\"")
+        for part in annotation.replace("Optional[", "").rstrip("]").split("|")
+    }
+    return bool(parts) and parts - {"None"} == {"bool"}
+
+
 def declares_its_unit(name: str) -> bool:
     """Whether the name ends in a unit or says it carries none."""
     lowered = name.lower()
@@ -343,6 +359,8 @@ def offenders() -> tuple[list[Parameter], list[Parameter], list[tuple[str, str, 
     used: set[tuple[str, str, str]] = set()
     for parameter in public_parameters():
         if not names_a_quantity(parameter.name):
+            continue
+        if holds_a_truth_value(parameter.annotation):
             continue
         key = (parameter.module, parameter.qualname, parameter.name)
         if key in EXEMPT or key in POSITIONAL:

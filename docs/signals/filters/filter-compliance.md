@@ -39,6 +39,15 @@ print(result.bands[0])
 # {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
 ```
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the hardware tests of IEC 61260-2 and IEC 61260-3 set apart as outside the check" width="88%"></picture>
+
+*The 1 kHz band of a bank like the one above, walked through the check: its
+relative attenuation at every Table 1 breakpoint, carried to one-third octave,
+against the class 1 and class 2 limits, with the smallest margin deciding the
+class. The red dashed line is where the decimated bank stops walking it. The
+dashed column on the right is what a laboratory does to an instrument instead,
+and none of it runs here.*
+
 The Table 1 acceptance mask itself is public too: `class_limits(fraction,
 filter_class, omega)` returns the minimum/maximum relative-attenuation
 limits at normalized frequencies $\Omega = f/f_\mathrm{m}$, the same limits the verifier

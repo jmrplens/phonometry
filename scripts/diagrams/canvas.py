@@ -129,10 +129,10 @@ DARK = Theme(
 #: corner and low-frequency levels of ISO 16283
 #: (Corner, LF, a word and an abbreviation all three parts print upright,
 #: which also sets the early lateral energy fraction $J_{LF}$ of ISO 3382-1
-#: upright, as its guide writes it), the airborne descriptors (AF, Cpeak,
-#: sa) and the upper guide value of DIN 4150-2:1999-06, 6.2 (o for "oberer", the
-#: adjective the clause spells out beside the letter, as it does the
-#: "unterer" of the u already here).
+#: upright, as its guide writes it), the airborne descriptors (AF, AFmax,
+#: ASmax, Cpeak, sa) and the upper guide value of DIN 4150-2:1999-06, 6.2
+#: (o for "oberer", the adjective the clause spells out beside the letter,
+#: as it does the "unterer" of the u already here).
 #:
 #: This set is keyed on the letter run alone and knows nothing of the
 #: symbol it belongs to, so a run is upright everywhere or nowhere. Ten
@@ -188,6 +188,7 @@ _ROMAN_SCRIPTS = frozenset(
         "inst",
         "ind",
         "in",
+        "out",
         "cal",
         "tab",
         "cum",
@@ -228,6 +229,8 @@ _ROMAN_SCRIPTS = frozenset(
         "DF",
         "DB",
         "AF",
+        "AFmax",
+        "ASmax",
         "Cpeak",
         "sa",
         "situ",

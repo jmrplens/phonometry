@@ -41,6 +41,14 @@ level track (see [Time Weighting](time-weighting.md)). And everything on
 this page assumes the signal is already in pascals: the sensitivity factor
 that gets it there is the subject of [Calibration](../metrology/calibration.md).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record.svg" alt="A calibrated pressure record drawn as a waveform between the times t1 and t2 that bound the stated interval T, with a short impulse, a longer event and the background labelled above it. The record passes through a frequency weighting box, A, C or Z, each 0 dB at 1 kHz, and splits into four columns. The first, A or Z weighted, averages the square: the squared record is a row of spikes and its mean over T a low flat line, which gives Leq and LAeq over T, and SEL, the same energy referred to 1 s against the reference exposure of 400 times ten to the minus twelve pascal-squared seconds. The second, A weighted, time-weights the square: a fast F track with a time constant of 0.125 s and a slower, lower S track with 1 s, a dot on the top of each for LAFmax and LASmax, and three dashed lines for L10, L50 and L90 read off the F track once its first five time constants are left out. The third, C weighted, holds the greatest excursion of either sign, the impulse, marked by dashed lines at plus and minus that pressure, for LCpeak with no average and no time constant; one cycle of 500 Hz reads 3.5 dB over the LC of the steady signal it is cut from. The fourth, A weighted, integrates the square: a running curve that steps up at the impulse, by about a fifth of the total, and climbs most during the event, ending at the sound exposure E in pascal-squared hours, kept until reset, and LEX,8h spreads that exposure over 8 h, 3.2 pascal-squared hours being exactly 90 dB and 1.01 being 85 dB. A box at the foot writes SEL as LAeq plus 10 lg of T over 1 s, LEX,8h as LAeq plus 10 lg of T over 8 h and as 10 lg of E over p0 squared times 8 h, and says that the maxima, the percentiles and the peak cannot be had from that energy and need the record itself" width="100%"></picture>
+
+*One record, four reductions. The mean square and the running integral keep
+nothing but the energy, which is why $L_\mathrm{Aeq}$, SEL and $L_\mathrm{EX,8h}$
+turn into one another through $T$, 1 s and 8 h alone; the maxima and the
+percentiles belong to the time-weighted track and the peak to a single
+excursion, so none of those can be rebuilt from the energy.*
+
 ## Leq and LAeq
 
 The equivalent continuous level integrates the squared pressure over the

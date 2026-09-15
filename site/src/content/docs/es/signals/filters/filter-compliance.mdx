@@ -37,7 +37,7 @@ references:
     title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 3: Periodic tests"
     designation: "IEC 61260-3:2016"
     url: "https://webstore.iec.ch/en/publication/24561"
-    note: "Los ensayos periódicos que recibe un analizador en servicio: atenuación relativa en el centro de banda de todos los filtros, ancho de banda efectivo, rango lineal de funcionamiento y su límite inferior, bajo condiciones ambientales declaradas."
+    note: "Los ensayos periódicos que recibe un analizador en servicio: atenuación relativa en el centro de banda de todos los filtros o, si son invariantes en el tiempo, desviación del ancho de banda efectivo con un barrido sobre todo el juego; atenuación relativa de tres filtros escogidos en las frecuencias del apartado 13; rango lineal de funcionamiento y su límite inferior, bajo condiciones ambientales declaradas."
 ---
 
 import ReportPreview from '../../../../../components/ReportPreview.astro';
@@ -86,16 +86,25 @@ print(result.bands[0])
 # {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
 ```
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Cadena de cálculo para calificar un filtro de banda frente a la Tabla 1 de IEC 61260-1. Arriba, cuatro cajas encadenadas: la banda diseñada, un tercio de octava a 1000 Hz de orden 6; su atenuación relativa, la atenuación en cada frecuencia normalizada menos la del centro de banda; la máscara de la Tabla 1, con sus puntos de quiebre de octava llevados a tercio de octava y los límites rectos en lg Ω entre ellos; y el margen y la clase. Debajo, dos paneles comparten un eje de frecuencia estirado punto de quiebre a punto de quiebre. El panel de la banda de paso va de Ω = 1 al borde de banda en 1,122 y contiene el corredor de clase 1, un suelo en −0,4 dB bajo un techo que sube de +0,4 dB a +5,3 dB, con el corredor más ancho de clase 2 en discontinua a su alrededor; la banda se queda plana en 0 dB y sube a 3 dB en el borde. El panel de la banda atenuada va del borde a 5,392, donde solo rige un mínimo, que sube de 1,2 dB pasando por 16,6, 40,5 y 60 dB hasta 70 dB para la clase 1, y la banda sube muy por encima; una línea discontinua en Ω = 1,41 marca dónde deja de evaluar el banco diezmado por defecto. Bajo las columnas, cada punto de quiebre de octava, desde G elevado a un octavo hasta G elevado a la cuarta, va emparejado con su valor en tercio de octava, y una fila da el margen de clase 1 en cada uno: +0,40 dB en los tres primeros, recuadrados como margen de la banda, luego +0,49, +2,29 y +1,81 dB, y de 26 a 92 dB en la banda atenuada. Una nota añade la clase 0 de la edición de 1995, ±0,15 dB en el centro de banda y 75 dB desde G elevado a la cuarta. Una caja verde da el veredicto, clase 1 con márgenes de +0,40 dB y +0,60 dB, un banco que toma la clase de su peor banda, y range_limited avisando de una banda recorrida solo hasta su propio Nyquist. Una columna discontinua a la derecha, que sale de la caja de atenuación relativa y queda fuera de la comprobación, recoge lo que un laboratorio le hace en su lugar a un instrumento: el ensayo de tipo de IEC 61260-2, con al menos tres especímenes presentados, al menos dos seleccionados y al menos uno ensayado por completo, con al menos 24 sinusoides por ancho de banda desde la mitad de la frecuencia central más baja hasta 1,5 veces la más alta; y los ensayos periódicos de IEC 61260-3, todos los filtros en su centro de banda dentro de ±0,4 dB o ±0,6 dB, o un barrido por todo el juego cuando los filtros son invariantes en el tiempo, y tres filtros en hasta 15 frecuencias. Tanto el ensayo de tipo como los ensayos periódicos piden además que la incertidumbre del laboratorio se mantenga dentro del Anexo B, 0,20, 0,30 o 0,50 dB. Las Fórmulas 9 y 11 van recuadradas al pie" width="100%" />
+
+*La banda de 1 kHz de un banco como el de arriba, a lo largo de la comprobación:
+su atenuación relativa en cada punto de quiebre de la Tabla 1, llevado a tercio
+de octava, frente a los límites de clase 1 y clase 2, y el menor margen decide
+la clase. La línea discontinua roja es donde el banco diezmado deja de
+recorrerla. La columna discontinua de la derecha es lo que un laboratorio le
+hace en su lugar a un instrumento, y nada de ella se ejecuta aquí.*
+
 **Hasta dónde de la máscara llega realmente el veredicto.**
 `checked_to_omega` es la frecuencia normalizada $\Omega = f/f_\mathrm{m}$ más alta a la
 que se evaluó esa banda, y en un banco multitasa es el propio Nyquist diezmado
 de la banda, no el final de la máscara de la Tabla 1. En el banco de arriba va
 de 3,81 a 1,20, así que el requisito de banda atenuada lejana (al menos 70 dB
-para la clase 1 más allá de $\Omega = 4$ aproximadamente) no queda demostrado
-*sobre el filtro de banda* en absoluto. Se da por satisfecho gracias al paso
-bajo antialiasing que precede al diezmado, que eliminó esa energía antes de que
-la banda llegara a verla. `range_limited` es el indicador de que se ha usado
-ese argumento, y aquí vale `True`.
+para la clase 1 desde $\Omega \approx 5{,}39$, la fila de octava $G^4$ llevada a
+tercio de octava) no queda demostrado *sobre el filtro de banda* en absoluto. Se
+da por satisfecho gracias al paso bajo antialiasing que precede al diezmado, que
+eliminó esa energía antes de que la banda llegara a verla. `range_limited` es el
+indicador de que se ha usado ese argumento, y aquí vale `True`.
 
 Conviene decirlo tal cual en un informe: el veredicto acredita la máscara hasta
 `checked_to_omega`, y el resto es un argumento sobre la cadena de diezmado.
@@ -367,13 +376,17 @@ El recorrido completo de la Tabla 1 pertenece al **ensayo de tipo**
 que recibe de verdad un instrumento en servicio es el **ensayo periódico** de
 IEC 61260-3:2016, y es más estrecho a propósito: se mide la atenuación relativa
 en la frecuencia central exacta de cada filtro del juego, por la entrada
-eléctrica y en el rango de nivel de referencia, junto con la desviación del
-ancho de banda efectivo obtenida en un ensayo con barrido de frecuencia, el
-rango lineal de funcionamiento con su control de rango de nivel y su
-comportamiento ante sobrecarga, y el límite inferior de ese rango, todo bajo
-condiciones ambientales declaradas y con equipos de ensayo trazables. Por eso un
-certificado lleva una fecha, una temperatura y una lista de números de serie, y
-por eso no dice nada de las partes de la máscara que no recorrió.
+eléctrica y en el rango de nivel de referencia, o bien, si los filtros son
+invariantes en el tiempo, la desviación del ancho de banda efectivo obtenida
+con un único barrido exponencial sobre todo el juego; la atenuación relativa de
+tres filtros escogidos, uno bajo, uno medio y uno alto, en las frecuencias
+normalizadas del apartado 13 ($k$ de $-7$ a $7$, hasta donde alcance el rango
+de frecuencias del juego); el rango lineal de funcionamiento con su control de
+rango de nivel y su comportamiento ante sobrecarga; y el límite inferior de ese
+rango, todo bajo condiciones ambientales declaradas y con equipos de ensayo
+trazables. Por eso un certificado lleva una fecha, una temperatura y una lista
+de números de serie, y por eso no dice nada de las partes de la máscara que no
+recorrió.
 
 Lo que sí se hereda merece constar en un informe: el veredicto de clase de esta
 página lo heredan todas las medidas hechas con los filtros de la biblioteca, y

@@ -853,6 +853,14 @@ published standards themselves are in the [errata registry](https://jmrplens.git
 Both instrument series continue past their Part 1 with two test regimes, and
 neither is something a software library can run on itself.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_verification_regimes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_verification_regimes.svg" alt="Three stacked bands, one for each part of the two instrument series, with sound level meters to IEC 61672 on the left and band filters to IEC 61260 on the right. A box at the top stands for the transfer function configured in phonometry, and two arrows, verify_weighting_class and verify_filter_class, reach down into the first band only. Part 1 holds the specifications: Table 3 of IEC 61672-1, the A, C and Z weightings at 34 frequencies from 10 Hz to 20 kHz with ±0.7 dB at 1 kHz for class 1, and Table 1 of IEC 61260-1, a relative attenuation corridor with ±0.4 dB at the mid-band, each with the largest uncertainty a laboratory may claim it with. A dashed line separates a design checked in software from a physical instrument in a laboratory. Part 2, pattern evaluation, shows at least three specimens submitted, at least two selected and at least one tested in full, with the environmental, electrostatic, radio-frequency, free-field, linearity and climate tests, and a report that states whether the pattern is approved. An arrow carries that approval down to Part 3, periodic tests on one working instrument at 20 °C to 26 °C with a limited set of checks, which support no general conclusion without it. A box at the foot gives the conformance criterion: the deviation within the acceptance limits and the uncertainty no larger than its maximum." width="100%"></picture>
+
+*The two series side by side, their three parts stacked. The verifiers reach
+only the Part 1 tables and only the first half of the conformance criterion;
+Parts 2 and 3, under the dashed line, need a physical instrument, and a
+periodic test says nothing general until the pattern approval it leans on is
+public.*
+
 **Pattern evaluation** (IEC 61672-2:2013 for meters, IEC 61260-2:2016 for
 filters) is the type-approval regime a *model* passes once: the tests
 necessary to verify conformance to **all mandatory specifications** of the

@@ -84,6 +84,15 @@ de esta página supone la señal ya en pascales: el factor de sensibilidad que
 la lleva ahí es el asunto de
 [Calibración](/phonometry/es/signals/metrology/calibration/).
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record.svg" alt="Un registro calibrado de presión dibujado como forma de onda entre los instantes t1 y t2 que delimitan el intervalo de tiempo establecido T, con un impulso breve, un suceso más largo y el fondo rotulados encima. El registro pasa por un bloque de ponderación frecuencial, A, C o Z, todas de 0 dB a 1 kHz, y se divide en cuatro columnas. La primera, con ponderación A o Z, promedia el cuadrado: el registro al cuadrado es una fila de picos y su media en T una línea plana baja, que da Leq y LAeq en T, y el SEL, la misma energía referida a 1 s frente a la exposición de referencia de 400 por diez elevado a menos doce pascal-cuadrado segundos. La segunda, con ponderación A, pondera el cuadrado en el tiempo: una traza F rápida con constante de tiempo de 0,125 s y una traza S más lenta y más baja con 1 s, un punto en la cima de cada una para LAFmax y LASmax, y tres líneas discontinuas para L10, L50 y L90 leídas sobre la traza F sin sus cinco primeras constantes de tiempo. La tercera, con ponderación C, mantiene la mayor excursión de cualquier signo, el impulso, marcada con líneas discontinuas en más y menos esa presión, para LCpeak sin promedio y sin constante de tiempo; un ciclo de 500 Hz da 3,5 dB sobre el LC de la señal estable de la que se extrae. La cuarta, con ponderación A, integra el cuadrado: una curva acumulada que sube un escalón en el impulso, de más o menos una quinta parte del total, y crece sobre todo durante el suceso, y termina en la exposición sonora E en pascal-cuadrado horas, retenida hasta reiniciar, y LEX,8h reparte esa exposición en 8 h, con 3,2 pascal-cuadrado horas exactamente 90 dB y 1,01 igual a 85 dB. Un recuadro al pie escribe el SEL como LAeq más 10 lg de T entre 1 s, LEX,8h como LAeq más 10 lg de T entre 8 h y como 10 lg de E entre p0 al cuadrado por 8 h, y advierte de que los máximos, los percentiles y el pico no se obtienen de esa energía y necesitan el registro mismo" width="100%" />
+
+*Un registro, cuatro reducciones. La media del cuadrado y la integral acumulada
+solo conservan la energía, y por eso $L_\mathrm{Aeq}$, SEL y $L_\mathrm{EX,8h}$
+se convierten unos en otros solo con $T$, 1 s y 8 h; los máximos y los
+percentiles pertenecen a la traza con ponderación temporal y el pico a una
+única excursión, así que ninguno de ellos se reconstruye a partir de la
+energía.*
+
 ## Leq y LAeq
 
 El nivel continuo equivalente integra la presión al cuadrado durante el tiempo

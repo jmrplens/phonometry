@@ -12,10 +12,11 @@ whether the record was fit to analyse at all.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
 
     from .canvas import SVG, Theme
 
@@ -563,6 +564,302 @@ def _d_time_weighting(s: SVG, th: Theme) -> None:
         s.text(cx + cw / 2, 380, title, 15, th.fg, "middle", bold=True)
         s.text(cx + cw / 2, 404, sub, 12, th.muted, "middle")
         cx += cw + cgap
+
+
+# ---------------------------------------------------------------------------
+# One calibrated record and every level the levels guide takes from it
+# ---------------------------------------------------------------------------
+
+#: The record drawn across the top of the plate and reduced in every branch:
+#: 111 samples of background, one impulse (sample 27, the greatest excursion)
+#: and one event centred on sample 68 (most of the energy). Offsets in px
+#: from the strip's centre line, hard-coded so the plate is identical on every
+#: platform.
+_LEVELS_RECORD = (
+    0, 2, -2, -5, -3, -5, 0, 7, -3, -3, 3, 2, 1, -5, 0, 4, -7, -3, -10, -7,
+    -10, -1, -7, 1, 1, -1, -14, -34, 19, -9, -8, -3, -5, -5, 6, -4, 0, 5, -3,
+    -1, 0, 0, -7, 0, 7, -12, 2, 6, -6, 6, 6, 3, -10, 1, -7, -15, 8, 3, 9, -15,
+    9, -12, -2, -24, -26, 25, -6, 13, -8, -14, -7, 2, -9, -3, 7, 25, 9, 4, -9,
+    -10, 9, 9, 1, 4, 5, -1, 5, -5, 13, -1, 2, 5, 0, 9, 2, 2, -9, 2, -10, -11,
+    -1, -5, 1, 12, -5, -3, 1, 3, -1, -1, 4,
+)  # fmt: skip
+
+
+def _polyline(xs: Sequence[float], ys: Sequence[float]) -> str:
+    """An open SVG path through the points, one decimal per coordinate."""
+    return "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in zip(xs, ys, strict=True))
+
+
+def _d_levels_from_a_record(s: SVG, th: Theme) -> None:
+    """One calibrated record and the four reductions the levels guide makes.
+
+    The frequency weighting of IEC 61672-1 5.5 comes first, and then the
+    record splits four ways: the mean square over the stated interval (3.10,
+    and the sound exposure level of 3.12 referred to 1 s), the exponential
+    time weighting of 3.6 with its maximum (3.7) and the percentile levels the
+    library reads off the same F track, the peak of 3.8 and 3.9 with C
+    weighting (5.13), and the running integral of IEC 61252 3.1 normalized to
+    8 h by 3.3. Each branch draws what it does to the same samples. The box
+    at the foot is the one bridge between branches: the three energy
+    quantities are one energy read over the stated interval, over the 1 s of
+    3.12 and over the 8 h of IEC 61252 3.3, and the other three need the
+    record itself.
+    """
+    rec = _LEVELS_RECORD
+    n = len(rec)
+    full = 34.0  # the greatest |offset|, the impulse
+
+    # --- The record ---------------------------------------------------------
+    x_a, x_b, mid = 220.0, 860.0, 112.0
+    step = (x_b - x_a) / (n - 1)
+    s.text(40, 94, "the calibrated record", 14, th.fg, anchor="start", bold=True)
+    s.text(40, 116, "$p(t)$ in pascals", 13, th.fg, anchor="start")
+    s.text(40, 138, "levels re $p_0$ = 20 µPa (3.2)", 12, th.muted, anchor="start")
+    s.line(x_a, mid, x_b, mid, th.muted, 0.8, dash="3,3")
+    s.path(
+        _polyline([x_a + step * k for k in range(n)], [mid + v for v in rec]),
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.text(x_a + step * 27, 68, "an impulse", 12, th.secondary)
+    s.text(x_a + step * 68, 68, "an event", 12, th.accent)
+    s.text(x_a + step * 100, 68, "background", 12, th.muted)
+    axis = 160.0
+    s.line(x_a, axis, x_b, axis, th.fg, 1.2)
+    for x, label in ((x_a, "$t_1$"), (x_b, "$t_2$")):
+        s.line(x, axis - 5, x, axis + 5, th.fg, 1.2)
+        s.text(x, axis + 22, label, 13, th.fg)
+    s.text((x_a + x_b) / 2, axis + 22, "the stated time interval $T$", 13, th.fg)
+
+    # --- Frequency weighting, 5.5 ---------------------------------------------
+    bar_y, bar_h = 204.0, 44.0
+    s.arrow(110, 150, 110, bar_y - 2, th.fg, 1.8)
+    s.rect(30, bar_y, 840, bar_h, th.panel, th.fg, rx=8, sw=1.8)
+    s.text(
+        450,
+        bar_y + 28,
+        "frequency weighting A, C or Z, each 0 dB at 1 kHz (5.5)",
+        14,
+        th.fg,
+        bold=True,
+    )
+
+    # --- Four branches ----------------------------------------------------------
+    col_w, gap, top, height = 198.0, 16.0, 290.0, 336.0
+    xs0 = [30.0 + k * (col_w + gap) for k in range(4)]
+    colours = (th.primary, th.accent, th.secondary, th.primary)
+    heads = (
+        ("Average the square", "IEC 61672-1, 3.10 and 3.12", "A or Z"),
+        ("Time-weight the square", "IEC 61672-1, 3.6, 3.7 and 5.8", "A"),
+        ("Hold the greatest $|p|$", "IEC 61672-1, 3.8, 3.9 and 5.13", "C"),
+        ("Integrate the square", "IEC 61252, 3.1 and 3.3", "A"),
+    )
+    # 13 px in English, where "Time-weight the square" runs 188 px at 14; the
+    # Spanish heads all keep 14.
+    head_size = s.fit_size(
+        [h for h, _, _ in heads], (14, 13, 12), col_w - 16, bold=True
+    )
+    for x0, colour, (head, clause, weight) in zip(xs0, colours, heads, strict=True):
+        cx = x0 + col_w / 2
+        s.arrow(cx, bar_y + bar_h, cx, top - 2, colour, 1.8)
+        s.text(
+            cx + 8, bar_y + bar_h + 26, weight, 12, colour, anchor="start", bold=True
+        )
+        s.rect(x0, top, col_w, height, th.panel, colour, rx=10, sw=2.0)
+        s.text(cx, top + 24, head, head_size, colour, bold=True)
+        s.text(cx, top + 42, clause, 11, th.muted)
+
+    sk_top, sk_h = top + 56, 94.0
+    sk_bot = sk_top + sk_h
+    leg_y = sk_bot + 22
+
+    def sx(x0: float, k: float) -> float:
+        return x0 + 10 + (col_w - 20) * k / (n - 1)
+
+    def legend(x0: float, items: Sequence[tuple[str, str, str]]) -> None:
+        widths = [22 + s.text_width(label, 11) for label, _, _ in items]
+        x = x0 + (col_w - sum(widths) - 10 * (len(items) - 1)) / 2
+        for (label, colour, dash), wd in zip(items, widths, strict=True):
+            s.line(x, leg_y - 4, x + 16, leg_y - 4, colour, 2.0, dash=dash)
+            s.text(x + 20, leg_y, label, 11, th.fg, anchor="start")
+            x += wd + 10
+
+    sq = [(v / full) ** 2 for v in rec]
+    ks = range(n)
+
+    # 1. The mean square over T (3.10): no time constant anywhere.
+    x0 = xs0[0]
+    top_sq = max(sq)
+    s.line(x0 + 10, sk_bot, x0 + col_w - 10, sk_bot, th.muted, 1.0)
+    s.path(
+        _polyline(
+            [sx(x0, k) for k in ks], [sk_bot - (sk_h - 6) * q / top_sq for q in sq]
+        ),
+        stroke=th.fg,
+        sw=1.1,
+    )
+    y_mean = sk_bot - (sk_h - 6) * (sum(sq) / n) / top_sq
+    s.line(x0 + 10, y_mean, x0 + col_w - 10, y_mean, th.primary, 2.4)
+    legend(x0, (("$p^2$", th.fg, ""), ("its mean over $T$", th.primary, "")))
+
+    # 2. The exponential time weighting (3.4, 3.6): a one-pole low-pass on the
+    # square, fast for F and slow for S, then the maxima of 3.7 and the
+    # percentiles of the F track once its first 5 tau are left out.
+    x0 = xs0[1]
+
+    def track(alpha: float) -> list[float]:
+        out: list[float] = []
+        y = sq[0] + 1e-3
+        for q in sq:
+            y += alpha * (q + 1e-3 - y)
+            out.append(10 * math.log10(y))
+        return out
+
+    f_track, s_track = track(0.35), track(0.06)  # tau of 2.3 and 16 samples
+
+    def ly(level: float) -> float:
+        return sk_bot - sk_h * (min(max(level, -24.0), 0.0) + 24.0) / 24.0
+
+    skip = 12  # 5 tau of the F track
+    xb = sx(x0, skip)
+    s.line(x0 + 10, sk_bot, x0 + col_w - 10, sk_bot, th.muted, 1.0)
+    s.line(xb, sk_top, xb, sk_bot, th.muted, 1.0, dash="2,2")
+    s.text((x0 + 10 + xb) / 2, sk_top + 10, "5$τ$", 10, th.muted)
+    kept = sorted(f_track[skip:])
+    for pct in (10, 50, 90):
+        level = kept[round((100 - pct) / 100 * (len(kept) - 1))]
+        s.line(xb, ly(level), x0 + col_w - 10, ly(level), th.muted, 1.0, dash="3,3")
+    s.path(
+        _polyline([sx(x0, k) for k in ks], [ly(v) for v in s_track]),
+        stroke=th.fg,
+        sw=1.3,
+        dash="4,2",
+    )
+    s.path(
+        _polyline([sx(x0, k) for k in ks], [ly(v) for v in f_track]),
+        stroke=th.accent,
+        sw=1.4,
+    )
+    k_f = max(ks, key=lambda k: f_track[k])
+    k_s = max(ks, key=lambda k: s_track[k])
+    s.circle(sx(x0, k_f), ly(f_track[k_f]), 3.6, th.accent)
+    s.circle(sx(x0, k_s), ly(s_track[k_s]), 3.6, th.fg)
+    legend(x0, (("F", th.accent, ""), ("S", th.fg, "4,2"), ("$L_N$", th.muted, "3,3")))
+
+    # 3. The peak (3.8, 3.9): the greatest excursion of either sign, unaveraged.
+    x0 = xs0[2]
+    yc = sk_top + sk_h / 2
+    scale = (sk_h / 2 - 4) / full
+    s.line(x0 + 10, yc, x0 + col_w - 10, yc, th.muted, 0.8, dash="3,3")
+    s.path(
+        _polyline([sx(x0, k) for k in ks], [yc + v * scale for v in rec]),
+        stroke=th.fg,
+        sw=1.1,
+    )
+    k_p = max(ks, key=lambda k: abs(rec[k]))
+    y_p = yc + rec[k_p] * scale
+    for y in (y_p, 2 * yc - y_p):
+        s.line(x0 + 10, y, x0 + col_w - 10, y, th.secondary, 1.3, dash="4,3")
+    s.circle(sx(x0, k_p), y_p, 3.8, th.secondary)
+    legend(x0, (("greatest $|p|$, either sign", th.secondary, "4,3"),))
+
+    # 4. The sound exposure (IEC 61252, 3.1): the running integral of the
+    # square, which the meter keeps until it is reset (4.1).
+    x0 = xs0[3]
+    running: list[float] = []
+    total = 0.0
+    for q in sq:
+        total += q
+        running.append(total)
+    s.line(x0 + 10, sk_bot, x0 + col_w - 10, sk_bot, th.muted, 1.0)
+    s.path(
+        _polyline(
+            [sx(x0, k) for k in ks], [sk_bot - (sk_h - 6) * r / total for r in running]
+        ),
+        stroke=th.primary,
+        sw=2.2,
+    )
+    y_e = sk_bot - (sk_h - 6)
+    s.circle(sx(x0, n - 1), y_e, 3.8, th.primary)
+    s.text(sx(x0, n - 1) - 8, y_e + 16, "$E$", 13, th.primary, anchor="end")
+    legend(x0, (("the running integral of $p^2$", th.primary, ""),))
+
+    # --- What each branch yields ------------------------------------------------
+    # Every line is measured against the column in both languages: the widest
+    # is 182 px of the 198 px column ("SEL: the same energy in 1 s" at 13 px).
+    rows = (
+        (
+            "$L_{eq}$, $L_{Aeq}$ over $T$",
+            "the mean square, in dB",
+            "SEL: the same energy in 1 s",
+            "no time constant at all",
+            "reference $E_0$ = $p_0^2$ · 1 s",
+            "= 400 × $10^{−12}$ Pa²s (3.12)",
+        ),
+        (
+            "$L_{AFmax}$, $L_{ASmax}$",
+            "the top of the F and S tracks",
+            "$L_{10}$, $L_{50}$, $L_{90}$ of the F track",
+            "exceeded $N$ % of the time",
+            "F: $τ$ = 0.125 s, S: $τ$ = 1 s",
+            "its first 5$τ$ left out",
+        ),
+        (
+            "$L_{Cpeak}$",
+            "the squared peak, in dB",
+            "no average and no $τ$",
+            "held on the display (5.1.14)",
+            "one cycle of 500 Hz: 3.5 dB",
+            "over the steady $L_C$ (Table 5)",
+        ),
+        (
+            "$E$ in Pa²h",
+            "kept until reset (4.1)",
+            "$L_{EX,8h}$: $E$ spread over 8 h",
+            "the normalized 8 h level (3.3)",
+            "3.2 Pa²h is exactly 90 dB",
+            "1.01 Pa²h is 85 dB (Table A.1)",
+        ),
+    )
+    styles = (
+        (top + 196, 14, th.fg),
+        (top + 216, 12, th.muted),
+        (top + 246, 13, th.fg),
+        (top + 266, 12, th.muted),
+        (top + 298, 12, th.muted),
+        (top + 316, 12, th.muted),
+    )
+    for x0, lines in zip(xs0, rows, strict=True):
+        for label, (y, size, colour) in zip(lines, styles, strict=True):
+            s.text(x0 + col_w / 2, y, label, size, colour)
+
+    # --- The one bridge between branches -----------------------------------------
+    box_y = 644.0
+    s.rect(30, box_y, 840, 100, th.panel, th.primary, rx=8, sw=1.8)
+    s.text(
+        450,
+        box_y + 30,
+        "SEL = $L_{Aeq}$ + 10 lg($T$ / 1 s)        "
+        "$L_{EX,8h}$ = $L_{Aeq}$ + 10 lg($T$ / 8 h)",
+        16,
+        th.fg,
+    )
+    s.text(
+        450,
+        box_y + 56,
+        "$L_{EX,8h}$ = 10 lg[$E$ / ($p_0^2$ · 8 h)], with $E$ in Pa²h and "
+        "$p_0$ = 20 µPa",
+        14,
+        th.fg,
+    )
+    s.text(
+        450,
+        box_y + 82,
+        "one energy over $T$, 1 s and 8 h; the maxima, the percentiles "
+        "and the peak need the record itself",
+        12,
+        th.muted,
+    )
 
 
 def _d_block_processing(s: SVG, th: Theme) -> None:
@@ -2708,3 +3005,635 @@ def _d_multichannel_capture(s: SVG, th: Theme) -> None:
         th.fg,
     )
     s.text(450, 542, "and no later check can detect it", 15, th.muted)
+
+
+# ---------------------------------------------------------------------------
+# d29 - How a band is graded against Table 1 (IEC 61260-1:2014, 5.10)
+# ---------------------------------------------------------------------------
+
+#: IEC 61260-1:2014 Table 1, high side, as the exponent x of the octave
+#: breakpoint G^x with the class 1 and class 2 limits the plate draws. In the
+#: pass band the column is the maximum (the minimum is -0.4 dB for class 1 and
+#: -0.6 dB for class 2 throughout); in the stop band it is the minimum (the
+#: maximum is unbounded). The first stop-band row is the G^(1/2) + epsilon row.
+_TABLE1_PASS_MAX: tuple[tuple[float, float, float], ...] = (
+    (0.0, 0.4, 0.6),
+    (1 / 8, 0.5, 0.7),
+    (1 / 4, 0.7, 0.9),
+    (3 / 8, 1.4, 1.7),
+    (1 / 2, 5.3, 5.8),
+)
+_TABLE1_STOP_MIN: tuple[tuple[float, float, float], ...] = (
+    (1 / 2, 1.2, 0.8),
+    (1.0, 16.6, 15.6),
+    (2.0, 40.5, 39.5),
+    (3.0, 60.0, 54.0),
+    (4.0, 70.0, 60.0),
+)
+_TABLE1_PASS_MIN = {1: -0.4, 2: -0.6}
+
+
+def _third_octave_breakpoint(exponent: float) -> float:
+    """IEC 61260-1:2014 Formula (9) for b = 3: octave breakpoint G^x on 1/3."""
+    g = math.pow(10, 3 / 10)
+    return 1 + (math.pow(g, 1 / 6) - 1) / (math.pow(g, 0.5) - 1) * (
+        math.pow(g, exponent) - 1
+    )
+
+
+def _butterworth_third_octave_db(omega: float) -> float:
+    """Relative attenuation of an order-6 Butterworth one-third-octave band.
+
+    The analogue band-pass magnitude, 10 lg(1 + x^12) with x the band-pass
+    frequency variable scaled to the band edges: 3.01 dB at both edges and the
+    shape the library's digital design follows to within 0.1 dB up to G and
+    2.2 dB at G^4, at 48 kHz without decimation.
+    """
+    g = 10 ** (3 / 10)
+    x = (omega - 1 / omega) / (g ** (1 / 6) - g ** (-1 / 6))
+    return 10 * math.log10(1 + x**12)
+
+
+def _d_filter_class_check(s: SVG, th: Theme) -> None:
+    """One band walked through the class check, and what the check leaves out.
+
+    The chain across the top is clause 5.10 of IEC 61260-1:2014 in the order
+    the library runs it: the designed band, its relative attenuation by
+    Formula (8), the Table 1 mask carried to one-third octave by Formula (9)
+    and mirrored by Formula (10), and the margin per class that decides the
+    verdict. The two panels draw that mask on an axis stretched breakpoint by
+    breakpoint, so every limit is a straight line between breakpoints, which
+    is what Formula (11) says. The band is an order-6 Butterworth one-third
+    octave at 1 kHz; the Nyquist line is where the decimated default bank
+    stops walking it (48 kHz over 17, halved). The dashed column is
+    IEC 61260-2 and IEC 61260-3, which test a device and are not run here.
+    """
+    pass_om = [_third_octave_breakpoint(row[0]) for row in _TABLE1_PASS_MAX]
+    stop_om = [_third_octave_breakpoint(row[0]) for row in _TABLE1_STOP_MIN]
+    pass_x = (62.0, 116.0, 170.0, 224.0, 278.0)
+    stop_x = (354.0, 410.0, 466.0, 522.0, 578.0)
+    stop_end = 614.0
+    top, bottom = 210.0, 400.0
+
+    def x_of(omega: float, oms: list[float], xs: tuple[float, ...]) -> float:
+        # Linear in lg(omega) between adjacent breakpoints: Formula (11).
+        for k in range(len(oms) - 1):
+            if oms[k] <= omega <= oms[k + 1]:
+                t = math.log10(omega / oms[k]) / math.log10(oms[k + 1] / oms[k])
+                return xs[k] + t * (xs[k + 1] - xs[k])
+        return xs[-1]
+
+    def y_pass(db: float) -> float:
+        return bottom - (db + 1.0) * (bottom - top) / 7.0  # -1 dB to +6 dB
+
+    def y_stop(db: float) -> float:
+        return bottom - db * (bottom - top) / 180.0  # 0 dB to 180 dB
+
+    s.text(
+        450,
+        62,
+        "The check runs on the design: every band, every breakpoint, "
+        "one margin per class",
+        15,
+        th.fg,
+        bold=True,
+    )
+
+    # -- The chain ---------------------------------------------------------
+    boxes = (
+        (
+            "1 · the designed band",
+            "$f_m$ = 1000 Hz, 1/3 octave",
+            "order 6, sections at $f_s/M$",
+            th.primary,
+        ),
+        (
+            "2 · relative attenuation",
+            "$ΔA(Ω) = A(Ω) − A_{ref}$",
+            "$Ω = f/f_m$, $A_{ref}$ at $Ω$ = 1",
+            th.primary,
+        ),
+        (
+            "3 · the Table 1 mask",
+            "octave breakpoints to $1/b$",
+            "straight lines in lg Ω between",
+            th.primary,
+        ),
+        (
+            "4 · margin and class",
+            "the worst distance to a limit",
+            "strictest class with $m ≥ 0$",
+            th.accent,
+        ),
+    )
+    bw, gap, by, bh = 197.0, 24.0, 80.0, 78.0
+    for i, (title, line1, line2, colour) in enumerate(boxes):
+        x0 = 20.0 + i * (bw + gap)
+        s.rect(x0, by, bw, bh, th.panel, colour, rx=8, sw=1.8)
+        s.text(x0 + bw / 2, by + 24, title, 13, colour, bold=True)
+        s.text(x0 + bw / 2, by + 46, line1, 12, th.fg)
+        s.text(x0 + bw / 2, by + 66, line2, 12, th.muted)
+        if i:
+            s.arrow(x0 - gap + 2, by + bh / 2, x0 - 3, by + bh / 2, th.fg, 1.8)
+
+    # -- The mask, pass band and stop band ---------------------------------
+    s.text(170, 196, "pass band, both limits", 12, th.fg, bold=True)
+    s.text(484, 196, "stop band, a minimum only", 12, th.fg, bold=True)
+    s.rect(62, top, 216, bottom - top, "none", th.muted, sw=1.0)
+    s.rect(354, top, stop_end - 354, bottom - top, "none", th.muted, sw=1.0)
+    for db in (0, 2, 4, 6):
+        s.line(57, y_pass(db), 62, y_pass(db), th.muted, 1.0)
+        s.text(53, y_pass(db) + 4, str(db), 11, th.muted, anchor="end")
+    for db in (0, 40, 80, 120, 160):
+        s.line(349, y_stop(db), 354, y_stop(db), th.muted, 1.0)
+        s.text(345, y_stop(db) + 4, str(db), 11, th.muted, anchor="end")
+    s.text(30, 305, "dB", 11, th.muted)
+
+    # Class 2 first, dashed, so class 1 is drawn over it.
+    for col, colour, dash, sw in ((2, th.muted, "6,4", 1.6), (1, th.primary, "", 2.2)):
+        pts = " L ".join(
+            f"{x:.1f} {y_pass(row[col]):.1f}"
+            for x, row in zip(pass_x, _TABLE1_PASS_MAX, strict=True)
+        )
+        s.path(f"M {pts}", stroke=colour, sw=sw, dash=dash)
+        y_min = y_pass(_TABLE1_PASS_MIN[col])
+        s.line(pass_x[0], y_min, pass_x[-1], y_min, colour, sw, dash=dash)
+        pts = " L ".join(
+            f"{x:.1f} {y_stop(row[col]):.1f}"
+            for x, row in zip(stop_x, _TABLE1_STOP_MIN, strict=True)
+        )
+        y_last = y_stop(_TABLE1_STOP_MIN[-1][col])
+        s.path(f"M {pts} L {stop_end} {y_last:.1f}", stroke=colour, sw=sw, dash=dash)
+
+    # The band on the same stretched axis, and its value at every breakpoint.
+    for oms, xs, y_of in ((pass_om, pass_x, y_pass), (stop_om, stop_x, y_stop)):
+        band_pts: list[str] = []
+        for k in range(len(oms) - 1):
+            for j in range(33):
+                om = oms[k] * (oms[k + 1] / oms[k]) ** (j / 32)
+                band_db = _butterworth_third_octave_db(om)
+                band_pts.append(f"{x_of(om, oms, xs):.1f} {y_of(band_db):.1f}")
+        s.path("M " + " L ".join(band_pts), stroke=th.fg, sw=2.0)
+        for om, x in zip(oms, xs, strict=True):
+            s.circle(x, y_of(_butterworth_third_octave_db(om)), 4.2, th.fg)
+
+    # The binding margin, drawn where it binds: 0.4 dB under the class 1 maximum.
+    s.line(68, y_pass(0.0), 68, y_pass(0.4), th.secondary, 3.0)
+
+    # Legend, in the empty top-left corner of the pass-band panel.
+    s.line(67, 222, 83, 222, th.primary, 2.2)
+    s.text(88, 226, "class 1", 11, th.fg, anchor="start")
+    s.line(67, 238, 83, 238, th.muted, 1.6, dash="5,3")
+    s.text(88, 242, "class 2", 11, th.fg, anchor="start")
+    s.line(67, 254, 83, 254, th.fg, 2.0)
+    s.text(88, 258, "$ΔA$ of the band", 11, th.fg, anchor="start")
+    s.circle(75, 270, 4.2, th.fg)
+    s.text(88, 274, "$ΔA$ at a breakpoint", 11, th.fg, anchor="start")
+
+    # Where the decimated default bank stops walking this band: its Nyquist.
+    x_nyq = x_of(48000 / 17 / 2 / 1000, stop_om, stop_x)
+    s.line(x_nyq, top + 4, x_nyq, bottom, th.secondary, 1.4, dash="4,4")
+    s.text(x_nyq + 5, 226, "decimated bank:", 11, th.secondary, anchor="start")
+    s.text(x_nyq + 5, 242, "walked to $Ω$ = 1.41", 11, th.secondary, anchor="start")
+
+    # Column labels: the octave breakpoint, then its one-third-octave value.
+    for xs, names, values in (
+        (
+            pass_x,
+            ("1", "$G^{1/8}$", "$G^{1/4}$", "$G^{3/8}$", "$G^{1/2} − ε$"),
+            ("1.000", "1.027", "1.056", "1.087", "1.122"),
+        ),
+        (
+            stop_x,
+            ("$G^{1/2} + ε$", "$G$", "$G^2$", "$G^3$", "$≥ G^4$"),
+            ("1.122", "1.294", "1.882", "3.054", "5.392"),
+        ),
+    ):
+        for x, name, value in zip(xs, names, values, strict=True):
+            s.text(x, 420, name, 13, th.fg)
+            s.text(x, 438, value, 11, th.muted)
+    s.text(
+        338,
+        458,
+        "top: octave breakpoints of Table 1; below: the same for one-third "
+        "octave, Formula (9)",
+        11,
+        th.muted,
+    )
+
+    # The class 1 margin at every breakpoint, and the one that decides.
+    s.text(338, 482, "class 1 margin at each breakpoint, in dB", 12, th.fg, bold=True)
+    margins = (
+        "+0.40", "+0.40", "+0.40", "+0.49", "+2.29",
+        "+1.81", "+26", "+52", "+69", "+92",
+    )  # fmt: skip
+    for i, (x, label) in enumerate(zip(pass_x + stop_x, margins, strict=True)):
+        s.text(x, 504, label, 12, th.secondary if i < 3 else th.fg, bold=True)
+    s.rect(40, 489, 152, 22, "none", th.secondary, rx=4, sw=1.4)
+    s.text(338, 526, "the smallest, +0.40 dB, is the band's margin", 11, th.secondary)
+
+    s.text(
+        338, 552, "edition '1995' adds class 0 on the same breakpoints:", 12, th.muted
+    )
+    s.text(
+        338,
+        570,
+        "±0.15 dB at mid-band and 75 dB from $G^4$, with class 1 at ±0.3 dB",
+        12,
+        th.muted,
+    )
+
+    # -- The verdict -------------------------------------------------------
+    s.rect(20, 588, 600, 104, th.panel, th.accent, rx=6, sw=1.8)
+    s.text(
+        320,
+        614,
+        "this band: $m_1$ = +0.40 dB, $m_2$ = +0.60 dB, so class 1",
+        14,
+        th.accent,
+        bold=True,
+    )
+    s.text(
+        320,
+        638,
+        "$m$ is the least distance to a limit over $2^{15}$ grid points and "
+        "every breakpoint",
+        12,
+        th.fg,
+    )
+    s.text(
+        320,
+        658,
+        "a bank takes the class of its worst band, and none if any band has none",
+        12,
+        th.fg,
+    )
+    s.text(
+        320,
+        678,
+        "past a band's own Nyquist nothing is walked, and range_limited says so",
+        12,
+        th.muted,
+    )
+
+    # -- Outside the check: what a laboratory does to an instrument ---------
+    s.line(339.5, by + bh, 339.5, 176, th.muted, 1.4, dash="5,4")
+    s.line(339.5, 176, 758, 176, th.muted, 1.4, dash="5,4")
+    s.arrow(758, 176, 758, 190, th.muted, 1.4)
+    s.rect(636, 192, 244, 514, "none", th.muted, rx=8, sw=1.4, dash="7,5")
+    s.text(758, 214, "Outside the check", 14, th.muted, bold=True)
+    s.text(758, 236, "on a device, $A = L_{in} − L_{out}$", 12, th.fg)
+    s.text(758, 254, "is measured, not computed", 12, th.fg)
+
+    s.rect(644, 268, 228, 196, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(758, 290, "IEC 61260-2, pattern evaluation", 12, th.fg, bold=True)
+    s.text(758, 307, "once per model", 11, th.muted)
+    for y, line in (
+        (328, "≥ 3 specimens in, ≥ 1 tested in full"),
+        (346, "$S ≥ 24$ sines per bandwidth,"),
+        (362, "at $Ω_i = G^{i/(bS)}$"),
+        (382, "from 0.5 $f_m$ of the lowest band"),
+        (398, "to 1.5 $f_m$ of the highest"),
+        (418, "1 dB under the top of the linear range"),
+        (438, "20 °C to 26 °C, 35 % to 65 % RH"),
+        (454, "after at least 6 h to acclimatize"),
+    ):
+        s.text(758, y, line, 11, th.fg)
+
+    s.rect(644, 476, 228, 188, th.panel, th.muted, rx=6, sw=1.2)
+    s.text(758, 498, "IEC 61260-3, periodic test", 12, th.fg, bold=True)
+    s.text(758, 515, "each instrument, on a date", 11, th.muted)
+    for y, line in (
+        (534, "every filter at its mid-band:"),
+        (550, "±0.4 dB class 1, ±0.6 dB class 2,"),
+        (566, "or, if time invariant, one sweep"),
+        (584, "three filters, low, middle and high,"),
+        (600, "such as 31.5 Hz, 1 kHz and 16 kHz,"),
+        (618, "up to 15 sines each, $k$ = −7 … 7,"),
+        (634, "with no band-edge row"),
+        (652, "20 °C to 26 °C, 25 % to 70 % RH"),
+    ):
+        s.text(758, y, line, 11, th.fg)
+    s.text(758, 684, "both also need the lab's uncertainty", 11, th.muted)
+    s.text(758, 700, "within Annex B: 0.20, 0.30 or 0.50 dB", 11, th.muted)
+
+    # -- The two formulas that carry Table 1 to any bandwidth --------------
+    s.rect(20, 718, 860, 64, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        450,
+        744,
+        "$Ω_{h(1/b)} = 1 + (G^{1/(2b)} − 1) / (G^{1/2} − 1) · (Ω_{h(1/1)} − 1)$"
+        "   (Formula 9)",
+        15,
+        th.fg,
+    )
+    s.text(
+        450,
+        770,
+        "$ΔA_x = ΔA_a + (ΔA_b − ΔA_a) · lg(Ω_x/Ω_a) / lg(Ω_b/Ω_a)$   (Formula 11)",
+        15,
+        th.fg,
+    )
+
+
+# ---------------------------------------------------------------------------
+# d30 - Verification regimes: the three parts of IEC 61672 and IEC 61260
+# ---------------------------------------------------------------------------
+
+
+def _d_verification_regimes(s: SVG, th: Theme) -> None:
+    """The three parts of IEC 61672 and IEC 61260, and the line the library stops at.
+
+    Both series split the same way. Part 1 fixes the design goals and the
+    acceptance limits, Table 3 of IEC 61672-1 and Table 1 of IEC 61260-1, and
+    it is the only part the two verifiers read. Part 2 is pattern evaluation,
+    and 4.1 of both parts sets minimums rather than counts: at least three
+    specimens submitted, at least two selected and at least one of those
+    tested in full against every mandatory specification, ending in a report
+    that states whether the pattern is approved (10.3 of both). Part 3 is the
+    periodic test of one working instrument on a deliberately limited set of
+    key tests, and its verdict says nothing general about Part 1 unless that
+    approval is public (clause 1 of IEC 61672-3, 1.5 of IEC 61260-3), which is
+    the arrow down the left margin. The filter cell of Part 3 carries the
+    condition 10.1.2 puts on the sweep, which stands in for the midband test
+    of 10.2 only where the filters are time invariant; for any other filter
+    set 10.2 is the only route. One condition the cell is too narrow to
+    carry: the k range of 13.4 runs from -7 to 7 only while the test
+    frequency stays above 0,5 times the lowest exact midband frequency of the
+    set and below 1,5 times the highest, so fifteen is a ceiling. The box at
+    the foot is the conformance criterion both series apply (5.1.21 of
+    IEC 61672-1, 5.1.9 of IEC 61260-1), of which a computed response can show
+    only the first half.
+    """
+    left, right, mid = 36.0, 864.0, 450.0
+    xl, xr = 52.0, 466.0  # text start of the meter cell and of the filter cell
+
+    def meter(x: float, y: float, colour: str, fill: str, dash: str = "") -> None:
+        # A hand-held sound level meter: microphone on its stem, body, display.
+        s.line(x, y + 2, x, y - 6, colour, 1.6)
+        s.circle(x, y - 10, 4, th.panel, colour, 1.6)
+        s.rect(x - 9, y + 2, 18, 32, fill, colour, rx=3, sw=1.6, dash=dash)
+        s.rect(x - 6, y + 7, 12, 7, th.bg, colour, rx=1, sw=1.1)
+
+    def filterset(x: float, y: float, colour: str, fill: str, dash: str = "") -> None:
+        # A band analyser: a case with a band-level display in it.
+        s.rect(x - 17, y - 2, 34, 36, fill, colour, rx=3, sw=1.6, dash=dash)
+        s.rect(x - 14, y + 2, 28, 28, th.bg, "none", rx=2)
+        for k, hgt in enumerate((7, 13, 18, 12, 6)):
+            s.rect(x - 12 + 5 * k, y + 29 - hgt, 4, hgt, colour)
+
+    def row(y0: float, h: float, colour: str, title: str) -> None:
+        s.rect(left, y0, right - left, h, "none", colour, rx=8, sw=1.8)
+        s.text(xl, y0 + 22, title, 14, colour, "start", bold=True)
+        s.line(mid, y0 + 36, mid, y0 + h - 34, th.muted, 1.0)
+
+    def lines(x: float, y0: float, texts: tuple[str, ...]) -> None:
+        for k, label in enumerate(texts):
+            s.text(x, y0 + 20 * k, label, 12, th.fg, "start")
+
+    # -- The library, and the two verifiers that reach down into Part 1 ------
+    s.rect(150, 50, 600, 60, th.panel, th.primary, rx=8, sw=2.0)
+    s.text(
+        mid,
+        74,
+        "phonometry: the transfer function you configured",
+        15,
+        th.primary,
+        bold=True,
+    )
+    s.text(
+        mid,
+        97,
+        "a computed design: no specimen, no air temperature, "
+        "no uncertainty of measurement",
+        12,
+        th.muted,
+    )
+    for x, name, anchor, dx in (
+        (239.0, "verify_weighting_class", "end", -8),
+        (661.0, "verify_filter_class", "start", 8),
+    ):
+        s.arrow(x, 110, x, 148, th.primary, 1.8)
+        s.text(x + dx, 134, name, 12, th.primary, anchor, mono=True)
+
+    # -- Part 1: the tables both verifiers read, and what a laboratory is held to
+    y1 = 150.0
+    row(
+        y1,
+        160,
+        th.primary,
+        "Part 1 · Specifications: design goals and acceptance limits",
+    )
+    s.text(
+        xl, y1 + 48, "IEC 61672-1 · sound level meters", 13, th.fg, "start", bold=True
+    )
+    lines(
+        xl,
+        y1 + 70,
+        (
+            "Table 3: A, C and Z at 34 nominal frequencies,",
+            "10 Hz to 20 kHz; ±0.7 dB at 1 kHz for class 1",
+        ),
+    )
+    s.text(
+        xl,
+        y1 + 110,
+        "the laboratory's $U$: at most 0.60 dB up to 4 kHz",
+        12,
+        th.muted,
+        "start",
+    )
+    s.text(xr, y1 + 48, "IEC 61260-1 · band filters", 13, th.fg, "start", bold=True)
+    lines(
+        xr,
+        y1 + 70,
+        (
+            "Table 1: a relative attenuation corridor",
+            "round each mid-band; ±0.4 dB at $Ω = 1$ for class 1",
+        ),
+    )
+    s.text(
+        xr,
+        y1 + 110,
+        "the laboratory's $U$: at most 0.20 dB while $ΔA ≤ 2$ dB",
+        12,
+        th.muted,
+        "start",
+    )
+    s.text(
+        mid,
+        y1 + 146,
+        "class 2 shares the design goals, with limits as wide or wider, "
+        "and 0 °C to +40 °C against −10 °C to +50 °C for class 1",
+        12,
+        th.muted,
+    )
+
+    # -- The line the verifiers stop at --------------------------------------
+    yb = 330.0
+    s.line(16, yb, 884, yb, th.fg, 1.6, dash="8,5")
+    chip = (
+        "above: a design checked in software · below: a physical instrument "
+        "in a laboratory"
+    )
+    wchip = s.text_width(chip, 12, bold=True) + 24
+    s.rect(mid - wchip / 2, yb - 12, wchip, 24, th.bg, th.fg, rx=12, sw=1.2)
+    s.text(mid, yb + 4, chip, 12, th.fg, bold=True)
+
+    # -- Part 2: a model, once, on specimens, and every count a minimum ------
+    y2 = 354.0
+    row(
+        y2,
+        222,
+        th.accent,
+        "Part 2 · Pattern evaluation: a model, once, "
+        "against every mandatory specification",
+    )
+    for x0, head, icon, pitch in (
+        (xl, "IEC 61672-2", meter, 26.0),
+        (xr, "IEC 61260-2", filterset, 42.0),
+    ):
+        s.text(x0, y2 + 48, head, 13, th.fg, "start", bold=True)
+        cx = x0 + 18
+        icon(cx, y2 + 70, th.accent, th.accent)  # the one tested in full
+        icon(cx + pitch, y2 + 70, th.accent, th.panel)  # the second one selected
+        icon(cx + 2 * pitch, y2 + 70, th.muted, th.panel, "3,2")  # submitted only
+        tx = cx + 2 * pitch + 30
+        s.text(
+            tx, y2 + 80, "at least three submitted, at least two", 12, th.fg, "start"
+        )
+        s.text(
+            tx, y2 + 100, "selected, at least one tested in full", 12, th.fg, "start"
+        )
+    lines(
+        xl,
+        y2 + 128,
+        (
+            "static pressure, temperature, humidity, ESD, RF fields",
+            "weightings in a free field, 1/3 octave apart to 2 kHz,",
+            "1/6 to 8 kHz and, for class 1, 1/12 to 20 kHz",
+            "level linearity, tonebursts, overload, self-noise",
+        ),
+    )
+    lines(
+        xr,
+        y2 + 128,
+        (
+            "every filter at 24 or more frequencies per bandwidth:",
+            "relative attenuation, effective bandwidth, summation",
+            "linearity on the lowest, a middle and the highest filter",
+            "ESD, RF and four pairs of temperature and humidity",
+        ),
+    )
+    s.text(
+        mid,
+        y2 + 212,
+        "the report states whether the pattern is approved, "
+        "and notice of an approval should be made public",
+        12,
+        th.accent,
+        bold=True,
+    )
+
+    # -- Part 3: one working instrument, a deliberately limited set ----------
+    y3 = 596.0
+    row(
+        y3,
+        234,
+        th.secondary,
+        "Part 3 · Periodic tests: one working instrument, a limited set of key tests",
+    )
+    for x0, head, icon, env in (
+        (
+            xl,
+            "IEC 61672-3",
+            meter,
+            "20 °C to 26 °C, 25 % to 70 % RH, 80 kPa to 105 kPa",
+        ),
+        (xr, "IEC 61260-3", filterset, "20 °C to 26 °C, 25 % to 70 % RH"),
+    ):
+        s.text(x0, y3 + 48, head, 13, th.fg, "start", bold=True)
+        cx = x0 + 18
+        icon(cx, y3 + 70, th.secondary, th.secondary)
+        s.text(
+            cx + 30,
+            y3 + 80,
+            "one instrument, its serial number visible",
+            12,
+            th.fg,
+            "start",
+        )
+        s.text(cx + 30, y3 + 100, env, 12, th.fg, "start")
+    lines(
+        xl,
+        y3 + 120,
+        (
+            "calibrator check, self-generated noise and weighting",
+            "by sound at 125 Hz, 1 kHz, 8 kHz; electrically at",
+            "octaves from 63 Hz to 16 kHz for class 1; linearity,",
+            "tonebursts, C-weighted peak, overload",
+        ),
+    )
+    lines(
+        xr,
+        y3 + 120,
+        (
+            "every filter at mid-band, ±0.4 dB for class 1, or one sweep",
+            "across the set if the filters are time invariant",
+            "three filters (31.5 Hz, 1 kHz, 16 kHz recommended): level",
+            "linearity, and Table 1 at up to 15 frequencies, $k = −7$ to 7",
+            "every filter's self-noise under the linear range",
+        ),
+    )
+    s.text(
+        mid,
+        y3 + 224,
+        "without that public approval, passing every test supports "
+        "no general conclusion on Part 1",
+        12,
+        th.secondary,
+        bold=True,
+    )
+
+    # The approval that Part 2 publishes is what the verdict of Part 3 leans on.
+    s.path(
+        f"M {left} {y2 + 208} H 22 V {y3 + 220} H {left - 10}",
+        stroke=th.accent,
+        sw=1.6,
+    )
+    s.arrow(left - 10, y3 + 220, left - 1, y3 + 220, th.accent, 1.6)
+
+    # -- The criterion both series apply, and the half software can see ------
+    yf = 850.0
+    s.rect(70, yf, 760, 84, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        mid,
+        yf + 30,
+        "$δ$ within the acceptance limits    and    $U ≤ U_{max}$",
+        17,
+        th.fg,
+    )
+    s.text(
+        mid,
+        yf + 54,
+        "$δ$ the deviation from the design goal, "
+        "$U$ the expanded uncertainty for 95 % coverage",
+        12,
+        th.fg,
+    )
+    s.text(
+        mid,
+        yf + 74,
+        "a verifier reads the first half off a computed response; "
+        "a laboratory has to meet both",
+        12,
+        th.muted,
+    )
+    s.text(
+        mid,
+        yf + 114,
+        "IEC 61043 keeps all three in one document: requirements in clauses "
+        "6 to 10, type tests in 11 to 13, periodic verification in Annex A",
+        12,
+        th.muted,
+    )

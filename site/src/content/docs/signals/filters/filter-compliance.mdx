@@ -37,7 +37,7 @@ references:
     title: "Electroacoustics — Octave-band and fractional-octave-band filters — Part 3: Periodic tests"
     designation: "IEC 61260-3:2016"
     url: "https://webstore.iec.ch/en/publication/24561"
-    note: "The periodic tests a working analyser receives: midband relative attenuation of every filter, effective bandwidth, linear operating range and its lower limit, under stated environmental conditions."
+    note: "The periodic tests a working analyser receives: midband relative attenuation of every filter or, for time-invariant filters, the effective-bandwidth deviation from one sweep across the set; the relative attenuation of three selected filters at the clause 13 frequencies; the linear operating range and its lower limit, under stated environmental conditions."
 ---
 
 import ReportPreview from '../../../../components/ReportPreview.astro';
@@ -84,12 +84,22 @@ print(result.bands[0])
 # {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
 ```
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading one band filter against Table 1 of IEC 61260-1. Across the top, four boxes lead into each other: the designed band, a one-third-octave band at 1000 Hz of order 6; its relative attenuation, the attenuation at each normalized frequency less the attenuation at mid-band; the Table 1 mask, its octave breakpoints carried to one-third octave with the limits straight in lg Ω between them; and the margin and class. Below, two panels share a frequency axis stretched breakpoint by breakpoint. The pass-band panel runs from Ω = 1 to the band edge at 1.122 and holds the class 1 corridor, a floor at −0.4 dB under a ceiling rising from +0.4 dB to +5.3 dB, with the wider class 2 corridor dashed around it; the band stays flat at 0 dB and climbs to 3 dB at the edge. The stop-band panel runs from the edge to 5.392, where only a minimum applies, rising from 1.2 dB through 16.6, 40.5 and 60 dB to 70 dB for class 1, and the band climbs far above it; a dashed line at Ω = 1.41 marks where the decimated default bank stops evaluating. Under the columns each octave breakpoint, from G raised to one eighth up to G raised to the fourth, is paired with its one-third-octave value, and a row gives the class 1 margin at each: +0.40 dB at the first three, boxed as the band's margin, then +0.49, +2.29 and +1.81 dB, and 26 to 92 dB in the stop band. A note adds the class 0 of the 1995 edition, ±0.15 dB at mid-band and 75 dB from G raised to the fourth. A green box gives the verdict, class 1 with margins of +0.40 dB and +0.60 dB, a bank taking the class of its worst band, and range_limited flagging a band walked only to its own Nyquist. A dashed column on the right, fed from the relative-attenuation box and marked outside the check, lists what a laboratory does to an instrument instead: IEC 61260-2 pattern evaluation, with at least three specimens submitted, at least two selected and at least one tested in full, using at least 24 sines per bandwidth from half the lowest mid-band frequency to 1.5 times the highest; and IEC 61260-3 periodic tests, every filter at mid-band within ±0.4 dB or ±0.6 dB, or one sweep across the set where the filters are time invariant, and three filters at up to 15 frequencies. Pattern evaluation and periodic tests both also need the laboratory's uncertainty to stay within Annex B, 0.20, 0.30 or 0.50 dB. Formulas 9 and 11 are boxed at the foot" width="100%" />
+
+*The 1 kHz band of a bank like the one above, walked through the check: its
+relative attenuation at every Table 1 breakpoint, carried to one-third octave,
+against the class 1 and class 2 limits, with the smallest margin deciding the
+class. The red dashed line is where the decimated bank stops walking it. The
+dashed column on the right is what a laboratory does to an instrument instead,
+and none of it runs here.*
+
 **How far up the mask the verdict actually reaches.** `checked_to_omega` is the
 highest normalized frequency $\Omega = f/f_\mathrm{m}$ at which that band was evaluated,
 and on a multirate bank it is the band's own decimated Nyquist rather than the
 end of the Table 1 mask. On the bank above it runs from 3.81 down to 1.20, so
-the far-stopband requirement (at least 70 dB for class 1 beyond roughly
-$\Omega = 4$) is not demonstrated *on the band filter* at all. It is taken as
+the far-stopband requirement (at least 70 dB for class 1 from
+$\Omega \approx 5.39$ up, the octave $G^4$ row carried to one-third octave) is
+not demonstrated *on the band filter* at all. It is taken as
 satisfied by the anti-alias low-pass that precedes the decimation, which
 removed that energy before the band ever saw it. `range_limited` is the flag
 that this argument was used, and it is `True` here.
@@ -350,12 +360,15 @@ which a filter-set model passes once. What a working instrument actually
 receives is the **periodic test** of IEC 61260-3:2016, and it is narrower on
 purpose: the relative attenuation is measured at the exact midband frequency of
 every filter in the set, through the electrical input on the reference level
-range, together with the effective-bandwidth deviation from a swept-frequency
-test, the linear operating range with its level-range control and overload
-behaviour, and the lower limit of that range (all under stated environmental
-conditions and with traceable test equipment). That is why a certificate carries
-a date, a temperature and a set of serial numbers, and why it says nothing
-about the parts of the mask it did not walk.
+range, or, for time-invariant filters, the effective-bandwidth deviation from
+one exponential sweep across the whole set instead; the relative attenuation of
+three selected filters, one low, one in the middle and one high, at the
+clause 13 normalized frequencies ($k$ from $-7$ to $7$, as far as the frequency
+range of the set reaches); the linear operating range with its level-range
+control and overload behaviour; and the lower limit of that range (all under
+stated environmental conditions and with traceable test equipment). That is why
+a certificate carries a date, a temperature and a set of serial numbers, and why
+it says nothing about the parts of the mask it did not walk.
 
 What carries over is worth stating in a report: a class verdict from this page
 is inherited by every measurement made with the library's filters, and a

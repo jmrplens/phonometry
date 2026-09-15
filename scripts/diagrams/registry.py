@@ -162,7 +162,9 @@ from .signals import (
     _d_data_qualification,
     _d_echo_geometry,
     _d_equal_loudness_weighting,
+    _d_filter_class_check,
     _d_infrasound_chain,
+    _d_levels_from_a_record,
     _d_miso_coherence,
     _d_miso_setup,
     _d_multichannel,
@@ -180,6 +182,7 @@ from .signals import (
     _d_tsa_setup,
     _d_uncertainty,
     _d_uncertainty_sources,
+    _d_verification_regimes,
 )
 from .simulation import (
     _d_elastic_fluid_solid,
@@ -558,6 +561,11 @@ DIAGRAMS = {
         _d_time_weighting,
         "Exponential-detector chain of the time weightings (IEC 61672-1)",
         460,
+    ),
+    "diagram_levels_from_a_record": (
+        _d_levels_from_a_record,
+        "Every level one calibrated record yields (IEC 61672-1, IEC 61252)",
+        760,
     ),
     "diagram_block_processing": (
         _d_block_processing,
@@ -1109,6 +1117,16 @@ DIAGRAMS = {
         _d_bank_dataflow,
         "Inside a band: the decimation decision and the biquad cascade",
         680,
+    ),
+    "diagram_filter_class_check": (
+        _d_filter_class_check,
+        "How a band is graded against Table 1 (IEC 61260-1)",
+        796,
+    ),
+    "diagram_verification_regimes": (
+        _d_verification_regimes,
+        "Specification, pattern evaluation, periodic test (IEC 61672, IEC 61260)",
+        974,
     ),
     "diagram_humid_air_chain": (
         _d_humid_air_chain,

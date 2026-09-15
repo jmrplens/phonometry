@@ -645,9 +645,10 @@ def _as_standard(span: str) -> Cited | None:
     )
 
 
-def _kind_by_shape(designation: str, shape: ReferenceKind) -> ReferenceKind:
-    """The kind of a work, declared where it is known and judged where it is
-    not.
+def _declared(
+    written: str, shape: ReferenceKind
+) -> tuple[str, str | None, ReferenceKind]:
+    """A work name as the corpus records it: designation, name written, kind.
 
     An author with a year looks like an article and an author with an edition
     mark like a book, which is the best a rule reading the string alone can
@@ -655,8 +656,20 @@ def _kind_by_shape(designation: str, shape: ReferenceKind) -> ReferenceKind:
     paper cited bare elsewhere, Ainslie (2010) a book cited with its year. So
     a work named in :data:`_WORKS` is what that list says it is, and the shape
     decides only for the works no list mentions.
+
+    The name a citation writes is not always the designation the corpus files
+    the work under: "NORAH2 (2015)" names the report recorded as "NORAH2
+    guidance". :data:`_WORK_KINDS` is keyed by the designation, so reading it
+    with the written name would miss that one and file the report as an
+    article under a designation nothing else cites. The written name is looked
+    up first and carries the expansion with it, exactly as :func:`_as_work`
+    does for the same name without a year.
     """
-    return _WORK_KINDS.get(designation, shape)
+    work = _WORKS.get(written)
+    if work is not None:
+        expanded = written if work.designation != written else None
+        return work.designation, expanded, work.kind
+    return written, None, _WORK_KINDS.get(written, shape)
 
 
 def _as_edition(span: str) -> Cited | None:
@@ -664,11 +677,13 @@ def _as_edition(span: str) -> Cited | None:
     match = _EDITION.match(span)
     if match is None:
         return None
+    designation, written, kind = _declared(match["designation"], ReferenceKind.BOOK)
     return Cited(
-        kind=_kind_by_shape(match["designation"], ReferenceKind.BOOK),
-        designation=match["designation"],
+        kind=kind,
+        designation=designation,
         edition=match["edition"],
         clause=match["clause"],
+        written=written,
     )
 
 
@@ -681,14 +696,13 @@ def _as_year(span: str) -> Cited | None:
     match = _YEAR.match(span)
     if match is None:
         return None
+    designation, written, kind = _declared(match["designation"], ReferenceKind.ARTICLE)
     return Cited(
-        kind=_DATED_WORK_KINDS.get(
-            (match["designation"], match["edition"]),
-            _kind_by_shape(match["designation"], ReferenceKind.ARTICLE),
-        ),
-        designation=match["designation"],
+        kind=_DATED_WORK_KINDS.get((match["designation"], match["edition"]), kind),
+        designation=designation,
         edition=match["edition"],
         clause=match["clause"],
+        written=written,
     )
 
 
@@ -697,11 +711,13 @@ def _as_clause(span: str) -> Cited | None:
     match = _CLAUSE_START.match(span)
     if match is None:
         return None
+    designation, written, kind = _declared(match["designation"], ReferenceKind.BOOK)
     return Cited(
-        kind=_kind_by_shape(match["designation"], ReferenceKind.BOOK),
-        designation=match["designation"],
+        kind=kind,
+        designation=designation,
         edition=None,
         clause=match["clause"],
+        written=written,
     )
 
 

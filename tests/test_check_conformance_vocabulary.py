@@ -109,8 +109,9 @@ def test_a_page_without_the_two_branches_is_a_defect_in_this_gate() -> None:
     If the words move somewhere this cannot read, the answer is to teach this
     where they went, not to let an unworded vocabulary through.
     """
+    rewritten = PAGE.replace("\n\t\t: {", "\n\t\telse {")
     with pytest.raises(LookupError, match="translation tables"):
-        gate.page_labels(PAGE.replace("\n\t\t: {", "\n\t\telse {"))
+        gate.page_labels(rewritten)
 
 
 def test_a_value_the_schema_refuses_is_reported_with_what_it_costs() -> None:

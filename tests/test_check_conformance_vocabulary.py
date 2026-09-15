@@ -133,6 +133,20 @@ def test_a_value_no_check_can_produce_fails_in_both_places() -> None:
     assert [problem for problem in labels if "'retired'" in problem]
 
 
+def test_a_value_only_the_committed_file_carries_is_a_hand_edit() -> None:
+    """The artefact is generated, so a value no enum defines was typed in.
+
+    Read the other way round from the two above: there the site had fallen
+    behind the enums, here the committed file has run ahead of them, which is
+    what an artefact edited by hand rather than regenerated looks like.
+    """
+    counts = collections.Counter({"supersedes": 2})
+    problems = gate._artefact_problems(_vocabulary(), counts)
+    assert any(
+        "'supersedes'" in problem and "2 rows" in problem for problem in problems
+    )
+
+
 def test_a_vocabulary_the_page_never_words_is_not_asked_for_labels() -> None:
     """A document kind is drawn, not written, so it has no map to be missing."""
     assert gate._label_problems(_vocabulary(labelled=False), {}, ["English"]) == []

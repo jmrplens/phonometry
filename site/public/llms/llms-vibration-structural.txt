@@ -1357,6 +1357,23 @@ to the one at its foundation, which is why the guideline value there does not
 depend on frequency: the response is already at the structure's own
 frequencies.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points.svg" alt="Section through a three-storey dwelling with no basement and a piling rig beside it: the foundation point in the lowest storey on the outside wall facing the source, the two horizontal directions in the topmost floor plane, the vertical direction on a floor at mid-span, and a buried pipeline more than 2 metres away, with enlarged details of the foundation point under its 0,5 m limit and of the transducers on the pipe" width="100%"></picture>
+
+**How the measurement goes.** Use a vibration meter that meets DIN 45669-1,
+checked and calibrated at a reference frequency and amplitude for the job. At the
+foundation, three transducers go close together in the lowest storey, on the
+outside wall or its foundation, preferably on the side facing the source and,
+without a basement, no higher than 0,5 m above ground level, recording $z$ and
+two horizontal directions at right angles, one parallel to a side wall and
+preferably $x$ pointing at the source. On a hard surface a transducer set down
+loose holds only to 100 Hz vertically and 40 Hz horizontally at 3 m/s² or less.
+In the topmost floor plane, $x$ and $y$ go in or close to the outside wall; where
+relevant, on the floors expected to vibrate most, $z$ goes at about mid-span; on
+a pipeline, the transducers go on the pipe itself, bared only at the measuring
+point. Where possible, extraneous vibration is judged by comparing the readings
+with and without the source acting. Read the peak of each component and its
+frequency, and report what Annex A lists.
+
 ## 2. Short-term vibration, and why the guideline rises with frequency
 
 Short-term vibration is vibration that does not occur often enough to build up
@@ -1521,7 +1538,15 @@ rule itself.
   with the curves of Bild 1, the ceiling rule of 5.2, the buried-pipeline
   values of Table 2, the long-term values of Table 3 and the 50 % reduction of
   6.3, the bending stress of Formula (1) in 6.2 and the storey estimate of
-  6.4.
+  6.4. The measuring points, directions and report of 5.4, the pipeline notes
+  of D.1 and the worked dwelling of D.2 are prose, set out in the measurement
+  section.
+- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
+  Teil 2: Messverfahren* (DIN 45669-2:2005-06). Where the transducers of a
+  building measurement go and how they are set down: the foundation positions
+  of 5.1.2, the measuring directions of 5.2, the loose-mounting limits of
+  5.3.2, the measurement time of 6.1, the check before use of 6.3 and the
+  comparison with the source stopped of 7.2.2.
 
 ## Standards
 

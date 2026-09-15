@@ -8,7 +8,13 @@ references:
     title: "Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf bauliche Anlagen"
     designation: "DIN 4150-3:1999-02"
     primary: true
-    note: "La magnitud medida del apartado 5.1, los valores de referencia de corta duración de la tabla 1 con las curvas del Bild 1, la regla de forjados del 5.2, los valores para tuberías enterradas de la tabla 2, los valores de larga duración de la tabla 3 y la reducción al 50 % del 6.3, la tensión de flexión de la fórmula (1) del 6.2 y la estimación por plantas del 6.4."
+    note: "La magnitud medida del apartado 5.1, los valores de referencia de corta duración de la tabla 1 con las curvas del Bild 1, la regla de forjados del 5.2, los valores para tuberías enterradas de la tabla 2, los valores de larga duración de la tabla 3 y la reducción al 50 % del 6.3, la tensión de flexión de la fórmula (1) del 6.2 y la estimación por plantas del 6.4. Los puntos de medida, las direcciones y el acta del 5.4, las indicaciones sobre tuberías del D.1 y el ejemplo resuelto de vivienda del D.2 son texto, y están en la sección de la medida."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2005
+    title: "Messung von Schwingungsimmissionen — Teil 2: Messverfahren"
+    designation: "DIN 45669-2:2005-06"
+    note: "Dónde van los captadores de una medida en un edificio y cómo se apoyan: los puntos del cimiento del 5.1.2, las direcciones de medida del 5.2, los límites de montaje suelto del 5.3.2, el tiempo de medida del 6.1, la comprobación previa del 6.3 y la comparación con la fuente parada del 7.2.2."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -51,6 +57,33 @@ componentes horizontales, medida en el muro exterior o junto a él. Esa medida
 no es una segunda excitación. Es la respuesta horizontal del edificio a la que
 recibe en su cimiento, y por eso el valor de referencia allí no depende de la
 frecuencia: la respuesta ya está en las frecuencias propias de la estructura.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points.svg" alt="Sección de una vivienda de tres plantas sin sótano, con una máquina de hinca sobre el terreno a su izquierda y ondas discontinuas que van desde el pilote por el terreno hacia el edificio. Hay cuatro puntos numerados. El punto 1 es un captador en la planta más baja, en la cara interior del muro exterior orientado hacia la fuente, justo encima de la solera. El punto 2 está en el mismo muro exterior, justo bajo el forjado superior, con flechas para las dos direcciones horizontales x e y, con x saliendo del edificio hacia la fuente. El punto 3 está sobre un forjado a mitad del vano, con el vano dividido en dos mitades iguales y una flecha para la dirección vertical z. El punto 4 es una tubería enterrada dibujada en sección transversal que pasa junto al edificio, a más de 2 metros del muro exterior y acotada como tal, descubierta en un solo sitio y con un captador sobre ella. Debajo, dos detalles ampliados. El primero muestra el punto del cimiento con sus tres direcciones juntas en la cara interior del muro exterior, con x saliendo hacia la fuente, bajo una línea discontinua a 0,5 m sobre la rasante exterior. El segundo muestra la tubería a lo largo de su eje con los captadores sobre la propia tubería, z, y y x registradas y x a lo largo del eje, un punto sustituto discontinuo en el terreno de encima marcado como solo una estimación, por lo general mayor que en la tubería, y la tubería juzgada con la tabla 2 según el material. Tres recuadros al pie dicen qué se lee en cada punto del edificio: el mayor pico de las tres componentes en el cimiento, frente a la tabla 1 a la frecuencia de ese pico; el mayor pico horizontal en el plano de la última planta, frente a un valor por tipo de edificio; y una velocidad vertical de 20 milímetros por segundo o menos en el forjado, para vibración de corta duración. Las líneas de debajo dan una lectura de 5,1 milímetros por segundo a 16,5 hercios en el cimiento de una vivienda frente a los 6,6 leídos en el Bild 1, el vibrómetro y su calibración, los límites de frecuencia y aceleración de un captador apoyado sin sujeción, y cuándo se mide en varios puntos o plantas a la vez" width="100%" />
+
+### Cómo se hace la medida
+
+Usa un vibrómetro conforme a la DIN 45669-1, con su comprobación de
+funcionamiento y su calibración a una frecuencia y amplitud de referencia. En el
+cimiento pon tres captadores juntos en la planta más baja, sobre el cimiento del
+muro exterior, sobre el muro o en un hueco de él, preferentemente en la cara
+orientada hacia la fuente y, sin sótano, a no más de 0,5 m sobre la rasante.
+Registra $z$ y dos direcciones horizontales perpendiculares entre sí, una
+paralela a una fachada y preferentemente con $x$ hacia la fuente; un edificio de
+gran superficie en planta pide varios puntos a la vez. No sirven los peldaños
+sueltos, las losas sueltas ni las superficies que suenan a hueco, y sobre
+superficie dura un captador apoyado sin sujeción solo vale hasta 100 Hz en
+vertical y 40 Hz en horizontal con picos de 3 m/s² o menos; si no, va pegado,
+atornillado o escayolado. En el plano de la última planta, $x$ e $y$ van en el
+muro exterior o junto a él; cuando proceda, en los forjados donde se espere más
+vibración, $z$ va aproximadamente en el centro del vano. En una tubería los
+captadores van sobre ella siempre que se pueda, descubierta solo en el punto de
+medida y con una horizontal a lo largo del eje; el terreno de encima sirve de
+sustituto cuando la fuente no está justo al lado de la tubería ni poco más abajo,
+y solo da una estimación, por lo general mayor. Registra el suceso entero o
+tramos representativos y, si se puede, juzga la vibración ajena comparando las
+lecturas con la fuente actuando y sin ella. Lee el pico de cada componente y su
+frecuencia, y levanta el acta del anexo A: cada punto, su dirección y su
+distancia a la fuente.
 
 ## 2. Vibración de corta duración, y por qué el valor sube con la frecuencia
 
@@ -283,9 +316,10 @@ en la norma y no modelados aquí.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**Ninguna cadena de medida.** Los requisitos de instrumentación de DIN 45669-1
-y -2, a los que remite el 5.4, no están implementados, y tampoco el acta de
-medida del anexo A.
+**La medida se describe, no se comprueba.** Dónde van los captadores, cómo se
+apoyan y qué lleva el acta son el 5.4, el anexo A y las partes de la DIN 45669
+a las que remite el 5.4, expuestos arriba para quien mide. Nada de eso está
+implementado aquí, y el instrumento tampoco.
 </ScopeClaim>
 </Scope>
 

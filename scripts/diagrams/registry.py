@@ -191,8 +191,13 @@ from .vibration import (
     _d_machine_vibration_positions,
     _d_mobility_rig,
     _d_multiple_shock,
+    _d_people_in_buildings,
     _d_power_injection_rig,
+    _d_railway_cross_section,
+    _d_railway_monitoring,
+    _d_structural_damage_points,
     _d_transfer_stiffness_rig,
+    _d_vibration_meter_coupling,
 )
 
 DIAGRAMS = {
@@ -665,6 +670,31 @@ DIAGRAMS = {
         _d_machine_vibration_positions,
         "Where machine vibration is measured (ISO 20816-1)",
         700,
+    ),
+    "diagram_structural_damage_points": (
+        _d_structural_damage_points,
+        "Where a building is measured for vibration damage (DIN 4150-3)",
+        850,
+    ),
+    "diagram_railway_monitoring": (
+        _d_railway_monitoring,
+        "How railway vibration is measured in a building (E DIN 4150-2)",
+        890,
+    ),
+    "diagram_people_in_buildings": (
+        _d_people_in_buildings,
+        "How vibration in a dwelling is measured and judged (DIN 4150-2)",
+        880,
+    ),
+    "diagram_vibration_meter_coupling": (
+        _d_vibration_meter_coupling,
+        "Where DIN 45669-2 puts the transducer, and how it is coupled",
+        836,
+    ),
+    "diagram_railway_cross_section": (
+        _d_railway_cross_section,
+        "Where vibration next to a railway is measured (DIN 45672-1, DIN 45672-2)",
+        960,
     ),
     "diagram_vibration_sound_power": (
         _d_vibration_sound_power,

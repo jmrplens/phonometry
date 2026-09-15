@@ -14,7 +14,7 @@ references:
     year: 2009
     title: "Schwingungsmessungen in der Umgebung von Schienenverkehrswegen — Teil 1: Messverfahren"
     designation: "DIN 45672-1:2009-12"
-    note: "Apartado 4.5: las velocidades de onda de las fórmulas (1) y (2), el coeficiente de Poisson de la fórmula (3), la deformación de cizalla de la fórmula (4) y los módulos de la fórmula (5), con las fórmulas (1) y (5) en la forma corregida que recoge el registro de erratas. El procedimiento de medida del resto de la norma no es aritmética y no está implementado."
+    note: "Apartado 4.5: las velocidades de onda de las fórmulas (1) y (2), el coeficiente de Poisson de la fórmula (3), la deformación de cizalla de la fórmula (4) y los módulos de la fórmula (5), con las fórmulas (1) y (5) en la forma corregida que recoge el registro de erratas. El procedimiento de medida del resto de la norma no es aritmética y no está implementado; las condiciones de medida del apartado 6, los estados de funcionamiento del apartado 7, la ejecución del apartado 8 y el informe del apartado 10 quedan recogidos en la sección de la medida."
   - type: standard
     organization: "Deutsches Institut für Normung"
     year: 2010
@@ -424,13 +424,52 @@ de cizalla de unos `10⁻⁴` y cayendo por debajo del 20 % de ese valor más al
 tráfico ferroviario, y las medidas que leen las velocidades, deforman el terreno
 en torno a `10⁻⁶`, así que el módulo que se mide es el que se aplica.
 
-## 8. Lo que esta página no es
+## 8. De dónde sale el registro
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_cross_section.svg" alt="Una sección perpendicular a una línea férrea. A la izquierda, un tren visto de frente sobre su vía a nivel del terreno, con el eje de la vía trazado a través de él, y a su lado una cruz de ejes: el eje x a lo largo de la vía, saliendo del papel, el eje y transversal a la vía y el eje z vertical. Sobre el terreno, hacia la derecha, hay captadores a 8, 16, 32, 64 y 128 metros del eje de la vía, cada uno con una flecha en la dirección vertical: el primero, en terreno inalterado si es posible, es el punto de emisión y los otros cuatro son puntos de transmisión, con la distancia duplicándose en cada paso. Más a la derecha, un edificio de dos plantas es la zona de inmisión, con un captador sobre el forjado que mide en vertical según z prima y otro al pie del muro que da a la vía, a ras de terreno, que mide perpendicular a él según y prima, puntos de inmisión sobre cimientos y forjados elegidos según la DIN 45669-2, la DIN 4150-2 y la DIN 4150-3. Debajo hay tres recuadros. En planta, tres secciones perpendiculares a la vía, en el centro de un tramo recto de ensayo de 100 a 200 metros cuando lo que se estudia es un tipo de vía, y un edificio girado un ángulo alfa con x prima a lo largo de su muro. Un terraplén y una trinchera llevan sus puntos a distancias en proyección de 8, 16 y 32 metros. Un túnel rectangular de dos vías tiene puntos en la solera en el centro de una vía y entre las dos vías, en la pared a 1,5 metros sobre el carril, en el centro del techo, en el terreno sobre él con el recubrimiento entre ambos, y en el terreno a un lado, a unos dos tercios del recubrimiento desde el eje de la vía y nunca a menos de 8 metros. Bajo los recuadros, un registro de treinta segundos de un paso lleva sus tres tramos: T3 sobre el suceso entero, T2 desde donde la amplitud llega a más o menos un cuarto de los máximos más frecuentes hasta donde vuelve a él, y T1 de unos cuatro segundos con los mayores valores hacia su centro. Dos recuadros al pie dan la longitud mínima de la vía de ensayo, l MG igual a l Z más r por v Z entre v R, y el valor de suceso, v E igual a v tilde 3 por la raíz cuadrada de T3 entre 3600 segundos. Dos notas cierran la lámina: un vibrómetro conforme a la DIN 45669-1 de 4 hercios a 315 hercios, con todos los puntos registrados a la vez si se puede, y un registro sin tren, en los mismos puntos y con la misma cadena, que muestre el fondo." width="100%" />
+
+La parte 1 es la otra mitad de la pareja: dice dónde van los captadores y qué
+tiene que ser un registro antes de que la parte 2 pueda reducirlo. La sección
+es el 6.1, perpendicular a la vía, y lleva el punto de emisión en el terreno a
+8 m del eje (6.2.1.2), los de transmisión al doble de distancia cada vez hasta
+128 m (6.2.2) y los de inmisión en el edificio que sitúan la DIN 45669-2, la
+DIN 4150-2 y la DIN 4150-3 (6.2.3). En el terreno las direcciones son las x, y
+y z del 6.4.1; en el edificio se giran alrededor de z para que x′ siga el muro
+exterior más próximo al eje de la vía, y la dirección que se prefiere es la
+normal a las superficies que delimitan el recinto (6.4.4).
+
+### Cómo se hace la medida
+
+Usa un vibrómetro conforme a la DIN 45669-1, verificado al menos cada tres
+años, que trabaje de 4 Hz a 315 Hz, o hasta 80 Hz si el resultado es para la
+DIN 4150-2, y pruébalo tras cada montaje. Traza una sección perpendicular a la
+vía: un punto de emisión en el terreno a 8 m del eje, en terreno inalterado si
+es posible, puntos de transmisión a 16 m, 32 m, 64 m y 128 m, y los de inmisión
+donde los sitúan las DIN 45669-2, DIN 4150-2 y DIN 4150-3. En terraplén o
+trinchera las distancias van en proyección; junto a un puente se miden desde la
+proyección del eje sobre el terreno, al lado de una pila, a 8 m, o a 16 m o
+32 m si el relleno es grande; en túnel, pon los puntos con preferencia en la
+solera, a 2 m o más de toda junta. Mide en tres direcciones, o solo en `z`
+sobre el terreno si bastan menos, y traza más de una sección para un tramo de
+línea. En carril y túnel, pega placas metálicas planas con adhesivo duro y
+aislante; en el terreno y en el edificio, acopla como dice la DIN 45669-2, y no
+dejes que la masa añadida pase de un décimo de la masa dinámica de lo medido.
+Registra varios pasos de cada clase de tren, todos los puntos a la vez si se
+puede, con la velocidad, cuando importa, determinada con una desviación máxima
+del 5 %, y descarta los trenes que frenan, aceleran o se cruzan, salvo que sea
+lo habitual. Registra también el fondo: mismos puntos, misma cadena, sin tren.
+El informe da posiciones, direcciones, vía, terreno, edificio y la evaluación
+según la DIN 45672-2.
+
+## 9. Lo que esta página no es
 
 La DIN 45672-1 es un método de medida: puntos de medida en el camino de la vía al
 edificio, direcciones, acoplamiento, los trenes que registrar y el informe que
-redactar. Nada de eso es aritmética y nada de eso está aquí, y el acoplamiento
-al que remite es la DIN 45669-2. Tampoco hay valoración ninguna: los números que
-produce esta página solo se comparan con algo en la DIN 4150-2 y la DIN 4150-3.
+redactar. Nada de eso es aritmética y la biblioteca no calcula nada de ello,
+pero ese procedimiento es lo que decide lo que vale un registro, así que queda
+resumido arriba; el acoplamiento al que remite es la DIN 45669-2. Tampoco hay
+valoración ninguna: los números que produce esta página solo se comparan con
+algo en la DIN 4150-2 y la DIN 4150-3.
 
 <Scope>
 
@@ -471,10 +510,11 @@ que calibrar.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**Ningún procedimiento de medida y ningún veredicto.** Los puntos de medida, las
-direcciones, el acoplamiento y la elección de trenes son la DIN 45672-1 y la
-DIN 45669-2; lo que significan los números para las personas y los edificios es
-la DIN 4150-2 y la DIN 4150-3.
+**No se comprueba ningún procedimiento de medida ni hay veredicto.** Los puntos
+de medida, las direcciones, el acoplamiento y la elección de trenes de la
+DIN 45672-1 y la DIN 45669-2 se resumen arriba, pero nada aquí los comprueba;
+lo que significan los números para las personas y los edificios es la
+DIN 4150-2 y la DIN 4150-3.
 </ScopeClaim>
 
 </Scope>

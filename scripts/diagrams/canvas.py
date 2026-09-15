@@ -94,8 +94,16 @@ DARK = Theme(
 #: the parts of a room and of a building element the building plates name
 #: (obj and air of EN 12354-6 Formulae 2 to 4, the wall/win mnemonics of
 #: its take-off inset, perp for the ⊥ of EN 12354-1 Annex E Formula E.3),
-#: the mid-frequency average of ANSI/ASA S12.2 Annex D (MF), and the
-#: Spanish twin the i18n table sets beside them (sup for upper).
+#: the mid-frequency average of ANSI/ASA S12.2 Annex D (MF), the KB
+#: indications of DIN 45669-1:2010-09, 3.10.1.2 to 3.10.1.5 (Fmax, FTm,
+#: where F abbreviates "Fast", the standard's own name for τ = 0,125 s, T
+#: the clock duration and m the averaging duration, so all three letters
+#: describe rather than stand for a quantity), the test track and the train
+#: of DIN 45672-1:2009-12, the note to 7.3.1 (MG for Messgleis, Z for Zug,
+#: both printed upright there), the train category the railway clause of
+#: E DIN 4150-2:2023-08, 6.5.3.2, groups the passages into (Zug, written
+#: out and printed upright in KBFTm,Zug, KBFmax,Zug, nZug and αZug), and
+#: the Spanish twin the i18n table sets beside them (sup for upper).
 #:
 #: The single letters come from holding every diagram against the prose,
 #: run by run, once the prose had settled which subscripts are descriptive:
@@ -104,7 +112,10 @@ DARK = Theme(
 #: w), the source and receiver geometry (s, r, m, h), the impact and
 #: coupling terms (C, D, E, F, G, K, L, P, R, T), the character penalties
 #: of RD 1367/2007 (f, t), the gate and ground times (g), the situation of
-#: ISO 12999-1 (situ) and the airborne descriptors (AF, Cpeak, sa).
+#: ISO 12999-1 (situ), the airborne descriptors (AF, Cpeak, sa) and the
+#: upper guide value of DIN 4150-2:1999-06, 6.2 (o for "oberer", the
+#: adjective the clause spells out beside the letter, as it does the
+#: "unterer" of the u already here).
 #:
 #: This set is keyed on the letter run alone and knows nothing of the
 #: symbol it belongs to, so a run is upright everywhere or nowhere. Nine
@@ -183,6 +194,11 @@ _ROMAN_SCRIPTS = frozenset(
         "Cpeak",
         "sa",
         "situ",
+        "Fmax",
+        "FTm",
+        "MG",
+        "Z",
+        "Zug",
         "C",
         "D",
         "E",
@@ -200,6 +216,7 @@ _ROMAN_SCRIPTS = frozenset(
         "h",
         "l",
         "m",
+        "o",
         "s",
         "t",
         "u",
@@ -210,14 +227,23 @@ _ROMAN_SCRIPTS = frozenset(
 #: Subscripts that are part quantity symbol and part word, letter by letter:
 #: ``"v"`` for the italic of a quantity, ``"u"`` for the upright of an
 #: abbreviation. :data:`_ROMAN_SCRIPTS` cannot express these, because it sets a
-#: whole run one way. The one member so far is the force exposure level of
-#: JIS A 1418-2, ``L_FE = 10 lg[(1/T_ref) int F(t)^2/F_0^2 dt]``: its F is the
+#: whole run one way. The two members so far are the force exposure level of
+#: JIS A 1418-2, ``L_FE = 10 lg[(1/T_ref) int F(t)^2/F_0^2 dt]``, whose F is the
 #: force the formula integrates, so it is italic like every other quantity in
-#: the corpus, while its E abbreviates "exposure" and is upright. Set roman
+#: the corpus, while its E abbreviates "exposure" and is upright -- set roman
 #: whole, as it was, the plate drew the same F upright that the figures and the
-#: library both draw italic.
+#: library both draw italic -- and the clock maxima of DIN 45669-1:2010-09,
+#: Formula (2), ``KB_FTi``, whose F and T describe the Fast time constant and
+#: the clock duration, as Fmax and FTm do above, while its i is the index that
+#: counts the clock intervals and stays italic, the one letter the note on
+#: :data:`_ROMAN_SCRIPTS` refuses to romanise anywhere. ``FTr``, the assessment
+#: vibration severity of DIN 4150-2:1999-06, 6.4.1, splits the same way: F and
+#: T describe as they do in FTi, while the r of "Beurteilung" is never expanded
+#: into a word and keeps the italic the two path lengths above hold it to.
 _MIXED_SCRIPTS: dict[str, str] = {
     "FE": "vu",
+    "FTi": "uuv",
+    "FTr": "uuv",
 }
 
 #: Script metrics of the ``$...$`` composer, as fractions of the font size:

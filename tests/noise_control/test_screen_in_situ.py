@@ -5,6 +5,14 @@ The standard prints eight pages, no worked example and one uncertainty number.
 The oracles are its printed thresholds, the boxed background formula of 5.7
 with its own window, the microphone geometry of 5.5.2 and the one thing it
 flatly forbids: an A-weighted attenuation obtained with an artificial source.
+
+The level pairs come from elsewhere, and the tests that use them say where.
+Four published worked examples print a level with the screen and a level
+without it, which is what clauses 5.8 and 5.9 subtract, and two more print the
+background correction of 5.7 at each end of its window. Their provenance, and
+the scope caveat each carries, is in the header of
+``scripts/conformance/domains/in_situ_measurement.py``, which pins the same
+numbers as conformance rows.
 """
 
 from __future__ import annotations
@@ -14,7 +22,7 @@ import math
 import numpy as np
 import pytest
 
-from phonometry import noise_control
+from phonometry import building, noise_control
 from phonometry.noise_control.screen_in_situ import (
     BACKGROUND_CORRECTION_WINDOW_DB,
     DIRECTIVITY_CIRCLE_RADIUS_M,
@@ -136,8 +144,9 @@ def test_the_directivity_index_is_the_mean_less_the_position() -> None:
 
 
 def test_the_directivity_index_needs_twelve_positions() -> None:
+    eleven_positions = np.full(11, 80.0)
     with pytest.raises(ValueError, match="12 positions"):
-        noise_control.directivity_index_db(np.full(11, 80.0))
+        noise_control.directivity_index_db(eleven_positions)
 
 
 def test_an_omnidirectional_source_has_no_directivity() -> None:
@@ -262,3 +271,187 @@ def test_a_band_centre_at_zero_is_refused() -> None:
 def test_a_non_positive_distance_is_refused() -> None:
     with pytest.raises(ValueError, match="distance_m"):
         noise_control.screen_attenuation([78.0], [70.0], distance_m=0.0)
+
+
+# ---------------------------------------------------------------------------
+# The level pairs the standard does not print itself
+# ---------------------------------------------------------------------------
+
+#: Barron (2003) Table 7-6, folio 316: the octave band centres of Example 7-9,
+#: in hertz, and the two rows printed under them, in decibels, without the
+#: barrier and with it. The case is a concrete barrier around an outdoor
+#: transformer station, which ISO 11821 sends to ISO 10847, so what it pins
+#: here is the subtraction of 5.8 and 5.9 and nothing about the method.
+BARRON_BANDS_HZ = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+BARRON_UNSCREENED_DB = [71.6, 75.6, 69.6, 65.6, 65.6, 59.6, 54.6, 48.6]
+BARRON_SCREENED_DB = [64.0, 66.3, 57.9, 51.2, 48.2, 39.2, 31.2, 24.4]
+
+#: IFA-LSA 01-234 (2020) Tab. 4.4, folio 17: the levels at the four positions
+#: of the worked example, in decibels, by octave band centre in hertz, from
+#: the nearest position outwards.
+IFA_LEVELS_DB = {
+    500: [79.2, 74.4, 70.2, 67.1],
+    1000: [81.9, 77.1, 73.0, 69.8],
+    2000: [80.4, 75.3, 71.0, 67.4],
+    4000: [84.3, 78.5, 73.2, 69.3],
+}
+
+
+def test_barrons_level_pair_gives_the_two_printed_band_reductions() -> None:
+    res = noise_control.screen_attenuation(
+        BARRON_UNSCREENED_DB,
+        BARRON_SCREENED_DB,
+        frequencies=BARRON_BANDS_HZ,
+        distance_m=20.0,
+    )
+    # Folio 317 works out two of the eight bands in prose: 71.6 - 64.0 at
+    # 63 Hz and 48.6 - 24.4 at 8000 Hz.
+    assert res.attenuation_db[0] == pytest.approx(7.6)
+    assert res.attenuation_db[-1] == pytest.approx(24.2)
+    # The other six are the difference of two printed rows and are printed
+    # nowhere, which is why they are asserted as a derivation, not as oracles.
+    assert res.attenuation_db.tolist() == pytest.approx(
+        [7.6, 9.3, 11.7, 14.4, 17.4, 20.4, 23.4, 24.2]
+    )
+
+
+def test_barrons_a_weighted_pair_gives_the_printed_reduction() -> None:
+    # Folio 315 prints 69.6 dBA without the barrier, folio 317 55.3 dBA with
+    # it and the 14.3 dBA between them.
+    res = noise_control.screen_attenuation(
+        BARRON_UNSCREENED_DB,
+        BARRON_SCREENED_DB,
+        frequencies=BARRON_BANDS_HZ,
+        source_kind="actual",
+        a_weighted_unscreened_level_db=69.6,
+        a_weighted_screened_level_db=55.3,
+        distance_m=20.0,
+    )
+    assert res.a_weighted_attenuation_db == pytest.approx(14.3)
+
+
+def test_the_indoor_worked_example_gives_its_printed_reduction() -> None:
+    # Barron (2003) Example 7-10, folios 319 to 321: a machine screened from
+    # its operator, 92.3 dB down to 84.0 dB in the 1000 Hz octave. The screen
+    # stands 1.00 m from the machine and the operator 3.00 m from it, so the
+    # position is 2 m from the screen.
+    res = noise_control.screen_attenuation(
+        [92.3], [84.0], frequencies=[1000.0], distance_m=2.0
+    )
+    assert res.attenuation_db[0] == pytest.approx(8.3)
+
+
+def test_the_office_screen_example_rounds_to_the_printed_integers() -> None:
+    # Hansen (2005) Example 6.23, folios 317 and 318: the total level at the
+    # receiver with the screen out and in, over the three bands that matter.
+    res = noise_control.screen_attenuation(
+        [48.8, 55.1, 52.9],
+        [39.0, 39.9, 33.3],
+        frequencies=[500.0, 1000.0, 2000.0],
+        distance_m=2.0,
+    )
+    assert res.attenuation_db.tolist() == pytest.approx([9.8, 15.2, 19.6])
+    # Clause 7.4 c) reports D_p rounded to the nearest integer, which is the
+    # "Reduction due to barrier 10 15 20" row of folio 318. The library
+    # returns the raw difference, so the rounding is the caller's.
+    assert np.round(res.attenuation_db).tolist() == [10.0, 15.0, 20.0]
+
+
+def test_the_single_path_levels_of_the_1991_example_subtract() -> None:
+    # Sound Research Laboratories (1991), folio 177: 80 dB without the screen,
+    # 65, 70 and 62 dB by each surviving path, and 71 dB for the three
+    # together. That 71 dB is the book's decibel-addition rule of thumb and
+    # not the energy sum, which is 71.687 dB and would give 8.3 dB.
+    res = noise_control.screen_attenuation(
+        [80.0, 80.0, 80.0, 80.0], [71.0, 65.0, 70.0, 62.0]
+    )
+    assert res.attenuation_db.tolist() == pytest.approx([9.0, 15.0, 10.0, 18.0])
+
+
+def test_the_ifa_worked_example_differences_are_the_printed_ones() -> None:
+    # IFA-LSA 01-234 (2020) Tab. 4.5, folio 18, read against the levels of
+    # Tab. 4.4 on folio 17. A test sound source, so 5.9 forbids D_pA.
+    bands = [float(band) for band in IFA_LEVELS_DB]
+    # Keyed by the nearer of the two positions: 0 is the "Lp1 - Lp2" row of
+    # Tab. 4.5 and 2 the "Lp3 - Lp4" one. The row between them is the next
+    # test, because the table misprints one of its cells.
+    printed = {0: [4.8, 4.8, 5.1, 5.8], 2: [3.1, 3.2, 3.6, 3.9]}
+    for step, values in printed.items():
+        res = noise_control.screen_attenuation(
+            [IFA_LEVELS_DB[band][step] for band in IFA_LEVELS_DB],
+            [IFA_LEVELS_DB[band][step + 1] for band in IFA_LEVELS_DB],
+            frequencies=bands,
+            source_kind="artificial",
+        )
+        assert res.attenuation_db.tolist() == pytest.approx(values, abs=5e-14)
+
+
+def test_the_ifa_table_misprints_one_of_its_twelve_differences() -> None:
+    # Tab. 4.5 prints 4,7 dB for Lp2 - Lp3 at 2000 Hz. Its own Tab. 4.4 gives
+    # 75,3 dB and 71,0 dB there, so the difference is 4,3 dB. The other eleven
+    # cells of the table agree with the levels; this one does not.
+    res = noise_control.screen_attenuation(
+        [IFA_LEVELS_DB[band][1] for band in IFA_LEVELS_DB],
+        [IFA_LEVELS_DB[band][2] for band in IFA_LEVELS_DB],
+        frequencies=[float(band) for band in IFA_LEVELS_DB],
+        source_kind="artificial",
+    )
+    assert res.attenuation_db.tolist() == pytest.approx([4.2, 4.1, 4.3, 5.3])
+    assert res.attenuation_db[2] != pytest.approx(4.7)
+
+
+def test_the_background_correction_matches_a_printed_worked_example() -> None:
+    # Barron (2003) Example 3-6, folio 73: a fan read at 83 dB over a 77 dB
+    # background, corrected to 81.7 dB. A 6 dB margin, the lower edge of the
+    # window of 5.7, so the clause corrects rather than refusing.
+    corrected = noise_control.background_corrected_level_db([83.0], [77.0])
+    assert corrected[0] == pytest.approx(81.7, abs=0.05)
+    assert 83.0 - corrected[0] == pytest.approx(1.3, abs=0.05)
+
+
+def test_the_printed_correction_table_holds_across_the_window() -> None:
+    # Barron (2003) Table 3-4, folio 72, the rows inside the 6 dB to 10 dB
+    # window of 5.7. The table prints to 0.1 dB, so that is what reproducing
+    # it means.
+    printed = {6.0: 1.3, 6.5: 1.1, 7.0: 1.0, 7.5: 0.9, 8.0: 0.7, 9.0: 0.6, 10.0: 0.5}
+    for margin, correction in printed.items():
+        corrected = noise_control.background_corrected_level_db([83.0], [83.0 - margin])
+        assert round(83.0 - float(corrected[0]), 1) == pytest.approx(correction)
+
+
+def test_the_upper_edge_of_the_window_is_still_corrected() -> None:
+    # Hansen (2005) Example 3.25, folio 147: 90 dB over an 80 dB background
+    # corrects to 89.5 dB, and 86.6 dB over the same background to 85.5 dB.
+    # The first margin is exactly 10 dB, so this pins the edge itself: 5.7
+    # drops the correction past 10 dB, not at it.
+    corrected = noise_control.background_corrected_level_db([90.0, 86.6], [80.0, 80.0])
+    assert corrected[0] == pytest.approx(89.5, abs=0.05)
+    assert corrected[1] == pytest.approx(85.5, abs=0.05)
+    assert noise_control.background_corrected_level_db([90.1], [80.0])[
+        0
+    ] == pytest.approx(90.1)
+
+
+def test_the_six_decibel_correction_is_the_one_two_standards_print() -> None:
+    # ISO 140-3:1995 6.5 (folio 7) and ISO 3744:2010 8.2.3 (folio 23) both
+    # print 1,3 dB for a 6 dB margin, from the same energy subtraction 5.7
+    # boxes. Neither reads the margin as 5.7 does: both apply the value as a
+    # floor below 6 dB, where ISO 11821 refuses the measurement instead.
+    corrected = noise_control.background_corrected_level_db([70.0], [64.0])
+    assert 70.0 - corrected[0] == pytest.approx(1.3, abs=0.05)
+    with pytest.raises(ValueError, match="unacceptable"):
+        noise_control.background_corrected_level_db([70.0], [64.5])
+
+
+def test_the_logarithmic_mean_under_the_directivity_index_is_printed() -> None:
+    # Barron (2003) Table 3-2 and Example 3-5, folios 61, 68 and 69: ten levels
+    # measured around a motor, whose energy mean is printed as 80.6 dB, and
+    # the ring of three at 41.4 degrees, printed as 81.8 dB. Definition 3.10
+    # reads twelve positions on a horizontal circle, so directivity_index_db
+    # refuses this set; the mean it takes internally is reached here through
+    # the entry point that publishes one.
+    levels = [86.0, 81.5, 82.4, 81.3, 70.9, 72.9, 68.0, 79.3, 78.5, 80.1]
+    assert building.energy_average_level(levels) == pytest.approx(80.6, abs=0.05)
+    assert building.energy_average_level(levels[1:4]) == pytest.approx(81.8, abs=0.05)
+    with pytest.raises(ValueError, match="12 positions"):
+        noise_control.directivity_index_db(levels)

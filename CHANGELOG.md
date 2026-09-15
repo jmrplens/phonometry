@@ -143,9 +143,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   than repeat it.
 
 - `emission.ROOM_ABSORPTION_ESTIMATES` is the table of approximate mean
-  absorption coefficients that ISO 3744 Table F.1, ISO 3746, ISO 11202 and
-  Table C.2 of ISO 11546-2 all print, from 0,05 for an empty room with hard
-  walls to 0,5 for a room with a highly absorptive ceiling and floor.
+  absorption coefficients of Table C.2 of ISO 11546-2, from 0,05 for an empty
+  room with hard walls to 0,5 for a room with large amounts of sound-absorbing
+  material on ceiling and walls.
 
 - Ten errata entries for the three standards, all read from the page as
   printed: a column of Table C.1 of ISO 11546-2 headed with a standard that
@@ -154,6 +154,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a ratio, and, in ISO 11957, a low-frequency clearance that relaxes the rule
   above it and a diffuser distance that restates the wall distance, plus three
   misprints inside normative sentences.
+
+- **Numeric oracles for the nine in situ standards.** Seven of the nine print
+  no worked example of their own, so the conformance report anchored them in
+  closed form: an identity the clause implies, or a limit where the equation
+  collapses to something known. That says the arithmetic is self-consistent and
+  nothing about whether the clause was read right. A hundred new rows change
+  that, nearly all of them a value printed by somebody else, read on the page
+  and recomputed from the inputs printed beside it. The exceptions say so: the
+  air-absorption correction of EN 16487 is printed nowhere, so its two rows
+  check the cap the clause prints and the verdict it reaches against it, and
+  hold no value of the correction itself.
+
+  The enclosure and cabin pair now runs on a machine enclosure worked through
+  in Barron (2003), on the seventeen environmental corrections an NPL
+  round-robin published in 1996, on a BAuA workroom study of 2024, and on three
+  accredited laboratory reports of real acoustic booths. The silencer, screen
+  and barrier trio runs on a Spanish master's thesis that measured three
+  silencers over sixty-three bands, on four published barrier campaigns
+  including the one the FHWA works through in its own manual, and on a German
+  guidance sheet that prints four levels at four distances. The two workroom
+  standards keep the annex of ISO 14257 and gain three witnesses that never
+  cite it, a Swiss national-institute guide, a DGUV data sheet and a BAuA
+  research report, plus Annex B of ISO 11690-3, which prints a workroom twice
+  over and had not been used.
+
+  EN 16487 gets a conformance section of its own, `Suspended ceilings in a
+  reverberation room`. It is a test code, so what it fixes is the arrangement
+  rather than a calculation, and the chain its air-absorption correction hangs
+  off is anchored where it can be: on Table 1 of ISO 9613-1, on the conversion
+  factor EN ISO 354 prints, and on a second published table of the same
+  attenuation constant. Three real suspended-ceiling test reports supply
+  arrangements and room climates nobody here chose. The three older EN 16487
+  rows are retired: one of them asserted an algebraic identity that holds for
+  any two numbers, and another fed the module invented attenuations and then
+  recomputed its own formula.
+
+  Four errata entries came out of it, all read on the printed page. ISO 11820
+  prints its temperature field correction with the ratio upside down, and says
+  why in the sentence beneath it: it counts the change in the speed of sound
+  and forgets that the density falls with temperature, so a silencer measured
+  across a temperature step comes out twice the correction low. Tables C.11 and
+  C.12 of ISO 14257 are not an Equation (8) result and cannot be got out of it
+  for any decay rate; they are readings of the measurement at a microphone
+  position, one of them with a logarithm entered as a round 30. Equation (4) of
+  the same standard rounds a constant its own Table 1 sums to exactly. And
+  Annex B of ISO 11690-3 gives its two workstations each other's positions:
+  recomputing the annex returns both printed levels, each against the other
+  label.
 
 ### Changed
 
@@ -172,6 +220,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   404 files.
 
 ### Fixed
+
+- One room description of `ROOM_ABSORPTION_ESTIMATES` was transcribed short.
+  Table C.2 of ISO 11546-2 closes its 0,25 row with a worked example of what it
+  means, "(e.g. partially absorptive ceiling)", and the table arrived in the
+  tree without it. Nothing caught it because nothing looked: the test compared
+  the seven keys and one substring, and the conformance row counted the
+  descriptions that were not empty, which any string satisfies. Both now
+  compare the text, and the sweep that found this one found no other.
+
+  The citation above the table was wrong on three counts and is rewritten. The
+  seven rows are ISO 11546-2:1995 Table C.2 and no other table: ISO 3744:2010
+  and ISO 3746:2010 print eight rows under the same title, adding one for a
+  room with an absorbing ceiling and bare walls and rewording two of the seven,
+  and ISO 11202:2010 prints no such table at all. Table F.1 of ISO 3744:2010,
+  which the comment named, is a list of microphone coordinates. The same claim
+  was published in the guide in both languages and is corrected there too,
+  along with a 0,5 row described as an absorbing ceiling and floor where the
+  printed row says ceiling and walls.
+
+- The conformance report cut six citations in two. The reference parser
+  accepted any split that rebuilt the string, so "Poiseuille limit (Stinson
+  1991)" was filed as a document named "Poiseuille limit (Stinson" of edition
+  "1991)", and a trailing comma stayed on the name of a Spanish handbook. The
+  conformance page prints that name as the leading text of each row. A split
+  that leaves a parenthesis open, or ends the name on a comma or a conjunction,
+  is now refused, and the six fall back to the whole citation or to the split
+  that does not cut them.
+  Books and reports cited by author and year, which that form files as
+  articles, are named in a table of their own, and an FHWA report number is
+  typed as the report it is.
+
+- `_reduce` in the building ratings cited "an ISO 80000-1 footnote" for
+  rounding half up. Annex B of ISO 80000-1:2009 is normative, not a footnote,
+  and half up is its Rule B, which selects the multiple greater in magnitude:
+  it prints -12,25 as -12,3, where `floor(x + 0.5)` gives -12,2. The ratings
+  this serves are positive in practice, so no published number moves, but the
+  docstring now names the annex and says where the two part company.
 
 - The Spanish pages called three different objects *bafle*, and the word is
   right for none of them. A vocabulary settles the radiating sense: UNE

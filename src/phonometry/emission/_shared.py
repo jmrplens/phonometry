@@ -320,13 +320,21 @@ def _background_exposure(
     return np.asarray(bg + 10.0 * np.log10(t / _T0), dtype=np.float64)
 
 
-#: Approximate mean sound absorption coefficient of a room by description,
-#: the table ISO 3744:2010 Table F.1, ISO 3746:2010 Table A.1,
-#: ISO 11202:2010 and ISO 11546-2:1995 Table C.2 all print with the same
-#: seven rows. It answers the question those annexes ask first: what is
-#: ``alpha`` in this room, when nobody measured it. The keys are the
-#: coefficients themselves, so a caller reads the value it needs and the
-#: description says what it stands for.
+#: Approximate mean sound absorption coefficient of a room by description, the
+#: seven rows of ISO 11546-2:1995 Table C.2, Annex C, printed folio 13.
+#: It answers the question that annex asks first: what is ``alpha`` in this
+#: room, when nobody measured it. The keys are the coefficients themselves, so
+#: a caller reads the value it needs and the description says what it stands
+#: for.
+#:
+#: The 2010 editions of the sound power standards print a different table under
+#: the same title, and it is not this one: ISO 3744:2010 Table A.1 (printed
+#: folio 36) and ISO 3746:2010 Table A.1 (printed folio 24) have eight rows,
+#: adding 0,30 for a room with an absorbing ceiling and bare walls, and they
+#: reword two of the seven kept here, saying "right cuboid" where ISO 11546-2
+#: says "rectangular" and "on part of ceiling or walls" where it says "with a
+#: small amount of sound-absorbing material on ceiling or walls". ISO 11202:2010
+#: prints no such table at all; its Annex A refers ``alpha`` out to ISO 3746.
 ROOM_ABSORPTION_ESTIMATES: dict[float, str] = {
     0.05: (
         "Nearly empty room with smooth hard walls made of concrete, brick, "
@@ -340,7 +348,8 @@ ROOM_ABSORPTION_ESTIMATES: dict[float, str] = {
     ),
     0.25: (
         "Room with upholstered furniture; machinery or industrial room with a "
-        "small amount of sound-absorbing material on ceiling or walls"
+        "small amount of sound-absorbing material on ceiling or walls "
+        "(e.g. partially absorptive ceiling)"
     ),
     0.35: "Room with sound-absorbing materials on both ceiling and walls",
     0.5: "Room with large amounts of sound-absorbing materials on ceiling and walls",

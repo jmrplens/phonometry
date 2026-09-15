@@ -124,9 +124,13 @@ which asks 6,6 rather than 45,6, and the answer that comes back from it is an
 A-weighted value with no spectrum behind it. Reading Table 1 after Annex C is
 how those two facts stay together. Where nobody measured the absorption, Table
 C.2 gives seven room descriptions and their coefficients, from 0,05 for an
-empty room with smooth hard walls to 0,5 for a room with a highly absorptive
-ceiling and floor; they are `ROOM_ABSORPTION_ESTIMATES`, the same seven rows
-ISO 3744 prints in its own Table F.1.
+empty room with smooth hard walls to 0,5 for a room with large amounts of
+sound-absorbing material on ceiling and walls; they are
+`ROOM_ABSORPTION_ESTIMATES`, transcribed from that table and from no other. The
+2010 editions of the sound power standards print a longer table under the same
+title: Table A.1 of ISO 3744:2010 and of ISO 3746:2010 has eight rows, adding
+0,30 for a room with an absorbing ceiling and bare walls, and words two of the
+seven differently.
 
 ## The cabin is the inverse problem
 

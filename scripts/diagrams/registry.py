@@ -17,6 +17,7 @@ from pathlib import Path
 from .aircraft import (
     _d_aircraft_certification,
     _d_aircraft_noise_station,
+    _d_anp_records,
     _d_doc29_segment_geometry,
     _d_rotorcraft_certification,
     _d_rotorcraft_hemisphere,
@@ -857,6 +858,11 @@ DIAGRAMS = {
         _d_doc29_segment_geometry,
         "Flight-path segment geometry (ECAC Doc 29, Chapter 4)",
         710,
+    ),
+    "diagram_anp_records": (
+        _d_anp_records,
+        "From an ANP aircraft record to an event level (ECAC Doc 29)",
+        866,
     ),
     "diagram_rotorcraft_hemisphere": (
         _d_rotorcraft_hemisphere,

@@ -586,6 +586,20 @@ acquisition either (the 0.1 m to 0.3 m measurement distance, the 0.1 m/s to
 test, the 10 dB background margin); so a single scan will produce a number
 just as readily as a qualified pair.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation.svg" alt="Section through a laboratory suite: the source room with a loudspeaker clear of the walls and five microphone positions for Lp1, the specimen flush in the test opening, and on the receiving side a box-shaped measurement surface at distance d whose front is split into three subareas and whose four sides are subareas too, with the p-p probe normal to it, intensity leaving through one subarea and flowing back through another. Below, the two scans turned 90 degrees with their 1.0 dB agreement, a corner panel for ISO 15186-3, and a box with the intensity sound reduction index and the pressure-intensity indicator limits" width="100%"></picture>
+
+**How the measurement goes.** The probe and analyser meet IEC 61043 class 1,
+are checked on the residual-intensity testing device before each use, and need a
+pressure-residual intensity index more than 10 dB above the $F_{pI}$ the scan
+gives. Take $L_{p1}$ in the source room as ISO 140-3 asks. On the receiving
+side, scan a surface that encloses the specimen, the flat opening of a niche at
+least 0.1 m deep or else a box, at 0.1 m to 0.3 m, with the probe normal to it
+and reading outwards, in lines one measurement distance apart at a constant
+0.1 m/s to 0.3 m/s. Scan again with the path turned 90°: the mean stands only if
+the two differ by less than 1.0 dB in every band and $F_{pI}$ stays at 10 dB or
+less, 6 dB for an absorbing receiving face. Both levels have to clear the
+background by 10 dB.
+
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -2174,6 +2188,19 @@ background-noise clause; ISO 16283-2 says it a second time inside Formula
 bands may come from three different corners, "each band can require an
 individual correction to the signal level for background noise" (the NOTE
 under Part 1 Clause 9.1, printed word for word in Part 2 Clause 9.1).
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_low_frequency_corners_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_low_frequency_corners.svg" alt="Plan, section and one corner close up of a 23 m³ receiving room: the central zone with five default positions, four corner microphones, two at floor and two at ceiling level, 0.3 m to 0.4 m from each surface, and the 63 Hz band carried from the corner readings through Formulae (12) and (13)" width="100%"></picture>
+
+**How the measurement goes.** Take the volume to the nearest cubic metre;
+under 25 m³ the corners are measured on top of the central zone, not instead
+of it. Put the microphone in at least four corners, preferably two at floor
+level and two at ceiling level, 0.3 m to 0.4 m from each surface, for at least
+15 s each, and repeat the set at each position of a single loudspeaker or of
+the tapping machine. Measure the background in every corner used, subtract it
+where it is between 6 dB and 10 dB down, and where it is 6 dB or less apply
+the 1.3 dB correction and report the band as a limit of measurement. Measure
+one reverberation time in the 63 Hz octave band for all three bands, and say
+in the report where the procedure was used.
 
 ## Combining the two (Formula (13))
 

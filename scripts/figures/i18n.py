@@ -1982,14 +1982,14 @@ _ES_EXACT = {
     "measured spectrum": "espectro medido",
     "reference curve, as shifted": "curva de referencia, ya desplazada",
     # ("unfavourable deviations" is already in this table, further down.)
-    "Normalized impact level $L\u2032_{\\mathrm{n}T}$ [dB]": "Nivel de impactos normalizado $L\u2032_{\\mathrm{n}T}$ [dB]",
+    "Normalized impact level $L_\\mathrm{n}$ [dB]": "Nivel de impactos normalizado $L_\\mathrm{n}$ [dB]",
     "over the cap: shift again": "pasa del límite: desplazar otra vez",
     "largest sum still under the cap": "la mayor suma bajo el límite",
     "legal, but the sum is smaller:": "válido, pero la suma es menor:",
     "this is one step too far": "esto es un paso de más",
     # Symbols only: reads the same in Spanish.
     r"$R_\mathrm{w}$": r"$R_\mathrm{w}$",
-    "$L\u2032_{\\mathrm{n}T,\\mathrm{w}}$": "$L\u2032_{\\mathrm{n}T,\\mathrm{w}}$",
+    "$L_{\\mathrm{n},\\mathrm{w}}$": "$L_{\\mathrm{n},\\mathrm{w}}$",
     # --- anim_block_vs_exponential: the alignment the block detector needs ---
     "One burst, two detectors, and the block grid underneath": "Una ráfaga, dos detectores y la rejilla de bloques debajo",
     "Sound pressure": "Presión acústica",

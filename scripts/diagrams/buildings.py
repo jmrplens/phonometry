@@ -3,7 +3,8 @@
 
 One subject: sound between and inside the rooms of a building. The
 insulation diagrams draw the field and laboratory measurements that grade a
-separating element, the room diagrams draw what is measured or predicted
+separating element and the rating that reduces what they measure to one
+number, the room diagrams draw what is measured or predicted
 inside one enclosure, and the design diagrams draw the prediction models that
 put the two together before anything is built.
 """
@@ -16,6 +17,8 @@ from typing import TYPE_CHECKING
 from .parts import _accel, _accel_wall, _rot_arrow, _spring_v
 
 if TYPE_CHECKING:
+    from collections.abc import Sequence
+
     from .canvas import SVG, Theme
 
 #: Width, in px, a stage-box title has to leave inside the box at the larger
@@ -1851,6 +1854,252 @@ def _d_insulation_lab(s: SVG, th: Theme) -> None:
         (564.0, "Continuously moving microphone: sweep radius ≥ 1 m, traverse ≥ 15 s"),
     ):
         s.text(80, y, txt, 15, th.fg, anchor="start")
+
+
+# ---------------------------------------------------------------------------
+# Sound insulation by intensity (ISO 15186)
+# ---------------------------------------------------------------------------
+
+
+def _d_intensity_insulation(s: SVG, th: Theme) -> None:
+    """The ISO 15186 measurement: a room average, an enclosing surface, two scans.
+
+    The section is Part 1: the source room driven and averaged as ISO 140-3
+    asks (6.2 and 6.3), the specimen in its test opening with any absorbing
+    side towards the source (5.3), and on the receiving side the box-shaped
+    measurement surface of 6.4.1 at the distance d, its front split into
+    subareas. The probe is held normal and reads outwards (6.4.3), Formula
+    (11) energy-averages the subareas, and a subarea whose net flow points
+    back at the specimen enters it with a minus sign (6.4.6). The specimen is
+    drawn flush with the receiving face of the wall, so the box sides are as
+    deep as d and the 4,0 m by 2,5 m opening gives S_m = 10 + 13 x 0,2 =
+    12,6 m2; the stand-off itself is drawn at 36 px rather than at the
+    section's 88 px/m, and the loudspeaker and the five microphone positions
+    keep the ISO 140-3 clearances at that scale (0,7 m from the boundaries,
+    1,0 m from the source and from the specimen).
+
+    The left panel is the pair of scans of 6.4.5 and Figure 1. The right one is
+    Part 3: the level read on the specimen (6.3), the absorbing back wall of
+    its 5.1, the 2,0 dB and 1,0 dB agreement of its 6.4.5 and the NOTE under
+    its Formula (7), which is about an absorbing face of the specimen in the
+    source room and not about that back wall. The box carries Formula (7) and
+    the 6.4.2 limits of Formula (10); the last note is the plane of
+    ISO 15186-2 6.5.2 and both branches of its Equation (15).
+    """
+    ceil, floor = 100.0, 410.0
+    wall_x, wall_w = 330.0, 36.0
+    spec_top, spec_bot = 160.0, 380.0  # 2,5 m at 88 px/m
+    face = wall_x + wall_w  # receiving face of the specimen, flush with the wall
+    surf = 402.0  # front of the measurement box, d drawn at 36 px
+
+    s.text(150, 84, "source room", 14, th.fg, bold=True)
+    s.text(356, 84, "the specimen, $S$ = 10 m²", 14, th.secondary, bold=True)
+    s.line(356, 90, 356, spec_top - 4, th.muted, 1.0, dash="3,3")
+    s.text(618, 84, "receiving room", 14, th.fg, bold=True)
+
+    # The suite in section: floor, ceiling, the two end walls.
+    s.ground(floor, 30, 870)
+    s.line(30, ceil, 870, ceil, th.fg, 2.2)
+    s.line(30, ceil, 30, floor, th.fg, 2.2)
+    s.line(870, ceil, 870, floor, th.fg, 2.2)
+
+    # The separating wall and the specimen in its opening.
+    s.rect(wall_x, ceil, wall_w, spec_top - ceil, th.panel, th.fg, sw=2.0)
+    s.rect(wall_x, spec_bot, wall_w, floor - spec_bot, th.panel, th.fg, sw=2.0)
+    s.rect(face - 14, spec_top, 14, spec_bot - spec_top, th.panel, th.secondary, sw=2.4)
+    for hy in range(int(spec_top) + 12, int(spec_bot) - 8, 14):
+        s.line(face - 12, hy + 8, face - 2, hy - 2, th.secondary, 1.0)
+
+    # The source room: a loudspeaker clear of the boundaries, five positions.
+    lsx, lsy = 94.0, 340.0
+    for r in (36, 58, 80):
+        s.path(
+            f"M {lsx + r * 0.22:.1f} {lsy - r:.1f} "
+            f"A {r} {r} 0 0 1 {lsx + r:.1f} {lsy - r * 0.22:.1f}",
+            stroke=th.accent,
+            sw=1.5,
+        )
+    s.line(94, 372, 94, floor, th.fg, 2.0)
+    s.line(78, floor, 110, floor, th.fg, 2.2)
+    s.rect(70, 318, 48, 54, th.panel, th.primary, rx=6, sw=2.0)
+    s.circle(94, 336, 11, th.primary)
+    s.circle(94, 336, 4.5, th.bg)
+    s.circle(94, 360, 6, th.primary)
+    for mx, my in ((120, 190), (230, 176), (250, 270), (160, 240), (196, 340)):
+        s.circle(mx, my, 6.5, th.secondary)
+        s.circle(mx, my, 2.2, th.bg)
+    s.text(180, 128, "$L_{p1}$, averaged over the room", 13, th.secondary)
+
+    # The measurement surface: a box whose sides run back to the wall.
+    s.path(
+        f"M {face} {spec_top} L {surf} {spec_top} "
+        f"L {surf} {spec_bot} L {face} {spec_bot}",
+        stroke=th.primary,
+        sw=2.2,
+        dash="7,5",
+    )
+    for ty in (233.0, 307.0):
+        s.line(surf - 6, ty, surf + 6, ty, th.primary, 2.0)
+    for ly, lab in ((226, "$S_{m1}$"), (300, "$S_{m2}$"), (374, "$S_{m3}$")):
+        s.text(416, ly, lab, 13, th.primary, anchor="start")
+    s.dim(face, 270, surf, 270, "$d$", size=13)
+
+    # The probe on subarea 1, the outward flow on 2, the flow back on 3.
+    s.line(399, 190, 405, 190, th.muted, 2.0)
+    s.circle(394, 190, 5, th.fg)
+    s.circle(410, 190, 5, th.fg)
+    s.line(410, 190, 452, 170, th.fg, 2.2)
+    s.arrow(surf + 2, 258, 462, 258, th.secondary, 2.0)
+    s.arrow(surf + 2, 280, 462, 280, th.secondary, 2.0)
+    s.arrow(462, 340, surf + 6, 340, th.accent, 2.0)
+    for y, txt, size, col in (
+        (184, "p-p probe held normal to $S_m$", 13, th.fg),
+        (202, "positive intensity outwards (6.4.3)", 12, th.muted),
+        (266, "intensity leaving the specimen counts plus", 13, th.secondary),
+        (284, "$L_{In}$ energy-averaged over the subareas (11)", 12, th.muted),
+        (338, "net flow back towards the specimen", 13, th.accent),
+        (356, "(11) takes that $S_{m3}$ with a minus sign (6.4.6)", 12, th.muted),
+    ):
+        s.text(480, y, txt, size, col, anchor="start")
+    s.text(618, 124, "a 4.0 m × 2.5 m opening at $d$ = 0.2 m:", 12, th.muted)
+    s.text(618, 142, "$S_m$ = 10 m² + 13 m × 0.2 m = 12.6 m²", 13, th.primary)
+    s.text(618, 160, "the four sides are subareas too (12)", 12, th.muted)
+    s.text(
+        420,
+        396,
+        "$d$ = 0.1 m to 0.3 m; the box sides run back to the wall (6.4.1)",
+        12,
+        th.fg,
+        anchor="start",
+    )
+
+    s.text(94, 434, "loudspeaker", 12, th.muted)
+    s.text(356, 434, "an absorbing side faces the source room (5.3)", 12, th.muted)
+    s.text(
+        30,
+        454,
+        "sound field and $L_{p1}$ as ISO 140-3 sets them (6.2, 6.3)",
+        12,
+        th.muted,
+        anchor="start",
+    )
+    s.text(
+        870,
+        454,
+        "$L_p$ read on the same surface, at once if possible (6.4.2)",
+        12,
+        th.muted,
+        anchor="end",
+    )
+
+    # The two scans of 6.4.5, drawn as Figure 1 draws them.
+    s.rect(30, 474, 470, 250, th.panel, th.muted, rx=10, sw=1.6)
+    head = "Two complete scans, the path turned 90° (6.4.5)"
+    size = s.fit_size([head], (14, 13), 446, bold=True)
+    s.text(265, 498, head, size, th.fg, bold=True)
+    s.rect(50, 514, 86, 86, th.bg, th.fg, sw=1.4)
+    s.rect(166, 514, 86, 86, th.bg, th.fg, sw=1.4)
+    vertical = [
+        ((x, 592), (x, 522)) if k % 2 == 0 else ((x, 522), (x, 592))
+        for k, x in enumerate((58, 72, 86, 100, 114, 128))
+    ]
+    horizontal = [
+        ((174, y), (244, y)) if k % 2 == 0 else ((244, y), (174, y))
+        for k, y in enumerate((522, 536, 550, 564, 578, 592))
+    ]
+    for runs in (vertical, horizontal):
+        pts = [p for run in runs for p in run]
+        s.path(
+            "M " + " L ".join(f"{x} {y}" for x, y in pts[:-1]),
+            stroke=th.accent,
+            sw=1.8,
+        )
+        s.arrow(*pts[-2], *pts[-1], th.accent, 1.8)
+    s.text(151, 562, "90°", 13, th.muted)
+    s.text(93, 618, "scan 1", 12, th.fg)
+    s.text(209, 618, "scan 2", 12, th.fg)
+    s.text(150, 644, "a pair per loudspeaker position", 12, th.muted)
+    s.text(150, 664, "or points held ≥ 10 s (6.4.4)", 12, th.muted)
+    for y, txt, size, col, bold in (
+        (530, "lines $d$ apart, turn at each edge", 12, th.fg, False),
+        (550, "speed: steady, 0.1 m/s to 0.3 m/s", 12, th.fg, False),
+        (570, "time per subarea follows its area", 12, th.fg, False),
+        (590, "stop only between subareas", 12, th.fg, False),
+        (622, "under 1.0 dB in every band:", 13, th.primary, True),
+        (642, "keep the mean of the two scans", 12, th.primary, False),
+        (664, "if not, repeat; then change the", 12, th.muted, False),
+        (684, "line density, the surface or", 12, th.muted, False),
+        (704, "the environment", 12, th.muted, False),
+    ):
+        s.text(268, y, txt, size, col, anchor="start", bold=bold)
+
+    # ISO 15186-3: the level on the specimen, and what changes below 100 Hz.
+    s.rect(516, 474, 354, 250, th.panel, th.muted, rx=10, sw=1.6)
+    s.text(693, 498, "ISO 15186-3: 50 Hz to 160 Hz", 14, th.fg, bold=True)
+    s.rect(684, 508, 10, 68, th.panel, th.secondary, sw=2.0)
+    for my in (512, 524, 535, 548, 561, 573):
+        s.circle(676, my, 3.5, th.secondary)
+    s.text(666, 536, "$L_{pS}$", 13, th.secondary, anchor="end", bold=True)
+    s.text(666, 556, "< 50 mm", 12, th.fg, anchor="end")
+    s.line(720, 504, 720, 580, th.primary, 1.8, dash="6,4")
+    s.circle(716, 542, 3.5, th.fg)
+    s.circle(724, 542, 3.5, th.fg)
+    s.line(724, 542, 742, 530, th.fg, 1.6)
+    s.text(728, 572, "$L_{In}$", 13, th.primary, anchor="start", bold=True)
+    s.rect(796, 504, 22, 72, th.panel, th.accent, rx=2, sw=1.6)
+    s.path(
+        "M 800 510 L 814 521 L 800 532 L 814 543 L 800 554 L 814 565 L 800 574",
+        stroke=th.accent,
+        sw=1.2,
+    )
+    s.text(807, 590, "absorber (5.1)", 12, th.accent)
+    s.text(
+        532,
+        610,
+        "$R_I = L_{pS} − 9 − [L_{In} + 10 lg(S_m/S)]$",
+        14,
+        th.fg,
+        anchor="start",
+    )
+    for y, txt, col in (
+        (632, "two scans at 90°: under 2.0 dB to 80 Hz", th.fg),
+        (650, "and under 1.0 dB from 100 Hz to 160 Hz", th.fg),
+        (674, "absorber on the source-room face: 100 mm works,", th.muted),
+        (692, "100 mm to 200 mm restricts it to 50 Hz to 80 Hz,", th.muted),
+        (710, "and anything thicker breaks Formula (7)", th.muted),
+    ):
+        s.text(532, y, txt, 12, col, anchor="start")
+
+    # The two results and the conditions on them.
+    s.rect(30, 744, 840, 72, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(450, 772, "$R_I = L_{p1} − 6 − [L_{In} + 10 lg(S_m/S)]$", 17, th.primary)
+    s.text(
+        450,
+        800,
+        "$F_{pI} = L_p − L_{In}$ ≤ 10 dB, or ≤ 6 dB for a specimen with an "
+        "absorbing receiving face (6.4.2)",
+        13,
+        th.fg,
+    )
+    for y, txt in (
+        (
+            840,
+            "probe and analyser to IEC 61043 class 1, with $δ_{pI0}$ more "
+            "than 10 dB above $F_{pI}$ (4.1)",
+        ),
+        (
+            862,
+            "pressure and intensity 10 dB over the background: with $F_{pI}$ "
+            "< 10 dB, drop the source 10 dB and a change under 1 dB shows it (6.5)",
+        ),
+        (
+            884,
+            "ISO 15186-2 in a building: a plane before a whole wall, the "
+            "indicator 7 dB under $δ_{pI0}$, or under 6 dB if the element "
+            "absorbs (6.5.4)",
+        ),
+    ):
+        s.text(450, y, txt, 12, th.muted)
 
 
 # ---------------------------------------------------------------------------
@@ -4112,6 +4361,1008 @@ def _d_workroom_path(s: SVG, th: Theme) -> None:
         684,
         "no obstacle on the floor below the path, nothing large within 1.5 m "
         "of either side, and a second path, orthogonal to this one",
+        12,
+        th.muted,
+    )
+
+
+def _d_low_frequency_corners(s: SVG, th: Theme) -> None:
+    """The ISO 16283 low-frequency procedure in a room under 25 m³.
+
+    Part 1 Clause 8, Part 2 Clause 8 and Part 3 Clause 7.3 add the same
+    measurement to the central zone of the default procedure: at least four
+    corners per source position, two at floor level and two at ceiling level,
+    the microphone 0.3 m to 0.4 m from each surface forming the corner (8.3),
+    each held for at least 15 s (8.4), and the background measured in every
+    corner used (9.1). The table on the right is the 63 Hz band of the guide's
+    bedroom: the highest corner inside each source position, their energy
+    mean, Formula (12), and its one-third weight against the central zone,
+    Formula (13), whose result is the L2 of Formula (1) (3.12).
+    """
+    m = 80.0  # px per metre, in the plan and in the section
+    inset = 0.35 * m  # a corner microphone, 0.3 m to 0.4 m from each surface
+    zone = 0.5 * m  # 7.6 b): the central zone keeps 0.5 m from every boundary
+
+    def floor_corner(x: float, y: float) -> None:
+        s.circle(x, y, 6.5, th.primary)
+
+    def ceiling_corner(x: float, y: float) -> None:
+        s.circle(x, y, 6.5, th.bg, th.primary, 2.2)
+
+    def default_mic(x: float, y: float) -> None:
+        s.circle(x, y, 6.0, th.fg)
+        s.circle(x, y, 2.4, th.bg)
+
+    # (x from the partition, y from the back wall, z above the floor), metres:
+    # five of them, no two in one plane and not a grid (7.3.2), and at least
+    # 0.7 m apart (7.6 a)).
+    defaults = (
+        (0.7, 0.8, 1.0),
+        (1.5, 1.9, 1.6),
+        (2.1, 0.7, 1.3),
+        (2.9, 1.5, 1.7),
+        (1.3, 1.2, 1.2),
+    )
+    near, far_x, far_y, high = (
+        inset / m,
+        3.6 - inset / m,
+        2.7 - inset / m,
+        2.4 - inset / m,
+    )
+    corners = (  # number, x, y, z, at floor level
+        ("1", near, near, near, True),
+        ("2", far_x, near, high, False),
+        ("3", far_x, far_y, near, True),
+        ("4", near, far_y, high, False),
+    )
+
+    s.text(
+        450,
+        84,
+        "At least four corners per source position, on top of the central zone",
+        17,
+        th.fg,
+        bold=True,
+    )
+
+    # ---- Plan: the loudspeaker positions and the receiving room ----------
+    top = 130.0
+    px0 = 244.0
+    px1, py1 = px0 + 3.6 * m, top + 2.7 * m  # 532, 346
+    s.text(40, 116, "Plan", 14, th.muted, anchor="start", bold=True)
+
+    # The source room, cut: only the part that holds the two positions.
+    s.line(40, top, 232, top, th.fg, 2.2)
+    s.line(40, py1, 232, py1, th.fg, 2.2)
+    s.path(
+        f"M 40 {top} L 48 172 L 32 216 L 48 260 L 32 304 L 40 {py1}",
+        stroke=th.muted,
+        sw=1.4,
+    )
+    s.text(136, 150, "source room", 13, th.muted)
+    for (lx, ly), label, ty in (
+        ((152.0, 178.0), "position 1", 210.0),
+        ((88.0, 298.0), "position 2", 330.0),
+    ):
+        s.rect(lx - 13, ly - 13, 26, 26, th.panel, th.primary, rx=4, sw=1.8)
+        s.circle(lx, ly, 7, th.primary)
+        s.circle(lx, ly, 3, th.bg)
+        s.text(lx, ty, label, 12, th.primary)
+
+    s.rect(232, top, 12, py1 - top, th.secondary, th.fg, sw=1.8)
+    s.text(238, 122, "partition", 12, th.secondary)
+
+    s.rect(px0, top, px1 - px0, py1 - top, th.panel, th.fg, sw=2.6)
+    s.text((px0 + px1) / 2, 150, "receiving room", 13, th.muted)
+    s.rect(
+        px0 + zone,
+        top + zone,
+        px1 - px0 - 2 * zone,
+        py1 - top - 2 * zone,
+        "none",
+        th.muted,
+        rx=3,
+        sw=1.2,
+        dash="5,4",
+    )
+    s.text((px0 + px1) / 2, 328, "central zone", 12, th.muted)
+    for x, y, _z in defaults:
+        default_mic(px0 + x * m, top + y * m)
+    for label, x, y, _z, on_floor in corners:
+        cx, cy = px0 + x * m, top + y * m
+        (floor_corner if on_floor else ceiling_corner)(cx, cy)
+        left = x < 1.8
+        s.text(
+            cx + (14 if left else -14),
+            cy + 5,
+            label,
+            13,
+            th.primary,
+            anchor="start" if left else "end",
+            bold=True,
+        )
+    s.dim(px0, 368, px1, 368, "3.6 m", size=13)
+    s.dim(548, top, 548, py1, "2.7 m", size=13, label_side="right")
+
+    volume = "3.6 m × 2.7 m × 2.4 m = 23.3 m³, 23 m³ to the nearest cubic metre"
+    s.text(286, 392, volume, s.fit_size([volume], (13, 12), 480), th.fg)
+
+    legend = (
+        (floor_corner, "corner at floor level"),
+        (ceiling_corner, "corner at ceiling level"),
+        (default_mic, "central-zone position"),
+    )
+    lsize = 12
+    total = sum(12 + s.text_width(t, lsize) + 22 for _f, t in legend) - 22
+    if total > 550:
+        lsize = 11
+    x = 52.0
+    for mark, label in legend:
+        mark(x, 411)
+        s.text(x + 12, 416, label, lsize, th.fg, anchor="start")
+        x += 12 + s.text_width(label, lsize) + 22
+
+    # ---- One corner, close up (Figure 2 of each part) ---------------------
+    dx = 745.0
+    s.text(dx, 116, "Corner 2, close up", 14, th.muted, bold=True)
+    s.rect(610, 128, 270, 298, th.panel, th.muted, rx=6, sw=1.2)
+    vy = 188.0
+    s.line(dx, vy, 632, 156, th.fg, 2.2)
+    s.line(dx, vy, 858, 156, th.fg, 2.2)
+    s.line(dx, vy, dx, 318, th.fg, 2.2)
+    s.text(dx, 150, "ceiling", 13, th.muted)
+    s.text(680, 262, "wall", 13, th.muted)
+    s.text(810, 262, "wall", 13, th.muted)
+    my = 218.0
+    s.arrow(dx, my - 4, dx, vy + 4, th.fg, 1.4)
+    s.arrow(dx - 3, my + 1, 704, 232, th.fg, 1.4)
+    s.arrow(dx + 3, my + 1, 786, 232, th.fg, 1.4)
+    s.text(dx + 8, 206, "$d$", 14, th.fg, anchor="start")
+    s.text(716, 250, "$d$", 14, th.fg)
+    s.text(774, 250, "$d$", 14, th.fg)
+    s.path(
+        "M 738 252 C 730 280, 752 292, 724 318",
+        stroke=th.muted,
+        sw=1.4,
+    )
+    s.line(dx, my, 738, 252, th.primary, 6)
+    s.circle(dx, my, 3.5, th.fg)
+    s.text(dx, 350, "$d$ = 0.3 m to 0.4 m", 14, th.fg)
+    notes = (
+        "from each surface of the corner,",
+        "and the three need not be equal",
+        "no furniture within 0.5 m",
+    )
+    nsize = s.fit_size(notes, (12, 11), 250)
+    for y, line in zip((372.0, 390.0, 412.0), notes, strict=True):
+        s.text(dx, y, line, nsize, th.muted)
+
+    # ---- Section through the same room -----------------------------------
+    s.text(40, 452, "Section", 14, th.muted, anchor="start", bold=True)
+    ex0, ceil, floor = 72.0, 470.0, 662.0
+    ex1 = ex0 + 3.6 * m  # 360
+    s.rect(ex0, ceil, ex1 - ex0, floor - ceil, th.panel, th.fg, sw=2.2)
+    s.rect(60, ceil, 12, floor - ceil, th.secondary, th.fg, sw=1.6)
+    s.ground(floor, 56, ex1 + 4)
+    s.rect(
+        ex0 + zone,
+        ceil + zone,
+        ex1 - ex0 - 2 * zone,
+        floor - ceil - 2 * zone,
+        "none",
+        th.muted,
+        rx=3,
+        sw=1.2,
+        dash="5,4",
+    )
+    for x, _y, z in defaults:
+        default_mic(ex0 + x * m, floor - z * m)
+    for label, x, _y, z, on_floor in corners:
+        sx, sy = ex0 + x * m, floor - z * m
+        (floor_corner if on_floor else ceiling_corner)(sx, sy)
+        left = x < 1.8
+        s.text(
+            sx + (16 if left else -16),
+            sy + 5,
+            label,
+            13,
+            th.primary,
+            anchor="start" if left else "end",
+            bold=True,
+        )
+    s.dim(376, ceil, 376, floor, "2.4 m", size=13, label_side="right")
+
+    # ---- The 63 Hz band, worked through ------------------------------------
+    caption = "The 63 Hz band, from corner readings to $L_{LF}$"
+    s.text(660, 452, caption, s.fit_size([caption], (14, 13), 430), th.muted, bold=True)
+    s.rect(440, 466, 440, 206, th.panel, th.muted, rx=6, sw=1.2)
+    cols = (604.0, 654.0, 704.0, 754.0)
+    s.text(568, 490, "corner", 12, th.muted, anchor="end")
+    for xx, n in zip(cols, "1234", strict=True):
+        s.text(xx, 490, n, 12, th.primary, bold=True)
+    s.text(832, 490, "highest", 12, th.muted)
+    for y, label, values, best in (
+        (514.0, "position 1", ("63.8", "65.1", "62.6", "64.2"), 1),
+        (540.0, "position 2", ("64.9", "63.4", "65.6", "62.9"), 2),
+    ):
+        s.text(456, y, label, 13, th.fg, anchor="start")
+        for k, (xx, v) in enumerate(zip(cols, values, strict=True)):
+            s.text(xx, y, v, 13, th.primary if k == best else th.fg, bold=k == best)
+        s.rect(cols[best] - 22, y - 16, 44, 22, "none", th.primary, rx=4, sw=1.6)
+        s.text(832, y, values[best], 13, th.primary, bold=True)
+    s.arrow(832, 548, 832, 562, th.primary, 1.6)
+    result = "$L_{Corner}$ = 65.4 dB, the energy mean of the two"
+    s.text(660, 580, result, s.fit_size([result], (14, 13), 420), th.primary, bold=True)
+    s.text(660, 600, "not the 65.6 dB of the loudest single corner", 12, th.muted)
+    s.text(660, 626, "central zone, default procedure: $L$ = 57.9 dB", 13, th.fg)
+    lf = "$L_{LF}$ = 61.9 dB, the $L_2$ that enters $D$"
+    s.text(660, 656, lf, s.fit_size([lf], (15, 14), 420), th.secondary, bold=True)
+
+    # ---- The two formulae --------------------------------------------------
+    s.rect(60, 686, 780, 86, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        420,
+        718,
+        "$L_{Corner} = 10 lg[(p_1^2 + p_2^2 + … + p_q^2) / (q · p_0^2)]$",
+        16,
+        th.primary,
+    )
+    s.text(820, 718, "Formula (12)", 13, th.muted, anchor="end")
+    # Formula (13) prints a level inside an exponent, and a script cannot
+    # carry a script, so the two exponents are set by hand at script size.
+    pieces = (
+        ("$L_{LF} = 10 lg[(10$", 16, 0.0),
+        ("$0.1 L_{Corner}$", 12, -7.0),
+        ("$ + (2 · 10$", 16, 0.0),
+        ("$0.1 L$", 12, -7.0),
+        ("$)) / 3]$", 16, 0.0),
+    )
+    width = sum(s.text_width(t, size) for t, size, _dy in pieces)
+    x = 420 - width / 2
+    for t, size, dy in pieces:
+        s.text(x, 756 + dy, t, size, th.secondary, anchor="start")
+        x += s.text_width(t, size)
+    s.text(820, 756, "Formula (13)", 13, th.muted, anchor="end")
+
+    for y, line in (
+        (
+            794.0,
+            "each corner held for at least 15 s, the background measured in "
+            "every corner used and corrected band by band",
+        ),
+        (
+            814.0,
+            "one reverberation time in the 63 Hz octave band, 0.66 s here, "
+            "stands for the 50, 63 and 80 Hz bands",
+        ),
+        (
+            834.0,
+            "Part 2: the tapping machine at two or more of its default "
+            "positions (8.2.2)",
+        ),
+        (
+            854.0,
+            "Part 3: the façade loudspeaker methods only (7.3.1), at least "
+            "four corners (7.3.2)",
+        ),
+    ):
+        s.text(450, y, line, 12, th.muted)
+
+
+def _d_iso717_rating_chain(s: SVG, th: Theme) -> None:
+    """How ISO 717 turns a band spectrum into one number, in both parts.
+
+    One input, one rule and two engines. The strip across the top is the band
+    set of 4.1 in both parts, 16 one-third octaves from 100 Hz to 3150 Hz or 5
+    octaves from 125 Hz to 2000 Hz, each value to one decimal place (4.4 of
+    ISO 717-1, 4.3.1 and 4.3.2 of ISO 717-2), with the dashed bands of an
+    enlarged range that only the adaptation terms read: 50 Hz to 80 Hz in both
+    parts (4.5 NOTE 2 and Annex B of ISO 717-1, the A.2.1 NOTE of ISO 717-2),
+    4000 Hz and 5000 Hz in ISO 717-1 alone. The boxed rule is 4.4 of ISO 717-1
+    and 4.3 of ISO 717-2, the same shift in both but for the side an
+    unfavourable deviation lies on, ISO 717-2 then taking 5 dB off an
+    octave-band reading (4.3.2). The two small charts are Table 3 of each part
+    against the laboratory example of Table C.1 of each part, drawn where the
+    curve comes to rest: 22 dB down with 31.8 dB of deviations below it, and
+    19 dB up with 28.0 dB above it. The brackets under them are the bands each
+    adaptation term reads (Formula (2) of ISO 717-1, A.2.1 of ISO 717-2), and
+    the two equations at the foot are Formula (1) of ISO 717-1 and Formula
+    (A.1) of ISO 717-2.
+    """
+    bands = (
+        "50",
+        "63",
+        "80",
+        "100",
+        "125",
+        "160",
+        "200",
+        "250",
+        "315",
+        "400",
+        "500",
+        "630",
+        "800",
+        "1000",
+        "1250",
+        "1600",
+        "2000",
+        "2500",
+        "3150",
+        "4000",
+        "5000",
+    )
+    # ISO 717-1:2020 Table 3, and R of its laboratory example, Table C.1.
+    ref_air = (33, 36, 39, 42, 45, 48, 51, 52, 53, 54, 55, 56, 56, 56, 56, 56)
+    r_air: tuple[float, ...] = (20.4, 16.3, 17.7, 22.6, 22.4, 22.7, 24.8, 26.6)
+    r_air += (28.0, 30.5, 31.8, 32.5, 33.4, 33.0, 31.0, 25.5)
+    # ISO 717-2:2020 Table 3, and Ln of the bare heavy floor, Table C.1.
+    ref_imp = (62, 62, 62, 62, 62, 62, 61, 60, 59, 58, 57, 54, 51, 48, 45, 42)
+    l_imp: tuple[float, ...] = (62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1)
+    l_imp += (73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2)
+
+    # ---- the spectrum that goes in ------------------------------------------
+    s.text(
+        450,
+        66,
+        "One spectrum in, every band given to one decimal place",
+        15,
+        th.fg,
+        bold=True,
+    )
+    slot_y, slot_h = 80.0, 18.0
+    for k, label in enumerate(bands):
+        x = 90.0 + 36.0 * k
+        if 3 <= k <= 18:  # the 16 bands the rating is taken over (4.1)
+            edge, width = (th.accent, 2.4) if k == 10 else (th.fg, 1.3)
+            s.rect(x - 15, slot_y, 30, slot_h, th.panel, edge, rx=3, sw=width)
+        else:
+            # The enlarged range: 50 Hz to 80 Hz in both parts, 4000 Hz and
+            # 5000 Hz in ISO 717-1 alone.
+            s.rect(x - 15, slot_y, 30, slot_h, "none", th.muted, rx=3, dash="3,3")
+        s.text(
+            x, slot_y + 31, label, 10, th.accent if k == 10 else th.muted, bold=k == 10
+        )
+    s.text(68, slot_y + 13, "thirds", 11, th.muted, "end")
+    # The five octaves, 125 Hz to 2000 Hz, each over its three thirds.
+    bracket_y = slot_y + 44
+    for k in (4, 7, 10, 13, 16):
+        x0, x1 = 90.0 + 36.0 * k - 51, 90.0 + 36.0 * k + 51
+        s.line(x0, bracket_y, x1, bracket_y, th.fg, 1.4)
+        s.line(x0, bracket_y - 5, x0, bracket_y, th.fg, 1.4)
+        s.line(x1, bracket_y - 5, x1, bracket_y, th.fg, 1.4)
+    s.text(68, bracket_y + 4, "octaves", 11, th.muted, "end")
+    s.text(
+        450,
+        bracket_y + 24,
+        "dashed: the bands of an enlarged range, read by the adaptation terms "
+        "and never by the rating",
+        12,
+        th.muted,
+    )
+
+    # ---- the rule both engines share ----------------------------------------
+    rule_y = 164.0
+    s.rect(40, rule_y, 820, 82, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        450,
+        rule_y + 26,
+        "Shift the Table 3 curve towards the measurement in 1 dB steps",
+        15,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        450,
+        rule_y + 48,
+        "until the sum of unfavourable deviations is as large as possible, but "
+        "not more than 32.0 dB over 16 bands or 10.0 dB over 5",
+        12,
+        th.fg,
+    )
+    s.text(
+        450,
+        rule_y + 68,
+        "in 0.1 dB steps for the expression of uncertainty; the rating is the "
+        "shifted curve read at 500 Hz",
+        12,
+        th.muted,
+    )
+
+    # ---- the two engines ------------------------------------------------------
+    s.line(450, 262, 450, 706, th.muted, 1.0, dash="4,5")
+    s.text(245, 282, "ISO 717-1: airborne", 16, th.primary, bold=True)
+    s.text(655, 282, "ISO 717-2: impact", 16, th.secondary, bold=True)
+    s.text(245, 302, "unfavourable where the measurement falls below", 12, th.muted)
+    s.text(655, 302, "unfavourable where the measurement rises above", 12, th.muted)
+
+    top, base = 322.0, 482.0
+    sum_y = base + 38
+
+    def chart(
+        x0: float,
+        low: float,
+        scale: float,
+        ref: Sequence[float],
+        measured: Sequence[float],
+        shift: int,
+        colour: str,
+        *,
+        impact: bool,
+    ) -> None:
+        """Table 3 unshifted and shifted, the measurement, and its deviations.
+
+        ``x0`` is the 100 Hz band and the bands follow 24 px apart; ``low`` is
+        the level on the axis and ``scale`` the px per dB.
+        """
+
+        def bx(i: float) -> float:
+            return x0 + 24.0 * i
+
+        def by(level: float) -> float:
+            return base - (level - low) * scale
+
+        s.line(x0 - 10, base + 4, x0 + 370, base + 4, th.muted, 1.2)
+        for i, label in ((0, "100"), (7, "500"), (15, "3150")):
+            s.line(bx(i), base + 4, bx(i), base + 9, th.muted, 1.2)
+            colour_tick = th.accent if i == 7 else th.muted
+            s.text(bx(i), base + 22, label, 10, colour_tick, bold=i == 7)
+        s.line(bx(7), top, bx(7), base + 4, th.accent, 1.2, dash="2,3")
+        shifted = [r + shift for r in ref]
+        # One bar per band, on the unfavourable side only: the column of
+        # Table C.1 that is added up.
+        for i, (r, m) in enumerate(zip(shifted, measured, strict=True)):
+            if (m - r if impact else r - m) > 0:
+                y0, y1 = sorted((by(r), by(m)))
+                s.add(
+                    f'<rect x="{bx(i) - 5:.1f}" y="{y0:.1f}" width="10" '
+                    f'height="{y1 - y0:.1f}" fill="{colour}" opacity="0.4"/>'
+                )
+
+        def polyline(values: Sequence[float]) -> str:
+            return " ".join(
+                f"{'M' if i == 0 else 'L'} {bx(i):.1f} {by(v):.1f}"
+                for i, v in enumerate(values)
+            )
+
+        s.path(polyline(ref), stroke=th.muted, sw=1.4, dash="5,4")
+        s.path(polyline(shifted), stroke=colour, sw=2.4)
+        s.path(polyline(measured), stroke=th.fg, sw=1.5)
+        for i, v in enumerate(measured):
+            s.circle(bx(i), by(v), 2.6, th.fg)
+        s.circle(bx(7), by(shifted[7]), 5.0, colour, th.bg, 1.5)
+        # The bands the adaptation term reads, under the axis.
+        last = 14 if impact else 15
+        s.line(bx(0), sum_y, bx(last), sum_y, colour, 1.6)
+        s.line(bx(0), sum_y - 5, bx(0), sum_y, colour, 1.6)
+        s.line(bx(last), sum_y - 5, bx(last), sum_y, colour, 1.6)
+
+    # Airborne: 100 Hz at x = 70, 3.0 px per dB, 8 dB on the axis.
+    chart(70.0, 8.0, 3.0, ref_air, r_air, -22, th.primary, impact=False)
+    s.arrow(406.0, 341.0, 406.0, 401.0, th.primary, 1.8)  # 56 dB to 34 dB
+    s.text(398, 376, "−22 dB", 13, th.primary, "end", bold=True)
+    s.text(382, 330, "Table 3", 11, th.muted)
+    s.text(76, 424, "measured $R$", 11, th.fg, "start")
+    s.text(250, sum_y + 18, "$C$ and $C_{tr}$ read all 16 bands", 12, th.primary)
+
+    # Impact: 100 Hz at x = 480, 3.3 px per dB, 38 dB on the axis.
+    chart(480.0, 38.0, 3.3, ref_imp, l_imp, 19, th.secondary, impact=True)
+    s.arrow(480.0, 397.0, 480.0, 344.0, th.secondary, 1.8)  # 62 dB to 81 dB
+    s.text(490, 376, "+19 dB", 13, th.secondary, "start", bold=True)
+    s.text(600, 432, "Table 3", 11, th.muted)
+    s.text(708, 390, "measured $L_n$", 11, th.fg)
+    s.text(660, sum_y + 18, "$C_I$ reads 15 bands, 3150 Hz left out", 12, th.secondary)
+
+    # ---- what each engine reads off -------------------------------------------
+    s.text(245, 578, "$R_w$ = 52 − 22 = 30 dB", 16, th.primary, bold=True)
+    s.text(245, 598, "31.8 dB of deviations below the curve", 12, th.fg)
+    s.text(655, 578, "$L_{n,w}$ = 60 + 19 = 79 dB", 16, th.secondary, bold=True)
+    s.text(655, 598, "28.0 dB of deviations above the curve", 12, th.fg)
+    s.text(655, 616, "in octave bands, the value at 500 Hz less 5 dB", 12, th.muted)
+
+    s.text(245, 640, "spectrum No. 1, pink noise: $C$ = 28 − 30 = −2 dB", 13, th.fg)
+    s.text(
+        245,
+        660,
+        "spectrum No. 2, urban traffic: $C_{tr}$ = 27 − 30 = −3 dB",
+        13,
+        th.fg,
+    )
+    # Annex B names the traffic family in full, and the English line reaches
+    # the divider at 12 px, so the pair is set one size down.
+    ranges = (
+        "enlarged ranges: $C_{50–3150}$, $C_{50–5000}$, $C_{100–5000}$ "
+        "and the $C_{tr}$ counterparts",
+        "enlarged ranges: $C_{I,50–2500}$ or $C_{I,63–2000}$",
+    )
+    size_ranges = s.fit_size(ranges, (12, 11), 380.0)
+    s.text(245, 680, ranges[0], size_ranges, th.muted)
+    s.text(245, 702, "stated as $R_{w}(C;C_{tr})$ = 30 (−2; −3) dB", 13, th.primary)
+    s.text(655, 640, "no source spectrum: the unweighted energy sum", 13, th.fg)
+    s.text(655, 660, "over 125 Hz to 2000 Hz when the bands are octaves", 13, th.fg)
+    s.text(655, 680, ranges[1], size_ranges, th.muted)
+    s.text(
+        655, 702, "a requirement may be written on $L′_{n,w} + C_I$", 13, th.secondary
+    )
+
+    # ---- the adaptation terms, as the two parts write them --------------------
+    eq_y = 722.0
+    s.rect(40, eq_y, 820, 80, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(245, eq_y + 32, "$C_j = X_{Aj} − X_w$", 18, th.primary)
+    s.text(655, eq_y + 32, "$C_I = L_{n,sum} − 15 − L_{n,w}$", 18, th.secondary)
+    notes = (
+        "$X_{Aj}$: minus the energy sum of $L_{i,j} − X_i$, to an integer",
+        "$L_{n,sum}$: the energy sum of the bands, to an integer",
+    )
+    # The Spanish of both notes runs past the 380 px of a half box at 12 px.
+    size = s.fit_size(notes, (12, 11), 380.0)
+    s.text(245, eq_y + 60, notes[0], size, th.fg)
+    s.text(655, eq_y + 60, notes[1], size, th.fg)
+
+
+def _d_db_hr_requirements(s: SVG, th: Theme) -> None:
+    """Where each DB-HR requirement sits, and the Annex A chain that feeds it.
+
+    The top half is a section through a residential building: three storeys
+    between a street facade and a party wall, with the elements clause 2
+    puts a number on drawn where they are. The partition inside a dwelling
+    carries the RA of 2.1.1 a) i, the wall between two dwellings the DnT,A of
+    a) ii, the floor between them the L'nT,w of 2.1.2 a) i, the floor over a
+    shop the DnT,A of a) iii and the L'nT,w of 2.1.2 a) ii and b) i, the door
+    of a hall onto the common landing the pair of RA values of b) ii, the
+    party wall the two alternative routes of c), and the facade the Table 2.1
+    value for a bedroom with its L1,2m position of Formula (A.2). The four
+    lines under the ground are the cases the section cannot show: the 45 dBA
+    of a habitable room, the 30 dBA door of a protected one, and the
+    readings of Ld in 2.1.1 a) iv.
+
+    The bottom half is Annex A: the band insulation over the eighteen
+    one-third octaves, with R from the laboratory and the two standardised
+    level differences in situ; the normalised spectrum of Tables A.2 to A.5
+    chosen by the dominant noise (the pairing of Table H.1); the energy sum
+    of Formulae (A.5) to (A.7) for the level differences and (A.17) for RA;
+    and the rounding of 3.1.3.1 point 4, which names the two quantities it
+    applies to. Two side routes skip the sum: the ISO 717-2 curve of
+    Table A.1 for impact sound and the window-size correction of the
+    Catalogo de Elementos Constructivos. The quantity names are set as the
+    module spells them rather than as math runs, because the composer keys
+    the slope of a subscript on its letter run and would set nT and A in
+    italic, where the guide sets them upright.
+    """
+    ground = 420.0
+    x_fac, fac_w = 204.0, 16.0  # the street facade
+    x_in = x_fac + fac_w
+    x_tab = 350.0  # the partition inside each dwelling
+    x_unit, unit_w = 500.0, 12.0  # the wall between the two dwellings
+    x_pw1, x_pw2, pw_w = 690.0, 706.0, 10.0  # the two leaves of the party wall
+    nb_right, nb_top = 884.0, 176.0  # the neighbouring building
+    roof_y, slab_t = 110.0, 10.0
+    s3_top, slab_a = roof_y + slab_t, 204.0  # top storey
+    s2_top, slab_b = slab_a + slab_t, 298.0  # middle storey
+    s1_top = slab_b + slab_t  # the shop and the plant room
+    door_top = slab_b - 66.0  # a 2.1 m door at the 31 px per metre of the storeys
+
+    def chip(
+        cx: float, cy: float, lines: list[str], colour: str, size: int = 12
+    ) -> float:
+        # A requirement written on the element it belongs to.
+        w = max(s.text_width(t, size, bold=True) for t in lines) + 14
+        h = 22 + 18 * (len(lines) - 1)
+        s.rect(cx - w / 2, cy - h / 2, w, h, th.panel, colour, rx=4, sw=1.6)
+        for j, t in enumerate(lines):
+            s.text(cx, cy - h / 2 + 15.5 + 18 * j, t, size, colour, bold=True)
+        return w
+
+    s.text(
+        450,
+        66,
+        "Clause 2 names the quantity and the limit for each element",
+        17,
+        th.fg,
+        bold=True,
+    )
+
+    # The building in section: facade, roof, the two floors and the party wall.
+    s.ground(ground, 20, nb_right)
+    s.rect(x_fac, roof_y, fac_w, ground - roof_y, th.panel, th.fg, sw=2.0)
+    s.rect(x_fac, roof_y, x_pw1 - x_fac, slab_t, th.panel, th.fg, sw=2.0)
+    s.rect(x_in, slab_a, x_pw1 - x_in, slab_t, th.panel, th.fg, sw=2.0)
+    s.rect(x_in, slab_b, x_pw1 - x_in, slab_t, th.panel, th.fg, sw=2.0)
+    s.rect(x_pw1, roof_y, pw_w, ground - roof_y, th.panel, th.fg, sw=2.0)
+
+    # The neighbour: its own leaf, its own lower roof, and nothing more of it.
+    s.rect(x_pw2, nb_top, pw_w, ground - nb_top, th.panel, th.fg, sw=2.0)
+    s.rect(x_pw2, nb_top - slab_t, nb_right - x_pw2, slab_t, th.panel, th.muted, sw=1.4)
+    s.line(nb_right, nb_top, nb_right, ground, th.muted, 1.2, dash="6,4")
+
+    # The wall between the dwellings, with the hall door in the middle storey.
+    s.rect(x_unit, s3_top, unit_w, slab_a - s3_top, th.panel, th.fg, sw=2.0)
+    s.rect(x_unit, s2_top, unit_w, door_top - s2_top, th.panel, th.fg, sw=2.0)
+    s.rect(x_unit + 3, door_top, unit_w - 6, slab_b - door_top, th.bg, th.fg, sw=1.2)
+    s.rect(x_unit, s1_top, unit_w, ground - s1_top, th.panel, th.fg, sw=2.0)
+    for top, bottom in ((s3_top, slab_a), (s2_top, slab_b)):
+        s.rect(x_tab, top, 4, bottom - top, th.fg, th.fg, sw=0.5)
+
+    # The bedroom window, in the colour of the correction it takes.
+    s.rect(x_fac, 138, fac_w, 48, th.bg, th.accent, sw=1.6)
+    s.line(x_fac + fac_w / 2, 138, x_fac + fac_w / 2, 186, th.accent, 1.2)
+
+    mid_l = (x_in + x_tab) / 2
+    mid_c = (x_tab + 4 + x_unit) / 2
+    mid_r = (x_unit + unit_w + x_pw1) / 2
+    mid_nb = (x_pw2 + pw_w + nb_right) / 2
+    for cx, cy, name in (
+        (mid_l, s3_top + 18, "bedroom"),
+        (mid_c, s3_top + 18, "living room"),
+        (mid_r, s3_top + 18, "bedroom, next dwelling"),
+        (mid_l, s2_top + 30, "bedroom"),
+        (mid_c, s2_top + 30, "hall"),
+        (mid_r, s2_top + 18, "common landing"),
+        ((x_in + x_unit) / 2, s1_top + 24, "shop, an activity room"),
+        (mid_r, s1_top + 24, "plant room"),
+        (mid_nb, ground - 12, "next building"),
+    ):
+        s.text(cx, cy, name, 11, th.muted)
+
+    # Clause 2.1.1 and 2.1.2, each on its element.
+    chip(x_tab + 2, 172, ["RA ≥ 33 dBA"], th.fg)
+    chip(x_unit + unit_w / 2, 172, ["DnT,A ≥ 50 dBA"], th.primary)
+    chip(mid_l, slab_a + slab_t / 2, ["L′nT,w ≤ 65 dB"], th.secondary)
+    chip(mid_l, slab_b + slab_t / 2, ["DnT,A ≥ 55 dBA"], th.primary)
+    chip(mid_c, slab_b + slab_t / 2, ["L′nT,w ≤ 60 dB"], th.secondary)
+
+    # The shared door needs room between the two walls, and a leader to the
+    # door itself: the landing is only 178 px wide and the Spanish runs long.
+    door_lines = ["door RA ≥ 20 dBA", "wall RA ≥ 50 dBA"]
+    door_size = s.fit_size(
+        door_lines, (11, 10), x_pw1 - (x_unit + unit_w) - 30, bold=True
+    )
+    door_w = chip(mid_r, 262, door_lines, th.fg, size=door_size)
+    s.line(mid_r - door_w / 2 - 2, 262, x_unit + unit_w - 3, 265, th.muted, 1.0)
+
+    # The party wall: two routes, either of which is enough.
+    s.text(mid_nb, 146, "party wall", 13, th.fg, bold=True)
+    s.line(mid_nb - 34, 152, x_pw2 + 2, nb_top - slab_t - 2, th.muted, 1.0)
+    s.text(mid_nb, 204, "each leaf", 11, th.muted)
+    chip(mid_nb, 222, ["D2m,nT,Atr ≥ 40 dBA"], th.accent, size=11)
+    s.text(mid_nb, 258, "or both together", 11, th.muted)
+    chip(mid_nb, 276, ["DnT,A ≥ 50 dBA"], th.primary, size=11)
+
+    # The street: the Table 2.1 value, the (A.2) position and where Ld comes from.
+    chip(106, 96, ["D2m,nT,Atr ≥ 32 dBA"], th.accent)
+    s.line(186, 104, x_fac - 2, 150, th.muted, 1.0)
+    s.text(96, 122, "Table 2.1, bedroom,", 11, th.muted)
+    s.text(96, 138, "60 < Ld ≤ 65 dBA", 11, th.muted)
+    mic_x = x_fac - 62.0  # 2 m out, at the scale of the storeys
+    s.mic(mic_x, 156, ground, scale=0.7)
+    s.text(mic_x - 12, 170, "$L_{1,2m}$", 13, th.fg, anchor="end")
+    s.dim(mic_x, 214, x_fac, 214, "2 m", size=12)
+    s.text(74, 300, "Ld of the zone,", 12, th.fg)
+    s.text(74, 318, "from the noise map", 12, th.fg)
+    s.rect(34, 392, 92, 20, th.panel, th.fg, rx=6, sw=1.6)
+    s.rect(54, 380, 50, 14, th.panel, th.fg, rx=4, sw=1.4)
+    s.circle(54, 414, 6, th.fg)
+    s.circle(106, 414, 6, th.fg)
+    s.text(80, 366, "road traffic", 11, th.muted)
+
+    # What the section cannot show.
+    for j, line in enumerate(
+        (
+            "a habitable room such as the hall takes 45 dBA where a protected room takes 50 dBA or 55 dBA",
+            "a door shared with another use unit: RA ≥ 30 dBA for a protected room, 20 dBA for a habitable one (residential or hospital use)",
+            "no official Ld: 60 dBA in a residential acoustic area, and what RD 1367/2007 sets for the others",
+            "a facade not directly exposed to the noise is read at Ld − 10 dBA, and where aircraft dominate the limit goes up 4 dBA",
+        )
+    ):
+        s.text(450, 446 + 18 * j, line, 12, th.muted)
+
+    # Annex A: the chain every airborne number goes through.
+    s.text(
+        450,
+        530,
+        "Annex A: from eighteen bands to the number each airborne limit is read against",
+        15,
+        th.fg,
+        bold=True,
+    )
+    bw, gap, bx0, by, bh = 196.0, 22.0, 25.0, 548.0, 141.0
+    boxes = (
+        (
+            "band insulation",
+            th.fg,
+            (
+                "18 one-third octaves,",
+                "100 Hz to 5 kHz",
+                "R (A.11) in the laboratory,",
+                "DnT (A.4) between rooms,",
+                "D2m,nT (A.2) at the facade,",
+                "the two D to $T_0$ = 0.5 s",
+            ),
+        ),
+        (
+            "normalised spectrum",
+            th.primary,
+            (
+                "(Tables A.2 to A.5)",
+                "pink noise → DnT,A, RA",
+                "road traffic → D2m,nT,Atr",
+                "aircraft → D2m,nT,Atr",
+                "railway → D2m,nT,A",
+            ),
+        ),
+        (
+            "energy sum",
+            th.primary,
+            (
+                "each band: the spectrum",
+                "less the insulation,",
+                "summed in energy",
+                "(A.5) to (A.7) for the D,",
+                "(A.17) for RA",
+            ),
+        ),
+        (
+            "rounding, 3.1.3.1",
+            th.accent,
+            (
+                "one decimal while working,",
+                "an integer at the end, in",
+                "DnT,A and L′nT,w:",
+                "52.7 dBA → 53 dBA,",
+                "against 50 dBA",
+            ),
+        ),
+    )
+    for k, (head, colour, lines) in enumerate(boxes):
+        x0 = bx0 + k * (bw + gap)
+        s.rect(x0, by, bw, bh, th.panel, colour, rx=6, sw=1.6)
+        s.text(x0 + bw / 2, by + 22, head, 13, colour, bold=True)
+        size = s.fit_size(lines, (11, 10), bw - 14)
+        for j, line in enumerate(lines):
+            s.text(x0 + bw / 2, by + 44 + j * 17, line, size, th.fg)
+        if k < len(boxes) - 1:
+            s.arrow(
+                x0 + bw + 3, by + bh / 2, x0 + bw + gap - 3, by + bh / 2, th.fg, 1.6
+            )
+
+    # The two routes that do not go through the sum.
+    s.text(
+        25,
+        712,
+        "impact: L′nT (A.21) → L′nT,w on the ISO 717-2 reference curve of Table A.1, with no spectrum",
+        12,
+        th.secondary,
+        anchor="start",
+    )
+    s.text(
+        25,
+        732,
+        "a window: catalogue RA and RA,tr less 1 dB above 2.7 m², 2 dB above 3.6 m², 3 dB above 4.6 m²",
+        12,
+        th.accent,
+        anchor="start",
+    )
+
+    # Formulae (A.5) to (A.7): the exponent is set as its own raised run,
+    # because the composer takes one script level and the exponent carries two.
+    ey = 752.0
+    s.rect(160, ey, 580, 76, th.panel, th.fg, rx=6, sw=1.6)
+    base = "$I_x = −10 lg Σ_i 10$"
+    exponent = "$(L_{x,i} − X_i)/10$"
+    w_base = s.text_width(base, 18)
+    w_exp = s.text_width(exponent, 13)
+    x0 = 450 - (w_base + 2 + w_exp) / 2
+    s.text(x0, ey + 34, base, 18, th.fg, anchor="start")
+    s.text(x0 + w_base + 2, ey + 26, exponent, 13, th.fg, anchor="start")
+    s.text(
+        450,
+        ey + 60,
+        "$X_i$: the band insulation; $L_{x,i}$: the spectrum of step 2; $i$: the eighteen bands",
+        12,
+        th.muted,
+    )
+
+
+def _d_source_qualification(s: SVG, th: Theme) -> None:
+    """The two setups ISO 3382-1 asks for before a hall is quoted by a number.
+
+    Left, the survey of 4.2.1 that qualifies the source: octave bands of pink
+    noise in a free field (the caption of Table 1), the microphone at least
+    1,5 m away, and the output averaged over gliding 30 degree arcs. Where no
+    turntable can be used the clause asks instead for a reading every
+    5 degrees and gliding averages of six neighbouring readings, which is the
+    ring of 72 bearings drawn here; either way every arc is compared with the
+    360 degree energetic average in the measurement plane and held to its
+    Table 1 limit. Right, the positions of A.4 in a 1 000-seat hall: three
+    source positions on the stage, one on the centre line and two at equal
+    distances either side, at 1,5 m; the eight microphone positions Table A.2
+    asks for as a minimum at that size, at 1,2 m and spread over one side of
+    a symmetrical hall; and more where a balcony splits the seating. The
+    boxes at the foot are the deviation of an arc and the line through the
+    three rows of Table A.2, held between the 6 and 10 of A.4.
+    """
+    # ------------------------------------------------------------ left panel
+    cx, cy, ring = 225.0, 272.0, 110.0
+    s.text(
+        cx,
+        72,
+        "The source, surveyed in a free field (4.2.1)",
+        15,
+        th.primary,
+        bold=True,
+    )
+    s.text(cx, 94, "on a turntable: the average over gliding 30° arcs", 12, th.muted)
+
+    def on_ring(deg: float, r: float) -> tuple[float, float]:
+        a = math.radians(deg)
+        return cx + r * math.cos(a), cy + r * math.sin(a)
+
+    # One gliding arc: readings 15 to 20 of the 72, at -105 to -80 degrees on
+    # the sheet, where 0 is the microphone and angles run clockwise.
+    arc = range(15, 21)
+    x0, y0 = on_ring(-107.5, ring + 11)
+    x1, y1 = on_ring(-77.5, ring + 11)
+    s.path(
+        f"M {x0:.1f} {y0:.1f} A {ring + 11:.1f} {ring + 11:.1f} 0 0 1 {x1:.1f} {y1:.1f}",
+        stroke=th.secondary,
+        sw=4.0,
+    )
+    _rot_arrow(s, cx, cy, ring + 22, -102.5, -72.5, th.muted, sw=1.4)
+    s.text(
+        cx, 116, "or, without one: a reading every 5°, six per arc", 12, th.secondary
+    )
+    s.text(cx, 132, "and the next arc starts one reading on", 12, th.muted)
+
+    # The 72 bearings of the survey made where no turntable can be used.
+    for k in range(72):
+        x, y = on_ring(-180.0 + 5.0 * k, ring)
+        if k in arc:
+            s.circle(x, y, 3.6, th.secondary)
+        else:
+            s.circle(x, y, 2.2, th.muted)
+
+    # The distance, from the acoustic centre to the microphone. The line
+    # starts on the centre, so the turntable drawn over it hides its inner
+    # end and it leaves the disc as one unbroken run to the capsule.
+    s.arrow(cx, cy, cx + ring - 2, cy, th.muted, 1.2)
+    s.text(cx + 70, cy - 8, "≥ 1.5 m", 13, th.fg)
+    # The microphone, its capsule on the ring and pointing at the source.
+    s.rect(cx + ring, cy - 5, 26, 10, th.primary, th.fg, rx=3, sw=1.0)
+    s.text(cx + ring + 16, cy - 16, "microphone", 12, th.primary, "start")
+
+    # Turntable and source on top of the dimension's inner end.
+    s.circle(cx, cy, 30, th.panel, th.fg, 1.6)
+    s.circle(cx, cy, 15, th.fg)
+    s.circle(cx, cy, 4.5, th.bg)
+    _rot_arrow(s, cx, cy, 40, 30, 150, th.muted, sw=1.6)
+    s.text(cx, cy + 66, "turntable", 12, th.muted)
+
+    s.text(cx, 406, "the 72 bearings of a survey without a turntable", 12, th.fg)
+    s.text(
+        cx,
+        424,
+        "the reference: the 360° energetic average in the measurement plane",
+        12,
+        th.fg,
+    )
+
+    # Table 1.
+    ty = 458.0
+    s.text(cx, ty - 10, "Table 1: the most any arc may deviate", 13, th.fg, bold=True)
+    col0, colw, rowh = 58.0, 55.0, 26.0
+    tx = cx - (col0 + 6 * colw) / 2
+    s.rect(tx, ty, col0 + 6 * colw, 2 * rowh, "none", th.fg, rx=4, sw=1.4)
+    s.rect(tx, ty, col0 + 6 * colw, rowh, th.panel, th.fg, rx=4, sw=1.4)
+    s.text(tx + col0 / 2, ty + 18, "Hz", 13, th.fg, bold=True)
+    s.text(tx + col0 / 2, ty + rowh + 18, "dB", 13, th.fg, bold=True)
+    for i, (band, limit) in enumerate(
+        zip(
+            ("125", "250", "500", "1 000", "2 000", "4 000"),
+            ("± 1", "± 1", "± 1", "± 3", "± 5", "± 6"),
+            strict=True,
+        )
+    ):
+        xc = tx + col0 + colw * (i + 0.5)
+        s.text(xc, ty + 18, band, 13, th.fg)
+        s.text(xc, ty + rowh + 18, limit, 13, th.secondary)
+    s.text(
+        cx,
+        ty + 2 * rowh + 18,
+        "octave bands of pink noise, measured in a free field",
+        12,
+        th.muted,
+    )
+
+    # ----------------------------------------------------------- right panel
+    rc = 675.0
+    s.text(rc, 72, "Where it stands in the hall (A.4)", 15, th.primary, bold=True)
+    s.text(rc, 94, "a 1 000-seat hall in plan, and in section", 12, th.muted)
+
+    hx0, hx1, hy0, hy1 = 490.0, 860.0, 108.0, 380.0
+    # Seating blocks either side of the aisle, then the balcony overhang.
+    s.rect(502, 184, 162, 188, th.panel, "none")
+    s.rect(686, 184, 162, 188, th.panel, "none")
+    s.rect(hx0, hy0, hx1 - hx0, hy1 - hy0, "none", th.fg, rx=4, sw=2.2)
+    s.rect(570, hy0, 210, 60, th.panel, th.fg, sw=1.8)
+    s.text(560, 142, "stage", 12, th.muted, "end")
+    s.line(rc, hy0, rc, hy1, th.muted, 1.2, dash="9,4,2,4")
+    s.text(rc + 8, 200, "centre line", 11, th.muted, "start")
+    s.rect(496, 322, 358, 52, "none", th.fg, rx=3, sw=1.3, dash="6,4")
+    s.text(766, 352, "under the balcony", 12, th.muted)
+
+    for x, label in ((615.0, "S2"), (rc, "S1"), (735.0, "S3")):
+        s.circle(x, 132, 8, th.fg)
+        s.circle(x, 132, 3, th.bg)
+        s.text(x + 13, 137, label, 12, th.fg, "start", bold=True)
+
+    k = 0
+    for y in (204.0, 240.0, 276.0, 310.0):
+        for x in (540.0, 612.0):
+            k += 1
+            s.circle(x, y, 6, th.primary, th.fg, 1.2)
+            s.text(x + 11, y + 5, f"M{k}", 11, th.fg, "start", bold=True)
+    for x in (540.0, 612.0):
+        k += 1
+        s.circle(x, 350, 6, th.accent, th.fg, 1.2)
+        s.text(x + 11, 355, f"M{k}", 11, th.accent, "start", bold=True)
+
+    # Section: the two heights.
+    floor = 494.0
+    s.ground(floor, hx0, hx1)
+    s.rect(hx0, 470, 132, floor - 470, th.panel, th.fg, sw=1.6)
+    sx = 560.0
+    sy = 470.0 - 45.0  # 1,5 m at 30 px per metre
+    s.line(sx, sy + 9, sx, 470, th.fg, 2.0)
+    s.line(sx - 12, 470, sx + 12, 470, th.fg, 2.0)
+    s.circle(sx, sy, 9, th.fg)
+    s.circle(sx, sy, 3, th.bg)
+    s.dim(sx - 30, 470, sx - 30, sy, "1.5 m", size=13, label_side="left")
+    mx = 748.0
+    my = floor - 36.0  # 1,2 m at 30 px per metre
+    s.mic(mx, my, floor, scale=0.55)
+    s.person(800, floor, h=40.0, seated=True)
+    s.dim(mx - 30, floor, mx - 30, my, "1.2 m", size=13, label_side="left")
+    s.text(sx, floor + 24, "source on the stage", 12, th.muted)
+    s.text(mx + 20, floor + 24, "microphone at a seat", 12, th.muted)
+
+    # --------------------------------------------------------------- boxes
+    by = 546.0
+    s.rect(30, by, 390, 84, th.panel, th.secondary, rx=6, sw=1.8)
+    s.text(cx, by + 28, "$ΔL = L_{30°} − L_{360°}$", 16, th.secondary, bold=True)
+    s.text(cx, by + 52, "each 30° arc against the 360° energetic reference,", 12, th.fg)
+    s.text(cx, by + 70, "and $|ΔL|$ inside Table 1, band by band", 12, th.fg)
+
+    s.rect(470, by, 400, 84, th.panel, th.primary, rx=6, sw=1.8)
+    s.text(rc, by + 28, "$N_{min} = 6 + 2 log_{2}(n/500)$", 16, th.primary, bold=True)
+    s.text(
+        rc,
+        by + 52,
+        "Table A.2 for $n$ seats: 500 → 6, 1 000 → 8, 2 000 → 10,",
+        12,
+        th.fg,
+    )
+    s.text(
+        rc, by + 70, "the line through its three rows, held between 6 and 10", 12, th.fg
+    )
+
+    s.text(
+        450,
+        656,
+        "normally at least three source positions on the stage, one on the centre line and two at equal distances either side of it",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        676,
+        "at least 8 microphone positions for 1 000 seats, spread evenly over one side of a symmetrical hall, and more under the balcony",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        696,
+        "a source close to its Table 1 limits: repeat with it turned in at least three steps, and average arithmetically",
         12,
         th.muted,
     )

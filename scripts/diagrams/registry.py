@@ -22,6 +22,7 @@ from .aircraft import (
     _d_rotorcraft_hemisphere,
 )
 from .buildings import (
+    _d_db_hr_requirements,
     _d_decay_range,
     _d_directivity_factor,
     _d_en12354_6_takeoff,
@@ -33,11 +34,14 @@ from .buildings import (
     _d_installed_paths,
     _d_insulation_lab,
     _d_insulation_setup,
+    _d_intensity_insulation,
     _d_ir_measurement,
+    _d_iso717_rating_chain,
     _d_iso12354_annexl,
     _d_iso12999,
     _d_iso16251_mockup,
     _d_junction_catalogue,
+    _d_low_frequency_corners,
     _d_open_plan,
     _d_open_plan_setup,
     _d_panel_insulation,
@@ -51,6 +55,7 @@ from .buildings import (
     _d_room_noise,
     _d_room_noise_setup,
     _d_room_second_microphone,
+    _d_source_qualification,
     _d_survey_sweep,
     _d_sweep_budget,
     _d_workroom_path,
@@ -263,6 +268,11 @@ DIAGRAMS = {
         "Facade sound insulation setup (ISO 16283-3)",
         700,
     ),
+    "diagram_iso717_rating_chain": (
+        _d_iso717_rating_chain,
+        "How a band spectrum becomes one number (ISO 717-1, ISO 717-2)",
+        816,
+    ),
     "diagram_heavy_impact_sources": (
         _d_heavy_impact_sources,
         "Standard heavy and soft impact sources (ISO 16283-2, JIS A 1418-2)",
@@ -272,6 +282,16 @@ DIAGRAMS = {
         _d_survey_sweep,
         "The ISO 10052 survey sweep (Clauses 6.2 and 6.3)",
         560,
+    ),
+    "diagram_low_frequency_corners": (
+        _d_low_frequency_corners,
+        "How a room under 25 m³ is measured at 50, 63 and 80 Hz (ISO 16283)",
+        870,
+    ),
+    "diagram_db_hr_requirements": (
+        _d_db_hr_requirements,
+        "Where each DB-HR requirement applies (CTE DB-HR)",
+        860,
     ),
     "sound_power_methods": (_d_methods, "Sound power methods compared", 944),
     "diagram_noise_declaration_chain": (
@@ -403,6 +423,11 @@ DIAGRAMS = {
         _d_room_measurement_section,
         "The measuring chain in section (ISO 3382-1 clauses 4.2 and 4.3)",
         600,
+    ),
+    "diagram_source_qualification": (
+        _d_source_qualification,
+        "How the source qualifies, and where it stands in the hall (ISO 3382-1)",
+        716,
     ),
     "diagram_room_noise": (
         _d_room_noise,
@@ -674,6 +699,11 @@ DIAGRAMS = {
         _d_insulation_lab,
         "Laboratory sound insulation suite (ISO 10140)",
         600,
+    ),
+    "diagram_intensity_insulation": (
+        _d_intensity_insulation,
+        "How sound insulation is measured by intensity (ISO 15186)",
+        904,
     ),
     "diagram_junction_rig": (
         _d_junction_rig,

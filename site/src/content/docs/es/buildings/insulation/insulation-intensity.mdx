@@ -182,6 +182,29 @@ Un método definido por cómo se mueve una sonda no queda documentado por su
 fórmula. Todo lo que sigue fija un número que la fórmula consume después, y
 nada de ello lo comprueban las funciones de esta página.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation.svg" alt="Sección de una instalación de laboratorio para ensayos de transmisión. A la izquierda, el recinto emisor con un altavoz abajo en el recinto, separado de las paredes, y cinco posiciones de micrófono repartidas por el recinto para el promedio Lp1. En el centro, el elemento de ensayo de diez metros cuadrados ocupa la abertura de ensayo de la pared separadora, enrasado con su cara hacia el receptor. En el lado receptor, una superficie de medición discontinua forma una caja poco profunda delante del elemento, con los lados tan profundos como la distancia de medición d, de 0,1 a 0,3 metros, y cada lado es una subárea; para una abertura de cuatro por dos metros y medio a 0,2 metros, su área Sm es de 12,6 metros cuadrados. El frente de la caja se divide en tres subáreas: en la primera hay una sonda p-p normal a la superficie, dos flechas atraviesan la segunda hacia fuera y en la tercera una flecha apunta de vuelta hacia el elemento, y su área entra en la fórmula 11 con signo menos. Debajo, un panel dibuja los dos patrones de barrido, líneas verticales y después horizontales giradas 90 grados, junto a las reglas: líneas separadas una distancia de medición, velocidad constante de 0,1 a 0,3 metros por segundo, tiempo por subárea según su área, y la media de la pareja solo si los dos difieren menos de 1,0 decibelio en todas las bandas. Otro panel muestra la ISO 15186-3: micrófonos a menos de 50 milímetros del elemento para LpS, la sonda sobre la superficie de medición, un absorbente en la pared opuesta, la fórmula con 9 decibelios, barridos que difieren menos de 2,0 decibelios hasta 80 hercios y menos de 1,0 decibelio de 100 a 160 hercios, y los límites de espesor de una cara absorbente del elemento en el recinto emisor. Un recuadro al pie lleva el índice de reducción acústica por intensidad con sus 6 decibelios y los límites del indicador presión-intensidad de 10 y 6 decibelios, y tres líneas recogen la sonda de clase 1 según IEC 61043, la prueba de 10 decibelios sobre el ruido de fondo y el plano que usa la ISO 15186-2 ante una pared entera en un edificio, con su indicador 7 decibelios por debajo del índice residual, o por debajo de 6 decibelios si el elemento absorbe" width="100%" />
+
+### Cómo se hace la medida
+
+El analizador y su sonda tienen que cumplir la clase 1 de IEC 61043, con un
+índice residual de presión-intensidad más de 10 dB por encima del $F_{pI}$
+esperado. Antes de cada uso, deja calentar el equipo, ajusta los dos micrófonos
+con un calibrador de clase 0 o 1 y mide el índice residual en el dispositivo de
+intensidad residual. Excita el recinto emisor y toma $L_{p1}$ como pide la
+ISO 140-3. En el receptor, la superficie de medición es la boca plana de un
+nicho de 0,1 m de fondo o más, y si no, una caja, a una distancia de medición
+de 0,1 m a 0,3 m. Bárrela con la sonda normal y midiendo hacia fuera, en líneas
+separadas una distancia de medición, a velocidad constante de 0,1 m/s a
+0,3 m/s y con un tiempo por subárea proporcional a su área. Una intensidad
+negativa, o un $F_{pI}$ de más de 10 dB (6 dB si el elemento es absorbente
+hacia el receptor), obliga a alejar la superficie de 5 cm a 10 cm antes de
+añadir absorción. Vuelve a barrer con el recorrido girado 90°: la media de los
+dos solo vale si difieren menos de 1,0 dB en todas las bandas. Con $F_{pI}$ por
+debajo de 10 dB, baja la fuente 10 dB: si $F_{pI}$ cambia menos de 1 dB, ambos
+niveles superan el fondo en 10 dB. Declara $R_\mathrm{I}$ con un decimal junto
+a $F_{pI}$ y el índice residual por banda, con $S$, $S_\mathrm{m}$, la distancia
+de medición y la sonda (micrófonos y espaciador).
+
 **La superficie (apartado 6.4.1).** La superficie de medición envuelve por
 completo el elemento de ensayo. Un elemento alojado en un nicho de más de 0,1 m
 de profundidad se mide normalmente sobre la superficie plana de la boca del

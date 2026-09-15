@@ -26,6 +26,18 @@ fiche. The measurements that produce the spectra live in the
 [flanking](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/) guides; the prediction that consumes the
 ratings is [EN 12354](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain.svg" alt="Calculation chain of the ISO 717 single-number ratings. Across the top, a strip of one-third-octave bands from 50 Hz to 5000 Hz: the 16 bands from 100 Hz to 3150 Hz drawn solid with 500 Hz picked out, the five octave bands from 125 Hz to 2000 Hz bracketed under them, and the bands at 50, 63, 80, 4000 and 5000 Hz dashed as an enlarged range that only the adaptation terms read, the 4000 and 5000 Hz bands in ISO 717-1 alone. A box states the rule both parts share: shift the Table 3 curve towards the measurement in 1 dB steps until the sum of unfavourable deviations is as large as possible but not more than 32.0 dB over 16 bands or 10.0 dB over 5, in 0.1 dB steps for the expression of uncertainty, and read the shifted curve at 500 Hz. Below it, two small charts side by side. On the left, ISO 717-1 for airborne sound: the reference curve moved 22 dB down onto a measured sound reduction index, with bars where the measurement falls below it that add up to 31.8 dB, giving Rw = 52 − 22 = 30 dB; C = 28 − 30 = −2 dB from spectrum No. 1, pink noise, and Ctr = 27 − 30 = −3 dB from spectrum No. 2, urban traffic, both over all 16 bands, stated as Rw(C;Ctr) = 30 (−2; −3) dB. On the right, ISO 717-2 for impact sound: the reference curve moved 19 dB up onto a measured normalized impact level, with bars where the measurement rises above it that add up to 28.0 dB, giving Ln,w = 60 + 19 = 79 dB, with 5 dB taken off when the bands are octaves, and CI from the unweighted energy sum of the first 15 bands, without 3150 Hz. Each side lists its enlarged-range terms, and a box at the foot carries Cj = XAj − Xw and CI = Ln,sum − 15 − Ln,w" width="100%"></picture>
+
+*One rule, two engines. Both parts shift their own Table 3 curve the same way,
+and the shift differs between them only in the side of the curve a deviation
+counts on: below it for airborne insulation, where the curve comes to rest
+22 dB down with 31.8 dB of deviations and reads 30 dB at 500 Hz, and above it
+for impact sound, where it comes to rest 19 dB up with 28.0 dB and reads
+79 dB. Where the bands are octaves, ISO 717-2 takes a further 5 dB off that
+reading and ISO 717-1 does not. The adaptation terms then go back to the
+measured bands, all 16 of them for $C$ and $C_\mathrm{tr}$ and only the first
+15 for $C_\mathrm{I}$.*
+
 ## Airborne ratings (ISO 717-1)
 
 The band spectrum is collapsed to one number by the **reference-curve
@@ -137,21 +149,22 @@ $L_\mathrm{n,r,0,w} = 77.6$ dB and $C_\mathrm{I,r,0} = -10.3$ dB of A.2.2).
 import numpy as np
 from phonometry import building
 
-# 16 one-third-octave impact levels (100 Hz - 3150 Hz), dB, from the
-# ISO 717-2 Annex C worked example; measured with T = T0, so these are
-# already the standardized L'nT values.
-l_nt = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-                 73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+# ISO 717-2 Annex C worked example: the bare heavy floor of Table C.1,
+# laboratory Ln in one-third octaves. CI is read over the 100-2500 Hz sum
+# that A.2.1 asks for, not over the sixteen bands the 2020 print of that
+# cell sums.
+l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-res_imp = building.weighted_impact_rating(l_nt)
-print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+res_imp = building.weighted_impact_rating(l_n)
+print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(building.weighted_impact_rating(octave).rating)  # 54
 
-res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
+res_imp.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
 
 <details>
@@ -162,38 +175,42 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import building
 
-# 16 standardized one-third-octave impact levels L'nT, dB (ISO 717-2
-# Annex C worked example, measured with T = T0).
-l_nt = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+# 16 one-third-octave impact levels Ln, dB (ISO 717-2 Annex C worked
+# example, the bare heavy floor of Table C.1; the CI in the title is read
+# over the 100-2500 Hz sum that A.2.1 asks for).
+l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-res_imp = building.weighted_impact_rating(l_nt)
+res_imp = building.weighted_impact_rating(l_n)
 
-# One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
+# One line — measured Ln vs the shifted ISO 717-2 reference (measured-above shaded):
 res_imp.plot()
 plt.show()
 
 # By hand, from the band curve the result now carries (note the opposite sign:
 # an unfavourable deviation is where the MEASURED level exceeds the reference).
-# Here the input was l_n_t, so the rated quantity is the field level L'nT,w:
+# Here the input was Ln, so the rated quantity is Ln,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured L'nT")
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured Ln")
 ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
 ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Impact sound pressure level [dB]")
-ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
 ax.legend()
 plt.show()
 ```
 
 </details>
 
-Feeding the standardized spectrum into `weighted_impact_rating` reproduces
-the ISO 717-2 Annex C values (thirds $L'_\mathrm{nT,w} = 79$, $C_\mathrm{I} = -11$; octave
-54, $C_\mathrm{I} = 0$).
+Feeding this spectrum into `weighted_impact_rating` reproduces the ISO 717-2
+Annex C rating (thirds $L_\mathrm{n,w} = 79$; octave 54, $C_\mathrm{I} = 0$)
+and, reading $C_\mathrm{I}$ over the 100–2500 Hz sum that A.2.1 specifies,
+$C_\mathrm{I} = -11$ for the thirds. The 2020 print of Table C.1 sums all
+sixteen bands in that cell and gives $-10$ instead; the registry entry is in
+[Errata](https://jmrplens.github.io/phonometry/reference/errata/).
 
 ### `weighted_impact_rating()` parameters
 
@@ -1226,6 +1243,8 @@ DB-HR states its requirements on two kinds of room: the **protected room**
 (*recinto protegido*, a habitable room with reinforced acoustic protection:
 bedrooms, living areas, classrooms, operating theatres, professional offices)
 and the **habitable room** (*recinto habitable*) in general.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements.svg" alt="Section through a three-storey residential building with each DB-HR requirement on its element: the Table 2.1 D2m,nT,Atr of the facade with the microphone 2 m out, the RA of the partition, DnT,A between dwellings and over a shop, the L′nT,w of the floors, the RA pair of a shared door and the two routes of the party wall, above the Annex A chain from eighteen bands to the rounded number each airborne limit is read against" width="88%"></picture>
 
 **Facades (Table 2.1).** The requirement on $D_{2\mathrm{m,nT,Atr}}$ is read by bands of
 the site's day noise index $L_\mathrm{d}$ ($L_\mathrm{d} \le 60$, $60 < L_\mathrm{d} \le 65$,

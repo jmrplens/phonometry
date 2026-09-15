@@ -276,6 +276,29 @@ returns here too: because the three bands may come from three different
 corners, "each band can require an individual correction to the signal level
 for background noise" (the NOTE under Part 1 Clause 9.1).
 
+### How the measurement goes
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_low_frequency_corners.svg" alt="Four panels about one receiving room of 3.6 m by 2.7 m by 2.4 m, 23 cubic metres to the nearest cubic metre. Top left, a plan: beyond the partition, part of the source room with the loudspeaker at two positions; in the receiving room, a dashed central zone half a metre in from every wall holding five default microphone positions, and four corner microphones numbered 1 to 4, corners 1 and 3 at floor level and corners 2 and 4 at ceiling level, two of them beside the partition and two beside the far wall. Top right, corner 2 close up, where two walls meet the ceiling, with the microphone between 0.3 and 0.4 metres from each of the three surfaces, the three distances not necessarily equal, and no furniture within half a metre. Bottom left, a section through the same room with corners 1 and 3 near the floor, 2 and 4 under the ceiling, and the five default positions at different heights inside the central zone. Bottom right, the 63 Hz band worked through: four corner readings at each of the two source positions, the highest of each, 65.1 and 65.6 dB, energy-averaged into a corner level of 65.4 dB rather than the loudest single reading, then combined with the central-zone level of 57.9 dB into a level of 61.9 dB that enters the level difference. A box at the foot carries Formula (12) for the corner level and Formula (13) for the combination, and four lines under it add the 15 s at each corner, the background in every corner used, the single 63 Hz octave reverberation time of 0.66 s for all three bands, and how Parts 2 and 3 differ" width="100%" />
+
+Use class 0 or 1 sound level meters, filters and calibrator, and check the
+chain with the calibrator at the start and end of every session; if two
+consecutive checks differ by more than 0.5 dB, discard what was measured since
+the last good one. Take the room volume to the nearest cubic metre: under
+25 m³ the corners are added to the central zone, not substituted for it, so
+take the default positions as usual, holding each fixed one for at least 15 s
+in the 50 Hz to 80 Hz bands. Then put the microphone in at least four corners,
+preferably two at floor level and two at ceiling level, 0.3 m to 0.4 m from
+each of the three surfaces and, in Part 1, at least 1.0 m from the
+loudspeaker, and average for at least 15 s. Repeat the set of corners at each
+position of a single loudspeaker or of the tapping machine, at least two in
+Parts 1 and 2. With the source off, measure the background in every corner
+used, aiming for more than 10 dB below signal plus background: between 6 dB
+and 10 dB, subtract it on an energy basis; at 6 dB or less, apply the 1.3 dB
+correction and report the band as a limit of measurement. Measure one
+reverberation time, in the 63 Hz octave band from at least six decays, for all
+three bands. The report gives the volume and says where the procedure was
+used.
+
 ## Combining the two (Formula (13))
 
 The reported low-frequency level weighs the corner level one third against two

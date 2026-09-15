@@ -174,6 +174,29 @@ A method defined by how a probe is moved is not documented by its formula.
 Everything below fixes a number that the formula then consumes, and none of it
 is checked by the functions on this page.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation.svg" alt="Section through a laboratory transmission suite. On the left, the source room with a loudspeaker low in the room, clear of the walls, and five microphone positions spread through the room for the room average Lp1. In the middle, the specimen of ten square metres fills the test opening of the separating wall, flush with its receiving face. On the receiving side a dashed measurement surface forms a shallow box in front of the specimen, its sides as deep as the measurement distance d of 0.1 to 0.3 metres and each side a subarea of its own; for a four by two and a half metre opening at 0.2 metres its area Sm is 12.6 square metres. The front of the box is split into three subareas: a p-p probe held normal to the surface sits on the first, two arrows cross the second outwards, and an arrow points back towards the specimen through the third, whose area enters Formula 11 with a minus sign. Below, one panel draws the two scan patterns, vertical lines and then horizontal lines turned 90 degrees, beside the rules: lines one measurement distance apart, a steady 0.1 to 0.3 metres per second, time per subarea following its area, and the mean of the pair kept only if the two differ by less than 1.0 decibel in every band. A second panel shows ISO 15186-3: microphones less than 50 millimetres from the specimen for LpS, the probe on the measurement surface, an absorber on the wall opposite, the formula with 9 decibels, scans differing by less than 2.0 decibels up to 80 hertz and 1.0 decibel from 100 to 160 hertz, and the thickness limits for an absorbing face of the specimen in the source room. A box at the foot carries the intensity sound reduction index with its 6 decibels and the pressure-intensity indicator limits of 10 and 6 decibels, and three lines give the IEC 61043 class 1 probe, the 10 decibel background test and the plane ISO 15186-2 uses before a whole wall in a building, with its indicator 7 decibels under the residual index, or under 6 decibels for an absorbing element" width="100%" />
+
+### How the measurement goes
+
+The analyser and its probe have to meet IEC 61043 class 1, with a
+pressure-residual intensity index more than 10 dB above the $F_{pI}$ you
+expect. Before each use, let the instrument warm up, set both microphones with
+a class 0 or class 1 sound calibrator, and measure the residual index on the
+residual-intensity testing device. Drive the source room and take $L_{p1}$ as
+ISO 140-3 asks. On the receiving side, the measurement surface is the flat
+opening of a niche at least 0.1 m deep, and otherwise a box, at a measurement
+distance of 0.1 m to 0.3 m. Scan it with the probe normal to the surface and
+reading outwards, in lines about one measurement distance apart, at a constant
+0.1 m/s to 0.3 m/s, giving each subarea time in proportion to its area. A
+negative intensity, or $F_{pI}$ above 10 dB (6 dB for a specimen whose
+receiving face absorbs), means moving the surface out by 5 cm to 10 cm before
+adding absorption. Scan again with the path turned 90°: the mean of the pair
+stands only if the two differ by less than 1.0 dB in every band. With $F_{pI}$
+below 10 dB, lower the source by 10 dB: if $F_{pI}$ moves by less than 1 dB,
+both levels clear the background by 10 dB. Report $R_\mathrm{I}$ to one decimal
+beside $F_{pI}$ and the residual index in every band, with $S$, $S_\mathrm{m}$,
+the measurement distance and the probe's microphones and spacer.
+
 **The surface (Clause 6.4.1).** The measurement surface totally encloses the
 test specimen. A specimen in a niche deeper than 0.1 m is normally measured on
 the flat surface of the niche opening; otherwise, and for most small building

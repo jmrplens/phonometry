@@ -496,14 +496,14 @@ def test_a_ten_point_humidity_swing_busts_the_cap_of_the_clause() -> None:
     assert printed_side.tolist() == pytest.approx(
         [0.0015494, 0.00361527, -0.01575226, -0.10329354], abs=5e-8
     )
+    attenuation_with = _library_m(temperature_c=20.0, humidity=60.0, bands=bands)
+    attenuation_empty = _library_m(temperature_c=20.0, humidity=50.0, bands=bands)
     with pytest.warns(SuspendedCeilingWarning, match="4.2.1"):
         got = materials.air_absorption_correction(
             volume_m3=_SRL_VOLUME_M3,
             specimen_area_m2=_SRL_AREA_M2,
-            attenuation_with=_library_m(temperature_c=20.0, humidity=60.0, bands=bands),
-            attenuation_empty=_library_m(
-                temperature_c=20.0, humidity=50.0, bands=bands
-            ),
+            attenuation_with=attenuation_with,
+            attenuation_empty=attenuation_empty,
         )
     assert got.tolist() == pytest.approx(printed_side.tolist(), abs=5e-9)
     assert float(np.max(np.abs(got))) > AIR_CORRECTION_LIMIT

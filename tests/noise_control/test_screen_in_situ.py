@@ -144,8 +144,9 @@ def test_the_directivity_index_is_the_mean_less_the_position() -> None:
 
 
 def test_the_directivity_index_needs_twelve_positions() -> None:
+    eleven_positions = np.full(11, 80.0)
     with pytest.raises(ValueError, match="12 positions"):
-        noise_control.directivity_index_db(np.full(11, 80.0))
+        noise_control.directivity_index_db(eleven_positions)
 
 
 def test_an_omnidirectional_source_has_no_directivity() -> None:

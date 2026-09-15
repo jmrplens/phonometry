@@ -371,7 +371,7 @@ def test_a_band_centre_at_zero_is_refused() -> None:
 
 def test_a_non_finite_wind_component_is_refused() -> None:
     with pytest.raises(ValueError, match="vector_component_m_s"):
-        environment.wind_class(float("nan"))
+        environment.wind_class(math.nan)
 
 
 # The campaigns other people published against ISO 10847, which prints no

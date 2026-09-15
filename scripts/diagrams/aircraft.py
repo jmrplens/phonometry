@@ -540,6 +540,380 @@ def _d_doc29_segment_geometry(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
+# From an ANP aircraft record to an event level (ECAC Doc 29, Appendix G)
+# ---------------------------------------------------------------------------
+
+
+def _d_anp_records(s: SVG, th: Theme) -> None:
+    """How one ANP aircraft record feeds the ECAC Doc 29 single-event chain.
+
+    Three bands on the shipped v2.3 tables for the A320-211. (a) The tables
+    one aircraft is read from and the keys that join them (Vol. 2 Appendix
+    G2 to G5): a type the database lacks enters through the Substitutions
+    table the ANP website keeps, NPD_ID leads to the NPD rows and ACFT_ID to
+    the trajectory, which is a fixed-point profile or procedural steps with
+    their weights and coefficients, never both for one operation in this
+    release. (b) The steps flown at a sea-level aerodrome (Appendix B) and
+    the third of the ten segments of the profile that result, drawn in the
+    plane of the segment and a receiver 3 000 m along the track and 500 m to
+    the side (Fig. 4-2b, 0.18 px per metre); the side view keeps 0.072 px per
+    metre along the track and 0.25 px per metre in height. (c) The four NPD
+    cells, the segment corrections of Eq. 4-8b and the energy sum of
+    Eq. 4-11, with the numbers the library returns at that receiver.
+    """
+    # ------------------------------------------------------------------ (a)
+    s.text(
+        36,
+        64,
+        "(a) One aircraft in the ANP tables, joined by their keys",
+        15,
+        th.fg,
+        bold=True,
+        anchor="start",
+    )
+
+    # A type the database lacks enters through a proxy (Appendix G5).
+    s.rect(36, 76, 304, 98, th.panel, th.muted, rx=6, sw=1.4, dash="5,4")
+    s.text(48, 95, "Substitutions table", 12, th.fg, bold=True, anchor="start")
+    s.text(328, 95, "on the ANP website", 10, th.muted, anchor="end")
+    s.text(
+        48, 113, "A20N (A320neo, CFM engines): not in v2.3", 11, th.fg, anchor="start"
+    )
+    s.text(48, 130, "ANP proxy A320-211, adjusted either by", 11, th.fg, anchor="start")
+    s.text(48, 147, "Δdep = −6.7 dB on its departure NPDs", 11, th.fg, anchor="start")
+    s.text(
+        48, 164, "or by Ndep = 0.21 on the A20N departures", 11, th.fg, anchor="start"
+    )
+    s.arrow(340, 125, 358, 125, th.muted, 1.6)
+
+    # The Aircraft.csv record (Appendix G2).
+    rx0, rw = 360.0, 508.0
+    s.rect(rx0, 76, rw, 98, th.panel, th.fg, rx=6, sw=1.8)
+    s.text(rx0 + 12, 95, "Aircraft.csv", 13, th.fg, bold=True, anchor="start")
+    s.text(
+        rx0 + rw - 12, 95, "ACFT_ID  A320-211", 13, th.accent, bold=True, anchor="end"
+    )
+    s.line(rx0, 103, rx0 + rw, 103, th.muted, 1.0)
+    s.text(
+        rx0 + 12,
+        123,
+        "Engine Type  Jet  ·  Number Of Engines  2  ·  Weight Class  Large",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    s.text(rx0 + 12, 143, "NPD_ID  CFM565", 12, th.primary, bold=True, anchor="start")
+    s.text(rx0 + 134, 143, "Power Parameter  CNT (lb)", 12, th.primary, anchor="start")
+    s.text(
+        rx0 + rw - 12, 143, "the power axis of NPD_data.csv", 11, th.muted, anchor="end"
+    )
+    s.text(
+        rx0 + 12,
+        163,
+        "Lateral Directivity Identifier  Wing",
+        12,
+        th.secondary,
+        anchor="start",
+    )
+    s.text(
+        rx0 + rw - 12,
+        163,
+        "selects $Δ_{I}(φ)$ for wing engines (Eq. 4-15)",
+        11,
+        th.muted,
+        anchor="end",
+    )
+
+    # Keys down into the tables.
+    s.arrow(420, 174, 420, 196, th.primary, 1.8)
+    s.arrow(800, 174, 800, 196, th.accent, 1.8)
+
+    # NPD_data.csv (Appendix G4.1): the 4 x 10 set and the four cells one lookup reads.
+    nx0, ny0, nw, nh = 36.0, 198.0, 420.0, 184.0
+    s.rect(nx0, ny0, nw, nh, th.panel, th.primary, rx=6, sw=1.8)
+    s.text(nx0 + 12, ny0 + 19, "NPD_data.csv", 13, th.fg, bold=True, anchor="start")
+    s.text(
+        nx0 + nw - 12,
+        ny0 + 19,
+        "NPD_ID CFM565 · Noise Metric SEL · Op Mode D",
+        11,
+        th.primary,
+        anchor="end",
+    )
+    s.line(nx0, ny0 + 27, nx0 + nw, ny0 + 27, th.muted, 1.0)
+    gx0, gy0, cw, ch = 146.0, ny0 + 52, 29.0, 18.0
+    s.text(nx0 + 12, ny0 + 45, "Power Setting (lb)", 11, th.muted, anchor="start")
+    for i, p in enumerate(("12 000", "15 500", "19 000", "22 500")):
+        s.text(gx0 - 8, gy0 + ch * i + 13, p, 11, th.fg, anchor="end")
+        for j in range(10):
+            used = i in (2, 3) and j in (4, 5)
+            s.rect(
+                gx0 + cw * j,
+                gy0 + ch * i,
+                cw,
+                ch,
+                th.panel if used else th.bg,
+                th.muted,
+                sw=0.6,
+            )
+    s.rect(gx0 + cw * 4, gy0 + ch * 2, cw * 2, ch * 2, "none", th.primary, sw=2.0)
+    for (i, j), v in {
+        (2, 4): "88.3",
+        (2, 5): "82.4",
+        (3, 4): "91.4",
+        (3, 5): "85.7",
+    }.items():
+        s.text(gx0 + cw * j + cw / 2, gy0 + ch * i + 13, v, 10, th.fg)
+    gyb = gy0 + ch * 4
+    s.text(gx0 + cw * 0.5, gyb + 16, "L_200ft", 10, th.muted)
+    s.text(gx0 + cw * 5 - 3, gyb + 16, "L_2000ft", 10, th.primary, anchor="end")
+    s.text(gx0 + cw * 5 + 3, gyb + 16, "L_4000ft", 10, th.primary, anchor="start")
+    s.text(gx0 + cw * 9.5, gyb + 16, "L_25000ft", 10, th.muted)
+    s.text(
+        nx0 + 12,
+        gyb + 34,
+        "SEL at ten slant distances, 200 ft to 25 000 ft",
+        11,
+        th.muted,
+        anchor="start",
+    )
+    s.text(
+        nx0 + 12,
+        gyb + 50,
+        "linear in power (Eq. 4-3), logarithmic in distance (Eq. 4-4)",
+        11,
+        th.muted,
+        anchor="start",
+    )
+
+    # The trajectory (Appendix G3.6 to G3.8): fixed points or procedural steps.
+    px0, pw = 476.0, 392.0
+    s.rect(px0, 198, pw, 62, th.panel, th.muted, rx=6, sw=1.4, dash="5,4")
+    s.text(
+        px0 + 12,
+        216,
+        "Default_fixed_point_profiles.csv",
+        12,
+        th.fg,
+        bold=True,
+        anchor="start",
+    )
+    s.text(px0 + pw - 12, 216, "no A320-211 rows", 11, th.fg, anchor="end")
+    s.text(
+        px0 + 12,
+        234,
+        "Distance (ft) · Altitude AFE (ft) · TAS (kt) · Power Setting",
+        11,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        px0 + 12,
+        251,
+        "tabulated for 13 departure and 20 arrival types only",
+        11,
+        th.muted,
+        anchor="start",
+    )
+    s.text(px0 + pw / 2, 275, "or", 12, th.muted)
+    s.rect(px0, 284, pw, 98, th.panel, th.accent, rx=6, sw=1.8)
+    s.text(
+        px0 + 12,
+        302,
+        "Default_departure_procedural_steps.csv",
+        12,
+        th.fg,
+        bold=True,
+        anchor="start",
+    )
+    s.text(px0 + pw - 12, 302, "Stage Length 1", 11, th.accent, anchor="end")
+    s.text(
+        px0 + 12,
+        320,
+        "Profile_ID DEFAULT, 9 steps: Takeoff … Climb to 10 000 ft",
+        11,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        px0 + 12,
+        337,
+        "Default_weights.csv: 133 400 lb",
+        11,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        px0 + 12,
+        354,
+        "Jet_engine_coefficients.csv: E, F, Ga, Gb, H by Thrust Rating",
+        11,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        px0 + 12,
+        371,
+        "Aerodynamic_coefficients.csv: B, C, R by Flap_ID",
+        11,
+        th.fg,
+        anchor="start",
+    )
+
+    # ------------------------------------------------------------------ (b)
+    s.text(
+        36,
+        412,
+        "(b) The steps flown into a path, and one segment of it seen from O",
+        15,
+        th.fg,
+        bold=True,
+        anchor="start",
+    )
+
+    # Left: the plane of the third segment and the receiver (Fig. 4-2b), 0.18 px/m.
+    sc = 0.18
+    yb = 512.0
+    x1 = 92.0
+    lam_px, q_px, dp_px = 1236.5 * sc, 675.9 * sc, 612.2 * sc
+    s.text(
+        36,
+        432,
+        "profile segment 3 of 10, in its plane with O (Fig. 4-2b)",
+        11,
+        th.muted,
+        anchor="start",
+    )
+    ox, oy = _segment_panel(s, th, x1, yb, q_px, dp_px, lam_px)
+    s.line(x1, yb, ox, oy, th.muted, 1.2, dash="5,4")
+    s.line(x1 + lam_px, yb, ox, oy, th.muted, 1.2, dash="5,4")
+    s.line(ox, yb, ox, oy, th.primary, 2.0)
+    s.text(ox + 10, yb + 16, "$d_p$ = 612 m", 12, th.primary, anchor="start")
+    s.text(x1 + 22, yb + dp_px / 2 + 22, "$d_1$ = 912 m", 11, th.muted, anchor="end")
+    s.text(x1 + lam_px - 8, yb + 40, "$d_2$ = 830 m", 11, th.muted, anchor="start")
+    s.dim(x1, yb - 30, ox, yb - 30, "$q$ = 676 m", offset=0, size=11)
+    s.dim(x1, yb - 56, x1 + lam_px, yb - 56, "$λ$ = 1 236 m", offset=0, size=11)
+    s.text(330, 590, "$0 ≤ q ≤ λ$, so $d_s = d_p$", 11, th.muted, anchor="start")
+    s.text(330, 607, "$P$ = 20 159 lb (Eq. 4-12)", 11, th.primary, anchor="start")
+    s.text(330, 624, "$V_{seg}$ = 171 kt (Eq. 4-13a)", 11, th.muted, anchor="start")
+
+    # Right: height against distance along the track, first 5 km, heights x3.5.
+    gx, gy = 490.0, 610.0
+    kx, kz = 0.072, 0.25
+
+    def at(xm: float, zm: float) -> tuple[float, float]:
+        return gx + kx * xm, gy - kz * zm
+
+    s.text(
+        476,
+        432,
+        "flown by Appendix B at sea level, 15 °C, 133 400 lb",
+        11,
+        th.muted,
+        anchor="start",
+    )
+    s.text(
+        476, 447, "first 5 km of 24.2 km; heights ×3.5", 10, th.muted, anchor="start"
+    )
+    s.text(
+        476,
+        461,
+        "the ten segments of the profile itself, not §3.6 sub-segments",
+        10,
+        th.muted,
+        anchor="start",
+    )
+    s.ground(gy, 480, 866)
+    pts = [
+        (0, 0),
+        (1026.6, 0),
+        (2300.9, 304.8),
+        (3534.4, 391.8),
+        (4332.2, 445.4),
+        (4637.0, 495.3),
+    ]
+    end = (5000.0, 554.7)
+    d = "M " + " L ".join(f"{at(*pt)[0]:.1f} {at(*pt)[1]:.1f}" for pt in [*pts, end])
+    s.path(d, stroke=th.fg, sw=2.0)
+    s.line(*at(0, 0), *at(1026.6, 0), th.muted, 4.5)
+    s.line(*at(*pts[2]), *at(*pts[3]), th.accent, 4.5)
+    for pt in pts:
+        s.circle(*at(*pt), 3.4, th.fg)
+    s.text(486, gy + 22, "ground roll 1 027 m", 11, th.muted, anchor="start")
+    a3, a4 = at(*pts[2]), at(*pts[3])
+    s.text(a3[0] - 8, a3[1] + 4, "$S_1$ 305 m, 20 636 lb", 11, th.fg, anchor="end")
+    s.text(a4[0] - 4, a4[1] - 14, "$S_2$ 392 m, 19 754 lb", 11, th.fg, anchor="end")
+    a6 = at(*pts[5])
+    s.line(a6[0], a6[1] + 6, a6[0], gy - 36, th.muted, 1.0, dash="3,3")
+    s.text(a6[0] - 6, gy - 62, "MaxTakeoff to MaxClimb", 10, th.muted, anchor="end")
+    s.text(a6[0] - 6, gy - 48, "19 301 to 16 254 lb", 10, th.muted, anchor="end")
+    oxr = at(3000.0, 0)[0]
+    s.mic(oxr, gy - 40, gy, 0.55)
+    s.text(oxr + 12, gy - 28, "O at 3 000 m", 11, th.secondary, anchor="start")
+    s.text(oxr + 12, gy - 14, "500 m aside", 11, th.secondary, anchor="start")
+
+    # ------------------------------------------------------------------ (c)
+    s.text(
+        36,
+        662,
+        "(c) Four table cells and one segment, then the sum over the path",
+        15,
+        th.fg,
+        bold=True,
+        anchor="start",
+    )
+    by, bh = 674.0, 96.0
+    s.rect(36, by, 220, bh, th.panel, th.primary, rx=6, sw=1.8)
+    s.text(146, by + 20, "NPD lookup", 12, th.primary, bold=True)
+    s.text(146, by + 42, "$L_{E∞}$(20 159 lb, 612 m)", 12, th.fg)
+    s.text(146, by + 62, "= 89.3 dB", 13, th.fg, bold=True)
+    s.text(146, by + 84, "+0.07 dB impedance (Eq. 4-6)", 11, th.muted)
+    s.arrow(258, by + bh / 2, 276, by + bh / 2, th.muted, 1.6)
+    s.rect(278, by, 330, bh, th.panel, th.accent, rx=6, sw=1.8)
+    s.text(
+        443,
+        by + 20,
+        "Corrections for this segment (Eq. 4-8b)",
+        12,
+        th.accent,
+        bold=True,
+    )
+    s.text(
+        443,
+        by + 42,
+        "$Δ_V$ −0.30, $Δ_{I}(φ)$ +0.20, $Λ(β, ℓ)$ 0.32, $Δ_F$ −0.97 dB",
+        12,
+        th.fg,
+    )
+    s.text(443, by + 62, "$β = φ$ = 35.2°, $ℓ$ = 500 m, Wing mounting", 11, th.muted)
+    s.text(443, by + 86, "$L_{E,seg}$ = 88.0 dB", 13, th.accent, bold=True)
+    s.arrow(610, by + bh / 2, 628, by + bh / 2, th.muted, 1.6)
+    s.rect(630, by, 238, bh, th.panel, th.secondary, rx=6, sw=1.8)
+    s.text(749, by + 20, "All ten profile segments", 12, th.secondary, bold=True)
+    s.text(749, by + 42, "58.4, 79.5, 88.0, 78.2, 65.6, …", 11, th.fg)
+    s.text(749, by + 64, "$L_E$ = 89.0 dB at O", 14, th.secondary, bold=True)
+    s.text(749, by + 86, "over an x, y grid: the contour", 11, th.muted)
+
+    fy = 786.0
+    s.rect(36, fy, 832, 64, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(
+        452,
+        fy + 26,
+        "$L_{E,seg} = L_{E∞}(P, d) + Δ_V + Δ_{I}(φ) − Λ(β, ℓ) + Δ_F$   (Eq. 4-8b)",
+        14,
+        th.fg,
+    )
+    s.text(
+        452,
+        fy + 50,
+        "$L_E$ = energy sum of the $L_{E,seg}$ (Eq. 4-11)  ·  "
+        "$Δ_{impedance} = 10 lg(ρ·c/409.81)$ (Eq. 4-6)",
+        13,
+        th.fg,
+    )
+
+
+# ---------------------------------------------------------------------------
 # One certification measurement station (ICAO Annex 16 Vol. I, Appendix 2)
 # ---------------------------------------------------------------------------
 

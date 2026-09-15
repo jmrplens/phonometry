@@ -4,8 +4,9 @@
 One subject: a device under test and the setup that measures it. The
 emission diagrams draw the sound power and intensity methods that grade a
 machine, the electroacoustics diagrams draw the transducer measurements, the
-broadcast diagram draws the programme loudness chain, and the noise control
-diagram draws what is done to a device once it has been graded.
+broadcast diagrams draw the programme loudness chain and the tests of the
+quasi-peak meter, and the noise control diagram draws what is done to a device
+once it has been graded.
 """
 
 from __future__ import annotations
@@ -818,6 +819,237 @@ def _d_reverberation_power(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
+# ISO 3747 comparison in situ: one room, two sources, the same microphones
+# ---------------------------------------------------------------------------
+
+
+def _d_sound_power_in_situ(s: SVG, th: Theme) -> None:
+    """The ISO 3747 comparison in plan: one room, two sources, the same microphones.
+
+    The machine is measured where it stands, and its reference box is the
+    guide's compressor, 2,2 m by 1,4 m. Its directivity survey spans 4 dB,
+    which makes it directional (7.2), so the reference sound source goes on
+    the side it emits towards, 0,5 m clear of the box (7.3.2, B.2), and one
+    location serves (7.3.1, 7.3.3). The four microphone positions stand at
+    the guide's measurement distance of 1,5 m, at least 2 m apart and 0,5 m
+    from every boundary (7.4.1), and they are zoned by Table 1: position 1
+    is as far from the source as from the box within 10 % (+/-), position 2
+    is nearer the source (-), position 3 nearer the machine (+), and
+    position 4 is screened by the machine, which is where B.4 recommends a
+    single position. The dotted ring is the directivity survey of 7.2, 1 m
+    out. The right-hand column shows the three readings of 7.5 and the
+    several locations of 7.3.3; the boxed lines are Eq. (11) and Eq. (A.1).
+    """
+    sc = 64.0  # px per metre of the plan
+    cx, cy = 292.0, 334.0  # centre of the reference box
+
+    def at(x: float, y: float) -> tuple[float, float]:
+        return cx + x * sc, cy - y * sc
+
+    s.text(450, 66, "One room, two sources, the same microphones", 17, th.fg, bold=True)
+
+    # The corner of the hall: the walls the clearances are read against.
+    wall_x = cx - 3.55 * sc
+    wall_y = cy - 3.1 * sc
+    s.line(wall_x, wall_y, 588, wall_y, th.fg, 3.0)
+    s.line(wall_x, wall_y, wall_x, 492, th.fg, 3.0)
+    x = wall_x + 18
+    while x < 588:
+        s.line(x, wall_y, x - 9, wall_y - 9, th.muted, 1.1)
+        x += 22
+    y = wall_y + 22
+    while y < 492:
+        s.line(wall_x, y, wall_x - 9, y - 9, th.muted, 1.1)
+        y += 22
+    s.text(586, wall_y - 16, "the workroom, as it stands", 12, th.muted, anchor="end")
+
+    bx0, by0 = at(-1.1, 0.7)
+    bw, bh = 2.2 * sc, 1.4 * sc
+    rx, ry = at(0.0, 1.2)
+
+    mics = ((1.23, 2.19), (-0.85, 2.20), (-2.6, 0.55), (0.6, -2.2))
+    pts = [at(*m) for m in mics]
+    (m1x, m1y), (m2x, m2y), (m3x, m3y), (m4x, m4y) = pts
+
+    # The lines of sight, under the machine, so the screened one is cut by it.
+    s.line(m4x, m4y, rx, ry, th.muted, 1.3, dash="5,4")
+    s.line(m1x, m1y, bx0 + bw, by0, th.muted, 1.2, dash="4,4")
+    s.line(m1x, m1y, rx, ry, th.accent, 1.3, dash="5,4")
+    s.line(m2x, m2y, rx, ry, th.accent, 1.3, dash="5,4")
+
+    # The directivity survey of 7.2: the locus 1 m out from the box.
+    s.rect(
+        cx - 2.1 * sc,
+        cy - 1.7 * sc,
+        4.2 * sc,
+        3.4 * sc,
+        "none",
+        th.muted,
+        rx=1.0 * sc,
+        sw=1.3,
+        dash="2,5",
+    )
+    s.text(74, 152, "directivity survey first,", 12, th.muted, anchor="start")
+    s.text(74, 170, "1 m out and 1.5 m up:", 12, th.muted, anchor="start")
+    s.text(74, 188, "±4 dB, so directional", 12, th.muted, anchor="start")
+
+    # The machine and its reference box.
+    s.rect(bx0 + 6, by0 + 6, bw - 12, bh - 12, th.panel, th.fg, rx=4, sw=2.2)
+    s.rect(bx0, by0, bw, bh, "none", th.fg, rx=2, sw=1.3, dash="6,4")
+    s.text(cx, cy - 4, "the reference box", 12, th.muted)
+    s.text(cx, cy + 14, "2.2 m × 1.4 m", 12, th.fg)
+
+    # The side the machine emits towards, which is the side the source goes on.
+    s.arrow(236, by0 + 6, 236, ry + 5, th.primary, 2.0)
+    s.text(230, 250, "main emission", 11, th.primary)
+
+    # The reference sound source, on that side and 0.5 m clear of the box.
+    s.dim(rx + 20, by0, rx + 20, ry, "≥ 0.5 m", size=12, label_side="right")
+    s.circle(rx, ry, 11, th.accent)
+    s.circle(rx, ry, 4.5, th.bg)
+    s.line(426, 240, rx + 11, ry - 3, th.accent, 1.2)
+    s.text(430, 234, "reference source", 12, th.accent, bold=True, anchor="start")
+    s.text(430, 252, "on the emitting side", 12, th.muted, anchor="start")
+
+    # Position 1, the +/- zone of Table 1: as far from the box as from the source.
+    s.text(
+        586,
+        158,
+        "position 1: 1.5 m to the box, 1.6 m to the source,",
+        12,
+        th.fg,
+        anchor="end",
+    )
+    s.text(
+        586,
+        176,
+        "equal within 10 %: the +/− zone of Table 1",
+        12,
+        th.muted,
+        anchor="end",
+    )
+
+    # The measurement distance, the 2 m spacing and the 0.5 m off the wall.
+    s.dim(m4x, by0 + bh, m4x, m4y, "$d_m$ = 1.5 m", offset=-38, size=12)
+    s.line(m1x, m1y, m2x, m2y, th.secondary, 1.2, dash="3,4")
+    s.text((m1x + m2x) / 2, 214, "≥ 2 m", 12, th.secondary)
+    s.dim(wall_x + 3, m3y, m3x, m3y, "≥ 0.5 m", offset=30, size=12)
+
+    tags = ("1 +/−", "2 −", "3 +", "4 ++")
+    for px, py in pts:
+        s.circle(px, py, 7, th.secondary)
+        s.circle(px, py, 2.4, th.bg)
+    # Position 1 is where the two sight lines leave, so its tag goes beside
+    # the dot rather than under it: centred below, both dashed lines run
+    # through the glyphs.
+    s.text(m1x + 14, 198, tags[0], 13, th.fg, bold=True, anchor="start")
+    s.text(m2x, 216, tags[1], 13, th.fg, bold=True)
+    s.text(m3x, 280, tags[2], 13, th.fg, bold=True)
+    s.text(344, 479, tags[3], 13, th.fg, bold=True, anchor="start")
+
+    s.text(
+        320,
+        498,
+        "three or four positions, each in sight of every emitting area "
+        "or screened from all",
+        12,
+        th.muted,
+    )
+    s.text(
+        320,
+        516,
+        "Table 1: 1 equally far from both, 2 nearer the source, 3 nearer the machine",
+        12,
+        th.muted,
+    )
+    s.text(
+        320,
+        534,
+        "4 is screened from the source, where Annex B recommends a single position",
+        12,
+        th.muted,
+    )
+
+    # What is read at every position (7.5).
+    col, cw = 604.0, 276.0
+    s.rect(col, 92, cw, 176, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(col + cw / 2, 116, "At every position, three readings", 13, th.fg, bold=True)
+    ix = col + 18
+    s.rect(ix - 8, 134, 16, 12, th.panel, th.fg, rx=2, sw=1.6)
+    s.text(col + 34, 144, "the machine running", 12, th.fg, anchor="start")
+    s.text(col + 34, 163, "$L′_{pi(ST)}$", 13, th.fg, anchor="start")
+    s.circle(ix, 184, 7, th.accent)
+    s.circle(ix, 184, 2.8, th.bg)
+    s.text(col + 34, 188, "the reference source, 30 s", 12, th.fg, anchor="start")
+    s.text(col + 34, 207, "$L′_{pi(RSS)}$", 13, th.accent, anchor="start")
+    s.circle(ix, 228, 6.5, "none", th.muted, sw=1.8)
+    s.text(
+        col + 32, 232, "the background, just before or after", 12, th.fg, anchor="start"
+    )
+    s.text(col + cw / 2, 256, "same positions, same orientations", 11, th.muted)
+
+    # Several locations of the reference source (7.3.3).
+    s.rect(col, 282, cw, 264, th.panel, th.fg, rx=6, sw=1.4)
+    s.text(col + cw / 2, 306, "When one location is not enough", 13, th.fg, bold=True)
+    lw, lh = 196.0, 28.0
+    lx0, ly0 = col + (cw - lw) / 2, 360.0
+    s.rect(lx0, ly0, lw, lh, th.bg, th.fg, rx=2, sw=1.3, dash="6,4")
+    step = lw / 4
+    for j in range(4):
+        xx = lx0 + step * (j + 0.5)
+        for yy in (ly0 - 13, ly0 + lh + 13):
+            s.circle(xx, yy, 6, th.accent)
+            s.circle(xx, yy, 2.4, th.bg)
+    s.dim(lx0 + step * 0.5, ly0 - 30, lx0 + step * 1.5, ly0 - 30, "$d_m$", size=12)
+    s.dim(lx0, ly0 + lh + 46, lx0 + lw, ly0 + lh + 46, "$a$ > $d_m$", size=12)
+    s.text(
+        col + cw / 2, 454, "omnidirectional: along the sides, $d_m$ apart", 12, th.fg
+    )
+    s.text(col + cw / 2, 472, "distinct emitting areas: one per area", 12, th.fg)
+    s.text(col + cw / 2, 490, "$a$ ≤ $d_m$, omnidirectional, none on top:", 12, th.fg)
+    s.text(col + cw / 2, 508, "one location by each vertical side", 12, th.fg)
+    s.text(col + cw / 2, 530, "here, one emitting side: one location", 11, th.muted)
+
+    # The comparison, the check on the room, and what the drawing cannot dimension.
+    s.rect(52, 560, 796, 80, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(450, 592, "$L_W = L_{W(RSS)} − L̄_{p(RSS)} + L̄_{p(ST)}$", 19, th.fg)
+    s.text(836, 592, "Eq. 11", 12, th.muted, anchor="end")
+    s.text(
+        440,
+        622,
+        "$ΔL_{f}(r) = L_{p(RSS),r} − L_{W(RSS)} + 11 dB + 20 lg(r/r_0)$, "
+        "at least 7 dB where the microphones stand",
+        13,
+        th.muted,
+    )
+    s.text(836, 622, "Annex A", 12, th.muted, anchor="end")
+    s.text(
+        450,
+        668,
+        "background at each position: over 15 dB no correction, 6 dB to "
+        "15 dB Eq. 7, under 6 dB 1.3 dB at most and an upper bound",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        690,
+        "class 1 instruments and filters, a class 1 calibrator on each "
+        "microphone before and after each series, 0.5 dB apart at most",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        712,
+        "grade 2 needs $ΔL_f$ ≥ 7 dB A-weighted at every position and a "
+        "directivity range within ±7 dB; otherwise grade 3",
+        12,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
 # ISO 3744 parallelepiped measurement surface and its microphone array
 # ---------------------------------------------------------------------------
 
@@ -1609,6 +1841,341 @@ def _d_program_loudness(s: SVG, th: Theme) -> None:
         642,
         "ungated, the same 40 s example would read near −29 LUFS",
         11,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
+# The quasi-peak meter and the tests clause 2 puts it through (ITU-R BS.468-4)
+# ---------------------------------------------------------------------------
+
+
+def _qp_sine(
+    s: SVG,
+    x0: float,
+    x1: float,
+    cy: float,
+    amp: float,
+    period: float,
+    colour: str,
+    sw: float = 1.6,
+) -> None:
+    """A sine that starts at a zero crossing, as every clause 2 burst does."""
+    n = max(2, int((x1 - x0) * 2))
+    points = []
+    for k in range(n + 1):
+        x = x0 + (x1 - x0) * k / n
+        y = cy - amp * math.sin(2.0 * math.pi * (x - x0) / period)
+        points.append(f"{x:.1f} {y:.1f}")
+    s.path("M " + " L ".join(points), stroke=colour, sw=sw)
+
+
+#: The 2.6 calibration and one row per Method of measurement of ITU-R
+#: BS.468-4 clause 2, in the order a bench runs them (the calibration first,
+#: because 2.5 is read against its 0 dB): the label, whether the test goes
+#: through the weighting network (every test but 2.4, clause 2 preamble), and
+#: three lines of what is applied and what it must read.
+_QP_TEST_ROWS: tuple[tuple[str, bool, tuple[str, str, str]], ...] = (
+    (
+        "2.6 Calibration",
+        True,
+        (
+            "steady 1 kHz sine at 0.775 V r.m.s., distortion under 1 %",
+            "must read 0.775 V, that is 0 dB",
+            "0 dB placed 2 dB to 10 dB below full scale, on a 20 dB scale or more",
+        ),
+    ),
+    (
+        "2.1 Single bursts",
+        True,
+        (
+            "single 5 kHz bursts from a zero crossing, 1 ms to 200 ms",
+            "whole periods; Table 2: 5 ms reads 34 % to 46 % of the steady tone",
+            "attenuators fixed, then reset for each duration to hold 80 %",
+        ),
+    ),
+    (
+        "2.2 Repetitive bursts",
+        True,
+        (
+            "5 ms bursts of 5 kHz at 2, 10 and 100 per second",
+            "Table 3: 43 % to 53 %, 72 % to 82 %, 94 % to 100 %",
+            "attenuators fixed, and within tolerance on every range",
+        ),
+    ),
+    (
+        "2.3 Overload",
+        True,
+        (
+            "isolated 0.6 ms bursts of 5 kHz, reading full scale",
+            "on the most sensitive range, then 20 dB down in steps",
+            "readings follow the steps within ±1 dB overall, on every range",
+        ),
+    ),
+    (
+        "2.4 Reversibility",
+        False,
+        (
+            "1 ms rectangular d.c. pulses, 100 per second or fewer",
+            "reading 80 % of full scale, then with the polarity reversed",
+            "the two readings differ by no more than 0.5 dB",
+        ),
+    ),
+    (
+        "2.5 Overswing",
+        True,
+        (
+            "1 kHz tone applied suddenly at the level that reads 0 dB",
+            "momentary excess reading under 0.3 dB",
+            "",
+        ),
+    ),
+)
+
+
+def _qp_stimulus(s: SVG, th: Theme, row: int, mid: float, colour: str) -> None:
+    """Sketch the stimulus of one row between x = 244 and x = 424.
+
+    The carrier periods keep their ratio, 22.5 px for 1 kHz against 4.5 px
+    for 5 kHz, so a burst reads five times denser than the calibration tone,
+    and every burst runs a whole number of periods from a zero crossing, as
+    clause 2 asks. Burst lengths are not on that scale, bar the 0.6 ms of
+    2.3, which is its three periods: 5 ms would be 112 px, so 2.1 and 2.2
+    keep only the order, the 2.2 bursts drawn longer than the 2.3 ones.
+    """
+    xb0, xb1 = 244.0, 424.0
+    if row == 0:  # 2.6: the steady 1 kHz sine
+        _qp_sine(s, xb0, xb1, mid, 13, 22.5, colour)
+    elif row == 1:  # 2.1: separate single bursts of growing duration
+        for sx, blen in ((xb0, 9.0), (xb0 + 62, 22.5), (xb0 + 124, 40.5)):
+            s.line(sx, mid, sx + 12, mid, colour, 1.4)
+            _qp_sine(s, sx + 12, sx + 12 + blen, mid, 13, 4.5, colour, 1.3)
+            s.line(sx + 12 + blen, mid, sx + 56, mid, colour, 1.4)
+    elif row == 2:  # 2.2: a train of the longer bursts
+        s.line(xb0, mid, xb1, mid, colour, 1.4)
+        for k in range(5):
+            bx = xb0 + 6 + 36 * k
+            _qp_sine(s, bx, bx + 18, mid, 13, 4.5, colour, 1.3)
+    elif row == 3:  # 2.3: isolated three-period bursts stepped down
+        s.line(xb0, mid, xb1, mid, colour, 1.4)
+        for k, amp in enumerate((14.0, 11.0, 8.5, 6.0, 4.0)):
+            bx = xb0 + 12 + 36 * k
+            _qp_sine(s, bx, bx + 13.5, mid, amp, 4.5, colour, 1.3)
+    elif row == 4:  # 2.4: d.c. pulses, then the same pulses reversed
+        s.line(xb0, mid, xb1, mid, colour, 1.4)
+        for x_first, sign in ((xb0 + 10, -1.0), (xb0 + 116, 1.0)):
+            y = mid + sign * 13
+            for k in range(3):
+                px = x_first + 24 * k
+                s.path(
+                    f"M {px} {mid} L {px} {y} L {px + 6} {y} L {px + 6} {mid}",
+                    stroke=colour,
+                    sw=1.6,
+                )
+        s.arrow(xb0 + 74, mid - 8, xb0 + 104, mid - 8, th.muted, 1.2)
+    else:  # 2.5: the 1 kHz tone switched on suddenly
+        s.line(xb0, mid, xb0 + 60, mid, colour, 1.4)
+        _qp_sine(s, xb0 + 60, xb1, mid, 13, 22.5, colour)
+
+
+def _d_quasi_peak_test(s: SVG, th: Theme) -> None:
+    """The ITU-R BS.468-4 measuring set, its calibration and its five tests.
+
+    The chain is the Recommendation's own: the weighting network of clause 1
+    with the amplifier that clause 1 counts into the measuring equipment
+    (Fig. 1a, Table 1), the attenuator that 2.1 to 2.3 hold, reset and step,
+    the quasi-peak detector of clause 2, which the preamble defines
+    by its readings and not by a circuit, and a reading device scaled in
+    dBqps (clause 3), with the input impedance of 2.7 at the terminals. The
+    dashed path around the network is the unweighted mode that only 2.4 uses.
+    The table is the 2.6 calibration and one row per Method of measurement,
+    each with its stimulus sketched and its acceptance limits written out,
+    and the box at the foot says what the percentages of Tables 2 and 3 and
+    the 0 dB of 2.6 are ratios of.
+    """
+    ay = 190.0  # the signal axis of the chain
+
+    s.text(
+        450,
+        66,
+        "The measuring set, and the six stimuli clause 2 tests it with",
+        15,
+        th.fg,
+        bold=True,
+    )
+
+    # The generator, outside the instrument.
+    s.rect(30, 150, 116, 80, th.panel, th.fg, rx=8, sw=2.2)
+    s.text(88, 178, "Generator", 14, th.fg, bold=True)
+    _qp_sine(s, 60, 116, 204, 8, 28, th.fg)
+    s.text(88, 256, "a stimulus from the table", 12, th.muted)
+
+    # The instrument itself.
+    s.rect(172, 92, 708, 220, "none", th.muted, rx=8, sw=1.3, dash="6,4")
+    s.text(870, 112, "the measuring set", 13, th.muted, anchor="end")
+
+    # The input terminals and the impedance clause 2.7 puts across them.
+    s.arrow(146, ay, 190, ay, th.fg, 2.0)
+    s.circle(196, ay, 5, th.bg, th.fg, 2.0)
+    s.line(196, ay + 5, 196, 206, th.fg, 2.0)
+    s.rect(188, 206, 16, 36, th.bg, th.fg, rx=2, sw=2.0)
+    s.line(196, 242, 196, 254, th.fg, 2.0)
+    for k, hw in enumerate((12.0, 7.5, 3.0)):
+        s.line(196 - hw, 254 + 5 * k, 196 + hw, 254 + 5 * k, th.fg, 2.0)
+    s.text(216, 286, "input impedance ≥ 20 kΩ", 12, th.fg, anchor="start")
+    s.text(216, 302, "termination, if any: 600 Ω ±1 %", 12, th.muted, anchor="start")
+
+    # Unweighted mode: the one test clause 2 runs around the network. The
+    # attenuator stays in circuit, so the path rejoins before it.
+    s.line(201, ay, 240, ay, th.fg, 2.0)
+    s.arrow(226, ay, 240, ay, th.fg, 2.0)
+    s.path(
+        f"M 218 {ay} L 218 124 L 432 124 L 432 {ay}",
+        stroke=th.secondary,
+        sw=1.8,
+        dash="6,4",
+    )
+    s.circle(218, ay, 3.5, th.fg)
+    s.circle(432, ay, 3.5, th.fg)
+    s.text(325, 114, "unweighted mode: the 2.4 test only", 12, th.secondary)
+
+    # Clause 1: the weighting network, and the amplifier clause 1 counts in
+    # with it when it states the tolerance of the measuring equipment.
+    s.rect(240, 144, 184, 94, th.panel, th.primary, rx=8, sw=2.2)
+    s.text(332, 170, "Weighting network", 14, th.fg, bold=True)
+    s.text(332, 190, "and amplifier", 12, th.muted)
+    s.text(332, 210, "Table 1: 0 dB at 1 kHz", 12, th.muted)
+    s.text(332, 228, "+12.2 dB at 6.3 kHz", 12, th.muted)
+    s.text(332, 262, "clause 1, Fig. 1a", 12, th.muted)
+
+    # The attenuator the table keeps sending the reader to: 2.1 and 2.2 hold
+    # it and reset it, 2.3 steps it down and repeats on every range.
+    s.arrow(424, ay, 446, ay, th.fg, 2.0)
+    s.rect(446, 168, 56, 44, th.panel, th.fg, rx=4, sw=2.0)
+    s.arrow(456, 204, 492, 176, th.fg, 1.8)
+    s.text(474, 232, "Attenuator", 12, th.fg, bold=True)
+    s.text(474, 250, "ranges: 2.1 to 2.3", 12, th.muted)
+
+    # Clause 2: the detector, specified only by what it reads.
+    s.arrow(502, ay, 530, ay, th.fg, 2.0)
+    s.rect(530, 144, 190, 94, th.panel, th.fg, rx=8, sw=2.2)
+    s.text(625, 174, "Quasi-peak detector", 14, th.fg, bold=True)
+    s.text(625, 200, "defined by its readings,", 12, th.muted)
+    s.text(625, 220, "not by a time constant", 12, th.muted)
+    s.text(625, 262, "clause 2, Tables 2 and 3", 12, th.muted)
+
+    # Clauses 2.5, 2.6 and 3: the reading device and its scale. The green
+    # tick is 80 % of full scale: where the steady tone would read in 2.1
+    # and 2.2, and where the pulses read in 2.4.
+    s.arrow(720, ay, 742, ay, th.fg, 2.0)
+    s.rect(742, 140, 124, 100, th.panel, th.accent, rx=8, sw=2.2)
+    s.text(804, 160, "Reading device", 13, th.fg, bold=True)
+    cx, cy, r = 804.0, 228.0, 42.0
+
+    def polar(deg: float, rad: float) -> tuple[float, float]:
+        return (
+            cx + rad * math.cos(math.radians(deg)),
+            cy - rad * math.sin(math.radians(deg)),
+        )
+
+    xa, ya = polar(150.0, r)
+    xb, yb = polar(30.0, r)
+    s.path(
+        f"M {xa:.1f} {ya:.1f} A {r} {r} 0 0 1 {xb:.1f} {yb:.1f}", stroke=th.fg, sw=1.8
+    )
+    for deg in (150.0, 90.0, 30.0):
+        x0, y0 = polar(deg, r - 7)
+        x1, y1 = polar(deg, r)
+        s.line(x0, y0, x1, y1, th.fg, 1.6)
+    x0, y0 = polar(54.0, r - 9)
+    x1, y1 = polar(54.0, r + 1)
+    s.line(x0, y0, x1, y1, th.accent, 2.4)
+    xn, yn = polar(54.0, r - 10)
+    s.line(cx, cy, xn, yn, th.fg, 2.2)
+    s.circle(cx, cy, 3.5, th.fg)
+    s.text(804, 258, "clause 3: dBqps", 12, th.muted)
+    s.text(804, 276, "0.775 V reads 0 dB", 12, th.muted)
+
+    # The calibration and the five methods of measurement.
+    s.text(
+        450,
+        346,
+        "The calibration and the five methods of measurement, and what each must read",
+        15,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        450,
+        368,
+        "2.1 and 2.2 set the level at which the steady tone would read 80 % "
+        "of full scale",
+        12,
+        th.muted,
+    )
+    top0, row_h = 380.0, 56.0
+    for i, (name, weighted, lines) in enumerate(_QP_TEST_ROWS):
+        top = top0 + row_h * i
+        if i:
+            s.line(30, top, 870, top, th.muted, 0.8, dash="2,4")
+        tag = th.primary if weighted else th.secondary
+        s.text(36, top + 24, name, 13, th.fg, anchor="start", bold=True)
+        s.text(
+            36,
+            top + 42,
+            "through the network" if weighted else "unweighted mode",
+            12,
+            tag,
+            anchor="start",
+        )
+        s.text(446, top + 18, lines[0], 13, th.fg, anchor="start")
+        s.text(446, top + 34, lines[1], 12, th.muted, anchor="start")
+        if lines[2]:
+            s.text(446, top + 50, lines[2], 12, th.muted, anchor="start")
+        _qp_stimulus(s, th, i, top + row_h / 2, tag)
+
+    # What the percentages and the 0 dB are ratios of.
+    box_y = top0 + row_h * 6 + 16
+    s.rect(30, box_y, 840, 88, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(245, box_y + 30, "$20 lg(U/U_{ss})$", 17, th.primary)
+    s.text(
+        245,
+        box_y + 54,
+        "Tables 2 and 3 in dB: Table 2 prints 40 % as −8.0 dB",
+        12,
+        th.fg,
+    )
+    s.text(655, box_y + 30, "$20 lg(U/U_0)$, $U_0$ = 0.775 V", 17, th.accent)
+    s.text(655, box_y + 54, "clauses 2.6 and 3: the level in dBqps", 12, th.fg)
+    s.text(
+        450,
+        box_y + 76,
+        "$U$ is the reading and $U_{ss}$ the steady reading of the same tone",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        box_y + 114,
+        "clause 2 prints no time constant: the readings above are all it "
+        "specifies about the dynamics",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        box_y + 134,
+        "its Note offers one possible arrangement: full-wave rectification, "
+        "then two peak rectifiers of different time constants in tandem",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        box_y + 154,
+        "overload capacity more than 20 dB above the top of the scale, at "
+        "every attenuator setting (2.3)",
+        12,
         th.muted,
     )
 
@@ -3534,6 +4101,332 @@ def _d_workstation_microphone(s: SVG, th: Theme) -> None:
     )
 
 
+def _d_in_duct_rig(s: SVG, th: Theme) -> None:
+    """The ISO 5136 test arrangement of Figure 5: one fan, a test duct each side.
+
+    The airway runs left to right as Figure 5 draws it: the bell mouth and
+    the anechoic termination of the inlet test duct, a transition and an
+    intermediate duct as long as the test duct is wide (l1 = d3), the fan,
+    then the outlet intermediate duct carrying the star straightener two
+    diameters long (5.2.9) with a straight run of d4 on each side of it, a
+    transition, and the outlet test duct with its own termination and the
+    throttle beyond it (5.2.8). That intermediate duct is the one section
+    drawn to a printed limit, (d4/d2)^2 = 1.06, inside the 0.95 to 1.07 of
+    Table 4; the test ducts and the transitions are foreshortened, and it
+    is the dimensions of 5.2.6 that carry their lengths. Each test duct
+    carries a microphone in a sampling tube on a stem through the wall,
+    pointing back at the fan (6.1) at the radius of Table 7, and both
+    lengths are dimensioned from the fan-side end of the duct. The
+    measurement plane sits at 0.63 of the test duct from that end, which
+    is 2.52 m of 4 m in a 0.63 m duct at its minimum lengths. Under the
+    airway, the measurement plane seen along the duct (Table 7, 6.2.2),
+    the sampling tube of Figure 1, and the three ways to the
+    circumferential mean with their times (6.2.2, 7.2.2 to 7.2.4). The
+    boxed lines are Equations (9) to (12).
+    """
+    ax = 214.0  # duct axis
+    h = 20.0  # test-duct half-height: d is drawn 40 px
+    top, bot = ax - h, ax + h
+    hf = 16.0  # fan inlet and outlet
+    h4 = 16.5  # outlet intermediate duct: (d4/d2)^2 = 1.06, Table 4
+    d4 = 2 * h4  # the unit the chain inside l4 is drawn in
+
+    x_bell, x_ti0 = 26.0, 50.0  # bell mouth, far end of the inlet termination
+    x_d3a, x_d3b = 110.0, 310.0  # inlet test duct, l3
+    x_t31 = x_d3b + 18.0  # transition l31 ends
+    x_fan0 = x_t31 + 2 * h  # intermediate duct, l1 = d3
+    x_fan1 = x_fan0 + 42.0  # the fan
+    x_t24 = x_fan1 + 16.0  # transition l24 ends
+    x_st0 = x_t24 + d4  # a straight d4, then the straightener
+    x_st1 = x_st0 + 2 * d4  # the straightener is 2 d4 long
+    x_t46a = x_st1 + d4  # a straight d4 before the transition
+    x_t46b = x_t46a + 18.0  # transition l46 ends
+    x_d6a, x_d6b = x_t46b, x_t46b + 200.0  # outlet test duct, l6
+    x_to1 = x_d6b + 60.0  # far end of the outlet termination
+    # l_m over l for a 0.63 m duct at its minimum lengths: 2.52 m of 4 m.
+    lm_frac = 0.63
+    x_p3 = x_d3b - lm_frac * (x_d3b - x_d3a)
+    x_p6 = x_d6a + lm_frac * (x_d6b - x_d6a)
+    r_px = 0.65 * h  # Table 7, sampling tube, d from 0.5 m
+
+    s.text(
+        450,
+        70,
+        "A test duct on each side, and a microphone that points back at the fan",
+        16,
+        th.fg,
+        bold=True,
+    )
+
+    # The centre line of the whole airway.
+    s.line(14, ax, 872, ax, th.muted, 0.9, dash="12,4,2,4")
+
+    # Air comes in through the bell mouth at the far inlet end: the wall
+    # leaves the duct horizontally and turns out into the mouth.
+    s.arrow(4, ax, 22, ax, th.fg, 1.8)
+    s.text(17, ax - 10, "flow", 11, th.muted)
+    for y_wall, dy in ((top, -1.0), (bot, 1.0)):
+        s.path(
+            f"M {x_ti0} {y_wall} C {x_ti0 - 10} {y_wall} "
+            f"{x_bell + 3} {y_wall + dy * 6} {x_bell} {y_wall + dy * 30}",
+            stroke=th.fg,
+            sw=2.2,
+        )
+
+    def termination(x_duct: float, x_far: float) -> None:
+        # The anechoic termination as Figure 5 draws it, keys 2 and 5: the
+        # passage runs straight through at the duct diameter, which is the
+        # closing edge of each absorbent body, and the absorbent flares out
+        # around it, square at the open end and tapered on the fan side.
+        sign = 1.0 if x_far > x_duct else -1.0
+        xm = x_duct + sign * 40
+        xc = x_duct + sign * 20
+        for y_wall, y_out in ((top, top - 36), (bot, bot + 36)):
+            s.path(
+                f"M {x_duct} {y_wall} C {xc} {y_wall} {xc + sign * 8} {y_out} "
+                f"{xm} {y_out} L {x_far} {y_out} L {x_far} {y_wall} Z",
+                fill=th.panel,
+                stroke=th.fg,
+                sw=2.0,
+            )
+            dy = -1 if y_out < y_wall else 1
+            for k in range(3):
+                xh = xm + sign * (3 + 6 * k) - sign * 10
+                s.line(
+                    xh, y_wall + dy * 3, xh + sign * 9, y_out - dy * 3, th.muted, 1.0
+                )
+
+    termination(x_d3a, x_ti0)
+    termination(x_d6b, x_to1)
+
+    # The two test ducts, in the colour of what is measured.
+    for x0, x1 in ((x_d3a, x_d3b), (x_d6a, x_d6b)):
+        s.rect(x0, top, x1 - x0, 2 * h, th.panel)
+        s.line(x0, top, x1, top, th.primary, 2.6)
+        s.line(x0, bot, x1, bot, th.primary, 2.6)
+
+    # Transitions and intermediate ducts between the test ducts and the fan.
+    for x0, h0, x1, h1 in (
+        (x_d3b, h, x_t31, hf),
+        (x_t31, hf, x_fan0, hf),
+        (x_fan1, hf, x_t24, h4),
+        (x_t24, h4, x_t46a, h4),
+        (x_t46a, h4, x_t46b, h),
+    ):
+        s.line(x0, ax - h0, x1, ax - h1, th.fg, 2.0)
+        s.line(x0, ax + h0, x1, ax + h1, th.fg, 2.0)
+
+    # The star straightener: eight radial vanes, three of them seen edge on.
+    s.line(x_st0, ax - h4, x_st0, ax + h4, th.fg, 1.4)
+    s.line(x_st1, ax - h4, x_st1, ax + h4, th.fg, 1.4)
+    for dy in (-10.0, 0.0, 10.0):
+        s.line(x_st0, ax + dy, x_st1, ax + dy, th.fg, 1.6)
+
+    # The fan.
+    s.rect(x_fan0, ax - 40, x_fan1 - x_fan0, 80, th.panel, th.fg, rx=5, sw=2.2)
+    s.circle((x_fan0 + x_fan1) / 2, ax, 14, th.fg)
+    s.circle((x_fan0 + x_fan1) / 2, ax, 5, th.bg)
+
+    # The throttle, at the end of the outlet termination remote from the fan.
+    s.line(x_to1 + 8, ax - 16, x_to1 + 8, ax + 16, th.fg, 3.0)
+    s.line(x_to1, ax, x_to1 + 22, ax, th.fg, 2.0)
+    s.rect(x_to1 + 20, ax - 8, 6, 16, th.fg)
+    s.line(x_to1 + 12, ax + 20, x_to1 + 12, bot + 44, th.muted, 0.9)
+
+    # The microphones: a sampling tube on a stem through the wall, at
+    # 2r/d = 0.65, nose towards the fan, and the measurement plane dashed.
+    for xp, sign in ((x_p3, 1.0), (x_p6, -1.0)):
+        y_t = ax - r_px
+        xs = xp - sign * 8
+        s.line(xs, top - 16, xs, y_t, th.fg, 2.0)
+        x_rear = xp - sign * 10
+        x_nose = xp + sign * 14
+        s.rect(min(x_rear, x_nose), y_t - 3, abs(x_nose - x_rear), 6, th.primary, rx=2)
+        s.path(
+            f"M {x_nose} {y_t - 3} L {x_nose + sign * 7} {y_t} L {x_nose} {y_t + 3} Z",
+            fill=th.fg,
+        )
+        s.line(xp, top - 4, xp, bot + 4, th.secondary, 1.4, dash="4,3")
+
+    # What each part is.
+    s.text(
+        (x_d3a + x_d3b) / 2, 118, "inlet test duct, $U$ < 0", 13, th.primary, bold=True
+    )
+    s.text(
+        (x_d6a + x_d6b) / 2, 118, "outlet test duct, $U$ > 0", 13, th.primary, bold=True
+    )
+    s.text(80, 146, "anechoic termination", 11, th.muted)
+    s.text(x_to1 - 30, 146, "anechoic termination", 11, th.muted)
+    s.text(x_p3 - 8, 170, "microphone", 11, th.fg)
+    s.text(x_p6 + 8, 170, "microphone", 11, th.fg)
+    s.text((x_fan0 + x_fan1) / 2, 166, "the fan", 13, th.fg, bold=True)
+    # The straightener's own name runs wider than the piece it names, in
+    # Spanish wide enough to reach over the fan, so it takes a leader.
+    s.text(
+        (x_st0 + x_st1) / 2,
+        146,
+        "star flow straightener, $2d_4$ long",
+        11,
+        th.muted,
+    )
+    s.line((x_st0 + x_st1) / 2, 152, (x_st0 + x_st1) / 2, ax - h4 - 4, th.muted, 0.9)
+    s.text(
+        (x_d3b + x_d6a) / 2,
+        bot + 56,
+        "transitions and intermediate ducts",
+        11,
+        th.muted,
+    )
+    s.text(x_to1 + 12, bot + 58, "throttle", 11, th.muted)
+
+    # The two lengths of 5.2.6, from the fan-side end of each test duct.
+    s.dim(x_p3, bot, x_d3b, bot, "$l_{m3}$ ≥ max(4$d_3$, 2 m)", offset=44, size=11)
+    s.dim(x_d3a, bot, x_d3b, bot, "$l_3$ ≥ max(6$d_3$, 4 m)", offset=78, size=11)
+    s.dim(x_d6a, bot, x_p6, bot, "$l_{m6}$ ≥ max(4$d_6$, 2 m)", offset=44, size=11)
+    s.dim(x_d6a, bot, x_d6b, bot, "$l_6$ ≥ max(6$d_6$, 4 m)", offset=78, size=11)
+
+    # The measurement plane seen along the duct: Table 7 and 6.2.2.
+    cx, cy, big_r = 160.0, 454.0, 70.0
+    rr = 0.65 * big_r
+    s.text(cx, 364, "the measurement plane", 13, th.fg, bold=True)
+    s.circle(cx, cy, big_r, th.panel, th.fg, sw=2.4)
+    s.line(cx - big_r - 8, cy, cx + big_r + 8, cy, th.muted, 0.9, dash="8,3,2,3")
+    # The vertical centre line breaks around the angle label it would cross.
+    s.line(cx, cy - big_r - 8, cx, cy + 22, th.muted, 0.9, dash="8,3,2,3")
+    s.line(cx, cy + 40, cx, cy + big_r + 4, th.muted, 0.9, dash="8,3,2,3")
+    s.circle(cx, cy, rr, "none", th.primary, sw=1.4)
+    spots = [
+        (cx + rr * math.cos(math.radians(a)), cy + rr * math.sin(math.radians(a)))
+        for a in (-90.0, 30.0, 150.0)
+    ]
+    for px, py in spots[1:]:
+        s.line(cx, cy, px, py, th.secondary, 1.0)
+    a0, a1, ra = math.radians(30.0), math.radians(150.0), 20.0
+    s.path(
+        f"M {cx + ra * math.cos(a0):.1f} {cy + ra * math.sin(a0):.1f} "
+        f"A {ra} {ra} 0 0 1 {cx + ra * math.cos(a1):.1f} {cy + ra * math.sin(a1):.1f}",
+        stroke=th.secondary,
+        sw=1.4,
+    )
+    for px, py in spots:
+        s.circle(px, py, 6.5, th.primary)
+        s.circle(px, py, 2.4, th.bg)
+    s.text(cx, cy + 36, "120°", 11, th.secondary)
+    s.dim(cx + 3, cy, cx + 3, cy - rr + 7, "$r$", size=13, label_side="right")
+    s.dim(
+        cx - big_r,
+        cy + big_r + 30,
+        cx + big_r,
+        cy + big_r + 30,
+        "$d$ from 0.15 m to 2 m",
+        size=12,
+    )
+    s.text(cx, 578, "$2r/d$ = 0.65 from $d$ = 0.5 m, 0.8 below it", 12, th.fg)
+    s.text(cx, 596, "0.5 with a nose cone or a foam ball", 12, th.muted)
+    s.text(cx, 616, "0.63 m duct: $r$ = 0.20 m, $l_m$ ≥ 2.52 m", 12, th.primary)
+
+    # The sampling tube of Figure 1, on its support through the duct wall.
+    bx = 462.0
+    wall_y, tube_y = 394.0, 450.0
+    s.text(bx, 364, "the sampling tube", 13, th.fg, bold=True)
+    s.line(340, wall_y, 584, wall_y, th.fg, 2.4)
+    s.text(584, wall_y - 8, "duct wall", 11, th.muted, anchor="end")
+    s.rect(530, wall_y, 8, tube_y - 10 - wall_y, th.fg)
+    s.rect(394, tube_y - 10, 170, 20, th.panel, th.fg, rx=4, sw=2.0)
+    s.rect(414, tube_y - 4, 96, 8, th.accent, rx=2)
+    s.path(f"M 394 {tube_y - 10} L 366 {tube_y} L 394 {tube_y + 10} Z", fill=th.fg)
+    s.rect(540, tube_y - 7, 20, 14, th.primary, rx=3)
+    s.arrow(358, tube_y, 336, tube_y, th.muted, 1.4)
+    s.text(400, tube_y - 22, "nose cone, pointing at the fan", 11, th.muted)
+    s.text(440, tube_y + 32, "slit under porous material", 11, th.accent)
+    s.text(564, tube_y + 32, "microphone", 11, th.primary)
+    s.text(bx, 520, "at most 22 mm across, within ± 5° of the axis", 12, th.fg)
+    s.text(bx, 538, "$C_2$: its own response, measured to ± 0.5 dB", 12, th.fg)
+    s.text(bx, 556, "$C_{3,4}$: the flow and the modes, from Annex A", 12, th.fg)
+    s.text(bx, 578, "usable to 40 m/s; a nose cone to 20 m/s", 12, th.muted)
+    s.text(bx, 596, "and a foam ball to 15 m/s", 12, th.muted)
+
+    # The three ways to the circumferential mean, and how long each takes.
+    kx = 624.0
+    s.text(752, 364, "the mean around the duct", 13, th.fg, bold=True)
+    for k, (tag, first, second) in enumerate(
+        (
+            (
+                "a)",
+                "one microphone moved round to three",
+                "or more equally spaced positions",
+            ),
+            ("b)", "three or more fixed microphones,", "read in turn or multiplexed"),
+            (
+                "c)",
+                "one microphone traversed once round",
+                "at constant speed, in 30 s or more",
+            ),
+        )
+    ):
+        y = 400 + 50 * k
+        s.text(kx, y, tag, 12, th.primary, anchor="start", bold=True)
+        s.text(kx + 22, y, first, 12, th.fg, anchor="start")
+        s.text(kx + 22, y + 18, second, 12, th.fg, anchor="start")
+    s.text(
+        kx, 578, "read in turn: at least 30 s a position", 12, th.muted, anchor="start"
+    )
+    s.text(kx, 596, "up to 160 Hz, 10 s from 200 Hz;", 12, th.muted, anchor="start")
+    s.text(kx, 614, "multiplexed: 30 s a band", 12, th.muted, anchor="start")
+
+    # Equations (9) to (12).
+    box_y = 636.0
+    s.rect(52, box_y, 796, 80, th.panel, th.primary, rx=6, sw=1.8)
+    s.text(
+        450,
+        box_y + 22,
+        "$L̄_p$ = energy mean of the $n$ ≥ 3 readings $L_{pi}$ + $C$,   "
+        "$C = C_1 + C_2 + C_{3,4}$",
+        15,
+        th.fg,
+    )
+    s.text(
+        450,
+        box_y + 44,
+        "with multiplexing or a traverse, it is $L̄_p = L_{pm} + C$ instead",
+        15,
+        th.fg,
+    )
+    s.text(
+        450,
+        box_y + 66,
+        "$L_W = L̄_p + 10 lg(S/S_0) − 10 lg[ρc/(ρc)_0]$,   $S = πd^2/4$,   "
+        "$S_0$ = 1 m²,   $(ρc)_0$ = 400 N·s/m³",
+        15,
+        th.primary,
+    )
+
+    s.text(
+        450,
+        744,
+        "type 1 microphone and amplifier, IEC 61260 one-third octaves from 50 Hz "
+        "to 10 kHz, class 1 calibrator before and after",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        764,
+        "every band at least 6 dB over the background and over the turbulence; "
+        "termination $r_a$ ≤ 0.4 at 50 Hz, ≤ 0.15 from 125 Hz",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        784,
+        "throttle noise at least 10 dB under the fan; the outlet read with and "
+        "without the straightener, the lower level kept",
+        12,
+        th.muted,
+    )
+
+
 def _d_valve_noise_place(s: SVG, th: Theme) -> None:
     """The place the printed level belongs to, and the path that gets it there.
 
@@ -3664,5 +4557,187 @@ def _d_valve_noise_place(s: SVG, th: Theme) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Where the microphone goes at a work station (ISO 11201:2010, Clause 9)
+# ISO 4871: declaring and verifying a sound power level
 # ---------------------------------------------------------------------------
+
+
+def _d_noise_declaration_chain(s: SVG, th: Theme) -> None:
+    """What ISO 4871 adds to a measured sound power, and how it is checked.
+
+    A calculation chain rather than an arrangement: the arrangements belong to
+    the basic standards and are drawn on their own pages. The declaration is
+    made for each operating mode (clause 4) by the manufacturer or supplier
+    (3.13) from two inputs, the measured value, not rounded (3.12), and its
+    uncertainty, K = 1,645 sigma_R, with the 2,5 dB and 4 dB of Annex A.2.2
+    when no noise test code gives sigma_R. Both belong to a single machine:
+    A.2.3 determines K another way for a batch, so the plate stays on the one
+    machine 6.2 verifies. The noise test code picks the form (clause 4): the
+    dual number of 3.16, each value rounded and both always stated together
+    (clause 5), or the single number of 3.15, the sum rounded once. The
+    verification value L_1 is measured under the same noise test code or,
+    where there is none, a basic standard of the same or better grade, under
+    the same operating conditions (6.1, with Note 20 for a lower grade), and
+    6.2 gives the two verdicts, both of them held against the declared value.
+    The values are the two operating modes of the declaration example, and
+    the two L_1 are the ones the guide verifies.
+    """
+    s.text(
+        450,
+        76,
+        "What is declared, and how it is verified on a single machine",
+        17,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        450,
+        114,
+        "the declaration, by the manufacturer or supplier, for each operating mode",
+        13,
+        th.muted,
+    )
+
+    # The two inputs: the measured value and its uncertainty.
+    top1, h1, w = 128.0, 104.0, 380.0
+    for x0, head, first, second, values in (
+        (
+            50.0,
+            "1 · the measured value, $L_{WA}$",
+            "from a basic standard, preferably grade 2 or better,",
+            "on one machine, and not rounded",
+            "mode 1: 88 dB · mode 2: 95 dB",
+        ),
+        (
+            470.0,
+            "2 · its uncertainty, $K_{WA}$",
+            "from the reproducibility $σ_R$ in the noise test code;",
+            "without a code, 2.5 dB at grade 2 and 4 dB at grade 3",
+            "mode 1: 2 dB · mode 2: 2 dB",
+        ),
+    ):
+        cx = x0 + w / 2
+        s.rect(x0, top1, w, h1, th.panel, th.primary, rx=6, sw=1.8)
+        s.text(cx, top1 + 26, head, 15, th.primary, bold=True)
+        s.text(cx, top1 + 50, first, 12, th.fg)
+        s.text(cx, top1 + 68, second, 12, th.fg)
+        s.text(cx, top1 + 92, values, 13, th.primary, bold=True)
+
+    # Both inputs feed both forms, and the noise test code chooses between them.
+    bus1 = 254.0
+    s.line(240, top1 + h1, 240, bus1, th.fg, 1.6)
+    s.line(660, top1 + h1, 660, bus1, th.fg, 1.6)
+    s.line(240, bus1, 660, bus1, th.fg, 1.6)
+    s.arrow(240, bus1, 240, 284, th.fg, 1.6)
+    s.arrow(660, bus1, 660, 284, th.fg, 1.6)
+    s.text(450, 276, "the noise test code picks the form", 12, th.muted)
+
+    # The two forms of clause 4, with the rounding of 3.16 and 3.15.
+    top2, h2 = 286.0, 100.0
+    for x0, head, first, second, values in (
+        (
+            50.0,
+            "dual-number form",
+            "$L_{WA}$ and $K_{WA}$, each rounded to the nearest",
+            "decibel and always stated together",
+            "88 dB and 2 dB · 95 dB and 2 dB",
+        ),
+        (
+            470.0,
+            "single-number form",
+            "$L_{WAd}$, the unrounded sum rounded once: an upper",
+            "limit repeated measurements are unlikely to exceed",
+            "90 dB · 97 dB",
+        ),
+    ):
+        cx = x0 + w / 2
+        s.rect(x0, top2, w, h2, th.panel, th.fg, rx=6, sw=1.8)
+        s.text(cx, top2 + 26, head, 15, th.fg, bold=True)
+        s.text(cx, top2 + 50, first, 12, th.fg)
+        s.text(cx, top2 + 68, second, 12, th.fg)
+        s.text(cx, top2 + 90, values, 13, th.primary, bold=True)
+
+    # Whichever form was declared is what the verification is held against, so
+    # the bus carries it out to the rail on the right rather than into one box.
+    bus2 = 402.0
+    s.line(240, top2 + h2, 240, bus2, th.fg, 1.6)
+    s.line(660, top2 + h2, 660, bus2, th.fg, 1.6)
+    s.line(240, bus2, 845, bus2, th.fg, 1.6)
+
+    # Above the line the maker declares; below it a new measurement checks.
+    s.line(40, 420, 860, 420, th.muted, 1.2, dash="6,5")
+    s.text(
+        50,
+        446,
+        "the verification: a new measurement on one machine",
+        13,
+        th.muted,
+        "start",
+    )
+
+    # The verification value and the conditions of 6.1 that admit it.
+    top3 = 462.0
+    s.rect(50, top3, 380, 130, th.panel, th.fg, rx=6, sw=1.8)
+    s.text(240, top3 + 26, "3 · the verification value, $L_1$", 15, th.fg, bold=True)
+    s.text(
+        240, top3 + 52, "the same noise test code or, without one, a basic", 12, th.fg
+    )
+    s.text(
+        240, top3 + 70, "standard of the same or better grade of accuracy,", 12, th.fg
+    )
+    s.text(240, top3 + 88, "and the same operating conditions", 12, th.fg)
+    s.text(
+        240,
+        top3 + 114,
+        "a lower grade only by agreement, allowing for it",
+        12,
+        th.muted,
+    )
+
+    # The declared value comes down the right-hand side into both verdicts.
+    s.line(845, bus2, 845, 562, th.fg, 1.6)
+    s.text(835, 452, "the declared value", 12, th.muted, "end")
+    s.arrow(430, top3 + 52, 468, top3 + 34, th.fg, 1.6)
+    s.arrow(430, top3 + 78, 468, top3 + 98, th.fg, 1.6)
+    for y0, colour, verdict, reading in (
+        (top3, th.accent, "declaration verified", "mode 1: $L_1$ = 89 dB ≤ 90 dB"),
+        (
+            top3 + 70,
+            th.secondary,
+            "declaration not verified",
+            "mode 2: $L_1$ = 98 dB > 97 dB",
+        ),
+    ):
+        s.rect(470, y0, 350, 60, th.panel, colour, rx=6, sw=2.2)
+        s.text(645, y0 + 25, verdict, 15, colour, bold=True)
+        s.text(645, y0 + 47, reading, 13, th.fg)
+        s.arrow(845, y0 + 30, 822, y0 + 30, th.fg, 1.6)
+
+    # The three relations the chain runs on.
+    foot = 616.0
+    s.rect(40, foot, 820, 74, th.panel, th.fg, rx=6, sw=1.6)
+    for cx, relation, colour, source in (
+        (145.0, "$K_{WA} = 1.645 σ_R$", th.primary, "one machine, Annex A.2.2"),
+        (
+            385.0,
+            "$L_{WAd} = L_{WA} + K_{WA}$",
+            th.fg,
+            "clause 3.15, to the nearest decibel",
+        ),
+        (
+            690.0,
+            "$L_1 ≤ L_{WAd}$   or   $L_1 ≤ (L_{WA} + K_{WA})$",
+            th.accent,
+            "clause 6.2, whichever form was declared",
+        ),
+    ):
+        s.text(cx, foot + 32, relation, 16, colour)
+        s.text(cx, foot + 56, source, 12, th.muted)
+
+    s.text(
+        450,
+        716,
+        "$L_{pA}$ at the work station is declared the same way, "
+        "with a $K_{pA}$ from ISO 11201 to ISO 11204",
+        12,
+        th.muted,
+    )

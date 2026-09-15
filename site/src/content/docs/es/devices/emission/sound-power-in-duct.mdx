@@ -58,6 +58,8 @@ de 160 Hz y por debajo y 10 s por encima (apartado 7.2.2), y debe quedar al
 menos 6 dB por encima del fondo y del ruido de turbulencia que la pantalla
 deja pasar (apartado 7.2.1, Anexo B).
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig.svg" alt="Sección lateral de un ventilador en el banco de ISO 5136, medido en sus dos conductos a la vez. El aire entra por la izquierda por una boca abocinada y una terminación anecoica al conducto de ensayo de aspiración, marcado U menor que 0, y pasa por una transición y un conducto intermedio hasta el ventilador. Desde ahí sigue por un conducto intermedio con un tramo recto a cada lado de un enderezador de flujo en estrella de dos diámetros de largo, y luego por una transición hasta el conducto de ensayo de impulsión, marcado U mayor que 0, que acaba en otra terminación anecoica con el estrangulador en su extremo. En cada conducto de ensayo un micrófono dentro de un tubo de muestreo cuelga de la pared y apunta hacia el ventilador. Cotas bajo cada conducto de ensayo, desde su extremo del lado del ventilador: al menos cuatro diámetros y 2 m hasta el plano de medida, y al menos seis diámetros y 4 m para todo el conducto. Debajo, tres paneles: el plano de medida visto a lo largo del conducto, con tres posiciones de micrófono separadas 120 grados a un radio r, con 2r/d igual a 0,65 desde 0,5 m, 0,8 por debajo y 0,5 con cono aerodinámico o bola de espuma, de modo que en un conducto de 0,63 m r vale 0,20 m; el tubo de muestreo, con su cono aerodinámico, su ranura porosa y el micrófono, de 22 mm de diámetro como máximo; y las tres formas de obtener la media alrededor del conducto con sus tiempos de promediado. Un recuadro al pie lleva las Ecuaciones 9 a 12, la media energética de tres o más lecturas, el mismo nivel a partir de una lectura multiplexada o de recorrido, y el paso a potencia sonora, y tres líneas bajo él los instrumentos, los márgenes de 6 dB, el coeficiente de reflexión de la terminación y la lectura con y sin enderezador" width="100%" />
+
 El apartado 8 convierte las lecturas en un nivel y el nivel en una potencia.
 Las posiciones se promedian en energía y se suma la corrección combinada
 $C$ (Ecs. 9 y 10), un nivel multiplexado o de recorrido toma la corrección
@@ -163,6 +165,28 @@ plt.show()
 ```
 
 </details>
+
+### Cómo se hace la medida
+
+Monta primero el conducto. Cada conducto de ensayo es recto, circular y coaxial
+con el ventilador, de al menos seis diámetros y 4 m, con el plano de medida a no
+menos de cuatro diámetros y 2 m del extremo junto al ventilador, y acaba en una
+terminación anecoica que cumple la Tabla 5. El estrangulador va detrás, al
+menos 10 dB más silencioso que el ventilador. Fija el punto de funcionamiento
+según ISO 5801 y verifica la cadena de tipo 1 con un calibrador de clase 1,
+sobre el micrófono sin tubo, antes y después de cada serie. Monta el tubo de
+muestreo aislado de las vibraciones de la pared, al radio de la Tabla 7, a ±5°
+del eje y apuntando al ventilador, con el extremo del micrófono redondeado en
+aspiración, y promedia alrededor del conducto: tres o más posiciones
+equiespaciadas durante al menos 30 s hasta 160 Hz y 10 s desde 200 Hz, un
+multiplexado de 30 s por banda, o una vuelta de 30 s o más. Cada banda debe
+superar en al menos 6 dB el fondo, con el ventilador parado, y la turbulencia
+del Anexo B; si no, se informa tal como se midió, sin corregir, con la nota del
+apartado 7.2.1. En impulsión, mide con y sin enderezador en el mismo punto de
+funcionamiento y toma el nivel menor de cada banda. El informe declara la
+conformidad, da los niveles en decibelios re 1 pW, describe el ventilador, su
+funcionamiento, los instrumentos, la pantalla y las opciones acordadas, y
+conviene que dé $2\sigma_R$ como incertidumbre.
 
 ## 2. Un ventilador en su conducto de impulsión
 

@@ -338,6 +338,12 @@ verifica un valor declarado. La magnitud preferida es el nivel de potencia
 acústica ponderado A $L_{W\mathrm{A}}$, acompañado opcionalmente del nivel de presión
 acústica de emisión ponderado A $L_{p\mathrm{A}}$ en un puesto de trabajo.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_noise_declaration_chain.svg" alt="Una cadena de cálculo en tres niveles. Arriba, dos cajas: el nivel de potencia acústica ponderado A medido L_WA, con una norma básica, a ser posible de grado 2 o mejor, en una máquina y sin redondear, ochenta y ocho decibelios en el modo de funcionamiento 1 y noventa y cinco en el modo 2; y su incertidumbre K_WA, de la reproducibilidad del código de ensayo de ruido o, sin código, dos coma cinco decibelios en grado 2 y cuatro en grado 3, dos decibelios en los dos modos. Unas líneas llevan ambos a las dos formas entre las que elige el código de ensayo de ruido: la forma de doble número, con L_WA y K_WA redondeados cada uno al decibelio más próximo y siempre indicados juntos, y la forma de número único, L_WAd, la suma sin redondear redondeada una vez, noventa y noventa y siete decibelios. Bajo una línea de trazos, una caja para el valor de verificación L_1, medido con el mismo código de ensayo de ruido o, si no lo hay, una norma básica de grado igual o mejor, con las mismas condiciones de funcionamiento, y un grado inferior solo por acuerdo. El valor declarado baja por la derecha hasta los dos veredictos, y dos flechas llevan L_1 hasta ellos: declaración verificada en el modo 1, donde L_1 es ochenta y nueve decibelios frente a noventa, y declaración no verificada en el modo 2, donde es noventa y ocho frente a noventa y siete. Un recuadro al pie lleva K_WA igual a uno coma seis cuatro cinco por sigma R para una máquina, L_WAd igual a L_WA más K_WA, y L_1 no mayor que L_WAd, o que L_WA más K_WA, según la forma declarada; una nota debajo indica que L_pA en el puesto de trabajo se declara igual, con una K_pA según las ISO 11201 a ISO 11204" width="100%" />
+
+*Lo que una declaración añade a una potencia acústica medida: una incertidumbre,
+una de las dos formas que elige el código de ensayo de ruido, y un valor
+declarado que una nueva medición en una máquina verifica o no.*
+
 Una declaración adopta una de dos formas alternativas (apartado 4):
 
 - la forma de **doble número** (apartado 3.16): el valor medido $L_{W\mathrm{A}}$ y su
@@ -412,7 +418,7 @@ Lo que hace admisible esa medición es el apartado 6.1, y es la parte que más s
 salta: la verificación debe seguir el **mismo código de ensayo de ruido** que la
 declaración o, si no existe ninguno, una norma básica de determinación de grado
 de precisión al menos igual al que respalda el valor declarado, con
-**condiciones de funcionamiento y de montaje idénticas**. Solo cabe usar un
+**condiciones de funcionamiento idénticas**. Solo cabe usar un
 grado inferior por acuerdo entre fabricante y usuario, y contabilizando la
 diferencia de precisión. Sin eso, la comparación mide el procedimiento y no la
 máquina.

@@ -35,6 +35,21 @@ in the bands at and below 160 Hz and 10 s above (clause 7.2.2), and must
 stand at least 6 dB above the background and above the turbulence noise the
 shield lets through (clause 7.2.1, Annex B).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig.svg" alt="Side section of a fan on the ISO 5136 rig: the inlet and outlet test ducts with their anechoic terminations, a microphone in a sampling tube in each pointing back at the fan, the minimum lengths of the test duct and of the run to the measurement plane, and panels for the measurement plane, the sampling tube and the mean around the duct" width="88%"></picture>
+
+**How the measurement goes.** Build each test duct straight and circular, at
+least six diameters and 4 m long, with the measurement plane at least four
+diameters and 2 m from its fan-side end, an anechoic termination within Table 5
+and the throttle beyond it. Check the type 1 chain with a class 1 calibrator
+before and after each series. Mount the sampling tube vibration-isolated from
+the wall, at the radius of Table 7, pointing at the fan and with its microphone
+end rounded on the inlet side, and average round the duct over three or more
+positions (at least 30 s up to 160 Hz, 10 s from 200 Hz), by multiplexing, or
+over one revolution of 30 s or more. Keep every band at least 6 dB above the
+background and the turbulence, read the outlet with and without the
+straightener and keep the lower level, and report the levels re 1 pW with
+$2\sigma_R$ as the uncertainty.
+
 Clause 8 turns the readings into a level and the level into a power. The
 positions are energy-averaged and the combined correction $C$ added
 (Eqs 9 and 10), a multiplexed or traversed level takes the correction

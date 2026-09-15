@@ -767,7 +767,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a factor of two, so the default here is the middle of the printed range and
   the caller can name a coefficient instead. The fourth is a fit to
   measurement, `f = 46/h` from 163 rectangular-plan buildings, and it carries
-  the error the annex admits: `empirical_frequency_bounds` is the ± 50 % D.3
+  the error the annex admits: `empirical_frequency_bounds` is the ± 50 % D.2
   calls not uncommon. One quiet agreement between the two is worth the test
   that pins it: 0,022 s/m is both the middle of the oldest code range and the
   coefficient of the measured fit. Damping gets `DAMPING_RATIO_RANGE` and no

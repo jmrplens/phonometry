@@ -45,11 +45,15 @@ viaje respecto a no llevar asiento, y no es un supuesto
 teórico: es lo que hace una suspensión cuando la frecuencia dominante de la
 máquina cae sobre su resonancia.
 
-Las dos aceleraciones son la media aritmética de **tres pasadas consecutivas
-cuyos valores estén dentro del ± 5 % de esa media** (10.2.1). La biblioteca lo
-trata como condición y no como nota al pie: `mean_of_test_runs` rechaza un
-conjunto que no cumpla la dispersión, porque la media de unas pasadas que
-discrepan más no es una medida que esta norma reconozca.
+$a_\mathrm{wS}$ es la media aritmética de **tres pasadas consecutivas cuyos
+valores en el asiento estén dentro del ± 5 % de esa media**, y $a_\mathrm{wP}$
+la media de los valores de la plataforma en esas mismas pasadas, que han de
+quedar dentro de las tolerancias de la entrada y no dentro de ese ± 5 %
+(10.2.1). La biblioteca trata la concordancia como condición y no como nota al
+pie: `mean_of_test_runs` rechaza un conjunto que no cumpla la dispersión,
+porque la media de unas pasadas que discrepan más no es una medida que esta
+norma reconozca. `seat_transmission` la aplica a los dos conjuntos, así que del
+lado de la plataforma es más estricta que la norma.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seat_vibration_test.svg" alt="Dos paneles. El panel izquierdo da tres pasadas del ensayo como barras emparejadas, la plataforma cerca de 1,00 y el asiento cerca de 0,71 metros por segundo al cuadrado, con la media de cada conjunto como línea discontinua y una flecha doble entre las dos medias rotulada SEAT = 0,71. El panel derecho da cuatro barras para la corrección del apartado 10.2.3: la entrada entregada en 1,00, la pretendida en 1,10, la magnitud medida en el asiento en 0,71 y la magnitud corregida en 0,78, sobre la fórmula a*wS = SEAT por a*wP." width="94%" loading="eager" />
 
@@ -81,6 +85,33 @@ except ValueError as error:
 *Un ensayo, y el cociente para el que existe. Las tres pasadas coinciden muy
 por dentro de la tolerancia, así que sus medias son los dos números con los que
 se construye el factor SEAT.*
+
+### Cómo se hace la medida
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig.svg" alt="Montaje de laboratorio para ensayar un asiento de vehículo. A la izquierda, de perfil: un asiento con suspensión de muelle y amortiguador sobre la plataforma de un simulador de vibración que lo mueve en vertical desde abajo, con el respaldo inclinado hacia atrás diez grados más menos cinco y una persona de ensayo sentada, con los pies en un apoyo aparte y los muslos sin tocar el borde delantero del cojín. El disco de montaje está sobre el cojín, bajo la pelvis de la persona, y lleva el acelerómetro del asiento S; una línea de trazo y punto baja de S a la plataforma, donde el acelerómetro de la plataforma P queda a 100 milímetros como máximo de ella. A la derecha, el disco en sección, de 250 más menos 50 milímetros de diámetro y 12 milímetros de altura como máximo, con los acelerómetros en una cavidad central sobre un disco metálico de 75 más menos 5 milímetros de diámetro y 1,5 más menos 0,2 milímetros de espesor, un borde de 3 más menos 1 milímetros, en caucho o plástico de dureza Shore A entre 80 y 90. Debajo, P y S pasan por la misma cadena de valor eficaz ponderado según la ISO 8041: a_wP es la media de las pasadas con la entrada en tolerancia, y a_wS la media de tres pasadas, cada una dentro del 5 por ciento de ella. Cuatro notas recogen el círculo de la plataforma, la posición del disco con su tolerancia de 15 grados en los ejes, el rodaje con 75 kilogramos y el calentamiento, y las dos personas de ensayo con el reposapiés. Un recuadro al pie lleva SEAT igual a a_wS entre a_wP, y la magnitud corregida a*_wS igual a SEAT por a*_wP" width="100%" />
+
+Usa una cadena de medida conforme a la ISO 8041, semejante en la plataforma y
+en el asiento, y calíbrala según la ISO 16063-1 antes y después de cada serie.
+Monta el asiento, comprueba los requisitos de seguridad de la ISO 13090-1 y, si
+el asiento tiene suspensión, hazle el rodaje: una masa inerte de 75 kg sobre el
+cojín, el asiento ajustado para un operador de 100 kg y una excitación
+sinusoidal cerca de la frecuencia natural de la suspensión al 75 % de su
+amplitud completa, hasta que se estabilice. Fija la altura de marcha como
+indica el 8.1.3 y el respaldo regulable unos 10° hacia atrás. Coloca el
+acelerómetro de la plataforma dentro de un círculo de 200 mm centrado justo
+debajo del acelerómetro del asiento, y pega el disco al cojín con cinta para
+que sus acelerómetros queden a medio camino entre las tuberosidades
+isquiáticas. Entrena a las personas de ensayo en pasadas previas hasta que
+mantengan una postura normal e inactiva durante toda la prueba. Pesa a cada una
+justo antes de su serie, ajusta el reposapiés para que los muslos no aprieten
+el borde delantero del cojín y aplica la entrada prescrita sin cortes en cada
+pasada; un calentamiento de hasta 10 min ayuda. Repite hasta que tres pasadas
+consecutivas den valores en el asiento dentro del ± 5 % de su media, con la
+plataforma dentro de sus tolerancias de entrada. La media de esos valores del
+asiento es $a_\mathrm{wS}$, y la media de los valores de la plataforma en esas
+mismas pasadas es $a_\mathrm{wP}$, un par por persona, porque el apartado 11
+exige que apruebe cada una. El informe recoge la duración del rodaje, el disco,
+las masas de las personas y el factor SEAT o la magnitud corregida.
 
 ## 2. Corregir a la entrada que se pretendía
 

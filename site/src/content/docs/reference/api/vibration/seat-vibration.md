@@ -22,10 +22,12 @@ $$
 $$
 
 Below 1 the seat is doing its job; at 1 it passes the vibration through
-unchanged; above 1 it is making the ride worse. Both accelerations are the arithmetic mean of **three
-consecutive runs agreeing within ± 5 %** (10.2.1), which is what
-[`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs) enforces, because a mean of runs that disagree by
-more than that is not a measurement this standard recognises.
+unchanged; above 1 it is making the ride worse. $a_\mathrm{wS}$ is the
+arithmetic mean of **three consecutive runs agreeing within ± 5 % at the
+seat**, and $a_\mathrm{wP}$ the mean of the platform values from those
+same runs, which 10.2.1 holds to the input tolerances of 9.2 instead.
+[`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs) enforces the agreement, because a mean of runs that
+disagree by more is not a measurement this standard recognises.
 
 **Correcting to an intended input** (10.2.3). A simulator does not reproduce
 its target spectrum exactly, so the magnitude measured on the seat is scaled
@@ -220,6 +222,8 @@ One simulated input vibration test, from its runs (10.2).
 
 Each set of runs is averaged through [`mean_of_test_runs`](/phonometry/reference/api/vibration/seat-vibration/#mean_of_test_runs), so a test
 whose runs do not agree within ± 5 % is refused rather than averaged.
+10.2.1 asks for that agreement at the seat only, so on the platform side
+this is stricter than the clause.
 
 **Parameters**
 

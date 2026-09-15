@@ -3,7 +3,7 @@
 
 Anchored on the printed formulae: the storey rule ``f = 10/n`` of D.2, the
 three code forms (D.1), (D.2) and (D.3) with the coefficient ranges the annex
-prints for each, the measured fit ``f = 46/h`` of D.3 with its ± 50 % band,
+prints for each, the measured fit ``f = 46/h`` of D.2 with its ± 50 % band,
 and the damping range of D.4.
 """
 
@@ -58,7 +58,7 @@ def test_the_default_coefficient_is_the_middle_of_the_printed_range() -> None:
 def test_the_midpoint_of_k1_is_the_coefficient_the_measured_fit_gives() -> None:
     """A quiet agreement worth pinning: 0,022 twice, from two directions.
 
-    The middle of the ``k1`` range the codes span is 0,022 s/m, and D.3's fit
+    The middle of the ``k1`` range the codes span is 0,022 s/m, and the fit
     to 163 measured buildings prints ``T = 0,022 h`` s. The default height
     model therefore lands within a percent and a half of ``f = 46/h``, which
     is a good deal closer than the ± 50 % the annex warns about.
@@ -117,7 +117,7 @@ def test_the_fit_refuses_a_height_that_is_not_one(bad: float) -> None:
 
 
 def test_the_error_band_is_the_fifty_percent_the_annex_prints() -> None:
-    """D.3: "errors of ± 50 % are not uncommon"."""
+    """D.2: "errors of ± 50 % are not uncommon"."""
     assert br.EMPIRICAL_FREQUENCY_TOLERANCE == pytest.approx(0.5)
     assert br.empirical_frequency_bounds(2.0) == pytest.approx((1.0, 3.0))
 

@@ -98,6 +98,37 @@ of the bench measurement added on top; that uncertainty has to fit inside the
 band as well. There is a second sentence about uncertainty, in 13.1 and 14.1,
 and it says something different; section 4 is about telling the two apart.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench.svg" alt="Three bands and a formula box. Top, the mechanical test of clause 12.11.2: a signal generator and a power amplifier drive a vibration exciter, and on its table the meter's own transducer sits on a calibrated reference transducer, both mounted as ISO 16063-21 describes; one cable runs to the human-vibration meter, which reads the weighted a_ind, the other to the laboratory reference, which measures the unweighted a_in, and a note says one weighting per application takes both tests. Under it, at the 15.915 Hz reference frequency the band-limited reading is set 20 dB over the lower linearity limit, in one-third-octave steps from 0.5 Hz to 160 Hz a_in is held while a_ind is noted, and a meter that reads a peak, an MTVV or a VDV has its phase checked on a vibration exciter by Annex H. Middle, the electrical test of clauses 12.11.3 and 12.13: a generator carrying a sine and a saw-tooth feeds the maker's substitute for the transducer, a test point, dummy transducer or input adapter, through a single-pole low-pass with a cut-off of, for example, 10 kHz where the saw-tooth needs it, and the meter shows a_ind again while the input signal value u_in is adjusted from 0.25 Hz to 160 Hz, its transducer set aside. Below the chain, two-cycle saw-tooth bursts with the whole-body timing of Table 6, the first at 1 s, one every 10 s, 60 s in all, with a fall time of at most 2 ms. Bottom, a 60 dB linear operating range: both frequency sweeps are set at the reference frequency 20 dB over its lower limit, the first bursts at 50 % of its upper limit and two tenfold steps below that, stopping above three times the lower limit, while from that same first level a single cycle is raised to overload. The box gives Formula (9) with at most 4.5 % expanded uncertainty, Formula (12) with at most 3 %, and Formula (10), which adds the transducer error to the weightings tested only electrically, graded against Table 5 with at most 5 %" width="100%" />
+
+### How the measurement goes
+
+In a pattern evaluation (clause 12), submit the meter with its transducer,
+mounting, cable and input adaptors, its sensitivity set by its documented
+procedure, and use traceably calibrated bench instruments with every test
+frequency within ±0.2 %. At the reference frequency, take at least three
+readings against a calibrated reference transducer at the same point: no more
+than 3 % apart, their mean inside Table 2.
+
+Per application, one weighting goes through both tests and the others through
+either, a third of an octave apart at most over Table 15. On the exciter, with
+both transducers mounted as ISO 16063-21 describes, set the band-limited
+reading 20 dB above the lower linearity limit at the reference frequency, then
+hold that input on the reference transducer and note the reading at every
+frequency: Formula (9), within 4.5 % expanded uncertainty. Through the
+electrical input, hold the reading and note the input signal value, with signal
+plus noise at least ten times the noise: Formula (12), within 3 %. The
+transducer error of the weighting tested both ways completes the others, graded
+against Table 5 within 5 %. For the bursts, set a steady sine to 50 % of the
+upper linearity limit, apply the Table 6 saw-tooth to every weighting, and
+repeat tenfold lower down to three times the lower limit. A meter reading a
+peak, an MTVV or a VDV also has its phase checked by Annex H; a one-off
+instrument is shaken at the fixed frequencies of 13.10. Report every
+configuration, condition, result and actual uncertainty, and whether the meter
+conforms. A periodic verification (clause 14) is a different bench: it keeps
+only the mechanical sensitivity, linearity and frequency-response checks, for a
+whole-body meter at 1.995, 7.943, 15.85 and 63.10 Hz at 1.00 m/s² with U at
+most 5 %.
+
 ## 2. The nine weightings, and the band that widens around them
 
 The design goal is not a table of numbers, it is a transfer function. Clause

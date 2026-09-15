@@ -166,6 +166,15 @@ jobs:
     # which one.
     - name: Fail if the committed artefact is not internally consistent
       run: python scripts/check_conformance_artifact.py
+    # The artefact's closed vocabularies are restated by the site: once in the
+    # Zod schema that validates it into the content collection, once in the
+    # label maps that word a verdict and a relation in each language. Nothing
+    # compared them until this, and a relation added to the reader and missing
+    # from the schema stopped the site build with a content error naming ten
+    # checks and no cause. Cheap and stdlib-only, so it runs here rather than
+    # waiting for the docs workflow to build the site.
+    - name: Fail if the site does not accept and word every vocabulary
+      run: python scripts/check_conformance_vocabulary.py
 
   # Drift gate for the generated Starlight API reference: the committed pages
   # under site/src/content/docs/reference/api and the sidebar fragment must

@@ -6629,8 +6629,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   superior izquierda.
 - **El problema:** los resultados corresponden al reparto de la figura y no al
   de las tablas. La máquina M2 está en 17 m, 3 m, 1 m, así que la posición que
-  la tabla B.5 llama W2 queda a un metro de ella y la que llama W1 queda a once
-  metros de la máquina más próxima. La posición lejana no puede ser la más
+  la tabla B.5 llama W2 queda a 1,2 m de ella y la que llama W1 queda a 11,4 m
+  de la máquina más próxima. La posición lejana no puede ser la más
   ruidosa de las dos, y los niveles impresos dicen que lo es. Al recalcular el
   caso A con el método de categoría 1 que prescribe el anexo, en la sala de
   20 m por 15 m por 7 m de la tabla B.2 con el coeficiente de absorción medio

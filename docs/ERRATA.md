@@ -6190,8 +6190,8 @@ in the same order.
   top left.
 - **The problem:** the results belong to the figure's assignment and not to the
   tables'. Machine M2 stands at 17 m, 3 m, 1 m, so the position Table B.5 calls
-  W2 is one metre from it and the position it calls W1 is eleven metres from
-  the nearer machine. The far position cannot be the louder of the two, and the
+  W2 is 1,2 m from it and the position it calls W1 is 11,4 m from the nearer
+  machine. The far position cannot be the louder of the two, and the
   printed levels say it is. Recomputing case A by the category 1 method the
   annex prescribes, in the 20 m by 15 m by 7 m room of Table B.2 at the mean
   absorption coefficient 0,15 of Table B.3, gives 82,10 dB at 17 m, 4 m, 1,6 m

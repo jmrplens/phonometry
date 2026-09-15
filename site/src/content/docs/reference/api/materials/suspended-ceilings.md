@@ -22,8 +22,9 @@ the room walls, and a mounting fixture of solid material with a surface density
 of at least 20 kg/m2. For the type E mounting that a suspended ceiling actually
 uses, it fixes the overall depth of construction at 200 mm for the measurement
 that CE marking rests on, the substructure at no more than 30 mm wide and 50 mm
-deep on a 0,6 m pitch, and
-the deflection of the specimen at no more than 5 mm.
+deep on a pitch of about 0,6 m, the support units under it at no more than
+50 mm by 50 mm in cross-section and at least 1,2 m apart, and the deflection of
+the specimen at no more than 5 mm.
 
 **What it costs to ignore the air.** 4.2.1 asks for test conditions under which
 the air-absorption correction
@@ -121,26 +122,40 @@ CeilingSpecimenCheck(
     deflection_ok: bool,
     substructure_ok: bool,
     fixture_ok: bool,
+    supports_ok: bool,
+    humidity_ok: bool | None,
     ce_marking_depth: bool,
     satisfied: bool,
 )
 ```
 
-Whether a test arrangement meets the geometry 4.1.1 fixes.
+Whether a test arrangement meets the printed limits of clause 4.
+
+The verdict covers the limits clause 4 puts a number on and a measured
+arrangement can be held to: the mounting fixture of 4.1.1.1.6, the
+substructure profile of 4.1.1.2.3.4, the deflection of 4.1.1.2.3.5, the
+support units of 4.1.1.2.3.6 and, when it was given, the relative humidity
+of 4.2.2. Two figures are reported beside the verdict and kept out of it,
+because the clause does not make them a pass or a fail: the area error,
+since 4.1.1.1.1 asks for an area "as close to 10,80 m2 as possible", and the
+CE marking depth, since 4.1.1.2.3.1 recommends 200 mm and requires it only
+of the data CE marking is compiled from.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
 | `area_m2` | The specimen area as built, in square metres. |
-| `area_error_m2` | How far it sits from the 10,80 m2 the code aims at. |
+| `area_error_m2` | How far it sits from the 10,80 m2 the code aims at, reported and not judged. |
 | `mounting` | The mounting letter the arrangement uses. |
 | `depth_mm` | The overall depth of construction, in millimetres, for a type E mounting, or `None` for the others. |
 | `deflection_ok` | Whether the deflection stays inside 5 mm. |
 | `substructure_ok` | Whether the profile stays inside 30 mm by 50 mm. |
 | `fixture_ok` | Whether the mounting fixture is heavy enough. |
-| `ce_marking_depth` | Whether the depth is the 200 mm the CE marking data rests on. |
-| `satisfied` | Whether every one of the above holds. |
+| `supports_ok` | Whether the support units stay inside 50 mm by 50 mm in cross-section and, when their centre distance was given, stand at least 1,2 m apart. |
+| `humidity_ok` | Whether every measurement was made at 50 % relative humidity or more, or `None` when no humidity was given. |
+| `ce_marking_depth` | Whether the depth is the 200 mm the CE marking data rests on, reported and not judged. |
+| `satisfied` | Whether every judged limit holds: the fixture, the substructure, the deflection, the supports and, when it was given, the humidity. |
 
 ## check_ceiling_specimen
 
@@ -154,10 +169,49 @@ check_ceiling_specimen(
     substructure_width_mm: float = 0.0,
     substructure_height_mm: float = 0.0,
     fixture_density_kg_m2: float = 20.0,
+    support_width_mm: float = 0.0,
+    support_height_mm: float = 0.0,
+    support_centre_distance_m: float | None = None,
+    relative_humidity_percent: ArrayLike | None = None,
 ) -> CeilingSpecimenCheck
 ```
 
-Does the arrangement meet the geometry of 4.1.1?
+Does the test arrangement meet the printed limits of clause 4?
+
+Clause 4 of EN 16487, "Test arrangements", holds both the specimen of 4.1
+and the temperature and humidity of 4.2. The verdict judges every bound of
+it that a number of the arrangement as built can be held to:
+
+* a mounting fixture of at least 20 kg/m2 (4.1.1.1.6);
+* a substructure profile no wider than 30 mm and no higher than 50 mm
+  (4.1.1.2.3.4);
+* a deflection of the specimen of no more than 5 mm (4.1.1.2.3.5);
+* support units no larger than 50 mm by 50 mm in cross-section, at centre
+  distances of at least 1,2 m (4.1.1.2.3.6);
+* when it is given, a relative humidity of at least 50 % in every
+  measurement (4.2.2, checked for each measurement by 4.2.3).
+
+Leaving one of them raises a [`SuspendedCeilingWarning`](/phonometry/reference/api/materials/suspended-ceilings/#suspendedceilingwarning) that names
+it, and makes `satisfied` false. A substructure and support units are
+what 4.1.1.2.3.4 and 4.1.1.2.3.6 allow rather than require, so their
+dimensions default to zero, which is none at all, and the centre distance
+is judged only when it is given. The cap of 4.2.1 on the air-absorption
+correction is judged where that correction is computed, by
+[`air_absorption_correction`](/phonometry/reference/api/materials/suspended-ceilings/#air_absorption_correction).
+
+Two figures are reported and kept out of the verdict. The area error,
+because 4.1.1.1.1 asks for an area "as close to 10,80 m2 as possible",
+which is a target and not a tolerance. And whether a type E depth is the
+200 mm that 4.1.1.2.3.1 recommends and fixes for the data CE marking is
+compiled from: another depth is said in the warning and passes.
+
+Three printed figures are targets to build to and are not judged at all:
+the 0,6 m by 0,6 m test object of 4.1.1.1.2 ([`TEST_OBJECT_SIZE_M`](/phonometry/reference/api/materials/suspended-ceilings/#test_object_size_m)),
+which "should" be that size and otherwise the closest in the product
+range; the 10 degree edge angle of 4.1.1.1.5
+([`MIN_ROOM_EDGE_ANGLE_DEG`](/phonometry/reference/api/materials/suspended-ceilings/#min_room_edge_angle_deg)), which "should be aimed at"; and the
+substructure pitch of "approx. 0,6 m" of 4.1.1.2.3.4
+([`SUBSTRUCTURE_SPACING_M`](/phonometry/reference/api/materials/suspended-ceilings/#substructure_spacing_m)).
 
 **Parameters**
 
@@ -170,6 +224,10 @@ Does the arrangement meet the geometry of 4.1.1?
 | `substructure_width_mm` | The substructure profile width, in millimetres. |
 | `substructure_height_mm` | Its height, in millimetres. |
 | `fixture_density_kg_m2` | The surface density of the mounting fixture, in kilograms per square metre. |
+| `support_width_mm` | One side of the cross-section of the support units, in millimetres; zero when the substructure has none. |
+| `support_height_mm` | The other side, in millimetres. |
+| `support_centre_distance_m` | The centre distance between support units, in metres, or `None` when there are none or it was not recorded. |
+| `relative_humidity_percent` | The relative humidity of the room in each measurement, in percent, one value per measurement, or `None` to leave 4.2.2 unjudged. |
 
 **Returns:** The verdict, as a [`CeilingSpecimenCheck`](/phonometry/reference/api/materials/suspended-ceilings/#ceilingspecimencheck).
 
@@ -177,7 +235,7 @@ Does the arrangement meet the geometry of 4.1.1?
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | For a non-positive area or depth, a negative or non-finite deflection, substructure dimension or fixture density, an unknown mounting letter, or a type E arrangement with no depth given. |
+| ValueError | For a non-positive area or depth, a negative or non-finite deflection, substructure or support dimension or fixture density, a non-positive or non-finite support centre distance, a relative humidity that is empty, not one-dimensional, not finite or outside 0 % to 100 %, an unknown mounting letter, or a type E arrangement with no depth given. |
 
 ## EN16487_COVERAGE_FACTOR
 
@@ -313,7 +371,11 @@ SUPPORT_SECTION_MM = (50.0, 50.0)
 
 ## SuspendedCeilingWarning
 
-The test arrangement is outside a condition EN 16487 states.
+The test arrangement departs from a condition EN 16487 states.
+
+Most often a limit of clause 4 it has left. The one exception is a type E
+depth other than 200 mm: the test code admits it, and the warning says only
+that the result is not the one CE marking data is compiled from.
 
 ## TARGET_SPECIMEN_AREA_M2
 

@@ -198,7 +198,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   C.12 of ISO 14257 are not an Equation (8) result and cannot be got out of it
   for any decay rate; they are readings of the measurement at a microphone
   position, one of them with a logarithm entered as a round 30. Equation (4) of
-  the same standard rounds a constant its own Table 1 sums to exactly. And
+  the same standard prints the A-weighting sum to one decimal and Table 1 the
+  weights to one decimal, and the two roundings miss each other by 0,05 dB;
+  its own annex was normalised exactly, so the printed equation runs 0,05 dB
+  high against it. The library keeps the printed 6,2 dB, says so, and
+  Equation (3) under the Table 1 weights gives the annex's reading. And
   Annex B of ISO 11690-3 gives its two workstations each other's positions:
   recomputing the annex returns both printed levels, each against the other
   label.
@@ -220,6 +224,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   404 files.
 
 ### Fixed
+
+- The in situ standards of this release did not do what their printed clauses
+  say in five places, and could not reach one textbook case.
+
+  The reference microphone of ISO 10847 could stand lower than the clause
+  allows. 7.2.2 puts it at least 1,5 m above the top edge of the barrier with
+  "shall", and its NOTE lets a close source raise it until it looks 10 degrees
+  over the top. `reference_microphone_height_m` returned the NOTE's height
+  whenever the source was nearer than 15 m, which for a 3 m barrier 5 m away is
+  4,34 m against the 4,5 m the clause asks for, and past 80 degrees a negative
+  height. It returns the higher of the two now, and where no height reaches the
+  10 degrees it keeps the clearance and emits a `BarrierInSituWarning`. The test
+  and the conformance row had both pinned that short geometry as correct; both
+  use one the angle governs now, and a new entry holds the clearance.
+
+  `extraneous_corrected_mean_level_db` flagged a 3 dB margin as capped. ISO
+  11820 caps the energy subtraction at 3 dB, and Table 1 prints what that 3 dB
+  is: the correction at a 3 dB margin, which the subtraction writes unrounded as
+  3,0206 dB. The cap is judged on the margin of the two energy means now, so the
+  two routes the clause offers agree at the boundary they share, and floating
+  point no longer decides which side of it a printed 3,0 dB pair lands on.
+
+  ISO 11821 7.4 c) reports the attenuation of a screen to the nearest whole
+  decibel, and `ScreenInSituResult` left that to the caller. `rounded()` and
+  `rounded_a_weighted()` give it, as the barrier, enclosure and cabin results
+  already did.
+
+  The two loss functions of ISO 11820 took their areas as single numbers. The
+  area of a diffuse room is a quarter of its absorption and moves with the
+  reverberation time band by band, which is how `reverberant_surface_area_m2`
+  returns it. `in_situ_transmission_loss` and `in_situ_insertion_loss` take each
+  area and the field correction as one value or one per band, and
+  `SilencerInSituResult.area_term_db` and `field_correction_difference_db` are
+  arrays of one value per band now, even when single values went in: code that
+  rounded them as floats needs an array operation. The thesis oracle that had to
+  be driven one band at a time is one call per table.
+
+  `check_ceiling_specimen` judged three of the limits clause 4 of EN 16487
+  prints and published the rest as constants nothing applied. It judges the
+  support units of 4.1.1.2.3.6 (`support_width_mm`, `support_height_mm`,
+  `support_centre_distance_m`) and, given one value per measurement in
+  `relative_humidity_percent`, the 50 % of 4.2.2. `CeilingSpecimenCheck` gains
+  `supports_ok` and `humidity_ok`, and `satisfied` covers them; the conformance
+  row on the room climates of three real test reports reads that verdict
+  instead of comparing by hand. A type E depth other than 200 mm still passes,
+  and its warning no longer calls the arrangement outside EN 16487: the clause
+  only says it is not the depth CE marking data is compiled from. The docstrings
+  name the printed figures that are targets and stay unjudged.
+
+  `room_to_room_transmission` gains `receiver_distance_m`, the direct field the
+  partition radiates into the receiving room, from Equations (7-71) and (7-72)
+  of Barron (2003). Norton's Equation (4.101) is its far limit and stays the
+  default. Barron's Example 7-6, an operator 1,5 m from the wall, reads 61,7 dB
+  on his page and would read 2,65 dB less without that term; the chain
+  reproduces it, `required_transmission_loss` carries the same term, and a
+  conformance row holds it.
+
+  The unit guard then read `humidity_ok` as a humidity without its unit. A
+  parameter typed `bool` holds a verdict and no number of the quantity it
+  names, so the guard leaves it out. And the printed tables the tests and the
+  conformance rows of these standards both read were transcribed twice, once
+  on each side; they are transcribed once now, in `tests/reference_data`, with
+  their citations, so a correction reaches both.
 
 - A citation that named two or three documents was filed under the first one,
   and the others never appeared as cited at all. `ISO 16283-1:2014 Clause 8.1 /

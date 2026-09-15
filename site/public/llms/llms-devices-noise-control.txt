@@ -1332,6 +1332,37 @@ half-second reverberation time a Schroeder frequency of 163 Hz, which is
 exactly why the 125 Hz band of problem 4.18 - the band that governs the
 whole answer - should be read as an estimate and not as a number.
 
+Both levels are also reverberant-field averages, and the desk pushed against the
+partition hears more: the direct field the partition radiates. Barron,
+*Industrial Noise Control and Acoustics* (2003), section 7.5, Equations (7-71)
+and (7-72), adds it inside the logarithm of Equation (4.101) as
+`S_w/(S_2 alpha_2) + g`, with `g = 1/4` closer to the wall than
+`r* = (S_w/2 pi)^(1/2)` and `g = S_w/(8 pi r_2^2)` beyond it, so that Norton's
+equation is the far limit. `receiver_distance_m` switches it on, in the chain and
+in the required transmission loss.
+
+```python
+import numpy as np
+from phonometry import noise_control, room
+
+# Barron (2003) Example 7-6: an operator 1,5 m from a 16 m2 wall of TL 30 dB.
+source = noise_control.SourceRoom(
+    power_level=105.0, room_constant=room.room_constant(900.0, 0.05), directivity=2.0,
+)
+near = noise_control.room_to_room_transmission(
+    [1000.0], 30.0, 16.0, room.room_constant(100.0, 0.35),
+    source=source, receiver_distance_m=1.5,
+)
+print(np.round(near.received_level, 1))   # [61.6]
+```
+
+Barron prints 61,7 dB with the 0,1 dB he adds to every level, which the library
+does not add. He writes the receiving room over its room constant
+`R_2 = S_2 alpha_2/(1 - alpha_2)`, so that is what goes in as the receiving
+absorption. Without the direct field the level is 59,0 dB: the operator, inside
+the 1,60 m of `r*`, hears 2,65 dB more than the reverberant level, and the excess
+is down to 0,1 dB at 10 m.
+
 ## What this guide covers
 
 **Covered.** The Norton & Karczub §4.9 power balance (Eq. 4.101) as
@@ -1344,7 +1375,8 @@ S12.2-2019 rating, NC by default and RC Mark II with
 `DesignCriterion(family="RC")`, plus `.required_transmission_loss`,
 `.exceedance`, `.meets_target` and `.table()`; and the §4.10 enclosure equation
 (Eq. 4.115) through `enclosure_required_transmission_loss` in both interior
-models listed by `ENCLOSURE_MODELS`.
+models listed by `ENCLOSURE_MODELS`. With `receiver_distance_m`, the direct field
+of the partition at a receiver, Barron (2003) Equations (7-71) and (7-72).
 
 **Not covered.** The transmission loss of the partition itself, which is
 measured or predicted elsewhere; flanking as a modelled path rather than the
@@ -1352,7 +1384,7 @@ flat allowance used here; and the leaks and openings of an enclosure, which
 need the composite of
 [Industrial noise control](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/). The whole chain is a diffuse-field
 argument, so it says nothing below either room's Schroeder frequency, or closer
-to a surface than roughly half a wavelength.
+to a surface other than the partition than roughly half a wavelength.
 
 ## See also
 
@@ -1396,6 +1428,9 @@ to a surface than roughly half a wavelength.
   against.
 - Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press. The Schroeder
   frequency (Eq. 3.44) that bounds the diffuse-field assumption from below.
+- Barron, R. F. (2003). *Industrial noise control and acoustics*. Marcel Dekker.
+  The direct field of the partition in the receiving room (section 7.5,
+  Eqs. 7-71 and 7-72) and Example 7-6, which `receiver_distance_m` reproduces.
 
 ---
 

@@ -6426,30 +6426,79 @@ dos ediciones con las mismas entradas y en el mismo orden.
 ## ISO 14257:2001, ecuación (4) frente a la tabla 1 (una segunda constante redondeada)
 
 - **Ubicación:** la ecuación (4) de 4.2.3 y la tabla 1 justo debajo, las dos en
-  la página impresa 4 (página 14 del PDF).
+  la página impresa 4 (página 14 del PDF), frente a la última columna de la
+  tabla C.6 en la página impresa 21 (página 31 del PDF) y a la tabla C.10 en
+  la página impresa 24 (página 34 del PDF).
 - **Lo impreso:** la ecuación (4) cierra con
   $D_\text{Norm} = 10\lg\!\left(\sum_j 10^{(D_j + P_j)/10}\right)$ dB
   $-\ 6,2$ dB, y la tabla 1 da los $P_j$ del espectro de referencia de ruido
   rosa ponderado A como $-16{,}1$; $-8{,}6$; $-3{,}2$; $0$; $1{,}2$; $1$ dB de
   125 Hz a 4 kHz.
-- **El problema:** los 6,2 dB son la suma energética de esa misma tabla
-  impresa, que es lo que normaliza el espectro ponderado a total unidad, y la
-  suma de los seis $P_j$ impresos es 6,251 dB. La constante impresa se queda
-  0,051 dB corta. Es el mismo desliz que el $\lg 2$ redondeado de la entrada
-  anterior, en la otra dirección: una constante que el documento podía haber
-  impreso exacta, redondeada a un decimal en el único sitio donde aparece.
-- **Evidencia:** la ecuación (4), su leyenda y la tabla 1 leídas en la página,
-  página 14 del PDF (página impresa 4) de la EN ISO 14257:2001.
-- **Consecuencia para las tablas de la propia norma:** 0,051 dB en cada valor
-  normalizado en frecuencia que tabula el anexo, que es medio dígito del último
-  que imprimen las tablas C.6, C.10 y C.12, así que puede mover una celda
-  impresa en una unidad del último lugar, nunca más.
+- **El problema:** los 6,2 dB son la suma energética de los $P_j$, que es lo
+  que normaliza el espectro ponderado a total unidad para que una curva plana
+  vuelva sin cambiar, y los seis $P_j$ impresos suman 6,251 5 dB, que redondea
+  a 6,3 y no a 6,2. La constante impresa se queda 0,051 dB corta respecto a la
+  tabla impresa. Las dos son redondeos de la misma curva hechos por separado:
+  los $P_j$ son la ponderación A de la IEC 61672-1 en los seis centros de
+  octava, $-16{,}19$; $-8{,}67$; $-3{,}25$; $0$; $1{,}20$; $0{,}96$ dB,
+  impresos a un decimal tal como los tabula esa norma, y la suma energética
+  de la curva sin redondear es 6,23 dB, que se imprime como el 6,2 de la
+  ecuación (4). Cada redondeo es correcto por sí solo y la ecuación impresa
+  no lo es: evaluada tal como está impresa, devuelve una curva plana 0,05 dB
+  alta. Es un desliz de la misma clase que el $\lg 2$ redondeado de la
+  entrada anterior, una constante impresa a un decimal donde el documento
+  calcula con más, y la ecuación (3), de la que la ecuación (4) es el caso
+  particular para el espectro de la tabla 1, lleva la misma normalización
+  exacta, como logaritmo de su denominador.
+- **Evidencia:** la ecuación (4), su leyenda y la tabla 1 leídas en la página
+  en cuatro impresiones, que coinciden carácter por carácter: ISO
+  14257:2001(E), página 10 del PDF (página impresa 4); EN ISO 14257:2001 tal
+  como la publica la BS EN ISO 14257:2001, página 14 del PDF (página impresa
+  4); UNE-EN ISO 14257:2002, página 9 del PDF (página impresa 9); y DIN EN ISO
+  14257:2011-11, página 13 del PDF (página impresa 9), cuyo prólogo nacional
+  enumera los errores técnicos corregidos en el texto alemán y no nombra este.
+  El anexo zanja con qué constante se calculó. Recorriendo las tablas C.2 a
+  C.4 impresas por el anexo B sin redondear, la última columna de la tabla C.6
+  vuelve con los seis $P_j$ impresos y su propia suma, 6,251 5 dB, dentro del
+  redondeo impreso en las 11 posiciones (peor 0,041 dB, desviaciones de los
+  dos signos), y con los 6,2 dB impresos una unidad alta en la última cifra en
+  6 de las 11 (peor 0,092 dB, todas las desviaciones positivas, de +0,011 a
+  +0,092 dB). La tabla C.10 hace lo mismo: +0,040, +0,004 y +0,045 dB con la
+  suma, +0,091, +0,055 y +0,097 dB con 6,2. La ponderación A sin redondear
+  con su propia suma deja las mismas 14 celdas dentro del redondeo (peor
+  0,047 dB), así que el anexo no dice cuál de las dos normalizaciones exactas
+  usó, solo que usó una; con los 6,2 dB impresos no lo consigue ninguna de
+  las dos ponderaciones (8 y 9 de 14 fuera). Sobre las columnas de octava
+  impresas, ya redondeadas, de la tabla C.6 el reparto es 3 de 11 frente a 7
+  de 11. La tabla C.8, una pendiente, no ve la constante, y los 115,7 dB
+  ponderados A de la tabla C.2 la vuelven a sumar. Verificado en la página 14
+  del PDF (página impresa 4) de la EN ISO 14257:2001 para la ecuación y la
+  tabla, y en las páginas 31 y 34 del PDF (páginas impresas 21 y 24) del mismo
+  documento para las dos tablas del anexo.
+- **Consecuencia para las tablas de la propia norma:** ninguna para el anexo,
+  que se normalizó exactamente. Lo que arrastra los 0,051 dB es cualquier
+  evaluación de la ecuación impresa, que queda esa cantidad por encima del
+  anexo en cada valor normalizado en frecuencia y puede mover una celda
+  impresa de las tablas C.6, C.10 y C.12 en una unidad de la última cifra,
+  siempre hacia arriba, y nunca más.
 - **Comportamiento de la biblioteca:**
   [`NORMALIZED_OFFSET_DB`](../src/phonometry/room/spatial_decay.py) lleva el 6,2
-  impreso, por la misma regla que la entrada anterior: la constante impresa es
-  la que usará quien compare contra la página. La fila de conformidad
-  "ISO 14257:2001 Annex C, Table C.6 last column" juzga el resultado contra el
-  anexo con la décima que el anexo imprime.
+  impreso, por la misma regla que la entrada anterior y que el 11 de la
+  ecuación (2): la constante impresa es la que usará quien compare contra la
+  página, y la imprimen cuatro impresiones. La normalización exacta es la
+  ecuación (3) con los pesos de la tabla 1 como espectro de la máquina, que
+  calcula
+  [`spectrum_distribution_value`](../src/phonometry/room/spatial_decay.py),
+  así que la lectura del anexo está disponible sin una segunda constante. La
+  fila de conformidad "ISO 14257:2001 Annex C, Table C.6 last column" juzga la
+  constante impresa contra el anexo a 0,1 dB y dice por qué, la fila
+  "ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table
+  C.10" registra que la suma exacta deja los catorce valores dentro del
+  redondeo impreso y la constante impresa no, y
+  `test_the_annex_normalized_with_the_table_one_sum_and_not_the_printed_offset`
+  en [`tests/room/test_spatial_decay.py`](../tests/room/test_spatial_decay.py)
+  sujeta los dos recuentos para que ni la constante ni las tolerancias puedan
+  moverse.
 - **Estado:** no reportada.
 
 ## ISO 14257:2001, anexo C, tablas C.11 y C.12 (resultados que la ecuación (8) no da)

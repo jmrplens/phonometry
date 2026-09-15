@@ -19,6 +19,12 @@ references:
     publisher: "CRC Press"
     doi: "10.1201/9781351228152"
     note: "The steady-state room relations (section 6.4, Eqs. 6.43-6.44) behind steady_state_spl and room_constant, and the enclosure insertion loss of section 7.4.2 (Eqs. 7.103, 7.111) that is the library default enclosure model."
+  - type: book
+    authors: ["Barron, R. F."]
+    year: 2003
+    title: "Industrial noise control and acoustics"
+    publisher: "Marcel Dekker"
+    note: "The direct field of the partition in the receiving room (section 7.5, Eqs. 7-71 and 7-72) and Example 7-6, an operator 1,5 m from the wall, which receiver_distance_m reproduces."
   - type: standard
     organization: "American National Standards Institute"
     year: 2019
@@ -565,16 +571,80 @@ and it returns 163.3 Hz for that room.
 In space: both levels are **reverberant-field spatial averages**. $L_{p2}$ is
 what a roving microphone would report over the receiving room, not the level at
 the desk pushed against the party wall, where the direct field of the radiating
-surface adds a few decibels within roughly a wavelength of it. The same holds in
+surface adds a few decibels (the next subsection puts a number on it). The same holds in
 reverse on the source side: $L_{p1}$ is the reverberant level that drives the
 whole partition, and a person standing beside the machine is in its direct field
 and hears more, so a *measured* source-room level has to be taken away from both
 the machine and the wall to be the right input. It is the reason the field
-standards keep their microphone positions half a wavelength from every surface,
-and the reason this calculation cannot answer where in the receiving room to put
-the workstation; when that is the question, the image-source and ray methods of
+standards keep their microphone positions half a wavelength from every surface.
+Past the partition's own direct field, below, it is also the reason this
+calculation cannot answer where in the receiving room to put the workstation;
+when that is the question, the image-source and ray methods of
 [Room image sources and steady field](/phonometry/buildings/rooms/room-image-sources/)
 are the tool.
+
+### A receiver next to the partition
+
+Barron, *Industrial Noise Control and Acoustics* (Marcel Dekker, 2003), section
+7.5, carries the direct field of the partition into the receiving room. Close to
+the wall the power it radiates is spread over its face; farther out the wall
+behaves as a source of directivity 2; and the two descriptions meet at
+$r^* = (S_\mathrm{w}/2\pi)^{1/2}$. His Equations (7-71) and (7-72), written over
+the variables of Equation (4.101), add one term inside the logarithm,
+
+$$
+\text{NR} = \text{TL}
+- 10\log_{10}\!\left[\frac{S_\mathrm{w}}{S_2 \alpha_2} + g\right],
+\qquad
+g = \begin{cases}
+1/4 & r_2 < r^* \\
+S_\mathrm{w} / (8 \pi r_2^2) & r_2 \geq r^*
+\end{cases}
+$$
+
+with $r_2$ the distance of the receiver from the partition. The two branches
+agree at $r^*$, and the second one vanishes as $r_2$ grows, so Norton's equation
+is the far limit of Barron's pair. `receiver_distance_m` switches the term on.
+Barron's Example 7-6 is a paper mill: a Jordan refiner with a sound power level
+of 105 dB stands in a room of 900 m² of surface at an average absorption
+coefficient of 0,05, and an operator sits 1,5 m from the 16 m² wall, of 30 dB
+transmission loss, in a room of 100 m² at 0,35. The refiner is 4 m from the wall
+with a directivity factor of 2, which moves the level Barron prints beside it
+and not the reverberant level that drives the wall:
+
+```python
+import numpy as np
+from phonometry import noise_control, room
+
+source = noise_control.SourceRoom(
+    power_level=105.0,
+    room_constant=room.room_constant(900.0, 0.05),   # 47.37 m2
+    directivity=2.0,
+)
+receiving = room.room_constant(100.0, 0.35)          # 53.85 m2, Barron's R2
+
+far = noise_control.room_to_room_transmission(
+    [1000.0], 30.0, 16.0, receiving, source=source,
+)
+near = noise_control.room_to_room_transmission(
+    [1000.0], 30.0, 16.0, receiving, source=source, receiver_distance_m=1.5,
+)
+print(np.round(far.received_level, 1))    # [59.]
+print(np.round(near.received_level, 1))   # [61.6]
+```
+
+Barron prints 61,7 dB, which is this 61,6 dB plus the 0,1 dB he adds to every
+level for the characteristic impedance of air; the library does not add it, as
+`steady_state_spl` does not. Two readings of his page stand between the two
+numbers. He writes the reverberant term of the receiving room over its room
+constant $R_2 = S_2\alpha_2/(1-\alpha_2)$ where Norton writes $S_2\alpha_2$, so
+his 53,85 m² goes in as the receiving absorption. And his example is one band,
+so the band centre given here only labels it. His $r^*$ is 1,60 m, the operator
+stands inside it and gets the whole quarter: 2,65 dB over the reverberant level.
+At 3 m the excess is 0,9 dB and at 10 m it is 0,1 dB, which is where Equation
+(4.101) becomes the answer again. `required_transmission_loss` carries the same
+term, so a wall specified with a receiver distance is specified for the desk at
+that distance.
 
 ## What this guide covers
 
@@ -590,7 +660,10 @@ S12.2-2019 rating, in the NC family by default and in the RC Mark II family
 with `DesignCriterion(family="RC")`; `.required_transmission_loss`,
 `.exceedance`, `.meets_target` and `.table()`; and the §4.10 enclosure
 equation (Eq. 4.115) through `enclosure_required_transmission_loss`, in both
-the Norton and the Bies interior models listed by `ENCLOSURE_MODELS`.
+the Norton and the Bies interior models listed by `ENCLOSURE_MODELS`. With
+`receiver_distance_m`, the direct field of the partition at a receiver in the
+receiving room, Barron (2003) Equations (7-71) and (7-72), in the chain and in
+the required transmission loss.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="Not covered">
@@ -598,7 +671,7 @@ The transmission loss of the partition itself, which is measured or predicted
 elsewhere; flanking as a modelled path rather than a flat allowance; the leaks
 and openings of an enclosure, which need the composite of the industrial
 noise-control guide; and anything below each room's Schroeder frequency, or
-closer to a surface than about half a wavelength.
+closer to a surface other than the partition than about half a wavelength.
 </ScopeClaim>
 </Scope>
 

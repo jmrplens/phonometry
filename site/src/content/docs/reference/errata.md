@@ -6059,30 +6059,75 @@ in the same order.
 ## ISO 14257:2001, Equation (4) against Table 1 (a second rounded constant)
 
 - **Location:** Equation (4) of 4.2.3 and Table 1 immediately beneath it, both
-  on printed page 4 (PDF page 14).
+  on printed page 4 (PDF page 14), against the last column of Table C.6 on
+  printed page 21 (PDF page 31) and Table C.10 on printed page 24 (PDF
+  page 34).
 - **The print:** Equation (4) closes
   $D_\text{Norm} = 10\lg\!\left(\sum_j 10^{(D_j + P_j)/10}\right)$ dB
   $-\ 6,2$ dB, and Table 1 gives the $P_j$ of the A-weighted pink-noise
   reference spectrum as $-16{,}1$; $-8{,}6$; $-3{,}2$; $0$; $1{,}2$; $1$ dB at
   125 Hz to 4 kHz.
-- **The problem:** the 6,2 dB is the energy sum of that same printed table,
-  which is what normalizes the weighted spectrum back to unit total, and the
-  sum of the six printed $P_j$ is 6,251 dB. The printed constant is 0,051 dB
-  small. It is the same slip as the rounded $\lg 2$ of the entry above, in the
-  other direction: a constant the document could have printed exactly, rounded
-  to one decimal in the one place it appears.
-- **Evidence:** Equation (4), its key and Table 1 read on the page, PDF page 14
-  (printed p. 4) of EN ISO 14257:2001.
-- **Consequence for the standard's own tables:** 0,051 dB on every
-  frequency-normalized value the annex tabulates, which is half the last digit
-  Tables C.6, C.10 and C.12 print, so it can move a printed cell by one in the
-  last place but never by more.
+- **The problem:** the 6,2 dB is the energy sum of the $P_j$, which is what
+  normalizes the weighted spectrum back to unit total so that a flat curve
+  comes back unchanged, and the six printed $P_j$ sum to 6,251 5 dB, which
+  rounds to 6,3 and not to 6,2. The printed constant is 0,051 dB short of the
+  printed table. The two are roundings of the same curve made separately:
+  the $P_j$ are the A-weighting of IEC 61672-1 at the six octave centres,
+  $-16{,}19$; $-8{,}67$; $-3{,}25$; $0$; $1{,}20$; $0{,}96$ dB, printed to
+  one decimal as that standard tabulates them, and the energy sum of the
+  unrounded curve is 6,23 dB, which prints as the 6,2 of Equation (4). Each
+  rounding is right on its own and the printed equation is not: evaluated as
+  printed, it returns a flat curve 0,05 dB high. It is the same kind of slip
+  as the rounded $\lg 2$ of the entry above, a constant printed to one decimal
+  where the document computes to more, and Equation (3), of which Equation
+  (4) is the special case for the Table 1 spectrum, carries the same
+  normalization exactly, as the logarithm of its denominator.
+- **Evidence:** Equation (4), its key and Table 1 read on the page in four
+  printings, which agree character for character: ISO 14257:2001(E), PDF
+  page 10 (printed p. 4); EN ISO 14257:2001 as published in
+  BS EN ISO 14257:2001, PDF page 14 (printed p. 4); UNE-EN ISO 14257:2002,
+  PDF page 9 (printed p. 9); and DIN EN ISO 14257:2011-11, PDF page 13
+  (printed p. 9), whose national foreword lists the technical errors corrected
+  in the German text and does not name this one. The annex settles which
+  constant it was computed with. Run from the printed Tables C.2 to C.4
+  through Annex B without rounding, the last column of Table C.6 comes back
+  with the six printed $P_j$ and their own sum, 6,251 5 dB, inside the
+  printed rounding at all 11 positions (worst 0,041 dB, departures of both
+  signs), and with the printed 6,2 dB one unit high in the last place at 6 of
+  the 11 (worst 0,092 dB, every departure positive, from +0,011 to
+  +0,092 dB). Table C.10 does the same: +0,040, +0,004 and +0,045 dB with the
+  sum, +0,091, +0,055 and +0,097 dB with 6,2. The unrounded A-weighting with
+  its own sum lands the same 14 cells inside the rounding (worst 0,047 dB),
+  so the annex does not say which of the two exact normalizations it used,
+  only that it used one; with the printed 6,2 dB neither weighting does
+  (8 and 9 of 14 outside). Over the printed, already rounded octave columns
+  of Table C.6 the split is 3 of 11 against 7 of 11. Table C.8, a slope,
+  does not see the constant, and the A-weighted 115,7 dB of Table C.2 adds it
+  back. Verified on PDF page 14 (printed p. 4) of EN ISO 14257:2001 for the
+  equation and the table, and on PDF pages 31 and 34 (printed pp. 21 and 24)
+  of the same document for the two annex tables.
+- **Consequence for the standard's own tables:** none for the annex, which
+  was normalized exactly. What carries the 0,051 dB is every evaluation of the
+  printed equation, which stands that much above the annex on each
+  frequency-normalized value and can move a printed cell of Tables C.6, C.10
+  and C.12 by one in the last place, always upward, and never by more.
 - **Library behaviour:**
   [`NORMALIZED_OFFSET_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) carries the
-  printed 6,2, on the same rule as the entry above: the printed constant is
-  what a reader checking against the page will use. The conformance row
-  "ISO 14257:2001 Annex C, Table C.6 last column" judges the result against the
-  annex at the tenth the annex prints.
+  printed 6,2, on the same rule as the entry above and as the 11 of
+  Equation (2): the printed constant is what a reader checking against the
+  page will use, and four printings print it. The exact normalization is
+  Equation (3) with the Table 1 weights as the machine spectrum, which
+  [`spectrum_distribution_value`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py)
+  computes, so the annex's reading is available without a second constant.
+  The conformance row "ISO 14257:2001 Annex C, Table C.6 last column" judges
+  the printed constant against the annex at 0,1 dB and says why, the row
+  "ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table
+  C.10" records that the exact sum lands all fourteen values inside the
+  printed rounding and the printed constant does not, and
+  `test_the_annex_normalized_with_the_table_one_sum_and_not_the_printed_offset`
+  in [`tests/room/test_spatial_decay.py`](https://github.com/jmrplens/phonometry/blob/main/tests/room/test_spatial_decay.py)
+  holds both counts so that neither the constant nor the tolerances can
+  drift.
 - **Status:** not reported.
 
 ## ISO 14257:2001, Annex C, Tables C.11 and C.12 (results Equation (8) does not give)

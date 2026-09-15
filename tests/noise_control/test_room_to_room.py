@@ -5,8 +5,10 @@ Oracles: the closed form of Norton & Karczub 2e Equation (4.101),
 ``NR = TL - 10 lg[S_w / (S_2 alpha_2 + tau S_w)]``, evaluated here with plain
 arithmetic; the identity ``NR = TL`` when the receiving-room absorption equals
 the partition area; and the exact ``10 lg Q`` of the sound power models of
-Table 4.5. The published worked answers live in
-``test_room_to_room_norton.py``.
+Table 4.5. The published worked answers of Norton live in
+``test_room_to_room_norton.py``; the one of Barron (2003) for a receiver near
+the partition, Example 7-6, lives here beside the closed forms of its two
+branches.
 """
 
 from __future__ import annotations
@@ -17,8 +19,9 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import pytest
+from reference_data import workroom_prediction as barron
 
-from phonometry import noise_control
+from phonometry import noise_control, room
 
 if TYPE_CHECKING:
     from phonometry.noise_control.room_to_room import RoomToRoomResult
@@ -341,6 +344,201 @@ def test_a_spectrum_with_an_extra_axis_is_refused() -> None:
     two_columns = np.column_stack([result.transmission_loss, result.transmission_loss])
     with pytest.raises(ValueError, match="'transmission_loss' must have one axis"):
         dataclasses.replace(result, transmission_loss=two_columns)
+
+
+# --------------------------------------------------------------------------
+# A receiver near the partition (Barron 2003, 7.5.2)
+# --------------------------------------------------------------------------
+#: Barron (2003), Industrial Noise Control and Acoustics, Example 7-6, folio 298
+#: (PDF page 310): the refiner room, the operator's room and the wall between
+#: them, as ``tests/reference_data/workroom_prediction.py`` carries them. The
+#: example carries one number rather than a spectrum, so one band stands for it.
+_BARRON_BAND = [1000.0]
+_BARRON_SOURCE_SURFACE_M2 = barron.BARRON_EXAMPLE_7_6_SOURCE_SURFACE_M2
+_BARRON_SOURCE_ALPHA = barron.BARRON_EXAMPLE_7_6_SOURCE_ABSORPTION
+_BARRON_POWER_LEVEL_DB = barron.BARRON_EXAMPLE_7_6_POWER_LEVEL_DB
+_BARRON_DIRECTIVITY = barron.BARRON_EXAMPLE_7_6_DIRECTIVITY
+_BARRON_RECEIVING_SURFACE_M2 = barron.BARRON_EXAMPLE_7_6_RECEIVING_SURFACE_M2
+_BARRON_RECEIVING_ALPHA = barron.BARRON_EXAMPLE_7_6_RECEIVING_ABSORPTION
+_BARRON_TL_DB = barron.BARRON_EXAMPLE_7_6_TRANSMISSION_LOSS_DB
+_BARRON_WALL_M2 = barron.BARRON_EXAMPLE_7_6_WALL_M2
+_BARRON_OPERATOR_DISTANCE_M = barron.BARRON_EXAMPLE_7_6_OPERATOR_DISTANCE_M
+#: The ``10 lg(rho_0 c W_ref / p_ref^2)`` Barron adds to every level, folio 295
+#: (PDF page 307); the library leaves it out, as ``room.steady_state_spl`` does.
+_BARRON_IMPEDANCE_TERM_DB = barron.BARRON_IMPEDANCE_TERM_DB
+
+
+def _near_wall_threshold_m(partition_area: float) -> float:
+    """``r* = (S_w / 2 pi)^(1/2)``, where Barron's two branches meet."""
+    return math.sqrt(partition_area / (2.0 * math.pi))
+
+
+def test_barron_example_7_6_operator_near_the_wall() -> None:
+    """The printed chain of Example 7-6, input to answer, folios 297 and 298.
+
+    The operator stands 1,5 m from a 16 m2 wall, inside the 1,596 m where the
+    wall still looks like a plane source, so Equation (7-71) applies and the
+    direct field of the wall adds 2,65 dB to what the reverberant field alone
+    delivers: the far-field chain gives 59,1 dB where Barron prints 61,7 dB.
+    Barron writes the reverberant term over the room constant ``R2``, so the
+    room constant is what goes in as the receiving absorption.
+    """
+    r1 = float(room.room_constant(_BARRON_SOURCE_SURFACE_M2, _BARRON_SOURCE_ALPHA))
+    r2 = float(
+        room.room_constant(_BARRON_RECEIVING_SURFACE_M2, _BARRON_RECEIVING_ALPHA)
+    )
+    assert r1 == pytest.approx(
+        barron.BARRON_EXAMPLE_7_6_SOURCE_ROOM_CONSTANT_M2, abs=5e-3
+    )
+    assert r2 == pytest.approx(
+        barron.BARRON_EXAMPLE_7_6_RECEIVING_ROOM_CONSTANT_M2, abs=5e-3
+    )
+    r_star = _near_wall_threshold_m(_BARRON_WALL_M2)
+    assert r_star == pytest.approx(
+        barron.BARRON_EXAMPLE_7_6_NEAR_WALL_DISTANCE_M, abs=5e-4
+    )
+    assert _BARRON_OPERATOR_DISTANCE_M < r_star
+    # The two printed terms of the last line: -16,8 and +3,4.
+    assert -10.0 * math.log10(r1) == pytest.approx(
+        barron.BARRON_EXAMPLE_7_6_ROOM_TERM_DB, abs=0.05
+    )
+    assert 10.0 * math.log10(4.0 * _BARRON_WALL_M2 / r2 + 1.0) == pytest.approx(
+        barron.BARRON_EXAMPLE_7_6_WALL_TERM_DB, abs=0.05
+    )
+    source = noise_control.SourceRoom(
+        power_level=_BARRON_POWER_LEVEL_DB,
+        room_constant=r1,
+        directivity=_BARRON_DIRECTIVITY,
+    )
+    result = noise_control.room_to_room_transmission(
+        _BARRON_BAND,
+        _BARRON_TL_DB,
+        _BARRON_WALL_M2,
+        r2,
+        source=source,
+        receiver_distance_m=_BARRON_OPERATOR_DISTANCE_M,
+    )
+    assert result.receiver_distance_m == pytest.approx(_BARRON_OPERATOR_DISTANCE_M)
+    printed = result.received_level[0] + _BARRON_IMPEDANCE_TERM_DB
+    assert printed == pytest.approx(
+        barron.BARRON_EXAMPLE_7_6_OPERATOR_LEVEL_DB, abs=0.05
+    )
+    reverberant = noise_control.room_to_room_transmission(
+        _BARRON_BAND, _BARRON_TL_DB, _BARRON_WALL_M2, r2, source=source
+    )
+    far_field = reverberant.received_level[0] + _BARRON_IMPEDANCE_TERM_DB
+    assert far_field == pytest.approx(59.1, abs=0.05)
+
+
+#: Receiver distances as fractions of ``r*``, on either side of it and close
+#: enough to it that a threshold placed anywhere else puts one of them on the
+#: wrong branch: the two branches differ by 0,02 dB at 0,99 ``r*`` and more
+#: beyond, far above the tolerance of the closed forms below.
+_INSIDE_FRACTIONS = (0.1, 0.5, 0.99)
+_OUTSIDE_FRACTIONS = (1.01, 1.5, 4.0)
+
+
+@pytest.mark.parametrize("fraction", _INSIDE_FRACTIONS)
+def test_near_wall_branch_closed_form(fraction: float) -> None:
+    """Equation (7-71) over Norton's variables: ``NR = TL - 10 lg(S_w/A + 1/4)``."""
+    absorption = np.array([5.0, 10.0, 20.0, 40.0, 60.0, 80.0])
+    result = noise_control.room_to_room_transmission(
+        _BANDS,
+        40.0,
+        20.0,
+        absorption,
+        source=noise_control.SourceRoom(level=_SOURCE),
+        receiver_distance_m=fraction * _near_wall_threshold_m(20.0),
+    )
+    expected = 40.0 - 10.0 * np.log10(20.0 / absorption + 0.25)
+    assert np.allclose(result.noise_reduction, expected, rtol=0.0, atol=1e-12)
+    assert np.allclose(result.received_level, _SOURCE - expected, rtol=0.0, atol=1e-12)
+
+
+@pytest.mark.parametrize("fraction", _OUTSIDE_FRACTIONS)
+def test_far_wall_branch_closed_form(fraction: float) -> None:
+    """Equation (7-72): ``NR = TL - 10 lg(S_w/A + S_w/(8 pi r2^2))`` beyond ``r*``."""
+    distance = fraction * _near_wall_threshold_m(20.0)
+    result = _chain(receiver_distance_m=distance)
+    expected = 40.0 - 10.0 * math.log10(
+        20.0 / 20.0 + 20.0 / (8.0 * math.pi * distance**2)
+    )
+    assert np.allclose(result.noise_reduction, expected, rtol=0.0, atol=1e-12)
+
+
+def test_the_two_branches_meet_at_the_threshold() -> None:
+    """Barron's two branches give one level at ``r* = (S_w / 2 pi)^(1/2)``."""
+    r_star = _near_wall_threshold_m(20.0)
+    inside = _chain(receiver_distance_m=math.nextafter(r_star, 0.0))
+    at = _chain(receiver_distance_m=r_star)
+    outside = _chain(receiver_distance_m=math.nextafter(r_star, math.inf))
+    assert np.allclose(inside.received_level, at.received_level, rtol=0.0, atol=1e-9)
+    assert np.allclose(outside.received_level, at.received_level, rtol=0.0, atol=1e-9)
+
+
+def test_far_from_the_wall_is_the_reverberant_field_alone() -> None:
+    """Norton's Equation (4.101) is the limit of Equation (7-72) as ``r2`` grows."""
+    reverberant = _chain()
+    distant = _chain(receiver_distance_m=1e4)
+    assert np.allclose(
+        distant.received_level, reverberant.received_level, rtol=0.0, atol=1e-6
+    )
+    assert np.all(distant.received_level > reverberant.received_level)
+
+
+def test_no_receiver_distance_keeps_the_reverberant_chain() -> None:
+    """``receiver_distance_m=None`` is the default and changes nothing."""
+    default = _chain()
+    explicit = _chain(receiver_distance_m=None)
+    assert default.receiver_distance_m is None
+    assert explicit.receiver_distance_m is None
+    assert np.array_equal(default.noise_reduction, explicit.noise_reduction)
+    assert np.allclose(default.noise_reduction, 40.0, rtol=0.0, atol=1e-12)
+
+
+def test_partition_transmission_term_with_a_receiver_distance() -> None:
+    """``tau S_w`` joins the absorption and the direct term stays outside it."""
+    tau = 10.0 ** (-40.0 / 10.0)
+    result = _chain(include_partition_transmission=True, receiver_distance_m=1.0)
+    expected = 40.0 - 10.0 * math.log10(20.0 / (20.0 + 20.0 * tau) + 0.25)
+    assert np.allclose(result.noise_reduction, expected, rtol=0.0, atol=1e-12)
+
+
+@pytest.mark.parametrize("distance", [0.0, -1.5, _NAN])
+def test_a_receiver_distance_that_is_not_a_distance_is_refused(
+    distance: float,
+) -> None:
+    """Zero, a negative number and NaN are refused before any logarithm runs."""
+    with pytest.raises(ValueError, match=r"'receiver_distance_m' must be positive"):
+        _chain(receiver_distance_m=distance)
+
+
+@pytest.mark.parametrize("distance", [0.5, 3.0])
+def test_required_transmission_loss_with_a_receiver_distance(distance: float) -> None:
+    """The inverse carries the direct term, so it still closes the chain."""
+    result = _chain(
+        criterion=noise_control.DesignCriterion(target=45.0, flanking_penalty=2.0),
+        receiver_distance_m=distance,
+    )
+    required = result.required_transmission_loss
+    curve = result.criterion_curve
+    reverberant = _chain(
+        criterion=noise_control.DesignCriterion(target=45.0, flanking_penalty=2.0)
+    ).required_transmission_loss
+    assert required is not None
+    assert curve is not None
+    assert reverberant is not None
+    assert np.all(required > reverberant)
+    tightened = noise_control.room_to_room_transmission(
+        _BANDS,
+        required,
+        20.0,
+        _ABSORPTION,
+        source=noise_control.SourceRoom(level=result.source_level),
+        criterion=noise_control.DesignCriterion(target=45.0, flanking_penalty=2.0),
+        receiver_distance_m=distance,
+    )
+    assert np.allclose(tightened.received_level, curve, rtol=0.0, atol=1e-9)
 
 
 def test_plot_smoke() -> None:

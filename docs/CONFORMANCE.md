@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1259/1259 conformance checks pass** across 87 domains and 460 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1261/1261 conformance checks pass** across 87 domains and 461 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1658,7 +1658,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Industrial noise control</b>: 100% (22/22)</summary>
+<summary><b>Industrial noise control</b>: 100% (23/23)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
@@ -1682,6 +1682,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Bies 5e Eqs. (7.103), (7.111) (enclosure, fully absorbing limit) | Enclosure correction C -> 10 lg 0.3 = -5.23 dB as alpha_i -> 1 | -5.2288 dB (+/-0.001 dB) | -5.2288 dB | 0 dB | 2 % | ![Pass][cv-pass] Pass |
 | Norton & Karczub 2e Eq. (4.101) (problem 4.21 answer) | Double brick wall into an 8 x 9 x 3 m room -> NR 37.5/40.8/49.0/62.8/65.3/65.9 dB | 0 dB +/-0.05 (max \|diff\| over the 6 bands) | 0.0308 dB | 0.0308 dB | 62 % | ![Pass][cv-pass] Pass |
 | Norton & Karczub 2e 4.6/4.9 (problem 4.18 answer) | Blower in a plant room to the operator room -> 72.3/60.4/41.4/41.0/33.8/30.7 dB | 0 dB +/-0.1 (max \|diff\| over the 6 bands) | 0.0682 dB | 0.0682 dB | 68 % | ![Pass][cv-pass] Pass |
+| Barron (2003) Example 7-6 with Eqs. (7-71) and (7-72), printed folios 297 and 298, PDF pages 309 and 310 | Refiner room to an operator 1.5 m from a 16 m2 wall (inside r* = 1.596 m) -> L_p2 = 61.7 dB | 61.7 dB (+/-0.05 dB) | 61.75 dB | 0.047 dB | 94 % | ![Pass][cv-pass] Pass |
 | Norton & Karczub 2e Eq. (4.115) (problem 4.16 answer) | Lined compressor enclosure against NC-45 -> required TL 14.4/25.2/28.9/34.4/35.2/34.7/34.7/31.6 dB | 0 dB +/-0.15 (max \|diff\| over the 8 bands) | 0.1099 dB | 0.1099 dB | 73 % | ![Pass][cv-pass] Pass |
 | Norton & Karczub 2e Table 4.5 (constant-volume source power) | Source in the intersection of two flat surfaces (Q = 4) -> +10 lg 4 = 6.02 dB | 6.0206 dB (+/-0 dB) | 6.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 
@@ -1790,7 +1791,7 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10847:1997 8.2.1 | A source that changed output between the two campaigns is normalised away by the reference position | 0 dB (+/-0 dB) | max absolute difference 0.000 dB for a 4 dB source gain | 0 dB | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10847:1997 Table 1 | The wind classes, with the upwind one existing only over short distances and read as negative | 4/4 readings of Table 1 | 4/4 readings of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10847:1997 6.3.1 | The short-distance ratio is strict at 0,1, and the after case needs both of its two inequalities | 0,1 exactly is not short, and both halves must hold | 1/1 readings of 6.3.1 | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 10847:1997 7.2.2 and 8.1.2 a) | The reference microphone clears the barrier top by 1,5 m, or takes the 10 degree rule for a source under 15 m away | 0 m (+/-0 m) | 0 m | 0 m | 0 % | ![Pass][cv-pass] Pass |
+| ISO 10847:1997 7.2.2 and 8.1.2 a) | The reference microphone stands at least 1,5 m above the top edge, and higher where the 10 degree rule of the NOTE asks for more | 0 m (+/-0 m) | 0 m | 0 m | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10847:1997 3.10 | The far field falls 6 dB per doubling for a point source and 3 dB for an incoherent line source | 6,02 dB and 3,01 dB, printed rounded to 6 and 3 | 6 dB and 3 dB | 0.0206 dB | 98 % | ![Pass][cv-pass] Pass |
 | Cordero et al. (2010) Tablas 1 and 2, printed folios 5 and 6 (PDF pages 5 and 6) | A campaign that prints all four levels: the two insertion losses it reports to the nearest decibel, 13 dBA and 10 dBA | sin ruido = 13 dBA; con ruido = 10 dBA | sin ruido = 13 dBA; con ruido = 10 dBA | exact | 0 % | ![Pass][cv-pass] Pass |
 | Cordero et al. (2010) Tablas 1 and 2, printed folios 5 and 6 (PDF pages 5 and 6) | The one value that campaign prints before rounding, 9,5 dBA, for the case with the background raised at the receiver alone | 9.5 dBA (+/-0.05 dBA) | 9.5 dBA | 0 dBA | 0 % | ![Pass][cv-pass] Pass |
@@ -1808,13 +1809,14 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 </details>
 
 <details>
-<summary><b>Spatial sound decay and prediction in workrooms</b>: 100% (35/35)</summary>
+<summary><b>Spatial sound decay and prediction in workrooms</b>: 100% (36/36)</summary>
 
 | Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
 |:---|:---|:---|:---|:---|:---:|:---:|
 | ISO 14257:2001 Eq. (2) | The free-field reference curve falls 6 dB per distance doubling and passes 11 dB under the source power at 1 m | at 1 m = -11 dB; per doubling = 6.02 dB | at 1 m = -11 dB; per doubling = 6.02 dB | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 14257:2001 Annex C, Table C.6 EXAMPLE | The Annex B correction reproduces all 66 printed values of the corrected distribution curve | 66/66 (worst departure 0.09 dB) | 66/66 printed values within the rounding of the table | exact | 0 % | ![Pass][cv-pass] Pass |
-| ISO 14257:2001 Annex C, Table C.6 last column | The A-weighted pink-noise normalisation of Eq. (4) reproduces the eleven printed values | every value within the printed rounding | worst departure 0.09 dB over 11 positions | 0.092 dB | 92 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Annex C, Table C.6 last column | The A-weighted pink-noise normalisation of Eq. (4), with the printed 6,2 dB, reproduces the eleven printed values to within 0,1 dB | every value within 0,1 dB: the printed 6,2 dB is 0,05 dB short of the sum of the printed Table 1 weights, which is what the annex normalised with, so a cell can come out one unit high in the last place and never low | worst departure 0.09 dB over 11 positions, 6 of them beyond the printed rounding and all of those high | 0.092 dB | 92 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Eq. (4) against Annex C, Table C.6 last column and Table C.10 (ISO 14257:2001, PDF page 10, printed folio 4; BS EN ISO 14257:2001, PDF page 14, printed folio 4) | The 6,2 dB Eq. (4) prints is the A-weighting curve's energy sum rounded, the six weights Table 1 prints sum to 6,2515 dB, and the annex was normalised exactly: Eq. (3) under the Table 1 weights lands all fourteen printed values inside their rounding where the printed constant lands nine of them one unit high | 0 of 14 outside the printed rounding with the Table 1 sum, against 9 of 14 with the printed 6,2 dB, every one of the 14 high | 0 of 14 with the sum (worst 0.045 dB, both signs); 9 of 14 with 6,2 dB (worst 0.097 dB, 0 low) | 0 | 0 % | ![Pass][cv-pass] Pass |
 | ISO 14257:2001 Eq. (5) / Annex C, Table C.7 EXAMPLE | The rate of spatial decay reproduces all 18 printed values, in three distance ranges and six octave bands | 18/18 (worst departure 0.05 dB) | 18/18 printed values of DL2 within the rounding of the table | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 14257:2001 Eqs. (6) and (7) / Annex C, Table C.9 EXAMPLE | The excess of sound pressure level reproduces all 18 printed values from the uncorrected curve of Table C.5 | 18/18 (worst departure 0.06 dB) | 18/18 printed values of DLf within the rounding of the table | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 14257:2001 Annex C (C.1 against Tables C.7 and C.9) | The annex applies its own Annex B correction to DL2 and not to DLf, which the two tables disagree about by more than a decibel | 28 of the 36 printed results leave the rounding of their own table when the other table's curve is used | 28 of 36, 14 in each table | 0 | 0 % | ![Pass][cv-pass] Pass |

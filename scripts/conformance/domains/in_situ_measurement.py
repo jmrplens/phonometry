@@ -104,7 +104,11 @@ import math
 import warnings
 
 import numpy as np
+from reference_data import barrier_in_situ as barrier_oracle
+from reference_data import rounding
+from reference_data import screen_in_situ as screen_oracle
 from reference_data import silencer_in_situ as oracle
+from reference_data import spatial_decay as spatial_oracle
 
 import phonometry as ph
 from phonometry.environment.propagation.barrier_in_situ import (
@@ -379,27 +383,28 @@ def _holgado_insertion_loss(table: dict[float, oracle.HolgadoRow]) -> float:
 
     The measurement is case 18 of Figure 1, a duct on the source side and a
     diffuse room on the receiver side, so both areas are a quarter of the room
-    absorption and both move band by band with the reverberation time.
-    :func:`in_situ_insertion_loss` takes its two areas as scalars, which is why
-    this drives it one band at a time.
+    absorption and both move band by band with the reverberation time. The
+    whole column goes in at once, with the two areas as the band arrays
+    :func:`reverberant_surface_area_m2` returns.
     """
-    worst = 0.0
-    for frequency, row in table.items():
-        time_without, level_without, time_with, level_with, printed = row
-        areas = ph.noise_control.reverberant_surface_area_m2(
-            oracle.HOLGADO_ROOM_VOLUME_M3, [time_without, time_with]
+    rows = list(table.values())
+    area_without, area_with = (
+        ph.noise_control.reverberant_surface_area_m2(
+            oracle.HOLGADO_ROOM_VOLUME_M3, [row[column] for row in rows]
         )
-        result = ph.noise_control.in_situ_insertion_loss(
-            [level_without],
-            [level_with],
-            area_without_m2=float(areas[0]),
-            area_with_m2=float(areas[1]),
-            frequencies=[frequency],
-            field_correction_difference_db=0.0,
-            case=18,
-        )
-        worst = max(worst, abs(float(result.loss_db[0]) - printed))
-    return worst
+        for column in (0, 2)
+    )
+    result = ph.noise_control.in_situ_insertion_loss(
+        [row[1] for row in rows],
+        [row[3] for row in rows],
+        area_without_m2=area_without,
+        area_with_m2=area_with,
+        frequencies=list(table),
+        field_correction_difference_db=0.0,
+        case=18,
+    )
+    printed = np.array([row[4] for row in rows], dtype=np.float64)
+    return float(np.max(np.abs(result.loss_db - printed)))
 
 
 def _sabine_absorption_m2(volume_m3: float, time_s: float, speed_m_s: float) -> float:
@@ -887,79 +892,15 @@ def _chk_iso11821_thresholds() -> Outcome:
 # ISO 11821: the level pairs the standard does not print itself
 # ---------------------------------------------------------------------------
 
-#: Barron (2003) Table 7-6 on folio 316: the octave band centres of Example
-#: 7-9, in hertz, and the two rows printed under them, in decibels, without
-#: the barrier and with it.
-_BARRON_BANDS_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
-_BARRON_UNSCREENED_DB = (71.6, 75.6, 69.6, 65.6, 65.6, 59.6, 54.6, 48.6)
-_BARRON_SCREENED_DB = (64.0, 66.3, 57.9, 51.2, 48.2, 39.2, 31.2, 24.4)
-
-#: Folio 317: the only two band reductions the example works out in prose,
-#: in decibels. The other six follow from the two rows above by subtraction
-#: and are nowhere on the page, so they are not claimed as printed.
-_BARRON_PRINTED_REDUCTIONS_DB = {"63 Hz": 7.6, "8000 Hz": 24.2}
-
-#: Folios 315 and 317: the A-weighted pair, in decibels, and the reduction
-#: printed between them.
-_BARRON_A_WEIGHTED_DB = (69.6, 55.3)
-_BARRON_PRINTED_A_REDUCTION_DB = 14.3
-
-#: Folio 314: the receiver stands 30 m from the transformer and the barrier
-#: 10 m from it, so the position is this far from the barrier, in metres.
-_BARRON_SCREEN_DISTANCE_M = 20.0
-
-#: Barron (2003) Table 3-4 on folio 72, the rows that fall inside the 6 dB to
-#: 10 dB window of ISO 11821 5.7: the margin and the correction to subtract,
-#: both in decibels. The rows under 6 dB are outside the clause, which calls
-#: the environmental conditions unacceptable there rather than correcting.
-_BARRON_TABLE_3_4_DB = (
-    (6.0, 1.3),
-    (6.5, 1.1),
-    (7.0, 1.0),
-    (7.5, 0.9),
-    (8.0, 0.7),
-    (9.0, 0.6),
-    (10.0, 0.5),
+#: Barron (2003) Table 3-4, the rows that fall inside the 6 dB to 10 dB window
+#: of ISO 11821 5.7: the margin and the correction to subtract, both in
+#: decibels. The rows under 6 dB are outside the clause, which calls the
+#: environmental conditions unacceptable there rather than correcting.
+_BARRON_TABLE_3_4_WINDOW_DB = tuple(
+    (margin, correction)
+    for margin, correction in oracle.BARRON_TABLE_3_4_DB.items()
+    if 6.0 <= margin <= 10.0
 )
-
-#: Barron (2003) Table 3-2 on folio 61: the ten levels measured around a motor
-#: in a semi-anechoic room, in decibels, positions 2 to 4 being the ring at
-#: 41.4 degrees from the vertical.
-_BARRON_MOTOR_LEVELS_DB = (
-    86.0,
-    81.5,
-    82.4,
-    81.3,
-    70.9,
-    72.9,
-    68.0,
-    79.3,
-    78.5,
-    80.1,
-)
-
-#: IFA-LSA 01-234 (2020) Tab. 4.4 on folio 17: the levels measured at the four
-#: positions of the worked example, in decibels, by octave band centre in
-#: hertz, from the nearest position outwards.
-_IFA_LEVELS_DB = {
-    500: (79.2, 74.4, 70.2, 67.1),
-    1000: (81.9, 77.1, 73.0, 69.8),
-    2000: (80.4, 75.3, 71.0, 67.4),
-    4000: (84.3, 78.5, 73.2, 69.3),
-}
-
-#: Tab. 4.5 on folio 18: the difference printed between each pair of
-#: neighbouring positions, in decibels, in the same band order.
-_IFA_PRINTED_DIFFERENCES_DB = {
-    "Lp1 - Lp2": (4.8, 4.8, 5.1, 5.8),
-    "Lp2 - Lp3": (4.2, 4.1, 4.7, 5.3),
-    "Lp3 - Lp4": (3.1, 3.2, 3.6, 3.9),
-}
-
-#: The one cell of Tab. 4.5 that its own Tab. 4.4 does not support: 75,3 dB
-#: less 71,0 dB is 4,3 dB and the table prints 4,7 dB. It is left out of the
-#: tally rather than papered over, and the 4,3 dB is pinned in the test suite.
-_IFA_MISPRINT = ("Lp2 - Lp3", 2000)
 
 
 @register(
@@ -970,19 +911,18 @@ _IFA_MISPRINT = ("Lp2 - Lp3", 2000)
 )
 def _chk_iso11821_printed_band_pair() -> Outcome:
     result = ph.noise_control.screen_attenuation(
-        _BARRON_UNSCREENED_DB,
-        _BARRON_SCREENED_DB,
-        frequencies=_BARRON_BANDS_HZ,
+        screen_oracle.BARRON_TABLE_7_6_UNSCREENED_DB,
+        screen_oracle.BARRON_TABLE_7_6_SCREENED_DB,
+        frequencies=screen_oracle.BARRON_TABLE_7_6_BANDS_HZ,
         source_kind="actual",
-        distance_m=_BARRON_SCREEN_DISTANCE_M,
+        distance_m=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
     computed = {
         "63 Hz": float(result.attenuation_db[0]),
         "8000 Hz": float(result.attenuation_db[-1]),
     }
-    worst = max(
-        abs(_BARRON_PRINTED_REDUCTIONS_DB[key] - computed[key]) for key in computed
-    )
+    printed = screen_oracle.BARRON_EXAMPLE_7_9_PRINTED_REDUCTIONS_DB
+    worst = max(abs(printed[key] - computed[key]) for key in computed)
     return numeric(
         0.0,
         worst,
@@ -1001,19 +941,24 @@ def _chk_iso11821_printed_band_pair() -> Outcome:
     "55.3 dBA with it",
 )
 def _chk_iso11821_printed_a_weighted_pair() -> Outcome:
+    unscreened, screened = screen_oracle.BARRON_EXAMPLE_7_9_A_WEIGHTED_DB
     result = ph.noise_control.screen_attenuation(
-        _BARRON_UNSCREENED_DB,
-        _BARRON_SCREENED_DB,
-        frequencies=_BARRON_BANDS_HZ,
+        screen_oracle.BARRON_TABLE_7_6_UNSCREENED_DB,
+        screen_oracle.BARRON_TABLE_7_6_SCREENED_DB,
+        frequencies=screen_oracle.BARRON_TABLE_7_6_BANDS_HZ,
         source_kind="actual",
-        a_weighted_unscreened_level_db=_BARRON_A_WEIGHTED_DB[0],
-        a_weighted_screened_level_db=_BARRON_A_WEIGHTED_DB[1],
-        distance_m=_BARRON_SCREEN_DISTANCE_M,
+        a_weighted_unscreened_level_db=unscreened,
+        a_weighted_screened_level_db=screened,
+        distance_m=screen_oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
     weighted = result.a_weighted_attenuation_db
     computed = math.nan if weighted is None else float(weighted)
     return numeric(
-        _BARRON_PRINTED_A_REDUCTION_DB, computed, 1e-12, unit="dBA", places=1
+        screen_oracle.BARRON_EXAMPLE_7_9_A_REDUCTION_DB,
+        computed,
+        1e-12,
+        unit="dBA",
+        places=1,
     )
 
 
@@ -1028,14 +973,15 @@ def _chk_iso11821_indoor_screen_pair() -> Outcome:
     # The barrier stands 1,00 m from the machine and the operator 3,00 m from
     # it, so the position is 2 m from the screen. Both levels are Barron's own
     # prediction, which is why this anchors the subtraction and not a method.
+    unscreened, screened, printed = screen_oracle.BARRON_EXAMPLE_7_10_DB
     result = ph.noise_control.screen_attenuation(
-        [92.3],
-        [84.0],
+        [unscreened],
+        [screened],
         frequencies=[1000.0],
         source_kind="actual",
-        distance_m=2.0,
+        distance_m=screen_oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
     )
-    return numeric(8.3, float(result.attenuation_db[0]), 1e-12, unit="dB", places=1)
+    return numeric(printed, float(result.attenuation_db[0]), 1e-12, unit="dB", places=1)
 
 
 @register(
@@ -1046,15 +992,25 @@ def _chk_iso11821_indoor_screen_pair() -> Outcome:
 )
 def _chk_iso11821_printed_rounded_reductions() -> Outcome:
     result = ph.noise_control.screen_attenuation(
-        [48.8, 55.1, 52.9],
-        [39.0, 39.9, 33.3],
-        frequencies=[500.0, 1000.0, 2000.0],
+        screen_oracle.HANSEN_EXAMPLE_6_23_UNSCREENED_DB,
+        screen_oracle.HANSEN_EXAMPLE_6_23_SCREENED_DB,
+        frequencies=screen_oracle.HANSEN_EXAMPLE_6_23_BANDS_HZ,
         distance_m=2.0,
     )
-    printed = {"500 Hz": 10.0, "1000 Hz": 15.0, "2000 Hz": 20.0}
-    # 7.4 c) asks for the nearest integer and the library returns the raw
-    # difference, 9,8 / 15,2 / 19,6 dB, so the rounding is done here.
-    computed = dict(zip(printed, np.round(result.attenuation_db).tolist(), strict=True))
+    printed = {
+        f"{band:g} Hz": float(value)
+        for band, value in zip(
+            screen_oracle.HANSEN_EXAMPLE_6_23_BANDS_HZ,
+            screen_oracle.HANSEN_EXAMPLE_6_23_REDUCTION_DB,
+            strict=True,
+        )
+    }
+    # The raw differences are 9,8 / 15,2 / 19,6 dB; rounded() is the integer
+    # report 7.4 c) asks for.
+    computed = {
+        band: float(value)
+        for band, value in zip(printed, result.rounded().tolist(), strict=True)
+    }
     return record(printed, computed, unit="dB")
 
 
@@ -1069,8 +1025,9 @@ def _chk_iso11821_path_level_pair() -> Outcome:
     # the energy sum of the three paths, which is 71,687 dB and would make the
     # reduction 8,3 dB. The pair is used exactly as printed.
     printed = {"screen": 9.0, "path 1": 15.0, "path 2": 10.0, "path 3": 18.0}
+    paths = screen_oracle.SRL_1991_SCREENED_DB
     result = ph.noise_control.screen_attenuation(
-        [80.0, 80.0, 80.0, 80.0], [71.0, 65.0, 70.0, 62.0]
+        [screen_oracle.SRL_1991_UNSCREENED_DB] * len(paths), list(paths.values())
     )
     computed = dict(zip(printed, result.attenuation_db.tolist(), strict=True))
     return record(printed, computed, unit="dB")
@@ -1083,19 +1040,22 @@ def _chk_iso11821_path_level_pair() -> Outcome:
     "less the one cell the document misprints",
 )
 def _chk_iso11821_ifa_printed_differences() -> Outcome:
-    bands = tuple(_IFA_LEVELS_DB)
+    levels = spatial_oracle.IFA_LSA_01_234_LEVELS_DB
+    bands = tuple(levels)
     matching, total = 0, 0
-    for step, (row, printed) in enumerate(_IFA_PRINTED_DIFFERENCES_DB.items()):
+    for step, (row, printed) in enumerate(
+        spatial_oracle.IFA_LSA_01_234_DIFFERENCES_DB.items()
+    ):
         result = ph.noise_control.screen_attenuation(
-            [_IFA_LEVELS_DB[band][step] for band in bands],
-            [_IFA_LEVELS_DB[band][step + 1] for band in bands],
+            [levels[band][step] for band in bands],
+            [levels[band][step + 1] for band in bands],
             frequencies=[float(band) for band in bands],
             # A test sound source, so 5.9 forbids the A-weighted difference.
             source_kind="artificial",
         )
         values = result.attenuation_db.tolist()
         for band, published, value in zip(bands, printed, values, strict=True):
-            if (row, band) == _IFA_MISPRINT:
+            if (row, band) == spatial_oracle.IFA_LSA_01_234_MISPRINT:
                 continue
             total += 1
             matching += int(round(float(value), 1) == published)
@@ -1109,8 +1069,9 @@ def _chk_iso11821_ifa_printed_differences() -> Outcome:
     "a 77 dB background",
 )
 def _chk_iso11821_background_worked_example() -> Outcome:
-    corrected = ph.noise_control.background_corrected_level_db([83.0], [77.0])
-    return numeric(81.7, float(corrected[0]), 0.05, unit="dB", places=4)
+    level, background, printed = oracle.BARRON_EXAMPLE_3_6_DB
+    corrected = ph.noise_control.background_corrected_level_db([level], [background])
+    return numeric(printed, float(corrected[0]), 0.05, unit="dB", places=4)
 
 
 @register(
@@ -1120,9 +1081,9 @@ def _chk_iso11821_background_worked_example() -> Outcome:
     "to 10 dB window, to the 0.1 dB the table prints",
 )
 def _chk_iso11821_background_printed_table() -> Outcome:
-    printed = {f"{margin:g} dB": value for margin, value in _BARRON_TABLE_3_4_DB}
+    printed = {f"{margin:g} dB": value for margin, value in _BARRON_TABLE_3_4_WINDOW_DB}
     computed: dict[str, float] = {}
-    for margin, _ in _BARRON_TABLE_3_4_DB:
+    for margin, _ in _BARRON_TABLE_3_4_WINDOW_DB:
         level = 83.0
         corrected = ph.noise_control.background_corrected_level_db(
             [level], [level - margin]
@@ -1139,10 +1100,11 @@ def _chk_iso11821_background_printed_table() -> Outcome:
     "window, and at a 6.6 dB one",
 )
 def _chk_iso11821_background_at_the_upper_edge() -> Outcome:
+    rows = screen_oracle.HANSEN_EXAMPLE_3_25_DB
     corrected = ph.noise_control.background_corrected_level_db(
-        [90.0, 86.6], [80.0, 80.0]
+        [row[0] for row in rows], [row[1] for row in rows]
     )
-    printed = (89.5, 85.5)
+    printed = tuple(row[2] for row in rows)
     worst = max(
         abs(value - float(level))
         for value, level in zip(printed, corrected, strict=True)
@@ -1168,7 +1130,13 @@ def _chk_iso11821_background_sibling_value() -> Outcome:
     # a floor below 6 dB, where ISO 11821 refuses the measurement instead. The
     # value is borrowed for the boundary, not the rule around it.
     corrected = ph.noise_control.background_corrected_level_db([70.0], [64.0])
-    return numeric(1.3, 70.0 - float(corrected[0]), 0.05, unit="dB", places=4)
+    return numeric(
+        screen_oracle.ISO140_3_SIX_DB_MARGIN_CORRECTION_DB,
+        70.0 - float(corrected[0]),
+        0.05,
+        unit="dB",
+        places=4,
+    )
 
 
 @register(
@@ -1183,14 +1151,11 @@ def _chk_iso11821_directivity_mean() -> Outcome:
     # circle, so directivity_index_db refuses this set as printed. What the
     # mean itself is worth is checked through the entry point that publishes
     # it, which shares the helper the directivity index calls.
-    printed = {"ten positions": 80.6, "ring of three": 81.8}
+    printed = screen_oracle.BARRON_EXAMPLE_3_5_MEANS_DB
+    levels = oracle.BARRON_EXAMPLE_3_3_LEVELS_DB
     computed = {
-        "ten positions": float(
-            ph.building.energy_average_level(_BARRON_MOTOR_LEVELS_DB)
-        ),
-        "ring of three": float(
-            ph.building.energy_average_level(_BARRON_MOTOR_LEVELS_DB[1:4])
-        ),
+        "ten positions": float(ph.building.energy_average_level(levels)),
+        "ring of three": float(ph.building.energy_average_level(levels[1:4])),
     }
     worst = max(abs(printed[k] - computed[k]) for k in printed)
     return numeric(
@@ -1397,21 +1362,25 @@ def _chk_iso10847_short_distance() -> Outcome:
 @register(
     _IN_SITU,
     "ISO 10847:1997 7.2.2 and 8.1.2 a)",
-    "The reference microphone clears the barrier top by 1,5 m, or takes the "
-    "10 degree rule for a source under 15 m away",
+    "The reference microphone stands at least 1,5 m above the top edge, and "
+    "higher where the 10 degree rule of the NOTE asks for more",
 )
 def _chk_iso10847_geometry() -> Outcome:
     # What 7.2.2 and 8.1.2 a) print is a clearance of 1,5 m, an increment of
     # 10 degrees, a threshold of 15 m and a limit of 30 m or twice the
     # barrier-to-receiver distance. No distance and no resulting height is
-    # printed with them, so these four are the printed rules applied at
+    # printed with them, so these five are the printed rules applied at
     # geometries this row chose, not values read off a page. The 10 degree
     # entry pins which branch fires at 10 m; what the increment means is a
     # separate row, because restating the formula here would prove nothing.
+    # The clearance is a "shall" and the NOTE only raises the microphone, so
+    # a 3 m barrier 5 m from the source, whose 10 degrees are reached at
+    # 4,34 m, keeps the 4,5 m of the clearance.
     close = 10.0 * math.tan(math.atan(4.0 / 10.0) + math.radians(10.0))
     from_the_printed_rules = {
         "clearance": 5.5,
         "10 degree rule": close,
+        "clearance governs a close source": 3.0 + 1.5,
         "hemi free field at 5 m": 10.0,
         "hemi free field at 20 m": 30.0,
     }
@@ -1419,6 +1388,9 @@ def _chk_iso10847_geometry() -> Outcome:
         "clearance": ph.environment.reference_microphone_height_m(4.0),
         "10 degree rule": ph.environment.reference_microphone_height_m(
             4.0, source_to_barrier_m=10.0
+        ),
+        "clearance governs a close source": (
+            ph.environment.reference_microphone_height_m(3.0, source_to_barrier_m=5.0)
         ),
         "hemi free field at 5 m": ph.environment.hemi_free_field_distance_m(5.0),
         "hemi free field at 20 m": ph.environment.hemi_free_field_distance_m(20.0),
@@ -1453,7 +1425,8 @@ def _chk_iso10847_divergence() -> Outcome:
 
 
 # The campaigns below are other people's, and every number in them was read off
-# the printed page. They are what ISO 10847 does not carry: four measured levels
+# the printed page; they are in ``tests/reference_data/barrier_in_situ.py`` with
+# the document, the folio and the PDF page of each. They are what ISO 10847 does not carry: four measured levels
 # and the insertion loss those four levels give. Each row says which part of
 # clause 8.2 its numbers reach, because agreeing with the subtraction says
 # nothing about the wind classes, the background table or the receiver
@@ -1463,25 +1436,11 @@ def _chk_iso10847_divergence() -> Outcome:
 #: value that agrees to better than this agrees to everything the page states.
 _PRINTED_TENTH_DB = 0.05
 
-#: Cordero and others (2010), Tabla 1 "Niveles equivalentes de los puntos de
-#: evaluacion", printed folio 5 (PDF page 5): the four A-weighted levels of
-#: each case, in the argument order of ``measured_insertion_loss_direct``, that
-#: is (L_ref,B, L_ref,A, L_r,B, L_r,A). "Antes" is the window open and
-#: "despues" the window closed, so the two roles of 8.2.1 are filled by a
-#: window rather than by a barrier: what these numbers anchor is the
-#: subtraction and the reporting rule, not the procedure. The second case is
-#: the same campaign with the background deliberately raised at the
-#: measurement point alone.
-_CORDERO_LEVELS_DBA: dict[str, tuple[float, float, float, float]] = {
-    "sin ruido": (61.0, 64.3, 55.6, 46.1),
-    "con ruido": (61.2, 63.7, 56.0, 49.0),
-}
-
 
 def _cordero(case: str) -> tuple[float, int]:
     """One printed case of that campaign, before and after the rounding."""
     reference_before, reference_after, receiver_before, receiver_after = (
-        _CORDERO_LEVELS_DBA[case]
+        barrier_oracle.CORDERO_TABLA_1_DBA[case]
     )
     result = ph.environment.measured_insertion_loss_direct(
         [reference_before], [reference_after], [receiver_before], [receiver_after]
@@ -1496,8 +1455,13 @@ def _cordero(case: str) -> tuple[float, int]:
     "reports to the nearest decibel, 13 dBA and 10 dBA",
 )
 def _chk_cordero_reported_insertion_loss() -> Outcome:
-    computed = {case: float(_cordero(case)[1]) for case in _CORDERO_LEVELS_DBA}
-    return record({"sin ruido": 13.0, "con ruido": 10.0}, computed, unit="dBA")
+    computed = {
+        case: float(_cordero(case)[1]) for case in barrier_oracle.CORDERO_TABLA_1_DBA
+    }
+    printed = {
+        case: float(value) for case, value in barrier_oracle.CORDERO_TABLA_2_DBA.items()
+    }
+    return record(printed, computed, unit="dBA")
 
 
 @register(
@@ -1507,25 +1471,12 @@ def _chk_cordero_reported_insertion_loss() -> Outcome:
     "case with the background raised at the receiver alone",
 )
 def _chk_cordero_before_rounding() -> Outcome:
-    return numeric(9.5, _cordero("con ruido")[0], _PRINTED_TENTH_DB, unit="dBA")
-
-
-#: Lindeman (1985) TABLE 8 "Calculations for Insertion Loss Based on Direct
-#: Method Test at Site 1", printed folio 39 (PDF page 7): the runs whose four
-#: levels are all printed, in the same argument order, in dBA. Runs 4 and 5
-#: print no "before" reference level and no insertion loss. Run 1 is left out
-#: of this row: column (7) prints 6,2 dB where its own four levels give
-#: 5,8 dB, and TABLES 4 and 5 on folio 37 reach those same two levels a second
-#: time through their own arithmetic, so what is defective is the printed
-#: insertion loss and not a level. The note's mean, 7,5 dBA, is the mean of
-#: the defective column and is left out with it.
-_LINDEMAN_DIRECT_DBA: dict[str, tuple[float, float, float, float]] = {
-    "run 2": (64.5, 67.1, 58.5, 53.6),
-    "run 3": (63.1, 65.5, 57.3, 51.0),
-}
-
-#: TABLE 8 column (7), "Insertion Loss", for those two runs.
-_LINDEMAN_DIRECT_PRINTED_DBA: dict[str, float] = {"run 2": 7.5, "run 3": 8.7}
+    return numeric(
+        barrier_oracle.CORDERO_UNROUNDED_CON_RUIDO_DBA,
+        _cordero("con ruido")[0],
+        _PRINTED_TENTH_DB,
+        unit="dBA",
+    )
 
 
 @register(
@@ -1537,7 +1488,7 @@ _LINDEMAN_DIRECT_PRINTED_DBA: dict[str, float] = {"run 2": 7.5, "run 3": 8.7}
 def _chk_lindeman_direct() -> Outcome:
     matching = 0
     worst = 0.0
-    for run, levels in _LINDEMAN_DIRECT_DBA.items():
+    for run, levels in barrier_oracle.LINDEMAN_TABLE_8_DBA.items():
         reference_before, reference_after, receiver_before, receiver_after = levels
         computed = float(
             ph.environment.measured_insertion_loss_direct(
@@ -1547,37 +1498,17 @@ def _chk_lindeman_direct() -> Outcome:
                 [receiver_after],
             ).insertion_loss_db[0]
         )
-        departure = abs(computed - _LINDEMAN_DIRECT_PRINTED_DBA[run])
+        departure = abs(
+            computed - barrier_oracle.LINDEMAN_TABLE_8_INSERTION_LOSS_DBA[run]
+        )
         matching += int(departure <= _PRINTED_TENTH_DB)
         worst = max(worst, departure)
     return count(
         matching,
-        len(_LINDEMAN_DIRECT_DBA),
+        len(barrier_oracle.LINDEMAN_TABLE_8_DBA),
         subject="runs within the 0,1 dB the table prints to",
         expected_label=f"2/2 (worst departure {worst:.3f} dBA)",
     )
-
-
-#: Lindeman (1985) TABLE 13 "Calculations Based on Indirect Measured Method",
-#: printed folio 41 (PDF page 9): five runs, with the equivalent site as the
-#: "before" pair (MIC 3 the reference, MIC 4 the receiver) and the barrier
-#: site as the "after" one (MIC 1 and MIC 2), all in dBA. Run 4 takes its
-#: "before" receiver level from TABLE 12 on the same folio, which prints 61,1
-#: where column (2) of TABLE 13 repeats run 3's 60,2. The table contradicts
-#: itself there rather than leaving the choice open: its own column (3) prints
-#: 7,7 for that run, and 68,8 - 60,2 is 8,6. Both receivers stand in the open,
-#: so C_r and C'_r are zero and this exercises the site pairing of 8.2.2
-#: rather than the facade branch.
-_LINDEMAN_INDIRECT_DBA: dict[str, list[float]] = {
-    "reference before": [66.7, 72.2, 66.1, 68.8, 67.4],
-    "reference after": [65.4, 67.1, 65.5, 65.9, 66.9],
-    "receiver before": [61.2, 65.3, 60.2, 61.1, 62.4],
-    "receiver after": [53.0, 53.6, 51.0, 54.6, 52.7],
-}
-
-#: TABLE 13 column (7) run by run, and the mean its note reports.
-_LINDEMAN_INDIRECT_PRINTED_DBA = (6.9, 6.6, 8.6, 3.6, 9.2)
-_LINDEMAN_INDIRECT_MEAN_DBA = 7.0
 
 
 @register(
@@ -1587,46 +1518,29 @@ _LINDEMAN_INDIRECT_MEAN_DBA = 7.0
     "site, and the mean insertion loss of 7,0 dBA the table reports",
 )
 def _chk_lindeman_indirect() -> Outcome:
+    levels = barrier_oracle.LINDEMAN_TABLE_13_DBA
+    printed = barrier_oracle.LINDEMAN_TABLE_13_INSERTION_LOSS_DBA
     result = ph.environment.measured_insertion_loss_indirect(
-        _LINDEMAN_INDIRECT_DBA["reference before"],
-        _LINDEMAN_INDIRECT_DBA["reference after"],
-        _LINDEMAN_INDIRECT_DBA["receiver before"],
-        _LINDEMAN_INDIRECT_DBA["receiver after"],
+        levels["reference before"],
+        levels["reference after"],
+        levels["receiver before"],
+        levels["receiver after"],
     )
-    departures = np.abs(
-        result.insertion_loss_db - np.array(_LINDEMAN_INDIRECT_PRINTED_DBA)
+    departures = np.abs(result.insertion_loss_db - np.array(printed))
+    mean = abs(
+        float(np.mean(result.insertion_loss_db))
+        - barrier_oracle.LINDEMAN_TABLE_13_MEAN_DBA
     )
-    mean = abs(float(np.mean(result.insertion_loss_db)) - _LINDEMAN_INDIRECT_MEAN_DBA)
     matching = int(np.count_nonzero(departures <= _PRINTED_TENTH_DB)) + int(
         mean <= _PRINTED_TENTH_DB
     )
     worst = max(float(np.max(departures)), mean)
     return count(
         matching,
-        len(_LINDEMAN_INDIRECT_PRINTED_DBA) + 1,
+        len(printed) + 1,
         subject="printed values, the five runs and their mean",
         expected_label=f"6/6 (worst departure {worst:.3f} dBA)",
     )
-
-
-#: FHWA-PD-96-046 clause 6.6.3 "Insertion Loss", printed folio 84 (PDF page
-#: 101), and the same example again in FHWA-HEP-18-065 on printed folios 108
-#: and 109: the levels its worked example lists, in decibels. L_edge is an
-#: FHWA reflections and edge-diffraction adjustment defined in clause 6.6.2,
-#: with no counterpart anywhere in ISO 10847, so it is applied outside the
-#: function under test rather than fed to it. The example contradicts itself,
-#: and that is the whole of the difference between its two published answers:
-#: the list gives a receiver level of 56,3 dB, the expression under it types
-#: 56,2 dB, and the FHWA Noise Barrier Design Handbook prints 8,7 dB for the
-#: first where these two manuals print 8,8 dB for the second.
-_FHWA_REFERENCE_BEFORE_DB = 77.7
-_FHWA_REFERENCE_AFTER_DB = 78.2
-_FHWA_RECEIVER_BEFORE_DB = 65.0
-_FHWA_EDGE_DB = -0.5
-_FHWA_PRINTED_DB: dict[str, tuple[float, float]] = {
-    "as the expression types it": (56.2, 8.8),
-    "as the list gives it": (56.3, 8.7),
-}
 
 
 @register(
@@ -1637,17 +1551,17 @@ _FHWA_PRINTED_DB: dict[str, tuple[float, float]] = {
 )
 def _chk_fhwa_worked_example() -> Outcome:
     worst = 0.0
-    for receiver_after, printed in _FHWA_PRINTED_DB.values():
+    for receiver_after, printed in barrier_oracle.FHWA_6_6_3_PRINTED_DB.values():
         computed = (
             float(
                 ph.environment.measured_insertion_loss_direct(
-                    [_FHWA_REFERENCE_BEFORE_DB],
-                    [_FHWA_REFERENCE_AFTER_DB],
-                    [_FHWA_RECEIVER_BEFORE_DB],
+                    [barrier_oracle.FHWA_6_6_3_REFERENCE_BEFORE_DB],
+                    [barrier_oracle.FHWA_6_6_3_REFERENCE_AFTER_DB],
+                    [barrier_oracle.FHWA_6_6_3_RECEIVER_BEFORE_DB],
                     [receiver_after],
                 ).insertion_loss_db[0]
             )
-            + _FHWA_EDGE_DB
+            + barrier_oracle.FHWA_6_6_3_EDGE_DB
         )
         worst = max(worst, abs(computed - printed))
     return numeric(
@@ -1673,32 +1587,29 @@ def _chk_iso10847_rounding_tie_break() -> Outcome:
     # asks for, and both are exact in binary, which the ties of the printed
     # 0,1 range are not. Rule B, the other convention in use, would print
     # 1 230 for the first of the two, so the pair discriminates.
-    result = ph.environment.measured_insertion_loss_direct(
-        [0.0, 0.0], [122.5, 123.5], [0.0, 0.0], [0.0, 0.0]
-    )
-    reported = result.rounded()
-    computed = {
-        "1 225,0": float(reported[0]) * 10.0,
-        "1 235,0": float(reported[1]) * 10.0,
+    ties = {
+        # "B.3 Rule A, 1 225,0 at range 10" is reported as "1 225,0".
+        key.split(", ", 1)[1].split(" at ", 1)[
+            0
+        ]: rounding.ISO80000_1_ANNEX_B_ROUNDINGS[key]
+        for key in rounding.ISO80000_1_RULE_A_TIES
     }
-    return record({"1 225,0": 1220.0, "1 235,0": 1240.0}, computed)
-
-
-#: FHWA-PD-96-046 Table 3 "Classes of wind conditions", printed folio 35 (PDF
-#: page 52): the three printed intervals of the source-to-receiver vector
-#: component of the wind, in metres per second. The upwind row prints as an
-#: interval, "-1 to -5", where ISO 10847 Table 1 prints "+ 1 to - 5"; that is
-#: the corroboration the errata entry rests on. FHWA prints one flat set of
-#: classes with no distance split, so it is read here against the
-#: short-distance table, the only one of the two in ISO 10847 that offers an
-#: upwind class at all. The endpoints are left alone because both documents
-#: print intervals that share them, and neither says which class a component
-#: of exactly -1 m/s or +1 m/s belongs to.
-_FHWA_WIND_CLASSES_M_S: dict[str, tuple[float, float]] = {
-    "upwind": (-5.0, -1.0),
-    "calm": (-1.0, 1.0),
-    "downwind": (1.0, 5.0),
-}
+    result = ph.environment.measured_insertion_loss_direct(
+        [0.0] * len(ties),
+        [number / scale for number, scale, _ in ties.values()],
+        [0.0] * len(ties),
+        [0.0] * len(ties),
+    )
+    computed = {
+        label: float(reported) * scale
+        for (label, (_, scale, _)), reported in zip(
+            ties.items(), result.rounded(), strict=True
+        )
+    }
+    printed = {
+        label: float(multiples) * scale for label, (_, scale, multiples) in ties.items()
+    }
+    return record(printed, computed)
 
 
 @register(
@@ -1710,7 +1621,7 @@ _FHWA_WIND_CLASSES_M_S: dict[str, tuple[float, float]] = {
 def _chk_fhwa_wind_classes() -> Outcome:
     matching = 0
     total = 0
-    for printed, (low, high) in _FHWA_WIND_CLASSES_M_S.items():
+    for printed, (low, high) in barrier_oracle.FHWA_TABLE_3_WIND_CLASSES_M_S.items():
         for fraction in (0.25, 0.5, 0.75):
             component = low + fraction * (high - low)
             total += 1
@@ -1723,7 +1634,9 @@ def _chk_fhwa_wind_classes() -> Outcome:
 def _refuses_a_margin_under_four() -> bool:
     """Whether a margin under the printed floor is refused as invalid."""
     try:
-        ph.environment.barrier_background_correction_db([3.9])
+        ph.environment.barrier_background_correction_db(
+            [barrier_oracle.CEN_TS_16272_7_MINIMUM_MARGIN_DB - 0.1]
+        )
     except ValueError:
         return True
     else:
@@ -1737,41 +1650,22 @@ def _refuses_a_margin_under_four() -> bool:
     "grouped rows, the 4 dB floor and the 10 dB margin its prose asks for",
 )
 def _chk_cen_ts_background_table() -> Outcome:
-    corrections = ph.environment.barrier_background_correction_db(
-        [4.0, 5.0, 6.0, 7.0, 8.0, 9.0]
+    # The table prints two rows and not six: "4 and 5" against -2 dB, then
+    # "6, 7, 8, 9" against -1 dB, so the grouping is part of what it says.
+    rows = tuple(
+        bool(np.all(ph.environment.barrier_background_correction_db(margins) == value))
+        for margins, value in barrier_oracle.CEN_TS_16272_7_TABLE_4_DB
     )
     readings = (
-        # The table prints two rows and not six: "4 and 5" against -2 dB, then
-        # "6, 7, 8, 9" against -1 dB, so the grouping is part of what it says.
-        bool(np.all(corrections[:2] == -2.0)),
-        bool(np.all(corrections[2:] == -1.0)),
+        *rows,
         _refuses_a_margin_under_four(),
-        ph.environment.ISO10847_PREFERRED_BACKGROUND_MARGIN_DB == 10.0,
+        ph.environment.ISO10847_PREFERRED_BACKGROUND_MARGIN_DB
+        == barrier_oracle.CEN_TS_16272_7_PREFERRED_MARGIN_DB,
     )
     return count(
         sum(readings), len(readings), subject="readings of Table 4 and its clause"
     )
 
-
-#: Jagniatinskis and others (2017), Table 1 on printed folio 293 (PDF page 5)
-#: and the conclusion on folio 294: three A-weighted results, each as the
-#: level at the reference point, the level at the site point and the
-#: "environment correction" the paper prints, in dBA and with the minus sign
-#: the table prints it with, then the insertion loss it reports. That
-#: correction is the "before" difference of 8.2.1 printed as a single number
-#: with its sign reversed, 76,0 - 56,3 - 9,1 = 10,6 dBA being how the table
-#: closes, so the two levels behind it are free; the row runs three
-#: unrelated splits of it and the answer does not move, which is the proof
-#: that only the difference reaches the result. The third entry is the same
-#: site read from its total level instead of the residual one, which is where
-#: the 8,0 dBA of folio 294 comes from. The residual levels themselves were
-#: reached through an ISO 1996 extraction of the connected-road traffic, which
-#: is not the background treatment of ISO 10847 6.4 and is not exercised here.
-_JAGNIATINSKIS_DBA: dict[str, tuple[float, float, float, float]] = {
-    "site 1, residual": (76.0, 56.3, -9.1, 10.6),
-    "site 2, residual": (75.4, 55.0, -6.9, 13.5),
-    "site 1, total": (76.0, 58.9, -9.1, 8.0),
-}
 
 #: Offsets applied to the free "before" pair, in decibels.
 _JAGNIATINSKIS_SPLITS_DB = (0.0, 6.0, -13.25)
@@ -1793,7 +1687,7 @@ def _chk_jagniatinskis_campaign() -> Outcome:
         receiver_after,
         correction,
         printed,
-    ) in _JAGNIATINSKIS_DBA.values():
+    ) in barrier_oracle.JAGNIATINSKIS_TABLE_1_DBA.values():
         for offset in _JAGNIATINSKIS_SPLITS_DB:
             reference_before = reference_after + offset
             computed = float(
@@ -1816,25 +1710,6 @@ def _chk_jagniatinskis_campaign() -> Outcome:
     )
 
 
-#: Rodino and Masson (2015), Tabla 2 on printed folio 7 (PDF page 7): the
-#: level at the crew position without the screen and with it, for three engine
-#: settings, unweighted and A-weighted, in decibels, with the insertion loss
-#: the table reports. No reference microphone was used at all, so 8.2.1
-#: degenerates to the plain difference of the two receiver levels and the
-#: reference pair the row feeds is a constant this project chose, not a
-#: measurement. What that anchors is the sign, which is positive for a screen
-#: that works, and the degenerate reduction itself; it reaches nothing else,
-#: and the paper cites ISO 14509 rather than ISO 10847.
-_RODINO_LEVELS_DB: dict[str, tuple[float, float, float]] = {
-    "Z, motor 100%": (117.6, 111.9, 5.7),
-    "Z, motor 75%": (106.5, 104.0, 2.5),
-    "Z, punto muerto": (73.8, 73.3, 0.5),
-    "A, motor 100%": (89.0, 87.9, 1.1),
-    "A, motor 75%": (81.5, 80.0, 1.5),
-    "A, punto muerto": (55.4, 53.7, 1.7),
-}
-
-
 @register(
     _IN_SITU,
     "Rodino & Masson (2015) Tabla 2, printed folio 7 (PDF page 7)",
@@ -1844,7 +1719,7 @@ _RODINO_LEVELS_DB: dict[str, tuple[float, float, float]] = {
 def _chk_rodino_degenerate_case() -> Outcome:
     matching = 0
     worst = 0.0
-    for without, with_screen, printed in _RODINO_LEVELS_DB.values():
+    for without, with_screen, printed in barrier_oracle.RODINO_TABLA_2_DB.values():
         computed = float(
             ph.environment.measured_insertion_loss_direct(
                 [0.0], [0.0], [without], [with_screen]
@@ -1855,7 +1730,7 @@ def _chk_rodino_degenerate_case() -> Outcome:
         worst = max(worst, departure)
     return count(
         matching,
-        len(_RODINO_LEVELS_DB),
+        len(barrier_oracle.RODINO_TABLA_2_DB),
         subject="printed insertion losses, unweighted and A-weighted",
         expected_label=f"6/6 (worst departure {worst:.3f} dB)",
     )
@@ -1895,8 +1770,9 @@ def _chk_iso10847_receiver_correction_is_a_pressure_doubling() -> Outcome:
 
 
 #: Geometries for the NOTE to 7.2.2, as (source-to-barrier distance, barrier
-#: height) in metres, all of them inside the 15 m under which the NOTE applies.
-_TEN_DEGREE_GEOMETRIES_M = ((5.0, 3.0), (10.0, 4.0), (12.0, 2.5), (14.999, 5.0))
+#: height) in metres, all of them inside the 15 m under which the NOTE applies
+#: and all of them where the angle asks for more than the 1,5 m clearance.
+_TEN_DEGREE_GEOMETRIES_M = ((5.0, 4.0), (10.0, 4.0), (12.0, 2.5), (14.999, 5.0))
 
 
 @register(

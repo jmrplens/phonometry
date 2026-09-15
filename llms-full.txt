@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1259 numerical conformance checks against 460 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1261 numerical conformance checks against 461 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1259 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 87 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1261 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 87 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -1264,19 +1264,6 @@ That database ships with phonometry. This page is the bridge between it and the
 Doc 29 functions: how to open it, what one aircraft record holds, and how to go
 from an aircraft identifier to an event level or a contour without writing a
 table yourself.
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records.svg" alt="How one ANP aircraft record feeds the Doc 29 chain: the substitution route into the A320-211 record, its NPD table with the four cells one lookup reads, the fixed-point or procedural trajectory tables, one profile segment of the flown departure seen from a receiver, and the chain from the 89.3 dB the lookup returns to 89.0 dB at the receiver" width="100%">
-</picture>
-
-One aircraft, from its record to one number. A type the database lacks enters
-at the top, through a proxy the ANP website recommends and an adjustment you
-apply yourself. The A320-211 ships no fixed-point departure, so its published
-steps are flown at a sea-level aerodrome; the third of the ten profile segments
-that result passes 612 m from a receiver 3 km down the track and 500 m to the
-side, reads the four NPD cells that surround 20 159 lb and 612 m, and at 88.0 dB
-carries about four fifths of the sound energy of the 89.0 dB event.
 
 ## Opening the database
 
@@ -7825,20 +7812,6 @@ acquisition either (the 0.1 m to 0.3 m measurement distance, the 0.1 m/s to
 test, the 10 dB background margin); so a single scan will produce a number
 just as readily as a qualified pair.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_intensity_insulation.svg" alt="Section through a laboratory suite: the source room with a loudspeaker clear of the walls and five microphone positions for Lp1, the specimen flush in the test opening, and on the receiving side a box-shaped measurement surface at distance d whose front is split into three subareas and whose four sides are subareas too, with the p-p probe normal to it, intensity leaving through one subarea and flowing back through another. Below, the two scans turned 90 degrees with their 1.0 dB agreement, a corner panel for ISO 15186-3, and a box with the intensity sound reduction index and the pressure-intensity indicator limits" width="100%"></picture>
-
-**How the measurement goes.** The probe and analyser meet IEC 61043 class 1,
-are checked on the residual-intensity testing device before each use, and need a
-pressure-residual intensity index more than 10 dB above the $F_{pI}$ the scan
-gives. Take $L_{p1}$ in the source room as ISO 140-3 asks. On the receiving
-side, scan a surface that encloses the specimen, the flat opening of a niche at
-least 0.1 m deep or else a box, at 0.1 m to 0.3 m, with the probe normal to it
-and reading outwards, in lines one measurement distance apart at a constant
-0.1 m/s to 0.3 m/s. Scan again with the path turned 90°: the mean stands only if
-the two differ by less than 1.0 dB in every band and $F_{pI}$ stays at 10 dB or
-less, 6 dB for an absorbing receiving face. Both levels have to clear the
-background by 10 dB.
-
 ### `intensity_sound_reduction()` / `adaptation_term_kc()` parameters
 
 | Parameter | Type | Units | Range / default | Notes |
@@ -8525,18 +8498,6 @@ fiche. The measurements that produce the spectra live in the
 [flanking](https://jmrplens.github.io/phonometry/buildings/insulation/flanking-lab/) guides; the prediction that consumes the
 ratings is [EN 12354](https://jmrplens.github.io/phonometry/buildings/design/insulation-prediction/).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain.svg" alt="Calculation chain of the ISO 717 single-number ratings. Across the top, a strip of one-third-octave bands from 50 Hz to 5000 Hz: the 16 bands from 100 Hz to 3150 Hz drawn solid with 500 Hz picked out, the five octave bands from 125 Hz to 2000 Hz bracketed under them, and the bands at 50, 63, 80, 4000 and 5000 Hz dashed as an enlarged range that only the adaptation terms read, the 4000 and 5000 Hz bands in ISO 717-1 alone. A box states the rule both parts share: shift the Table 3 curve towards the measurement in 1 dB steps until the sum of unfavourable deviations is as large as possible but not more than 32.0 dB over 16 bands or 10.0 dB over 5, in 0.1 dB steps for the expression of uncertainty, and read the shifted curve at 500 Hz. Below it, two small charts side by side. On the left, ISO 717-1 for airborne sound: the reference curve moved 22 dB down onto a measured sound reduction index, with bars where the measurement falls below it that add up to 31.8 dB, giving Rw = 52 − 22 = 30 dB; C = 28 − 30 = −2 dB from spectrum No. 1, pink noise, and Ctr = 27 − 30 = −3 dB from spectrum No. 2, urban traffic, both over all 16 bands, stated as Rw(C;Ctr) = 30 (−2; −3) dB. On the right, ISO 717-2 for impact sound: the reference curve moved 19 dB up onto a measured normalized impact level, with bars where the measurement rises above it that add up to 28.0 dB, giving Ln,w = 60 + 19 = 79 dB, with 5 dB taken off when the bands are octaves, and CI from the unweighted energy sum of the first 15 bands, without 3150 Hz. Each side lists its enlarged-range terms, and a box at the foot carries Cj = XAj − Xw and CI = Ln,sum − 15 − Ln,w" width="100%"></picture>
-
-*One rule, two engines. Both parts shift their own Table 3 curve the same way,
-and the shift differs between them only in the side of the curve a deviation
-counts on: below it for airborne insulation, where the curve comes to rest
-22 dB down with 31.8 dB of deviations and reads 30 dB at 500 Hz, and above it
-for impact sound, where it comes to rest 19 dB up with 28.0 dB and reads
-79 dB. Where the bands are octaves, ISO 717-2 takes a further 5 dB off that
-reading and ISO 717-1 does not. The adaptation terms then go back to the
-measured bands, all 16 of them for $C$ and $C_\mathrm{tr}$ and only the first
-15 for $C_\mathrm{I}$.*
-
 ## Airborne ratings (ISO 717-1)
 
 The band spectrum is collapsed to one number by the **reference-curve
@@ -8648,22 +8609,21 @@ $L_\mathrm{n,r,0,w} = 77.6$ dB and $C_\mathrm{I,r,0} = -10.3$ dB of A.2.2).
 import numpy as np
 from phonometry import building
 
-# ISO 717-2 Annex C worked example: the bare heavy floor of Table C.1,
-# laboratory Ln in one-third octaves. CI is read over the 100-2500 Hz sum
-# that A.2.1 asks for, not over the sixteen bands the 2020 print of that
-# cell sums.
-l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+# 16 one-third-octave impact levels (100 Hz - 3150 Hz), dB, from the
+# ISO 717-2 Annex C worked example; measured with T = T0, so these are
+# already the standardized L'nT values.
+l_nt = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+                 73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-res_imp = building.weighted_impact_rating(l_n)
-print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
+res_imp = building.weighted_impact_rating(l_nt)
+print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
 
 # Octave-band data carry the extra -5 dB reduction (Clause 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(building.weighted_impact_rating(octave).rating)  # 54
 
-res_imp.plot()   # measured Ln vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
+res_imp.plot()   # measured L'nT vs shifted ISO 717-2 reference, measured-above shaded (needs matplotlib)
 ```
 
 <details>
@@ -8674,42 +8634,38 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import building
 
-# 16 one-third-octave impact levels Ln, dB (ISO 717-2 Annex C worked
-# example, the bare heavy floor of Table C.1; the CI in the title is read
-# over the 100-2500 Hz sum that A.2.1 asks for).
-l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+# 16 standardized one-third-octave impact levels L'nT, dB (ISO 717-2
+# Annex C worked example, measured with T = T0).
+l_nt = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 # Weighted impact rating + spectrum adaptation term CI (ISO 717-2)
-res_imp = building.weighted_impact_rating(l_n)
+res_imp = building.weighted_impact_rating(l_nt)
 
-# One line — measured Ln vs the shifted ISO 717-2 reference (measured-above shaded):
+# One line — measured L'nT vs the shifted ISO 717-2 reference (measured-above shaded):
 res_imp.plot()
 plt.show()
 
 # By hand, from the band curve the result now carries (note the opposite sign:
 # an unfavourable deviation is where the MEASURED level exceeds the reference).
-# Here the input was Ln, so the rated quantity is Ln,w:
+# Here the input was l_n_t, so the rated quantity is the field level L'nT,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured Ln")
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Measured L'nT")
 ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Shifted reference")
 ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Unfavourable deviations")
 ax.set_xlabel("Frequency [Hz]")
 ax.set_ylabel("Impact sound pressure level [dB]")
-ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
 ax.legend()
 plt.show()
 ```
 
 </details>
 
-Feeding this spectrum into `weighted_impact_rating` reproduces the ISO 717-2
-Annex C rating (thirds $L_\mathrm{n,w} = 79$; octave 54, $C_\mathrm{I} = 0$)
-and, reading $C_\mathrm{I}$ over the 100–2500 Hz sum that A.2.1 specifies,
-$C_\mathrm{I} = -11$ for the thirds. The 2020 print of Table C.1 sums all
-sixteen bands in that cell and gives $-10$ instead; the registry entry is in
-[Errata](https://jmrplens.github.io/phonometry/reference/errata/).
+Feeding the standardized spectrum into `weighted_impact_rating` reproduces
+the ISO 717-2 Annex C values (thirds $L'_\mathrm{nT,w} = 79$, $C_\mathrm{I} = -11$; octave
+54, $C_\mathrm{I} = 0$).
 
 ### `weighted_impact_rating()` parameters
 
@@ -9477,19 +9433,6 @@ bands may come from three different corners, "each band can require an
 individual correction to the signal level for background noise" (the NOTE
 under Part 1 Clause 9.1, printed word for word in Part 2 Clause 9.1).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_low_frequency_corners_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_low_frequency_corners.svg" alt="Plan, section and one corner close up of a 23 m³ receiving room: the central zone with five default positions, four corner microphones, two at floor and two at ceiling level, 0.3 m to 0.4 m from each surface, and the 63 Hz band carried from the corner readings through Formulae (12) and (13)" width="100%"></picture>
-
-**How the measurement goes.** Take the volume to the nearest cubic metre;
-under 25 m³ the corners are measured on top of the central zone, not instead
-of it. Put the microphone in at least four corners, preferably two at floor
-level and two at ceiling level, 0.3 m to 0.4 m from each surface, for at least
-15 s each, and repeat the set at each position of a single loudspeaker or of
-the tapping machine. Measure the background in every corner used, subtract it
-where it is between 6 dB and 10 dB down, and where it is 6 dB or less apply
-the 1.3 dB correction and report the band as a limit of measurement. Measure
-one reverberation time in the 63 Hz octave band for all three bands, and say
-in the report where the procedure was used.
-
 ## Combining the two (Formula (13))
 
 The reported low-frequency level weighs the corner level one third against two
@@ -10009,8 +9952,6 @@ DB-HR states its requirements on two kinds of room: the **protected room**
 (*recinto protegido*, a habitable room with reinforced acoustic protection:
 bedrooms, living areas, classrooms, operating theatres, professional offices)
 and the **habitable room** (*recinto habitable*) in general.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_db_hr_requirements.svg" alt="Section through a three-storey residential building with each DB-HR requirement on its element: the Table 2.1 D2m,nT,Atr of the facade with the microphone 2 m out, the RA of the partition, DnT,A between dwellings and over a shop, the L′nT,w of the floors, the RA pair of a shared door and the two routes of the party wall, above the Annex A chain from eighteen bands to the rounded number each airborne limit is read against" width="88%"></picture>
 
 **Facades (Table 2.1).** The requirement on $D_{2\mathrm{m,nT,Atr}}$ is read by bands of
 the site's day noise index $L_\mathrm{d}$ ($L_\mathrm{d} \le 60$, $60 < L_\mathrm{d} \le 65$,
@@ -11086,21 +11027,6 @@ on-stage source positions in the normal case, a source height of 1,5 m, a
 microphone height of 1,2 m at audience seat locations, positions evenly
 distributed over all the seating, and more of them wherever a hall breaks
 into balconies and under-balcony areas.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves: the source surveyed in a free field, on a turntable or, where no turntable can be used, from seventy-two readings taken every 5 degrees, with one gliding 30 degree arc of six readings and the Table 1 limits, and a 1 000-seat hall in plan and in section with three source positions on the stage at 1,5 m, the microphone positions of Table A.2 at 1,2 m, and more under the balcony" width="100%"></picture>
-
-**How the measurement goes.** Qualify the source first: octave bands of pink
-noise in a free field, the microphone at least 1,5 m away, and the output
-averaged over gliding 30 degree arcs on a turntable or, without one, over six
-neighbouring readings taken every 5 degrees, each arc inside Table 1 against
-the 360 degree energetic average. In the hall, normally use at least three
-source positions on the stage with the acoustic centre 1,5 m up, and the
-minimum microphone positions of Table A.2 at 1,2 m at seats, spread evenly and
-added to where balconies split the seating. Hold the source at least 45 dB
-over the background without synchronous averaging, measure a marginal source
-again turned in at least three steps, and report the source and microphone
-positions with their heights, preferably on a plan, with the fifteen items
-of 9.2.
 
 ## 3. The single number, and the two exceptions in it
 
@@ -15016,18 +14942,6 @@ three constants have to be refitted.
 
 ## 5. Conformance
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test.svg" alt="Block diagram of the ITU-R BS.468-4 measuring set above a table of the checks clause 2 puts it through. A generator feeds the input terminals, marked with an input impedance of at least 20 kilohms and a 600 ohm termination within 1 percent where one is fitted. Inside a dashed outline the signal runs through the weighting network and its amplifier, 0 decibels at 1 kilohertz and plus 12.2 decibels at 6.3 kilohertz, then an attenuator whose ranges the tests of 2.1 to 2.3 hold, reset and step, then the quasi-peak detector, defined by its readings rather than by a time constant, then a reading device with a needle, scaled in dBqps with 0.775 volts reading 0 decibels. A dashed red path around the network is the unweighted mode, used by the reversibility test alone. Below, one row for the calibration and one for each method of measurement, each with a sketch of its stimulus: a steady 1 kilohertz sine at 0.775 volts that must read 0 decibels; single 5 kilohertz bursts of whole periods, 1 to 200 milliseconds, a 5 millisecond burst reading 34 to 46 percent of the steady tone; trains of 5 millisecond bursts at 2, 10 and 100 per second with their Table 3 windows; isolated 0.6 millisecond bursts stepped down 20 decibels, the readings following the steps within 1 decibel overall; 1 millisecond rectangular pulses and the same pulses reversed, whose readings may differ by 0.5 decibels at most, the only row in the unweighted mode; and a 1 kilohertz tone switched on suddenly, whose momentary excess reading must stay under 0.3 decibels. A box at the foot gives the table readings as 20 lg of the reading over the steady reading, with Table 2's 40 percent printed as minus 8.0 decibels, and the level in dBqps as 20 lg of the reading over 0.775 volts" width="100%"></picture>
-
-**How the measurement goes.** Calibrate to 2.6 first: a steady 1 kHz sine at
-0.775 V r.m.s. must read 0.775 V, 0 dB. Every test but 2.4 runs through the
-weighting network. Single 5 kHz bursts of whole periods for Table 2 and trains
-of 5 ms bursts at 2, 10 and 100 per second for Table 3 go in at the level where
-a steady 5 kHz tone would read 80 % of full scale; isolated 0.6 ms bursts
-stepped down 20 dB from full scale have to follow within ±1 dB overall on every
-range; and the 1 kHz tone switched on suddenly must overshoot by less than
-0.3 dB. Only 2.4 is unweighted: reversing the polarity of 1 ms d.c. pulses that
-read 80 % of full scale may change the reading by 0.5 dB at most.
-
 `verify_quasi_peak_dynamics` builds the clause 2.1 and 2.2 stimuli exactly as
 specified: a 5 kHz sine starting at a zero crossing and lasting an integral
 number of full periods, through the weighting network, and reads each against
@@ -17865,21 +17779,6 @@ in the bands at and below 160 Hz and 10 s above (clause 7.2.2), and must
 stand at least 6 dB above the background and above the turbulence noise the
 shield lets through (clause 7.2.1, Annex B).
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig.svg" alt="Side section of a fan on the ISO 5136 rig: the inlet and outlet test ducts with their anechoic terminations, a microphone in a sampling tube in each pointing back at the fan, the minimum lengths of the test duct and of the run to the measurement plane, and panels for the measurement plane, the sampling tube and the mean around the duct" width="88%"></picture>
-
-**How the measurement goes.** Build each test duct straight and circular, at
-least six diameters and 4 m long, with the measurement plane at least four
-diameters and 2 m from its fan-side end, an anechoic termination within Table 5
-and the throttle beyond it. Check the type 1 chain with a class 1 calibrator
-before and after each series. Mount the sampling tube vibration-isolated from
-the wall, at the radius of Table 7, pointing at the fan and with its microphone
-end rounded on the inlet side, and average round the duct over three or more
-positions (at least 30 s up to 160 Hz, 10 s from 200 Hz), by multiplexing, or
-over one revolution of 30 s or more. Keep every band at least 6 dB above the
-background and the turbulence, read the outlet with and without the
-straightener and keep the lower level, and report the levels re 1 pW with
-$2\sigma_R$ as the uncertainty.
-
 Clause 8 turns the readings into a level and the level into a power. The
 positions are energy-averaged and the combined correction $C$ added
 (Eqs 9 and 10), a multiplexed or traversed level takes the correction
@@ -18237,16 +18136,16 @@ Source: https://jmrplens.github.io/phonometry/devices/emission/sound-power-in-si
 Some machines never travel to a test room: a compressor bolted to the floor
 of the plant, a press line, a packaging machine wired into the rest of the
 line. ISO 3747 determines their sound power where they stand, by comparison.
-A reference sound source (RSS) of calibrated band sound power is run in the
-same room as the machine, the same three or four microphones listen to each
-source in turn from the reverberant part of the room, and because both
-sources see the same room the room cancels: the sound power of the source
-under test is the calibrated power of the reference source carried across by
-the difference of the two mean levels. The method reaches engineering grade 2
-where the field is reverberant enough and the source not too directional, and
-survey grade 3 otherwise; an impulsive source gets a sound energy level
-instead of a sound power level by the same route. Which route fits which job
-is weighed in [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+A reference sound source (RSS) of calibrated band sound power is set beside
+the machine, the same three or four microphones listen to each source in
+turn from the reverberant part of the room, and because both sources see the
+same room the room cancels: the sound power of the source under test is the
+calibrated power of the reference source carried across by the difference of
+the two mean levels. The method reaches engineering grade 2 where the field
+is reverberant enough and the source not too directional, and survey grade 3
+otherwise; an impulsive source gets a sound energy level instead of a sound
+power level by the same route. Which route fits which job is weighed in
+[Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
 
 ## 1. The comparison in situ (ISO 3747)
 
@@ -18254,23 +18153,15 @@ The microphone positions must lie where the field is **reverberant**, which
 the standard measures as the excess of sound pressure level over the free
 field, $\Delta L_f \ge 7$ dB (clause 4.1, Annex A). Three or four positions
 are used, at least 2 m apart, none closer than 0,5 m to any boundary,
-distributed as evenly as possible round the machine, each either in sight of
-every sound-emitting area or screened from all of them (clause 7.4.1); the
-reference source goes as close to the acoustic centre as it can, on top of a
-directional machine where it cannot simulate the emission pattern and
-alongside only failing that, where positions closer than 0,5 m to the
-reference box are to be avoided. One location is normally enough; where the
-largest dimension of the reference box exceeds the measurement distance, the
-source is run at several, along the sides one measurement distance apart when
-the machine is omnidirectional and one per clearly definable emission area
-when it has them, and where that dimension does not exceed the measurement
-distance and an omnidirectional machine cannot take the source on top, four
-locations are used, one adjacent to each vertical side of the box
-(clause 7.3). Both sources and the background are read at the same positions,
-the reference source for 30 s (clause 7.5), in **octave bands from 125 Hz
-to 8 kHz** (clause 3.11); Table D.1 tabulates a 63 Hz row besides, for use
-only where the environment and the instrumentation are satisfactory there
-(footnote a), which is why the API accepts that band too.
+distributed as evenly as possible round the machine (clause 7.4.1); the
+reference source stands alongside the machine, never closer than 0,5 m to
+its reference box, and where the machine is long it is run at several
+locations along the sides (clause 7.3). Both sources and the background are
+read at the same positions, the reference source for 30 s (clause 7.5), in
+**octave bands from 125 Hz to 8 kHz** (clause 3.11); Table D.1 tabulates a
+63 Hz row besides, for use only where the environment and the instrumentation
+are satisfactory there (footnote a), which is why the API accepts that band
+too.
 
 The background is corrected **position by position** before anything is
 averaged (clause 8.1, Eq. 7):
@@ -18410,34 +18301,6 @@ print(two.reference_levels.shape)               # (2, 7): mean level per locatio
 print(np.round(two.sound_power_level, 1))       # [89.1 92.  93.  92.2 89.3 85.1 78.9]
 print(round(two.sound_power_level_a, 1))        # 96.5 dB(A)
 ```
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ.svg" alt="Plan of a corner of a workroom: the machine inside its dashed reference box, the reference sound source on the side it emits towards and 0.5 m clear of the box, four microphone positions 1.5 m out tagged with their zones from Table 1, the three readings taken at every position, the rules for several source locations, and Equation 11 with the Annex A excess over the free field" width="100%"></picture>
-
-**How the measurement goes.** Apply a class 1 calibrator to every microphone
-before and after each series, and discard the series if the two readings differ
-by more than 0,5 dB. Listen to the machine first: where the sound from one
-component predominates, the geometric centre of that component is the acoustic
-centre, and the reference box is drawn just round that component, down to the
-floor it stands on; where no component sounds more than the rest, leave out any
-component that clearly emits nothing and take the geometric centre and the box
-of what is left. Survey the directivity 1 m from the reference box:
-within ±2 dB the machine counts as omnidirectional, and beyond ±7 dB the result
-stays at survey grade. Set the reference source as close to the acoustic centre
-as you can: for a directional machine, where it simulates the emission pattern,
-otherwise on top, and only failing that alongside, avoiding positions closer
-than 0,5 m to the reference box. One location normally does. Where the largest
-dimension of the reference box is greater than the measurement distance, use
-several: along the sides, one measurement distance apart, for an
-omnidirectional machine, and one per area for a machine with clearly definable
-emission areas. Where that dimension does not exceed the measurement distance
-and an omnidirectional machine cannot take the source on top, use four
-locations, one adjacent to each vertical side of the box. Place three or four
-microphones round the machine, at least 2 m apart and 0,5 m from every
-boundary, where $\Delta L_f \ge 7$ dB, seeking positions as far from the source
-as from the box, within 10 %. At each position read the machine, the reference
-source for about 30 s and the background just before or after, correct each
-position for background, and report the band and A-weighted levels to 0,1 dB
-with the grade and the expanded uncertainty.
 
 ### `sound_power_in_situ()` parameters
 
@@ -20360,12 +20223,6 @@ documents: which quantities are stated, in which form, and how a declared value
 is verified. The preferred quantity is the A-weighted sound power level
 $L_{W\mathrm{A}}$, optionally accompanied by the A-weighted emission sound pressure level
 $L_{p\mathrm{A}}$ at a work station.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_noise_declaration_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_noise_declaration_chain.svg" alt="A calculation chain in three tiers. At the top, two boxes: the measured A-weighted sound power level L_WA, from a basic standard, preferably of grade 2 or better, on one machine and not rounded, eighty-eight decibels in operating mode 1 and ninety-five in operating mode 2; and its uncertainty K_WA, from the reproducibility in the noise test code or, without a code, two point five decibels at grade 2 and four at grade 3, two decibels in both modes. Joined lines carry both into the two forms the noise test code chooses between: the dual-number form, with L_WA and K_WA each rounded to the nearest decibel and always stated together, and the single-number form, L_WAd, the unrounded sum rounded once, ninety and ninety-seven decibels. Below a dashed line, a box for the verification value L_1, measured to the same noise test code or, where there is none, a basic standard of the same or better grade, under the same operating conditions, with a lower grade only by agreement. The declared value runs down the right-hand side into both verdicts, and two arrows from L_1 lead to them: declaration verified for mode 1, where L_1 is eighty-nine decibels against ninety, and declaration not verified for mode 2, where it is ninety-eight against ninety-seven. A box at the foot carries K_WA equal to one point six four five times sigma R for one machine, L_WAd equal to L_WA plus K_WA, and L_1 no greater than L_WAd, or than L_WA plus K_WA, whichever form was declared; a note underneath says that L_pA at the work station is declared the same way, with a K_pA from ISO 11201 to ISO 11204" width="92%"></picture>
-
-*What a declaration adds to a measured sound power: an uncertainty, one of two
-forms chosen by the noise test code, and a declared value that a new measurement
-on one machine either verifies or does not.*
 
 A declaration takes one of two alternative forms (clause 4):
 
@@ -22810,13 +22667,14 @@ res = noise_control.in_situ_transmission_loss(
     frequencies=bands, case=2,
 )
 print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
-print(round(res.area_term_db, 1))  # -10.8 dB
+print(res.area_term_db.round(1))   # [-10.8 -10.8 -10.8 -10.8 -10.8 -10.8] dB
 ```
 
 The area term is negative and that is not a mistake: a duct of 0,9 m² discharging
 into a room whose quarter-absorption is 10,8 m² spreads the same power over
 twelve times the area, and subtracting that is what stops the room being credited
-to the silencer.
+to the silencer. The term comes back once per band, because the area of a room
+is not one number either.
 
 ## The twenty installations
 
@@ -22836,7 +22694,20 @@ and four more are insertion measurements, and Figure 1 draws all twenty.
 `installation_case` carries the area rule clause 9 gives each side, and the two
 loss functions refuse a case that belongs to the other quantity. The room area
 itself comes from the reverberation time through Equations (6), (10) and (12),
-as a quarter of the Sabine equivalent absorption area.
+as a quarter of the Sabine equivalent absorption area, and so moves from band to
+band with it: `reverberant_surface_area_m2` returns one area per band, and both
+loss functions take each area and the field correction as one value or as one
+per band.
+
+```python
+area = noise_control.reverberant_surface_area_m2(320.0, [1.6, 1.4, 1.2, 1.1, 1.0, 0.9])
+res = noise_control.in_situ_transmission_loss(
+    source, receiver, source_area_m2=0.9, receiver_area_m2=area,
+    frequencies=bands, case=2,
+)
+print(res.area_term_db.round(1))   # [ -9.6 -10.1 -10.8 -11.2 -11.6 -12.1] dB
+print(res.loss_db.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
+```
 
 A silencer is not measured until the flow is measured too. Clause 9 is here in
 full: the total pressure loss of Equation (13), the static difference behind a
@@ -22860,7 +22731,10 @@ run. `screen_attenuation` is the difference between the two runs, and the
 A-weighted pair of 5.9 is refused with an artificial source, because then the
 spectrum weighted is the loudspeaker's. An artificial source has its own test to
 pass first, the twelve-position directivity index of definition 3.10 with the
-8 dB limit of 5.2.2.
+8 dB limit of 5.2.2. 7.4 c) reports the attenuation and its A-weighted value to
+the nearest whole decibel: `rounded()` and `rounded_a_weighted()` give them that
+way, with an exact half going to the even decibel, while `attenuation_db` keeps
+the unrounded difference.
 
 ```python
 print(noise_control.microphone_distances_m(3.0))   # [1.  1.5 3.  6. ] m
@@ -22878,8 +22752,10 @@ nearest, which is why all four are asked for rather than an average.
 
 **How the measurement goes.** Fix the receiver and reference positions first and
 keep them for both campaigns. Reference microphone at least 1,5 m above the top
-edge on a vertical plane through it, or the elevation rule of the NOTE for a
-source region closer than 15 m. Record the wind component, the temperature and
+edge on a vertical plane through it, which 7.2.2 states with "shall", and higher
+where the source region comes closer than 15 m and the elevation rule of the
+NOTE asks for more: the NOTE only ever raises it, so a 3 m barrier 5 m from the
+source keeps 4,5 m although its 10 degrees are reached at 4,34 m. Record the wind component, the temperature and
 the cloud cover for every run, stop above 5 m/s, repeat at least three times,
 and check before the second campaign that the weather still matches within
 2 m/s and 10 °C.
@@ -22934,14 +22810,16 @@ implementations for that reason, and a conformance check holds them against each
 other at the margin where they part. ISO 11820 offers a second route for
 switchable extraneous sources, the energy subtraction of Equations (17) and (18),
 capped at 3 dB; past the cap the quantity is not determined and only the
-inequality of clause 4 may be stated.
+inequality of clause 4 may be stated. The cap is judged on the margin, where
+Table 1 draws it: a margin of exactly 3 dB takes off 3,02 dB, the printed 3 dB
+unrounded, and still determines the level.
 
 ## What this guide covers
 
 Implemented: the whole arithmetic of ISO 11820, from the level differences of
 Equations (1) to (3) to the flow quantities of Equations (27) to (31), with the
 twenty installations of Figure 1; the attenuation, background window, directivity
-test, microphone geometry and impulse rule of ISO 11821; and the direct and
+test, microphone geometry, impulse rule and reporting rounding of ISO 11821; and the direct and
 indirect methods, background table, wind and cloud classes, short-distance test,
 reference microphone height and hemi-free-field clearance of ISO 10847. Two
 defects in the print of ISO 10847 are recorded in the
@@ -23822,6 +23700,37 @@ half-second reverberation time a Schroeder frequency of 163 Hz, which is
 exactly why the 125 Hz band of problem 4.18 - the band that governs the
 whole answer - should be read as an estimate and not as a number.
 
+Both levels are also reverberant-field averages, and the desk pushed against the
+partition hears more: the direct field the partition radiates. Barron,
+*Industrial Noise Control and Acoustics* (2003), section 7.5, Equations (7-71)
+and (7-72), adds it inside the logarithm of Equation (4.101) as
+`S_w/(S_2 alpha_2) + g`, with `g = 1/4` closer to the wall than
+`r* = (S_w/2 pi)^(1/2)` and `g = S_w/(8 pi r_2^2)` beyond it, so that Norton's
+equation is the far limit. `receiver_distance_m` switches it on, in the chain and
+in the required transmission loss.
+
+```python
+import numpy as np
+from phonometry import noise_control, room
+
+# Barron (2003) Example 7-6: an operator 1,5 m from a 16 m2 wall of TL 30 dB.
+source = noise_control.SourceRoom(
+    power_level=105.0, room_constant=room.room_constant(900.0, 0.05), directivity=2.0,
+)
+near = noise_control.room_to_room_transmission(
+    [1000.0], 30.0, 16.0, room.room_constant(100.0, 0.35),
+    source=source, receiver_distance_m=1.5,
+)
+print(np.round(near.received_level, 1))   # [61.6]
+```
+
+Barron prints 61,7 dB with the 0,1 dB he adds to every level, which the library
+does not add. He writes the receiving room over its room constant
+`R_2 = S_2 alpha_2/(1 - alpha_2)`, so that is what goes in as the receiving
+absorption. Without the direct field the level is 59,0 dB: the operator, inside
+the 1,60 m of `r*`, hears 2,65 dB more than the reverberant level, and the excess
+is down to 0,1 dB at 10 m.
+
 ## What this guide covers
 
 **Covered.** The Norton & Karczub §4.9 power balance (Eq. 4.101) as
@@ -23834,7 +23743,8 @@ S12.2-2019 rating, NC by default and RC Mark II with
 `DesignCriterion(family="RC")`, plus `.required_transmission_loss`,
 `.exceedance`, `.meets_target` and `.table()`; and the §4.10 enclosure equation
 (Eq. 4.115) through `enclosure_required_transmission_loss` in both interior
-models listed by `ENCLOSURE_MODELS`.
+models listed by `ENCLOSURE_MODELS`. With `receiver_distance_m`, the direct field
+of the partition at a receiver, Barron (2003) Equations (7-71) and (7-72).
 
 **Not covered.** The transmission loss of the partition itself, which is
 measured or predicted elsewhere; flanking as a modelled path rather than the
@@ -23842,7 +23752,7 @@ flat allowance used here; and the leaks and openings of an enclosure, which
 need the composite of
 [Industrial noise control](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/). The whole chain is a diffuse-field
 argument, so it says nothing below either room's Schroeder frequency, or closer
-to a surface than roughly half a wavelength.
+to a surface other than the partition than roughly half a wavelength.
 
 ## See also
 
@@ -23886,6 +23796,9 @@ to a surface than roughly half a wavelength.
   against.
 - Kuttruff, H. (2016). *Room acoustics* (6th ed.). CRC Press. The Schroeder
   frequency (Eq. 3.44) that bounds the diffuse-field assumption from below.
+- Barron, R. F. (2003). *Industrial noise control and acoustics*. Marcel Dekker.
+  The direct field of the partition in the receiving room (section 7.5,
+  Eqs. 7-71 and 7-72) and Example 7-6, which `receiver_distance_m` reproduces.
 
 ---
 
@@ -29711,8 +29624,6 @@ Those are the conditions of the first row of Table F.1, and the numbers are
 the ones the annex prints. Every one of the ten figures it tabulates comes
 back inside the rounding of its last printed digit.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain.svg" alt="The humid-air model as a chain: four conditions in, the water vapour mole fraction first, then the compressibility factor and the density, the speed of sound, the ratio of specific heats and the viscosity, and the thermal diffusivity built from the density and the two expressions of Clause F.6, with the five properties Table F.1 prints a value for marked apart from the two it does not" width="88%"></picture>
-
 ## The three conditions are not equally important
 
 The library asks for the temperature and assumes the other two. That is not
@@ -32350,15 +32261,6 @@ Stinson (1991). `critical_coupling_design` inverts the model, tuning
 the cavity length and the slit height so both matching conditions
 $\mathrm{Re}(Z)\cos\theta = Z_0$ and $\mathrm{Im}(Z) = 0$ hold.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain.svg" alt="Schematic section of one period of the slit panel, from the face on the left to the rigid backing on the right. A plane wave arrives at angle theta and leaves as the reflection R, with the air in front referred to Z0 = rho0 c0 / S0. A slit 0.978 mm high runs the 30 mm depth of the panel and is closed at the backing, and a Helmholtz resonator with a neck 3 mm wide and 1 mm long and a cavity 27 mm wide and 44.7 mm long opens into its upper wall halfway along. Labels place each matrix where it acts: M delta l at the mouth, x1 = 0; M s over each 15 mm half step either side of the neck; M HR at the resonator; and v = 0 at the backing, x1 = L, with L = N a = 30 mm for one resonator. Three panels below write the matrices out. The mouth is a series radiation mass whose slit end correction is 1.12 mm for h over d = 0.0196. The half step holds the cosine and sine of ks a/2 with the slit impedance Zs, built from the visco-thermal effective density and bulk modulus of the narrow slit, the density being 1.355 minus 0.203j kg/m³ at 300 Hz against 1.205 in free air. The resonator is a shunt admittance, 1 over ZHR, its neck and cavity treated as square visco-thermal ducts, the 1 mm neck carrying 2.08 mm of end correction, 1.18 mm towards the cavity and 0.90 mm towards the slit, and acting below its own resonance as a compliance that softens the slit without adding mass. A box multiplies the matrices into T over the N resonators, gives R of theta from T11 and T21 and the absorption as one minus the squared magnitude of R, and notes that the backing stops the particle velocity, so the face sees Z = T11 / T21. Two boxes at the foot state critical coupling, Re(Z) cos theta = Z0 and Im(Z) = 0, which puts the zero of R on the real-frequency axis so that R = 0 and alpha = 1, and the 300 Hz design at normal incidence: the slit height sets the loss, the 44.7 mm cavity sets the resonance, and the normalised impedance is 1 + 0j in a panel lambda/38 deep" width="100%"></picture>
-
-*One period of the 300 Hz design as the chain the library multiplies: a
-radiation mass at the mouth, a lossy half step of slit either side of the
-resonator, the resonator as a shunt, and the rigid backing that turns the
-product into a surface impedance. Critical coupling is then two conditions on
-that impedance, and the design meets both with a 0.978 mm slit and a 44.7 mm
-cavity.*
-
 ```python
 import numpy as np
 from phonometry import materials
@@ -33527,25 +33429,38 @@ print(materials.mounting_type("E"))
 ```
 
 The area is a target and not a tolerance, so the check reports the difference
-and leaves the judgement to the laboratory. Of the rest it judges the three it
-is given: a substructure no more than 30 mm wide and 50 mm deep, a mounting
-fixture of at least 20 kg/m2, and a deflection of no more than 5 mm. Leaving one
-of those raises a `SuspendedCeilingWarning` that says which. The 0,6 m pitch of
-the substructure and the supports of no more than 50 mm by 50 mm at least 1,2 m
-apart are published as constants to build to, and describe how the specimen
-was hung rather than a measurement taken on it, so the call cannot check them.
+and leaves the judgement to the laboratory. A type E depth other than 200 mm
+passes too, with a warning that says only that the result is not the CE marking
+data. What the verdict judges is every limit of clause 4 that a dimension of the
+arrangement can be held to: a substructure no more than 30 mm wide and 50 mm
+deep, support units no larger than 50 mm by 50 mm at centre distances of at
+least 1,2 m, a mounting fixture of at least 20 kg/m2, a deflection of no more
+than 5 mm and, when `relative_humidity_percent` gives one value per measurement,
+the 50 % of 4.2.2 in every one of them. Leaving one makes `satisfied` false and
+raises a `SuspendedCeilingWarning` that says which. The 0,6 m test object, the
+10 degree edge angle and the substructure pitch of about 0,6 m are targets the
+clause asks to be aimed at, published as constants to build to and not judged.
+
+```python
+dry = materials.check_ceiling_specimen(
+    area_m2=10.8, mounting="E", depth_mm=200.0,
+    support_width_mm=40.0, support_height_mm=40.0, support_centre_distance_m=1.2,
+    relative_humidity_percent=[41.0, 44.0],
+)
+print(dry.supports_ok, dry.humidity_ok, dry.satisfied)   # True False False
+```
 
 ## How the measurement goes
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_suspended_ceiling_specimen.svg" alt="Four views of one test arrangement. Top left, the floor of a reverberation room in plan: a specimen of ten point eight square metres made of thirty test objects of sixty by sixty centimetres, five by six, butted together with the joints unsealed and no grid over them, framed by a mounting fixture that covers its perimeter, the whole turned at least ten degrees off the walls and kept at least seventy-five centimetres from every room edge, one metre where possible. Top right, the two runs the absorption is a difference of: the empty room with the fixture taken out, giving T1 and A1, and the room with the specimen in its fixture, giving T2 and A2, with the temperature and the humidity checked for each, over notes asking for a relative humidity of at least fifty per cent with the humidifier off while measuring, the empty room measured at least once a day in stable conditions and again the same day if the air correction passes zero point zero five, and no microphone plane parallel to a room surface. Bottom left, a section through the type E mounting standing face up on the floor, not sunk into it, as CE marking requires: a solid fixture of at least twenty kilograms per square metre sealed to the floor, the exposed face flush with its top and the joint taped, two hundred millimetres of overall depth from the floor to the face, substructure profiles no more than thirty millimetres wide and fifty high at about sixty centimetre centres on support units no larger than fifty by fifty millimetres, a closed air space with no partitions, and a deflection of no more than five millimetres at any point, under a note that the face up arrangement is only for a ceiling whose absorption gravity does not change, a loosely laid porous backing being held to the tile by a wire grid of wire no thicker than two millimetres with a mesh of about one hundred millimetres. Bottom right, the substructure seen from below, the profiles running one way about sixty centimetres apart and their supports at least one metre twenty apart. A box at the foot carries the absorption coefficient as A2 minus A1 over S, with S taken over the test objects, and the air-absorption correction, four V times m2 minus m1 over S, whose magnitude is capped at zero point zero five in every band, with the note that the uncertainty of Table 1 holds for this mounting alone" width="100%"></picture>
-
 Build the specimen to 10,80 m2 out of whole test objects, butted together, with
-the joints unsealed and the perimeter covered by the mounting fixture. Mount it at
+the joints unsealed and the perimeter covered by the mounting fixture. Hang it at
 200 mm overall depth if the result is to support CE marking, on a substructure
-inside the 30 mm by 50 mm section, and check the deflection at the worst point.
+inside the 30 mm by 50 mm section carried by supports inside 50 mm by 50 mm and
+at least 1,2 m apart, and check the deflection at the worst point.
 Set the specimen edges at an angle to the room walls. Measure the empty room and
 then the room with the specimen in it as EN ISO 354 prescribes, holding
-temperature and humidity steady between the two runs: the correction below is
+temperature and humidity steady between the two runs and the humidity at 50 % or
+more in each: the correction below is
 the difference between them, and it is a difference of days rather than of
 ceilings.
 
@@ -33568,7 +33483,7 @@ print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
 ```
 
 That last band is over the cap and the library says so rather than returning it
-quietly: the answer is a second measurement of the empty room, which is what 5.2
+quietly: the answer is a second measurement of the empty room, which is what 6.3
 asks for.
 
 ## What the whole thing buys
@@ -34520,11 +34435,6 @@ necks and cavities included) and lets the same 2 kHz wavefront hit them: the
 [Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_metadiffuser.webm)
 
 ## 3. The design recipe: phases first, geometry second
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain.svg" alt="The metadiffuser prediction in three bands: the target quadratic residue diffuser beside the 2 cm panel at the same scale with the phase each well has to return, slit 1 enlarged with its transfer-matrix chain along the depth and the loop that tunes it, and six periods with their five grating lobes and the diffusion coefficient" width="100%"></picture>
-
-*Phases first, geometry second, the far field last. The two panels at the top
-share one scale: 27.4 cm of wells against 2 cm of slits.*
 
 Designing a metadiffuser is a two-step translation. First pick the Schroeder
 sequence exactly as for a [classical design](https://jmrplens.github.io/phonometry/materials/diffusers/diffusers/): the quadratic
@@ -35584,8 +35494,8 @@ Source: https://jmrplens.github.io/phonometry/perception/hearing/hearing-protect
 
 # Hearing Protectors (ISO 4869-2)
 
-A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
-sixteen people and records the threshold shift each of them gets, so what
+A hearing protector is not measured on a coupler. ISO 4869-1 seats it on at
+least sixteen people and records the threshold shift each of them gets, so what
 comes back from the laboratory is a **distribution**: one attenuation per
 subject per octave band, with a spread that is often a third of the mean.
 ISO 4869-2 is the standard that turns that distribution into a number someone
@@ -35593,9 +35503,8 @@ can act on, and the first thing it does is refuse to use the mean.
 
 ## The distribution first (Clause 5)
 
-All three methods take a mean less a multiple of its own spread, and differ in
-what they take it over. The octave-band method takes it over the attenuations
-of each band, and the result is the assumed protection value:
+Every method starts from the assumed protection value, the mean attenuation
+reduced by a multiple of its own spread:
 
 $$
 APV_{fx} = m_f - \alpha\, s_f
@@ -35605,11 +35514,6 @@ $\alpha$ is the inverse standard normal cumulative distribution at the
 protection performance $x$ (Table 1), so $APV_{f84}$ with $\alpha = 1$ is the
 attenuation 84 % of wearers reach or beat, and $APV_{f98}$ with $\alpha = 2$ is
 what all but one in fifty reach.
-
-The HML and SNR methods never form that value. They rate each subject first,
-against the eight reference noises of Table 2 or the pink noise of Table 3, and
-take the same reduction over those ratings (Formulae (3) to (5) and (19)). What
-the three share is the choice of $x$ and its $\alpha$.
 
 ```python
 import numpy as np
@@ -35640,13 +35544,6 @@ on, with the three methods' answers for the same noise.*
 
 ## Three methods, in decreasing order of what they need
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_protector_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_protector_chain.svg" alt="Calculation chain: the ISO 4869-1 attenuation grid of sixteen subjects, one protection performance for all three methods, and the octave-band, HML and SNR columns, each combining what the protector is reduced to with what it needs from the noise and ending at 81 dB, 82 dB and 82 dB" width="88%"></picture>
-
-*One protector model on sixteen subjects, reduced three ways and met with one
-noise. Only the octave-band method goes through the assumed protection value;
-HML and SNR rate each subject first and take the spread out over those ratings,
-and the three land within a decibel of each other.*
-
 **The octave-band method (Clause 6)** is the most faithful and the only one
 that sees the shape of the noise: subtract the assumed protection value band by
 band from the A-weighted spectrum and sum what is left (Formula (2)).
@@ -35658,9 +35555,7 @@ reference spectra of Table 2. Applying them needs only the C- and A-weighted
 levels of the real noise, through two straight segments that meet at $+2$ dB.
 
 **The SNR method (Clause 8)** collapses it to one number against a pink noise
-and subtracts it from the C-weighted level. Clauses 7.3 and 8.3 both allow the
-unweighted level in place of the C-weighted one, which reads high for noise
-with a lot of very low frequency content.
+and subtracts it from the C-weighted level.
 
 ```python
 noise = [75.0, 84.0, 86.0, 88.0, 97.0, 99.0, 97.0, 96.0]   # LpA = 104, LpC = 103 dB
@@ -35676,11 +35571,11 @@ print(hearing.snr_protected_level(snr, l_p_c=103.0).reported_level)   # 82
 ```
 
 The three answer the same question and rarely agree exactly: 81 dB, 82 dB and
-82 dB for one protector in one noise. The NOTE that closes the Introduction
-puts differences of 3 dB or less between comparable protectors below the
-resolution of the exercise. The ordering is not a ranking: the octave-band
-method uses more information and is the one to prefer when the spectrum is
-available, while HML and SNR exist precisely for when it is not.
+82 dB for one protector in one noise. Clause 1's own NOTE puts differences of
+3 dB or less between comparable protectors below the resolution of the
+exercise. The ordering is not a ranking: the octave-band method uses more
+information and is the one to prefer when the spectrum is available, while HML
+and SNR exist precisely for when it is not.
 
 The values that enter the HML and SNR applications are the **rounded** ones:
 Clauses 7.2 and 8.2 round the ratings to the nearest integer, which is what a
@@ -36068,7 +35963,7 @@ In the order the chain runs.
   HTLAN.
 - **Protection**: [Hearing Protectors (ISO 4869-2)](https://jmrplens.github.io/phonometry/perception/hearing/hearing-protectors/):
   the octave-band, HML and SNR methods that say what a protector actually
-  leaves at the ear, and the one protection performance all three are set to.
+  leaves at the ear, and the assumed protection value all three start from.
 
 ## What this section does not cover
 
@@ -40913,7 +40808,7 @@ documents, one page per module.
 | `speech_direct_level` / `crowd_noise_level` / `speech_to_noise_ratio` / `absorption_per_table` | `function` | **Crowd-noise building blocks (Long Eqs. 17.50–17.54).**<br>• `speech_direct_level(r)` = `Lw + 10 lg(Q/4πr²)` [dB]<br>• `crowd_noise_level(N, A)` = `Lw + 10 lg N + 10 lg(4/A)` [dB]<br>• `speech_to_noise_ratio(r, A_tab)` [dB]<br>• `absorption_per_table(r, L_SN)` [m²]: the inverse | `crowd_noise_level(20, 20.0)  # 76`<br>`absorption_per_table(1.0, -6.0)  # 6.31` |
 | `NORMAL_VOICE_POWER_LEVEL` / `TALKER_DIRECTIVITY` / `COMMUNICATION_SNR` / `PRIVACY_SNR` | `constant` | **Crowd-noise defaults (Long Ch. 17).**<br>• 70 dB re 1 pW per talker, Q = 2<br>• −6 dB communication limit (Eq. 17.53), −9 dB privacy limit (Eq. 17.54) | `absorption_per_table(1.0, COMMUNICATION_SNR)` |
 | `sound_distribution_value` / `reference_distribution_value` / `ISO14257_REFERENCE_DISTANCE_M` / `FREE_FIELD_OFFSET_DB` | `function` / `constant` | **The curve a workroom is judged by, ISO 14257 Eqs. (1) and (2).**<br>• `sound_distribution_value(levels, power_levels)`: D = L_p − L_W, the level at a position referred to the power of the source that made it<br>• `reference_distribution_value(distances)`: D_ref = 20 lg(r_0/r) − 11 dB, the free field the same source would give, with r_0 = 1 m<br>• the 11 dB is 10 lg(4 π r_0²) rounded, which is why a free field slopes 6 dB per doubling and starts where it does | `d = room.sound_distribution_value(levels, 110.8)`<br>`room.reference_distribution_value([2.0, 4.0])  # -17.02, -23.04` |
-| `spectrum_distribution_value` / `normalized_distribution_value` / `PINK_NOISE_WEIGHTS_DB` / `NORMALIZED_OFFSET_DB` | `function` / `mapping` / `constant` | **The six bands collapsed into one number, Eqs. (3) and (4).**<br>• `spectrum_distribution_value(values, machine_power_levels)`: the curve weighted by the spectrum of the machine that will stand there<br>• `normalized_distribution_value(values)`: the same sum with A-weighted pink noise fixed as the spectrum, Table 1, minus 6,2 dB<br>• 4.2.3 says why that spectrum is a normalisation and not an average machine: real spectra are too varied for an average to mean anything | `room.normalized_distribution_value(d_by_band)` |
+| `spectrum_distribution_value` / `normalized_distribution_value` / `PINK_NOISE_WEIGHTS_DB` / `NORMALIZED_OFFSET_DB` | `function` / `mapping` / `constant` | **The six bands collapsed into one number, Eqs. (3) and (4).**<br>• `spectrum_distribution_value(values, machine_power_levels)`: the curve weighted by the spectrum of the machine that will stand there<br>• `normalized_distribution_value(values)`: the same sum with A-weighted pink noise fixed as the spectrum, Table 1, minus the printed 6,2 dB; the six printed weights sum to 6,251 5 dB, so a flat curve comes back 0,05 dB high, and `spectrum_distribution_value(values, PINK_NOISE_WEIGHTS_DB values)` is the exact normalisation Annex C used<br>• 4.2.3 says why that spectrum is a normalisation and not an average machine: real spectra are too varied for an average to mean anything | `room.normalized_distribution_value(d_by_band)` |
 | `spatial_decay_rate` / `DECADE_TO_DOUBLING` | `function` / `constant` | **DL2, the rate of spatial decay per distance doubling, Eq. (5).**<br>• the least-squares slope of D against lg r, times 0,3, sign flipped so a decay is positive<br>• 6 dB is the free field; a workroom gives less, and how much less is what the room is worth<br>• `DECADE_TO_DOUBLING` is the printed 0,3, which is lg 2 rounded | `room.spatial_decay_rate(d, distances)  # 4.39` |
 | `level_excess` / `mean_level_excess` / `level_excess_at` / `EVALUATION_DISTANCES_M` | `function` / `mapping` | **DLf, how far the room sits above a free field, Eqs. (6) to (8).**<br>• `level_excess`: D − D_ref at every position<br>• `mean_level_excess`: the average of Eq. (7), a trapezoid over lg r, so the wide gaps of a logarithmic distribution weigh what they should<br>• `level_excess_at`: the height of the fitted line over the free-field line at one distance, which a single outlying position moves much less<br>• `EVALUATION_DISTANCES_M`: 4 m, 10 m and 30 m, the conventional distances 6.4.3 reads the line at | `room.mean_level_excess(d, distances)  # 6.73` |
 | `spatial_decay_curve` / `SpatialDecayResult` | `function` / `dataclass` | **One region of the path, with both descriptors, clause 6.**<br>• `region`: 'near', 'middle', 'far' or 'whole'; `near_limit_m` d₁ and `far_limit_m` d₂ place the boundaries<br>• result: `distances_m`, `distribution_values_db`, `reference_values_db`, `level_excess_db`, `decay_rate_db`, `mean_excess_db`, `region`, `band_hz`<br>• `.plot()`: the curve, the free field it is judged by, and the fitted slope | `res = room.spatial_decay_curve(d, distances, region="middle")`<br><br>• `res.decay_rate_db`, `res.mean_excess_db` |
@@ -41221,7 +41116,7 @@ documents, one page per module.
 | `barrier_background_correction_db` / `ISO10847_BACKGROUND_CORRECTIONS_DB` / `ISO10847_MINIMUM_BACKGROUND_MARGIN_DB` / `ISO10847_PREFERRED_BACKGROUND_MARGIN_DB` | `function` / `mapping` / `constant` | **Table 3 of ISO 10847, in decibels to add.**<br>• 2 dB comes off at a margin of 4 or 5 dB, 1 dB from 6 to 9 dB, nothing from 10 dB up, which is the margin 6.4 asks for in the first place<br>• the column reads "correction to be made to", so the values are negative and are added, where ISO 11820 prints the same physical thing positive and subtracts it<br>• under 4 dB the results "are not valid", which is a refusal | `environment.barrier_background_correction_db([5.0, 7.0])  # -2.0, -1.0` |
 | `wind_class` / `WIND_CLASSES` / `MAXIMUM_WIND_SPEED_M_S` / `WIND_VECTOR_TOLERANCE_M_S` / `TEMPERATURE_TOLERANCE_C` / `CLOUD_COVER_CLASSES` | `function` / `mapping` / `constant` | **The weather the two campaigns have to share, ISO 10847 Table 1 and 6.2.**<br>• the vector component of the wind on the source-to-receiver line: positive downwind, negative upwind<br>• downwind 1 m/s to 5 m/s and calm ± 1 m/s over any distance; the upwind class exists over short distances alone<br>• past 5 m/s no measurement is made, which is a refusal rather than a class<br>• the two campaigns must agree within 2 m/s on the component and 10 °C on the temperature, and the cloud cover is recorded in the four classes of Table 2 | `environment.wind_class(2.5)  # 'downwind'` |
 | `is_short_distance` / `SHORT_DISTANCE_RATIO` / `LONG_DISTANCE_M` / `CLOSE_SOURCE_DISTANCE_M` / `POINT_SOURCE_DIVERGENCE_DB` / `LINE_SOURCE_DIVERGENCE_DB` | `function` / `constant` | **Short distance or long? ISO 10847 6.3.1, and what hangs on it.**<br>• (H_s + H_R)/(d₁ + d₂) > 0,1 for the "before" campaign, and both of (H_s + H)/d₁ and (H + H_R)/d₂ > 0,1 for the "after" one<br>• the inequalities are strict, so exactly 0,1 is not a short distance<br>• only a short distance may be measured into the wind; beyond 250 m the standard stops claiming the method at all<br>• 6 dB per doubling for a point source and 3 dB for a line one, the divergence the geometry is read against | `environment.is_short_distance(source_height_m=1.0, receiver_height_m=1.5, barrier_height_m=4.0, source_to_barrier_m=10.0, barrier_to_receiver_m=20.0)` |
-| `reference_microphone_height_m` / `REFERENCE_MICROPHONE_CLEARANCE_M` / `REFERENCE_ELEVATION_INCREMENT_DEG` / `MINIMUM_RECEIVER_HEIGHT_M` / `MINIMUM_REPETITIONS` | `function` / `constant` | **Where the two microphones stand, ISO 10847 7.2.2 and 7.3.**<br>• the reference microphone at least 1,5 m above the top edge of the barrier, measured from its highest point where the top is not a straight edge<br>• for a source region nearer than 15 m the NOTE allows raising it until the elevation angle exceeds the angle to the top by 10°, which is the h = d tan(arctan(H/d) + 10°) this returns<br>• a receiver stands at 1,2 m or higher, and the measurement is repeated at least three times | `environment.reference_microphone_height_m(4.0, source_to_barrier_m=8.0)` |
+| `reference_microphone_height_m` / `REFERENCE_MICROPHONE_CLEARANCE_M` / `REFERENCE_ELEVATION_INCREMENT_DEG` / `MINIMUM_RECEIVER_HEIGHT_M` / `MINIMUM_REPETITIONS` | `function` / `constant` | **Where the two microphones stand, ISO 10847 7.2.2 and 7.3.**<br>• the reference microphone at least 1,5 m above the top edge of the barrier, measured from its highest point where the top is not a straight edge<br>• for a source region nearer than 15 m the NOTE raises it further, until the elevation angle exceeds the angle to the top by 10°; the NOTE never lowers it, so this returns the higher of H + 1,5 m and d tan(arctan(H/d) + 10°)<br>• where the top already stands 80° or more above the source region no height reaches the 10°: the clearance is returned and a `BarrierInSituWarning` emitted<br>• a receiver stands at 1,2 m or higher, and the measurement is repeated at least three times | `environment.reference_microphone_height_m(4.0, source_to_barrier_m=8.0)` |
 | `hemi_free_field_distance_m` / `HEMI_FREE_FIELD_DISTANCE_M` / `HEMI_FREE_FIELD_DISTANCE_FACTOR` / `RECEIVER_CORRECTIONS_DB` / `EQUIVALENT_SURROUNDINGS_RADIUS_M` / `EQUIVALENT_SECTOR_DEG` | `function` / `constant` / `mapping` | **What makes a receiver position a free field, and a site an equivalent one, ISO 10847 8.1.2 and 6.1.**<br>• `min(30 m, 2 d)` to any vertical reflecting surface, so a receiver close behind the barrier needs less clearance rather than more, the two rules crossing at 15 m<br>• a microphone against a facade instead carries the 6 dB of `RECEIVER_CORRECTIONS_DB`<br>• an equivalent site matches over 30 m around the receiver and over a 60° sector towards the source | `environment.hemi_free_field_distance_m(10.0)  # 20.0` |
 | `ISO10847_OCTAVE_BAND_RANGE_HZ` / `ISO10847_OCTAVE_BAND_EXTENDED_RANGE_HZ` / `ISO10847_THIRD_OCTAVE_BAND_RANGE_HZ` / `ISO10847_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ` | `constant` | **The bands ISO 10847 measures in, clause 5.**<br>• 63 Hz to 4 kHz in octaves and 50 Hz to 5 kHz in one-third octaves<br>• the extended ranges reach 8 kHz and 10 kHz where the source or the barrier asks for them | `environment.ISO10847_OCTAVE_BAND_RANGE_HZ  # (63.0, 4000.0)` |
 | `BarrierInSituWarning` | `warning class` | **The measurement is outside a condition ISO 10847 states.**<br>• a distance past 250 m, a reference microphone with less clearance than 7.2.2 asks for, a receiver lower than 1,2 m, campaigns whose weather does not match | `warnings.catch_warnings()` |
@@ -41450,8 +41345,8 @@ documents, one page per module.
 | `DuctElement` / `DuctPathStage` | `dataclass` | **One path element and its computed rows.**<br>• `DuctElement`: `label`, `attenuation` (positive loss; scalar, array or `HvacSpectrumResult`), `self_noise` L_W, `code`<br>• `DuctPathStage`: `attenuation`, `attenuated` (the *Sum* row), `self_noise`, `level` (the *Combined* row) | `DuctElement('Silencer', il, sn, code='3')` |
 | `DuctPathResult` | `dataclass` | **Duct-borne noise path result.**<br>• `received_level`, `stages`, `room_effect`, `criterion`, `target`, `contributions`<br>• `.rating` (NC/RC), `.criterion_curve`, `.exceedance`, `.meets_target`<br>• `.table()`: the printed sheet, row by row<br>• `.plot()`: the cascade vs the criterion curve; `.report()`: one-page sheet | `res.meets_target` |
 | `combine_duct_paths` | `function` | **Energy sum of the received spectra of several paths (supply + return).**<br>• `paths`, `criterion`, `target`, `label` | `combine_duct_paths([supply, ret])`<br><br>• `DuctPathResult` with `contributions` |
-| `room_to_room_transmission` | `function` | **Room-to-room chain: source-room level → partition TL → receiving-room absorption → criterion (Norton Eq. 4.101, `NR = TL − 10 lg[S_w/(S₂α₂ + τS_w)]`).**<br>• `frequencies`, `transmission_loss`, `partition_area` S_w [m²], `receiving_absorption` S₂α₂ [m²]<br>• `source`: `SourceRoom`<br>• `include_partition_transmission` (the τS_w term)<br>• `criterion`: `DesignCriterion`, `label` | `room_to_room_transmission(bands, tl, 24.0, a2, source=noise_control.SourceRoom(level=lp1), criterion=noise_control.DesignCriterion(target=45))`<br><br>• `RoomToRoomResult` |
-| `RoomToRoomResult` | `dataclass` | **Room-to-room chain result.**<br>• `source_level`, `transmission_loss`, `receiving_absorption`, `noise_reduction`, `received_level`<br>• `.rating` (NC/RC), `.criterion_curve`, `.exceedance`, `.meets_target`<br>• `.required_transmission_loss`: the partition TL that just meets the criterion<br>• `.table()`: the rows of the hand calculation; `.plot()`: both spectra, the curve and NR | `res.required_transmission_loss` |
+| `room_to_room_transmission` | `function` | **Room-to-room chain: source-room level → partition TL → receiving-room absorption → criterion (Norton Eq. 4.101, `NR = TL − 10 lg[S_w/(S₂α₂ + τS_w)]`).**<br>• `frequencies`, `transmission_loss`, `partition_area` S_w [m²], `receiving_absorption` S₂α₂ [m²]<br>• `source`: `SourceRoom`<br>• `include_partition_transmission` (the τS_w term)<br>• `criterion`: `DesignCriterion`, `label`<br>• `receiver_distance_m` [m]: adds the direct field of the partition at that distance, Barron (2003) Eqs. (7-71) and (7-72), g = 1/4 inside r* = (S_w/2π)^½ and S_w/(8πr₂²) beyond it; `None` (Default) is the reverberant field alone | `room_to_room_transmission(bands, tl, 24.0, a2, source=noise_control.SourceRoom(level=lp1), criterion=noise_control.DesignCriterion(target=45))`<br><br>• `RoomToRoomResult` |
+| `RoomToRoomResult` | `dataclass` | **Room-to-room chain result.**<br>• `source_level`, `transmission_loss`, `receiving_absorption`, `noise_reduction`, `received_level`<br>• `.rating` (NC/RC), `.criterion_curve`, `.exceedance`, `.meets_target`<br>• `.required_transmission_loss`: the partition TL that just meets the criterion, at `receiver_distance_m` when one was given<br>• `.table()`: the rows of the hand calculation; `.plot()`: both spectra, the curve and NR | `res.required_transmission_loss` |
 | `SourceRoom` | `dataclass` | **The source room of the room-to-room chain (Norton 4.7, Table 4.5).**<br>• `level` L_p1 [dB], or `power_level` L_W [dB] + `room_constant` R₁ [m²]<br>• `directivity` Q (Default: 1)<br>• `model`: 'constant_power' (Default) / 'constant_volume' / 'constant_pressure' | `SourceRoom(power_level=lw, room_constant=r1, directivity=4.0, model='constant_volume')` |
 | `DesignCriterion` | `dataclass` | **The design criterion of a composed chain.**<br>• `family`: 'NC' (Default) / 'RC'<br>• `target` (Default: None → no verdict)<br>• `flanking_penalty` [dB] (Default: 0) | `DesignCriterion(target=45.0, flanking_penalty=3.0)` |
 | `circular_duct_cut_on` / `rectangular_duct_cut_on` | `function` | **Higher-order acoustic mode cut-on with mean flow (Norton & Karczub Eqs. 7.6-7.10, Table 7.1).**<br>• circular: `diameter_m`, `flow_velocity`, `speed_of_sound`, `count` (≤ 12)<br>• rectangular: `width`, `height`, …<br>• Flow lowers every cut-on by √(1 − M²) and shifts it to k_x = −Mκ/√(1 − M²) | `circular_duct_cut_on(0.254, flow_velocity=200.0)`<br><br>• `DuctModeResult` |
@@ -41478,17 +41373,17 @@ documents, one page per module.
 | `uncertainty_conditions` / `CabinUncertainty` / `MIN_ROOM_TO_CABIN_VOLUME_RATIO` / `STATED_UNCERTAINTY_BAND_RANGE_HZ` / `INCREASED_UNCERTAINTY_BAND_RANGE_HZ` / `IN_SITU_EXCESS_STANDARD_DEVIATION_DB` | `function` / `dataclass` / `constant` | **What ISO 11957 clause 10 is willing to say about a measurement.**<br>• `room_volume_m3`, `cabin_volume_m3`, `method`<br>• in the laboratory the uncertainty of ISO 3741 carries over from 250 Hz to 10 kHz, while the room is at least 20 times the volume of the cabin; from 50 Hz to 200 Hz, and below that ratio, a larger uncertainty is expected<br>• the loudspeaker method in situ adds about 2 dB to the standard deviation<br>• for the actual-noise method the clause states nothing and sends a declared value to ISO 4871, so `stateable` is `False` | `noise_control.uncertainty_conditions(room_volume_m3=300.0, cabin_volume_m3=12.0)` |
 | `MIN_LOUDSPEAKER_SEPARATION_M` / `MIN_SOURCE_TO_CABIN_M` / `MIN_SOURCE_TO_MICROPHONE_M` / `MIN_SOURCE_TO_MICROPHONE_IN_SITU_M` / `MAX_MICROPHONE_TO_CABIN_M` / `MIN_MICROPHONE_HEIGHT_M` / `OPERATOR_SPHERE_RADIUS_M` / `OPERATOR_PATH_INCLINATION_DEG` / `INTERNAL_NOISE_CENTRE_HEIGHT_M` / `INTERNAL_NOISE_CENTRE_TOLERANCE_M` / `MIN_FIXED_MICROPHONE_POSITIONS` / `MIN_LOUDSPEAKER_POSITIONS` | `constant` | **The geometry of ISO 11957 6.4, 6.5 and 7.4, as numbers rather than as prose.**<br>• loudspeakers at least 3 m apart and 2 m from the cabin; 2 m from a microphone in the laboratory and 3 m in situ, which is a deliberate difference<br>• in a large room with a short reverberation time, no microphone further than 5 m from the outside of the cabin<br>• inside, no position closer than 0,2 d to a surface and none below 1 m; with a defined operator position, three points on a sphere of radius 0,3 m, or a path inclined 45°<br>• for the internal noise level the centre of that sphere is 1,55 m ± 0,075 m above the floor<br>• at least six fixed microphone positions and two loudspeaker positions in the laboratory; 7.4 fixes the microphones at exactly six | `noise_control.OPERATOR_SPHERE_RADIUS_M  # 0.3` |
 | `MAX_LEAK_RATIO` / `MIN_SIGNAL_TO_BACKGROUND_DB` / `PREFERRED_SIGNAL_TO_BACKGROUND_DB` / `INTERNAL_NOISE_CORRECTION_WINDOW_DB` | `constant` | **The four thresholds ISO 11957 states as conditions rather than as advice.**<br>• clause 1 applies the standard to a cabin of leak ratio 2 % or less, where ISO 11546 only prefers the same figure<br>• 6 dB over the background, and preferably more than 12 dB, in every band of interest<br>• 6.7 corrects the internal noise level only while the margin is between 6 dB and 10 dB | `noise_control.MAX_LEAK_RATIO  # 0.02` |
-| `in_situ_transmission_loss` / `in_situ_insertion_loss` / `SilencerInSituResult` | `function` / `function` / `dataclass` | **What a silencer is worth where it stands, ISO 11820 Eqs. (19) and (21).**<br>• `in_situ_transmission_loss(source_levels_db, receiver_levels_db, source_area_m2=, receiver_area_m2=)`: D_ts = D_tps + 10 lg(S₂/S₁) + K₂ − K₁<br>• `in_situ_insertion_loss(levels_without_db, levels_with_db, area_without_m2=, area_with_m2=)`: the same form with the two runs of Eq. (3) in place of the two sides<br>• `field_correction_difference_db` [dB], `case`: which installation of Figure 1 the numbers came from, checked against the quantity<br>• result: `loss_db`, `level_difference_db`, `area_term_db`, `quantity`, `.plot()` | `noise_control.in_situ_transmission_loss(l2, l1, source_area_m2=0.9, receiver_area_m2=18.0)` |
+| `in_situ_transmission_loss` / `in_situ_insertion_loss` / `SilencerInSituResult` | `function` / `function` / `dataclass` | **What a silencer is worth where it stands, ISO 11820 Eqs. (19) and (21).**<br>• `in_situ_transmission_loss(source_levels_db, receiver_levels_db, source_area_m2=, receiver_area_m2=)`: D_ts = D_tps + 10 lg(S₂/S₁) + K₂ − K₁<br>• `in_situ_insertion_loss(levels_without_db, levels_with_db, area_without_m2=, area_with_m2=)`: the same form with the two runs of Eq. (3) in place of the two sides<br>• each area and `field_correction_difference_db` [dB] take one value or one per band: the area of a diffuse room is a quarter of its absorption and moves with T, so pass what `reverberant_surface_area_m2` returns<br>• `case`: which installation of Figure 1 the numbers came from, checked against the quantity<br>• result: `loss_db`, `level_difference_db`, `area_term_db` and `field_correction_difference_db` (always per band), `quantity`, `.plot()` | `noise_control.in_situ_transmission_loss(l2, l1, source_area_m2=0.9, receiver_area_m2=18.0)` |
 | `installation_case` / `InstallationCase` / `INSTALLATION_CASES` | `function` / `dataclass` / `mapping` | **The twenty installations of Figure 1 as data, with the area rules clause 9 gives each.**<br>• `number` 1 to 20, `source_side` / `receiver_side`: 'duct', 'room' or 'outdoors'<br>• `quantity`: 'transmission' for 1 to 16, 'insertion' for 17 to 20<br>• `source_area_rule` / `receiver_area_rule`: the duct cross-section, a quarter of the room absorption, a hemisphere or the aperture in the wall | `noise_control.installation_case(7).receiver_area_rule` |
 | `transmission_level_difference_db` / `insertion_level_difference_db` / `mean_sound_pressure_level_db` | `function` | **The level differences ISO 11820 builds everything else from, Eqs. (1), (3) and (2).**<br>• `transmission_level_difference_db(source_levels_db, receiver_levels_db)`: across the silencer<br>• `insertion_level_difference_db(levels_without_db, levels_with_db)`: between the run without it and the run with it<br>• `mean_sound_pressure_level_db(levels_db)`: the energy mean over the measuring points | `noise_control.mean_sound_pressure_level_db([71.2, 73.4, 72.0])` |
 | `sound_power_level_db` / `reverberant_surface_area_m2` / `SABINE_AREA_COEFFICIENT` | `function` / `function` / `constant` | **From a mean level to a sound power, Eqs. (5), (7), (9) and (11), and the area a reverberant room stands in for, Eqs. (6), (10) and (12).**<br>• `L_W = L̄_p + 10 lg(S/S₀) + K`, with S₀ = 1 m² and S whichever area the case calls for<br>• `reverberant_surface_area_m2(volume_m3, reverberation_time_s, speed_of_sound=340.0)`: S = 6 ln10 V / (c T), a quarter of the Sabine absorption area<br>• `SABINE_AREA_COEFFICIENT` is that 6 ln10, the 13,8 the three equations share | `noise_control.reverberant_surface_area_m2(320.0, t20)` |
-| `extraneous_corrected_mean_level_db` / `silencer_background_correction_db` / `ISO11820_BACKGROUND_CORRECTIONS_DB` / `MAXIMUM_EXTRANEOUS_CORRECTION_DB` / `ISO11820_MINIMUM_BACKGROUND_MARGIN_DB` / `ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` | `function` / `function` / `mapping` / `constant` | **The two routes ISO 11820 offers around extraneous sound, 9.1.1 to 9.1.3.**<br>• `extraneous_corrected_mean_level_db(levels_db, extraneous_levels_db)`: the energy subtraction of Eqs. (17) and (18), and whether it hit the 3 dB cap past which the quantity is not determined<br>• `silencer_background_correction_db(level_difference_db)`: Table 1, in decibels to take off, stepped from 3 dB at a margin of 3 dB to 0,5 dB at 9 or 10<br>• a margin under 3 dB is refused; above 10 dB nothing is corrected, and 10 dB itself still takes off 0,5 dB | `noise_control.silencer_background_correction_db([4.0, 9.0])  # 2.0, 0.5` |
+| `extraneous_corrected_mean_level_db` / `silencer_background_correction_db` / `ISO11820_BACKGROUND_CORRECTIONS_DB` / `MAXIMUM_EXTRANEOUS_CORRECTION_DB` / `ISO11820_MINIMUM_BACKGROUND_MARGIN_DB` / `ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB` | `function` / `function` / `mapping` / `constant` | **The two routes ISO 11820 offers around extraneous sound, 9.1.1 to 9.1.3.**<br>• `extraneous_corrected_mean_level_db(levels_db, extraneous_levels_db)`: the energy subtraction of Eqs. (17) and (18), and whether it hit the 3 dB cap past which the quantity is not determined, judged on the margin of the two energy means as Table 1 draws it: a 3 dB margin, a 3,02 dB correction, is still determined<br>• `silencer_background_correction_db(level_difference_db)`: Table 1, in decibels to take off, stepped from 3 dB at a margin of 3 dB to 0,5 dB at 9 or 10<br>• a margin under 3 dB is refused; above 10 dB nothing is corrected, and 10 dB itself still takes off 0,5 dB | `noise_control.silencer_background_correction_db([4.0, 9.0])  # 2.0, 0.5` |
 | `temperature_field_correction_db` / `TYPICAL_FIELD_CORRECTION_LIMIT_DB` / `ISO11820_SOUND_SPEED_M_S` | `function` / `constant` | **What a difference of temperature does to the field correction, Eqs. (20) and (22).**<br>• `K₂ − K₁ = 5 lg[(273 + θ₁)/(273 + θ₂)]`, the standard's own 273 rather than 273,15<br>• the same expression serves the insertion measurement, with the with-silencer run as the receiver side<br>• NOTE 4 expects K to stay under 3 dB in absolute value once the areas are the ones 3.3 and 3.4 define | `noise_control.temperature_field_correction_db(receiver_temperature_c=20.0, source_temperature_c=120.0)` |
 | `octave_levels_from_third_octave_db` / `ISO11820_OCTAVE_BAND_RANGE_HZ` / `ISO11820_OCTAVE_BAND_EXTENDED_RANGE_HZ` / `ISO11820_THIRD_OCTAVE_BAND_RANGE_HZ` / `ISO11820_THIRD_OCTAVE_BAND_EXTENDED_RANGE_HZ` | `function` / `constant` | **The bands ISO 11820 measures in, 9.1.5 and 8.1.**<br>• `octave_levels_from_third_octave_db(levels_db)`: threes folded into octaves, the route the clause allows when the narrower bands were measured<br>• 63 Hz to 4 kHz in octaves, 50 Hz to 5 kHz in one-third octaves, with the extended ranges the clause names for a silencer that works outside them | `noise_control.octave_levels_from_third_octave_db(third_octave_levels)` |
 | `total_pressure_loss_pa` / `static_pressure_difference_pa` / `velocity_pressure_pa` / `flow_velocity_m_s` / `gas_density_kg_m3` / `silencer_flow_velocity_m_s` / `ISO11820_GAS_CONSTANT` / `ISO11820_AIR_GAS_CONSTANT` / `ISO11820_AMBIENT_PRESSURE_PA` / `VELOCITY_UNIFORMITY_TOLERANCE_PERCENT` | `function` / `constant` | **The flow side of the measurement, Eqs. (13) to (16) and (27) to (31).**<br>• pressure loss Δp_T, the static difference Δp_S behind a change of area, the velocity pressure and the velocity it stands for<br>• `gas_density_kg_m3(temperature_c=, molar_mass_kg_kmol=None)`: ρ = M p_amb / [R (273 + θ)], with R/M = 287 N m per kg K for air<br>• `silencer_flow_velocity_m_s`: the upstream mean velocity scaled by S_u/S_f, which is the velocity the regenerated noise answers to<br>• 9.2 asks the velocity profile to be uniform within 10 % | `noise_control.gas_density_kg_m3(temperature_c=120.0)` |
 | `measurement_distance_upstream_m` / `measurement_distance_downstream_m` / `UPSTREAM_DISTANCE_DIAMETERS` / `DOWNSTREAM_DISTANCE_COEFFICIENTS` | `function` / `constant` | **Where the measurement surfaces stand along the duct, Eqs. (15) and (16).**<br>• upstream: one and a half equivalent diameters of the measurement cross-section<br>• downstream: 12 √S_d − 10 √S_f, which can fall to zero for a silencer whose free area is most of the duct, and 8.3.1 then sends the parties to agree<br>• S_f is the free cross-section, which NOTE 18 warns is not the intake one | `noise_control.measurement_distance_downstream_m(0.9, 0.45)` |
 | `SilencerInSituWarning` | `warning class` | **The measurement is outside a condition ISO 11820 states.**<br>• a downstream distance the geometry cannot give, a field correction past what NOTE 4 expects, a velocity profile outside the 10 % the standard asks for | `warnings.catch_warnings()` |
-| `screen_attenuation` / `ScreenInSituResult` | `function` / `dataclass` | **What a removable screen is worth where it stands, ISO 11821 clauses 5.8 and 5.9.**<br>• `unscreened_levels_db`, `screened_levels_db` [dB], `frequencies` [Hz], `distance_m`<br>• `source_kind`: 'actual' (Default) or 'artificial'<br>• `a_weighted_unscreened_level_db` / `a_weighted_screened_level_db`: the pair of 5.9, refused with an artificial source because the spectrum would be the loudspeaker's<br>• result: `attenuation_db`, `a_weighted_attenuation_db`, `.plot()` | `noise_control.screen_attenuation(without, with_screen, frequencies=f)` |
+| `screen_attenuation` / `ScreenInSituResult` | `function` / `dataclass` | **What a removable screen is worth where it stands, ISO 11821 clauses 5.8 and 5.9.**<br>• `unscreened_levels_db`, `screened_levels_db` [dB], `frequencies` [Hz], `distance_m`<br>• `source_kind`: 'actual' (Default) or 'artificial'<br>• `a_weighted_unscreened_level_db` / `a_weighted_screened_level_db`: the pair of 5.9, refused with an artificial source because the spectrum would be the loudspeaker's<br>• result: `attenuation_db`, `a_weighted_attenuation_db`, `.plot()`<br>• `.rounded()` and `.rounded_a_weighted()`: the whole decibels 7.4 c) reports, an exact half to the even one | `noise_control.screen_attenuation(without, with_screen, frequencies=f)` |
 | `background_corrected_level_db` / `BACKGROUND_CORRECTION_WINDOW_DB` / `ISO11821_MINIMUM_BACKGROUND_MARGIN_DB` / `ISO11821_PREFERRED_BACKGROUND_MARGIN_DB` | `function` / `constant` | **The background correction ISO 11821 boxes, clause 5.7.**<br>• `L_p = 10 lg(10^(L_ps/10) − 10^(L_pb/10))`, the plain energy subtraction, band by band and position by position<br>• over 10 dB of margin nothing is corrected; under 6 dB the conditions are "not acceptable", which is a refusal, because the background it names includes wind noise<br>• where ISO 11820 corrects from a stepped table, this standard prints the formula | `noise_control.background_corrected_level_db(levels, background)` |
 | `directivity_index_db` / `DIRECTIVITY_POSITIONS` / `DIRECTIVITY_INDEX_LIMIT_DB` / `DIRECTIVITY_CIRCLE_RADIUS_M` | `function` / `constant` | **Is this loudspeaker omnidirectional enough? ISO 11821 definition 3.10 and 5.2.2.**<br>• twelve positions evenly spaced on a horizontal circle of about 1,5 m radius<br>• `DI_i = L₃₆₀ − L₃₀,i`, the logarithmic mean less the position, so the index is positive where the position is quieter than the mean<br>• the source qualifies while no position falls more than 8 dB below the mean | `noise_control.directivity_index_db(levels_at_twelve)` |
 | `microphone_distances_m` / `SCREEN_DISTANCE_FACTORS` / `MINIMUM_MICROPHONE_DISTANCE_M` / `MINIMUM_SCREEN_DIMENSION_M` | `function` / `constant` | **Where the microphones stand in front of a screen, ISO 11821 5.5.2.**<br>• a quarter, a half, once and twice the screen height, never closer than 1 m, so for a low screen the two nearest positions coincide<br>• NOTE 2 reads the spread: the smallest attenuation at the most remote position, the largest at the nearest<br>• a screen under 1,5 m in either dimension is outside the standard, and that is reported | `noise_control.microphone_distances_m(3.0)` |
@@ -41836,8 +41731,8 @@ documents, one page per module.
 | `SHORT_TERM_FOUNDATION_MM_S` / `FOUNDATION_FREQUENCIES_HZ` / `SHORT_TERM_TOP_FLOOR_MM_S` / `LONG_TERM_TOP_FLOOR_MM_S` / `PIPELINE_MM_S` | `constant` | **The three printed tables of DIN 4150-3, as data.**<br>• Table 1 at the foundation, by class, at 1, 10, 50 and 100 Hz<br>• Table 1 in the topmost floor plane: 40 / 15 / 8 mm/s<br>• Table 3, long-term: 10 / 5 / 2.5 mm/s; Table 2, pipelines: 100 / 80 / 50 mm/s | `vibration.SHORT_TERM_FOUNDATION_MM_S['residential']  # (5.0, 5.0, 15.0, 20.0)` |
 | `FLOOR_VERTICAL_MM_S` / `MASSIVE_STRUCTURE_FACTOR` / `PIPELINE_LONG_TERM_FACTOR` / `BENDING_STRESS_CONSTANT` / `STOREY_FREQUENCY_NUMERATOR_HZ` / `STOREY_FREQUENCY_MIN_STOREYS` | `constant` | **The numbers DIN 4150-3 prints in sentences rather than in tables.**<br>• 20 mm/s vertical for a floor (5.2); the factor 2 for massive engineering structures (5.1)<br>• the 50 % of 6.3; the 1,73 of Formula (1)<br>• the 10 Hz and the five storeys of 6.4 | `vibration.FLOOR_VERTICAL_MM_S  # 20.0` |
 | `fundamental_period` / `fundamental_frequency` / `PERIOD_MODELS` | `function` / `constant` | **Empirical fundamental translation mode of a building (ISO 4866 Annex D).**<br>• `fundamental_period` returns `T` in **seconds**, `fundamental_frequency` returns `f` in **hertz**<br>• `model`: `'storeys'` (T = 0,1 n), `'height'` (T = k₁h), `'height_width'` (T = k₂h/√b), `'slenderness'` (T = k₃(h/√b)√(h/(h+b)))<br>• `storeys`, `height_m`, `width_m` as the model needs them, and only those: an argument the form does not use is refused<br>• `coefficient` defaults to the middle of the range D.2 prints for that form | `vibration.fundamental_frequency('height_width', height_m=60, width_m=20)`<br><br>• 0.76 Hz |
-| `height_fundamental_frequency` / `HEIGHT_FREQUENCY_CONSTANT_HZ_M` / `HEIGHT_PERIOD_COEFFICIENT_S_PER_M` | `function` / `constant` | **The fit ISO 4866 D.2 closes with, to 163 measured buildings.**<br>• `f = 46/h` hertz, or `T = 0,022 h` seconds, scalar or array<br>• D.3 goes on to report that computed frequencies correlate with measurement worse than this line does | `vibration.height_fundamental_frequency(46)  # 1.0 Hz` |
-| `empirical_frequency_bounds` / `EMPIRICAL_FREQUENCY_TOLERANCE` | `function` / `constant` | **The error an empirical prediction carries (ISO 4866 D.2).**<br>• ± 50 %, which the annex calls not uncommon and typical of empirical formulae<br>• returns `(lower, upper)` in hertz | `vibration.empirical_frequency_bounds(2.0)  # (1.0, 3.0)` |
+| `height_fundamental_frequency` / `HEIGHT_FREQUENCY_CONSTANT_HZ_M` / `HEIGHT_PERIOD_COEFFICIENT_S_PER_M` | `function` / `constant` | **The fit of ISO 4866 D.3 to 163 measured buildings.**<br>• `f = 46/h` hertz, or `T = 0,022 h` seconds, scalar or array<br>• D.3 reports that computed frequencies correlate with measurement worse than this line does | `vibration.height_fundamental_frequency(46)  # 1.0 Hz` |
+| `empirical_frequency_bounds` / `EMPIRICAL_FREQUENCY_TOLERANCE` | `function` / `constant` | **The error an empirical prediction carries (ISO 4866 D.3).**<br>• ± 50 %, which the annex calls not uncommon and typical of empirical formulae<br>• returns `(lower, upper)` in hertz | `vibration.empirical_frequency_bounds(2.0)  # (1.0, 3.0)` |
 | `estimate_fundamental_frequency` / `BuildingFrequencyEstimate` | `function` / `dataclass` | **One prediction with the coefficient and band it carries.**<br>• `.frequency_hz`, `.period_s`, `.model`, `.coefficient`, `.height_m`<br>• `.bounds_hz` the ± 50 % band, `.plot()` Figure D.1 with the estimate on it | `vibration.estimate_fundamental_frequency('height', height_m=46).bounds_hz` |
 | `PERIOD_COEFFICIENT_RANGES` / `STOREY_PERIOD_COEFFICIENT_S` / `DAMPING_RATIO_RANGE` | `constant` | **What ISO 4866 Annex D prints as ranges rather than values, damping included: it reports measurements and offers no estimator.**<br>• k₁ 0,014 to 0,03, k₂ 0,087 to 0,109, k₃ 0,06 to 0,08 (D.2)<br>• the storey rule as a period, 0,1 s per storey<br>• damping measured between 0,5 % and 2,1 % of critical, with no predictor at all (D.4) | `vibration.PERIOD_COEFFICIENT_RANGES['height']  # (0.014, 0.03)` |
 | `ZoneBoundaries` / `evaluation_zone` | `class` / `function` | **Evaluation zones of machine vibration (ISO 20816-1 6.3.2.3).**<br>• `ZoneBoundaries(a_b, b_c, c_d)`: the three boundaries, rising, in whichever quantity the applicable part states<br>• `evaluation_zone(magnitude, boundaries)` → `'A'`/`'B'`/`'C'`/`'D'`; a magnitude on a boundary is the top of the zone below | `z = vibration.ZoneBoundaries(2.8, 7.1, 11.2)`<br>`vibration.evaluation_zone(3.4, z)  # 'B'` |
@@ -42086,9 +41981,9 @@ documents, one page per module.
 | `OCTAVE_BANDS` | `tuple` | **ISO 11654 octave rating bands [Hz].**<br>(250, 500, 1000, 2000, 4000) | `OCTAVE_BANDS  # (250, ..., 4000)` |
 | `THIRD_OCTAVE_BANDS` | `tuple` | **ISO 11654 one-third-octave input bands [Hz].**<br>200 Hz to 5000 Hz (15 bands) | `THIRD_OCTAVE_BANDS[0]  # 200` |
 | `REFERENCE_CURVE` | `mapping` | **ISO 11654 Figure 1 reference curve (read-only).**<br>Keyed by octave band [Hz] → coefficient | `REFERENCE_CURVE[250]  # 0.8` |
-| `check_ceiling_specimen` / `CeilingSpecimenCheck` / `TARGET_SPECIMEN_AREA_M2` / `TEST_OBJECT_SIZE_M` / `TYPE_E_DEPTH_MM` / `MAX_DEFLECTION_MM` | `function` / `dataclass` / `constant` | **The test arrangement EN 16487 fixes, 4.1.1.**<br>• 10,80 m² of specimen, laid out in 0,6 m by 0,6 m objects, so a laboratory's own room does not change the answer<br>• mounting type E hangs it 200 mm below the ceiling; the panels may sag no more than 5 mm<br>• check: `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `ce_marking_depth`, `satisfied` | `materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=200.0)` |
-| `mounting_type` / `MOUNTING_TYPES` / `SUBSTRUCTURE_LIMITS_MM` / `SUBSTRUCTURE_SPACING_M` / `SUPPORT_SECTION_MM` / `MIN_SUPPORT_SPACING_M` / `MIN_FIXTURE_DENSITY_KG_M2` / `MIN_ROOM_EDGE_ANGLE_DEG` | `function` / `mapping` / `constant` | **How the specimen hangs, and on what.**<br>• the four mountings of EN ISO 354 Annex B this code uses: A against a hard surface, B glued with a 3 mm space, E suspended, J a discrete absorber<br>• the exposed substructure at most 30 mm wide and 50 mm deep, on a 0,6 m grid, hung from 50 mm by 50 mm supports at least 1,2 m apart<br>• a fixture counts as part of the specimen from 20 kg/m², and the specimen edges sit at least 10° off the room's own | `materials.mounting_type("E")` |
-| `air_absorption_correction` / `AIR_CORRECTION_LIMIT` / `MIN_RELATIVE_HUMIDITY_PERCENT` | `function` / `constant` | **What the air in the room absorbs, 4.2.1.**<br>• 4V(m₂ − m₁)/S, as an absorption coefficient, from the attenuation with and without the specimen<br>• over 0,05 the result is not reported: the air is doing too much of the absorbing to attribute it to the ceiling<br>• the room is held at 50 % relative humidity or more, which is what keeps that term small at 4 kHz | `materials.air_absorption_correction(volume_m3=200.0, specimen_area_m2=10.8, attenuation_with=m2, attenuation_empty=m1)` |
+| `check_ceiling_specimen` / `CeilingSpecimenCheck` / `TARGET_SPECIMEN_AREA_M2` / `TEST_OBJECT_SIZE_M` / `TYPE_E_DEPTH_MM` / `MAX_DEFLECTION_MM` | `function` / `dataclass` / `constant` | **The test arrangement EN 16487 fixes, clause 4.**<br>• 10,80 m² of specimen, laid out in 0,6 m by 0,6 m objects, so a laboratory's own room does not change the answer<br>• mounting type E hangs it 200 mm below the ceiling; the panels may sag no more than 5 mm<br>• `support_width_mm`, `support_height_mm`, `support_centre_distance_m`: the support units of 4.1.1.2.3.6; `relative_humidity_percent`: one value per measurement, each held to the 50 % of 4.2.2<br>• check: `deflection_ok`, `substructure_ok`, `fixture_ok`, `supports_ok`, `humidity_ok` (`None` without a humidity) and `satisfied` over them; `area_error_m2` and `ce_marking_depth` reported and not judged, since the area is a target and the 200 mm is the CE marking depth | `materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=200.0)` |
+| `mounting_type` / `MOUNTING_TYPES` / `SUBSTRUCTURE_LIMITS_MM` / `SUBSTRUCTURE_SPACING_M` / `SUPPORT_SECTION_MM` / `MIN_SUPPORT_SPACING_M` / `MIN_FIXTURE_DENSITY_KG_M2` / `MIN_ROOM_EDGE_ANGLE_DEG` | `function` / `mapping` / `constant` | **How the specimen hangs, and on what.**<br>• the four mountings of EN ISO 354 Annex B this code uses: A against a hard surface, B glued with a 3 mm space, E suspended, J a discrete absorber<br>• the exposed substructure at most 30 mm wide and 50 mm deep, on a 0,6 m grid, hung from 50 mm by 50 mm supports at least 1,2 m apart, the section and centre distance of which `check_ceiling_specimen` judges<br>• a fixture counts as part of the specimen from 20 kg/m², and the specimen edges sit at least 10° off the room's own; the grid and the angle are targets and not judged | `materials.mounting_type("E")` |
+| `air_absorption_correction` / `AIR_CORRECTION_LIMIT` / `MIN_RELATIVE_HUMIDITY_PERCENT` | `function` / `constant` | **What the air in the room absorbs, 4.2.1.**<br>• 4V(m₂ − m₁)/S, as an absorption coefficient, from the attenuation with and without the specimen<br>• over 0,05 the result is not reported: the air is doing too much of the absorbing to attribute it to the ceiling<br>• the room is held at 50 % relative humidity or more, which is what keeps that term small at 4 kHz; `check_ceiling_specimen(relative_humidity_percent=...)` judges it for each measurement | `materials.air_absorption_correction(volume_m3=200.0, specimen_area_m2=10.8, attenuation_with=m2, attenuation_empty=m1)` |
 | `reproducibility_uncertainty` / `CEILING_UNCERTAINTY` / `WEIGHTED_UNCERTAINTY` / `EN16487_COVERAGE_FACTOR` | `function` / `mapping` / `constant` | **What two laboratories will differ by, Table 1.**<br>• the reproducibility standard deviation band by band: 0,23 at 125 Hz and 250 Hz, then 0,11, 0,10, 0,10 and 0,13 up to 4 kHz<br>• 0,08 for the weighted single number α_w<br>• expanded with k = 2,8, which is the factor the standard prints rather than the usual 2 | `materials.reproducibility_uncertainty()  # one per octave band` |
 | `SuspendedCeilingWarning` | `warning class` | **The test arrangement is outside a condition EN 16487 states.**<br>• a deflection over 5 mm, a substructure over 30 mm by 50 mm, a fixture under 20 kg/m², a type E plenum that is not 200 mm, an air correction over 0,05<br>• the specimen area is not one of them: 4.1.1.1.1 asks for "as close to 10,80 m² as possible", which is a target rather than a tolerance, so the check reports the difference and leaves the judgement to the laboratory | `warnings.simplefilter('error', SuspendedCeilingWarning)` |
 | `speed_of_sound_iso17497` | `function` | **Speed of sound (ISO 17497-1 Eq. 2).**<br>• `temperature_c` t [°C] | `speed_of_sound_iso17497(temperature_c=20.0)  # 343.2`<br><br>• 343.2 √((273.15 + t)/293.15) [m/s] |
@@ -47190,15 +47085,6 @@ print(result.bands[0])
 # {'freq': 12.589254117941678, 'class': 1, 'checked_to_omega': 3.8127755266765493, 'margin_class1_db': 0.3999999999999595, 'margin_class2_db': 0.5999999999999595}
 ```
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_filter_class_check.svg" alt="Calculation chain for grading a band filter against IEC 61260-1 Table 1: a one-third-octave band at 1 kHz, its relative attenuation at every breakpoint against the class 1 and class 2 limits, the class 1 margin at each breakpoint and the class it gives, with the hardware tests of IEC 61260-2 and IEC 61260-3 set apart as outside the check" width="88%"></picture>
-
-*The 1 kHz band of a bank like the one above, walked through the check: its
-relative attenuation at every Table 1 breakpoint, carried to one-third octave,
-against the class 1 and class 2 limits, with the smallest margin deciding the
-class. The red dashed line is where the decimated bank stops walking it. The
-dashed column on the right is what a laboratory does to an instrument instead,
-and none of it runs here.*
-
 The Table 1 acceptance mask itself is public too: `class_limits(fraction,
 filter_class, omega)` returns the minimum/maximum relative-attenuation
 limits at normalized frequencies $\Omega = f/f_\mathrm{m}$, the same limits the verifier
@@ -48580,14 +48466,6 @@ only through the percentile levels, which are defined on the time-weighted
 level track (see [Time Weighting](https://jmrplens.github.io/phonometry/signals/levels/time-weighting/)). And everything on
 this page assumes the signal is already in pascals: the sensitivity factor
 that gets it there is the subject of [Calibration](https://jmrplens.github.io/phonometry/signals/metrology/calibration/).
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_levels_from_a_record.svg" alt="A calibrated pressure record drawn as a waveform between the times t1 and t2 that bound the stated interval T, with a short impulse, a longer event and the background labelled above it. The record passes through a frequency weighting box, A, C or Z, each 0 dB at 1 kHz, and splits into four columns. The first, A or Z weighted, averages the square: the squared record is a row of spikes and its mean over T a low flat line, which gives Leq and LAeq over T, and SEL, the same energy referred to 1 s against the reference exposure of 400 times ten to the minus twelve pascal-squared seconds. The second, A weighted, time-weights the square: a fast F track with a time constant of 0.125 s and a slower, lower S track with 1 s, a dot on the top of each for LAFmax and LASmax, and three dashed lines for L10, L50 and L90 read off the F track once its first five time constants are left out. The third, C weighted, holds the greatest excursion of either sign, the impulse, marked by dashed lines at plus and minus that pressure, for LCpeak with no average and no time constant; one cycle of 500 Hz reads 3.5 dB over the LC of the steady signal it is cut from. The fourth, A weighted, integrates the square: a running curve that steps up at the impulse, by about a fifth of the total, and climbs most during the event, ending at the sound exposure E in pascal-squared hours, kept until reset, and LEX,8h spreads that exposure over 8 h, 3.2 pascal-squared hours being exactly 90 dB and 1.01 being 85 dB. A box at the foot writes SEL as LAeq plus 10 lg of T over 1 s, LEX,8h as LAeq plus 10 lg of T over 8 h and as 10 lg of E over p0 squared times 8 h, and says that the maxima, the percentiles and the peak cannot be had from that energy and need the record itself" width="100%"></picture>
-
-*One record, four reductions. The mean square and the running integral keep
-nothing but the energy, which is why $L_\mathrm{Aeq}$, SEL and $L_\mathrm{EX,8h}$
-turn into one another through $T$, 1 s and 8 h alone; the maxima and the
-percentiles belong to the time-weighted track and the peak to a single
-excursion, so none of those can be rebuilt from the energy.*
 
 ## Leq and LAeq
 
@@ -50601,14 +50479,6 @@ published standards themselves are in the [errata registry](https://jmrplens.git
 
 Both instrument series continue past their Part 1 with two test regimes, and
 neither is something a software library can run on itself.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_verification_regimes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_verification_regimes.svg" alt="Three stacked bands, one for each part of the two instrument series, with sound level meters to IEC 61672 on the left and band filters to IEC 61260 on the right. A box at the top stands for the transfer function configured in phonometry, and two arrows, verify_weighting_class and verify_filter_class, reach down into the first band only. Part 1 holds the specifications: Table 3 of IEC 61672-1, the A, C and Z weightings at 34 frequencies from 10 Hz to 20 kHz with ±0.7 dB at 1 kHz for class 1, and Table 1 of IEC 61260-1, a relative attenuation corridor with ±0.4 dB at the mid-band, each with the largest uncertainty a laboratory may claim it with. A dashed line separates a design checked in software from a physical instrument in a laboratory. Part 2, pattern evaluation, shows at least three specimens submitted, at least two selected and at least one tested in full, with the environmental, electrostatic, radio-frequency, free-field, linearity and climate tests, and a report that states whether the pattern is approved. An arrow carries that approval down to Part 3, periodic tests on one working instrument at 20 °C to 26 °C with a limited set of checks, which support no general conclusion without it. A box at the foot gives the conformance criterion: the deviation within the acceptance limits and the uncertainty no larger than its maximum." width="100%"></picture>
-
-*The two series side by side, their three parts stacked. The verifiers reach
-only the Part 1 tables and only the first half of the conformance criterion;
-Parts 2 and 3, under the dashed line, need a physical instrument, and a
-periodic test says nothing general until the pattern approval it leans on is
-public.*
 
 **Pattern evaluation** (IEC 61672-2:2013 for meters, IEC 61260-2:2016 for
 filters) is the type-approval regime a *model* passes once: the tests
@@ -56644,7 +56514,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1259 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1261 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -57327,7 +57197,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1259 numerical conformance checks across 87 domains and 460 standards, covering
+1261 numerical conformance checks across 87 domains and 461 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise
@@ -60342,22 +60212,6 @@ of the bench measurement added on top; that uncertainty has to fit inside the
 band as well. There is a second sentence about uncertainty, in 13.1 and 14.1,
 and it says something different; section 4 is about telling the two apart.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench.svg" alt="Three bands: the meter's transducer on a calibrated reference on a vibration exciter, with the two readings Formula (9) compares; a generator feeding the maker's substitute for the transducer, with the saw-tooth bursts of Table 6; and where the sweeps and the bursts sit in a 60 dB linear operating range, above a box with Formulae (9), (12) and (10)" width="100%"></picture>
-
-**How the measurement goes.** In a pattern evaluation (clause 12), mount the
-meter's transducer and a calibrated reference transducer on the exciter as
-ISO 16063-21 describes, set the band-limited reading 20 dB above the lower
-linearity limit at the reference frequency, and in one-third-octave steps over
-Table 15 hold that input on the reference and note the reading: Formula (9).
-Repeat through the electrical input, holding the reading and noting the input
-signal value, Formula (12), and add the transducer error of the weighting
-tested both ways to the ones tested only electrically before grading against
-Table 5. For the bursts, start from a steady sine at 50 % of the upper
-linearity limit, apply the Table 6 saw-tooth to every weighting, and step down
-tenfold to three times the lower limit. A one-off instrument is shaken at the
-fixed frequencies of 13.10 instead, and a periodic verification (clause 14)
-keeps only the mechanical checks.
-
 ## 2. The nine weightings, and the band that widens around them
 
 The design goal is not a table of numbers, it is a transfer function. Clause
@@ -62040,14 +61894,11 @@ ride worse than no seat at all, which is not a hypothetical: it is
 what a suspension does when the machine's dominant frequency lands on its
 resonance.
 
-$a_\mathrm{wS}$ is the arithmetic mean of **three consecutive runs whose seat
-values lie within ± 5 % of that mean**, and $a_\mathrm{wP}$ the mean of the
-platform values from those same runs, which have to stay inside the input
-tolerances rather than inside the 5 % (10.2.1). The library treats the
-agreement as a condition rather than a footnote: `mean_of_test_runs` refuses a
-set that does not meet the spread, because a mean of runs that disagree by more
-is not a measurement this standard recognises. `seat_transmission` puts both
-sets through it, so on the platform side it is stricter than the clause.
+Both accelerations are the arithmetic mean of **three consecutive runs whose
+values lie within ± 5 % of that mean** (10.2.1). The library treats that as a
+condition rather than a footnote: `mean_of_test_runs` refuses a set that does
+not meet the spread, because a mean of runs that disagree by more is not a
+measurement this standard recognises.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seat_vibration_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seat_vibration_test.svg" alt="Two panels. The left panel gives three test runs as paired bars, the platform near 1,00 and the seat near 0,71 metres per second squared, with the mean of each set drawn as a dashed line and a double arrow between the two means labelled SEAT = 0,71. The right panel gives four bars for the correction of clause 10.2.3: the input delivered at 1,00, the input intended at 1,10, the magnitude measured on the seat at 0,71 and the corrected magnitude at 0,78, over the formula a*wS = SEAT times a*wP." width="94%"></picture>
 
@@ -62079,21 +61930,6 @@ except ValueError as error:
 *One test, and the ratio it exists to produce. The three runs agree to well
 inside the tolerance, so their means are the two numbers the SEAT factor is
 built from.*
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig.svg" alt="Side view of a suspension seat on a vibration simulator with a test person on the mounting disc, the seat accelerometer S under the person and the platform accelerometer P within 100 mm of the vertical through it; the disc of Figure 2 in section; the same weighted r.m.s. chain at both points; and SEAT = a_wS / a_wP with the corrected magnitude at the foot" width="100%"></picture>
-
-**How the measurement goes.** Calibrate the chain to ISO 16063-1 before and
-after each series, check the safety requirements of ISO 13090-1, and run a
-suspension seat in under a 75 kg inert mass first. Fix the platform
-accelerometer inside a 200 mm circle centred directly below the seat
-accelerometer, and tape the disc to the cushion so its accelerometers lie
-midway between the ischial tuberosities. Train the test persons in preliminary
-runs until they hold a normal, still posture, weigh each of them, set the feet
-support so the thighs do not press on the front of the cushion, and drive the
-prescribed input until three consecutive runs give seat values within ± 5 % of
-their mean, with the platform inside its input tolerances. The mean of those
-seat values is $a_\mathrm{wS}$ and the mean of the platform values from the
-same runs is $a_\mathrm{wP}$, one pair per test person.
 
 ## 2. Correcting to the input that was intended
 
@@ -62436,19 +62272,6 @@ rule still be regarded as met", the standard concludes, and the verdict says
 so, with `within_uncertainty` set for anyone who wants to read it more
 strictly.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings.svg" alt="Section through a dwelling with the triaxial transducer at the middle of the floor panel, x towards the source and a fourth channel beside it; the meter's chain and ten 30 second clocks with a maximum of 0.25 and a clock maximum r.m.s. of 0.23; the day split into 8 hours of night and 16 hours of day with the rest hours; and the order of the assessment against the guide values of a residential area, with the two formulae at the foot" width="100%"></picture>
-
-**How the measurement goes.** Use a DIN 45669-1 meter, checked before and after,
-and measure on the floor of the room itself: `z` usually at the middle of the
-floor panel, `x` and `y` along the outer walls with `x` towards the source where
-possible, the three at once unless the vibration is steady, and a fourth channel
-near the source. Set down loose, a transducer holds while the peaks stay at or
-below 3 m/s², its horizontals only to 40 Hz; on a carpet it stands on the spiked
-device, about 2,5 kg with the transducer, pressed and tapped through the
-covering. Capture the characteristic exposure, form `KB_Fmax` and, where it is
-needed, `KB_FTr` by day and by night with the rest hours apart, and report the
-positions, the coupling, the meter and its settings.
-
 ## 2. The assessment vibration severity
 
 `KB_FTr` is the clock maximum r.m.s. of each stretch of exposure, weighted by
@@ -62688,12 +62511,9 @@ line, a construction site beyond 78 working days, a hospital next to one, and
 whatever 6.2 sends to an individual assessment are decided case by case in
 the standard, and are not decided here.
 
-**The measurement is described, not checked.** Where the transducers go, how
-they are coupled and how long a measurement runs are Clause 5 and
-DIN 45669-2, set out above for the person measuring. Of all that, the library
-puts a number only to the loose-mounting limits, the wax limit of Table 1 and
-the mass loading of 7.2.4, on the meter's page; the quantities themselves come
-from the meter of DIN 45669-1, which forms them from a record.
+**No measurement.** Where the transducers go and how long a measurement runs
+are Clause 5 and DIN 45669-2; the quantities themselves come from the meter
+of DIN 45669-1, whose page forms them from a record.
 
 ## See also
 
@@ -62716,21 +62536,11 @@ from the meter of DIN 45669-1, which forms them from a record.
   the rules by source of 6.5 with Table 2 and the interpolation of Figure 3,
   the estimate of Clause 7 with Formulae (6) and (7) and Table 3, and Annex A
   with Formulae (A.1) to (A.4). Annex C is the oracle of the conformance rows.
-  Clause 5 on the measurement and the report of Clause 8 are prose, set out in
-  the measurement section.
+  The measurement report of Clause 8 is prose.
 - Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
   The meter whose KB_Fmax and clock maxima this standard judges, and the 5.6 Hz
-  corner frequency Formula (6) carries. The three simultaneous channels and the
-  fourth near the source of 5.1.2, the interruption and back-erasure of the
-  clock maxima of 5.1.6.4, and the check before a measurement of 6.5.
-- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
-  Teil 2: Messverfahren* (DIN 45669-2:2005-06). The floor positions of 5.1.3,
-  the directions of 5.2, the couplings of 5.3.2 and 5.3.3 with Table 1, the
-  measuring time of 6.1, the disturbances of 7.2.2 and the report of Clause 9,
-  as the measurement section describes them. The loose-mounting limits, the wax
-  limit and the mass loading are implemented on the meter's page; the rest is
-  prose.
+  corner frequency Formula (6) carries.
 
 ---
 
@@ -62783,22 +62593,6 @@ print([round(v, 3) for v in kb_ftm])  # [0.037, 0.047, 0.406, 0.568]
 print(vibration.train_kb_fmax(kb_ftm).round(3))  # [0.055 0.07  0.609 0.851]
 print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
 ```
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring.svg" alt="A section through a railway and the building beside it, a strip of train passages, and the formulae. Top left, a tram runs on the surface and a metro in a tunnel below it, with arrows through the ground to the building. In the upper storey, the room to be protected, a transducer stands at the middle of the floor span with arrows for the vertical z and the horizontals x and y, marked 1. A second transducer sits on the foundation in the basement, marked 3, and a dashed arrow marked 2 rises from it to the floor of the room. Three boxes at the right explain the numbers: the floor point takes z, x and y where the vibration is expected to be strongest, for z mostly the middle of the span; the transfer to the room is a linear factor or a frequency-dependent transfer function, preferably measured, with its uncertainty only as an upper bound; the substitute point, at the foundation for monitoring over weeks or months, is held to DIN 45669-2. A line beneath says that from a substitute point only KB Fmax below A o and KB FTr below A r can be shown. In the middle, a time axis from 0 to 380 seconds carries four passages, a metro running north and one running south with small humps and a tram running east and one running west with large ones, each inside one dashed interval however long it lasts. Under them, per category: 14 passages giving 0.037 and 0.055, 14 giving 0.047 and 0.070, 9 giving 0.406 and 0.609, and 10 giving 0.568 and 0.851, the largest, which is the KB Fmax of the railway. A box at the foot carries Formulae 5, 7, 8 and 6, with notes on the 1920 and 960 intervals of the day and the night, the zero for a category at or below 0.1, and the meter to DIN 45669-1, for which a 4 Hz lower limit is usually enough at a railway" width="100%"></picture>
-
-**How the measurement goes.** Use a vibration meter to DIN 45669-1, where a
-lower limit of 4 Hz is usually enough beside a railway, and couple the
-transducers as DIN 45669-2 asks on the floor of the room to be protected,
-where the vibration is expected to be strongest: for `z` mostly the middle of
-the floor span, with `x` and `y` horizontal and at right angles. Carry the
-whole measurement out with particular regard to DIN 45672-1 and DIN 45672-2.
-Record every passage whole and keep one clock maximum from it, sorted into
-categories of normally at least one per track or direction and kind of
-train, and mark anything atypical. For monitoring over weeks or months a
-substitute point at the foundation may stand in, through a transfer
-determined preferably by measurement, but only to show `KB_Fmax < A_o` and
-`KB_FTr < A_r`. Expect up to about 15 % uncertainty, and report the points,
-directions, coupling and meter.
 
 ## 2. A weighting factor for the kind of train
 
@@ -63037,9 +62831,6 @@ Clause 8, the report, are text.
   measure yet.
 - [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
   the clock maxima the categories are formed from.
-- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
-  the two parts a railway measurement is carried out with particular regard
-  to.
 - API reference:
   [`vibration.immission.train_categories`](https://jmrplens.github.io/phonometry/reference/api/vibration/train-categories/)
   and [`vibration.immission.people`](https://jmrplens.github.io/phonometry/reference/api/vibration/people/).
@@ -63093,10 +62884,6 @@ The example of Annex C predicts a tram at 50 km/h for a building 7 m from
 the track, on a concrete floor with a natural frequency of 20 Hz; its
 emission spectrum was already taken at a foundation, so the foundation term
 is zero.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_prediction_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_prediction_chain.svg" alt="Section from a street tram line to the building beside it, with the chain of E DIN 45672-3 drawn over it. On the left a tram at 50 kilometres per hour stands on rails set flush in the street, one wheel on each rail; a dash-dotted line marks the track centre and a dashed box around the rails and the track bed marks where a mitigation measure D e would go. Two dimensions start at the track centre: r 0 to the emission point on the ground, where the Max Hold spectrum L v E is taken, and 7 metres to the building. A blue arc through the ground carries the ground term delta L v BB to a point in front of the building, under the power law v of r over v of r 0 equals r over r 0 to the minus n, with n per band, and the note that an exponent from a point excitation is reduced by 0.5 up to R 0, about L squared over lambda. Green arrows carry delta L v FB into the foundation in the basement and delta L v DF up to the middle of the first floor, where the level L v is taken in the vertical direction. The floors are concrete with a natural frequency of 20 hertz, the first floor's mode is dashed, and a note asks for one prediction per natural frequency, never the envelope. Two notes at the top say the emission can be taken at a tunnel floor or wall, a point in the ground or a foundation, and that Table 1 recommends a prediction within 25 metres of a tram line on the surface. A box below writes Formula (1), L v equals L v E plus delta L v BB plus delta L v FB plus delta L v DF plus D e, with where each term comes from: the level on the floor, vertical and band by band; the Max Hold emission at r 0, from 4 to 250 hertz, plus 20 lg of the ratio of speeds for another speed of the same category, up to 30 per cent; Formula (5) or (6) for the ground; Table A.3 or A.4 into the foundation, which is zero when L v E is itself taken at a foundation; Table A.5 or A.6 up to the floor; and DIN SPEC 45673-2 or -3 for the mitigation; a bracket over the two building terms says they can be taken in one step as delta L v DB from Table A.1 or A.2, by the natural frequency. Two boxes at the foot turn the spectrum into the assessment quantities: KB F T m Zug for each category of train, from the Table 2 weighting and the energy sum from 4 to 80 hertz with c T1 equal to 1 and v 0 equal to 5 times 10 to the minus 5 millimetres per second, with KB F max Zug 1.5 times it and v max 3 times that; and KB F T r over the timetable, the root of the sum over the categories of n Zug over N r times the square of alpha Zug times KB F T m Zug, with N r 1920 by day and 960 by night and alpha Zug 0.7 for a tram on the surface. A last line says E DIN 4150-2 holds KB F max, the largest KB F max Zug, and KB F T r to its Table 1, with a category at or below 0.1 counting as zero in KB F T r" width="100%"></picture>
-
-*Where each term of Formula (1) belongs, from the track to the middle of a floor, and the two quantities Clause 7 turns the spectrum into for DIN 4150-2.*
 
 ```python
 import numpy as np
@@ -63804,34 +63591,13 @@ and dropping below 20 % of that value further on. Rail traffic, and the
 measurements that read the speeds, strain the ground around `10⁻⁶`, so the
 modulus measured is the one that applies.
 
-## 8. Where the record comes from
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_cross_section_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_cross_section.svg" alt="A cross-section at right angles to a railway line. On the left a train stands end-on on its track at ground level, the track axis drawn through it, and a coordinate cross beside it gives x along the track out of the page, y across the track and z vertical. On the ground to the right, transducers stand 8, 16, 32, 64 and 128 metres from the track axis, each with an arrow for the vertical direction: the first, preferably in undisturbed ground, is the emission point and the other four are transmission points, the distance doubling at each step. Further right a two-storey building is the immission area, with one transducer on the floor slab measuring vertically along z prime and one at the foot of the wall facing the track, at ground level, measuring at right angles to it along y prime, these immission points on foundations and floors chosen after DIN 45669-2, DIN 4150-2 and DIN 4150-3. Three insets follow. In plan, three cross-sections run at right angles to the track, in the middle of a straight test section 100 to 200 metres long where a track form is what is being studied, and a building turned by the angle alpha carries x prime along its wall. An embankment and a cutting carry their points at projected distances of 8, 16 and 32 metres. A rectangular tunnel with two tracks has points on the invert at a track centre and between the tracks, on the wall 1.5 metres above the rail, at the middle of the roof, on the ground above it with the cover between, and on the ground beside it, about two thirds of the cover out from the track axis but at least 8 metres. Under the insets, a thirty-second record of one passage carries its three stretches: T3 over the whole event, T2 from where the amplitude reaches about a quarter of the most frequent maxima to where it falls back to it, and T1 of about four seconds with the largest values near its middle. Two boxes at the foot give the minimum test-track length, l MG equals l Z plus r times v Z over v R, and the event value, v E equals v tilde 3 times the square root of T3 over 3600 seconds. Two notes close the plate: a meter to DIN 45669-1 from 4 hertz to 315 hertz, with every point recorded at once where possible, and a record without a train, at the same points and through the same chain, to show the background" width="100%"></picture>
-
-Part 1 says where the transducers go and what a record has to be before Part 2
-may reduce it: a cross-section at right angles to the track (6.1), the emission
-point on the ground 8 m from the track axis (6.2.1.2), the transmission points
-at twice the distance each time out to 128 m (6.2.2), and the immission points
-that DIN 45669-2, DIN 4150-2 and DIN 4150-3 place (6.2.3).
-
-**How the measurement goes.** Use a meter to DIN 45669-1 working from 4 Hz to
-315 Hz and check it after every set-up. Put the emission point on the ground 8 m
-from the track axis, or on the invert in a tunnel, and the transmission points at
-16 m, 32 m, 64 m and 128 m, with the distances projected on an embankment or in a
-cutting; the building points go where DIN 45669-2, DIN 4150-2 and DIN 4150-3 put
-them. Record several passages of each kind of train, every point at once where
-possible, then the same points with no train for the background, and cut each
-record into `T₁`, `T₂` and `T₃`.
-
-## 9. What this page is not
+## 8. What this page is not
 
 DIN 45672-1 is a measuring method: measurement points on the way from the
 track to the building, directions, coupling, the trains to record and the
-report to write. None of that is arithmetic and the library computes none of
-it, but that procedure is what decides what a record is worth, so it is set out
-above; the coupling it points to is DIN 45669-2. Nor is any assessment: the
-numbers this page produces are compared with something only in DIN 4150-2 and
-DIN 4150-3.
+report to write. None of that is arithmetic and none of it is here, and the
+coupling it points to is DIN 45669-2. Nor is any assessment: the numbers this
+page produces are compared with something only in DIN 4150-2 and DIN 4150-3.
 
 ## What this guide covers
 
@@ -63858,10 +63624,9 @@ printed forms registered as errata.
 a narrow-band analyser, with and without a Hanning window; the library's
 density is correct by construction and has nothing to calibrate.
 
-**No measuring procedure is checked, and no verdict.** The measurement points,
-directions, coupling and choice of trains of DIN 45672-1 and DIN 45669-2 are
-summarised above, but nothing here checks them; what the numbers mean for
-people and buildings is DIN 4150-2 and DIN 4150-3.
+**No measuring procedure and no verdict.** Measurement points, directions,
+coupling and the choice of trains are DIN 45672-1 and DIN 45669-2; what the
+numbers mean for people and buildings is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
@@ -63894,9 +63659,7 @@ people and buildings is DIN 4150-2 and DIN 4150-3.
   Formula (3), the shear strain of Formula (4) and the moduli of Formula (5),
   with Formulae (1) and (5) in the corrected form registered in the errata. The
   measuring procedure of the rest of the standard is not arithmetic and is not
-  implemented; the measuring conditions of Clause 6, the operating states of
-  Clause 7, the execution of Clause 8 and the report of Clause 10 are set out in
-  the measurement section.
+  implemented.
 - Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
   The meter a railway measurement is made with, in its 4 Hz to 315 Hz working
@@ -64230,8 +63993,6 @@ disturbances have to be kept out of it. Nearly all of it is judgement written
 down. The little that is a number is here, because a number a measurement is
 planned by belongs where the plan is checked.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling.svg" alt="Section through a building with transducers on the top floor ceiling, at mid-span of a floor, on the foundation facing the source and in the ground near it, with the directions of DIN 45669-2, three insets for coupling on a hard surface, on a soft covering and in the ground, and the DIN 45669-1 chain along the foot" width="100%"></picture>
-
 A transducer set down without fastening walks or lifts off when the vibration
 is strong, and a coupling that is not force-locked resonates against the
 surface. Clauses 5.3.2 and 5.3.3 fix both limits: a loose transducer measures
@@ -64280,23 +64041,12 @@ that the coupling alone can move the reading by up to 15 dB, and that the
 horizontal components suffer most. Which of the four methods of Table 2 to
 use is the one judgement Part 2 leaves entirely to the reader.
 
-**How the measurement goes.** Use a DIN 45669-1 meter with three channels, plus
-a fourth near the source when its signal has to be told apart, and check the
-chain on site. Measure on the foundation nearest the source, no higher than
-0,5 m above ground, and on the top floor ceiling next to the outer wall for the
-building; at mid-span of their floors for the people in it; on the building plot
-for a building still to be built. Point `z` up and `x` preferably towards the
-source, couple the transducer as the diagram shows, measure over the assessment
-time or stretches that represent it, and judge vibration from other sources with
-and without the source running.
-
 ## 7. What this page is not
 
 Measurement positions, directions, durations and the list of disturbances are
-the text of DIN 45669-2: section 6 describes them, and none of it is computed
-here. What is here is the instrument the two parts describe between them, the
-quantities it is required to produce, and the limits a measurement with it is
-planned by.
+the text of DIN 45669-2, and none of that is here. What is here is the
+instrument the two parts describe between them, the quantities it is required
+to produce, and the limits a measurement with it is planned by.
 
 ## What this guide covers
 
@@ -64328,10 +64078,10 @@ The numbers of **DIN 45669-2**: the loose-mounting limits of 5.3.2 and 5.3.3
 as a verdict, the wax limit of Table 1, the mass loading of 7.2.4 and the
 instrument confidence limits of Table 3.
 
-**No measurement procedure in code.** Measurement positions, directions,
-durations, the choice of a ground coupling and the treatment of disturbances
-are the text of DIN 45669-2, described in section 6 and not computed, and the
-assessment of what was measured is DIN 4150-2 and DIN 4150-3.
+**No measurement procedure.** Measurement positions, directions, durations,
+the choice of a ground coupling and the treatment of disturbances are the
+text of DIN 45669-2, and the assessment of what was measured is DIN 4150-2
+and DIN 4150-3.
 
 ## See also
 
@@ -64358,9 +64108,9 @@ assessment of what was measured is DIN 4150-2 and DIN 4150-3.
   of 5.2.2, the amplitude response tolerances of Tables 2 and 3 with the
   deviation of Formula (7), the reference conditions of 5.2.10 and the reference
   indications of 6.2.3.12 with Table 9, the dominant frequency methods of Annex
-  D, the assessment weightings and guideline values of Annex E with Tables
-  E.1 and E.2, and the channel count of 5.1.2 and the on-site checks of 6.5. The
-  design and type-test clauses that need a bench are not implemented.
+  D and the assessment weightings and guideline values of Annex E with Tables
+  E.1 and E.2. The design and type-test clauses that need a bench are not
+  implemented.
 - Deutsches Institut für Normung. (2012). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1*
   (DIN 45669-1 Ber 1:2012-12).
@@ -64375,8 +64125,8 @@ assessment of what was measured is DIN 4150-2 and DIN 4150-3.
   implemented.
 - Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil 3:
   Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
-  Table 1, whose guideline curve the Annex E weightings invert, the three
-  building classes they are written for, and the measuring points of 5.4.
+  Table 1, whose guideline curve the Annex E weightings invert, and the three
+  building classes they are written for.
 
 ---
 
@@ -64394,10 +64144,6 @@ and says so in its foreword: the constants of a real case come from trial
 blasts, from comparable ground, from a measurement with a few machines
 running. What it does fix, it fixes plainly, and its Annex A shows the
 shapes in the ground twenty-seven times over.
-
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_prediction_path_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_prediction_path.svg" alt="Section through the ground from a vibration source to a five-storey building. On the left the source sits on the surface, its extent a dimensioned along the path, and a dashed red line marks the far-field boundary R1; under the ground a chain of dimensions counts it from the centre of the source as a over 2 plus the Rayleigh wavelength, and a longer dimension gives the distance R to a point further out. The band above the ground between the source centre and R1 is shaded as the near field, where the approximations do not hold. Beyond R1, in the far field of Formula (2), three blue arrows on the surface shrink along a dashed decay curve from v1 at R1 to v at R, a source near the surface sending mostly a Rayleigh wave, while dashed fronts under the surface stand for the body waves, compression and shear. On the right the foundation of the building rests on two springs and a damper, the stiffness kB of the ground and the system damping D0, under the building mass mB; the foundation is marked VF, one floor is drawn bending and marked VD, and a double arrow at the roof marks the horizontal frequency f1. Three panels below give the exponent n of Figure 1, 0 for a harmonic line source on a surface wave with 0.5 added for a point source, for impulsive excitation and for a body wave, up to 1.5, and 0.3 to 0.5 for a train of point sources; the attenuation coefficient alpha of about 2 pi D over lambda, with D at most 0.01 on loose ground in a first estimate, higher frequencies damped more, and 0.005 per metre for D of 0.01 and a wavelength of 12.5 metres; and the building: about 15 hertz for one to two storeys, 8 to 12 hertz for two to six and under 8 hertz above six on ground of medium stiffness, a foundation passing at most 2 at that frequency on loose ground, a mean of 0.5 above it and no reduction on rock, and a floor amplifying 10 to 25 at its resonance in reinforced concrete with a damping ratio between 0.02 and 0.05. Two boxes at the foot carry Formulae (1) to (4) and the two maximum transfer values, and a closing note says the transfer values assume the whole building excited in phase by predominantly harmonic vibration, and that for a source close by, moving or impulsive they lie on the safe side" width="100%"></picture>
-
-*The path clause 4 of Part 1 lays down for propagation and transfer: a near field where its approximations do not hold, the decay of Formula (2) beyond it, and a building that sits on its ground as a mass on a spring and hands the motion on through its foundation to its floors.*
 
 ## 1. How far vibration carries
 
@@ -65704,9 +65450,10 @@ that own frequency is. This page is what ISO 4866 says to do when you cannot
 measure it.
 
 Measure it if you can: that is the main body of the standard and it comes
-first. Annex D is the fallback, for when a direct measurement cannot be made,
-or high damping, subcomponent resonances or other practical problems limit how
-useful it is. It offers four predictors and is candid about every one.
+first. Annex D is the fallback, for when the excitation is too weak to bring
+the building out, the damping too high, or the subcomponents too loud to
+separate the fundamental mode from them. It offers four predictors and is
+candid about every one.
 
 ## 1. Four predictors, and what they are made of
 
@@ -65737,14 +65484,6 @@ spread across the codes it collected them from, and the annex offers no way to
 choose inside it, so `fundamental_period` takes the midpoint unless you name a
 coefficient.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_building_frequency_predictors_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_building_frequency_predictors.svg" alt="Elevation of an eighteen-storey building sixty metres tall and fifteen metres wide, drawn to scale on the ground, with four horizontal force arrows against one facade, the width b dimensioned parallel to them under the building, the height h dimensioned up that same side and clear of the arrows, and the fundamental translation mode drawn as the same outline swayed in the direction of the force; a note gives h over b as 4 and the slenderness factor, the square root of h over h plus b, as 0,89. To the right, four rows show what each predictor reads off that building and what it gives: the storey rule f = 10/n reads n alone and gives 0,56 hertz, a period of 1,8 seconds; Formula D.1, T = k1 h, reads h, with k1 from 0,014 to 0,03, and gives 0,56 to 1,19 hertz; Formula D.2, T = k2 h over the square root of b, reads h and b, with k2 from 0,087 to 0,109, and gives 0,59 to 0,74 hertz; Formula D.3, T = k3 h over the square root of b times the slenderness factor, reads h and b too, with k3 from 0,06 to 0,08, and gives 0,90 to 1,20 hertz, each row with its period beside it. A note says the four span 0,56 to 1,20 hertz on this one building and that D.2 gives no rule for choosing inside a range. Two boxes at the foot carry the fit of Figure D.1, f = 46/h or T = 0,022 h from 163 rectangular-plan buildings, which gives 0,77 hertz here with errors of plus or minus fifty per cent not uncommon, from 0,38 to 1,15 hertz, and the damping of D.4, for which no proven method exists and 0,5 % to 2,1 % of critical can occur, with large differences between orthogonal modes. Two lines under them say the annex is for when a measurement cannot be made or is limited by high damping or subcomponent resonances, and that a computer model correlates with measurement worse than f = 46/h, an unproven one not to be assumed more accurate" width="100%"></picture>
-
-*The building the code below describes twice, and what each predictor takes
-from it. The three code forms give a period and a range for its coefficient,
-so on one building they give a span, not a frequency; the fit to measurement
-gives one value with errors of ± 50 % not uncommon around it, and damping has
-no proven method at all.*
-
 The four predictors take different arguments, so comparing them means
 describing the same building twice: eighteen storeys at a shade over three
 metres each is the sixty metres the other three are given.
@@ -65766,17 +65505,17 @@ for model, kwargs in (
 
 ## 2. The fit to measurement, and the error it admits
 
-D.2 closes by leaving the codes aside and fitting one curve to data: 163
-rectangular-plan buildings give $f = 46/h$ hertz, equivalently $T = 0{,}022\,h$
-seconds. Two things about that line are worth carrying away.
+D.3 leaves the codes aside and fits one curve to data: 163 rectangular-plan
+buildings give $f = 46/h$ hertz, equivalently $T = 0{,}022\,h$ seconds. Two
+things about that line are worth carrying away.
 
 The first is quiet and this library pins it with a test: **0,022 is also the
 middle of the $k_1$ range** the codes span. The oldest and crudest of the code
 forms, taken at the centre of its spread, is the measured fit.
 
 The second is the annex being honest about accuracy. Around that line, errors
-of **± 50 % are not uncommon**, and D.2 says this is typical of what an
-empirical formula can do. D.3 then says something a reader does not expect: the
+of **± 50 % are not uncommon**, and D.3 says this is typical of what an
+empirical formula can do. It then says something a reader does not expect: the
 correlation between *computed* frequencies, from a standard structural model,
 and measured ones is **worse** than the correlation with $46/h$, because a
 model is only as good as its idea of what the building is made of.
@@ -65862,9 +65601,9 @@ D.4: a number to sanity-check a measured decay against, not one to assume.
 
 The four **empirical predictors** of Annex D: the storey rule of D.2, the
 three code forms (D.1), (D.2) and (D.3) with the coefficient ranges D.2 prints
-for each, and the $f = 46/h$ fit D.2 closes with, as frequencies or as periods.
+for each, and the $f = 46/h$ fit of D.3, as frequencies or as periods.
 
-The **error** those predictions carry: the ± 50 % band of D.2, published as a
+The **error** those predictions carry: the ± 50 % band of D.3, published as a
 constant and as bounds around any prediction.
 
 The **damping range** measured in D.4, as a range and not as an estimator,
@@ -65904,8 +65643,8 @@ them is implemented here, and this page is not a substitute for one.
   measurement of vibrations and evaluation of their effects on structures*
   (ISO 4866:2010).
   Annex D: the storey rule and the three code forms of D.2 with their
-  coefficient ranges, the f = 46/h fit D.2 closes with and the ± 50 % accuracy
-  it admits, and the measured damping values of D.4.
+  coefficient ranges, the f = 46/h fit and the ± 50 % accuracy of D.3, and the
+  measured damping values of D.4.
 
 ## Standards
 
@@ -65913,9 +65652,9 @@ ISO 4866:2010, *Mechanical vibration and shock — Vibration of fixed structures
 — Guidelines for the measurement of vibrations and evaluation of their effects
 on structures*: Annex D only. The four empirical predictors of the fundamental
 translation frequency with the coefficient ranges D.2 prints, the measured
-`f = 46/h` fit D.2 closes with and the ± 50 % accuracy it admits, and the
-damping values of D.4, which the annex reports without offering an estimator.
-The measurement the annex is a fallback for, the classifications of Annex B, the
+`f = 46/h` fit of D.3 with the ± 50 % accuracy it admits, and the damping
+values of D.4, which the annex reports without offering an estimator. The
+measurement the annex is a fallback for, the classifications of Annex B, the
 response ranges of Annex A and the soil interaction of Annex E are not
 implemented.
 
@@ -66964,23 +66703,6 @@ to the one at its foundation, which is why the guideline value there does not
 depend on frequency: the response is already at the structure's own
 frequencies.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_structural_damage_points.svg" alt="Section through a three-storey dwelling with no basement and a piling rig beside it: the foundation point in the lowest storey on the outside wall facing the source, the two horizontal directions in the topmost floor plane, the vertical direction on a floor at mid-span, and a buried pipeline more than 2 metres away, with enlarged details of the foundation point under its 0,5 m limit and of the transducers on the pipe" width="100%"></picture>
-
-**How the measurement goes.** Use a vibration meter that meets DIN 45669-1,
-checked and calibrated at a reference frequency and amplitude for the job. At the
-foundation, three transducers go close together in the lowest storey, on the
-outside wall or its foundation, preferably on the side facing the source and,
-without a basement, no higher than 0,5 m above ground level, recording $z$ and
-two horizontal directions at right angles, one parallel to a side wall and
-preferably $x$ pointing at the source. On a hard surface a transducer set down
-loose holds only to 100 Hz vertically and 40 Hz horizontally at 3 m/s² or less.
-In the topmost floor plane, $x$ and $y$ go in or close to the outside wall; where
-relevant, on the floors expected to vibrate most, $z$ goes at about mid-span; on
-a pipeline, the transducers go on the pipe itself, bared only at the measuring
-point. Where possible, extraneous vibration is judged by comparing the readings
-with and without the source acting. Read the peak of each component and its
-frequency, and report what Annex A lists.
-
 ## 2. Short-term vibration, and why the guideline rises with frequency
 
 Short-term vibration is vibration that does not occur often enough to build up
@@ -67145,15 +66867,7 @@ rule itself.
   with the curves of Bild 1, the ceiling rule of 5.2, the buried-pipeline
   values of Table 2, the long-term values of Table 3 and the 50 % reduction of
   6.3, the bending stress of Formula (1) in 6.2 and the storey estimate of
-  6.4. The measuring points, directions and report of 5.4, the pipeline notes
-  of D.1 and the worked dwelling of D.2 are prose, set out in the measurement
-  section.
-- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
-  Teil 2: Messverfahren* (DIN 45669-2:2005-06). Where the transducers of a
-  building measurement go and how they are set down: the foundation positions
-  of 5.1.2, the measuring directions of 5.2, the loose-mounting limits of
-  5.3.2, the measurement time of 6.1, the check before use of 6.3 and the
-  comparison with the source stopped of 7.2.2.
+  6.4.
 
 ## Standards
 

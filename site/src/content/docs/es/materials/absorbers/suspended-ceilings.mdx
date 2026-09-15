@@ -85,7 +85,9 @@ Para ese montaje de tipo E, 4.1.1.2.3.1 fija la profundidad total de construcci�
 en **200 mm**, y dice con todas las letras que esa es la profundidad con la que se
 recopilan los datos del marcado CE. Se puede medir y declarar otra profundidad,
 pero entonces el resultado es la medida de ese montaje y no la del que sostiene
-el marcado.
+el marcado. La comprobación lo da por conforme y su único aviso dice sólo eso:
+que la profundidad no es aquella con la que se recopilan los datos del marcado
+CE, que no es lo mismo que salirse del código de ensayo.
 
 ```python
 import warnings
@@ -99,16 +101,37 @@ print(len(raised))              # 1
 ```
 
 El resto del montaje también lleva números: una subestructura de 30 mm de ancho y
-50 mm de canto como mucho, con un paso de 0,6 m; soportes de 50 mm por 50 mm
-como mucho, separados 1,2 m por lo menos; un marco de montaje de material macizo
-de 20 kg/m² o más; y una muestra que no flecte más de 5 mm en ningún punto. Los
-tres que recibe la comprobación, la sección de la subestructura, la densidad del
-marco y la flecha, sí se juzgan, y salirse de uno lanza un
-`SuspendedCeilingWarning` que dice cuál. El paso de la subestructura y la
-sección y separación de los soportes se publican como `SUBSTRUCTURE_SPACING_M`,
-`SUPPORT_SECTION_MM` y `MIN_SUPPORT_SPACING_M` para construir con ellos:
-describen cómo se colgó la muestra y no una medida hecha sobre ella, así que
-nada en la llamada puede comprobarlos.
+50 mm de canto como mucho, con un paso de unos 0,6 m; soportes debajo de ella de
+50 mm por 50 mm de sección como mucho, con distancias entre ejes de 1,2 m por lo
+menos; un marco de montaje de material macizo de 20 kg/m² o más; y una muestra
+que no flecte más de 5 mm en ningún punto. Se juzga cada uno de esos límites que
+se pueda contrastar con una dimensión del montaje tal como se construyó: la
+sección de la subestructura, la sección y la distancia entre ejes de los
+soportes, la densidad del marco y la flecha. Salirse de uno pone `satisfied` a
+falso y lanza un `SuspendedCeilingWarning` que dice cuál.
+
+```python
+with warnings.catch_warnings(record=True) as raised:
+    warnings.simplefilter("always")
+    hung = materials.check_ceiling_specimen(
+        area_m2=10.8, mounting="E", depth_mm=200.0,
+        substructure_width_mm=24.0, substructure_height_mm=38.0,
+        support_width_mm=60.0, support_height_mm=40.0,
+        support_centre_distance_m=1.0,
+    )
+print(hung.substructure_ok)     # True
+print(hung.supports_ok)         # False
+print(hung.satisfied)           # False
+```
+
+La subestructura y los soportes son algo que el apartado permite y no exige, así
+que sus dimensiones valen por defecto cero, es decir, ninguno, y la distancia
+entre ejes sólo se juzga cuando se da. Tres cifras impresas no se juzgan, porque
+el apartado no las convierte en límites: el objeto de ensayo de 0,6 m, que
+«debería» tener ese tamaño y si no el más próximo de la gama del producto; el
+ángulo de 10° con el borde de la sala, al que «se debería tender»; y el paso de
+la subestructura de «aprox. 0,6 m». Se publican como `TEST_OBJECT_SIZE_M`,
+`MIN_ROOM_EDGE_ANGLE_DEG` y `SUBSTRUCTURE_SPACING_M` para construir con ellos.
 
 ### Cómo se hace la medida
 
@@ -117,11 +140,12 @@ nada en la llamada puede comprobarlos.
 Monta la muestra hasta 10,80 m² con objetos de ensayo enteros, unidos a tope, con
 las juntas sin sellar y el perímetro cubierto por el marco de montaje. Colócala a
 200 mm de profundidad total si el resultado va a sostener el marcado CE, sobre una
-subestructura dentro de la sección de 30 mm por 50 mm, y comprueba la flecha en el
+subestructura dentro de la sección de 30 mm por 50 mm, apoyada en soportes dentro
+de 50 mm por 50 mm y separados 1,2 m por lo menos, y comprueba la flecha en el
 punto peor. Pon los bordes de la muestra en ángulo con las paredes de la sala.
 Mide primero la sala vacía y después la sala con la muestra, como prescribe la
 EN ISO 354, manteniendo estables la temperatura y la humedad entre las dos
-medidas: la corrección de abajo es la diferencia entre ellas, y es una diferencia
+medidas y la humedad en el 50 % o más en cada una: la corrección de abajo es la diferencia entre ellas, y es una diferencia
 de días y no de techos.
 
 ## 3. El aire de la sala es parte de la respuesta
@@ -140,7 +164,22 @@ $$
 
 y las condiciones de ensayo «se elegirán de forma» que no supere 0,05 en ninguna
 frecuencia. El 4.2.2 añade la mitad práctica: 50 % de humedad relativa en la sala
-como mínimo.
+como mínimo, que el 4.2.3 pide comprobar en cada medida. La comprobación de la
+muestra recibe una humedad por medida y juzga la más seca:
+
+```python
+with warnings.catch_warnings(record=True) as raised:
+    warnings.simplefilter("always")
+    dry = materials.check_ceiling_specimen(
+        area_m2=10.8, mounting="E", depth_mm=200.0,
+        relative_humidity_percent=[41.0, 44.0],   # sala vacía, después con la muestra
+    )
+print(dry.humidity_ok)          # False
+print(dry.satisfied)            # False
+```
+
+Si no se da la humedad, `humidity_ok` es `None`: el veredicto cubre entonces la
+muestra y no dice nada de la sala.
 
 ```python
 correction = materials.air_absorption_correction(
@@ -184,8 +223,9 @@ montaje. Un bafle, una isla o una unidad colgada quedan fuera.
 
 - **EN 16487:2014**: la geometría de muestra de 4.1.1.1, los cuatro montajes de
   4.1.1.2 con la profundidad de tipo E de 4.1.1.2.3.1, los límites de
-  subestructura y flecha de 4.1.1.2.3.4 y 4.1.1.2.3.5, la corrección por absorción
-  del aire y su tope de 4.2.1, la humedad de 4.2.2, y la tabla 1 con su factor de
+  subestructura, flecha y soportes de 4.1.1.2.3.4 a 4.1.1.2.3.6, el marco de
+  montaje de 4.1.1.1.6, la corrección por absorción del aire y su tope de 4.2.1,
+  la humedad de 4.2.2 juzgada en cada medida, y la tabla 1 con su factor de
   cobertura.
 
 </ScopeClaim>

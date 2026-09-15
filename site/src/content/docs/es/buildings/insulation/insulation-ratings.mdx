@@ -61,6 +61,18 @@ espectral $C$ y $C_\mathrm{tr}$. Para el espectro medido que se usa abajo,
 `w.rating, w.c, w.ctr` imprime `30 -2 -3`: $R_\mathrm{w}\ (C\ ;\ C_\mathrm{tr}) = 30\ (-2\ ;\ -3)$. La
 misma llamada valora $R'$, $D_\mathrm{n}$ y $D_\mathrm{nT}$.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_iso717_rating_chain.svg" alt="Cadena de cálculo de los índices globales de ISO 717. Arriba, una tira de bandas de tercio de octava de 50 Hz a 5000 Hz: las 16 bandas de 100 Hz a 3150 Hz en trazo continuo con la de 500 Hz destacada, las cinco bandas de octava de 125 Hz a 2000 Hz marcadas con corchetes debajo, y las bandas de 50, 63, 80, 4000 y 5000 Hz a trazos, como rango ampliado que solo leen los términos de adaptación, las de 4000 y 5000 Hz solo en ISO 717-1. Un recuadro enuncia la regla que comparten las dos partes: desplazar la curva de la Tabla 3 hacia la curva medida en pasos de 1 dB hasta que la suma de desviaciones desfavorables sea lo mayor posible pero no más de 32,0 dB en 16 bandas o 10,0 dB en 5, en pasos de 0,1 dB para expresar la incertidumbre, y leer la curva desplazada a 500 Hz. Debajo, dos gráficas pequeñas lado a lado. A la izquierda, ISO 717-1 para ruido aéreo: la curva de referencia bajada 22 dB sobre un índice de reducción acústica medido, con barras donde la medida queda por debajo que suman 31,8 dB, y de ahí Rw = 52 − 22 = 30 dB; C = 28 − 30 = −2 dB con el espectro n.º 1, ruido rosa, y Ctr = 27 − 30 = −3 dB con el espectro n.º 2, tráfico urbano, ambos sobre las 16 bandas, expresado como Rw(C;Ctr) = 30 (−2; −3) dB. A la derecha, ISO 717-2 para ruido de impactos: la curva de referencia subida 19 dB sobre un nivel de impactos normalizado medido, con barras donde la medida queda por encima que suman 28,0 dB, y de ahí Ln,w = 60 + 19 = 79 dB, con 5 dB menos cuando las bandas son de octava, y CI a partir de la suma energética sin ponderar de las 15 primeras bandas, sin la de 3150 Hz. Cada lado lista sus términos de rango ampliado, y un recuadro al pie lleva Cj = XAj − Xw y CI = Ln,sum − 15 − Ln,w" width="100%" />
+
+*Una regla, dos motores. Las dos partes desplazan igual su propia curva de la
+Tabla 3, y el desplazamiento solo cambia entre ellas en el lado de la curva en
+que cuenta una desviación: por debajo en el aislamiento a ruido aéreo, donde la
+curva se detiene 22 dB más abajo con 31,8 dB de desviaciones y lee 30 dB a
+500 Hz, y por encima en el ruido de impactos, donde se detiene 19 dB más arriba
+con 28,0 dB y lee 79 dB. Cuando las bandas son de octava, ISO 717-2 resta otros
+5 dB a esa lectura y ISO 717-1 no. Los términos de adaptación vuelven después a
+las bandas medidas: las 16 para $C$ y $C_\mathrm{tr}$, y solo las 15 primeras
+para $C_\mathrm{I}$.*
+
 ## Índices de ruido aéreo (ISO 717-1)
 
 El espectro por bandas se reduce a un número mediante el **método de la curva
@@ -75,14 +87,14 @@ que el método permite en realidad es **una desviación desfavorable media de
 referencia desplazada leída a 500 Hz.
 
 La curva de referencia en sí (ISO 717-1:2020, Tabla 3) tampoco es arbitraria.
-Sube 9 dB por octava de 100 Hz a 500 Hz, después solo 4 dB en la octava
-siguiente, y es plana a partir de 1250 Hz. Un motor de valoración que lleve esa
-forma es deliberadamente indulgente en baja frecuencia e implacable por encima
-de 1 kHz, que es la razón por la que una construcción con un valle en baja
-frecuencia puede valorarse bien, y la razón por la que existe $C_\mathrm{tr}$: para
-devolverle la penalización. El objeto de resultado entrega la curva en su
-posición desplazada, así que la curva sin desplazar está a una resta de
-distancia:
+Sube 3 dB por tercio de octava (9 dB por octava) de 100 Hz a 400 Hz, después
+1 dB por tercio de octava hasta 1250 Hz, y es plana a partir de 1250 Hz. Un
+motor de valoración que lleve esa forma es deliberadamente indulgente en baja
+frecuencia e implacable por encima de 1 kHz, que es la razón por la que una
+construcción con un valle en baja frecuencia puede valorarse bien, y la razón
+por la que existe $C_\mathrm{tr}$: para devolverle la penalización. El objeto de
+resultado entrega la curva en su posición desplazada, así que la curva sin
+desplazar está a una resta de distancia:
 
 ```python
 import numpy as np
@@ -214,7 +226,7 @@ resueltos de esta página.
   width={2400}
   height={1350}
   title="Desplazar la curva de referencia ISO 717 hasta que encaja justo"
-  description="La curva de referencia avanza en pasos de 1 dB hacia el espectro medido mientras las desviaciones desfavorables se sombrean banda a banda y su suma se acerca al tope de 32,0 dB. El motor aéreo se detiene en 31,8 dB para Rw = 30 dB, un paso antes de la posición que desaprovecharía el margen; el motor de impactos ejecuta después la misma regla con el signo de la desviación invertido, con la curva subiendo paso a paso y deteniéndose en 28,0 dB para L'nT,w = 79 dB."
+  description="La curva de referencia avanza en pasos de 1 dB hacia el espectro medido mientras las desviaciones desfavorables se sombrean banda a banda y su suma se acerca al tope de 32,0 dB. El motor aéreo se detiene en 31,8 dB para Rw = 30 dB, un paso antes de la posición que desaprovecharía el margen; el motor de impactos ejecuta después la misma regla con el signo de la desviación invertido, con la curva subiendo paso a paso y deteniéndose en 28,0 dB para Ln,w = 79 dB."
 />
 
 *Los dos recorridos se detienen donde manda la norma: en la mayor suma
@@ -304,7 +316,7 @@ ejemplo de más abajo dice que el espectro medido es mucho más plano y está
 mucho más cargado hacia la alta frecuencia que la curva de referencia, es
 decir, una losa desnuda y no un forjado con revestimiento, así que el forjado
 es mejor en las bajas frecuencias que excitan las pisadas de lo que sugiere por
-sí solo $L'_\mathrm{nT,w} = 79$ dB. El corolario es una trampa de diseño: un
+sí solo $L_\mathrm{n,w} = 79$ dB. El corolario es una trampa de diseño: un
 revestimiento blando actúa donde la curva de referencia es más exigente, así
 que mejora el número único más de lo que mejora lo que oye el vecino. La suma
 sin ponderar sobre la que se construye $C_\mathrm{I}$ existe precisamente porque se
@@ -330,21 +342,22 @@ forjado valorado así es peor cuanto más alto es su número.*
 import numpy as np
 from phonometry import building
 
-# 16 niveles de impactos en tercios de octava (100 Hz - 3150 Hz), dB, del
-# ejemplo resuelto del Anexo C de ISO 717-2; medidos con T = T0, así que ya
-# son los valores estandarizados L'nT.
-l_nt = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-                 73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+# Ejemplo resuelto del Anexo C de ISO 717-2: el forjado pesado desnudo de la
+# Tabla C.1, Ln de laboratorio en tercios de octava. CI se lee sobre la suma
+# de 100-2500 Hz que pide A.2.1, no sobre las dieciséis bandas que suma la
+# edición de 2020 de esa celda.
+l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 
 # Índice de impactos ponderado + término de adaptación espectral CI (ISO 717-2)
-res_imp = building.weighted_impact_rating(l_nt)
-print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  L'nT,w(CI)=79(-11)
+res_imp = building.weighted_impact_rating(l_n)
+print(res_imp.rating, res_imp.ci, res_imp.unfavourable_sum)   # 79 -11 28.0  ->  Ln,w(CI)=79(-11)
 
 # Los datos en banda de octava llevan la reducción extra de -5 dB (apartado 4.3.2)
 octave = np.array([65.3, 64.5, 58.0, 55.8, 43.0])
 print(building.weighted_impact_rating(octave).rating)  # 54
 
-res_imp.plot()   # L'nT medido frente a la referencia ISO 717-2 desplazada, exceso sombreado (requiere matplotlib)
+res_imp.plot()   # Ln medido frente a la referencia ISO 717-2 desplazada, exceso sombreado (requiere matplotlib)
 ```
 
 <details>
@@ -355,38 +368,42 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import building
 
-# 16 niveles de impactos estandarizados L'nT en tercios de octava, dB
-# (ejemplo resuelto del Anexo C de ISO 717-2, medidos con T = T0).
-l_nt = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
-               73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
+# 16 niveles de impactos Ln en tercios de octava, dB (ejemplo resuelto del
+# Anexo C de ISO 717-2, el forjado pesado desnudo de la Tabla C.1; el CI del
+# título se lee sobre la suma de 100-2500 Hz que pide A.2.1).
+l_n = np.array([62.1, 63.2, 63.5, 66.2, 68.5, 70.0, 71.7, 73.1,
+                73.8, 73.5, 73.8, 73.3, 73.1, 73.0, 72.4, 71.2])
 # Índice de impactos ponderado + término de adaptación espectral CI (ISO 717-2)
-res_imp = building.weighted_impact_rating(l_nt)
+res_imp = building.weighted_impact_rating(l_n)
 
-# En una línea — L'nT medido frente a la referencia ISO 717-2 desplazada (exceso sombreado):
+# En una línea — Ln medido frente a la referencia ISO 717-2 desplazada (exceso sombreado):
 res_imp.plot(language="es")
 plt.show()
 
 # A mano, con la curva por banda que ahora lleva el resultado (signo opuesto: la
 # desviación desfavorable está donde el nivel MEDIDO supera la referencia).
-# Aquí la entrada fue l_n_t, así que la magnitud valorada es el nivel de campo L'nT,w:
+# Aquí la entrada fue Ln, así que la magnitud valorada es Ln,w:
 fig, ax = plt.subplots()
-ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="L'nT medido")
+ax.semilogx(res_imp.band_centers, res_imp.measured, "o-", label="Ln medido")
 ax.semilogx(res_imp.band_centers, res_imp.shifted_reference, "s--", label="Referencia desplazada")
 ax.fill_between(res_imp.band_centers, res_imp.shifted_reference, res_imp.measured,
                 where=res_imp.measured > res_imp.shifted_reference, interpolate=True,
                 alpha=0.3, label="Desviaciones desfavorables")
 ax.set_xlabel("Frecuencia [Hz]")
 ax.set_ylabel("Nivel de presión acústica de impactos [dB]")
-ax.set_title(f"L'nT,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
+ax.set_title(f"Ln,w = {res_imp.rating} dB  (CI={res_imp.ci:+d})")
 ax.legend()
 plt.show()
 ```
 
 </details>
 
-Pasar el espectro estandarizado a `weighted_impact_rating` reproduce los
-valores del Anexo C de ISO 717-2 (tercios $L'_\mathrm{nT,w} = 79$, $C_\mathrm{I} = -11$;
-octavas 54, $C_\mathrm{I} = 0$).
+Pasar este espectro a `weighted_impact_rating` reproduce el índice del Anexo C
+de ISO 717-2 (tercios $L_\mathrm{n,w} = 79$; octavas 54, $C_\mathrm{I} = 0$) y,
+leyendo $C_\mathrm{I}$ sobre la suma de 100–2500 Hz que fija A.2.1,
+$C_\mathrm{I} = -11$ en tercios. La edición de 2020 de la Tabla C.1 suma en esa
+celda las dieciséis bandas y da $-10$; la entrada del registro está en
+[Erratas](/phonometry/es/reference/errata/).
 
 ### Parámetros de `weighted_impact_rating()`
 

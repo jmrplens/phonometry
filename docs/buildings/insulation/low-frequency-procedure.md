@@ -232,6 +232,19 @@ bands may come from three different corners, "each band can require an
 individual correction to the signal level for background noise" (the NOTE
 under Part 1 Clause 9.1, printed word for word in Part 2 Clause 9.1).
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_low_frequency_corners_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_low_frequency_corners.svg" alt="Plan, section and one corner close up of a 23 m³ receiving room: the central zone with five default positions, four corner microphones, two at floor and two at ceiling level, 0.3 m to 0.4 m from each surface, and the 63 Hz band carried from the corner readings through Formulae (12) and (13)" width="100%"></picture>
+
+**How the measurement goes.** Take the volume to the nearest cubic metre;
+under 25 m³ the corners are measured on top of the central zone, not instead
+of it. Put the microphone in at least four corners, preferably two at floor
+level and two at ceiling level, 0.3 m to 0.4 m from each surface, for at least
+15 s each, and repeat the set at each position of a single loudspeaker or of
+the tapping machine. Measure the background in every corner used, subtract it
+where it is between 6 dB and 10 dB down, and where it is 6 dB or less apply
+the 1.3 dB correction and report the band as a limit of measurement. Measure
+one reverberation time in the 63 Hz octave band for all three bands, and say
+in the report where the procedure was used.
+
 ## Combining the two (Formula (13))
 
 The reported low-frequency level weighs the corner level one third against two

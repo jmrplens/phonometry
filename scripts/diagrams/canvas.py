@@ -120,8 +120,13 @@ DARK = Theme(
 #: w), the source and receiver geometry (s, r, m, h), the impact and
 #: coupling terms (C, D, E, F, G, K, L, P, R, T), the character penalties
 #: of RD 1367/2007 (f, t), the gate and ground times (g), the situation of
-#: ISO 12999-1 (situ), the airborne descriptors (AF, Cpeak, sa) and the
-#: upper guide value of DIN 4150-2:1999-06, 6.2 (o for "oberer", the
+#: ISO 12999-1 (situ), the energy sum of the impact levels that
+#: ISO 717-2:2020, Formula (A.3), prints upright in $L_{n,sum}$ (sum), the
+#: corner and low-frequency levels of ISO 16283
+#: (Corner, LF, a word and an abbreviation all three parts print upright,
+#: which also sets the early lateral energy fraction $J_{LF}$ of ISO 3382-1
+#: upright, as its guide writes it), the airborne descriptors (AF, Cpeak,
+#: sa) and the upper guide value of DIN 4150-2:1999-06, 6.2 (o for "oberer", the
 #: adjective the clause spells out beside the letter, as it does the
 #: "unterer" of the u already here).
 #:
@@ -219,6 +224,9 @@ _ROMAN_SCRIPTS = frozenset(
         "Cpeak",
         "sa",
         "situ",
+        "sum",
+        "Corner",
+        "LF",
         "Fmax",
         "FTm",
         "MG",
@@ -274,13 +282,28 @@ _ROMAN_SCRIPTS = frozenset(
 #: $K_{pA}$ that way, ISO/TS 7849-1:2009 prints $L_{vA}$ that way, and the guides
 #: that explain them write ``L_{W\mathrm{A}}`` throughout, so a whole-run slope
 #: would leave the plates the only place in the corpus setting the A italic.
+#:
+#: The intensity levels of ISO 15186 follow the same rule: the normal
+#: intensity level ``L_In`` of all three parts and the surface pressure level
+#: ``L_pS`` of Part 3. I and p are the quantities and stay italic, while n
+#: abbreviates "normal" and S "surface", and the three parts print both
+#: upright. The guide already writes ``L_{I\mathrm{n}}`` and ``L_{p\mathrm{S}}``,
+#: so the plate follows it. A bare ``I_n`` cannot be keyed here: its run is the
+#: single letter n, the index the note on :data:`_ROMAN_SCRIPTS` keeps italic.
+#:
+#: The spectrum adaptation term of ISO 717-1:2020, Formulae (1) and (2), splits
+#: the other way round: in ``X_Aj`` the A is the A-weighting and printed
+#: upright, while the j counts the source spectra and stays italic.
 _MIXED_SCRIPTS: dict[str, str] = {
+    "Aj": "uv",
     "FE": "vu",
     "FTi": "uuv",
     "FTr": "uuv",
+    "In": "vu",
     "WA": "vu",
     "WAd": "vuu",
     "pA": "vu",
+    "pS": "vu",
     "vA": "vu",
 }
 

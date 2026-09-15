@@ -754,6 +754,18 @@ three constants have to be refitted.
 
 ## 5. Conformance
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test.svg" alt="Block diagram of the ITU-R BS.468-4 measuring set above a table of the checks clause 2 puts it through. A generator feeds the input terminals, marked with an input impedance of at least 20 kilohms and a 600 ohm termination within 1 percent where one is fitted. Inside a dashed outline the signal runs through the weighting network and its amplifier, 0 decibels at 1 kilohertz and plus 12.2 decibels at 6.3 kilohertz, then an attenuator whose ranges the tests of 2.1 to 2.3 hold, reset and step, then the quasi-peak detector, defined by its readings rather than by a time constant, then a reading device with a needle, scaled in dBqps with 0.775 volts reading 0 decibels. A dashed red path around the network is the unweighted mode, used by the reversibility test alone. Below, one row for the calibration and one for each method of measurement, each with a sketch of its stimulus: a steady 1 kilohertz sine at 0.775 volts that must read 0 decibels; single 5 kilohertz bursts of whole periods, 1 to 200 milliseconds, a 5 millisecond burst reading 34 to 46 percent of the steady tone; trains of 5 millisecond bursts at 2, 10 and 100 per second with their Table 3 windows; isolated 0.6 millisecond bursts stepped down 20 decibels, the readings following the steps within 1 decibel overall; 1 millisecond rectangular pulses and the same pulses reversed, whose readings may differ by 0.5 decibels at most, the only row in the unweighted mode; and a 1 kilohertz tone switched on suddenly, whose momentary excess reading must stay under 0.3 decibels. A box at the foot gives the table readings as 20 lg of the reading over the steady reading, with Table 2's 40 percent printed as minus 8.0 decibels, and the level in dBqps as 20 lg of the reading over 0.775 volts" width="100%"></picture>
+
+**How the measurement goes.** Calibrate to 2.6 first: a steady 1 kHz sine at
+0.775 V r.m.s. must read 0.775 V, 0 dB. Every test but 2.4 runs through the
+weighting network. Single 5 kHz bursts of whole periods for Table 2 and trains
+of 5 ms bursts at 2, 10 and 100 per second for Table 3 go in at the level where
+a steady 5 kHz tone would read 80 % of full scale; isolated 0.6 ms bursts
+stepped down 20 dB from full scale have to follow within ±1 dB overall on every
+range; and the 1 kHz tone switched on suddenly must overshoot by less than
+0.3 dB. Only 2.4 is unweighted: reversing the polarity of 1 ms d.c. pulses that
+read 80 % of full scale may change the reading by 0.5 dB at most.
+
 `verify_quasi_peak_dynamics` builds the clause 2.1 and 2.2 stimuli exactly as
 specified: a 5 kHz sine starting at a zero crossing and lasting an integral
 number of full periods, through the weighting network, and reads each against

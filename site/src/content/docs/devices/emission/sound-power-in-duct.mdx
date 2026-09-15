@@ -55,6 +55,8 @@ in the bands at and below 160 Hz and 10 s above (clause 7.2.2), and must
 stand at least 6 dB above the background and above the turbulence noise the
 shield lets through (clause 7.2.1, Annex B).
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_in_duct_rig.svg" alt="Side section of a fan on the ISO 5136 rig, measured in both its ducts at once. Air enters at the left through a bell mouth and an anechoic termination into the inlet test duct, marked U less than 0, and passes a transition and an intermediate duct to the fan. From there it runs through an intermediate duct with a straight run on each side of a star flow straightener two diameters long, then a transition into the outlet test duct, marked U greater than 0, which ends in a second anechoic termination with the throttle at its far end. In each test duct a microphone in a sampling tube hangs from the wall and points back at the fan. Dimensions under each test duct, from its fan-side end: at least four diameters and 2 m to the measurement plane, at least six diameters and 4 m for the whole duct. Below, three panels: the measurement plane seen along the duct, with three microphone positions 120 degrees apart at radius r, 2r/d being 0.65 from 0.5 m, 0.8 below it and 0.5 for a nose cone or foam ball, so a 0.63 m duct puts r at 0.20 m; the sampling tube, with its nose cone, porous slit and microphone, at most 22 mm across; and the three ways to the mean around the duct with their averaging times. A box at the foot carries Equations 9 to 12, the energy mean of three or more readings, the same level from a multiplexed or traversed reading, and the step to sound power, and three lines under it the instruments, the 6 dB margins, the reflection coefficient of the termination and the reading with and without the straightener" width="100%" />
+
 Clause 8 turns the readings into a level and the level into a power. The
 positions are energy-averaged and the combined correction $C$ added
 (Eqs 9 and 10), a multiplexed or traversed level takes the correction
@@ -156,6 +158,28 @@ plt.show()
 ```
 
 </details>
+
+### How the measurement goes
+
+Build the airway first. Each test duct is straight, circular and coaxial with
+the fan, at least six diameters and 4 m long, with the measurement plane at
+least four diameters and 2 m from its fan-side end, ending in an anechoic
+termination within Table 5. The throttle goes beyond it, at least 10 dB quieter
+than the fan. Set the operating point by ISO 5801 and check the type 1 chain
+with a class 1 calibrator on the bare microphone before and after each series.
+Mount the sampling tube vibration-isolated from the duct wall, at the radius of
+Table 7, aligned with the axis to ±5° and pointing at the fan, with its
+microphone end rounded on the inlet side, and take the mean round the duct:
+three or more equally spaced positions for at least 30 s up to 160 Hz and 10 s
+from 200 Hz, multiplexing for 30 s a band, or one revolution of 30 s or more.
+Every band has to stand at least 6 dB above the background with the fan
+stopped, and above the turbulence of Annex B; where it does not, report it as
+measured, uncorrected, with the note of clause 7.2.1. On the outlet side,
+measure with and without the star straightener at the same operating point and
+keep the lower level in each band. The report states compliance, gives the
+levels in decibels re 1 pW, names the fan, its operating conditions, the
+instruments, the shield and any agreed options, and should quote $2\sigma_R$ as
+the uncertainty.
 
 ## 2. A ducted fan on its outlet duct
 

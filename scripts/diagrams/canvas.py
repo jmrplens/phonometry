@@ -89,7 +89,9 @@ DARK = Theme(
 #: them -- weightings, averages and exposure (Aeq, eq, EQ, EX), extremes
 #: and bounds (max, MAX, min, upper, lower, low, high, limit), qualifiers
 #: (ref, rms, tot, TOT, eff, mod, norm, spec, inst, cal, tab, cum, ss,
-#: shadow, co, tr, diff, ff, ax, SN, CS, MS), the indicated value and the
+#: shadow, co, tr, diff, ff, ax, SN, CS, MS), the reference sound source
+#: and the source under test of the ISO 3740 series (RSS, ST, printed
+#: upright in ISO 3747:2010, Equation (11)), the indicated value and the
 #: input of ISO 8041-1, Formulae (9) and (12) (ind, in, both printed
 #: upright there beside an italic f and w), the hand-arm/whole-body
 #: vibration axes of ISO 5349 and ISO 2631 (hv, hwx, hwy, hwz, wx, wy, wz),
@@ -190,6 +192,8 @@ _ROMAN_SCRIPTS = frozenset(
         "SN",
         "CS",
         "MS",
+        "RSS",
+        "ST",
         "hv",
         "hwx",
         "hwy",
@@ -261,10 +265,23 @@ _ROMAN_SCRIPTS = frozenset(
 #: vibration severity of DIN 4150-2:1999-06, 6.4.1, splits the same way: F and
 #: T describe as they do in FTi, while the r of "Beurteilung" is never expanded
 #: into a word and keeps the italic the two path lengths above hold it to.
+#:
+#: The emission levels split the same way, and are the largest family here: the
+#: first letter is the quantity the level is of, italic (``W`` sound power,
+#: ``p`` sound pressure, ``v`` vibratory velocity), and the rest of the run
+#: describes it and is upright (``A`` the frequency weighting, ``d`` for
+#: "declared"). ISO 4871:1996 prints $L_{WA}$, $L_{WAd}$, $K_{WA}$, $L_{pA}$ and
+#: $K_{pA}$ that way, ISO/TS 7849-1:2009 prints $L_{vA}$ that way, and the guides
+#: that explain them write ``L_{W\mathrm{A}}`` throughout, so a whole-run slope
+#: would leave the plates the only place in the corpus setting the A italic.
 _MIXED_SCRIPTS: dict[str, str] = {
     "FE": "vu",
     "FTi": "uuv",
     "FTr": "uuv",
+    "WA": "vu",
+    "WAd": "vuu",
+    "pA": "vu",
+    "vA": "vu",
 }
 
 #: Script metrics of the ``$...$`` composer, as fractions of the font size:

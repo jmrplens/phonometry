@@ -240,6 +240,12 @@ three constants have to be refitted.
 
 ## 5. Conformance
 
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test.svg"
+  alt="Block diagram of the ITU-R BS.468-4 measuring set above a table of the checks clause 2 puts it through. A generator feeds the input terminals, marked with an input impedance of at least 20 kilohms and a 600 ohm termination within 1 percent where one is fitted. Inside a dashed outline the signal runs through the weighting network and its amplifier, 0 decibels at 1 kilohertz and plus 12.2 decibels at 6.3 kilohertz, then an attenuator whose ranges the tests of 2.1 to 2.3 hold, reset and step, then the quasi-peak detector, defined by its readings rather than by a time constant, then a reading device with a needle, scaled in dBqps with 0.775 volts reading 0 decibels. A dashed red path around the network is the unweighted mode, used by the reversibility test alone. Below, one row for the calibration and one for each method of measurement, each with a sketch of its stimulus: a steady 1 kilohertz sine at 0.775 volts that must read 0 decibels; single 5 kilohertz bursts of whole periods, 1 to 200 milliseconds, a 5 millisecond burst reading 34 to 46 percent of the steady tone; trains of 5 millisecond bursts at 2, 10 and 100 per second with their Table 3 windows; isolated 0.6 millisecond bursts stepped down 20 decibels, the readings following the steps within 1 decibel overall; 1 millisecond rectangular pulses and the same pulses reversed, whose readings may differ by 0.5 decibels at most, the only row in the unweighted mode; and a 1 kilohertz tone switched on suddenly, whose momentary excess reading must stay under 0.3 decibels. A box at the foot gives the table readings as 20 lg of the reading over the steady reading, with Table 2's 40 percent printed as minus 8.0 decibels, and the level in dBqps as 20 lg of the reading over 0.775 volts"
+  width="100%"
+/>
+
 `verify_quasi_peak_dynamics` builds the clause 2.1 and 2.2 stimuli exactly as
 specified: a 5 kHz sine starting at a zero crossing and lasting an integral
 number of full periods, through the weighting network, and reads each against
@@ -281,6 +287,25 @@ impedance of at least 20 kΩ and a 600 Ω termination are instrument hardware.
 So is "80 % of full scale", which constrains where a real needle sits during
 the test rather than the quantity, which is why this library models no full
 scale at all.
+
+### How the measurement goes
+
+Calibrate first, to 2.6: a steady 1 kHz sine of 0.775 V r.m.s., with under 1 %
+total harmonic distortion, must read 0.775 V, 0 dB. The input impedance should
+be at least 20 kΩ, and 600 Ω ±1 % where a termination is provided. Every test
+but 2.4 runs through the weighting network. For 2.1, set the level at which a
+steady 5 kHz tone would read 80 % of full scale and apply single bursts of whole
+periods from a zero crossing, one for each duration of Table 2, read once with
+the attenuators untouched and once reset for each duration to hold the reading
+near 80 %. For 2.2, apply 5 ms bursts at 2, 10 and 100 per second at that level,
+attenuators untouched, and check Table 3 on every range. For 2.3, bring isolated
+0.6 ms bursts to full scale on the most sensitive range and step them down 20 dB
+in all: the readings have to follow within ±1 dB overall, range by range. For
+2.4, switch to the unweighted mode, apply 1 ms rectangular d.c. pulses, 100 per
+second or fewer, reading 80 % of full scale, and reverse their polarity: the
+readings may differ by 0.5 dB at most. For 2.5, switch the 1 kHz tone on suddenly
+at 0 dB: the momentary excess reading must stay under 0.3 dB. Noise read on an
+instrument that passes is expressed in dBqps.
 
 ## 6. What no oracle can check
 

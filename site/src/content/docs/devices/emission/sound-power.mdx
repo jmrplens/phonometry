@@ -322,6 +322,12 @@ is verified. The preferred quantity is the A-weighted sound power level
 $L_{W\mathrm{A}}$, optionally accompanied by the A-weighted emission sound pressure level
 $L_{p\mathrm{A}}$ at a work station.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_noise_declaration_chain.svg" alt="A calculation chain in three tiers. At the top, two boxes: the measured A-weighted sound power level L_WA, from a basic standard, preferably of grade 2 or better, on one machine and not rounded, eighty-eight decibels in operating mode 1 and ninety-five in operating mode 2; and its uncertainty K_WA, from the reproducibility in the noise test code or, without a code, two point five decibels at grade 2 and four at grade 3, two decibels in both modes. Joined lines carry both into the two forms the noise test code chooses between: the dual-number form, with L_WA and K_WA each rounded to the nearest decibel and always stated together, and the single-number form, L_WAd, the unrounded sum rounded once, ninety and ninety-seven decibels. Below a dashed line, a box for the verification value L_1, measured to the same noise test code or, where there is none, a basic standard of the same or better grade, under the same operating conditions, with a lower grade only by agreement. The declared value runs down the right-hand side into both verdicts, and two arrows from L_1 lead to them: declaration verified for mode 1, where L_1 is eighty-nine decibels against ninety, and declaration not verified for mode 2, where it is ninety-eight against ninety-seven. A box at the foot carries K_WA equal to one point six four five times sigma R for one machine, L_WAd equal to L_WA plus K_WA, and L_1 no greater than L_WAd, or than L_WA plus K_WA, whichever form was declared; a note underneath says that L_pA at the work station is declared the same way, with a K_pA from ISO 11201 to ISO 11204" width="100%" />
+
+*What a declaration adds to a measured sound power: an uncertainty, one of two
+forms chosen by the noise test code, and a declared value that a new measurement
+on one machine either verifies or does not.*
+
 A declaration takes one of two alternative forms (clause 4):
 
 - the **dual-number** form (clause 3.16): the measured value $L_{W\mathrm{A}}$ and its
@@ -394,7 +400,7 @@ What makes such a measurement admissible is clause 6.1, and it is the part most
 often skipped: the verification shall follow the **same noise test code** as the
 declaration or, where none exists, a basic determination standard of accuracy
 grade at least equal to the one behind the declared value, under **identical
-operating and mounting conditions**. A lower grade may be used only by agreement
+operating conditions**. A lower grade may be used only by agreement
 between manufacturer and user, and the difference in accuracy accounted for.
 Without that, the comparison is measuring the procedure and not the machine.
 

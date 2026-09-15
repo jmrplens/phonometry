@@ -65,7 +65,7 @@ In the order the chain runs.
   HTLAN.
 - **Protection**: [Hearing Protectors (ISO 4869-2)](hearing-protectors.md):
   the octave-band, HML and SNR methods that say what a protector actually
-  leaves at the ear, and the assumed protection value all three start from.
+  leaves at the ear, and the one protection performance all three are set to.
 
 ## What this section does not cover
 

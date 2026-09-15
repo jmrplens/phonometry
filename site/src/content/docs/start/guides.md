@@ -327,7 +327,7 @@ ISO 9612.
   uncertainty budget and the upper limit.
 - [Hearing Protectors (ISO 4869-2)](/phonometry/perception/hearing/hearing-protectors/):
   the octave-band, HML and SNR methods that say what a protector leaves at the
-  ear, and the assumed protection value all three start from.
+  ear, and the one protection performance all three are set to.
 
 ## [Rooms and buildings](/phonometry/buildings/)
 

@@ -129,6 +129,7 @@ from .materials import (
 from .perception import (
     _d_dosimeter,
     _d_emission_positions,
+    _d_hearing_protector_chain,
     _d_hearing_threshold,
     _d_loudness_capture,
     _d_mg_capture_routes,
@@ -493,6 +494,11 @@ DIAGRAMS = {
         _d_nihl,
         "Noise-induced hearing loss (ISO 1999): NIPTS and HTLAN",
         470,
+    ),
+    "diagram_hearing_protector_chain": (
+        _d_hearing_protector_chain,
+        "From sixteen subjects to the effective A-weighted level (ISO 4869-2)",
+        910,
     ),
     "diagram_ntacou112": (
         _d_impulse_prominence,

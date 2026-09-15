@@ -208,6 +208,18 @@ jobs:
       - name: Validate HTML
         run: pnpm run html-validate
         working-directory: site
+      - name: Check a standard designation still finds the guides written to it
+        # A search for "ISO 3744" has to return the guides written to ISO 3744
+        # first, and none of the machinery that makes it do so is visible on a
+        # page: the designations are indexed in a metadata field that one
+        # stylesheet rule keeps out of the search panel, the weight is one
+        # number in the config, and the query normalizer is attached by an
+        # alias that would simply stop applying if the search component changed
+        # how it imports its UI. This runs the built search index in Node and
+        # measures it, and reads the built bundle for the rest. No browser, no
+        # server.
+        run: pnpm run check:search
+        working-directory: site
       - name: Check the structured data every page publishes
         # The JSON-LD graph is the only part of a page written for machines
         # alone, and nothing else here reads it: html-validate does not look

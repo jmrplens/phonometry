@@ -1,5 +1,7 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, realpathSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightLinksValidator from 'starlight-links-validator';
@@ -13,6 +15,7 @@ import { doi, doiUrl } from './src/data/citation.mjs';
 import { redirects } from './src/data/redirects.mjs';
 import { basePath, siteUrl } from './src/data/site.mjs';
 import { isOurMedia, mediaUrl, REMOTE_PREFIXES } from './src/lib/media.mjs';
+import { PAGEFIND_RANKING } from './src/lib/search-ranking.mjs';
 import { rehypeWrappableMath } from './src/lib/wrappable-math.mjs';
 import {
   featureList,
@@ -432,9 +435,49 @@ const jsonLd = JSON.stringify({
   ],
 });
 
+// Starlight's search UI, with this site's query normalizer in front of it.
+//
+// Starlight's Search component imports '@pagefind/default-ui' by its bare name,
+// so aliasing that name is enough to put src/lib/search-ui.mjs in its place;
+// the subclass there reaches the real component through the second alias. The
+// package publishes no `exports` map, so its entry point has to be read out of
+// its own package.json rather than guessed. The regular expression is anchored
+// on both ends so the `@import url('@pagefind/default-ui/css/ui.css')` inside
+// Starlight's Search component, which is a subpath, is left alone.
+//
+// The script is resolved from Starlight's own dependency, not from this site's.
+// That stylesheet import is resolved from where Starlight is installed, and the
+// script and the stylesheet share the scoping classes the compiled component
+// generates, so they have to be the same copy of the package. Resolving from
+// Starlight's directory makes them the same copy by construction, whatever
+// version its range settles on, and leaves this site nothing to pin by hand.
+//
+// Only the built site is affected: `astro dev` returns from the search script
+// before the UI is ever instantiated.
+const pagefindUiEntry = (() => {
+  const starlightManifest = realpathSync(
+    fileURLToPath(new URL('./node_modules/@astrojs/starlight/package.json', import.meta.url)),
+  );
+  const require = createRequire(starlightManifest);
+  const manifestPath = require.resolve('@pagefind/default-ui/package.json');
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  return fileURLToPath(new URL(manifest.module, pathToFileURL(manifestPath)));
+})();
+
 export default defineConfig({
   site: siteUrl,
   base: basePath,
+  vite: {
+    resolve: {
+      alias: [
+        {
+          find: /^@pagefind\/default-ui$/,
+          replacement: fileURLToPath(new URL('./src/lib/search-ui.mjs', import.meta.url)),
+        },
+        { find: 'pagefind-default-ui-upstream', replacement: pagefindUiEntry },
+      ],
+    },
+  },
   // Every address this site has published and no longer serves. The eight
   // entries that used to be written out here covered the four guides that were
   // split, and nothing else: the reorganisations that followed moved 217 pages
@@ -498,6 +541,13 @@ export default defineConfig({
         }),
       ],
       description: siteDescription,
+      // Weight for the per-page `standards` metadata field written in
+      // src/components/Head.astro, so a search for a designation ranks the
+      // guides written to that standard above the pages that merely mention
+      // the number. Naming one ranking field keeps Starlight's defaults for the
+      // rest; src/lib/search-ranking.mjs says why the weight is what it is, and
+      // scripts/check-search-designation.mjs measures the index against it.
+      pagefind: { ranking: PAGEFIND_RANKING },
       lastUpdated: true,
       // "Edit page" link in each page's footer. The docs live under site/ in
       // the repository, so the base includes that segment; Starlight appends
@@ -565,6 +615,7 @@ export default defineConfig({
         './src/styles/home.css',
         './src/styles/sidebar.css',
         './src/styles/page-chips.css',
+        './src/styles/search.css',
       ],
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/jmrplens/phonometry' },

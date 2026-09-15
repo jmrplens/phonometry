@@ -133,7 +133,9 @@ const conformanceCited = z.object({
   /** The literal text that introduces it; absent on the first document. */
   lead: z.string().min(1).optional(),
   /** What that text says, read off the connector and never inferred. */
-  relation: z.enum(['corroborates', 'compares', 'via', 'mentions']).optional(),
+  relation: z
+    .enum(['corroborates', 'compares', 'via', 'supplies', 'mentions'])
+    .optional(),
   /** What the citation writes, where it differs from the designation. */
   written: z.string().min(1).optional(),
 });

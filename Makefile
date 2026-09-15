@@ -200,6 +200,17 @@ parameter-units:
 conformance-rows:
 	$(PYTHON) scripts/check_conformance_rows.py
 
+# The artefact's closed vocabularies (verdict, comparison shape, tolerance
+# mode, document kind, relation) are stated three times: the Python enums that
+# produce them, the Zod schema that validates the artefact into the site, and
+# the label maps that word two of them in English and Spanish. A value added to
+# the first and missing from the second stops the site build on every row that
+# carries it; missing from the third it prints untranslated. This compares the
+# three, both ways, so a vocabulary that grows or shrinks moves everywhere at
+# once. Stdlib only.
+conformance-vocabulary:
+	$(PYTHON) scripts/check_conformance_vocabulary.py
+
 # The Spanish variant of a figure is the English one with its strings looked
 # up in a table at save time, so a string nobody added to the table ships in
 # English inside `X_es.svg` and every other gate stays green: the page is
@@ -380,14 +391,16 @@ reports:
 # every figure run. The claims step rewrites the counts in the prose that has no
 # build step to interpolate them through (.zenodo.json, the plain-markdown
 # mirror under docs/, the site frontmatter); the Astro page bodies import them
-# from site/src/data/conformance-stats.mjs and need nothing. The last step is
-# the read-only validation CI also runs. CI fails if any output drifts (see the
-# `conformance` job in python-app.yml).
+# from site/src/data/conformance-stats.mjs and need nothing. The last two steps
+# are the read-only validations CI also runs: the artefact against itself, and
+# its vocabularies against the site that has to accept and word them. CI fails
+# if any output drifts (see the `conformance` job in python-app.yml).
 conformance:
 	$(PYTHON) scripts/conformance_report.py --file-header > docs/CONFORMANCE.md
 	$(PYTHON) scripts/conformance_badges.py
 	$(PYTHON) scripts/check_conformance_claims.py --write
 	$(PYTHON) scripts/check_conformance_artifact.py
+	$(PYTHON) scripts/check_conformance_vocabulary.py
 
 # Optional convenience: install a git pre-commit hook that regenerates
 # docs/CONFORMANCE.md when the library source or the report generator changes.
@@ -439,4 +452,4 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point control-characters hazards dead-constants \
-	conformance-rows parameter-units
+	conformance-rows conformance-vocabulary parameter-units

@@ -38393,7 +38393,7 @@
       "kind": "count",
       "expected": {
         "value": 6.0,
-        "label": "6/6: five within the 0,05 dB half step of the printed tenth (worst 0.036 dB), and the cell beside the new machine with the first choice at its recorded -0.063 dB (computed -0.0628 dB)"
+        "label": "6/6: all but one within the 0,05 dB half step of the printed tenth (worst 0.037 dB), and the cell beside the new machine with the first choice at its recorded -0.063 dB (computed -0.0628 dB)"
       },
       "computed": {
         "value": 6.0,
@@ -38427,11 +38427,11 @@
       "kind": "count",
       "expected": {
         "value": 12.0,
-        "label": "12/12: the six cells within 0,1 dB at the positions Figure B.1 draws, and the same six more than 0,1 dB out at the positions Tables B.5 and B.8 tabulate (nearest 0.477 dB, farthest 1.832 dB)"
+        "label": "12/12: the 6 cells within 0,1 dB at the positions Figure B.1 draws, and the same 6 more than 0,1 dB out at the positions Tables B.5 and B.8 tabulate (nearest 0.478 dB, farthest 1.836 dB)"
       },
       "computed": {
         "value": 12.0,
-        "label": "12/12 readings of the six printed cells, reproduced at the positions Figure B.1 draws and rejected at the positions Tables B.5 and B.8 tabulate"
+        "label": "12/12 readings of the 6 printed cells, reproduced at the positions Figure B.1 draws and rejected at the positions Tables B.5 and B.8 tabulate"
       },
       "tolerance": {
         "mode": "absolute",

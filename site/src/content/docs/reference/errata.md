@@ -6220,8 +6220,8 @@ in the same order.
   the nearer machine. The far position cannot be the louder of the two, and the
   printed levels say it is. Recomputing case A by the category 1 method the
   annex prescribes, in the 20 m by 15 m by 7 m room of Table B.2 at the mean
-  absorption coefficient 0,15 of Table B.3, gives 82,09 dB at 17 m, 4 m, 1,6 m
-  and 80,27 dB at 3 m, 12 m, 1,6 m: the two levels Table B.6 prints, each
+  absorption coefficient 0,15 of Table B.3, gives 82,10 dB at 17 m, 4 m, 1,6 m
+  and 80,26 dB at 3 m, 12 m, 1,6 m: the two levels Table B.6 prints, each
   against the other workstation's label. Table B.8 contradicts itself on its own
   row, since it prints the far position for W1 and 82 dB, the rounded near
   level, beside it.
@@ -6229,7 +6229,7 @@ in the same order.
   p. 16); Table B.4 with the machine positions on PDF page 27 (printed p. 17);
   Tables B.5 to B.9 on PDF page 28 (printed p. 18). All of EN ISO 11690-3:1998
   as published in BS EN ISO 11690-3:1999. Under the figure's assignment the six
-  levels of Table B.9 come back within 0,07 dB, and under the tables' the four
+  levels of Table B.9 come back within 0,07 dB, and under the tables', the four
   at W1 and W2 miss by 0,48 dB to 1,04 dB (W3 stands in the same place in both)
   while case A misses by 1,8 dB on both rows.
 - **Consequence for the standard's own tables:** the Position columns of Tables
@@ -6240,7 +6240,12 @@ in the same order.
 - **Library behaviour:** the conformance rows for the two cases of Annex B read
   the printed coordinates and never the labels, and the row "ISO 11690-3:1998
   Annex B, Figure B.1 against Tables B.5 and B.8" records that the results
-  reproduce at the positions the figure draws and at no other.
+  reproduce at the positions the figure draws and at no other. The 50 dB of
+  background Table B.5 prints against W1 goes with that label rather than with
+  the coordinates beside it, so it is heard at the position the figure gives
+  W1, next to machine M2. It is worth 0,004 dB: read the other way case A comes
+  back 82,09 dB and 80,27 dB instead of 82,10 dB and 80,26 dB, and both
+  readings round to the tenth Table B.6 prints.
 - **Status:** not reported.
 
 ## Related source properties that are not errata

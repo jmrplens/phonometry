@@ -1,0 +1,14 @@
+{
+  "_comment": [
+    "Search tokens for the designations src/lib/standard-search.mjs cannot parse.",
+    "A designation that yields no token carrying a number throws instead of",
+    "indexing nothing, so anything that lands here did so on a pull request that",
+    "could decide what a reader would search it by. Keys are the designation",
+    "exactly as the bibliography spells it; values are the tokens, lowercase",
+    "alphanumerics only. Keys beginning with an underscore are ignored, which is",
+    "what lets this note live in the file it documents."
+  ],
+  "108th AES Convention, Paris, preprint 5093": ["aes", "5093"],
+  "CTE DB-HR": ["cte", "dbhr"],
+  "OJ L 5, 10.1.2018, p. 35": ["oj", "l5", "l52018"]
+}

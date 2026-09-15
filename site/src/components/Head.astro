@@ -19,6 +19,7 @@ import { breadcrumbsFor } from '../lib/breadcrumbs.mjs';
 import { topicForSlug } from '../data/topics.mjs';
 import { firstPublished } from '../lib/page-dates.mjs';
 import { citationsFor, referenceId, referenceNode } from '../lib/citations.mjs';
+import { pageStandardTokens } from '../lib/standard-search.mjs';
 
 const SITE = import.meta.env.SITE ?? 'https://jmrplens.github.io';
 const BASE = (import.meta.env.BASE_URL ?? '/').replace(/\/$/, '');
@@ -267,6 +268,18 @@ const breadcrumbList = crumbs
     }
   : null;
 
+// Search tokens for the standards this page declares, from the same
+// `references` frontmatter the chips and the References section come from. They
+// become a Pagefind metadata field, weighted in src/lib/search-ranking.mjs, so
+// that a search for a designation ranks the guides written to it first instead
+// of the pages that happen to say the number most often.
+//
+// The head is the right place for this and the chips paragraph is not: that
+// paragraph is only painted when the page has at least one chip, which is a
+// layout condition. A page whose only standard produced no chip would lose
+// every token with nothing in the build to notice. The head always exists.
+const standardTokens = pageStandardTokens(data.references);
+
 const graph = [article, homePage, breadcrumbList, ...bibliographyNodes].filter(Boolean);
 const jsonLd = graph.length
   ? JSON.stringify({ '@context': 'https://schema.org', '@graph': graph })
@@ -287,6 +300,18 @@ const jsonLd = graph.length
     fallback content it is the copy of the entry actually rendered here. */}
 {route?.markdownCopy && (
   <link rel="alternate" type="text/markdown" href={route.markdownCopy} />
+)}
+{/* The designations this page declares, as a Pagefind metadata field. The
+    `name` attribute is not decoration: html-validate rejects a <meta content>
+    without one of name, http-equiv, itemprop or property. The value is a list
+    of index tokens, never shown to a reader; src/styles/search.css hides the
+    tag the default result list would otherwise print from it. */}
+{standardTokens.length > 0 && (
+  <meta
+    name="phonometry-standards"
+    data-pagefind-meta="standards[content]"
+    content={standardTokens.join(' ')}
+  />
 )}
 <meta property="og:locale" content={lang === 'es' ? 'es_ES' : 'en_US'} />
 <meta property="og:locale:alternate" content={lang === 'es' ? 'en_US' : 'es_ES'} />

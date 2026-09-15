@@ -277,8 +277,9 @@ def test_the_rating_reads_the_rating_bands() -> None:
 
 
 def test_a_spectrum_that_is_not_the_rating_bands_is_refused() -> None:
+    eighteen_bands = np.zeros(18)
     with pytest.raises(ValueError, match="16 bands"):
-        noise_control.weighted_insulation(np.zeros(18))
+        noise_control.weighted_insulation(eighteen_bands)
 
 
 def test_the_octave_rating_reads_five_bands() -> None:
@@ -597,7 +598,7 @@ def test_an_infinite_a_weighted_level_is_refused() -> None:
             with_box,
             frequencies=THIRD_OCTAVES,
             a_weighted_without=99.0,
-            a_weighted_with=float("nan"),
+            a_weighted_with=math.nan,
         )
 
 

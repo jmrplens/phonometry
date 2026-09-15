@@ -432,14 +432,14 @@ def test_a_non_finite_field_correction_is_refused() -> None:
             [70.0],
             source_area_m2=0.9,
             receiver_area_m2=9.0,
-            field_correction_difference_db=float("nan"),
+            field_correction_difference_db=math.nan,
         )
 
 
 def test_a_non_finite_temperature_is_refused() -> None:
     with pytest.raises(ValueError, match="source_temperature_c"):
         noise_control.temperature_field_correction_db(
-            receiver_temperature_c=20.0, source_temperature_c=float("nan")
+            receiver_temperature_c=20.0, source_temperature_c=math.nan
         )
 
 

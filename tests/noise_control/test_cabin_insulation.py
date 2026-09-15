@@ -232,8 +232,9 @@ def test_the_rating_reads_the_rating_bands_and_keeps_the_prime() -> None:
 
 
 def test_a_spectrum_that_is_not_the_rating_bands_is_refused() -> None:
+    eighteen_bands = np.zeros(18)
     with pytest.raises(ValueError, match="16 bands"):
-        noise_control.weighted_cabin_insulation(np.zeros(18))
+        noise_control.weighted_cabin_insulation(eighteen_bands)
 
 
 def test_a_flat_insulation_estimates_itself() -> None:
@@ -346,10 +347,11 @@ def test_a_spread_the_six_positions_can_carry_is_not_flagged() -> None:
 
 
 def test_fewer_than_three_positions_is_refused() -> None:
+    two_positions = np.vstack(
+        [np.full(OCTAVES.size, 30.0), np.full(OCTAVES.size, 31.0)]
+    )
     with pytest.raises(ValueError, match="7.2.1"):
-        noise_control.check_source_positions(
-            np.vstack([np.full(OCTAVES.size, 30.0), np.full(OCTAVES.size, 31.0)])
-        )
+        noise_control.check_source_positions(two_positions)
 
 
 def test_the_flatness_limits_are_the_printed_ones() -> None:
@@ -552,7 +554,7 @@ def test_a_non_finite_a_weighted_level_is_refused() -> None:
             frequencies=THIRD_OCTAVES,
             method="in-situ-actual-noise",
             a_weighted_room_level=86.4,
-            a_weighted_cabin_level=float("inf"),
+            a_weighted_cabin_level=np.inf,
         )
 
 

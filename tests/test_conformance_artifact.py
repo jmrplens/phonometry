@@ -435,7 +435,8 @@ def test_a_series_read_on_its_own_keeps_its_number() -> None:
         ("NASA CR-3406 Table SLD-I", ("NASA CR-3406", None, "Table SLD-I")),
     ):
         document = references.documents(references.parse(cite, overrides={}))[0]
-        assert (document.designation, document.edition, document.clause) == split, cite
+        read = (document.designation, document.edition, document.clause)
+        assert read == split, cite
 
 
 def test_every_named_work_is_earned_by_a_citation(committed: dict) -> None:
@@ -1168,16 +1169,12 @@ FIXTURE = {
             "domain": "d",
             "reference": {
                 "cite": "ISO 1:2020 Table 1",
-                "tail": None,
                 "documents": [
                     {
                         "kind": "standard",
                         "designation": "ISO 1",
                         "edition": "2020",
                         "clause": "Table 1",
-                        "lead": None,
-                        "relation": None,
-                        "written": None,
                     }
                 ],
             },
@@ -1196,16 +1193,12 @@ FIXTURE = {
             "domain": "d",
             "reference": {
                 "cite": "ISO 1:2020 Table 2",
-                "tail": None,
                 "documents": [
                     {
                         "kind": "standard",
                         "designation": "ISO 1",
                         "edition": "2020",
                         "clause": "Table 2",
-                        "lead": None,
-                        "relation": None,
-                        "written": None,
                     }
                 ],
             },
@@ -1225,16 +1218,12 @@ FIXTURE = {
             "domain": "d",
             "reference": {
                 "cite": "ISO 2:2020 Annex A",
-                "tail": None,
                 "documents": [
                     {
                         "kind": "standard",
                         "designation": "ISO 2",
                         "edition": "2020",
                         "clause": "Annex A",
-                        "lead": None,
-                        "relation": None,
-                        "written": None,
                     }
                 ],
             },
@@ -1271,6 +1260,37 @@ def test_the_fixture_is_a_document_the_gate_accepts() -> None:
         if not problem.startswith(gate.OVERRIDES_PATH.name)
     ]
     assert problems == []
+
+
+def test_a_citation_with_nothing_after_its_last_document_has_no_tail() -> None:
+    """Absent, never null, because the site reads the document that way.
+
+    The site schema declares ``tail`` an optional string of at least one
+    character, like every field a check may not have, and rejects ``null``.
+    A reference keeps an empty tail, which the builder writes as ``None`` and
+    then drops along with every other null-valued key, so the key is left out
+    of the file. The bracket a citation does close on is still written.
+
+    The builder is the only thing between a null and a documentation build
+    that fails far from the check that wrote it, so the gate asks the whole
+    document for nulls as well. It did not before, and accepted the fixture
+    above while it carried twelve of them.
+    """
+    bare = references.parse("ISO 16283-1:2014 Clause 8.1", overrides={})
+    closed = references.parse("IEC 651:1979 Table V (via BS 5969:1981)", overrides={})
+    assert bare.tail == ""
+    assert "tail" not in artifact._without_nulls(artifact._reference_document(bare))
+    assert artifact._without_nulls(artifact._reference_document(closed))["tail"] == ")"
+
+    written = json.loads(json.dumps(FIXTURE))
+    written["checks"][0]["reference"]["tail"] = None
+    written["checks"][1]["reference"]["documents"][0]["lead"] = None
+    nulls = [problem.split(" ", 1)[0] for problem in gate._null_problems(written)]
+    assert nulls == [
+        "checks[0].reference.tail",
+        "checks[1].reference.documents[0].lead",
+    ]
+    assert gate._null_problems(FIXTURE) == []
 
 
 def test_the_renderer_works_on_a_three_check_document() -> None:

@@ -38,6 +38,52 @@ from conformance import artifact, compare, metrics, references, registry, units
 #: to the designation of a standard rather than to the place inside it.
 _SHEET_OPENER = re.compile(r"(?:Blatt|Teil|Ber|Berichtigung)\s+\d+\b")
 
+#: An issuing body followed by a document number, anywhere in a string. The
+#: number must not be an ordinal: "Farina 2000, AES 108th Conv." names the
+#: conference Farina presented at, not a document of the Audio Engineering
+#: Society.
+_BODY_AND_NUMBER = re.compile(
+    r"\b(?:"
+    + "|".join(re.escape(body) for body in references._BODIES)
+    + r")[ ]?[A-Za-z]?[\w./()-]*?\d+(?!\d)(?!st\b|nd\b|rd\b|th\b)"
+)
+
+#: ``/ -3:2016``: a sibling part of the series the document before it belongs
+#: to, written the short way a citation writes it.
+_RELATIVE_PART = re.compile(r"/\s*-\d+(?::(?:19|20)\d{2})?")
+
+#: An author with the year or the edition their work is cited by.
+_AUTHOR_AND_DATE = re.compile(
+    r"\b[A-Z][^,]*?\s(?:\(?(?:19|20)\d{2}\)?(?!\w)"
+    r"|\d+(?:e|st ed|nd ed|rd ed|th ed)\b)"
+)
+
+#: The connectors a citation writes between two documents in prose. The
+#: bracket the reader also reads is left out on purpose: a bracket is how a
+#: body writes its own name, as in "Directive (EU) 2015/996", and how a
+#: descriptor is written in front of a work, as in "Poiseuille limit (Stinson
+#: 1991)", which is a defect of its own in the same reader and not this one.
+#: The reader's prose connectors are left out for the same reason: "and" and
+#: "in" are words a title is written with, so what is left is the connectors
+#: no name can carry.
+_DOCUMENT_JOINER = re.compile(
+    "|".join(
+        pattern
+        for pattern, relation, _ in references._LEADS
+        if relation is not references.Relation.MENTIONS
+        and pattern not in references._PROSE_LEADS
+    )
+)
+
+#: A place inside a document, opening a clause. The reader's own vocabulary,
+#: so the net asks the question the reader asks. The word boundary sits outside
+#: the alternation, as it does in the reader: written inside it, it would bind
+#: to the last opener alone and the bare "p" would then match the "prototype"
+#: of "(NORAH2 prototype)", turning a descriptor into a document.
+_CLAUSE_OPENER = (
+    "(?:" + "|".join(re.escape(word) for word in references._CLAUSE_OPENERS) + r")\b|§"
+)
+
 #: The documentation tree whose frontmatter names every document a guide cites.
 _DOCS = (
     pathlib.Path(__file__).resolve().parent.parent / "site" / "src" / "content" / "docs"
@@ -179,10 +225,16 @@ def test_the_document_carries_no_provenance_that_changes_by_itself(
 # --------------------------------------------------------------------------
 
 
+def _first(cite: str) -> references.Cited:
+    """The document a citation opens with, for the citations that name one."""
+    return references.documents(references.parse(cite, overrides={}))[0]
+
+
 def test_every_citation_rebuilds_from_its_split(committed: dict) -> None:
-    """The whole split rests on this: three fields that cannot be reassembled
-    into the original string have lost or moved something, and the designation
-    count is then counting the wrong thing.
+    """The whole split rests on this: a list of documents that cannot be
+    reassembled into the original string, connectors and all, has lost or
+    moved something, and the designation count is then counting the wrong
+    thing.
     """
     overridden = gate._overridden()
     for check in committed["checks"]:
@@ -191,11 +243,24 @@ def test_every_citation_rebuilds_from_its_split(committed: dict) -> None:
             continue
         rebuilt = references.recompose(
             references.Reference(
-                kind=references.ReferenceKind(reference["kind"]),
-                designation=reference["designation"],
-                edition=reference.get("edition"),
-                clause=reference.get("clause"),
                 cite=reference["cite"],
+                documents=tuple(
+                    references.Cited(
+                        kind=references.ReferenceKind(document["kind"]),
+                        designation=document["designation"],
+                        edition=document.get("edition"),
+                        clause=document.get("clause"),
+                        lead=document.get("lead") or "",
+                        relation=(
+                            None
+                            if document.get("relation") is None
+                            else references.Relation(document["relation"])
+                        ),
+                        written=document.get("written"),
+                    )
+                    for document in reference["documents"]
+                ),
+                tail=reference.get("tail") or "",
             )
         )
         assert rebuilt == reference["cite"], check["id"]
@@ -204,6 +269,272 @@ def test_every_citation_rebuilds_from_its_split(committed: dict) -> None:
 def test_the_override_ratchet_carries_no_dead_lines(committed: dict) -> None:
     """A line for a citation nobody makes hides the next real one."""
     assert gate._ratchet_problems(committed) == []
+
+
+# --------------------------------------------------------------------------
+# A citation that names more than one document
+# --------------------------------------------------------------------------
+
+
+def _named(cite: str) -> list[tuple]:
+    """Every document one citation names, read the only way there is.
+
+    Each document as ``(kind, designation, edition, clause, lead, relation)``,
+    in the order the citation writes them.
+    """
+    reference = references.parse(cite, overrides={})
+    return [
+        (
+            str(document.kind),
+            document.designation,
+            document.edition,
+            document.clause,
+            document.lead,
+            None if document.relation is None else str(document.relation),
+        )
+        for document in references.documents(reference)
+    ]
+
+
+def test_a_citation_names_every_document_it_writes() -> None:
+    """The defect this closes: a citation naming two or three documents was
+    filed under the first one, and the others never appeared as cited at all.
+
+    ANSI S1.11, BS 5969, JIS A 1418-2 and EBU R 98 were named by a check and
+    counted by nothing, while four guides carried ANSI S1.11-2004 in their
+    bibliography. The clause of the second document sat inside the clause of
+    the first, so the row could not be found by searching for the document it
+    is about.
+    """
+    assert _named(
+        "ISO 16283-1:2014 Clause 8.1 / -2:2020 Clause 8.1 / -3:2016 Clause 7.3.1"
+    ) == [
+        ("standard", "ISO 16283-1", "2014", "Clause 8.1", "", None),
+        ("standard", "ISO 16283-2", "2020", "Clause 8.1", " / ", "corroborates"),
+        ("standard", "ISO 16283-3", "2016", "Clause 7.3.1", " / ", "corroborates"),
+    ]
+    assert _named("IEC 61260:1995 / ANSI S1.11-2004 Table 1") == [
+        ("standard", "IEC 61260", "1995", None, "", None),
+        ("standard", "ANSI S1.11", "2004", "Table 1", " / ", "corroborates"),
+    ]
+    assert _named("ISO 16283-2:2020 Table A.1 / JIS A 1418-2:2019 Table A.2") == [
+        ("standard", "ISO 16283-2", "2020", "Table A.1", "", None),
+        ("standard", "JIS A 1418-2", "2019", "Table A.2", " / ", "corroborates"),
+    ]
+    assert _named("ISO 3747:2010 Eq. 11 vs ISO 3741:2010 Eq. 21") == [
+        ("standard", "ISO 3747", "2010", "Eq. 11", "", None),
+        ("standard", "ISO 3741", "2010", "Eq. 21", " vs ", "compares"),
+    ]
+    assert _named("IEC 651:1979 Table V (via BS 5969:1981)") == [
+        ("standard", "IEC 651", "1979", "Table V", "", None),
+        ("standard", "BS 5969", "1981", None, " (via ", "via"),
+    ]
+
+
+def test_a_trailing_clause_belongs_to_the_document_before_it() -> None:
+    """The printed pages settle it. In ISO 10846-3:2002, 7.6 is the test for
+    linearity; 7.6 of part 2 is "Measurements" and its test for linearity is
+    7.7. A clause shared backwards would file the check against a clause that
+    is about something else, so the first document is recorded with none.
+    """
+    assert _named("ISO 10846-2:2008 / -3:2002 7.6") == [
+        ("standard", "ISO 10846-2", "2008", None, "", None),
+        ("standard", "ISO 10846-3", "2002", "7.6", " / ", "corroborates"),
+    ]
+
+
+def test_every_connector_the_corpus_writes_is_read() -> None:
+    """One citation per connector, and the relation each one records.
+
+    The connector vocabulary is closed: a citation is split only where one of
+    these introduces something that opens like a document, so "Normal modes vs
+    ideal waveguide" and "ISO 7196:1995 Table 2 / A.3" stay whole.
+    """
+    assert _named("Cox & D'Antonio Eq (5.8) + ISO 17497-2 Formula (7)") == [
+        ("book", "Cox & D'Antonio", None, "Eq (5.8)", "", None),
+        ("standard", "ISO 17497-2", None, "Formula (7)", " + ", "corroborates"),
+    ]
+    assert _named("ISO 11690-3:1998 4.3 against ISO 14257 Annex C") == [
+        ("standard", "ISO 11690-3", "1998", "4.3", "", None),
+        ("standard", "ISO 14257", None, "Annex C", " against ", "compares"),
+    ]
+    assert _named("IEC 537:1976 (withdrawn) via NASA CR-3406 Table SLD-I") == [
+        ("standard", "IEC 537", "1976", "(withdrawn)", "", None),
+        ("report", "NASA CR-3406", None, "Table SLD-I", " via ", "via"),
+    ]
+    assert _named(
+        "EBU Tech 3285:2011 (2.3): CodingHistory row per EBU R 98 Appendix 1"
+    ) == [
+        ("standard", "EBU Tech 3285", "2011", "(2.3): CodingHistory row", "", None),
+        ("standard", "EBU R 98", None, "Appendix 1", " per ", "via"),
+    ]
+    assert _named("Moore, Psychology of Hearing 6e, p. 77 (Glasberg & Moore 1990)") == [
+        ("book", "Moore, Psychology of Hearing", "6e", "p. 77", "", None),
+        ("article", "Glasberg & Moore", "1990", None, " (", "mentions"),
+    ]
+    assert _named("ISO 389-1:1998 Table 1 (coupler, IEC 60303)") == [
+        ("standard", "ISO 389-1", "1998", "Table 1", "", None),
+        ("standard", "IEC 60303", None, None, " (coupler, ", "mentions"),
+    ]
+
+
+def test_a_relative_part_is_expanded_against_the_series_it_belongs_to() -> None:
+    """ "-2:2020" is ISO 16283-2, and the count and the bibliography need it
+    written out; the citation still has to rebuild from what it wrote, so the
+    document keeps "-2" as well.
+    """
+    documents = references.documents(
+        references.parse(
+            "ISO 16283-1:2014 Formula (12) / -2:2020 Formula (15)", overrides={}
+        )
+    )
+    assert [(document.designation, document.written) for document in documents] == [
+        ("ISO 16283-1", None),
+        ("ISO 16283-2", "-2"),
+    ]
+
+
+def test_a_single_document_is_not_split_by_its_own_locator() -> None:
+    """A connector decides nothing on its own.
+
+    Every one of these writes a connector between two places in one document,
+    between two methods, or inside a title, and a reader that split on the
+    word alone would invent a document for each.
+    """
+    for cite in (
+        "ISO 7196:1995 Table 2 / A.3",
+        "ANSI S1.4-1983 Tables IV/V",
+        "ISO/PAS 1996-3:2022 3.5",
+        "ISO/IEC Guide 98-3-1 clause 9.2",
+        "ITU-R BS.468-4 Table 1",
+        "RD 1367/2007 Annex I A.2 d",
+        "Directive (EU) 2015/996 Appendix F, Tables F-2 and F-3",
+        "UNESCO sound speed (EOS-80 canonical value)",
+        "Farina 2000, AES 108th Conv. (THD from one sweep)",
+        "Hopkins Eq. 2.229 (Leppington/Maidanik)",
+        "Bies 5e Table 8.14 (ASHRAE end reflection, flush)",
+        "ISO 2631-5:2018 Formula 1 vs Annex D Table D.1",
+        "Allard & Atalla 2e Eq. (6.107) vs Sect. 11.5 assembly",
+        "Normal modes vs ideal waveguide",
+        "ISO 8041-1:2017 Table 1 + Table B.3",
+        "ISO 14257:2001 Eq. (5) against Eq. (8)",
+        "ISO 12999-2:2020 Clause 7, Examples 1/2",
+        "Sabine (W. C. Sabine, 1922)",
+    ):
+        assert len(_named(cite)) == 1, cite
+
+
+def test_a_series_read_on_its_own_keeps_its_number() -> None:
+    """The documents a multi-document citation names have to survive being
+    read alone, and three of them did not: the body took the whole designation
+    and left the number in the clause.
+    """
+    for cite, split in (
+        ("JIS A 1418-2:2019 Table A.2", ("JIS A 1418-2", "2019", "Table A.2")),
+        ("EBU R 98 Appendix 1", ("EBU R 98", None, "Appendix 1")),
+        ("NASA CR-3406 Table SLD-I", ("NASA CR-3406", None, "Table SLD-I")),
+    ):
+        document = references.documents(references.parse(cite, overrides={}))[0]
+        read = (document.designation, document.edition, document.clause)
+        assert read == split, cite
+
+
+def test_every_named_work_is_earned_by_a_citation(committed: dict) -> None:
+    """The undated works the reader knows by name are a ratchet of their own.
+
+    A work is on the list because a citation names it behind a connector with
+    neither an edition mark nor a year, which is the one shape no rule can
+    read. An entry no citation uses any more is dead weight that hides the
+    next real one, exactly as a stale override line is.
+
+    The heads counted are only the ones the list could have produced, which
+    means the ones with no edition. Asking for the name alone does not close
+    the ratchet: an author cited "Mechel 2e" everywhere is read by the edition
+    rule long before the list is consulted, so a "Mechel" entry would sit here
+    unused and unnoticed. The name is taken as the citation writes it, since
+    that is what the list is keyed by: a work whose record expands to a longer
+    designation is earned by the short form the citation puts behind the
+    connector.
+    """
+    heads = {
+        document.get("written") or document["designation"]
+        for check in committed["checks"]
+        for document in check["reference"]["documents"]
+        if document.get("lead") and document.get("edition") is None
+    }
+    assert sorted(set(references._WORKS) - heads) == []
+
+
+def test_every_prose_connector_is_one_the_reader_reads() -> None:
+    """The prose connectors are listed by the pattern the reader writes them
+    as, so a connector reworded in one place and not the other would quietly
+    stop being excluded from the net below, which would then turn red on the
+    next book called "Ver and Beranek".
+    """
+    written = {pattern for pattern, _, _ in references._LEADS}
+    assert sorted(references._PROSE_LEADS - written) == []
+
+
+def test_no_document_carries_another_document(committed: dict) -> None:
+    """The committed artefact, asked the question the reader was not.
+
+    This is the net. It is deliberately more liberal than the reader: a
+    citation that names a document the reader cannot recognise turns red here
+    as soon as the corpus records that document anywhere, and the fix is a
+    line in the tool, never a citation trimmed until it fits.
+    """
+    recorded = {
+        document["designation"]
+        for check in committed["checks"]
+        for document in check["reference"]["documents"]
+        if document["kind"] != "derivation"
+    }
+    swallowed = []
+    for check in committed["checks"]:
+        for document in check["reference"]["documents"]:
+            clause = document.get("clause") or ""
+            designation = document["designation"]
+            if (
+                _BODY_AND_NUMBER.search(clause)
+                or _RELATIVE_PART.search(clause)
+                or _AUTHOR_AND_DATE.search(clause)
+            ):
+                swallowed.append((check["reference"]["cite"], clause))
+            # A derivation names no document: its designation is the whole
+            # citation, prose and all, and "Passive sonar equation
+            # (Urick/Etter)" credits two books inside one closed form.
+            if document["kind"] == "derivation":
+                continue
+            if _DOCUMENT_JOINER.search(designation):
+                swallowed.append((check["reference"]["cite"], designation))
+            swallowed += [
+                (check["reference"]["cite"], clause)
+                for other in recorded - {designation}
+                if _clause_names(other, clause)
+            ]
+    assert sorted(set(swallowed)) == []
+
+
+def _clause_names(designation: str, clause: str) -> bool:
+    """Whether a clause writes a recorded designation, whole or shortened.
+
+    Asking for the whole designation leaves a blind spot exactly where the
+    reader has one. A citation writes the name a reader would recognise and
+    leaves the rest of the title off: the clause "flight-condition
+    interpolation (NORAH2 Eq. 8)" named Eq. 8 of a second document while the
+    designation on record is "NORAH2 guidance", so the full string never
+    matched and the net stayed green over the last citation of the class.
+
+    The shortened form only counts in front of a place in the document. That
+    is what separates a document from a descriptor: "NORAH2 Eq. 8" is a clause
+    of a report, "(NORAH2 prototype)" is a word about the model the check ran.
+    """
+    if re.search(rf"\b{re.escape(designation)}(?!\w)", clause):
+        return True
+    head = designation.split(" ", 1)[0]
+    if head == designation:
+        return False
+    return bool(re.search(rf"\b{re.escape(head)}\s+(?:{_CLAUSE_OPENER})", clause))
 
 
 def test_no_designation_stops_before_the_document_number(committed: dict) -> None:
@@ -220,14 +551,20 @@ def test_no_designation_stops_before_the_document_number(committed: dict) -> Non
     documents issued by a body are asked.
     """
     truncated = [
-        (reference["designation"], reference["cite"])
+        (document["designation"], check["reference"]["cite"])
         for check in committed["checks"]
-        for reference in [check["reference"]]
-        if reference["kind"] in {"standard", "report"}
-        and not any(char.isdigit() for char in reference["designation"])
-        and any(char.isdigit() for char in (reference.get("clause") or " ").split()[0])
+        for document in check["reference"]["documents"]
+        if document["kind"] in {"standard", "report"}
+        and not any(char.isdigit() for char in document["designation"])
+        and any(char.isdigit() for char in _opening_word(document.get("clause")))
     ]
     assert truncated == []
+
+
+def _opening_word(clause: str | None) -> str:
+    """The first word of a clause, or nothing at all when there is none."""
+    words = (clause or "").split()
+    return words[0] if words else ""
 
 
 def test_a_document_series_is_part_of_the_designation() -> None:
@@ -247,15 +584,15 @@ def test_a_document_series_is_part_of_the_designation() -> None:
             "Directive (EU) 2015/996",
         ),
     ):
-        assert references.parse(cite, overrides={}).designation == designation, cite
+        assert _first(cite).designation == designation, cite
 
 
 def test_an_amended_edition_is_still_an_edition() -> None:
     """``ISO 10140-5:2010+A1`` matched no year, so the whole of the number fell
     into the clause and the document became the bare body "ISO".
     """
-    reference = references.parse("ISO 10140-5:2010+A1 Annex B, Table B.1", overrides={})
-    assert (reference.designation, reference.edition, reference.clause) == (
+    document = _first("ISO 10140-5:2010+A1 Annex B, Table B.1")
+    assert (document.designation, document.edition, document.clause) == (
         "ISO 10140-5",
         "2010+A1",
         "Annex B, Table B.1",
@@ -276,8 +613,8 @@ def test_an_edition_dated_to_the_month_keeps_its_month() -> None:
         ("DIN 4150-3:1999-02 Bild 1", ("DIN 4150-3", "1999-02", "Bild 1")),
         ("DIN 45692:2009-08 Clause 6", ("DIN 45692", "2009-08", "Clause 6")),
     ):
-        reference = references.parse(cite, overrides={})
-        read = (reference.designation, reference.edition, reference.clause)
+        document = _first(cite)
+        read = (document.designation, document.edition, document.clause)
         assert read == split, cite
 
 
@@ -303,8 +640,8 @@ def test_a_sheet_or_a_corrigendum_is_part_of_the_designation() -> None:
             ("DIN 45669-1 Ber 1", "2012-12", "Table 8"),
         ),
     ):
-        reference = references.parse(cite, overrides={})
-        read = (reference.designation, reference.edition, reference.clause)
+        document = _first(cite)
+        read = (document.designation, document.edition, document.clause)
         assert read == split, cite
 
 
@@ -317,11 +654,11 @@ def test_no_clause_opens_with_a_sheet_or_a_corrigendum(committed: dict) -> None:
     catches a bare body never fired for it.
     """
     dropped = [
-        reference["cite"]
+        check["reference"]["cite"]
         for check in committed["checks"]
-        for reference in [check["reference"]]
-        if reference["kind"] in {"standard", "report"}
-        and _SHEET_OPENER.match(reference.get("clause") or "")
+        for document in check["reference"]["documents"]
+        if document["kind"] in {"standard", "report"}
+        and _SHEET_OPENER.match(document.get("clause") or "")
     ]
     assert dropped == []
 
@@ -343,9 +680,9 @@ def test_a_dated_edition_is_the_edition_the_guides_cite(committed: dict) -> None
         {
             named
             for check in committed["checks"]
-            for reference in [check["reference"]]
-            if reference["designation"].split(" ", 1)[0] in {"DIN", "VDI"}
-            for named in [_named_edition(reference)]
+            for document in check["reference"]["documents"]
+            if document["designation"].split(" ", 1)[0] in {"DIN", "VDI"}
+            for named in [_named_edition(document)]
             if named not in cited
         }
     )
@@ -375,16 +712,16 @@ def test_every_dated_edition_in_the_guides_carries_its_month() -> None:
     assert undated == []
 
 
-def _named_edition(reference: dict) -> str:
+def _named_edition(document: dict) -> str:
     """The designation with its edition, as a frontmatter reference writes it.
 
     A citation of one of these bodies with no edition at all is itself the
     drift the test is after, and comes back as the bare designation, which no
     dated frontmatter entry can equal.
     """
-    edition = reference.get("edition")
+    edition = document.get("edition")
     return (
-        f"{reference['designation']}:{edition}" if edition else reference["designation"]
+        f"{document['designation']}:{edition}" if edition else document["designation"]
     )
 
 
@@ -398,20 +735,20 @@ def test_a_series_prefix_does_not_swallow_a_plain_designation() -> None:
         ("Directive 2002/49/EC Annex II", "Directive 2002/49/EC"),
         ("ISO/TR 17534-3:2015 Table 1", "ISO/TR 17534-3"),
     ):
-        assert references.parse(cite, overrides={}).designation == designation, cite
+        assert _first(cite).designation == designation, cite
 
 
 def test_a_series_designation_keeps_its_body_kind() -> None:
     """ECAC publishes reports, and "ECAC Doc 29" is still an ECAC document."""
-    assert references.parse("ECAC Doc 29 NPD interpolation", overrides={}).kind is (
+    assert _first("ECAC Doc 29 NPD interpolation").kind is (
         references.ReferenceKind.REPORT
     )
 
 
 def test_a_standard_splits_into_designation_edition_and_clause() -> None:
-    reference = references.parse("IEC 61260-1:2014 Table 1", overrides={})
-    assert reference.kind is references.ReferenceKind.STANDARD
-    assert (reference.designation, reference.edition, reference.clause) == (
+    document = _first("IEC 61260-1:2014 Table 1")
+    assert document.kind is references.ReferenceKind.STANDARD
+    assert (document.designation, document.edition, document.clause) == (
         "IEC 61260-1",
         "2014",
         "Table 1",
@@ -420,18 +757,16 @@ def test_a_standard_splits_into_designation_edition_and_clause() -> None:
 
 def test_a_book_edition_is_a_string_not_a_year() -> None:
     """An edition has to hold "2e" and "4th ed" as well as "2014"."""
-    reference = references.parse(
-        "Long, Architectural Acoustics 2e, Table 8.1", overrides={}
-    )
-    assert reference.kind is references.ReferenceKind.BOOK
-    assert reference.edition == "2e"
-    assert reference.designation == "Long, Architectural Acoustics"
+    document = _first("Long, Architectural Acoustics 2e, Table 8.1")
+    assert document.kind is references.ReferenceKind.BOOK
+    assert document.edition == "2e"
+    assert document.designation == "Long, Architectural Acoustics"
 
 
 def test_a_closed_form_is_a_derivation_and_not_a_document() -> None:
-    reference = references.parse("Model identity (uniform absorption)", overrides={})
-    assert reference.kind is references.ReferenceKind.DERIVATION
-    assert reference.clause is None
+    document = _first("Model identity (uniform absorption)")
+    assert document.kind is references.ReferenceKind.DERIVATION
+    assert document.clause is None
 
 
 def test_no_designation_is_cut_inside_a_phrase(committed: dict) -> None:
@@ -445,10 +780,10 @@ def test_no_designation_is_cut_inside_a_phrase(committed: dict) -> None:
     """
     cut = sorted(
         {
-            reference["designation"]
+            document["designation"]
             for check in committed["checks"]
-            for reference in [check["reference"]]
-            if not references._is_whole(reference["designation"])
+            for document in check["reference"]["documents"]
+            if not references._is_whole(document["designation"])
         }
     )
     assert cut == []
@@ -481,37 +816,80 @@ def test_a_split_that_cuts_a_name_falls_through_to_the_next_reading() -> None:
         ),
     ):
         reference = references.parse(cite, overrides={})
-        got = (
-            str(reference.kind),
-            reference.designation,
-            reference.edition,
-            reference.clause,
-        )
-        assert got == read, cite
+        got = [
+            (
+                str(document.kind),
+                document.designation,
+                document.edition,
+                document.clause,
+            )
+            for document in references.documents(reference)
+        ]
+        assert got == [read], cite
         assert references.recompose(reference) == cite
 
 
 def test_the_year_form_files_a_known_book_or_report_as_what_it_is() -> None:
-    """ "Barron (2003)" reads as a paper and is a book; the table says so."""
+    """ "Barron (2003)" reads as a paper and is a book; the table says so.
+
+    A work named second in a citation is asked the same question: "Fuchs
+    (2013)" is a Springer monograph and "INSHT NTP 668 (2004)" a national
+    institute's technical note, and both are only ever written behind a
+    connector.
+    """
     kinds = references.ReferenceKind
     for cite, kind in (
         ("Barron (2003) Table 7-5, PDF p. 320, printed folio 308", kinds.BOOK),
+        ("Fuchs (2013) Table 13.4, PDF page 588, folio 574", kinds.BOOK),
+        ("Ver and Beranek (2006) Example 4.2, PDF page 96, folio 91", kinds.BOOK),
+        ("INSHT NTP 668 (2004) Ec. 2 and Ec. 3, PDF pages 3 and 4", kinds.REPORT),
         ("Harris (1991) Figures A3-2 and A3-8", kinds.BOOK),
         ("Harris 1978 closed form (DFT-even Hann)", kinds.ARTICLE),
         ("NPL CIRA(EXT) 009 (1996) Tables 8 to 14", kinds.REPORT),
         ("IFA-LSA 01-234 (2020) Tab. 4.2 (printed folio 14, PDF p. 14)", kinds.REPORT),
         ("Heisterkamp (2024) Table 3, PDF p. 10, printed folio 186", kinds.ARTICLE),
     ):
-        assert references.parse(cite, overrides={}).kind is kind, cite
+        assert _first(cite).kind is kind, cite
+
+
+def test_a_declared_work_keeps_its_kind_whatever_shape_follows_the_name() -> None:
+    """A work listed in ``_WORKS`` is what the list says, in all four shapes.
+
+    The name a citation writes is not always the designation the work is filed
+    under, and the kind table is keyed by the designation. Reading it with the
+    written name misses exactly the works whose record expands the name:
+    "NORAH2 (2015)" looked like an author with a year and came back an article
+    called "NORAH2", which is neither the kind nor the designation the rest of
+    the corpus cites. Every shape has to land on the same document.
+    """
+    kinds = references.ReferenceKind
+    for cite in (
+        "NORAH2",
+        "NORAH2 Eq. 8",
+        "NORAH2 (2015) Eq. 8",
+        "NORAH2 2e Eq. 8",
+    ):
+        document = _first(cite)
+        assert document.kind is kinds.REPORT, cite
+        assert document.designation == "NORAH2 guidance", cite
+        assert document.written == "NORAH2", cite
+
+
+def test_a_work_whose_name_is_its_designation_is_not_given_a_written_form() -> None:
+    """``written`` records an expansion, so a name that needs none stays bare.
+
+    It is what ``recompose`` puts back on the page, and a citation rebuilt with
+    a redundant written form would no longer match the string it came from.
+    """
+    for cite in ("Bies (2017) 4.9.2", "Mackenzie (1981)", "Ainslie (2010) §3.2"):
+        assert _first(cite).written is None, cite
 
 
 def test_a_report_number_joined_to_its_body_keeps_the_body_kind() -> None:
     """FHWA writes its report numbers onto the body with a hyphen."""
-    reference = references.parse(
-        "FHWA-PD-96-046 Table 3, printed folio 35 (PDF page 52)", overrides={}
-    )
-    assert reference.kind is references.ReferenceKind.REPORT
-    assert reference.designation == "FHWA-PD-96-046"
+    document = _first("FHWA-PD-96-046 Table 3, printed folio 35 (PDF page 52)")
+    assert document.kind is references.ReferenceKind.REPORT
+    assert document.designation == "FHWA-PD-96-046"
 
 
 def test_an_override_line_needs_five_fields() -> None:
@@ -763,7 +1141,7 @@ def test_the_committed_markdown_is_what_the_artefact_renders(committed: dict) ->
 #: renderer is a pure function of the artefact, so it can be exercised on this
 #: instead of only end to end on 554 rows.
 FIXTURE = {
-    "schema": 1,
+    "schema": 2,
     "library": "0.0.0",
     "generator": "test",
     "counts": {
@@ -823,11 +1201,15 @@ FIXTURE = {
             "id": "d/iso-1-2020-table-1/scalar",
             "domain": "d",
             "reference": {
-                "kind": "standard",
-                "designation": "ISO 1",
-                "edition": "2020",
-                "clause": "Table 1",
                 "cite": "ISO 1:2020 Table 1",
+                "documents": [
+                    {
+                        "kind": "standard",
+                        "designation": "ISO 1",
+                        "edition": "2020",
+                        "clause": "Table 1",
+                    }
+                ],
             },
             "quantity": "Scalar",
             "kind": "scalar",
@@ -843,11 +1225,15 @@ FIXTURE = {
             "id": "d/iso-1-2020-table-2/mask",
             "domain": "d",
             "reference": {
-                "kind": "standard",
-                "designation": "ISO 1",
-                "edition": "2020",
-                "clause": "Table 2",
                 "cite": "ISO 1:2020 Table 2",
+                "documents": [
+                    {
+                        "kind": "standard",
+                        "designation": "ISO 1",
+                        "edition": "2020",
+                        "clause": "Table 2",
+                    }
+                ],
             },
             "quantity": "Mask",
             "kind": "mask",
@@ -864,11 +1250,15 @@ FIXTURE = {
             "id": "d/iso-2-2020-annex-a/record",
             "domain": "d",
             "reference": {
-                "kind": "standard",
-                "designation": "ISO 2",
-                "edition": "2020",
-                "clause": "Annex A",
                 "cite": "ISO 2:2020 Annex A",
+                "documents": [
+                    {
+                        "kind": "standard",
+                        "designation": "ISO 2",
+                        "edition": "2020",
+                        "clause": "Annex A",
+                    }
+                ],
             },
             "quantity": "Record",
             "kind": "record",
@@ -881,6 +1271,80 @@ FIXTURE = {
         },
     ],
 }
+
+
+def test_the_fixture_is_a_document_the_gate_accepts() -> None:
+    """A fixture that states a schema has to be one.
+
+    The renderer reads one field of a reference, so a fixture can carry a
+    superseded shape and stay green forever while claiming, in the file whose
+    subject is the artefact's invariants, that the artefact looks like that.
+    This one did: it still declared schema 1 and a single headline document
+    per citation after a citation had become a list of them.
+
+    The override ratchet is the one thing the gate asks that is about the
+    corpus rather than about the document in front of it, and three checks are
+    not the corpus, so it is the one thing excused here.
+    """
+    assert FIXTURE["schema"] == artifact.SCHEMA
+    problems = [
+        problem
+        for problem in gate.validate(FIXTURE)
+        if not problem.startswith(gate.OVERRIDES_PATH.name)
+    ]
+    assert problems == []
+
+
+def test_a_citation_with_nothing_after_its_last_document_has_no_tail() -> None:
+    """Absent, never null, because the site reads the document that way.
+
+    The site schema declares ``tail`` an optional string of at least one
+    character, and no field of a check there is nullable, so ``null`` is
+    rejected wherever it appears.
+    A reference keeps an empty tail, which the builder writes as ``None`` and
+    then drops along with every other null-valued key, so the key is left out
+    of the file. The bracket a citation does close on is still written.
+
+    The builder is the only thing between a null and a documentation build
+    that fails far from the check that wrote it, so the gate asks the whole
+    document for nulls as well. It did not before, and accepted the fixture
+    above while it carried twelve of them.
+    """
+    bare = references.parse("ISO 16283-1:2014 Clause 8.1", overrides={})
+    closed = references.parse("IEC 651:1979 Table V (via BS 5969:1981)", overrides={})
+    assert bare.tail == ""
+    assert "tail" not in artifact._without_nulls(artifact._reference_document(bare))
+    assert artifact._without_nulls(artifact._reference_document(closed))["tail"] == ")"
+
+    written = json.loads(json.dumps(FIXTURE))
+    written["checks"][0]["reference"]["tail"] = None
+    written["checks"][1]["reference"]["documents"][0]["lead"] = None
+    # Through validate(), not only the helper: a gate that stopped calling it
+    # would otherwise accept the nulls with every test still green.
+    nulls = [
+        problem.split(" ", 1)[0]
+        for problem in gate.validate(written)
+        if not problem.startswith(gate.OVERRIDES_PATH.name)
+    ]
+    assert nulls == [
+        "checks[0].reference.tail",
+        "checks[1].reference.documents[0].lead",
+    ]
+    assert gate._null_problems(FIXTURE) == []
+
+
+def test_a_null_where_a_list_belongs_is_reported_rather_than_raised() -> None:
+    """The validators after the null check walk lists and mappings."""
+    written = json.loads(json.dumps(FIXTURE))
+    written["checks"][0]["reference"]["documents"] = None
+    problems = [
+        problem
+        for problem in gate.validate(written)
+        if not problem.startswith(gate.OVERRIDES_PATH.name)
+    ]
+    assert [problem.split(" ", 1)[0] for problem in problems] == [
+        "checks[0].reference.documents"
+    ]
 
 
 def test_the_renderer_works_on_a_three_check_document() -> None:

@@ -114,7 +114,7 @@ from conformance.artifact import (
     write,
 )
 from conformance.compare import document_problems
-from conformance.references import Reference, ReferenceKind
+from conformance.references import Cited, Reference, ReferenceKind, Relation
 from conformance.registry import (
     _DATA,
     _ROOT,
@@ -170,12 +170,14 @@ __all__ = [
     "_TESTS",
     "Binding",
     "Check",
+    "Cited",
     "Deviation",
     "FilterClass",
     "Kind",
     "Outcome",
     "Reference",
     "ReferenceKind",
+    "Relation",
     "Side",
     "Tolerance",
     "ToleranceMode",

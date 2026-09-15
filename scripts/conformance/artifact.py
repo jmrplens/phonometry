@@ -38,7 +38,7 @@ import re
 from typing import TYPE_CHECKING, Any
 
 from .compare import document_problems
-from .references import Reference, ReferenceKind, parse
+from .references import Cited, Reference, ReferenceKind, documents, parse
 from .registry import _ROOT, CHECKS, Kind, Outcome, Verdict, _snap, deviation_places
 from .shared import _FILTER_ARCHS, _filter_class, _weighting_deviation
 from .units import UNITS
@@ -49,8 +49,11 @@ if TYPE_CHECKING:
 
     from .registry import Check
 
-#: Bumped only when the shape changes in a way a reader cannot ignore.
-SCHEMA = 1
+#: Bumped only when the shape changes in a way a reader cannot ignore. Two
+#: since a citation carries every document it names rather than the first one,
+#: which also changes what ``counts.designations`` and ``counts.sources``
+#: measure.
+SCHEMA = 2
 
 #: Where the document is committed. Beside the Markdown it generates, in the
 #: directory the project already declares as the home of its numerical
@@ -129,13 +132,30 @@ def _exact(value: float) -> float:
 
 
 def _reference_document(reference: Reference) -> dict[str, Any]:
-    """The reference of one check, as the document carries it."""
+    """The reference of one check, as the document carries it.
+
+    A citation and every document it names, in written order. There is no
+    headline document, because a citation that names three does not say one of
+    them is the one that counts, and a consumer that read the first was what
+    left six checks of ISO 16283 filed under part 1 alone.
+    """
     return {
-        "kind": str(reference.kind),
-        "designation": reference.designation,
-        "edition": reference.edition,
-        "clause": reference.clause,
         "cite": reference.cite,
+        "tail": reference.tail or None,
+        "documents": [_cited_document(cited) for cited in documents(reference)],
+    }
+
+
+def _cited_document(cited: Cited) -> dict[str, Any]:
+    """One named document, with the words that introduced it."""
+    return {
+        "kind": str(cited.kind),
+        "designation": cited.designation,
+        "edition": cited.edition,
+        "clause": cited.clause,
+        "lead": cited.lead or None,
+        "relation": None if cited.relation is None else str(cited.relation),
+        "written": cited.written,
     }
 
 
@@ -380,17 +400,29 @@ def _counts(
     documents, and distinct further works - and are reported alongside rather
     than in place of it, because changing a published claim is the maintainer's
     call and not a side effect of a refactor.
+
+    Both count every document a citation names, wherever in it the citation
+    names it, and not the one it opens with. The rule is lexical and makes no
+    judgement about which of the named documents matters: what the citation
+    names, the citation cites. Deciding that a coupler or an input-test
+    standard "does not really count" is the same unverifiable judgement that
+    filed ANSI S1.11 under IEC 61260 in the first place.
     """
     passing = sum(1 for _, outcome in results if outcome.passed)
-    designations = {
-        reference.designation
+    cited = [
+        document
         for reference in references.values()
-        if reference.kind is ReferenceKind.STANDARD
+        for document in documents(reference)
+    ]
+    designations = {
+        document.designation
+        for document in cited
+        if document.kind is ReferenceKind.STANDARD
     }
     sources = {
-        reference.designation
-        for reference in references.values()
-        if reference.kind is not ReferenceKind.STANDARD
+        document.designation
+        for document in cited
+        if document.kind is not ReferenceKind.STANDARD
     }
     legacy = {check.standard.split(":")[0].split(" Annex")[0] for check, _ in results}
     return {

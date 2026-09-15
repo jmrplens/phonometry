@@ -121,21 +121,42 @@ const conformanceSide = z.object({
   record: z.record(z.string(), z.number()).optional(),
 });
 
+const conformanceCited = z.object({
+  // Same vocabulary as the page bibliographies above, plus `derivation`
+  // for a check whose reference is a closed form and not a document.
+  kind: z.enum(['standard', 'book', 'article', 'report', 'web', 'derivation']),
+  /** Written out in full: "ISO 16283-2", never the "-2" the citation writes. */
+  designation: z.string().min(1),
+  /** A string, so it can hold "2014", "2e", "2020 + AMD1:2023", "(2010)". */
+  edition: z.string().min(1).optional(),
+  clause: z.string().min(1).optional(),
+  /** The literal text that introduces it; absent on the first document. */
+  lead: z.string().min(1).optional(),
+  /** What that text says, read off the connector and never inferred. */
+  relation: z
+    .enum(['corroborates', 'compares', 'via', 'supplies', 'mentions'])
+    .optional(),
+  /** What the citation writes, where it differs from the designation. */
+  written: z.string().min(1).optional(),
+});
+
 const conformanceCheck = z
   .object({
     /** `domain/citation/quantity`, slugged. The join key and the row anchor. */
     id: z.string().min(1),
     domain: z.string().min(1),
     reference: z.object({
-      // Same vocabulary as the page bibliographies above, plus `derivation`
-      // for a check whose reference is a closed form and not a document.
-      kind: z.enum(['standard', 'book', 'article', 'report', 'web', 'derivation']),
-      designation: z.string().min(1),
-      /** A string, so it can hold "2014", "2e", "2020 + AMD1:2023", "(2010)". */
-      edition: z.string().min(1).optional(),
-      clause: z.string().min(1).optional(),
       /** The citation exactly as the check registered it. */
       cite: z.string().min(1),
+      /** What the citation writes after the last document, usually a bracket. */
+      tail: z.string().min(1).optional(),
+      /**
+       * Every document the citation names, in the order it writes them. A
+       * citation naming two or three has no headline document: it is about
+       * all of them, and a consumer reading only the first is the defect this
+       * list replaced.
+       */
+      documents: z.array(conformanceCited).min(1),
     }),
     quantity: z.string().min(1),
     /** Dotted path to the symbol under test. Not populated yet. */
@@ -178,7 +199,7 @@ const conformanceCheck = z
 
 const conformanceSchema = z.object({
   /** Bumped only on a shape change a reader cannot ignore. */
-  schema: z.literal(1),
+  schema: z.literal(2),
   library: z.string().min(1),
   generator: z.string().min(1),
   counts: z.object({
@@ -189,9 +210,9 @@ const conformanceSchema = z.object({
     /** Citation groups, the figure the project publishes. */
     standards: z.number().int(),
     citations: z.number().int(),
-    /** Distinct normative documents, from the split citation. */
+    /** Distinct normative documents named anywhere in a citation. */
     designations: z.number().int(),
-    /** Distinct further cited works. */
+    /** Distinct further cited works, named anywhere in a citation. */
     sources: z.number().int(),
   }),
   /** The closed unit vocabulary every row's `unit` must come from. */

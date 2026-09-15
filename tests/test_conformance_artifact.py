@@ -434,6 +434,86 @@ def test_a_closed_form_is_a_derivation_and_not_a_document() -> None:
     assert reference.clause is None
 
 
+def test_no_designation_is_cut_inside_a_phrase(committed: dict) -> None:
+    """The committed artefact, asked whether any split cut a name in two.
+
+    The site prints the designation as the leading text of every row, so a
+    split that rebuilds the citation but cuts it inside a phrase publishes
+    "Tab. 4.2 (printed folio 14, PDF" as the name of a document. The tell is a
+    parenthesis the designation opens and never closes, or a trailing comma or
+    conjunction that was joining it to the rest of the citation.
+    """
+    cut = sorted(
+        {
+            reference["designation"]
+            for check in committed["checks"]
+            for reference in [check["reference"]]
+            if not references._is_whole(reference["designation"])
+        }
+    )
+    assert cut == []
+
+
+def test_a_split_that_cuts_a_name_falls_through_to_the_next_reading() -> None:
+    """Refused splits land on the next splitter, or on the whole string."""
+    for cite, read in (
+        (
+            "Poiseuille limit (Stinson 1991)",
+            ("derivation", "Poiseuille limit (Stinson 1991)", None, None),
+        ),
+        (
+            "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1",
+            (
+                "book",
+                "Manual de acustica ambiental y arquitectonica",
+                None,
+                "Ejemplo 7.1",
+            ),
+        ),
+        (
+            "Suva 66008.f, 8th revised edition, August 2006, Tableau 2 and Figure 7",
+            (
+                "derivation",
+                "Suva 66008.f, 8th revised edition, August 2006, Tableau 2 and Figure 7",
+                None,
+                None,
+            ),
+        ),
+    ):
+        reference = references.parse(cite, overrides={})
+        got = (
+            str(reference.kind),
+            reference.designation,
+            reference.edition,
+            reference.clause,
+        )
+        assert got == read, cite
+        assert references.recompose(reference) == cite
+
+
+def test_the_year_form_files_a_known_book_or_report_as_what_it_is() -> None:
+    """ "Barron (2003)" reads as a paper and is a book; the table says so."""
+    kinds = references.ReferenceKind
+    for cite, kind in (
+        ("Barron (2003) Table 7-5, PDF p. 320, printed folio 308", kinds.BOOK),
+        ("Harris (1991) Figures A3-2 and A3-8", kinds.BOOK),
+        ("Harris 1978 closed form (DFT-even Hann)", kinds.ARTICLE),
+        ("NPL CIRA(EXT) 009 (1996) Tables 8 to 14", kinds.REPORT),
+        ("IFA-LSA 01-234 (2020) Tab. 4.2 (printed folio 14, PDF p. 14)", kinds.REPORT),
+        ("Heisterkamp (2024) Table 3, PDF p. 10, printed folio 186", kinds.ARTICLE),
+    ):
+        assert references.parse(cite, overrides={}).kind is kind, cite
+
+
+def test_a_report_number_joined_to_its_body_keeps_the_body_kind() -> None:
+    """FHWA writes its report numbers onto the body with a hyphen."""
+    reference = references.parse(
+        "FHWA-PD-96-046 Table 3, printed folio 35 (PDF page 52)", overrides={}
+    )
+    assert reference.kind is references.ReferenceKind.REPORT
+    assert reference.designation == "FHWA-PD-96-046"
+
+
 def test_an_override_line_needs_five_fields() -> None:
     with pytest.raises(ValueError, match="expected 5 tab-separated fields"):
         references._override_line("only\ttwo", 3)

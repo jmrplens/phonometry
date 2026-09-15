@@ -3,14 +3,14 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1161,
-    "passing": 1161,
+    "checks": 1259,
+    "passing": 1259,
     "failing": 0,
-    "domains": 86,
-    "standards": 424,
-    "citations": 770,
-    "designations": 161,
-    "sources": 85
+    "domains": 87,
+    "standards": 460,
+    "citations": 861,
+    "designations": 163,
+    "sources": 101
   },
   "units": [
     "%",
@@ -551,20 +551,26 @@
     {
       "id": "enclosure-and-cabin-insulation",
       "title": "Enclosure and cabin insulation",
-      "checks": 15,
-      "passing": 15
+      "checks": 43,
+      "passing": 43
     },
     {
       "id": "in-situ-measurement-of-silencers-screens-and-barriers",
       "title": "In-situ measurement of silencers, screens and barriers",
-      "checks": 22,
-      "passing": 22
+      "checks": 61,
+      "passing": 61
     },
     {
       "id": "spatial-sound-decay-and-prediction-in-workrooms",
       "title": "Spatial sound decay and prediction in workrooms",
-      "checks": 16,
-      "passing": 16
+      "checks": 35,
+      "passing": 35
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "title": "Suspended ceilings in a reverberation room (EN 16487)",
+      "checks": 12,
+      "passing": 12
     },
     {
       "id": "control-valve-noise-iec-60534-8-3",
@@ -1532,7 +1538,7 @@
       "domain": "room-building-acoustics",
       "reference": {
         "kind": "book",
-        "designation": "Manual de acustica ambiental y arquitectonica,",
+        "designation": "Manual de acustica ambiental y arquitectonica",
         "clause": "Ejemplo 7.1",
         "cite": "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1"
       },
@@ -1560,7 +1566,7 @@
       "domain": "room-building-acoustics",
       "reference": {
         "kind": "book",
-        "designation": "Manual de acustica ambiental y arquitectonica,",
+        "designation": "Manual de acustica ambiental y arquitectonica",
         "clause": "Ejemplo 7.1",
         "cite": "Manual de acustica ambiental y arquitectonica, Ejemplo 7.1"
       },
@@ -1814,9 +1820,8 @@
       "id": "room-acoustics/arau-puchades-acustica-65-1988-formula-18/t-0-5-0-1-0-1-per-wall-pair-dims-8-5-3-m",
       "domain": "room-acoustics",
       "reference": {
-        "kind": "book",
-        "designation": "Arau-Puchades (Acustica 65, 1988,",
-        "clause": "Formula 18)",
+        "kind": "derivation",
+        "designation": "Arau-Puchades (Acustica 65, 1988, Formula 18)",
         "cite": "Arau-Puchades (Acustica 65, 1988, Formula 18)"
       },
       "quantity": "T (α=0.5/0.1/0.1 per wall pair, dims 8×5×3 m)",
@@ -6292,7 +6297,7 @@
       "id": "room-building-acoustics/vigran-2008-eqs-9-18-9-20/plenum-model-eq-9-18-converges-to-eq-9-20-as-the-damping-vanishes",
       "domain": "room-building-acoustics",
       "reference": {
-        "kind": "article",
+        "kind": "book",
         "designation": "Vigran",
         "edition": "(2008)",
         "clause": "Eqs. (9.18)-(9.20)",
@@ -15018,14 +15023,14 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/fundamental-frequency-of-a-23-m-building-f-46-h-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-23-m-building-f-46-h-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
         "kind": "standard",
         "designation": "ISO 4866",
         "edition": "2010",
-        "clause": "D.2",
-        "cite": "ISO 4866:2010 D.2"
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
       },
       "quantity": "Fundamental frequency of a 23 m building, f = 46/h, Hz",
       "kind": "scalar",
@@ -15047,14 +15052,14 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/fundamental-frequency-of-a-46-m-building-f-46-h-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-46-m-building-f-46-h-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
         "kind": "standard",
         "designation": "ISO 4866",
         "edition": "2010",
-        "clause": "D.2",
-        "cite": "ISO 4866:2010 D.2"
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
       },
       "quantity": "Fundamental frequency of a 46 m building, f = 46/h, Hz",
       "kind": "scalar",
@@ -15076,14 +15081,14 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/fundamental-frequency-of-a-92-m-building-f-46-h-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-92-m-building-f-46-h-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
         "kind": "standard",
         "designation": "ISO 4866",
         "edition": "2010",
-        "clause": "D.2",
-        "cite": "ISO 4866:2010 D.2"
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
       },
       "quantity": "Fundamental frequency of a 92 m building, f = 46/h, Hz",
       "kind": "scalar",
@@ -15105,14 +15110,14 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/the-same-fit-as-a-period-t-0-022-h-s",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/the-same-fit-as-a-period-t-0-022-h-s",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
         "kind": "standard",
         "designation": "ISO 4866",
         "edition": "2010",
-        "clause": "D.2",
-        "cite": "ISO 4866:2010 D.2"
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
       },
       "quantity": "The same fit as a period, T = 0,022 h, s",
       "kind": "scalar",
@@ -15337,14 +15342,14 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/upper-end-of-the-error-band-an-empirical-prediction-carries-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/upper-end-of-the-error-band-an-empirical-prediction-carries-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
         "kind": "standard",
         "designation": "ISO 4866",
         "edition": "2010",
-        "clause": "D.2",
-        "cite": "ISO 4866:2010 D.2"
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
       },
       "quantity": "Upper end of the error band an empirical prediction carries, Hz",
       "kind": "scalar",
@@ -15366,14 +15371,14 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/lower-end-of-the-error-band-an-empirical-prediction-carries-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/lower-end-of-the-error-band-an-empirical-prediction-carries-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
         "kind": "standard",
         "designation": "ISO 4866",
         "edition": "2010",
-        "clause": "D.2",
-        "cite": "ISO 4866:2010 D.2"
+        "clause": "D.3",
+        "cite": "ISO 4866:2010 D.3"
       },
       "quantity": "Lower end of the error band an empirical prediction carries, Hz",
       "kind": "scalar",
@@ -22994,10 +22999,8 @@
       "id": "underwater-sound-propagation-propagation-loss/del-grosso-refit-wong-zhu-1995-table-iv/c-t90-20-c-s-35-p-500-bar-vs-the-printed-check-table-m-s",
       "domain": "underwater-sound-propagation-propagation-loss",
       "reference": {
-        "kind": "article",
-        "designation": "Del Grosso refit (Wong-Zhu",
-        "edition": "1995",
-        "clause": "Table IV)",
+        "kind": "derivation",
+        "designation": "Del Grosso refit (Wong-Zhu 1995 Table IV)",
         "cite": "Del Grosso refit (Wong-Zhu 1995 Table IV)"
       },
       "quantity": "c(t90 = 20 °C, S = 35, P = 500 bar) vs the printed check table, m/s",
@@ -24993,10 +24996,8 @@
       "id": "porous-multilayer-absorbers-mechel-bies-cox-d-antonio/lossless-layer-limit-mechel-2e-sect-d-3-d-4/air-cavity-over-a-rigid-wall-at-lambda-4-alpha",
       "domain": "porous-multilayer-absorbers-mechel-bies-cox-d-antonio",
       "reference": {
-        "kind": "book",
-        "designation": "Lossless-layer limit (Mechel",
-        "edition": "2e",
-        "clause": "Sect. D.3-D.4)",
+        "kind": "derivation",
+        "designation": "Lossless-layer limit (Mechel 2e Sect. D.3-D.4)",
         "cite": "Lossless-layer limit (Mechel 2e Sect. D.3-D.4)"
       },
       "quantity": "Air cavity over a rigid wall at lambda/4: alpha",
@@ -25449,9 +25450,8 @@
       "id": "slow-sound-perfect-absorbers-jimenez-et-al-appl-sci-2017/poiseuille-limit-stinson-1991/slit-j-w-rho-s-12-eta-h-2-as-w-0-h-1-2-mm",
       "domain": "slow-sound-perfect-absorbers-jimenez-et-al-appl-sci-2017",
       "reference": {
-        "kind": "article",
-        "designation": "Poiseuille limit (Stinson",
-        "edition": "1991)",
+        "kind": "derivation",
+        "designation": "Poiseuille limit (Stinson 1991)",
         "cite": "Poiseuille limit (Stinson 1991)"
       },
       "quantity": "Slit: j w rho_s -> 12 eta / h^2 as w -> 0 (h = 1.2 mm)",
@@ -25477,9 +25477,8 @@
       "id": "slow-sound-perfect-absorbers-jimenez-et-al-appl-sci-2017/poiseuille-limit-stinson-1991/square-duct-j-w-rho-28-454-eta-w-2-as-w-0-w-3-mm",
       "domain": "slow-sound-perfect-absorbers-jimenez-et-al-appl-sci-2017",
       "reference": {
-        "kind": "article",
-        "designation": "Poiseuille limit (Stinson",
-        "edition": "1991)",
+        "kind": "derivation",
+        "designation": "Poiseuille limit (Stinson 1991)",
         "cite": "Poiseuille limit (Stinson 1991)"
       },
       "quantity": "Square duct: j w rho -> 28.454 eta / w^2 as w -> 0 (w = 3 mm)",
@@ -26645,9 +26644,8 @@
       "id": "swept-sine-distortion-phase-utilities-farina-novak/all-pass-decomposition-of-a-pure-latency-b-p-sec-13-1-4/excess-group-delay-of-a-biquad-delayed-7-25-samples-samples",
       "domain": "swept-sine-distortion-phase-utilities-farina-novak",
       "reference": {
-        "kind": "book",
-        "designation": "All-pass decomposition of a pure latency (B&P",
-        "clause": "Sec. 13.1.4)",
+        "kind": "derivation",
+        "designation": "All-pass decomposition of a pure latency (B&P Sec. 13.1.4)",
         "cite": "All-pass decomposition of a pure latency (B&P Sec. 13.1.4)"
       },
       "quantity": "Excess group delay of a biquad delayed 7.25 samples, samples",
@@ -28968,7 +28966,7 @@
       "verdict": "pass"
     },
     {
-      "id": "enclosure-and-cabin-insulation/iso-11546-2-1995-table-c-2/the-seven-mean-absorption-coefficients-of-the-room-descriptions",
+      "id": "enclosure-and-cabin-insulation/iso-11546-2-1995-table-c-2/the-seven-room-descriptions-word-for-word-under-the-mean-absorption-coefficient-each-of-them-is-printed-against",
       "domain": "enclosure-and-cabin-insulation",
       "reference": {
         "kind": "standard",
@@ -28977,7 +28975,7 @@
         "clause": "Table C.2",
         "cite": "ISO 11546-2:1995 Table C.2"
       },
-      "quantity": "The seven mean absorption coefficients of the room descriptions",
+      "quantity": "The seven room descriptions, word for word, under the mean absorption coefficient each of them is printed against",
       "kind": "count",
       "expected": {
         "value": 7.0,
@@ -29310,6 +29308,889 @@
       "verdict": "pass"
     },
     {
+      "id": "enclosure-and-cabin-insulation/npl-cira-ext-009-1996-tables-8-to-14-pdf-pp-19-to-24-printed-folios-15-to-20/the-environmental-correction-taken-from-a-room-s-printed-volume-and-a-weighted-reverberation-time-reproduces-all-17-values-measured-in-five-real-rooms",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "report",
+        "designation": "NPL CIRA(EXT) 009",
+        "edition": "(1996)",
+        "clause": "Tables 8 to 14, PDF pp. 19 to 24, printed folios 15 to 20",
+        "cite": "NPL CIRA(EXT) 009 (1996) Tables 8 to 14, PDF pp. 19 to 24, printed folios 15 to 20"
+      },
+      "quantity": "The environmental correction taken from a room's printed volume and A-weighted reverberation time reproduces all 17 values measured in five real rooms",
+      "kind": "count",
+      "expected": {
+        "value": 17.0,
+        "label": "17/17 (worst departure 0.08 dB)"
+      },
+      "computed": {
+        "value": 17.0,
+        "label": "17/17 printed values of K_2A, from 1,1 dB to 8,4 dB"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/npl-cira-ext-009-1996-tables-9-to-14-pdf-pp-20-to-24-printed-folios-16-to-20/annex-c-calls-a-room-fit-for-iso-3746-exactly-where-the-measured-environmental-correction-stays-under-the-7-db-of-table-c-1-in-all-17-configurations",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "report",
+        "designation": "NPL CIRA(EXT) 009",
+        "edition": "(1996)",
+        "clause": "Tables 9 to 14, PDF pp. 20 to 24, printed folios 16 to 20",
+        "cite": "NPL CIRA(EXT) 009 (1996) Tables 9 to 14, PDF pp. 20 to 24, printed folios 16 to 20"
+      },
+      "quantity": "Annex C calls a room fit for ISO 3746 exactly where the measured environmental correction stays under the 7 dB of Table C.1, in all 17 configurations",
+      "kind": "count",
+      "expected": {
+        "value": 17.0,
+        "label": "17/17, reading the absorption at the upper end of each printed range"
+      },
+      "computed": {
+        "value": 17.0,
+        "label": "17/17 verdicts that agree with the measurement"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/npl-cira-ext-009-1996-tables-9-to-14-pdf-pp-20-to-24-printed-folios-16-to-20/at-the-2-db-ceiling-iso-3744-is-given-the-annex-agrees-with-13-of-the-same-17-measurements-and-the-four-it-refuses-are-the-hemi-anechoic-room-the-report-says-the-table-of-room-descriptions-cannot-reach",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "report",
+        "designation": "NPL CIRA(EXT) 009",
+        "edition": "(1996)",
+        "clause": "Tables 9 to 14, PDF pp. 20 to 24, printed folios 16 to 20",
+        "cite": "NPL CIRA(EXT) 009 (1996) Tables 9 to 14, PDF pp. 20 to 24, printed folios 16 to 20"
+      },
+      "quantity": "At the 2 dB ceiling ISO 3744 is given, the annex agrees with 13 of the same 17 measurements, and the four it refuses are the hemi-anechoic room the report says the table of room descriptions cannot reach",
+      "kind": "scalar",
+      "expected": {
+        "value": 13.0,
+        "label": "13 of 17, the four that differ being room A, which is hemi-anechoic and so more absorbent than the 0,5 the table stops at"
+      },
+      "computed": {
+        "value": 13.0,
+        "label": "13 of 17, differing at A1, A2, A3, A4"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/npl-cira-ext-009-1996-tables-6-and-9-pdf-pp-15-and-20-printed-folios-11-and-16/room-e-is-printed-with-two-different-boundary-areas-and-only-the-one-table-9-pairs-with-the-volume-and-the-reverberation-time-puts-the-annex-back-on-the-measurement",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "report",
+        "designation": "NPL CIRA(EXT) 009",
+        "edition": "(1996)",
+        "clause": "Tables 6 and 9, PDF pp. 15 and 20, printed folios 11 and 16",
+        "cite": "NPL CIRA(EXT) 009 (1996) Tables 6 and 9, PDF pp. 15 and 20, printed folios 11 and 16"
+      },
+      "quantity": "Room E is printed with two different boundary areas, and only the one Table 9 pairs with the volume and the reverberation time puts the annex back on the measurement",
+      "kind": "scalar",
+      "expected": {
+        "value": 3.0,
+        "label": "all three surfaces judged as measured, from the 358 m2 of Table 9"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3 of 3 with Table 9, and 1 of 3 with the 258 m2 Table 6 prints for the same room"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/npl-cira-ext-009-1996-tables-10-to-14-pdf-pp-22-to-24-printed-folios-18-to-20/the-estimated-room-absorption-column-of-the-study-does-not-follow-the-study-s-own-eq-3-every-one-of-its-17-cells-sits-more-than-0-4-db-away-from-it-so-that-column-is-no-oracle-for-this-library",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "report",
+        "designation": "NPL CIRA(EXT) 009",
+        "edition": "(1996)",
+        "clause": "Tables 10 to 14, PDF pp. 22 to 24, printed folios 18 to 20",
+        "cite": "NPL CIRA(EXT) 009 (1996) Tables 10 to 14, PDF pp. 22 to 24, printed folios 18 to 20"
+      },
+      "quantity": "The estimated room absorption column of the study does not follow the study's own Eq. (3): every one of its 17 cells sits more than 0,4 dB away from it, so that column is no oracle for this library",
+      "kind": "count",
+      "expected": {
+        "value": 17.0,
+        "label": "17/17 (closest approach 0.45 dB)"
+      },
+      "computed": {
+        "value": 17.0,
+        "label": "17/17 printed cells Eq. (3) does not reach"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/heisterkamp-2024-table-3-pdf-p-10-printed-folio-186/the-environmental-correction-from-a-mean-absorption-coefficient-and-a-boundary-area-reproduces-the-six-values-three-test-engineers-reached-for-one-workroom",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "article",
+        "designation": "Heisterkamp",
+        "edition": "(2024)",
+        "clause": "Table 3, PDF p. 10, printed folio 186",
+        "cite": "Heisterkamp (2024) Table 3, PDF p. 10, printed folio 186"
+      },
+      "quantity": "The environmental correction from a mean absorption coefficient and a boundary area reproduces the six values three test engineers reached for one workroom",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 (worst departure 0.05 dB)"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed values of K_2A"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/heisterkamp-2024-table-3-pdf-p-10-printed-folio-186/annex-c-puts-the-same-workroom-outside-iso-11202-on-the-first-two-assessments-and-inside-it-on-the-third-which-is-where-their-printed-k-2a-falls-against-the-7-db-of-table-c-1",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "article",
+        "designation": "Heisterkamp",
+        "edition": "(2024)",
+        "clause": "Table 3, PDF p. 10, printed folio 186",
+        "cite": "Heisterkamp (2024) Table 3, PDF p. 10, printed folio 186"
+      },
+      "quantity": "Annex C puts the same workroom outside ISO 11202 on the first two assessments and inside it on the third, which is where their printed K_2A falls against the 7 dB of Table C.1",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6, the tightest of them sitting 0,09 dB over the 7 dB ceiling"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 verdicts that agree with the printed K_2A"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/heisterkamp-2024-table-4-pdf-p-11-printed-folio-187/the-environmental-correction-taken-from-an-absorption-area-measured-with-a-reference-sound-source-reproduces-all-six-printed-values-in-two-rooms-and-on-three-measurement-surfaces",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "article",
+        "designation": "Heisterkamp",
+        "edition": "(2024)",
+        "clause": "Table 4, PDF p. 11, printed folio 187",
+        "cite": "Heisterkamp (2024) Table 4, PDF p. 11, printed folio 187"
+      },
+      "quantity": "The environmental correction taken from an absorption area measured with a reference sound source reproduces all six printed values, in two rooms and on three measurement surfaces",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 (worst departure 0.04 dB)"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed values of K_2A"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/barron-2003-example-7-8-pdf-pp-321-and-323-printed-folios-309-and-311/the-two-a-weighted-totals-of-that-example-on-their-own-108-4-dba-without-the-enclosure-and-89-8-dba-with-it-which-is-where-the-weighting-table-shows-and-the-difference-of-the-two-hides-it",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Example 7-8, PDF pp. 321 and 323, printed folios 309 and 311",
+        "cite": "Barron (2003) Example 7-8, PDF pp. 321 and 323, printed folios 309 and 311"
+      },
+      "quantity": "The two A-weighted totals of that example on their own, 108,4 dBA without the enclosure and 89,8 dBA with it, which is where the weighting table shows and the difference of the two hides it",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "both totals within the one decimal the book prints"
+      },
+      "computed": {
+        "value": 0.0248,
+        "label": "without the enclosure 108.38 dBA, with the enclosure 89.79 dBA, worst departure 0.025 dB"
+      },
+      "unit": "dBA",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0248
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/peters-smith-and-hollins-acoustics-and-noise-control-3rd-ed-example-1-13-pdf-pp-31-and-32-printed-folios-16-and-17/one-enclosure-one-measured-band-attenuation-two-source-spectra-the-annex-d-estimate-gives-14-dba-against-one-machine-and-27-dba-against-the-other-which-is-why-the-annex-calls-it-an-estimate",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Peters, Smith and Hollins, Acoustics and Noise Control",
+        "edition": "3rd ed",
+        "clause": "Example 1.13, PDF pp. 31 and 32, printed folios 16 and 17",
+        "cite": "Peters, Smith and Hollins, Acoustics and Noise Control 3rd ed, Example 1.13, PDF pp. 31 and 32, printed folios 16 and 17"
+      },
+      "quantity": "One enclosure, one measured band attenuation, two source spectra: the Annex D estimate gives 14 dBA against one machine and 27 dBA against the other, which is why the annex calls it an estimate",
+      "kind": "record",
+      "expected": {
+        "label": "machine A = 14 dBA; machine B = 27 dBA",
+        "record": {
+          "machine A": 14.0,
+          "machine B": 27.0
+        }
+      },
+      "computed": {
+        "label": "machine A = 13.90 dBA, machine B = 26.92 dBA, a spread of 13.0 dB",
+        "record": {
+          "machine A": 14.0,
+          "machine B": 27.0
+        }
+      },
+      "unit": "dBA",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/schirmer-2006-10-8-1-pdf-pp-323-and-324-printed-folios-303-and-304/iso-11546-1-1995-3-16-iso-11546-2-1995-3-14-the-leak-ratio-of-an-enclosure-with-a-0-25-m2-opening-in-95-75-m2-of-wall-taken-over-the-interior-surface-with-the-opening-counted-in-against-the-printed-q-2-6e-3",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Schirmer",
+        "edition": "(2006)",
+        "clause": "10.8.1, PDF pp. 323 and 324, printed folios 303 and 304",
+        "cite": "Schirmer (2006) 10.8.1, PDF pp. 323 and 324, printed folios 303 and 304"
+      },
+      "quantity": "ISO 11546-1:1995 3.16 / ISO 11546-2:1995 3.14: the leak ratio of an enclosure with a 0,25 m2 opening in 95,75 m2 of wall, taken over the interior surface with the opening counted in, against the printed q = 2,6e-3",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0026,
+        "label": "q = 2,6e-3 (+/-5e-5, half of the last digit printed)"
+      },
+      "computed": {
+        "value": 0.002604,
+        "label": "0.002604"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-05
+      },
+      "deviation": {
+        "value": 4e-06
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/ifa-lsa-01-243-2014-anhang-beispiele-1-and-3-pdf-pp-22-23-and-25-printed-folios-22-23-and-25/the-a-weighted-insulation-of-two-enclosures-measured-where-they-stand-at-a-punching-machine-and-at-an-emery-machine-which-pins-the-order-of-the-subtraction-against-real-installations",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "report",
+        "designation": "IFA-LSA 01-243",
+        "edition": "(2014)",
+        "clause": "Anhang, Beispiele 1 and 3, PDF pp. 22, 23 and 25, printed folios 22, 23 and 25",
+        "cite": "IFA-LSA 01-243 (2014) Anhang, Beispiele 1 and 3, PDF pp. 22, 23 and 25, printed folios 22, 23 and 25"
+      },
+      "quantity": "The A-weighted insulation of two enclosures measured where they stand, at a punching machine and at an emery machine, which pins the order of the subtraction against real installations",
+      "kind": "record",
+      "expected": {
+        "label": "punching machine, Beispiel 1 = 20 dB; emery machine, Beispiel 3 = 20 dB",
+        "record": {
+          "punching machine, Beispiel 1": 20.0,
+          "emery machine, Beispiel 3": 20.0
+        }
+      },
+      "computed": {
+        "label": "punching machine, Beispiel 1 = 20 dB; emery machine, Beispiel 3 = 20 dB",
+        "record": {
+          "punching machine, Beispiel 1": 20.0,
+          "emery machine, Beispiel 3": 20.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-6-4-with-iso-3741-2010-9-1-2-equation-14-and-its-clamps-pdf-pp-28-and-29-printed-folios-19-and-20/the-background-correction-6-4-delegates-at-the-two-clamp-points-iso-3741-prints-1-26-db-for-a-6-db-margin-and-0-46-db-for-a-10-db-one",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "6.4 with ISO 3741:2010 9.1.2, Equation (14) and its clamps (PDF pp. 28 and 29, printed folios 19 and 20)",
+        "cite": "ISO 11957:1996 6.4 with ISO 3741:2010 9.1.2, Equation (14) and its clamps (PDF pp. 28 and 29, printed folios 19 and 20)"
+      },
+      "quantity": "The background correction 6.4 delegates, at the two clamp points ISO 3741 prints: 1,26 dB for a 6 dB margin and 0,46 dB for a 10 dB one",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "the printed 1,26 dB and 0,46 dB, to the two decimals folio 20 prints them at (+/-0,005 dB, half of that last digit)"
+      },
+      "computed": {
+        "value": 0.0037,
+        "label": "worst departure 0.0037 dB over the three bands, which re-evaluate Equation (14) at the clamped margin instead of taking the rounded constant the clause writes"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0037
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-6-4-and-6-7-with-iso-3741-2010-9-1-2-pdf-p-29-printed-folio-20/the-two-clauses-that-spend-that-correction-the-internal-noise-level-at-the-two-edges-of-its-6-db-to-10-db-window-and-the-insulation-of-6-4",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "6.4 and 6.7 with ISO 3741:2010 9.1.2 (PDF p. 29, printed folio 20)",
+        "cite": "ISO 11957:1996 6.4 and 6.7 with ISO 3741:2010 9.1.2 (PDF p. 29, printed folio 20)"
+      },
+      "quantity": "The two clauses that spend that correction: the internal noise level at the two edges of its 6 dB to 10 dB window, and the insulation of 6.4",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "80 - 1,26 and 80 - 0,46 for L_pA, and 31,26 / 30,46 / 31,26 for D_p (+/-0,005 dB, half of the last digit printed)"
+      },
+      "computed": {
+        "value": 0.0037,
+        "label": "worst departure 0.0037 dB over the five values"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0037
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-clause-8-with-iso-717-1-2013-annex-c-table-c-1-pdf-p-24-printed-folio-16/clause-8-is-iso-717-1-with-d-p-written-where-that-standard-writes-r-so-its-printed-example-rates-30-2-3-db-on-an-unfavourable-sum-of-31-8-db",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "clause 8 with ISO 717-1:2013 Annex C, Table C.1 (PDF p. 24, printed folio 16)",
+        "cite": "ISO 11957:1996 clause 8 with ISO 717-1:2013 Annex C, Table C.1 (PDF p. 24, printed folio 16)"
+      },
+      "quantity": "Clause 8 is ISO 717-1 with D_p written where that standard writes R, so its printed example rates 30 (-2; -3) dB on an unfavourable sum of 31,8 dB",
+      "kind": "record",
+      "expected": {
+        "label": "D_p,w = 30 dB; C = -2 dB; Ctr = -3 dB; unfavourable sum = 31.8 dB",
+        "record": {
+          "D_p,w": 30.0,
+          "C": -2.0,
+          "Ctr": -3.0,
+          "unfavourable sum": 31.8
+        }
+      },
+      "computed": {
+        "label": "D_p,w = 30 dB; C = -2 dB; Ctr = -3 dB; unfavourable sum = 31.8 dB",
+        "record": {
+          "D_p,w": 30.0,
+          "C": -2.0,
+          "Ctr": -3.0,
+          "unfavourable sum": 31.8
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-annex-a-with-iso-717-1-2013-annex-c-table-c-1-pdf-p-24-printed-folio-16/the-summation-term-of-the-annex-a-estimate-against-the-two-printed-sums-28-308-db-and-26-859-db-over-sixteen-bands-each",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "Annex A with ISO 717-1:2013 Annex C, Table C.1 (PDF p. 24, printed folio 16)",
+        "cite": "ISO 11957:1996 Annex A with ISO 717-1:2013 Annex C, Table C.1 (PDF p. 24, printed folio 16)"
+      },
+      "quantity": "The summation term of the Annex A estimate against the two printed sums, 28,308 dB and 26,859 dB, over sixteen bands each",
+      "kind": "mask",
+      "expected": {
+        "label": "the printed -10 lg of the two sums, 28,308 dB and 26,859 dB. The table truncates rather than rounds, which its ellipsis says, so a correct value sits at or above each and within 0,001 dB of it"
+      },
+      "computed": {
+        "label": "departures +0.000551 dB and +0.000986 dB over the two spectra"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "mask",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.000986
+      },
+      "binding": {
+        "lower": 0.0,
+        "upper": 0.001
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-clause-8-in-sgs-cstc-report-sdhl260400706101hi-2026-pdf-p-3-printed-folio-3-of-4/a-meeting-pod-measured-in-a-200-m3-reverberation-room-and-rated-by-the-issuing-laboratory-at-d-p-w-32-db",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "clause 8 in SGS-CSTC report SDHL260400706101HI (2026), PDF p. 3, printed folio 3 of 4",
+        "cite": "ISO 11957:1996 clause 8 in SGS-CSTC report SDHL260400706101HI (2026), PDF p. 3, printed folio 3 of 4"
+      },
+      "quantity": "A meeting pod measured in a 200 m3 reverberation room and rated by the issuing laboratory at D_p,w = 32 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 32.0,
+        "label": "D_p,w = 32 dB, the integer the report prints"
+      },
+      "computed": {
+        "value": 32.0,
+        "label": "D_p,w = 32 dB on an unfavourable sum of 22.9 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-clause-8-in-agh-report-5-5-130-2023-pdf-p-10-printed-folio-10-of-10/an-acoustic-booth-measured-in-a-180-4-m3-reverberation-room-and-rated-by-the-issuing-laboratory-at-d-p-w-22-db",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "clause 8 in AGH report 5.5.130. (2023), PDF p. 10, printed folio 10 of 10",
+        "cite": "ISO 11957:1996 clause 8 in AGH report 5.5.130. (2023), PDF p. 10, printed folio 10 of 10"
+      },
+      "quantity": "An acoustic booth measured in a 180,4 m3 reverberation room and rated by the issuing laboratory at D_p,w = 22 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 22.0,
+        "label": "D_p,w = 22 dB, the integer the report prints"
+      },
+      "computed": {
+        "value": 22.0,
+        "label": "D_p,w = 22 dB on an unfavourable sum of 29.7 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-clause-8-in-agh-report-5-5-130-680-2017-pdf-p-11-printed-folio-11-of-12/a-telephone-booth-whose-insulation-is-tabulated-to-whole-decibels-rated-by-the-issuing-laboratory-at-d-p-w-30-db",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "clause 8 in AGH report 5.5.130.680 (2017), PDF p. 11, printed folio 11 of 12",
+        "cite": "ISO 11957:1996 clause 8 in AGH report 5.5.130.680 (2017), PDF p. 11, printed folio 11 of 12"
+      },
+      "quantity": "A telephone booth whose insulation is tabulated to whole decibels, rated by the issuing laboratory at D_p,w = 30 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 30.0,
+        "label": "D_p,w = 30 dB, the integer the report prints"
+      },
+      "computed": {
+        "value": 30.0,
+        "label": "D_p,w = 30 dB on an unfavourable sum of 23.0 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-annex-a-with-barron-2003-example-7-8-table-7-5-pdf-pp-319-to-323-printed-folios-307-to-311/the-a-weighted-estimate-over-six-octave-bands-the-two-totals-the-example-prints-108-4-dba-and-89-8-dba-are-18-6-db-apart",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "Annex A with Barron (2003) Example 7-8, Table 7-5, PDF pp. 319 to 323, printed folios 307 to 311",
+        "cite": "ISO 11957:1996 Annex A with Barron (2003) Example 7-8, Table 7-5, PDF pp. 319 to 323, printed folios 307 to 311"
+      },
+      "quantity": "The A-weighted estimate over six octave bands: the two totals the example prints, 108.4 dBA and 89.8 dBA, are 18.6 dB apart",
+      "kind": "scalar",
+      "expected": {
+        "value": 18.60000000000001,
+        "label": "108.4 dBA less 89.8 dBA, each printed to a tenth, so the difference carries a tenth of its own (+/-0.1 dB)"
+      },
+      "computed": {
+        "value": 18.582
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.1
+      },
+      "deviation": {
+        "value": -0.018
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/barron-2003-table-7-5-pdf-p-320-printed-folio-308/iso-11546-1-1995-eq-3-d-p-band-by-band-from-the-two-printed-sound-pressure-spectra-against-the-printed-insertion-loss-row",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Table 7-5, PDF p. 320, printed folio 308",
+        "cite": "Barron (2003) Table 7-5, PDF p. 320, printed folio 308"
+      },
+      "quantity": "ISO 11546-1:1995 Eq. (3): D_p band by band from the two printed sound pressure spectra, against the printed insertion loss row",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 (worst departure 7.1e-15 dB)"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed values of the insertion loss row"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/barron-2003-example-7-8-pdf-pp-321-and-323-printed-folios-309-and-311/iso-11546-1-1995-eq-4-d-pa-from-the-same-two-band-spectra-against-the-difference-of-the-printed-108-4-dba-and-89-8-dba",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Example 7-8, PDF pp. 321 and 323, printed folios 309 and 311",
+        "cite": "Barron (2003) Example 7-8, PDF pp. 321 and 323, printed folios 309 and 311"
+      },
+      "quantity": "ISO 11546-1:1995 Eq. (4): D_pA from the same two band spectra, against the difference of the printed 108.4 dBA and 89.8 dBA",
+      "kind": "scalar",
+      "expected": {
+        "value": 18.60000000000001
+      },
+      "computed": {
+        "value": 18.58
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.1
+      },
+      "deviation": {
+        "value": -0.018
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/barron-2003-example-7-8-pdf-pp-320-to-323-printed-folios-308-to-311/iso-11546-1-1995-annex-c-the-estimate-formed-from-the-unenclosed-spectrum-and-the-printed-insertion-loss-lands-on-the-same-printed-difference-of-a-weighted-levels",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Example 7-8, PDF pp. 320 to 323, printed folios 308 to 311",
+        "cite": "Barron (2003) Example 7-8, PDF pp. 320 to 323, printed folios 308 to 311"
+      },
+      "quantity": "ISO 11546-1:1995 Annex C: the estimate formed from the unenclosed spectrum and the printed insertion loss lands on the same printed difference of A-weighted levels",
+      "kind": "scalar",
+      "expected": {
+        "value": 18.60000000000001
+      },
+      "computed": {
+        "value": 18.58
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.1
+      },
+      "deviation": {
+        "value": -0.018
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/barron-2003-table-7-5-pdf-p-320-printed-folio-308/iso-11546-1-1995-eq-1-d-w-from-the-printed-sound-power-levels-with-and-without-the-enclosure-in-the-five-bands-where-the-table-closes-on-itself",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Table 7-5, PDF p. 320, printed folio 308",
+        "cite": "Barron (2003) Table 7-5, PDF p. 320, printed folio 308"
+      },
+      "quantity": "ISO 11546-1:1995 Eq. (1): D_W from the printed sound power levels with and without the enclosure, in the five bands where the table closes on itself",
+      "kind": "count",
+      "expected": {
+        "value": 5.0,
+        "label": "5/5 (worst departure 5.3e-15 dB)"
+      },
+      "computed": {
+        "value": 5.0,
+        "label": "5/5 printed values of the insertion loss row"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/harris-1991-figures-a3-2-and-a3-8-pdf-pp-135-and-141-printed-folios-125-and-131/iso-11546-1-1995-annex-c-the-a-weighted-reduction-of-four-enclosure-cases-within-the-decibel-the-book-s-own-pairwise-addition-costs",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "book",
+        "designation": "Harris",
+        "edition": "(1991)",
+        "clause": "Figures A3-2 and A3-8, PDF pp. 135 and 141, printed folios 125 and 131",
+        "cite": "Harris (1991) Figures A3-2 and A3-8, PDF pp. 135 and 141, printed folios 125 and 131"
+      },
+      "quantity": "ISO 11546-1:1995 Annex C: the A-weighted reduction of four enclosure cases, within the decibel the book's own pairwise addition costs",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 (worst departure 0.71 dB)"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 printed A-weighted reductions"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-717-1-2020-annex-c-table-c-1-pdf-p-23-printed-folio-17/iso-11546-1-1995-7-4-rates-d-w-the-way-iso-717-1-rates-r-and-the-printed-calculation-example-reads-through-that-pass-through-unchanged",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 717-1",
+        "edition": "2020",
+        "clause": "Annex C, Table C.1, PDF p. 23, printed folio 17",
+        "cite": "ISO 717-1:2020 Annex C, Table C.1, PDF p. 23, printed folio 17"
+      },
+      "quantity": "ISO 11546-1:1995 7.4 rates D_W the way ISO 717-1 rates R, and the printed calculation example reads through that pass-through unchanged",
+      "kind": "record",
+      "expected": {
+        "label": "rating = 30 dB; C = -2 dB; Ctr = -3 dB; unfavourable sum = 31.8 dB",
+        "record": {
+          "rating": 30.0,
+          "C": -2.0,
+          "Ctr": -3.0,
+          "unfavourable sum": 31.8
+        }
+      },
+      "computed": {
+        "label": "rating = 30 dB; C = -2 dB; Ctr = -3 dB; unfavourable sum = 31.8 dB",
+        "record": {
+          "rating": 30.0,
+          "C": -2.0,
+          "Ctr": -3.0,
+          "unfavourable sum": 31.8
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-80000-1-2009-annex-b-b-2-and-b-3-pdf-pp-43-and-44-printed-folios-35-and-36/iso-11546-1-1995-9-4-states-every-result-rounded-to-the-nearest-integer-and-names-no-rule-the-rule-this-rounding-follows-is-rule-a-the-even-multiple-which-the-annex-calls-generally-preferable",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 80000-1",
+        "edition": "2009",
+        "clause": "Annex B, B.2 and B.3, PDF pp. 43 and 44, printed folios 35 and 36",
+        "cite": "ISO 80000-1:2009 Annex B, B.2 and B.3, PDF pp. 43 and 44, printed folios 35 and 36"
+      },
+      "quantity": "ISO 11546-1:1995 9.4 states every result rounded to the nearest integer and names no rule; the rule this rounding follows is Rule A, the even multiple, which the annex calls generally preferable",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "8/8 printed roundings of Annex B, two of them ties"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 printed roundings of Annex B, two of them ties"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/suva-66026-d-2010-6-2-1-pdf-p-17-printed-folio-15/iso-11546-1-1995-eq-2-the-a-weighted-total-of-an-octave-sound-power-spectrum-read-as-the-insulation-against-a-reference-that-carries-its-energy-in-the-1-khz-band-alone",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "report",
+        "designation": "Suva 66026.d",
+        "edition": "(2010)",
+        "clause": "6.2.1, PDF p. 17, printed folio 15",
+        "cite": "Suva 66026.d (2010) 6.2.1, PDF p. 17, printed folio 15"
+      },
+      "quantity": "ISO 11546-1:1995 Eq. (2): the A-weighted total of an octave sound power spectrum, read as the insulation against a reference that carries its energy in the 1 kHz band alone",
+      "kind": "scalar",
+      "expected": {
+        "value": 104.0,
+        "label": "104 dB, the integer the guide prints"
+      },
+      "computed": {
+        "value": 104.23
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.226
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
       "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-table-1/the-stepped-background-correction-db-to-subtract-over-the-eight-printed-rows",
       "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
       "reference": {
@@ -29596,6 +30477,523 @@
       "verdict": "pass"
     },
     {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-9-1-5-iso-14163-1998-table-b-1-pdf-page-47-folio-47/the-three-spectra-of-the-sister-standard-s-worked-conversion-fold-to-the-63-hz-octave-levels-it-prints",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "9.1.5 / ISO 14163:1998 Table B.1, PDF page 47, folio 47",
+        "cite": "ISO 11820:1996 9.1.5 / ISO 14163:1998 Table B.1, PDF page 47, folio 47"
+      },
+      "quantity": "The three spectra of the sister standard's worked conversion fold to the 63 Hz octave levels it prints",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "six octave levels inside the half decibel the printed integers allow"
+      },
+      "computed": {
+        "value": 0.4243,
+        "label": "worst departure 0.424 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.5
+      },
+      "deviation": {
+        "value": 0.4243
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-9-1-5-iso-14163-1998-table-b-1-pdf-page-47-folio-47/the-printed-octave-attenuation-of-each-spectrum-which-is-the-difference-of-the-two-folded-levels-and-not-the-fold-of-the-difference",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "9.1.5 / ISO 14163:1998 Table B.1, PDF page 47, folio 47",
+        "cite": "ISO 11820:1996 9.1.5 / ISO 14163:1998 Table B.1, PDF page 47, folio 47"
+      },
+      "quantity": "The printed octave attenuation of each spectrum, which is the difference of the two folded levels and not the fold of the difference",
+      "kind": "record",
+      "expected": {
+        "label": "laboratory pink noise = 7 dB; axial fan = 12 dB; centrifugal fan = 5 dB",
+        "record": {
+          "laboratory pink noise": 7.0,
+          "axial fan": 12.0,
+          "centrifugal fan": 5.0
+        }
+      },
+      "computed": {
+        "label": "laboratory pink noise = 7 dB; axial fan = 12 dB; centrifugal fan = 5 dB",
+        "record": {
+          "laboratory pink noise": 7.0,
+          "axial fan": 12.0,
+          "centrifugal fan": 5.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-2-holgado-palacios-2014-tabla-xl-pdf-page-149-folio-121/the-energy-mean-of-six-microphone-positions-over-the-twenty-one-bands-of-a-measured-silencer-test",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (2) / Holgado Palacios (2014) Tabla XL, PDF page 149, folio 121",
+        "cite": "ISO 11820:1996 Eq. (2) / Holgado Palacios (2014) Tabla XL, PDF page 149, folio 121"
+      },
+      "quantity": "The energy mean of six microphone positions, over the twenty-one bands of a measured silencer test",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "all 21 bands inside the 0,05 dB the printed tenth allows"
+      },
+      "computed": {
+        "value": 0.0487,
+        "label": "worst departure 0.049 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0487
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-21-holgado-palacios-2014-tablas-lxiv-to-lxvi-pdf-pages-173-176-and-178-folios-145-148-and-150/the-insertion-loss-of-three-silencers-measured-in-place-sixty-three-bands-of-the-level-difference-and-the-area-term",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (21) / Holgado Palacios (2014) Tablas LXIV to LXVI, PDF pages 173, 176 and 178, folios 145, 148 and 150",
+        "cite": "ISO 11820:1996 Eq. (21) / Holgado Palacios (2014) Tablas LXIV to LXVI, PDF pages 173, 176 and 178, folios 145, 148 and 150"
+      },
+      "quantity": "The insertion loss of three silencers measured in place, sixty-three bands of the level difference and the area term",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "all 63 bands inside the rounding of the printed inputs"
+      },
+      "computed": {
+        "value": 0.1177,
+        "label": "worst departure 0.118 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.15
+      },
+      "deviation": {
+        "value": 0.1177
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-17-and-18-barron-2003-table-3-4-pdf-page-84-folio-72/the-energy-subtraction-at-one-measuring-point-over-the-twenty-two-printed-margins-from-1-db-to-20-db",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eqs. (17) and (18) / Barron (2003) Table 3-4, PDF page 84, folio 72",
+        "cite": "ISO 11820:1996 Eqs. (17) and (18) / Barron (2003) Table 3-4, PDF page 84, folio 72"
+      },
+      "quantity": "The energy subtraction at one measuring point, over the twenty-two printed margins from 1 dB to 20 dB",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "all 22 rows inside the 0,05 dB the printed tenth allows"
+      },
+      "computed": {
+        "value": 0.0496,
+        "label": "worst departure 0.050 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0496
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-17-and-18-bies-hansen-and-howard-2017-example-1-4-pdf-page-65-folio-36-and-barron-2003-example-3-6-pdf-page-85-folio-73/two-worked-background-subtractions-at-a-single-point-each-printed-to-the-tenth-of-a-decibel",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eqs. (17) and (18) / Bies, Hansen and Howard (2017) Example 1.4, PDF page 65, folio 36, and Barron (2003) Example 3-6, PDF page 85, folio 73",
+        "cite": "ISO 11820:1996 Eqs. (17) and (18) / Bies, Hansen and Howard (2017) Example 1.4, PDF page 65, folio 36, and Barron (2003) Example 3-6, PDF page 85, folio 73"
+      },
+      "quantity": "Two worked background subtractions at a single point, each printed to the tenth of a decibel",
+      "kind": "record",
+      "expected": {
+        "label": "Bies 1.4, 92,0 dB over 88,0 dB = 89.8 dB; Barron 3-6, 83 dB over 77 dB = 81.7 dB",
+        "record": {
+          "Bies 1.4, 92,0 dB over 88,0 dB": 89.8,
+          "Barron 3-6, 83 dB over 77 dB": 81.7
+        }
+      },
+      "computed": {
+        "label": "Bies 1.4, 92,0 dB over 88,0 dB = 89.8 dB; Barron 3-6, 83 dB over 77 dB = 81.7 dB",
+        "record": {
+          "Bies 1.4, 92,0 dB over 88,0 dB": 89.8,
+          "Barron 3-6, 83 dB over 77 dB": 81.7
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-2-and-5-barron-2003-example-3-4-pdf-pages-77-and-78-folios-65-and-66/the-energy-mean-of-nine-levels-on-a-measurement-surface-and-the-10-lg-s-s0-of-the-24-56-m2-that-surface-encloses",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eqs. (2) and (5) / Barron (2003) Example 3-4, PDF pages 77 and 78, folios 65 and 66",
+        "cite": "ISO 11820:1996 Eqs. (2) and (5) / Barron (2003) Example 3-4, PDF pages 77 and 78, folios 65 and 66"
+      },
+      "quantity": "The energy mean of nine levels on a measurement surface, and the 10 lg (S/S0) of the 24,56 m2 that surface encloses",
+      "kind": "record",
+      "expected": {
+        "label": "mean of nine levels = 80.4 dB; 10 lg (S/S0) at 24,56 m2 = 13.9 dB",
+        "record": {
+          "mean of nine levels": 80.4,
+          "10 lg (S/S0) at 24,56 m2": 13.9
+        }
+      },
+      "computed": {
+        "label": "mean of nine levels = 80.4 dB; 10 lg (S/S0) at 24,56 m2 = 13.9 dB",
+        "record": {
+          "mean of nine levels": 80.4,
+          "10 lg (S/S0) at 24,56 m2": 13.9
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-5-barron-2003-example-3-3-pdf-pages-72-to-74-folios-60-to-62/a-sound-power-from-a-mean-level-a-measurement-area-and-a-field-correction-all-three-terms-together",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (5) / Barron (2003) Example 3-3, PDF pages 72 to 74, folios 60 to 62",
+        "cite": "ISO 11820:1996 Eq. (5) / Barron (2003) Example 3-3, PDF pages 72 to 74, folios 60 to 62"
+      },
+      "quantity": "A sound power from a mean level, a measurement area and a field correction, all three terms together",
+      "kind": "scalar",
+      "expected": {
+        "value": 90.4
+      },
+      "computed": {
+        "value": 90.38
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.019
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-6-10-and-12-ver-and-beranek-2006-example-4-2-pdf-pages-95-and-96-folios-90-and-91/a-quarter-of-the-printed-sabine-absorption-area-of-a-200-m3-room-at-21-4-c-where-the-speed-of-sound-is-344-m-s",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eqs. (6), (10) and (12) / Ver and Beranek (2006) Example 4.2, PDF pages 95 and 96, folios 90 and 91",
+        "cite": "ISO 11820:1996 Eqs. (6), (10) and (12) / Ver and Beranek (2006) Example 4.2, PDF pages 95 and 96, folios 90 and 91"
+      },
+      "quantity": "A quarter of the printed Sabine absorption area of a 200 m3 room at 21,4 C, where the speed of sound is 344 m/s",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.7
+      },
+      "computed": {
+        "value": 10.7097
+      },
+      "unit": "m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0097
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-5-ver-and-beranek-2006-example-4-2-pdf-page-96-folio-91/the-decibel-term-that-absorption-area-becomes-printed-as-the-first-of-the-five-the-example-adds",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (5) / Ver and Beranek (2006) Example 4.2, PDF page 96, folio 91",
+        "cite": "ISO 11820:1996 Eq. (5) / Ver and Beranek (2006) Example 4.2, PDF page 96, folio 91"
+      },
+      "quantity": "The decibel term that absorption area becomes, printed as the first of the five the example adds",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.3
+      },
+      "computed": {
+        "value": 10.3
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.002
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-6-10-and-12-barron-2003-example-7-2-pdf-pages-297-to-299-folios-285-to-287/the-same-area-at-another-room-and-another-speed-of-sound-against-two-absorption-areas-the-example-reaches-by-two-unrelated-routes",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eqs. (6), (10) and (12) / Barron (2003) Example 7-2, PDF pages 297 to 299, folios 285 to 287",
+        "cite": "ISO 11820:1996 Eqs. (6), (10) and (12) / Barron (2003) Example 7-2, PDF pages 297 to 299, folios 285 to 287"
+      },
+      "quantity": "The same area at another room and another speed of sound, against two absorption areas the example reaches by two unrelated routes",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "both areas inside the rounding of the printed time"
+      },
+      "computed": {
+        "value": 0.0257,
+        "label": "worst departure 0.0257 m2"
+      },
+      "unit": "m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.03
+      },
+      "deviation": {
+        "value": 0.0257
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-29-barron-2003-examples-8-11-and-8-10-pdf-pages-399-and-392-folios-387-and-380/the-density-of-the-air-flowing-through-a-muffler-at-two-temperatures-and-two-ambient-pressures-away-from-the-defaults",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (29) / Barron (2003) Examples 8-11 and 8-10, PDF pages 399 and 392, folios 387 and 380",
+        "cite": "ISO 11820:1996 Eq. (29) / Barron (2003) Examples 8-11 and 8-10, PDF pages 399 and 392, folios 387 and 380"
+      },
+      "quantity": "The density of the air flowing through a muffler, at two temperatures and two ambient pressures away from the defaults",
+      "kind": "record",
+      "expected": {
+        "label": "Example 8-11, air at 450 K and 140 kPa = 1.084 kg/m3; Example 8-10, air at 600 K and 110 kPa = 0.639 kg/m3",
+        "record": {
+          "Example 8-11, air at 450 K and 140 kPa": 1.084,
+          "Example 8-10, air at 600 K and 110 kPa": 0.639
+        }
+      },
+      "computed": {
+        "label": "Example 8-11, air at 450 K and 140 kPa = 1.084 kg/m3; Example 8-10, air at 600 K and 110 kPa = 0.639 kg/m3",
+        "record": {
+          "Example 8-11, air at 450 K and 140 kPa": 1.084,
+          "Example 8-10, air at 600 K and 110 kPa": 0.639
+        }
+      },
+      "unit": "kg/m³",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-28-insht-ntp-668-2004-ec-2-and-ec-3-pdf-pages-3-and-4/the-flow-velocity-a-velocity-pressure-stands-for-against-the-two-coefficients-a-national-guide-prints-for-it",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (28) / INSHT NTP 668 (2004) Ec. 2 and Ec. 3, PDF pages 3 and 4",
+        "cite": "ISO 11820:1996 Eq. (28) / INSHT NTP 668 (2004) Ec. 2 and Ec. 3, PDF pages 3 and 4"
+      },
+      "quantity": "The flow velocity a velocity pressure stands for, against the two coefficients a national guide prints for it",
+      "kind": "record",
+      "expected": {
+        "label": "Ec. 2, density free, 1 kg/m3 = 4.43 m/s; Ec. 3, air at 20 C, 1,2 kg/m3 = 4.04 m/s",
+        "record": {
+          "Ec. 2, density free, 1 kg/m3": 4.43,
+          "Ec. 3, air at 20 C, 1,2 kg/m3": 4.04
+        }
+      },
+      "computed": {
+        "label": "Ec. 2, density free, 1 kg/m3 = 4.43 m/s; Ec. 3, air at 20 C, 1,2 kg/m3 = 4.04 m/s",
+        "record": {
+          "Ec. 2, density free, 1 kg/m3": 4.43,
+          "Ec. 3, air at 20 C, 1,2 kg/m3": 4.04
+        }
+      },
+      "unit": "m/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-31-vdi-2081-blatt-2-2005-05-tabelle-1-pdf-page-12-folio-12/the-mean-velocity-in-the-passages-of-a-splitter-silencer-carrying-16-000-m3-h-from-the-face-velocity-and-the-area-ratio",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (31) / VDI 2081 Blatt 2:2005-05 Tabelle 1, PDF page 12, folio 12",
+        "cite": "ISO 11820:1996 Eq. (31) / VDI 2081 Blatt 2:2005-05 Tabelle 1, PDF page 12, folio 12"
+      },
+      "quantity": "The mean velocity in the passages of a splitter silencer carrying 16 000 m3/h, from the face velocity and the area ratio",
+      "kind": "scalar",
+      "expected": {
+        "value": 14.81
+      },
+      "computed": {
+        "value": 14.815
+      },
+      "unit": "m/s",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.005
+      },
+      "precision": 3,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-31-fuchs-2013-table-13-4-pdf-page-588-folio-574/twelve-printed-airway-velocities-of-two-splitter-designs-at-three-flow-rates-and-three-housing-cross-sections",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (31) / Fuchs (2013) Table 13.4, PDF page 588, folio 574",
+        "cite": "ISO 11820:1996 Eq. (31) / Fuchs (2013) Table 13.4, PDF page 588, folio 574"
+      },
+      "quantity": "Twelve printed airway velocities of two splitter designs, at three flow rates and three housing cross-sections",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12/12 printed airway velocities"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 printed airway velocities"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eq-15-barron-2003-example-5-7-pdf-page-215-folio-203/the-area-equivalent-diameter-inside-the-upstream-distance-for-the-0-810-m2-cross-section-of-a-900-mm-square-duct",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11820",
+        "edition": "1996",
+        "clause": "Eq. (15) / Barron (2003) Example 5-7, PDF page 215, folio 203",
+        "cite": "ISO 11820:1996 Eq. (15) / Barron (2003) Example 5-7, PDF page 215, folio 203"
+      },
+      "quantity": "The area-equivalent diameter inside the upstream distance, for the 0,810 m2 cross-section of a 900 mm square duct",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.524
+      },
+      "computed": {
+        "value": 1.52331
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.00075
+      },
+      "deviation": {
+        "value": -0.00069
+      },
+      "precision": 5,
+      "verdict": "pass"
+    },
+    {
       "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-7/the-background-correction-at-the-two-ends-of-the-6-db-to-10-db-window",
       "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
       "reference": {
@@ -29734,6 +31132,372 @@
         "value": 0.0
       },
       "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-8-barron-2003-table-7-6-pdf-page-328-folio-316/d-p-from-a-printed-level-pair-at-the-two-octave-bands-the-worked-example-prints-a-reduction-for",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.8 / Barron (2003) Table 7-6, PDF page 328, folio 316",
+        "cite": "ISO 11821:1997 5.8 / Barron (2003) Table 7-6, PDF page 328, folio 316"
+      },
+      "quantity": "D_p from a printed level pair, at the two octave bands the worked example prints a reduction for",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "7.6 dB at 63 Hz and 24.2 dB at 8000 Hz"
+      },
+      "computed": {
+        "value": 5.33e-15,
+        "label": "7.6 dB and 24.2 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 5.33e-15
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-9-barron-2003-example-7-9-pdf-pages-327-and-329-folios-315-and-317/d-pa-from-the-printed-a-weighted-pair-69-6-dba-without-the-barrier-and-55-3-dba-with-it",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.9 / Barron (2003) Example 7-9, PDF pages 327 and 329, folios 315 and 317",
+        "cite": "ISO 11821:1997 5.9 / Barron (2003) Example 7-9, PDF pages 327 and 329, folios 315 and 317"
+      },
+      "quantity": "D_pA from the printed A-weighted pair, 69.6 dBA without the barrier and 55.3 dBA with it",
+      "kind": "scalar",
+      "expected": {
+        "value": 14.3
+      },
+      "computed": {
+        "value": 14.3
+      },
+      "unit": "dBA",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": -3.55e-15
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-8-barron-2003-example-7-10-pdf-pages-331-to-333-folios-319-to-321/d-p-for-a-screen-standing-indoors-92-3-db-falls-to-84-0-db-in-the-1000-hz-octave-at-the-operator-position",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.8 / Barron (2003) Example 7-10, PDF pages 331 to 333, folios 319 to 321",
+        "cite": "ISO 11821:1997 5.8 / Barron (2003) Example 7-10, PDF pages 331 to 333, folios 319 to 321"
+      },
+      "quantity": "D_p for a screen standing indoors: 92.3 dB falls to 84.0 dB in the 1000 Hz octave at the operator position",
+      "kind": "scalar",
+      "expected": {
+        "value": 8.3
+      },
+      "computed": {
+        "value": 8.3
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": -3.55e-15
+      },
+      "precision": 1,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-8-hansen-2005-example-6-23-pdf-pages-325-and-326-folios-317-and-318/d-p-over-three-octave-bands-rounded-to-the-whole-decibel-7-4-c-reports-it-in",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.8 / Hansen (2005) Example 6.23, PDF pages 325 and 326, folios 317 and 318",
+        "cite": "ISO 11821:1997 5.8 / Hansen (2005) Example 6.23, PDF pages 325 and 326, folios 317 and 318"
+      },
+      "quantity": "D_p over three octave bands, rounded to the whole decibel 7.4 c) reports it in",
+      "kind": "record",
+      "expected": {
+        "label": "500 Hz = 10 dB; 1000 Hz = 15 dB; 2000 Hz = 20 dB",
+        "record": {
+          "500 Hz": 10.0,
+          "1000 Hz": 15.0,
+          "2000 Hz": 20.0
+        }
+      },
+      "computed": {
+        "label": "500 Hz = 10 dB; 1000 Hz = 15 dB; 2000 Hz = 20 dB",
+        "record": {
+          "500 Hz": 10.0,
+          "1000 Hz": 15.0,
+          "2000 Hz": 20.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-8-noise-control-in-industry-3e-1991-pdf-page-188-folio-177/d-p-from-the-80-db-71-db-pair-the-worked-example-prints-and-from-the-three-single-path-levels-printed-beside-it",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.8 / Noise Control in Industry 3e (1991), PDF page 188, folio 177",
+        "cite": "ISO 11821:1997 5.8 / Noise Control in Industry 3e (1991), PDF page 188, folio 177"
+      },
+      "quantity": "D_p from the 80 dB / 71 dB pair the worked example prints, and from the three single-path levels printed beside it",
+      "kind": "record",
+      "expected": {
+        "label": "screen = 9 dB; path 1 = 15 dB; path 2 = 10 dB; path 3 = 18 dB",
+        "record": {
+          "screen": 9.0,
+          "path 1": 15.0,
+          "path 2": 10.0,
+          "path 3": 18.0
+        }
+      },
+      "computed": {
+        "label": "screen = 9 dB; path 1 = 15 dB; path 2 = 10 dB; path 3 = 18 dB",
+        "record": {
+          "screen": 9.0,
+          "path 1": 15.0,
+          "path 2": 10.0,
+          "path 3": 18.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-8-ifa-lsa-01-234-2020-tab-4-5-pdf-page-18-folio-18/the-differences-printed-between-neighbouring-positions-band-by-band-less-the-one-cell-the-document-misprints",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.8 / IFA-LSA 01-234 (2020) Tab. 4.5, PDF page 18, folio 18",
+        "cite": "ISO 11821:1997 5.8 / IFA-LSA 01-234 (2020) Tab. 4.5, PDF page 18, folio 18"
+      },
+      "quantity": "The differences printed between neighbouring positions, band by band, less the one cell the document misprints",
+      "kind": "count",
+      "expected": {
+        "value": 11.0,
+        "label": "11/11 cells of Tab. 4.5"
+      },
+      "computed": {
+        "value": 11.0,
+        "label": "11/11 cells of Tab. 4.5"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-7-barron-2003-example-3-6-pdf-page-85-folio-73/the-corrected-level-at-the-lower-edge-of-the-window-83-db-measured-over-a-77-db-background",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.7 / Barron (2003) Example 3-6, PDF page 85, folio 73",
+        "cite": "ISO 11821:1997 5.7 / Barron (2003) Example 3-6, PDF page 85, folio 73"
+      },
+      "quantity": "The corrected level at the lower edge of the window: 83 dB measured over a 77 dB background",
+      "kind": "scalar",
+      "expected": {
+        "value": 81.7
+      },
+      "computed": {
+        "value": 81.7437
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0437
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-7-barron-2003-table-3-4-pdf-page-84-folio-72/the-seven-rows-of-the-printed-correction-table-that-fall-inside-the-6-db-to-10-db-window-to-the-0-1-db-the-table-prints",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.7 / Barron (2003) Table 3-4, PDF page 84, folio 72",
+        "cite": "ISO 11821:1997 5.7 / Barron (2003) Table 3-4, PDF page 84, folio 72"
+      },
+      "quantity": "The seven rows of the printed correction table that fall inside the 6 dB to 10 dB window, to the 0.1 dB the table prints",
+      "kind": "record",
+      "expected": {
+        "label": "6 dB = 1.3 dB; 6.5 dB = 1.1 dB; 7 dB = 1 dB; 7.5 dB = 0.9 dB; 8 dB = 0.7 dB; 9 dB = 0.6 dB; 10 dB = 0.5 dB",
+        "record": {
+          "6 dB": 1.3,
+          "6.5 dB": 1.1,
+          "7 dB": 1.0,
+          "7.5 dB": 0.9,
+          "8 dB": 0.7,
+          "9 dB": 0.6,
+          "10 dB": 0.5
+        }
+      },
+      "computed": {
+        "label": "6 dB = 1.3 dB; 6.5 dB = 1.1 dB; 7 dB = 1 dB; 7.5 dB = 0.9 dB; 8 dB = 0.7 dB; 9 dB = 0.6 dB; 10 dB = 0.5 dB",
+        "record": {
+          "6 dB": 1.3,
+          "6.5 dB": 1.1,
+          "7 dB": 1.0,
+          "7.5 dB": 0.9,
+          "8 dB": 0.7,
+          "9 dB": 0.6,
+          "10 dB": 0.5
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-7-hansen-2005-example-3-25-pdf-pages-154-and-155-folios-146-and-147/the-corrected-level-at-a-margin-of-exactly-10-db-the-upper-edge-of-the-window-and-at-a-6-6-db-one",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.7 / Hansen (2005) Example 3.25, PDF pages 154 and 155, folios 146 and 147",
+        "cite": "ISO 11821:1997 5.7 / Hansen (2005) Example 3.25, PDF pages 154 and 155, folios 146 and 147"
+      },
+      "quantity": "The corrected level at a margin of exactly 10 dB, the upper edge of the window, and at a 6.6 dB one",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "89.5 dB at a 10 dB margin and 85.5 dB at a 6.6 dB one"
+      },
+      "computed": {
+        "value": 0.0424,
+        "label": "89.542 dB and 85.528 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0424
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-5-7-iso-140-3-1995-6-5-pdf-page-13-folio-7/the-1-3-db-that-iso-140-3-and-iso-3744-2010-8-2-3-both-print-for-a-6-db-margin-which-is-where-the-window-of-5-7-opens",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "5.7 / ISO 140-3:1995 6.5, PDF page 13, folio 7",
+        "cite": "ISO 11821:1997 5.7 / ISO 140-3:1995 6.5, PDF page 13, folio 7"
+      },
+      "quantity": "The 1,3 dB that ISO 140-3 and ISO 3744:2010 8.2.3 both print for a 6 dB margin, which is where the window of 5.7 opens",
+      "kind": "scalar",
+      "expected": {
+        "value": 1.3
+      },
+      "computed": {
+        "value": 1.2563
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": -0.0437
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11821-1997-3-10-barron-2003-example-3-5-pdf-pages-80-and-81-folios-68-and-69/the-logarithmic-mean-under-the-directivity-index-80-6-db-over-ten-printed-levels-and-81-8-db-over-three-of-them",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11821",
+        "edition": "1997",
+        "clause": "3.10 / Barron (2003) Example 3-5, PDF pages 80 and 81, folios 68 and 69",
+        "cite": "ISO 11821:1997 3.10 / Barron (2003) Example 3-5, PDF pages 80 and 81, folios 68 and 69"
+      },
+      "quantity": "The logarithmic mean under the directivity index: 80.6 dB over ten printed levels and 81.8 dB over three of them",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "80.6 dB over ten positions and 81.8 dB over the ring"
+      },
+      "computed": {
+        "value": 0.0398,
+        "label": "80.5857 dB and 81.7602 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0398
+      },
+      "precision": 4,
       "verdict": "pass"
     },
     {
@@ -30023,6 +31787,378 @@
       },
       "deviation": {
         "value": 0.0206
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/cordero-et-al-2010-tablas-1-and-2-printed-folios-5-and-6-pdf-pages-5-and-6/a-campaign-that-prints-all-four-levels-the-two-insertion-losses-it-reports-to-the-nearest-decibel-13-dba-and-10-dba",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "article",
+        "designation": "Cordero et al.",
+        "edition": "(2010)",
+        "clause": "Tablas 1 and 2, printed folios 5 and 6 (PDF pages 5 and 6)",
+        "cite": "Cordero et al. (2010) Tablas 1 and 2, printed folios 5 and 6 (PDF pages 5 and 6)"
+      },
+      "quantity": "A campaign that prints all four levels: the two insertion losses it reports to the nearest decibel, 13 dBA and 10 dBA",
+      "kind": "record",
+      "expected": {
+        "label": "sin ruido = 13 dBA; con ruido = 10 dBA",
+        "record": {
+          "sin ruido": 13.0,
+          "con ruido": 10.0
+        }
+      },
+      "computed": {
+        "label": "sin ruido = 13 dBA; con ruido = 10 dBA",
+        "record": {
+          "sin ruido": 13.0,
+          "con ruido": 10.0
+        }
+      },
+      "unit": "dBA",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/cordero-et-al-2010-tablas-1-and-2-printed-folios-5-and-6-pdf-pages-5-and-6/the-one-value-that-campaign-prints-before-rounding-9-5-dba-for-the-case-with-the-background-raised-at-the-receiver-alone",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "article",
+        "designation": "Cordero et al.",
+        "edition": "(2010)",
+        "clause": "Tablas 1 and 2, printed folios 5 and 6 (PDF pages 5 and 6)",
+        "cite": "Cordero et al. (2010) Tablas 1 and 2, printed folios 5 and 6 (PDF pages 5 and 6)"
+      },
+      "quantity": "The one value that campaign prints before rounding, 9,5 dBA, for the case with the background raised at the receiver alone",
+      "kind": "scalar",
+      "expected": {
+        "value": 9.5
+      },
+      "computed": {
+        "value": 9.5
+      },
+      "unit": "dBA",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/lindeman-1985-table-8-printed-folio-39-pdf-page-7/a-barrier-measured-before-it-stood-and-after-by-the-direct-method-the-runs-whose-four-levels-are-printed-give-the-printed-insertion-loss",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "article",
+        "designation": "Lindeman",
+        "edition": "(1985)",
+        "clause": "Table 8, printed folio 39 (PDF page 7)",
+        "cite": "Lindeman (1985) Table 8, printed folio 39 (PDF page 7)"
+      },
+      "quantity": "A barrier measured before it stood and after, by the direct method: the runs whose four levels are printed give the printed insertion loss",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2 (worst departure 0.000 dBA)"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 runs within the 0,1 dB the table prints to"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/lindeman-1985-tables-12-and-13-printed-folio-41-pdf-page-9/the-same-barrier-by-the-indirect-method-five-runs-against-an-equivalent-site-and-the-mean-insertion-loss-of-7-0-dba-the-table-reports",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "article",
+        "designation": "Lindeman",
+        "edition": "(1985)",
+        "clause": "Tables 12 and 13, printed folio 41 (PDF page 9)",
+        "cite": "Lindeman (1985) Tables 12 and 13, printed folio 41 (PDF page 9)"
+      },
+      "quantity": "The same barrier by the indirect method, five runs against an equivalent site, and the mean insertion loss of 7,0 dBA the table reports",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 (worst departure 0.020 dBA)"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed values, the five runs and their mean"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/fhwa-pd-96-046-clause-6-6-3-printed-folio-84-pdf-page-101/the-insertion-loss-worked-through-with-every-level-printed-8-8-db-and-8-7-db-once-the-off-model-edge-adjustment-is-applied-outside",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "report",
+        "designation": "FHWA-PD-96-046",
+        "clause": "clause 6.6.3, printed folio 84 (PDF page 101)",
+        "cite": "FHWA-PD-96-046 clause 6.6.3, printed folio 84 (PDF page 101)"
+      },
+      "quantity": "The insertion loss worked through with every level printed, 8,8 dB and 8,7 dB, once the off-model edge adjustment is applied outside",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "8,8 dB from the 56,2 dB typed, 8,7 dB from the 56,3 dB listed"
+      },
+      "computed": {
+        "value": 3.55e-15,
+        "label": "largest departure 0.000 dB"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 3.55e-15
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-80000-1-2009-annex-b-b-3-rule-a-printed-folios-35-and-36-pdf-pages-43-and-44/the-tie-break-clause-10-c-of-iso-10847-leaves-open-an-exact-half-is-reported-as-the-even-whole-decibel-the-rule-annex-b-calls-preferable",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 80000-1",
+        "edition": "2009",
+        "clause": "Annex B, B.3 Rule A, printed folios 35 and 36 (PDF pages 43 and 44)",
+        "cite": "ISO 80000-1:2009 Annex B, B.3 Rule A, printed folios 35 and 36 (PDF pages 43 and 44)"
+      },
+      "quantity": "The tie-break clause 10 c) of ISO 10847 leaves open: an exact half is reported as the even whole decibel, the rule Annex B calls preferable",
+      "kind": "record",
+      "expected": {
+        "label": "1 225,0 = 1220; 1 235,0 = 1240",
+        "record": {
+          "1 225,0": 1220.0,
+          "1 235,0": 1240.0
+        }
+      },
+      "computed": {
+        "label": "1 225,0 = 1220; 1 235,0 = 1240",
+        "record": {
+          "1 225,0": 1220.0,
+          "1 235,0": 1240.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/fhwa-pd-96-046-table-3-printed-folio-35-pdf-page-52/a-second-document-classing-the-wind-the-same-way-with-the-upwind-class-printed-as-an-interval-running-from-1-m-s-to-5-m-s",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "report",
+        "designation": "FHWA-PD-96-046",
+        "clause": "Table 3, printed folio 35 (PDF page 52)",
+        "cite": "FHWA-PD-96-046 Table 3, printed folio 35 (PDF page 52)"
+      },
+      "quantity": "A second document classing the wind the same way, with the upwind class printed as an interval running from -1 m/s to -5 m/s",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 readings inside the printed intervals"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 readings inside the printed intervals"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/cen-ts-16272-7-2015-table-4-and-7-3-7-printed-folio-14-pdf-page-15/a-second-committee-reprinting-the-same-background-correction-the-two-grouped-rows-the-4-db-floor-and-the-10-db-margin-its-prose-asks-for",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "CEN/TS 16272-7",
+        "edition": "2015",
+        "clause": "Table 4 and 7.3.7, printed folio 14 (PDF page 15)",
+        "cite": "CEN/TS 16272-7:2015 Table 4 and 7.3.7, printed folio 14 (PDF page 15)"
+      },
+      "quantity": "A second committee reprinting the same background correction: the two grouped rows, the 4 dB floor and the 10 dB margin its prose asks for",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 readings of Table 4 and its clause"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 readings of Table 4 and its clause"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/jagniatinskis-et-al-2017-table-1-printed-folios-293-and-294-pdf-pages-5-and-6/three-insertion-losses-from-a-highway-campaign-that-prints-its-before-difference-as-one-number-read-at-three-unrelated-splits-of-it",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "article",
+        "designation": "Jagniatinskis et al.",
+        "edition": "(2017)",
+        "clause": "Table 1, printed folios 293 and 294 (PDF pages 5 and 6)",
+        "cite": "Jagniatinskis et al. (2017) Table 1, printed folios 293 and 294 (PDF pages 5 and 6)"
+      },
+      "quantity": "Three insertion losses from a highway campaign that prints its before difference as one number, read at three unrelated splits of it",
+      "kind": "count",
+      "expected": {
+        "value": 9.0,
+        "label": "9/9 (worst departure 0.000 dBA)"
+      },
+      "computed": {
+        "value": 9.0,
+        "label": "9/9 readings, three printed results at three splits each"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/rodino-masson-2015-tabla-2-printed-folio-7-pdf-page-7/six-printed-insertion-losses-of-a-screen-measured-with-no-reference-microphone-where-8-2-1-degenerates-to-the-plain-level-difference",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "article",
+        "designation": "Rodino & Masson",
+        "edition": "(2015)",
+        "clause": "Tabla 2, printed folio 7 (PDF page 7)",
+        "cite": "Rodino & Masson (2015) Tabla 2, printed folio 7 (PDF page 7)"
+      },
+      "quantity": "Six printed insertion losses of a screen measured with no reference microphone, where 8.2.1 degenerates to the plain level difference",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 (worst departure 0.000 dB)"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed insertion losses, unweighted and A-weighted"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/bies-5e-4-9-2-printed-folio-201-pdf-page-230/the-6-db-of-c-r-read-off-a-page-outside-the-standard-the-pressure-doubling-at-a-receiver-held-against-a-reflecting-surface",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "book",
+        "designation": "Bies",
+        "edition": "5e",
+        "clause": "§4.9.2 (printed folio 201, PDF page 230)",
+        "cite": "Bies 5e §4.9.2 (printed folio 201, PDF page 230)"
+      },
+      "quantity": "The 6 dB of C'_r read off a page outside the standard: the pressure doubling at a receiver held against a reflecting surface",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.0,
+        "label": "6 dB, the 20 lg 2 of a pressure doubling as the page prints it"
+      },
+      "computed": {
+        "value": 6.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-10847-1997-7-2-2-note/the-close-source-height-puts-the-reference-microphone-10-degrees-above-the-angle-to-the-barrier-top-and-not-10-degrees-above-the-ground",
+      "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 10847",
+        "edition": "1997",
+        "clause": "7.2.2, NOTE",
+        "cite": "ISO 10847:1997 7.2.2, NOTE"
+      },
+      "quantity": "The close-source height puts the reference microphone 10 degrees above the angle to the barrier top, and not 10 degrees above the ground",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0,
+        "label": "10 degrees over the angle to the top, at four geometries"
+      },
+      "computed": {
+        "value": 3.55e-15,
+        "label": "largest departure 3.55e-15 deg"
+      },
+      "unit": "deg",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 3.55e-15
       },
       "precision": 4,
       "verdict": "pass"
@@ -30321,6 +32457,354 @@
       "verdict": "pass"
     },
     {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-a-pdf-pages-24-and-25-printed-folios-14-and-15/the-limits-a-test-source-is-qualified-against-are-the-ones-the-normative-annex-prints",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Annex A (PDF pages 24 and 25, printed folios 14 and 15)",
+        "cite": "ISO 14257:2001 Annex A (PDF pages 24 and 25, printed folios 14 and 15)"
+      },
+      "quantity": "The limits a test source is qualified against are the ones the normative annex prints",
+      "kind": "record",
+      "expected": {
+        "label": "max |DI|, dB = 8; DI tolerance to 630 Hz, dB = 2; DI tolerance from 1 kHz, dB = 8; ramp starts, Hz = 630; ramp ends, Hz = 1000; adjacent band step, dB = 8; Lw stability 100 Hz to 160 Hz, dB = 1; Lw stability 200 Hz to 5 kHz, dB = 0.5",
+        "record": {
+          "max |DI|, dB": 8.0,
+          "DI tolerance to 630 Hz, dB": 2.0,
+          "DI tolerance from 1 kHz, dB": 8.0,
+          "ramp starts, Hz": 630.0,
+          "ramp ends, Hz": 1000.0,
+          "adjacent band step, dB": 8.0,
+          "Lw stability 100 Hz to 160 Hz, dB": 1.0,
+          "Lw stability 200 Hz to 5 kHz, dB": 0.5
+        }
+      },
+      "computed": {
+        "label": "max |DI|, dB = 8; DI tolerance to 630 Hz, dB = 2; DI tolerance from 1 kHz, dB = 8; ramp starts, Hz = 630; ramp ends, Hz = 1000; adjacent band step, dB = 8; Lw stability 100 Hz to 160 Hz, dB = 1; Lw stability 200 Hz to 5 kHz, dB = 0.5",
+        "record": {
+          "max |DI|, dB": 8.0,
+          "DI tolerance to 630 Hz, dB": 2.0,
+          "DI tolerance from 1 kHz, dB": 8.0,
+          "ramp starts, Hz": 630.0,
+          "ramp ends, Hz": 1000.0,
+          "adjacent band step, dB": 8.0,
+          "Lw stability 100 Hz to 160 Hz, dB": 1.0,
+          "Lw stability 200 Hz to 5 kHz, dB": 0.5
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-c-3-pdf-page-29-printed-folio-19/the-source-the-annex-declares-as-qualified-is-inside-both-limits-it-is-declared-against",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "C.3 (PDF page 29, printed folio 19)",
+        "cite": "ISO 14257:2001 C.3 (PDF page 29, printed folio 19)"
+      },
+      "quantity": "The source the annex declares as qualified is inside both limits it is declared against",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "2/2, the closer of the two 1,5 dB under the 8 dB cap"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 declared characteristics inside their limit"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-c-table-c-2-last-column-pdf-page-28-printed-folio-18/the-a-weighted-sound-power-level-of-the-test-source-is-the-energy-sum-of-its-six-printed-octave-bands-under-the-table-1-weights",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Annex C, Table C.2 last column (PDF page 28, printed folio 18)",
+        "cite": "ISO 14257:2001 Annex C, Table C.2 last column (PDF page 28, printed folio 18)"
+      },
+      "quantity": "The A-weighted sound power level of the test source is the energy sum of its six printed octave bands under the Table 1 weights",
+      "kind": "scalar",
+      "expected": {
+        "value": 115.7
+      },
+      "computed": {
+        "value": 115.7086
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.05
+      },
+      "deviation": {
+        "value": 0.0086
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-annex-c-tables-c-11-and-c-12-bs-en-iso-14257-2001-pdf-page-34-printed-folio-24-une-en-iso-14257-2002-pdf-page-30-printed-folio-30/equation-8-over-the-printed-curves-does-not-give-the-printed-tables-and-two-printings-print-the-same-numbers-so-the-annex-is-inconsistent-here-rather-than-mis-set",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Annex C, Tables C.11 and C.12 (BS EN ISO 14257:2001, PDF page 34, printed folio 24; UNE-EN ISO 14257:2002, PDF page 30, printed folio 30)",
+        "cite": "ISO 14257:2001 Annex C, Tables C.11 and C.12 (BS EN ISO 14257:2001, PDF page 34, printed folio 24; UNE-EN ISO 14257:2002, PDF page 30, printed folio 30)"
+      },
+      "quantity": "Equation (8) over the printed curves does not give the printed tables, and two printings print the same numbers, so the annex is inconsistent here rather than mis-set",
+      "kind": "scalar",
+      "expected": {
+        "value": 18.0,
+        "label": "18 of the 21 printed results leave the rounding of their own table: 15 of the 18 of Table C.11 over Table C.5, up to 1,55 dB, and the 3 of Table C.12 over the last column of Table C.6. The two printings of the standard agree digit for digit, so neither is a misprint of the other"
+      },
+      "computed": {
+        "value": 18.0,
+        "label": "18 of 21, departures from -0.41 dB to +1.55 dB with no systematic sign"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/suva-66008-f-2006-tableau-2-and-figure-7-pdf-page-13-printed-page-11/equation-5-reproduces-the-21-decay-rates-a-swiss-workroom-survey-prints-in-three-distance-ranges-and-seven-columns",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "report",
+        "designation": "Suva 66008.f",
+        "edition": "(2006)",
+        "clause": "Tableau 2 and Figure 7 (PDF page 13, printed page 11)",
+        "cite": "Suva 66008.f (2006) Tableau 2 and Figure 7 (PDF page 13, printed page 11)"
+      },
+      "quantity": "Equation (5) reproduces the 21 decay rates a Swiss workroom survey prints, in three distance ranges and seven columns",
+      "kind": "count",
+      "expected": {
+        "value": 21.0,
+        "label": "21/21 (worst departure 0.051 dB)"
+      },
+      "computed": {
+        "value": 21.0,
+        "label": "21/21 printed values of DL2 reproduced within 0,06 dB"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/suva-66008-f-2006-tableau-2-and-figure-7-pdf-page-13-printed-page-11/equations-6-and-7-reproduce-the-21-printed-values-of-the-excess-over-a-free-field-from-the-same-measured-curve",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "report",
+        "designation": "Suva 66008.f",
+        "edition": "(2006)",
+        "clause": "Tableau 2 and Figure 7 (PDF page 13, printed page 11)",
+        "cite": "Suva 66008.f (2006) Tableau 2 and Figure 7 (PDF page 13, printed page 11)"
+      },
+      "quantity": "Equations (6) and (7) reproduce the 21 printed values of the excess over a free field from the same measured curve",
+      "kind": "count",
+      "expected": {
+        "value": 21.0,
+        "label": "21/21 (worst departure 0.048 dB)"
+      },
+      "computed": {
+        "value": 21.0,
+        "label": "21/21 printed values of DLf within the rounding of the summary"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-eq-2-against-suva-66008-f-2006-figure-7-pdf-page-13-printed-page-11/the-free-field-reference-the-survey-measured-its-excess-against-recovered-from-its-21-printed-values-is-the-whole-sphere",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "Eq. (2) against Suva 66008.f (2006) Figure 7 (PDF page 13, printed page 11)",
+        "cite": "ISO 14257:2001 Eq. (2) against Suva 66008.f (2006) Figure 7 (PDF page 13, printed page 11)"
+      },
+      "quantity": "The free-field reference the survey measured its excess against, recovered from its 21 printed values, is the whole sphere",
+      "kind": "scalar",
+      "expected": {
+        "value": 10.992098640220963,
+        "label": "10 lg(4 pi) = 10,992 dB, which Eq. (2) prints as 11 dB"
+      },
+      "computed": {
+        "value": 10.9876,
+        "label": "10.988 dB, from the mean of the 21 residuals"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.02
+      },
+      "deviation": {
+        "value": -0.0045
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-14257-2001-6-2-against-suva-66008-f-2006-2-6-2-and-2-6-3-pdf-page-11-printed-page-9/the-three-distance-ranges-hold-every-one-of-the-23-measurement-radii-the-same-page-lists",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 14257",
+        "edition": "2001",
+        "clause": "6.2 against Suva 66008.f (2006) 2.6.2 and 2.6.3 (PDF page 11, printed page 9)",
+        "cite": "ISO 14257:2001 6.2 against Suva 66008.f (2006) 2.6.2 and 2.6.3 (PDF page 11, printed page 9)"
+      },
+      "quantity": "The three distance ranges hold every one of the 23 measurement radii the same page lists",
+      "kind": "count",
+      "expected": {
+        "value": 23.0,
+        "label": "23/23 radii put in a range the printed bounds admit"
+      },
+      "computed": {
+        "value": 23.0,
+        "label": "23/23 radii put in a range the printed bounds admit"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/ifa-lsa-01-234-2020-tab-4-4-and-tab-4-5-pdf-pages-17-and-18-printed-folios-17-and-18/equation-5-reproduces-the-decay-rate-a-german-guidance-sheet-prints-for-four-octave-bands-measured-at-four-distances",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "report",
+        "designation": "IFA-LSA 01-234",
+        "edition": "(2020)",
+        "clause": "Tab. 4.4 and Tab. 4.5 (PDF pages 17 and 18, printed folios 17 and 18)",
+        "cite": "IFA-LSA 01-234 (2020) Tab. 4.4 and Tab. 4.5 (PDF pages 17 and 18, printed folios 17 and 18)"
+      },
+      "quantity": "Equation (5) reproduces the decay rate a German guidance sheet prints for four octave bands measured at four distances",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 (worst departure 0.036 dB)"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 printed values of DL2 within the rounding of the table"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/ifa-lsa-01-234-2020-tab-4-4-against-tab-4-5-pdf-pages-17-and-18-printed-folios-17-and-18/the-2-khz-level-difference-the-result-table-prints-4-7-db-is-not-the-one-its-own-decay-rate-was-computed-from",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "report",
+        "designation": "IFA-LSA 01-234",
+        "edition": "(2020)",
+        "clause": "Tab. 4.4 against Tab. 4.5 (PDF pages 17 and 18, printed folios 17 and 18)",
+        "cite": "IFA-LSA 01-234 (2020) Tab. 4.4 against Tab. 4.5 (PDF pages 17 and 18, printed folios 17 and 18)"
+      },
+      "quantity": "The 2 kHz level difference the result table prints, 4,7 dB, is not the one its own decay rate was computed from",
+      "kind": "count",
+      "expected": {
+        "value": 2.0,
+        "label": "the printed level gives the printed 4,3 dB and the level the printed difference would need gives 4,4 dB"
+      },
+      "computed": {
+        "value": 2.0,
+        "label": "2/2 readings the printed decay rate settles"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/probst-2006-anh-1-tabs-3-6-13-and-22-pdf-pages-and-printed-folios-79-82-93-and-105/the-fitting-density-of-note-3-of-6-2-2-reproduces-the-four-values-an-independent-vdi-3760-tool-printed-for-surveyed-workrooms",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "report",
+        "designation": "Probst",
+        "edition": "(2006)",
+        "clause": "Anh. 1 Tabs. 3, 6, 13 and 22 (PDF pages and printed folios 79, 82, 93 and 105)",
+        "cite": "Probst (2006) Anh. 1 Tabs. 3, 6, 13 and 22 (PDF pages and printed folios 79, 82, 93 and 105)"
+      },
+      "quantity": "The fitting density of NOTE 3 of 6.2.2 reproduces the four values an independent VDI 3760 tool printed for surveyed workrooms",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 (worst departure 0.00049 1/m)"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 printed densities within half of their last printed figure"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
       "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-annex-c-table-c-2-example/the-level-increase-at-a-machine-s-own-workstation-is-the-iso-3744-environmental-correction-which-reproduces-seven-of-the-eight-rows",
       "domain": "spatial-sound-decay-and-prediction-in-workrooms",
       "reference": {
@@ -30441,37 +32925,248 @@
       "verdict": "pass"
     },
     {
-      "id": "spatial-sound-decay-and-prediction-in-workrooms/en-16487-2014-table-1/the-reproducibility-uncertainty-of-the-absorption-coefficient-is-the-printed-spectrum-and-a-coverage-factor-of-2-8-over-its-standard-deviation",
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-annex-b-tables-b-2-to-b-6-example-bs-en-printing-printed-folios-16-to-18-pdf-pp-26-to-28/case-a-what-the-two-workstations-hear-once-the-two-new-machines-are-installed-at-the-positions-the-annex-prints",
       "domain": "spatial-sound-decay-and-prediction-in-workrooms",
       "reference": {
         "kind": "standard",
-        "designation": "EN 16487",
-        "edition": "2014",
-        "clause": "Table 1",
-        "cite": "EN 16487:2014 Table 1"
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "Annex B, Tables B.2 to B.6 EXAMPLE (BS EN printing, printed folios 16 to 18, PDF pp. 26 to 28)",
+        "cite": "ISO 11690-3:1998 Annex B, Tables B.2 to B.6 EXAMPLE (BS EN printing, printed folios 16 to 18, PDF pp. 26 to 28)"
       },
-      "quantity": "The reproducibility uncertainty of the absorption coefficient is the printed spectrum, and a coverage factor of 2,8 over its standard deviation",
+      "quantity": "Case A: what the two workstations hear once the two new machines are installed, at the positions the annex prints",
       "kind": "record",
       "expected": {
-        "label": "125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13",
+        "label": "beside M2 = 82.1 dB; far corner = 80.3 dB",
         "record": {
-          "125 Hz": 0.23,
-          "250 Hz": 0.23,
-          "500 Hz": 0.11,
-          "1 kHz": 0.1,
-          "2 kHz": 0.1,
-          "4 kHz": 0.13
+          "beside M2": 82.1,
+          "far corner": 80.3
         }
       },
       "computed": {
-        "label": "125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13",
+        "label": "beside M2 = 82.1 dB; far corner = 80.3 dB",
         "record": {
-          "125 Hz": 0.23,
-          "250 Hz": 0.23,
-          "500 Hz": 0.11,
-          "1 kHz": 0.1,
-          "2 kHz": 0.1,
-          "4 kHz": 0.13
+          "beside M2": 82.1,
+          "far corner": 80.3
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-annex-b-tables-b-7-to-b-9-example-bs-en-printing-printed-folio-18-pdf-p-28/case-b-the-six-levels-printed-for-the-two-machines-on-offer-at-the-three-workstation-positions",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "Annex B, Tables B.7 to B.9 EXAMPLE (BS EN printing, printed folio 18, PDF p. 28)",
+        "cite": "ISO 11690-3:1998 Annex B, Tables B.7 to B.9 EXAMPLE (BS EN printing, printed folio 18, PDF p. 28)"
+      },
+      "quantity": "Case B: the six levels printed for the two machines on offer, at the three workstation positions",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6: five within the 0,05 dB half step of the printed tenth (worst 0.036 dB), and the cell beside the new machine with the first choice at its recorded -0.063 dB (computed -0.0628 dB)"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed levels of Table B.9"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-annex-b-figure-b-1-against-tables-b-5-and-b-8-bs-en-printing-printed-folios-16-and-18/the-results-of-annex-b-belong-to-the-positions-figure-b-1-draws-and-not-to-the-ones-the-two-workstation-tables-put-the-same-labels-on",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "Annex B, Figure B.1 against Tables B.5 and B.8 (BS EN printing, printed folios 16 and 18)",
+        "cite": "ISO 11690-3:1998 Annex B, Figure B.1 against Tables B.5 and B.8 (BS EN printing, printed folios 16 and 18)"
+      },
+      "quantity": "The results of Annex B belong to the positions Figure B.1 draws, and not to the ones the two workstation tables put the same labels on",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6, against 0/6 at the positions Tables B.5 and B.8 tabulate, which are between 0,5 dB and 1,8 dB out"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed cells reproduced at the position Figure B.1 draws"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-annex-c-table-c-2-last-column-example-bs-en-printing-printed-folio-20-pdf-p-30/the-level-at-a-machine-s-own-workstation-rounds-to-the-printed-integer-for-all-seven-machines-the-diagram-of-figure-c-1-can-show",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "Annex C, Table C.2 last column EXAMPLE (BS EN printing, printed folio 20, PDF p. 30)",
+        "cite": "ISO 11690-3:1998 Annex C, Table C.2 last column EXAMPLE (BS EN printing, printed folio 20, PDF p. 30)"
+      },
+      "quantity": "The level at a machine's own workstation rounds to the printed integer for all seven machines the diagram of Figure C.1 can show",
+      "kind": "record",
+      "expected": {
+        "label": "M1 = 89 dB; M2 = 84 dB; M3 = 92 dB; M4 = 83 dB; M5 = 88 dB; M6 = 84 dB; M7 = 87 dB",
+        "record": {
+          "M1": 89.0,
+          "M2": 84.0,
+          "M3": 92.0,
+          "M4": 83.0,
+          "M5": 88.0,
+          "M6": 84.0,
+          "M7": 87.0
+        }
+      },
+      "computed": {
+        "label": "M1 = 89 dB; M2 = 84 dB; M3 = 92 dB; M4 = 83 dB; M5 = 88 dB; M6 = 84 dB; M7 = 87 dB",
+        "record": {
+          "M1": 89.0,
+          "M2": 84.0,
+          "M3": 92.0,
+          "M4": 83.0,
+          "M5": 88.0,
+          "M6": 84.0,
+          "M7": 87.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/iso-11690-3-1998-4-3-bs-en-printing-printed-folios-2-and-3-pdf-pp-12-and-13/the-bounds-the-clause-prints-for-the-two-descriptors-region-by-region-with-the-five-it-leaves-open-left-open",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11690-3",
+        "edition": "1998",
+        "clause": "4.3 (BS EN printing, printed folios 2 and 3, PDF pp. 12 and 13)",
+        "cite": "ISO 11690-3:1998 4.3 (BS EN printing, printed folios 2 and 3, PDF pp. 12 and 13)"
+      },
+      "quantity": "The bounds the clause prints for the two descriptors, region by region, with the five it leaves open left open",
+      "kind": "count",
+      "expected": {
+        "value": 12.0,
+        "label": "12/12 bounds of 4.3, the five the clause prints no number for included"
+      },
+      "computed": {
+        "value": 12.0,
+        "label": "12/12 bounds of 4.3, the five the clause prints no number for included"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/ifa-lsa-01-234-2020-tab-4-2-printed-folio-14-pdf-p-14/the-equivalent-absorption-area-of-a-6-000-m3-production-hall-from-the-reverberation-times-measured-in-it",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "report",
+        "designation": "IFA-LSA 01-234",
+        "edition": "(2020)",
+        "clause": "Tab. 4.2 (printed folio 14, PDF p. 14)",
+        "cite": "IFA-LSA 01-234 (2020) Tab. 4.2 (printed folio 14, PDF p. 14)"
+      },
+      "quantity": "The equivalent absorption area of a 6 000 m3 production hall, from the reverberation times measured in it",
+      "kind": "record",
+      "expected": {
+        "label": "500 Hz = 279 m²; 1 kHz = 257 m²; 2 kHz = 296 m²; 4 kHz = 391 m²",
+        "record": {
+          "500 Hz": 279.0,
+          "1 kHz": 257.0,
+          "2 kHz": 296.0,
+          "4 kHz": 391.0
+        }
+      },
+      "computed": {
+        "label": "500 Hz = 279 m²; 1 kHz = 257 m²; 2 kHz = 296 m²; 4 kHz = 391 m²",
+        "record": {
+          "500 Hz": 279.0,
+          "1 kHz": 257.0,
+          "2 kHz": 296.0,
+          "4 kHz": 391.0
+        }
+      },
+      "unit": "m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/ifa-lsa-01-234-2020-tab-4-2-printed-folio-14-pdf-p-14/the-mean-absorption-coefficient-of-the-same-hall-which-is-that-area-over-the-2-200-m2-of-boundary-the-sheet-works-out-from-its-dimensions",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "report",
+        "designation": "IFA-LSA 01-234",
+        "edition": "(2020)",
+        "clause": "Tab. 4.2 (printed folio 14, PDF p. 14)",
+        "cite": "IFA-LSA 01-234 (2020) Tab. 4.2 (printed folio 14, PDF p. 14)"
+      },
+      "quantity": "The mean absorption coefficient of the same hall, which is that area over the 2 200 m2 of boundary the sheet works out from its dimensions",
+      "kind": "record",
+      "expected": {
+        "label": "500 Hz = 0.13; 1 kHz = 0.12; 2 kHz = 0.13; 4 kHz = 0.18",
+        "record": {
+          "500 Hz": 0.13,
+          "1 kHz": 0.12,
+          "2 kHz": 0.13,
+          "4 kHz": 0.18
+        }
+      },
+      "computed": {
+        "label": "500 Hz = 0.13; 1 kHz = 0.12; 2 kHz = 0.13; 4 kHz = 0.18",
+        "record": {
+          "500 Hz": 0.13,
+          "1 kHz": 0.12,
+          "2 kHz": 0.13,
+          "4 kHz": 0.18
         }
       },
       "tolerance": {
@@ -30485,27 +33180,306 @@
       "verdict": "pass"
     },
     {
-      "id": "spatial-sound-decay-and-prediction-in-workrooms/en-16487-2014-table-1-note/the-printed-uncertainty-is-a-reproducibility-standard-deviation-times-the-coverage-factor-of-2-8-that-iso-5725-6-applies",
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/ver-beranek-2e-table-7-4-and-the-text-before-it-printed-folios-199-and-200-pdf-pp-203-and-204/nine-machines-around-one-assembly-bench-add-on-a-power-basis-to-the-two-printed-totals-and-to-the-benefit-of-treating-the-ceiling",
       "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "book",
+        "designation": "Ver & Beranek",
+        "edition": "2e",
+        "clause": "Table 7.4 and the text before it (printed folios 199 and 200, PDF pp. 203 and 204)",
+        "cite": "Ver & Beranek 2e, Table 7.4 and the text before it (printed folios 199 and 200, PDF pp. 203 and 204)"
+      },
+      "quantity": "Nine machines around one assembly bench add on a power basis to the two printed totals, and to the benefit of treating the ceiling",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 (worst departure 0.05 dB, on the total before treatment: the nine contributions are themselves printed to 0,1 dB, so their sum can only be recovered to half a step)"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 printed totals and the benefit printed beside them"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/barron-2003-example-7-8-and-table-7-5-printed-folios-307-to-309-pdf-pp-319-to-321/the-level-at-the-operator-in-six-octave-bands-with-the-direct-term-as-the-statement-and-the-worked-line-write-it-q-4-pi-r-2",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Example 7-8 and Table 7-5 (printed folios 307 to 309, PDF pp. 319 to 321)",
+        "cite": "Barron (2003) Example 7-8 and Table 7-5 (printed folios 307 to 309, PDF pp. 319 to 321)"
+      },
+      "quantity": "The level at the operator in six octave bands, with the direct term as the statement and the worked line write it, Q/(4 pi r^2)",
+      "kind": "record",
+      "expected": {
+        "label": "125 Hz = 93.4 dB; 250 Hz = 98.5 dB; 500 Hz = 102.9 dB; 1 kHz = 104.6 dB; 2 kHz = 102.8 dB; 4 kHz = 95.5 dB",
+        "record": {
+          "125 Hz": 93.4,
+          "250 Hz": 98.5,
+          "500 Hz": 102.9,
+          "1 kHz": 104.6,
+          "2 kHz": 102.8,
+          "4 kHz": 95.5
+        }
+      },
+      "computed": {
+        "label": "125 Hz = 93.4 dB; 250 Hz = 98.5 dB; 500 Hz = 102.9 dB; 1 kHz = 104.6 dB; 2 kHz = 102.8 dB; 4 kHz = 95.5 dB",
+        "record": {
+          "125 Hz": 93.4,
+          "250 Hz": 98.5,
+          "500 Hz": 102.9,
+          "1 kHz": 104.6,
+          "2 kHz": 102.8,
+          "4 kHz": 95.5
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/barron-2003-table-7-5-against-itself-printed-folio-308-pdf-p-320/the-room-constant-printed-at-2-khz-is-the-one-a-mean-absorption-of-0-041-gives-and-not-the-0-043-the-row-above-it-prints",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Table 7-5 against itself (printed folio 308, PDF p. 320)",
+        "cite": "Barron (2003) Table 7-5 against itself (printed folio 308, PDF p. 320)"
+      },
+      "quantity": "The room constant printed at 2 kHz is the one a mean absorption of 0,041 gives, and not the 0,043 the row above it prints",
+      "kind": "scalar",
+      "expected": {
+        "value": 47.88,
+        "label": "the 47,88 m2 Table 7-5 prints at 2 kHz"
+      },
+      "computed": {
+        "value": 47.8832,
+        "label": "47.88 m2 from a mean absorption of 0,041, against the 50.32 m2 the printed 0,043 gives"
+      },
+      "unit": "m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.005
+      },
+      "deviation": {
+        "value": 0.0032
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "spatial-sound-decay-and-prediction-in-workrooms/barron-2003-example-7-6-printed-folio-298-pdf-p-310/the-level-in-a-paper-mill-refiner-room-from-the-room-constant-the-example-works-out-and-a-directivity-factor-of-2",
+      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "reference": {
+        "kind": "book",
+        "designation": "Barron",
+        "edition": "(2003)",
+        "clause": "Example 7-6 (printed folio 298, PDF p. 310)",
+        "cite": "Barron (2003) Example 7-6 (printed folio 298, PDF p. 310)"
+      },
+      "quantity": "The level in a paper mill refiner room, from the room constant the example works out and a directivity factor of 2",
+      "kind": "scalar",
+      "expected": {
+        "value": 94.8,
+        "label": "the 94,8 dB the example prints, for a room constant of 47,37 m2"
+      },
+      "computed": {
+        "value": 94.85,
+        "label": "94.85 dB, from the 47.37 m2 the library returns for (0,05)(900)/(1 - 0,05)"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.06
+      },
+      "deviation": {
+        "value": 0.049
+      },
+      "precision": 2,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/en-16487-2014-table-1-bs-en-16487-2014-printed-folio-14-pdf-page-16/reproducibility-uncertainty-of-the-absorption-coefficient-the-six-printed-octave-bands-and-the-weighted-rating",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
       "reference": {
         "kind": "standard",
         "designation": "EN 16487",
         "edition": "2014",
-        "clause": "Table 1 NOTE",
-        "cite": "EN 16487:2014 Table 1 NOTE"
+        "clause": "Table 1 (BS EN 16487:2014, printed folio 14, PDF page 16)",
+        "cite": "EN 16487:2014 Table 1 (BS EN 16487:2014, printed folio 14, PDF page 16)"
       },
-      "quantity": "The printed uncertainty is a reproducibility standard deviation times the coverage factor of 2,8 that ISO 5725-6 applies",
-      "kind": "scalar",
+      "quantity": "Reproducibility uncertainty of the absorption coefficient, the six printed octave bands and the weighted rating",
+      "kind": "record",
       "expected": {
-        "value": 0.1,
-        "label": "0,10 at 1 kHz, which is 2,8 times 0,0357"
+        "label": "125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13; alpha_w = 0.08",
+        "record": {
+          "125 Hz": 0.23,
+          "250 Hz": 0.23,
+          "500 Hz": 0.11,
+          "1 kHz": 0.1,
+          "2 kHz": 0.1,
+          "4 kHz": 0.13,
+          "alpha_w": 0.08
+        }
       },
       "computed": {
-        "value": 0.1
+        "label": "125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13; alpha_w = 0.08",
+        "record": {
+          "125 Hz": 0.23,
+          "250 Hz": 0.23,
+          "500 Hz": 0.11,
+          "1 kHz": 0.1,
+          "2 kHz": 0.1,
+          "4 kHz": 0.13,
+          "alpha_w": 0.08
+        }
       },
       "tolerance": {
         "mode": "absolute",
-        "value": 1e-12
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/en-16487-2014-table-1-note-printed-folio-14-against-iso-12999-2-2020-table-3-printed-folio-6/the-coverage-factor-is-the-2-8-of-iso-5725-6-for-this-test-code-and-the-2-0-of-table-3-at-95-for-the-general-method",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "Table 1 NOTE (printed folio 14) against ISO 12999-2:2020 Table 3 (printed folio 6)",
+        "cite": "EN 16487:2014 Table 1 NOTE (printed folio 14) against ISO 12999-2:2020 Table 3 (printed folio 6)"
+      },
+      "quantity": "The coverage factor is the 2,8 of ISO 5725-6 for this test code and the 2,0 of Table 3 at 95 % for the general method",
+      "kind": "record",
+      "expected": {
+        "label": "EN 16487 NOTE = 2.8; ISO 12999-2 Table 3 at 95 % = 2",
+        "record": {
+          "EN 16487 NOTE": 2.8,
+          "ISO 12999-2 Table 3 at 95 %": 2.0
+        }
+      },
+      "computed": {
+        "label": "EN 16487 NOTE = 2.8; ISO 12999-2 Table 3 at 95 % = 2",
+        "record": {
+          "EN 16487 NOTE": 2.8,
+          "ISO 12999-2 Table 3 at 95 %": 2.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/iso-9613-1-1993-table-1-sub-tables-i-and-j-printed-folio-9-pdf-page-12/pure-tone-attenuation-in-db-km-at-the-four-climates-the-air-absorption-correction-of-4-2-1-is-exercised-at-below",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 9613-1",
+        "edition": "1993",
+        "clause": "Table 1, sub-tables (i) and (j) (printed folio 9, PDF page 12)",
+        "cite": "ISO 9613-1:1993 Table 1, sub-tables (i) and (j) (printed folio 9, PDF page 12)"
+      },
+      "quantity": "Pure-tone attenuation in dB/km at the four climates the air-absorption correction of 4.2.1 is exercised at below",
+      "kind": "count",
+      "expected": {
+        "value": 20.0,
+        "label": "20/20 (worst cell 95% of its half-digit)"
+      },
+      "computed": {
+        "value": 20.0,
+        "label": "20/20 printed cells inside half of their last printed digit"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/vigran-2008-eq-4-41-printed-page-122-pdf-page-143/the-en-iso-354-2003-8-1-2-1-conversion-between-alpha-and-m-printed-as-10-lg-e-4-343",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "book",
+        "designation": "Vigran",
+        "edition": "(2008)",
+        "clause": "Eq. (4.41), printed page 122, PDF page 143",
+        "cite": "Vigran (2008) Eq. (4.41), printed page 122, PDF page 143"
+      },
+      "quantity": "The EN ISO 354:2003 8.1.2.1 conversion between alpha and m, printed as 10 lg(e) = 4,343",
+      "kind": "scalar",
+      "expected": {
+        "value": 4.343,
+        "label": "4,343, to the four figures the page prints"
+      },
+      "computed": {
+        "value": 4.342945
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0005
+      },
+      "deviation": {
+        "value": -5.5e-05
+      },
+      "precision": 6,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/vigran-2008-eq-4-42-and-the-example-printed-page-123-pdf-page-144/the-factor-of-four-in-the-air-term-of-4-2-1-against-a-printed-air-absorption-area-of-20-m2",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "book",
+        "designation": "Vigran",
+        "edition": "(2008)",
+        "clause": "Eq. (4.42) and the Example, printed page 123, PDF page 144",
+        "cite": "Vigran (2008) Eq. (4.42) and the Example, printed page 123, PDF page 144"
+      },
+      "quantity": "The factor of four in the air term of 4.2.1, against a printed air-absorption area of 20 m2",
+      "kind": "scalar",
+      "expected": {
+        "value": 20.0,
+        "label": "20 m2 of air absorption, from V = 100 m3 and m = 0,05 1/m"
+      },
+      "computed": {
+        "value": 20.0
+      },
+      "unit": "m²",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 5e-09
       },
       "deviation": {
         "value": 0.0
@@ -30514,32 +33488,225 @@
       "verdict": "pass"
     },
     {
-      "id": "spatial-sound-decay-and-prediction-in-workrooms/en-16487-2014-4-2-1/the-air-absorption-correction-is-four-room-volumes-of-attenuation-difference-spread-over-the-specimen",
-      "domain": "spatial-sound-decay-and-prediction-in-workrooms",
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/cox-d-antonio-3e-table-4-2-printed-page-104-pdf-page-161/the-air-absorption-constant-m-at-20-degc-over-the-three-humidity-rows-4-2-2-admits",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
       "reference": {
-        "kind": "standard",
-        "designation": "EN 16487",
-        "edition": "2014",
-        "clause": "4.2.1",
-        "cite": "EN 16487:2014 4.2.1"
+        "kind": "book",
+        "designation": "Cox & D'Antonio",
+        "edition": "3e",
+        "clause": "Table 4.2, printed page 104, PDF page 161",
+        "cite": "Cox & D'Antonio 3e Table 4.2, printed page 104, PDF page 161"
       },
-      "quantity": "The air-absorption correction is four room volumes of attenuation difference spread over the specimen",
-      "kind": "scalar",
+      "quantity": "The air absorption constant m at 20 degC, over the three humidity rows 4.2.2 admits",
+      "kind": "count",
       "expected": {
-        "value": 0.14814814814814814,
-        "label": "4V(m2 - m1)/S with V = 200 m3, S = 10,80 m2"
+        "value": 24.0,
+        "label": "24/24 (worst cell 86% of its half-digit)"
       },
       "computed": {
-        "value": 0.1481
+        "value": 24.0,
+        "label": "24/24 printed cells inside half of their own last decimal"
       },
       "tolerance": {
         "mode": "absolute",
-        "value": 1e-09
+        "value": 0.0
       },
       "deviation": {
         "value": 0.0
       },
-      "precision": 4,
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/en-16487-2014-4-2-1-printed-folio-12-pdf-page-14-with-iso-9613-1-1993-table-1-i-and-en-iso-354-2003-8-1-2-1/the-air-absorption-correction-of-a-300-m3-room-whose-humidity-moved-from-50-to-60-which-the-clause-reports-as-over-its-printed-cap",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "4.2.1 (printed folio 12, PDF page 14) with ISO 9613-1:1993 Table 1(i) and EN ISO 354:2003 8.1.2.1",
+        "cite": "EN 16487:2014 4.2.1 (printed folio 12, PDF page 14) with ISO 9613-1:1993 Table 1(i) and EN ISO 354:2003 8.1.2.1"
+      },
+      "quantity": "The air-absorption correction of a 300 m3 room whose humidity moved from 50 % to 60 %, which the clause reports as over its printed cap",
+      "kind": "record",
+      "expected": {
+        "label": "the printed 0,05, and the room reported as over it",
+        "record": {
+          "cap of 4.2.1": 0.05,
+          "reported as over it": 1.0
+        }
+      },
+      "computed": {
+        "label": "cap 0.05, largest correction -0.10329 at 4000 Hz, reported",
+        "record": {
+          "cap of 4.2.1": 0.05,
+          "reported as over it": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/en-16487-2014-4-2-1-printed-folio-12-pdf-page-14-with-iso-9613-1-1993-table-1-i-and-1-j/the-same-correction-in-a-200-m3-room-at-90-relative-humidity-which-the-clause-passes-in-silence-as-inside-its-printed-cap",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "4.2.1 (printed folio 12, PDF page 14) with ISO 9613-1:1993 Table 1(i) and 1(j)",
+        "cite": "EN 16487:2014 4.2.1 (printed folio 12, PDF page 14) with ISO 9613-1:1993 Table 1(i) and 1(j)"
+      },
+      "quantity": "The same correction in a 200 m3 room at 90 % relative humidity, which the clause passes in silence as inside its printed cap",
+      "kind": "record",
+      "expected": {
+        "label": "the printed 0,05, and the room passed in silence",
+        "record": {
+          "cap of 4.2.1": 0.05,
+          "passed in silence": 1.0
+        }
+      },
+      "computed": {
+        "label": "cap 0.05, largest correction +0.03309 at 2000 Hz, not reported",
+        "record": {
+          "cap of 4.2.1": 0.05,
+          "passed in silence": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/iso-354-2003-formulae-8-and-9-printed-folios-10-and-11-pdf-pages-20-and-21-of-the-en-printing-as-en-16487-2014-4-2-1-uses-them/the-absorption-coefficient-of-a-type-e-200-mm-ceiling-from-the-reverberation-times-and-climates-a-ukas-certificate-prints",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 354",
+        "edition": "2003",
+        "clause": "Formulae (8) and (9) (printed folios 10 and 11, PDF pages 20 and 21 of the EN printing), as EN 16487:2014 4.2.1 uses them",
+        "cite": "ISO 354:2003 Formulae (8) and (9) (printed folios 10 and 11, PDF pages 20 and 21 of the EN printing), as EN 16487:2014 4.2.1 uses them"
+      },
+      "quantity": "The absorption coefficient of a type E 200 mm ceiling, from the reverberation times and climates a UKAS certificate prints",
+      "kind": "count",
+      "expected": {
+        "value": 6.0,
+        "label": "6/6 (worst departure 0.0046)"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6/6 printed coefficients within the rounding of the certificate"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/en-16487-2014-4-1-1-1-1-and-4-1-1-2-3-1-printed-folios-6-and-9-pdf-pages-8-and-11/four-real-suspended-ceiling-arrangements-judged-against-the-printed-10-80-m2-and-the-printed-200-mm",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "4.1.1.1.1 and 4.1.1.2.3.1 (printed folios 6 and 9, PDF pages 8 and 11)",
+        "cite": "EN 16487:2014 4.1.1.1.1 and 4.1.1.2.3.1 (printed folios 6 and 9, PDF pages 8 and 11)"
+      },
+      "quantity": "Four real suspended-ceiling arrangements judged against the printed 10,80 m2 and the printed 200 mm",
+      "kind": "count",
+      "expected": {
+        "value": 4.0,
+        "label": "4/4 against the 10,80 m2 of 4.1.1.1.1 and the 200 mm of 4.1.1.2.3.1"
+      },
+      "computed": {
+        "value": 4.0,
+        "label": "4/4 arrangements judged as the two clauses print them"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/en-16487-2014-4-2-2-printed-folio-12-pdf-page-14/the-50-relative-humidity-floor-against-the-room-climates-three-laboratories-printed",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "4.2.2 (printed folio 12, PDF page 14)",
+        "cite": "EN 16487:2014 4.2.2 (printed folio 12, PDF page 14)"
+      },
+      "quantity": "The 50 % relative humidity floor against the room climates three laboratories printed",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "3/3 against the 50 % of 4.2.2, one of them below it"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 printed climates judged against the floor of the clause"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "suspended-ceilings-in-a-reverberation-room-en-16487/en-16487-2014-table-1-footnote-b-with-en-iso-11654-1997-4-1-and-4-2-printed-folios-2-and-3/the-weighted-rating-and-absorption-class-three-laboratories-printed-for-their-own-suspended-ceilings",
+      "domain": "suspended-ceilings-in-a-reverberation-room-en-16487",
+      "reference": {
+        "kind": "standard",
+        "designation": "EN 16487",
+        "edition": "2014",
+        "clause": "Table 1 footnote b with EN ISO 11654:1997 4.1 and 4.2 (printed folios 2 and 3)",
+        "cite": "EN 16487:2014 Table 1 footnote b with EN ISO 11654:1997 4.1 and 4.2 (printed folios 2 and 3)"
+      },
+      "quantity": "The weighted rating and absorption class three laboratories printed for their own suspended ceilings",
+      "kind": "count",
+      "expected": {
+        "value": 8.0,
+        "label": "3/3 printed alpha_w with class and indicator, and 5/5 printed alpha_p"
+      },
+      "computed": {
+        "value": 8.0,
+        "label": "8/8 printed ratings and practical coefficients reproduced"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

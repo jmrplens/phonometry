@@ -612,9 +612,16 @@ def temperature_field_correction_db(
 
     Unless Annex A gives a reason to say otherwise, the field corrections
     account for markedly different temperatures on the two sides and for
-    nothing else: a different temperature is a different speed of sound, and a
-    different speed of sound is a different factor from squared pressure to
-    power.
+    nothing else. The standard explains the term by the speed of sound alone,
+    and that is where the ratio comes out upside down: the factor from squared
+    pressure to power is the characteristic impedance, and at one ambient
+    pressure the standard's own Equation (29) makes the density fall as
+    :math:`1/T` while :math:`c` rises as :math:`\sqrt{T}`, so
+    :math:`\rho c` falls as :math:`T^{-1/2}` and the correction rises with
+    temperature. The printed form is returned unchanged, because a reader
+    holding ISO 11820 has to find the standard's own number; the defect is
+    registered in ``docs/ERRATA.md`` under "ISO 11820:1996, Equations (20) and
+    (22)".
 
     The same expression is Equation (22) with the two runs of an insertion
     measurement in place of the two sides: there :math:`\theta_I` is the

@@ -766,11 +766,11 @@ def _round_half_up_tenths(values: np.ndarray) -> np.ndarray:
     negative ones).
 
     .. note::
-        This rounds negative halves *away from zero* (−0.05 → −0.1), whereas
-        the adaptation-term reductions (:func:`_adaptation_term`,
-        :func:`_impact_ci`) use the ISO 80000-1 footnote form
-        :math:`\lfloor x + 0.5 \rfloor` which rounds them *towards* +∞
-        (−0.5 → 0). The two
+        This rounds negative halves *away from zero* (−0.05 → −0.1), which is
+        Rule B of ISO 80000-1:2009 Annex B, whereas the adaptation-term
+        reductions (:func:`_adaptation_term`, :func:`_impact_ci`) use the plain
+        :math:`\lfloor x + 0.5 \rfloor`, which rounds them *towards* +∞
+        (−0.5 → 0) and so follows neither printed rule there. The two
         conventions differ only for exactly-half negative values, which do
         not occur with realistic (positive-level) insulation data; the
         difference is documented here rather than unified so each function
@@ -1295,7 +1295,16 @@ class ExtendedImpactRatingResult:
 
 
 def _reduce(value: float, *, one_decimal: bool) -> float:
-    """Round half-up to an integer, or to one decimal (ISO 80000-1 footnote)."""
+    r"""Round half-up to an integer, or to one decimal.
+
+    Half-up is Rule B of ISO 80000-1:2009 Annex B (normative), B.3, printed
+    folio 36: of two equally near multiples, the greater in magnitude is the
+    rounded number. :math:`\lfloor x + 0.5 \rfloor` is that rule only for a
+    non-negative ``value``; it rounds a negative half towards positive infinity
+    instead, where Rule B prints -12,25 as -12,3. The ratings this serves are
+    levels and differences of levels that are positive in practice, so the two
+    never part company here.
+    """
     if one_decimal:
         return math.floor(value * 10.0 + 0.5) / 10.0
     return float(math.floor(value + 0.5))

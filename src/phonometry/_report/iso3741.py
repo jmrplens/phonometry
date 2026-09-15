@@ -110,7 +110,7 @@ def _value_table(
     lw = np.asarray(result.sound_power_level, dtype=np.float64)
     lp = np.asarray(result.mean_pressure_level, dtype=np.float64)
     n = lw.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
 
     if not verbose:
         header = [t(_COL_FREQUENCY, language), _COL_LP, _COL_LW]

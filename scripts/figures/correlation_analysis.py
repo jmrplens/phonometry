@@ -15,6 +15,7 @@ from scipy import signal as scipy_signal
 
 from phonometry._plot.common import format_frequency_axis, theme_fill
 
+from .i18n import _LANG, localize_panel
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -410,6 +411,7 @@ def generate_cepstrum_variants(output_dir: str) -> None:
     axins.set_ylim(-0.05, 0.55)
     axins.tick_params(labelsize=7)
     axins.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
+    localize_panel(axins)
     ax.indicate_inset_zoom(axins, edgecolor=COLOR_FG, alpha=0.5)
     ax.annotate(
         "first rahmonic at 8 ms:\nheight $\\approx a$ on the power cepstrum",
@@ -503,7 +505,7 @@ def generate_lifter_split(output_dir: str) -> None:
     for ax in axes:
         ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
         ax.set_axisbelow(True)
-        format_frequency_axis(ax, 500.0, 2000.0)
+        format_frequency_axis(ax, 500.0, 2000.0, language=_LANG)
     axes[0].set_title("Liftering at 4 ms: Envelope Versus Echo Ripple", pad=12)
     plt.tight_layout()
     save_figure(output_dir, "lifter_split.svg")

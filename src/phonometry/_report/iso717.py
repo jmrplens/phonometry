@@ -360,12 +360,15 @@ def _verdict(
 
 def _extended_terms(
     result: WeightedRatingResult | ImpactRatingResult,
+    *,
+    language: str = "en",
 ) -> list[str]:
     """Return the extended spectrum-adaptation terms the result carries, if any.
 
     The core rating results do not hold the enlarged-range terms, so this is
     normally empty; it only lists terms that are genuinely present on the
-    object (never fabricated).
+    object (never fabricated). ``language`` is the fiche language, handed to
+    the number formatter like every other value on the sheet.
     """
     terms: list[str] = []
     airborne_specs = [
@@ -390,7 +393,7 @@ def _extended_terms(
             continue
         # Sign only when negative, the style of the standard's own examples
         # (format_number also normalises a signed zero away).
-        terms.append(f"{label} = {format_number(number, decimals=0)} dB")
+        terms.append(f"{label} = {format_number(number, language, decimals=0)} dB")
     return terms
 
 
@@ -550,7 +553,11 @@ def render_iso717_report(
     flow.append(Spacer(1, 8))
 
     # Boxed single-number result, optional verdict row, footer.
-    flow.append(result_box(statement, styles, accent, _extended_terms(result)))
+    flow.append(
+        result_box(
+            statement, styles, accent, _extended_terms(result, language=language)
+        )
+    )
     if metadata is not None and metadata.requirement is not None:
         text, passed = _verdict(result, metadata.requirement, language, symbol)
         flow.extend(

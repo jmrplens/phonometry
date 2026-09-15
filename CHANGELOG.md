@@ -173,6 +173,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A figure drawn in Spanish could print an English decimal point on its
+  frequency axis. `k_weighting_response(48000.0).plot(language="es")` labelled
+  its lowest octave `31.5`, and so did every renderer whose logarithmic
+  frequency axis reached that band. Nothing after the plot can repair it:
+  `format_frequency_axis` writes the band centres as fixed strings, so
+  `localize_axes` leaves that axis alone, and the comma can only come from the
+  call that makes the labels, when that call is told the language. 61 calls in
+  the plotting modules were not, and so were 115 in the figure generators,
+  where the translation pass that runs before a figure is saved happened to
+  cover for them.
+
+  The same omission reached the other helpers that take the language. Ten
+  `_format_freq` calls dropped it, among them the categories of the radiated
+  power bars and the cut-off and resonance frequencies in the legends of the
+  floor covering, floating floor, tapping force and lining figures. The duct
+  path fiche printed `NC-58.3 (31.5 Hz)` on a Spanish sheet, and the noise
+  criterion figure kept the rating's decimal point in its title. Thirty figure
+  generators called a result's `.plot()` without the language, so the result
+  drew English text for the translation table to replace afterwards. Those
+  panels are drawn in Spanish by the library now, and where its wording and
+  the published figure differed the library takes the published one
+  (*velocidad aerodinámica*, *figura de mérito*, *aristas de difracción*,
+  *camino difractado*, *distancia en la sección*, *nivel de evento*, *SEL del
+  segmento*). Two figures change their words instead: the radiation efficiency
+  panels title their plate *placa en pantalla*, as the plate geometry figure
+  and the rest of the Spanish pages call a baffle, and the mean ground plane
+  figure reads *plano medio del suelo*, as the guide does.
+
+  `scripts/check_language_forwarding.py` is the guard
+  (`make language-forwarding`, and a job of its own in CI). It reads
+  `src/phonometry` and `scripts`, indexes every function and method that takes a
+  `language`, and fails on any call to one of them that does not pass it on from
+  a function where a language is in scope. It resolves the helper through the
+  imports, a result's `.plot()` through the class of its receiver and a
+  `**kwargs` through what it can carry, and it found 219 such calls on the tree
+  it was written against. The one left is the comb filtering clip, whose
+  labelled centres run from 63 Hz to 8 kHz and so read the same in both
+  languages; it is listed as exempt with that reason.
+
+- A Spanish figure could still print an English decimal point on a panel other
+  than the one the data was drawn on. `localize_axes` was handed the main axes
+  and nothing else, so a twin axis, a colorbar and the `z` of a 3-D panel each
+  kept matplotlib's English formatter beside a panel already in Spanish:
+  `rotorcraft_hemisphere_es.svg` read *Nivel de fuente a 60 m [dB]* over a
+  scale numbered `76.8 78.4 80.0`, and `precision_positions_arrays_es.svg`
+  labelled `x` and `y` with commas and `z` with points. Five plot functions
+  built a twin and left it in English, nine built a colorbar, and the 3-D
+  microphone array left all three of its axes untouched.
+
+  The other half was the rule `localize_axes` applied. It skipped any axis that
+  was not linear, which is right for a frequency axis, whose labels
+  `format_frequency_axis` has already written as fixed strings, and wrong for
+  everything else on a logarithmic scale: the decade axis of distances of the
+  steady-state room field wrote `0.10 1.00 10.00` beside an annotation reading
+  `r_c = 1,11 m`, one figure with two separators. What decides it is the
+  formatter, not the scale, so a panel is localised when its labels are still
+  being written by the default numeric formatter, whatever it is drawn on.
+
+  Two panels the save-time pass of the figure generators cannot reach are now
+  localised where they are built, through `figures.i18n.localize_panel`: a zoom
+  inset made with `Axes.inset_axes`, which is a child of its host panel rather
+  than of the figure, so the pole migration and cepstrum figures drew their
+  zooms in English inside a Spanish page; and a contour colorbar, whose axis is
+  spaced by its own boundaries and so reports a scale that is neither linear
+  nor logarithmic.
+
+  `scripts/check_figure_decimal_point.py` is the gate that closes the class
+  (`make figure-decimal-point`, and a step of its own in CI). Rather than ask
+  each pass whether it covered everything, which is how these shipped, it reads
+  the committed Spanish figures and fails on a tick label that is a number with
+  a point in it, whichever pass was meant to write the comma. It found the six
+  figures above, which are regenerated here; the clause numbers of the work
+  station diagram are listed as allowed, with the reason.
+
+- The band column of a fiche kept the English point on a Spanish sheet. The
+  room criterion sheet printed `31.5 60,0` as one row, the band centre in
+  English beside a level already in Spanish, and so did every sheet of the
+  sound-power family, which share one helper: ISO 3741, ISO 3744, ISO 7849,
+  ISO 9614 and its precision variant, EN 12354-5, EN 15657 and the enclosure,
+  silencer and HVAC sheets. A result measured without band frequencies was
+  labelled `Band 1`, `Band 2` in a table headed in Spanish, and now reads
+  *Banda 1*. The ISO 9614-3 uncertainty column looks its standard deviations up
+  by band centre rather than by parsing the printed label back, which a decimal
+  comma would have turned into a column of em dashes.
+
+- The forwarding gate read less of the tree than it said it did. A call in a
+  module body or a class body was never looked at, in the one tree it treats as
+  speaking everywhere; a helper reached through a local alias or a
+  `functools.partial` was not resolved, and the tree writes both; and the three
+  shapes that stay out of reach, a callable pulled out of a mapping, one
+  reached by `getattr` and one passed in as a parameter, are now named as limits
+  instead of being covered by a promise. An exemption is keyed by its line, so
+  one approved call no longer speaks for a second one written beside it, and a
+  call that moves is re-approved rather than carried along unread. The
+  untyped-receiver fallback needs every method of a name to take the language,
+  and one namesake without it switched the name off silently: `report` was
+  already in that state, so an untyped `result.report(path)` was unchecked. The
+  outlier takes the language now, and a name that falls into that state is a
+  failure of its own, naming it.
+
 - Two verifier figures painted the verdict backwards. The frequency-weighting
   and phase-response plots of ISO 8041-1 drew the points **inside** the
   tolerance in red and the ones outside in orange, which is the only pair in

@@ -544,6 +544,7 @@ def plot_intensity(
         " dB)"
     )
     localize_axes(ax, language)
+    localize_axes(twin, language)
     return ax
 
 
@@ -656,6 +657,7 @@ def plot_field_indicators(
     ax.legend(lines + tlines, labels + tlabels, loc="best", fontsize="small")
     ax.set_title(_t("ISO 9614-1 field indicators", language))
     localize_axes(ax, language)
+    localize_axes(twin, language)
     return ax
 
 
@@ -801,7 +803,7 @@ def plot_intensity_class(
             label=_t("Below the class {cls} minimum", language, cls=marked_cls),
         )
 
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     ax.set_xlim(float(freqs.min()) / 1.15, float(freqs.max()) * 1.15)
     ax.set_ylim(y_bot, y_top)
     ax.set_xlabel(_t(_FREQ_LABEL, language))

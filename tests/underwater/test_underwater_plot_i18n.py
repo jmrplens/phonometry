@@ -124,7 +124,7 @@ def test_detection_range_plot_labels() -> None:
     assert ax.get_title() == "Propagation loss vs figure of merit"
     ax_es = res.plot(language="es")
     labels = [t.get_text() for t in ax_es.get_legend().get_texts()]
-    assert ax_es.get_title() == "Pérdida de propagación frente a cifra de mérito"
+    assert ax_es.get_title() == "Pérdida de propagación frente a figura de mérito"
     assert any(text.startswith("Alcance de detección") for text in labels)
     plt.close("all")
 

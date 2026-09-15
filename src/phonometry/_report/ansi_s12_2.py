@@ -47,7 +47,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
-from ._i18n import format_number, t
+from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
@@ -122,11 +122,19 @@ def _metadata_pairs(
     return escaped_pairs(specs)
 
 
-def _band_labels() -> list[str]:
-    """Nominal octave-band labels (16 ... 8000 Hz), aligned with the levels."""
+def _band_labels(language: str = "en") -> list[str]:
+    """Nominal octave-band labels (16 ... 8000 Hz), aligned with the levels.
+
+    The centre of the 31,5 Hz band is a number like any other on the sheet, so
+    a Spanish sheet writes it with the decimal comma the level beside it in the
+    same row already uses.
+    """
     from ..room.noise_criteria import OCTAVE_BANDS
 
-    return [f"{f:g}" for f in np.asarray(OCTAVE_BANDS, dtype=np.float64)]
+    return [
+        decimal_comma(f"{f:g}", language)
+        for f in np.asarray(OCTAVE_BANDS, dtype=np.float64)
+    ]
 
 
 def _level_cell(level: float, language: str, decimals: int = 1) -> str:
@@ -209,7 +217,7 @@ def _nc_contour_column(levels: np.ndarray, language: str) -> list[str]:
 def _base_columns(levels: np.ndarray, language: str) -> list[tuple[str, list[str]]]:
     """The two columns every room-noise table opens with (frequency, level)."""
     return [
-        (t("Frequency f [Hz]", language), _band_labels()),
+        (t("Frequency f [Hz]", language), _band_labels(language)),
         ("L<sub>p</sub> [dB]", [_level_cell(v, language) for v in levels]),
     ]
 

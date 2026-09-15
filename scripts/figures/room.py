@@ -227,7 +227,7 @@ def generate_excitation_signals(output_dir: str) -> None:
     ax_ms.set_xlabel("Frequency [Hz]")
     ax_ms.set_ylabel("Magnitude [dB]")
     ax_ms.set_xlim(20.0, fs / 2)
-    format_frequency_axis(ax_ms, 20.0, fs / 2)
+    format_frequency_axis(ax_ms, 20.0, fs / 2, language=_LANG)
     ax_ms.set_ylim(-12.0, 12.0)
     ax_ms.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
 
@@ -857,7 +857,7 @@ def generate_modal_count_per_band(output_dir: str) -> None:
     )
     ax.set_xscale("log")
     ax.set_yscale("log")
-    format_frequency_axis(ax, 45.0, 5600.0)
+    format_frequency_axis(ax, 45.0, 5600.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Modes inside the octave band")
     ax.set_ylim(5.0, counts.max() * 6.0)
@@ -2173,7 +2173,9 @@ def generate_enclosed_space_air_term(output_dir: str) -> None:
     )
 
     for ax in (left, right):
-        format_frequency_axis(ax, float(freq[0]), float(freq[-1]), minor=None)
+        format_frequency_axis(
+            ax, float(freq[0]), float(freq[-1]), minor=None, language=_LANG
+        )
         ax.set_xlabel(LABEL_FREQ_HZ)
         ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.45)
         ax.set_axisbelow(True)
@@ -2305,7 +2307,9 @@ def generate_enclosed_space_objects(output_dir: str) -> None:
     right.set_ylim(bottom=0.0)
     right.set_title("The volume the objects displace", pad=10)
     right.legend(loc="lower left", fontsize=9)
-    format_frequency_axis(right, float(freq[0]), float(freq[-1]), minor=None)
+    format_frequency_axis(
+        right, float(freq[0]), float(freq[-1]), minor=None, language=_LANG
+    )
     right.annotate(
         rf"the gap is $\psi$ alone: {100.0 * psi:.1f} %",
         xy=(1000.0, float(furnished.reverberation_time[3])),

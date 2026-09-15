@@ -389,7 +389,7 @@ def plot_vibration_weighting(
     )
     ax.set_title(_t(title, language).format(name=result.name))
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -619,7 +619,7 @@ def plot_mobility(
             v=format_number(freq[peak], language, decimals=1)
         ),
     )
-    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_MOBILITY_LABEL, language))
     ax.set_title(_t("ISO 7626-1 mechanical mobility", language))
@@ -713,7 +713,7 @@ def plot_rigid_mass_calibration(
 
     if ax is not None:
         _deviation_panel(ax, **kwargs)
-        format_frequency_axis(ax, fmin, fmax)
+        format_frequency_axis(ax, fmin, fmax, language=language)
         localize_axes(ax, language)
         return ax
 
@@ -752,7 +752,7 @@ def plot_rigid_mass_calibration(
     )
     _deviation_panel(axd)
     for axf in axes:
-        format_frequency_axis(axf, fmin, fmax)
+        format_frequency_axis(axf, fmin, fmax, language=language)
         localize_axes(axf, language)
     return axes
 
@@ -780,7 +780,7 @@ def plot_transfer_stiffness(
     kwargs.setdefault("color", _C_PRIMARY)
     kwargs.setdefault("label", r"$L_k = 20\,\log_{10}(|k_{2,1}|/k_0)$")
     ax.semilogx(freq, level, **kwargs)
-    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Transfer stiffness level $L_k$ [dB re 1 N/m]", language))
     ax.set_title(_t("ISO 10846 dynamic transfer stiffness", language))
@@ -824,7 +824,7 @@ def plot_radiation_efficiency(
         lw=1.0,
         label=f"$f_\\mathrm{{c}}$ = {result.critical_frequency:.0f} Hz",
     )
-    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(r"Radiation efficiency $\sigma$", language))
     ax.set_title(_t("Plate radiation efficiency (Leppington / Maidanik)", language))
@@ -1716,7 +1716,7 @@ def plot_power_injection(
         lw=1.3,
         label=r"$\eta_{2}$",
     )
-    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Loss factor", language))
     ax.set_title(

@@ -622,6 +622,7 @@ _STRINGS: dict[str, str] = {
     "Single-band parameters": "Parámetros de banda única",
     "Broadband analysis": "Análisis de banda ancha",
     "Broadband": "Banda ancha",
+    "Band {number}": "Banda {number}",
     "Room": "Sala",
     "Floor area S [m<super>2</super>]": "Superficie del suelo S [m<super>2</super>]",
     "Source positions": "Posiciones de fuente",

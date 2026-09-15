@@ -155,8 +155,8 @@ def generate_fdtd_simulation(output_dir: str) -> None:
     _fig, (ax_f, ax_p) = plt.subplots(
         1, 2, figsize=(12.5, 5.0), gridspec_kw={"width_ratios": [1.25, 1.0]}
     )
-    res.plot(kind="snapshot", frame=7, ax=ax_f)
-    res.plot(ax=ax_p)
+    res.plot(kind="snapshot", frame=7, ax=ax_f, language=_LANG)
+    res.plot(ax=ax_p, language=_LANG)
     ax_p.set_title("FDTD probe pressure", pad=10)
     ax_f.set_title(ax_f.get_title(), pad=10)
 
@@ -207,7 +207,7 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
     assert res.snapshots is not None
     assert res.snapshot_times is not None
     vmax = 0.18 * float(np.abs(res.snapshots[-1]).max())
-    res.plot(kind="snapshot", frame=-1, ax=ax, vmin=-vmax, vmax=vmax)
+    res.plot(kind="snapshot", frame=-1, ax=ax, vmin=-vmax, vmax=vmax, language=_LANG)
 
     # Wavefront radii from the pulse centre time (t0 = 4 * width).
     t_eff = float(res.snapshot_times[-1]) - 4.0 * width
@@ -301,7 +301,7 @@ def generate_scholte_interface_wave(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(9.5, 4.6))
     assert res.snapshots is not None
     vmax = 0.22 * float(np.abs(res.snapshots[-1]).max())
-    res.plot(kind="snapshot", frame=-1, ax=ax, vmin=-vmax, vmax=vmax)
+    res.plot(kind="snapshot", frame=-1, ax=ax, vmin=-vmax, vmax=vmax, language=_LANG)
     # The light RdBu_r field stays light everywhere, so its in-axes
     # annotations keep a fixed dark ink rather than COLOR_FG; on the dark
     # theme the renderer picks the black-centred field, which takes the

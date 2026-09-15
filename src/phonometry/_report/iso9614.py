@@ -71,6 +71,7 @@ from ._sound_power_fiche import (
     d1,
     energy_sum,
     fraction_caption,
+    nominal_bands,
     power_statement,
     power_value_table,
     power_verdict,
@@ -168,7 +169,7 @@ def _value_table(
     """
     lw = np.asarray(result.sound_power_level, dtype=np.float64)
     n = lw.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
 
     if not verbose:
         header = [t(_COL_FREQ, language), _COL_LW]
@@ -278,7 +279,7 @@ def _criteria_strip(result: SoundPowerIntensityResult, language: str = "en") -> 
     if omitted is not None and bool(np.any(omitted)):
         mask = np.asarray(omitted, dtype=bool)
         frequencies = getattr(result, "frequencies", None)
-        labels, _fraction = band_labels(frequencies, mask.size)
+        labels, _fraction = band_labels(frequencies, mask.size, language)
         bands = ", ".join(str(labels[i]) for i in range(mask.size) if mask[i])
         if frequencies is not None:
             bands += " Hz"
@@ -379,14 +380,14 @@ def _band_uncertainty(result: PrecisionIntensityResult) -> np.ndarray:
     frequencies = getattr(result, "frequencies", None)
     if frequencies is None:
         return uncertainty
-    labels, fraction = band_labels(frequencies, n)
-    if fraction != _THIRD_OCTAVE_FRACTION:
+    centres, fraction = nominal_bands(frequencies)
+    if centres is None or fraction != _THIRD_OCTAVE_FRACTION:
         return uncertainty
     from ..emission.sound_power_intensity import _sigma_r0_9614_3
 
-    for i, label in enumerate(labels):
+    for i, centre in enumerate(centres):
         try:
-            sigma = _sigma_r0_9614_3(round(float(label)))
+            sigma = _sigma_r0_9614_3(round(centre))
         except ValueError:  # a band outside the Table 1 range
             continue
         uncertainty[i] = _COVERAGE_FACTOR * sigma
@@ -469,7 +470,7 @@ def _precision_value_table(
     lw = np.asarray(result.sound_power_level, dtype=np.float64)
     lw0 = np.asarray(result.sound_power_level_normalized, dtype=np.float64)
     n = lw.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
     uncertainty = _band_uncertainty(result)
 
     if not verbose:
@@ -539,7 +540,7 @@ def _precision_caption(result: PrecisionIntensityResult, language: str = "en") -
     n = np.asarray(result.sound_power_level, dtype=np.float64).size
     if frequencies is None or n < _MIN_BANDS_FOR_RANGE:
         return caption
-    labels, _fraction = band_labels(frequencies, n)
+    labels, _fraction = band_labels(frequencies, n, language)
     return t("{caption}, {lo} Hz to {hi} Hz", language).format(
         caption=caption, lo=labels[0], hi=labels[-1]
     )
@@ -759,7 +760,9 @@ def _omitted_band_list(
     language: str = "en",
 ) -> str:
     """The omitted bands, each with the rule that omitted it."""
-    labels, _fraction = band_labels(getattr(result, "frequencies", None), omitted.size)
+    labels, _fraction = band_labels(
+        getattr(result, "frequencies", None), omitted.size, language
+    )
     unit = " Hz" if getattr(result, "frequencies", None) is not None else ""
     return ", ".join(
         f"{labels[i]}{unit} ({_omission_reason(result, criteria, i, language)})"

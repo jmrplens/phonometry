@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING
 from . import _publish
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from matplotlib.figure import Figure
 
 # The miss recorder sits at the top of ``scripts/``, next to the checker that
@@ -4044,7 +4045,7 @@ _ES_EXACT = {
     "0.5 m × 0.4 m pane, same glass": "vidrio de 0,5 m × 0,4 m, el mismo material",
     r"$\sigma = 1$ (as efficient as a piston)": r"$\sigma = 1$ (tan eficiente como un pistón)",
     # simply_supported is the boundary= literal, kept as typed.
-    "Baffled plate (simply_supported)": "Placa con bafle (simply_supported)",
+    "Baffled plate (simply_supported)": "Placa en pantalla (simply_supported)",
     "Edge Radiation, Coincidence and the Slow Return to Unity": "Radiación de bordes, coincidencia y el lento retorno a la unidad",
     # structure_borne_conversion (buildings/design/structure-borne-power)
     "One Source, Four Levels: the EN 15657 Conversion Chain": "Una fuente, cuatro niveles: la cadena de conversión de la EN 15657",
@@ -4091,7 +4092,7 @@ _ES_EXACT = {
     "A 600 m hard strip across it": "Una franja dura de 600 m que lo cruza",
     "track": "trayectoria",
     "the event receiver": "el receptor del evento",
-    "Mean Ground Plane and Equivalent Heights (ECAC Doc 32 / NORAH2)": "Plano medio del terreno y alturas equivalentes (ECAC Doc 32 / NORAH2)",
+    "Mean Ground Plane and Equivalent Heights (ECAC Doc 32 / NORAH2)": "Plano medio del suelo y alturas equivalentes (ECAC Doc 32 / NORAH2)",
     "receiver": "receptor",
     r"Raw ($V$, $\gamma$) plane: pass it as triangles=": r"Plano ($V$, $\gamma$) sin normalizar: se pasa como triangles=",
     "Normalised plane: the library default": "Plano normalizado: el comportamiento por defecto",
@@ -4801,7 +4802,7 @@ _ES_PATTERNS = [
     (r"^Total SEL = (.+) dB$", r"SEL total = \1 dB"),
     (
         r"^Mean ground plane \(\$a\$ = (\d+)\.(\d+)\)$",
-        r"Plano medio del terreno ($a$ = \1,\2)",
+        r"Plano medio del suelo ($a$ = \1,\2)",
     ),
     (r"^(.+) Hz \(\$\\varphi\$ = 0°\)$", r"\1 Hz ($\\varphi$ = 0°)"),
     (
@@ -6766,6 +6767,41 @@ def audit_figure(stem: str) -> None:
     :func:`lookup` cannot translate is attributed to the file it ships in.
     """
     _audit.visit(stem, _LANG)
+
+
+def localize_panel(ax: Axes) -> None:
+    """Write the Spanish decimal comma on a panel the save-time pass misses.
+
+    :func:`_translate_figure` walks ``fig.get_axes()`` and swaps the formatter
+    of every axis that is linear and still carries matplotlib's default numeric
+    one. Two panels a generator can build fall outside that description and
+    keep their English decimal point beside a host panel already in Spanish:
+
+    * a zoom inset made with ``Axes.inset_axes``, which is registered as a child
+      of its host panel rather than of the figure, so the walk never reaches it
+      (the other inset helper, ``axes_grid1.inset_locator.inset_axes``, ends in
+      ``figure.add_axes`` and is reached);
+    * a contour colorbar, whose own axis is spaced by the contour boundaries,
+      so its scale reads "function" rather than "linear" although its labels
+      are as numeric as any other.
+
+    Call it on either one, right after building it, the way the library's plot
+    functions end on ``localize_axes``: it is the same helper, so a panel drawn
+    here and a panel drawn by the library write their numbers the same way.
+    English is a no-op.
+
+    Widening the pass itself would reach these without a call, and it is not
+    what this does, because ``_translate_figure`` is hashed into the
+    fingerprint of every committed clip: editing it marks all forty-three stale
+    and asks for a re-render of frames that cannot change, since no clip draws
+    an inset, a colorbar or a 3-D panel. What keeps the class closed instead is
+    ``scripts/check_figure_decimal_point.py``, which reads the committed
+    Spanish figures and fails on an English decimal in a tick label whichever
+    pass was meant to write it.
+    """
+    from phonometry._i18n import localize_axes
+
+    localize_axes(ax, _LANG)
 
 
 def lookup(s: str) -> str:

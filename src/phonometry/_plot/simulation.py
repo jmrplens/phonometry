@@ -176,7 +176,8 @@ def _render_snapshot(
             markeredgecolor="black",
             linestyle="none",
         )
-    ax.figure.colorbar(img, ax=ax, label=colorbar_label)
+    cbar = ax.figure.colorbar(img, ax=ax, label=colorbar_label)
+    localize_axes(cbar.ax, language)
     ax.set_xlabel("$x$ [m]")
     ax.set_ylabel("$y$ [m]")
     ax.set_title(title)

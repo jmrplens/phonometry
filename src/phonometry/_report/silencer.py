@@ -41,6 +41,7 @@ from ._noise_control_fiche import (
     band_labels,
     d1,
     mean_finite,
+    nominal_bands,
     performance_verdict,
     power_value_table,
     render_noise_control_fiche,
@@ -80,10 +81,9 @@ def _prediction_statement(language: str = "en") -> str:
 def _caption(result: ReactiveSilencerResult, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
-    n = np.asarray(result.transmission_loss, dtype=np.float64).size
     if freqs is None:
         return t("Transmission loss per band", language)
-    _, fraction = band_labels(freqs, n)
+    _, fraction = nominal_bands(freqs)
     if fraction == 1:
         return t("Octave-band transmission loss", language)
     return t("One-third-octave-band transmission loss", language)
@@ -96,7 +96,7 @@ def _value_table(result: ReactiveSilencerResult, language: str = "en") -> Table:
     """
     tl = np.asarray(result.transmission_loss, dtype=np.float64)
     n = tl.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
 
     if result.insertion_loss is None:
         header = [t("f [Hz]", language), "TL [dB]"]

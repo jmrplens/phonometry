@@ -473,6 +473,17 @@ jobs:
       # over the calibrated number of pixels either way, printing the band
       # below that for a person to judge.
       run: python scripts/check_figure_annotations.py
+    - name: Fail if a Spanish figure numbers a tick with an English point
+      # The decimal-comma check above reads the label a generator writes; this
+      # reads the label a formatter wrote, in the figure as committed. They are
+      # different halves: three machines localise a Spanish figure (the
+      # library's localize_axes, format_frequency_axis where a caller hands it
+      # the language, and the save-time pass), and a panel none of them reached
+      # keeps its English point while the legend beside it carries the comma.
+      # A zoom inset, a contour colorbar, the z of a 3-D array and a log axis
+      # of distances each shipped that way. Reads the committed SVGs, so it
+      # needs no rendering stack.
+      run: python scripts/check_figure_decimal_point.py
 
   # The Python snippets printed in the guides must run. They are the first
   # thing a reader copies, and nothing executed them until this job existed:
@@ -604,6 +615,30 @@ jobs:
         python-version: "3.13"
     - name: Check that no docstring doubles a backslash in its mathematics
       run: python scripts/check_docstring_math.py
+
+  # Every helper that takes a language defaults to English, so a call that does
+  # not pass the caller's on raises nothing and ships an English string or an
+  # English decimal point in the Spanish figure. On a log frequency axis nothing
+  # in the library repairs it: localize_axes skips that axis, whose labels are
+  # fixed strings by the time it runs. Finding the calls needs the helper resolved
+  # through the imports, a result's .plot() through its receiver and a **kwargs
+  # through what it can carry, so the check is an AST walk rather than a grep.
+  # Static and dependency-free, so it runs on its own.
+  language-forwarding:
+    name: Every call passes the language on
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+    - name: Check that no call leaves the caller's language behind
+      run: python scripts/check_language_forwarding.py
 
   # A private module-level constant is a number lifted out of a standard so the
   # code that uses it can say where it came from, and one nothing reads is

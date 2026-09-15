@@ -263,7 +263,7 @@ def generate_floating_floor_transmissibility(output_dir: str) -> None:
     ax_r.set_xlabel(LABEL_FREQ_HZ)
     ax_r.set_ylabel("Improvement of impact insulation [dB]")
     ax_r.set_title("Installed: only well above $f_0$", pad=12)
-    format_frequency_axis(ax_r, 30.0, 3150.0)
+    format_frequency_axis(ax_r, 30.0, 3150.0, language=_LANG)
     ax_r.legend(loc="upper left", fontsize=9)
     ax_r.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_r.set_axisbelow(True)
@@ -1703,7 +1703,7 @@ def generate_metadiffuser_spectrum(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Normalised diffusion coefficient")
     ax.set_title("The honest bandwidth of the trick", pad=12)
-    format_frequency_axis(ax, freqs[0], freqs[-1])
+    format_frequency_axis(ax, freqs[0], freqs[-1], language=_LANG)
     ax.legend(loc="upper right", fontsize=9)
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
@@ -2336,7 +2336,7 @@ def generate_diffuser_modulation(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Normalised diffusion coefficient")
     ax.set_title("Band by band, same 4.2 m panel", pad=12)
-    format_frequency_axis(ax, freqs[0], freqs[-1])
+    format_frequency_axis(ax, freqs[0], freqs[-1], language=_LANG)
     ax.legend(loc="upper left", fontsize=9)
     ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
@@ -2453,7 +2453,7 @@ def generate_diffuser_prediction(output_dir: str) -> None:
     )
     ax.set_ylim(0.0, 1.0)
     ax.set_ylabel("Predicted diffusion coefficient $d$")
-    format_frequency_axis(ax, 250.0, 5000.0)
+    format_frequency_axis(ax, 250.0, 5000.0, language=_LANG)
     ax.set_title(
         "Predicted diffusion from design (Cox & D'Antonio Fraunhofer model)",
     )
@@ -2720,7 +2720,7 @@ def generate_adrienne_window(output_dir: str) -> None:
     bot.set_ylim(-46.0, 4.0)
     bot.set_ylabel("Level [dB re max]")
     bot.set_xlabel(LABEL_FREQ_HZ)
-    format_frequency_axis(bot, 100.0, 5000.0)
+    format_frequency_axis(bot, 100.0, 5000.0, language=_LANG)
     bot.legend(loc="lower right", fontsize=9)
     bot.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     bot.set_axisbelow(True)
@@ -2786,7 +2786,7 @@ def generate_insitu_method_windows(output_dir: str) -> None:
     ax_b.set_ylim(-0.6, 1.8)
     ax_b.set_yticks([])
     ax_b.set_title("Two in-situ methods, two reported bands", pad=12)
-    format_frequency_axis(ax_b, 200.0, 5000.0)
+    format_frequency_axis(ax_b, 200.0, 5000.0, language=_LANG)
     ax_b.grid(axis="x", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_b.set_axisbelow(True)
 
@@ -3026,7 +3026,7 @@ def generate_mpp_absorption_peak(output_dir: str) -> None:
         ],
     )
     ax = res.plot(language=_LANG)
-    format_frequency_axis(ax, 100.0, 4000.0)
+    format_frequency_axis(ax, 100.0, 4000.0, language=_LANG)
     plt.gcf().set_size_inches(10, 6)
     plt.tight_layout()
     save_figure(output_dir, "mpp_absorption_peak.svg")
@@ -3390,7 +3390,7 @@ def generate_flow_resistivity_window(output_dir: str) -> None:
             linestyle=style,
             label=f"{sigma / 1e3:g} kPa·s/m²  ({tag})",
         )
-    format_frequency_axis(ax_f, 100.0, 5000.0)
+    format_frequency_axis(ax_f, 100.0, 5000.0, language=_LANG)
     ax_f.set_xlabel(LABEL_FREQ_HZ)
     ax_f.set_ylabel(r"Normal-incidence absorption $\alpha$")
     ax_f.set_title("50 mm hard-backed layer", pad=10)
@@ -3560,7 +3560,7 @@ def generate_tube_working_ranges(output_dir: str) -> None:
     ax.set_xlim(25.0, 11000.0)
     ax.set_ylim(-1.2, len(rows) - 0.35)
     ax.set_yticks([])
-    format_frequency_axis(ax, 25.0, 11000.0)
+    format_frequency_axis(ax, 25.0, 11000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_title("Plane-Wave Working Range of an Impedance Tube", pad=12)
     ax.grid(which="both", axis="x", color=COLOR_GRID, linestyle="--", alpha=0.5)
@@ -3761,7 +3761,7 @@ def generate_porous_model_comparison(output_dir: str) -> None:
             "edgecolor": COLOR_GRID,
         },
     )
-    format_frequency_axis(ax_z, 20.0, 20000.0)
+    format_frequency_axis(ax_z, 20.0, 20000.0, language=_LANG)
     ax_z.set_xlabel(LABEL_FREQ_HZ)
     ax_z.set_ylabel(r"$Z_\mathrm{c}/(\rho_0 c_0)$")
     ax_z.set_title(r"Characteristic impedance, $\sigma$ = 20 kPa·s/m²", pad=10)
@@ -3789,7 +3789,7 @@ def generate_porous_model_comparison(output_dir: str) -> None:
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "lw": 1.0, "color": COLOR_FG},
     )
-    format_frequency_axis(ax_s, 20.0, 20000.0)
+    format_frequency_axis(ax_s, 20.0, 20000.0, language=_LANG)
     ax_s.set_xlabel(LABEL_FREQ_HZ)
     ax_s.set_ylabel(
         r"$\mathrm{Re}(Z_\mathrm{s})/(\rho_0 c_0)$,"
@@ -3882,7 +3882,7 @@ def generate_biot_waves(output_dir: str) -> None:
         arrowprops={"arrowstyle": "->", "lw": 1.0, "color": COLOR_FG},
     )
     ax_mu.set_xscale("log")
-    format_frequency_axis(ax_mu, 50.0, 1500.0)
+    format_frequency_axis(ax_mu, 50.0, 1500.0, language=_LANG)
     ax_mu.set_xlabel(LABEL_FREQ_HZ)
     ax_mu.set_ylabel(r"$|\mu|$ = fluid / frame displacement")
     ax_mu.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
@@ -4000,7 +4000,7 @@ def generate_oblique_absorption(output_dir: str) -> None:
         color=COLOR_FG,
         ha="right",
     )
-    format_frequency_axis(ax_f, 125.0, 4000.0)
+    format_frequency_axis(ax_f, 125.0, 4000.0, language=_LANG)
     ax_f.set_xlabel(LABEL_FREQ_HZ)
     ax_f.set_ylabel("Absorption coefficient")
     ax_f.set_title("The two averages, and the tube", pad=10)
@@ -4098,7 +4098,7 @@ def generate_sheet_transfer_impedance(output_dir: str) -> None:
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="upper left", fontsize=9.5)
-    format_frequency_axis(ax, 100.0, 2500.0)
+    format_frequency_axis(ax, 100.0, 2500.0, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "sheet_transfer_impedance.svg")
     plt.close()
@@ -4319,7 +4319,7 @@ def generate_slow_sound_dispersion(output_dir: str) -> None:
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9.5)
-    format_frequency_axis(ax, 50.0, 3000.0)
+    format_frequency_axis(ax, 50.0, 3000.0, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "slow_sound_dispersion.svg")
     plt.close()

@@ -109,7 +109,7 @@ def generate_ship_source_level(output_dir: str) -> None:
     twin.set_ylabel(r"Surface correction $\Delta L$ [dB]")
     # After twinx() re-initialises the shared x-axis with the default log
     # locator, so the octave-band labelling is not reset to 10^n ticks.
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=_LANG)
 
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
@@ -608,7 +608,7 @@ def generate_ocean_ambient_noise(output_dir: str) -> None:
     ax.set_title("Ocean Ambient Noise (Wenz)", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=_LANG)
     ax.legend(loc="upper right", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "ocean_ambient_noise.svg")
@@ -674,7 +674,7 @@ def generate_ship_traffic_noise(output_dir: str) -> None:
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
     _sf = np.asarray(s.frequency, dtype=float)
-    format_frequency_axis(ax, float(_sf.min()), float(_sf.max()))
+    format_frequency_axis(ax, float(_sf.min()), float(_sf.max()), language=_LANG)
     ax.legend(loc="upper right", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "ship_traffic_noise.svg")
@@ -869,7 +869,7 @@ def generate_seawater_absorption(output_dir: str) -> None:
     ax_r.set_axisbelow(True)
     ax_r.legend(loc="lower left", fontsize=9)
     for ax in (ax_a, ax_r):
-        format_frequency_axis(ax, 10.0, 1e6)
+        format_frequency_axis(ax, 10.0, 1e6, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "seawater_absorption.svg")
     plt.close(fig)
@@ -952,7 +952,7 @@ def generate_detection_range(output_dir: str) -> None:
     fig, (ax_c, ax_m) = plt.subplots(1, 2, figsize=(13.5, 5.4))
 
     res = underwater.detection_range(82.7, 50e3)
-    res.plot(ax=ax_c)
+    res.plot(ax=ax_c, language=_LANG)
     ax_c.set_title("Closed Form: One Crossing (FOM = 82.7 dB, 50 kHz)", pad=12)
 
     # A shallow waveguide: the modal loss oscillates, so a figure of merit can
@@ -1143,7 +1143,7 @@ def generate_normal_modes(output_dir: str) -> None:
     ax.legend(loc="upper left", fontsize=9)
 
     ax = axes[2]
-    res.plot(ax=ax)
+    res.plot(ax=ax, language=_LANG)
     ax.set_title("Modal Propagation Loss ($z$ = 100 m)", pad=12)
     plt.tight_layout()
     save_figure(output_dir, "normal_modes.svg")
@@ -1897,7 +1897,7 @@ def generate_marine_mammal_audiograms(output_dir: str) -> None:
             "edgecolor": COLOR_GRID,
         },
     )
-    format_frequency_axis(ax_g, 100.0, 200e3)
+    format_frequency_axis(ax_g, 100.0, 200e3, language=_LANG)
 
     orca_f = np.logspace(np.log10(500.0), np.log10(80e3), 600)
     orca = underwater.orca_audiogram(orca_f)
@@ -1964,7 +1964,7 @@ def generate_marine_mammal_audiograms(output_dir: str) -> None:
     ax_o.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_o.set_axisbelow(True)
     ax_o.legend(loc="upper center", fontsize=8.5)
-    format_frequency_axis(ax_o, 500.0, 80e3)
+    format_frequency_axis(ax_o, 500.0, 80e3, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "marine_mammal_audiograms.svg")
     plt.close(fig)
@@ -2070,7 +2070,7 @@ def generate_marine_mammal_exposure_functions(output_dir: str) -> None:
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="upper center", fontsize=9, ncols=5)
-    format_frequency_axis(ax, 10.0, 400e3)
+    format_frequency_axis(ax, 10.0, 400e3, language=_LANG)
 
     ax = axes[1]
     for guidance, color, ls in (
@@ -2093,7 +2093,7 @@ def generate_marine_mammal_exposure_functions(output_dir: str) -> None:
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower center", fontsize=9)
-    format_frequency_axis(ax, 10.0, 400e3)
+    format_frequency_axis(ax, 10.0, 400e3, language=_LANG)
 
     ax = axes[2]
     idx = np.arange(len(groups), dtype=float)

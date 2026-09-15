@@ -250,7 +250,9 @@ def _plot_density_with_band(
     ax.set_title(title)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
+    format_frequency_axis(
+        ax, float(freqs[pos].min()), float(freqs[pos].max()), language=language
+    )
     localize_axes(ax, language)
     return ax
 
@@ -383,7 +385,7 @@ def plot_cross_spectral_density(
     if ax is not None:
         _magnitude(ax)
         ax.set_xlabel(_t(_FREQ_LABEL, language))
-        format_frequency_axis(ax, fmin, fmax)
+        format_frequency_axis(ax, fmin, fmax, language=language)
         localize_axes(ax, language)
         return ax
 
@@ -414,7 +416,7 @@ def plot_cross_spectral_density(
     axes[2].set_xlabel(_t(_FREQ_LABEL, language))
     axes[2].grid(visible=True, which="both", alpha=0.3)
     for axf in axes:
-        format_frequency_axis(axf, fmin, fmax)
+        format_frequency_axis(axf, fmin, fmax, language=language)
         localize_axes(axf, language)
     return axes
 
@@ -470,7 +472,7 @@ def plot_coherent_output_spectrum(
     if ax is not None:
         _spectra_panel(ax)
         ax.set_xlabel(_t(_FREQ_LABEL, language))
-        format_frequency_axis(ax, fmin, fmax)
+        format_frequency_axis(ax, fmin, fmax, language=language)
         localize_axes(ax, language)
         return ax
 
@@ -483,7 +485,7 @@ def plot_coherent_output_spectrum(
     axes[1].set_xlabel(_t(_FREQ_LABEL, language))
     axes[1].grid(visible=True, which="both", alpha=0.3)
     for axf in axes:
-        format_frequency_axis(axf, fmin, fmax)
+        format_frequency_axis(axf, fmin, fmax, language=language)
         localize_axes(axf, language)
     return axes
 
@@ -606,7 +608,7 @@ def plot_miso_coherence(
     if ax is not None:
         _miso_spectra_panel(ax, result, freqs, pos, language)
         ax.set_xlabel(_t(_FREQ_LABEL, language))
-        format_frequency_axis(ax, fmin, fmax)
+        format_frequency_axis(ax, fmin, fmax, language=language)
         localize_axes(ax, language)
         return ax
 
@@ -618,7 +620,7 @@ def plot_miso_coherence(
     _miso_coherence_panel(axes[1], result, freqs, pos, language)
     axes[1].set_xlabel(_t(_FREQ_LABEL, language))
     for axf in axes:
-        format_frequency_axis(axf, fmin, fmax)
+        format_frequency_axis(axf, fmin, fmax, language=language)
         localize_axes(axf, language)
     return axes
 
@@ -682,7 +684,8 @@ def plot_spectrogram(
             **kwargs,
         },
     )
-    ax.figure.colorbar(img, ax=ax, label=_psd_ylabel(result.scaling, language))
+    cbar = ax.figure.colorbar(img, ax=ax, label=_psd_ylabel(result.scaling, language))
+    localize_axes(cbar.ax, language)
     ax.set_xlabel(_t(_TIME_LABEL, language))
     ax.set_ylabel(_t(_FREQ_LABEL, language))
     ax.set_title(_t("Calibrated spectrogram (Bendat & Piersol 12.6.4.2)", language))
@@ -972,7 +975,7 @@ def plot_phase_decomposition(
         _phase_panel(ax)
         ax.set_xlabel(_t(_FREQ_LABEL, language))
         ax.set_title(_t("Phase decomposition", language))
-        format_frequency_axis(ax, fmin, fmax)
+        format_frequency_axis(ax, fmin, fmax, language=language)
         localize_axes(ax, language)
         return ax
 
@@ -1004,7 +1007,7 @@ def plot_phase_decomposition(
     axes[2].grid(visible=True, which="both", alpha=0.3)
     axes[2].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     for axf in axes:
-        format_frequency_axis(axf, fmin, fmax)
+        format_frequency_axis(axf, fmin, fmax, language=language)
         localize_axes(axf, language)
     return axes
 
@@ -1158,7 +1161,7 @@ def plot_resampled_signal(
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="lower left", fontsize="small")
     ax.set_xlim(f_lo, f_hi)
-    format_frequency_axis(ax, f_lo, f_hi, minor=None)
+    format_frequency_axis(ax, f_lo, f_hi, minor=None, language=language)
     localize_axes(ax, language)
     return ax
 
@@ -1537,7 +1540,9 @@ def plot_inverse_filter(
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    format_frequency_axis(ax, float(freqs[pos].min()), float(freqs[pos].max()))
+    format_frequency_axis(
+        ax, float(freqs[pos].min()), float(freqs[pos].max()), language=language
+    )
     localize_axes(ax, language)
     return ax
 

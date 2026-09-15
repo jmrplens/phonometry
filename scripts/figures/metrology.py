@@ -16,7 +16,7 @@ import numpy as np
 
 from phonometry._plot.common import format_frequency_axis, theme_fill
 
-from .i18n import _fmt_minus
+from .i18n import _LANG, _fmt_minus
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -238,7 +238,7 @@ def generate_dbfs_versus_spl(output_dir: str) -> None:
     ax_l.set_title(f"Same shape, different origin: {offset:.2f} dB apart", pad=10)
     ax_l.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax_l.set_axisbelow(True)
-    format_frequency_axis(ax_l, 22.0, 11300.0)
+    format_frequency_axis(ax_l, 22.0, 11300.0, language=_LANG)
     # Lower left, not upper: the spectrum peaks near 250 Hz and an upper-left
     # box clips the peak, which is the one feature the panel exists to show.
     ax_l.legend(loc="lower left", fontsize=9)

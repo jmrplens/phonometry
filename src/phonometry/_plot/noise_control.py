@@ -157,7 +157,7 @@ def plot_reactive_silencer(
     ax.set_ylabel(_t("Loss [dB]", language))
     ax.set_title(f"{_t('Reactive silencer', language)}: {result.kind}")
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=language)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -196,7 +196,7 @@ def plot_hvac_spectrum(
     )
     ax.set_title(result.label)
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=language)
     ax.legend(loc="best", fontsize="small")
     localize_axes(ax, language)
     return ax
@@ -305,7 +305,7 @@ def plot_duct_path(
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(f"{_t('Duct-borne noise path', language)}: {result.label}")
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=language)
     ax.legend(
         loc="upper right",
         fontsize="xx-small",
@@ -406,8 +406,8 @@ def plot_room_to_room(
     # The twin axis resets the shared log-frequency formatting, so the ticks are
     # set last and on both axes.
     ax.set_xlabel(_t(_FREQ_LABEL, language))
-    format_frequency_axis(ax)
-    format_frequency_axis(twin)
+    format_frequency_axis(ax, language=language)
+    format_frequency_axis(twin, language=language)
     localize_axes(ax, language)
     localize_axes(twin, language)
     return ax
@@ -523,7 +523,7 @@ def plot_enclosure(
     ax.grid(visible=True, which="both", alpha=0.3)
     if continuous:
         ax.set_xlabel(_t(_FREQ_LABEL, language))
-        format_frequency_axis(ax)
+        format_frequency_axis(ax, language=language)
     else:
         ax.set_xlabel(_t("Band", language))
         ax.set_xticks(x)

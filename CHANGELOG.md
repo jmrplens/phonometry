@@ -237,7 +237,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   height. It returns the higher of the two now, and where no height reaches the
   10 degrees it keeps the clearance and emits a `BarrierInSituWarning`. The test
   and the conformance row had both pinned that short geometry as correct; both
-  use one the angle governs now, and a new entry holds the clearance.
+  now use the height the angle governs, and a new entry holds the clearance.
 
   `extraneous_corrected_mean_level_db` flagged a 3 dB margin as capped. ISO
   11820 caps the energy subtraction at 3 dB, and Table 1 prints what that 3 dB

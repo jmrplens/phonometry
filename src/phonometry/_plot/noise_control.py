@@ -17,14 +17,17 @@ from .common import (
     _C_TERTIARY,
     _new_axes,
     format_frequency_axis,
+    style_default,
     theme_fill,
 )
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
+    from ..noise_control.cabin_insulation import CabinInsulationResult
     from ..noise_control.duct_modes import DuctModeResult
     from ..noise_control.duct_path import DuctPathResult
+    from ..noise_control.enclosure_insulation import EnclosureInsulationResult
     from ..noise_control.enclosures import EnclosureResult
     from ..noise_control.hvac import HvacSpectrumResult
     from ..noise_control.room_to_room import RoomToRoomResult
@@ -76,6 +79,14 @@ _STRINGS: dict[str, str] = {
     "Noise reduction": "Reducción de ruido",
     "Loss and noise reduction [dB]": "Pérdida y reducción de ruido [dB]",
     "Room-to-room transmission": "Transmisión entre recintos",
+    "Without the enclosure": "Sin el encapsulado",
+    "With the enclosure": "Con el encapsulado",
+    "Enclosure insulation": "Aislamiento del encapsulado",
+    "In the room": "En la sala",
+    "Inside the cabin": "Dentro de la cabina",
+    "Cabin insulation": "Aislamiento de la cabina",
+    "Insulation [dB]": "Aislamiento [dB]",
+    "Sound pressure level [dB]": "Nivel de presión acústica [dB]",
 }
 
 
@@ -589,3 +600,186 @@ def plot_operating_line(
     ax.legend(loc="upper left", fontsize="small")
     localize_axes(ax, language)
     return ax
+
+
+_INSULATION_LABEL = "Insulation [dB]"
+_PRESSURE_LEVEL_LABEL = "Sound pressure level [dB]"
+_POWER_LEVEL_LABEL = "Sound power level [dB]"
+#: The symbol each quantity of ISO 11546 is reported under.
+_ENCLOSURE_SYMBOLS = {
+    "sound_power": "$D_W$",
+    "sound_pressure": "$D_p$",
+    "reciprocity": "$D_{pr}$",
+}
+
+
+def _plot_two_runs(
+    ax: Axes | None,
+    frequencies: np.ndarray | None,
+    upper: np.ndarray,
+    lower: np.ndarray,
+    insulation: np.ndarray,
+    *,
+    labels: tuple[str, str, str],
+    ylabel: str,
+    title: str,
+    language: str,
+    kwargs: dict[str, Any],
+) -> Axes:
+    """Two measured spectra, the area between them, and their difference.
+
+    The shape ISO 11546 and ISO 11957 share: a run without the barrier, a run
+    with it, and the insulation that is the vertical gap between the two. The
+    gap is washed in so that the difference is visible as an area, and the
+    difference itself is drawn against its own axis, because it starts at zero
+    while the levels do not.
+
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param frequencies: Band centres in hertz, or ``None`` for band indices.
+    :param upper: The louder run: without the enclosure, or in the room.
+    :param lower: The quieter run: with the enclosure, or inside the cabin.
+    :param insulation: The difference between them, in decibels.
+    :param labels: The legend entries for ``upper``, ``lower`` and
+        ``insulation``, already localised.
+    :param ylabel: The label of the level axis, already localised.
+    :param title: The title, already localised.
+    :param language: Label language, for the axis localisation pass.
+    :param kwargs: Forwarded to the insulation ``Axes.plot``.
+    :return: The axes carrying the levels.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    continuous = frequencies is not None
+    x = (
+        np.asarray(frequencies, dtype=np.float64)
+        if continuous
+        else np.arange(upper.size, dtype=np.float64)
+    )
+    ax.fill_between(x, lower, upper, color=theme_fill(_C_PRIMARY, ax), lw=0.0)
+    ax.plot(
+        x,
+        upper,
+        color=_C_REFERENCE,
+        lw=1.4,
+        ls="--",
+        marker="s",
+        ms=3,
+        label=labels[0],
+    )
+    ax.plot(
+        x,
+        lower,
+        color=_C_SECONDARY,
+        lw=1.4,
+        ls="-.",
+        marker="v",
+        ms=3,
+        label=labels[1],
+    )
+    ax.set_ylabel(ylabel)
+    ax.set_title(title)
+    ax.grid(visible=True, which="both", alpha=0.3)
+
+    twin = ax.twinx()
+    style_default(kwargs, "color", _C_TERTIARY)
+    style_default(kwargs, "lw", 2.0)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    style_default(kwargs, "label", labels[2])
+    twin.plot(x, insulation, **kwargs)
+    twin.set_ylabel(_t(_INSULATION_LABEL, language), color=_C_TERTIARY)
+    twin.tick_params(axis="y", labelcolor=_C_TERTIARY)
+    twin.grid(visible=False)
+    handles, names = ax.get_legend_handles_labels()
+    extra_handles, extra_names = twin.get_legend_handles_labels()
+    ax.legend(
+        handles + extra_handles,
+        names + extra_names,
+        loc="best",
+        fontsize="small",
+        framealpha=1.0,
+    )
+    # The twin axis resets the shared x-axis, so the ticks are set last.
+    if continuous:
+        ax.set_xlabel(_t(_FREQ_LABEL, language))
+        format_frequency_axis(ax)
+        format_frequency_axis(twin)
+    else:
+        ax.set_xlabel(_t("Band", language))
+        ax.set_xticks(x)
+    localize_axes(ax, language)
+    localize_axes(twin, language)
+    return ax
+
+
+def plot_enclosure_insulation(
+    result: EnclosureInsulationResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The two runs of ISO 11546 and the insulation between them.
+
+    :param result: An
+        :class:`~phonometry.noise_control.enclosure_insulation.EnclosureInsulationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the insulation ``Axes.plot``.
+    :return: The axes.
+    """
+    level_label = (
+        _POWER_LEVEL_LABEL
+        if result.quantity == "sound_power"
+        else _PRESSURE_LEVEL_LABEL
+    )
+    return _plot_two_runs(
+        ax,
+        None if result.frequencies is None else np.asarray(result.frequencies),
+        np.asarray(result.level_without, dtype=np.float64),
+        np.asarray(result.level_with, dtype=np.float64),
+        np.asarray(result.insulation, dtype=np.float64),
+        labels=(
+            _t("Without the enclosure", language),
+            _t("With the enclosure", language),
+            _ENCLOSURE_SYMBOLS[result.quantity],
+        ),
+        ylabel=_t(level_label, language),
+        title=_t("Enclosure insulation", language),
+        language=language,
+        kwargs=kwargs,
+    )
+
+
+def plot_cabin_insulation(
+    result: CabinInsulationResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The room, the inside of the cabin and the insulation between them.
+
+    :param result: A
+        :class:`~phonometry.noise_control.cabin_insulation.CabinInsulationResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the insulation ``Axes.plot``.
+    :return: The axes.
+    """
+    symbol = "$D'_p$" if result.apparent else "$D_p$"
+    return _plot_two_runs(
+        ax,
+        None if result.frequencies is None else np.asarray(result.frequencies),
+        np.asarray(result.room_levels, dtype=np.float64),
+        np.asarray(result.cabin_levels, dtype=np.float64),
+        np.asarray(result.insulation, dtype=np.float64),
+        labels=(
+            _t("In the room", language),
+            _t("Inside the cabin", language),
+            symbol,
+        ),
+        ylabel=_t(_PRESSURE_LEVEL_LABEL, language),
+        title=_t("Cabin insulation", language),
+        language=language,
+        kwargs=kwargs,
+    )

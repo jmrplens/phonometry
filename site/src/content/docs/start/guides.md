@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 133 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 134 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and thirty-three guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and thirty-four guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -762,6 +762,10 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
 - [Measuring a Silencer (ISO 7235 and ISO 11691)](/phonometry/devices/noise-control/silencer-measurement/):
   the substitution measurement a catalogue insertion loss comes from, its
   reverberation correction, and the reproducibility both standards publish.
+- [Enclosures and Cabins Measured (ISO 11546, ISO 11957)](/phonometry/devices/noise-control/enclosure-cabin-insulation/):
+  the difference of two determinations that says what a built enclosure is
+  worth, the annex that asks whether the room is good enough, and the cabin
+  whose source-position count is read off its own answer.
 - [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.

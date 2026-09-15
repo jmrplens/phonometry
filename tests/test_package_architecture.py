@@ -43,6 +43,13 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     # HVAC plenum and machine enclosures reuse the room constant
     # R = S*alpha/(1 - alpha) of the steady-state room field
     ("noise_control", "room"),
+    # an enclosure or a cabin is rated by the ISO 717-1 reference-curve
+    # shift, the same procedure the building ratings already implement
+    ("noise_control", "building"),
+    # the insulation of an enclosure is a difference of two sound powers,
+    # so it reuses the A-weighting corrections and the background
+    # correction of the sound power measurement methods it cites
+    ("noise_control", "emission"),
     # the level functions detect io.Signal so a read measurement carries
     # its own fs and calibration; io imports no toolbox code back at
     # module level, so import stays acyclic

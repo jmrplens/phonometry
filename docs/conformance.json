@@ -3,13 +3,13 @@
   "library": "4.0.0rc1",
   "generator": "scripts/conformance_report.py",
   "counts": {
-    "checks": 1108,
-    "passing": 1108,
+    "checks": 1123,
+    "passing": 1123,
     "failing": 0,
-    "domains": 83,
-    "standards": 415,
-    "citations": 720,
-    "designations": 152,
+    "domains": 84,
+    "standards": 418,
+    "citations": 734,
+    "designations": 155,
     "sources": 85
   },
   "units": [
@@ -547,6 +547,12 @@
       "title": "Industrial noise control",
       "checks": 22,
       "passing": 22
+    },
+    {
+      "id": "enclosure-and-cabin-insulation",
+      "title": "Enclosure and cabin insulation",
+      "checks": 15,
+      "passing": 15
     },
     {
       "id": "control-valve-noise-iec-60534-8-3",
@@ -28772,6 +28778,523 @@
         "value": 8.88e-16
       },
       "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-1-1995-eq-1-iso-11546-2-1995-eq-1/d-w-is-the-difference-of-the-two-sound-power-determinations-and-a-level-shift-common-to-both-leaves-it-alone",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-1",
+        "edition": "1995",
+        "clause": "Eq. (1) / ISO 11546-2:1995 Eq. (1)",
+        "cite": "ISO 11546-1:1995 Eq. (1) / ISO 11546-2:1995 Eq. (1)"
+      },
+      "quantity": "D_W is the difference of the two sound power determinations, and a level shift common to both leaves it alone",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 7.11e-15,
+        "label": "max absolute difference 0.000 dB over 18 bands"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 7.11e-15
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-1-1995-annex-c-iso-11546-2-1995-annex-d/d-wa-e-of-the-annex-equals-the-difference-of-the-two-a-weighted-totals-computed-from-the-same-assumed-spectrum",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-1",
+        "edition": "1995",
+        "clause": "Annex C / ISO 11546-2:1995 Annex D",
+        "cite": "ISO 11546-1:1995 Annex C / ISO 11546-2:1995 Annex D"
+      },
+      "quantity": "D_WA,e of the annex equals the difference of the two A-weighted totals computed from the same assumed spectrum",
+      "kind": "scalar",
+      "expected": {
+        "value": 16.314458502219665
+      },
+      "computed": {
+        "value": 16.3145
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-1-1995-annex-c-iso-11546-2-1995-annex-d/an-enclosure-of-no-insulation-at-all-estimates-exactly-0-db-which-is-the-sign-test-of-the-a-weighting-term-a-i",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-1",
+        "edition": "1995",
+        "clause": "Annex C / ISO 11546-2:1995 Annex D",
+        "cite": "ISO 11546-1:1995 Annex C / ISO 11546-2:1995 Annex D"
+      },
+      "quantity": "An enclosure of no insulation at all estimates exactly 0 dB, which is the sign test of the A-weighting term A_i",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-2-1995-figure-c-1/the-area-ratio-s-v-s-the-closed-form-returns-puts-k-2-back-on-the-table-c-1-limit-at-every-absorption-coefficient-of-table-c-2",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-2",
+        "edition": "1995",
+        "clause": "Figure C.1",
+        "cite": "ISO 11546-2:1995 Figure C.1"
+      },
+      "quantity": "The area ratio S_V/S the closed form returns puts K_2 back on the Table C.1 limit, at every absorption coefficient of Table C.2",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 4.44e-16,
+        "label": "max deviation 4.44e-16 dB over the 7 rows of Table C.2"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-09
+      },
+      "deviation": {
+        "value": 4.44e-16
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-2-1995-table-c-1/environmental-correction-ceiling-k-2-and-background-margin-dl-of-the-nine-columns",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-2",
+        "edition": "1995",
+        "clause": "Table C.1",
+        "cite": "ISO 11546-2:1995 Table C.1"
+      },
+      "quantity": "Environmental correction ceiling K_2 and background margin dL of the nine columns",
+      "kind": "record",
+      "expected": {
+        "label": "ISO 3743-1 dL = 6 dB; ISO 3744 K2 = 2 dB; ISO 3744 dL = 6 dB; ISO 3746 K2 = 7 dB; ISO 3746 dL = 3 dB; ISO 3747 dL = 3 dB; ISO 11201 K2 = 2 dB; ISO 11201 dL = 6 dB; ISO 11202 K2 = 7 dB; ISO 11202 dL = 3 dB; ISO 11204 K2 = 7 dB; ISO 11204 dL = 6 dB",
+        "record": {
+          "ISO 3743-1 dL": 6.0,
+          "ISO 3744 K2": 2.0,
+          "ISO 3744 dL": 6.0,
+          "ISO 3746 K2": 7.0,
+          "ISO 3746 dL": 3.0,
+          "ISO 3747 dL": 3.0,
+          "ISO 11201 K2": 2.0,
+          "ISO 11201 dL": 6.0,
+          "ISO 11202 K2": 7.0,
+          "ISO 11202 dL": 3.0,
+          "ISO 11204 K2": 7.0,
+          "ISO 11204 dL": 6.0
+        }
+      },
+      "computed": {
+        "label": "ISO 3743-1 dL = 6 dB; ISO 3744 K2 = 2 dB; ISO 3744 dL = 6 dB; ISO 3746 K2 = 7 dB; ISO 3746 dL = 3 dB; ISO 3747 dL = 3 dB; ISO 11201 K2 = 2 dB; ISO 11201 dL = 6 dB; ISO 11202 K2 = 7 dB; ISO 11202 dL = 3 dB; ISO 11204 K2 = 7 dB; ISO 11204 dL = 6 dB",
+        "record": {
+          "ISO 3743-1 dL": 6.0,
+          "ISO 3744 K2": 2.0,
+          "ISO 3744 dL": 6.0,
+          "ISO 3746 K2": 7.0,
+          "ISO 3746 dL": 3.0,
+          "ISO 3747 dL": 3.0,
+          "ISO 11201 K2": 2.0,
+          "ISO 11201 dL": 6.0,
+          "ISO 11202 K2": 7.0,
+          "ISO 11202 dL": 3.0,
+          "ISO 11204 K2": 7.0,
+          "ISO 11204 dL": 6.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-2-1995-table-c-2/the-seven-mean-absorption-coefficients-of-the-room-descriptions",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-2",
+        "edition": "1995",
+        "clause": "Table C.2",
+        "cite": "ISO 11546-2:1995 Table C.2"
+      },
+      "quantity": "The seven mean absorption coefficients of the room descriptions",
+      "kind": "count",
+      "expected": {
+        "value": 7.0,
+        "label": "7/7 rows of Table C.2"
+      },
+      "computed": {
+        "value": 7.0,
+        "label": "7/7 rows of Table C.2"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-2-1995-table-1/the-survey-methods-give-an-a-weighted-value-only-so-no-band-quantity-may-be-declared-from-them",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-2",
+        "edition": "1995",
+        "clause": "Table 1",
+        "cite": "ISO 11546-2:1995 Table 1"
+      },
+      "quantity": "The survey methods give an A-weighted value only, so no band quantity may be declared from them",
+      "kind": "record",
+      "expected": {
+        "label": "ISO 3744 bands, ISO 3746 none, ISO 11202 none, ISO 11204 bands",
+        "record": {
+          "ISO 3744": 1.0,
+          "ISO 3746": 0.0,
+          "ISO 11202": 0.0,
+          "ISO 11204": 1.0
+        }
+      },
+      "computed": {
+        "label": "ISO 3744 bands, ISO 3746 none, ISO 11202 none, ISO 11204 bands",
+        "record": {
+          "ISO 3744": 1.0,
+          "ISO 3746": 0.0,
+          "ISO 11202": 0.0,
+          "ISO 11204": 1.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11546-1-1995-table-1/the-laboratory-table-carries-no-survey-grade-row-and-its-footnote-2-excludes-the-grade-3-variant-of-iso-9614-1-and-iso-11204",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11546-1",
+        "edition": "1995",
+        "clause": "Table 1",
+        "cite": "ISO 11546-1:1995 Table 1"
+      },
+      "quantity": "The laboratory table carries no survey-grade row, and its footnote 2 excludes the grade 3 variant of ISO 9614-1 and ISO 11204",
+      "kind": "count",
+      "expected": {
+        "value": 3.0,
+        "label": "no survey row, the three reverberation rows, footnote 2 on two"
+      },
+      "computed": {
+        "value": 3.0,
+        "label": "3/3 readings of Table 1"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-eq-1-and-eq-2/d-p-and-d-p-are-the-same-subtraction-and-only-the-method-decides-whether-the-answer-carries-the-prime",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "Eq. (1) and Eq. (2)",
+        "cite": "ISO 11957:1996 Eq. (1) and Eq. (2)"
+      },
+      "quantity": "D_p and D'_p are the same subtraction, and only the method decides whether the answer carries the prime",
+      "kind": "scalar",
+      "expected": {
+        "value": 0.0
+      },
+      "computed": {
+        "value": 0.0,
+        "label": "max absolute difference 0.000 dB, D_p and D'_p"
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-annex-a/d-pa-e-of-the-annex-equals-the-difference-of-the-two-a-weighted-totals-the-same-identity-as-the-enclosure-annexes",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "Annex A",
+        "cite": "ISO 11957:1996 Annex A"
+      },
+      "quantity": "D_pA,e of the annex equals the difference of the two A-weighted totals, the same identity as the enclosure annexes",
+      "kind": "scalar",
+      "expected": {
+        "value": 19.76519983465461
+      },
+      "computed": {
+        "value": 19.7652
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 1e-12
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-6-2/cabin-clearance-half-a-wavelength-at-100-hz-is-1-715-m-at-343-m-s-and-the-50-hz-to-80-hz-range-takes-a-flat-2-m",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "6.2",
+        "cite": "ISO 11957:1996 6.2"
+      },
+      "quantity": "Cabin clearance: half a wavelength at 100 Hz is 1,715 m at 343 m/s, and the 50 Hz to 80 Hz range takes a flat 2 m",
+      "kind": "record",
+      "expected": {
+        "label": "100 Hz = 1.715 m; 80 Hz = 2 m; 63 Hz = 2 m; 50 Hz = 2 m",
+        "record": {
+          "100 Hz": 1.715,
+          "80 Hz": 2.0,
+          "63 Hz": 2.0,
+          "50 Hz": 2.0
+        }
+      },
+      "computed": {
+        "label": "100 Hz = 1.715 m; 80 Hz = 2 m; 63 Hz = 2 m; 50 Hz = 2 m",
+        "record": {
+          "100 Hz": 1.715,
+          "80 Hz": 2.0,
+          "63 Hz": 2.0,
+          "50 Hz": 2.0
+        }
+      },
+      "unit": "m",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-6-4-and-7-2-1/source-spectrum-flatness-6-db-in-the-125-hz-octave-5-db-in-the-250-hz-octave-and-4-db-above",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "6.4 and 7.2.1",
+        "cite": "ISO 11957:1996 6.4 and 7.2.1"
+      },
+      "quantity": "Source-spectrum flatness: 6 dB in the 125 Hz octave, 5 dB in the 250 Hz octave and 4 dB above",
+      "kind": "record",
+      "expected": {
+        "label": "125 Hz = 6 dB; 250 Hz = 5 dB; 500 Hz = 4 dB",
+        "record": {
+          "125 Hz": 6.0,
+          "250 Hz": 5.0,
+          "500 Hz": 4.0
+        }
+      },
+      "computed": {
+        "label": "125 Hz = 6 dB; 250 Hz = 5 dB; 500 Hz = 4 dB",
+        "record": {
+          "125 Hz": 6.0,
+          "250 Hz": 5.0,
+          "500 Hz": 4.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-7-2-1/source-positions-at-least-the-largest-deviation-of-d-p-between-any-two-positions-in-octave-bands-three-at-least-and-six-at-most",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "7.2.1",
+        "cite": "ISO 11957:1996 7.2.1"
+      },
+      "quantity": "Source positions: at least the largest deviation of D'_p between any two positions in octave bands, three at least and six at most",
+      "kind": "scalar",
+      "expected": {
+        "value": 6.0,
+        "label": "6 positions for a 9,5 dB spread, capped at six"
+      },
+      "computed": {
+        "value": 6.0,
+        "label": "6 positions for 9.5 dB"
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 4,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-6-7/the-internal-noise-level-is-corrected-for-the-background-only-while-the-margin-lies-between-6-db-and-10-db",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "6.7",
+        "cite": "ISO 11957:1996 6.7"
+      },
+      "quantity": "The internal noise level is corrected for the background only while the margin lies between 6 dB and 10 dB",
+      "kind": "record",
+      "expected": {
+        "label": "margin 8 dB = 59.2506 dB; margin 15 dB = 60 dB",
+        "record": {
+          "margin 8 dB": 59.250596325673854,
+          "margin 15 dB": 60.0
+        }
+      },
+      "computed": {
+        "label": "margin 8 dB = 59.2506 dB; margin 15 dB = 60 dB",
+        "record": {
+          "margin 8 dB": 59.250596325673854,
+          "margin 15 dB": 60.0
+        }
+      },
+      "unit": "dB",
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
+      "verdict": "pass"
+    },
+    {
+      "id": "enclosure-and-cabin-insulation/iso-11957-1996-clause-10/the-stated-uncertainty-needs-a-room-at-least-20-times-the-volume-of-the-cabin-and-the-loudspeaker-method-in-situ-adds-about-2-db",
+      "domain": "enclosure-and-cabin-insulation",
+      "reference": {
+        "kind": "standard",
+        "designation": "ISO 11957",
+        "edition": "1996",
+        "clause": "clause 10",
+        "cite": "ISO 11957:1996 clause 10"
+      },
+      "quantity": "The stated uncertainty needs a room at least 20 times the volume of the cabin, and the loudspeaker method in situ adds about 2 dB",
+      "kind": "record",
+      "expected": {
+        "label": "volume ratio = 20; excess deviation = 2",
+        "record": {
+          "volume ratio": 20.0,
+          "excess deviation": 2.0
+        }
+      },
+      "computed": {
+        "label": "volume ratio = 20; excess deviation = 2",
+        "record": {
+          "volume ratio": 20.0,
+          "excess deviation": 2.0
+        }
+      },
+      "tolerance": {
+        "mode": "absolute",
+        "value": 0.0
+      },
+      "deviation": {
+        "value": 0.0
+      },
+      "precision": 0,
       "verdict": "pass"
     },
     {

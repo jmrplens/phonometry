@@ -59,6 +59,7 @@ from .devices import (
     _d_box_array,
     _d_distortion_bench,
     _d_duct_path,
+    _d_enclosure_cabin_measurement,
     _d_intensity_scan,
     _d_loudspeaker_freefield,
     _d_loudspeaker_polar,
@@ -895,6 +896,11 @@ DIAGRAMS = {
         _d_room_to_room,
         "Plant room to operator room: every symbol of the balance, in section",
         586,
+    ),
+    "diagram_enclosure_cabin_measurement": (
+        _d_enclosure_cabin_measurement,
+        "How an enclosure and a cabin are measured (ISO 11546, ISO 11957)",
+        560,
     ),
     "diagram_silencer_iso7235": (
         _d_silencer_iso7235,

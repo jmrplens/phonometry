@@ -1,0 +1,411 @@
+---
+title: "Encapsulados y cabinas medidos (ISO 11546, ISO 11957)"
+description: "Lo que vale de verdad una caja alrededor de una máquina una vez construida, y lo que deja fuera una cabina alrededor de un operario: las dos determinaciones cuya diferencia es la respuesta, las fuentes sustitutas para una máquina que no puede funcionar, el anexo que pregunta si la sala es bastante buena, y el único criterio de aceptación que se lee en la respuesta en vez de fijarse de antemano."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1995
+    title: "Acoustics — Determination of sound insulation performances of enclosures — Part 1: Measurements under laboratory conditions (for declaration purposes)"
+    designation: "ISO 11546-1:1995"
+    primary: true
+    note: "La medida de laboratorio con la que declara un fabricante: las ecuaciones (1) a (5), la tabla 1, los métodos de reciprocidad y de fuente artificial del apartado 7, y la estimación del anexo C. Leída de la BS EN ISO 11546-1:2009, que la adopta sin modificación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1995
+    title: "Acoustics — Determination of sound insulation performances of enclosures — Part 2: Measurements in situ (for acceptance and verification purposes)"
+    designation: "ISO 11546-2:1995"
+    note: "Las mismas magnitudes medidas donde se instaló el encapsulado, más el anexo C, que pregunta si la sala sirve siquiera para la norma base. Leída de la BS EN ISO 11546-2:2009, que la adopta sin modificación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Determination of sound insulation performances of cabins — Laboratory and in situ measurements"
+    designation: "ISO 11957:1996"
+    note: "La cabina: las ecuaciones (1), (2) y (3), el criterio de posiciones de fuente de 7.2.1, las reglas de planitud y de ruido de fondo de 6.4 y 6.7, y la estimación del anexo A. Leída de la BS EN ISO 11957:2009, que la adopta sin modificación."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels of noise sources using sound pressure — Precision methods for reverberation test rooms"
+    designation: "ISO 3741:2010"
+    note: "La corrección por ruido de fondo a la que los tres documentos remiten sus medidas, y la cámara reverberante en la que se hace el método de laboratorio de la cabina."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2020
+    title: "Acoustics — Rating of sound insulation in buildings and of building elements — Part 1: Airborne sound insulation"
+    designation: "ISO 717-1:2020"
+    note: "El número único al que los tres documentos delegan, con su propia magnitud puesta donde esa norma escribe el índice de reducción acústica."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un modelo dice lo que debería valer un encapsulado. Toma el índice de reducción
+acústica de los paneles, resta una penalización por la acumulación reverberante
+en la cavidad y devuelve una pérdida por inserción. Es un buen número y no es
+el que un comprador puede exigirle a nadie, porque no sabe nada del hueco bajo
+la puerta, del tubo que se pasó por la pared después, ni del ventilador que se
+montó para refrigerar la máquina.
+
+Estas tres normas miden lo que se construyó. La magnitud es una **diferencia de
+dos ensayos**: se determina la potencia acústica de la máquina sin el
+encapsulado, se determina otra vez con el encapsulado puesto y se resta banda a
+banda.
+
+$$
+D_W = L_{W,\text{sin}} - L_{W,\text{con}}
+$$
+
+Esa es la ecuación (1) de las dos partes de la ISO 11546, y nada más en ninguno
+de los dos documentos es más complicado que eso. El cuidado está entero en qué
+significa «la misma determinación dos veces».
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/enclosure_cabin_insulation.svg" alt="Tres paneles. Izquierda: dos espectros en bandas de octava de la potencia acústica de la misma máquina, uno medido sin el encapsulado que baja de noventa y seis a ochenta y nueve decibelios y otro medido con él que baja de ochenta y ocho a sesenta y tres, con el área entre ambos sombreada y la pérdida por inserción dibujada contra un segundo eje, que sube de ocho decibelios en 125 Hz a veintiséis en 2 kHz, anotada con la pérdida por inserción ponderada A de diecinueve coma tres decibelios. Centro: el cociente de superficies que debe alcanzar una sala frente a su coeficiente medio de absorción, en ejes logarítmicos, dibujado como dos rectas descendentes, una para el límite de dos decibelios de corrección ambiental de los métodos de precisión y de ingeniería y otra para el límite de siete decibelios de los métodos de control, con las siete descripciones de sala de la tabla C.2 marcadas sobre la recta superior. Derecha: una escalera con las posiciones de altavoz que exige una medida de cabina in situ frente a la mayor desviación del aislamiento aparente entre dos cualesquiera de ellas, plana en tres hasta los tres decibelios, escalonada a cuatro, cinco y seis, y plana en seis a partir de ahí, con la región pasados los seis decibelios sombreada para marcar dónde el exceso se hace constar en su lugar" width="100%" />
+
+*La pérdida por inserción es el hueco entre dos ensayos; la sala tiene que ser
+bastante buena para el método que los midió; y, in situ, el número de
+posiciones de fuente lo decide la respuesta.*
+
+## 1. Dos partes, un procedimiento
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_enclosure_cabin_measurement.svg" alt="Dos montajes uno al lado del otro. A la izquierda, la misma máquina medida dos veces sobre la misma superficie de medida de trazos, una exenta y otra dentro del encapsulado, y la pérdida por inserción es la diferencia de las dos potencias acústicas. A la derecha, una sala excitada por un altavoz con tres micrófonos en ella y una cabina vacía dentro con otros dos, y el aislamiento es la diferencia de los dos niveles de presión. Un recuadro al pie lleva las dos ecuaciones" width="100%" />
+
+La **ISO 11546-1** mide en laboratorio, para **declarar**: la cifra del
+fabricante, obtenida en condiciones que un comprador puede comparar entre
+proveedores. La **ISO 11546-2** mide lo mismo **in situ**, para **aceptar**: el
+encapsulado tal como se instaló, en la sala donde se instaló, con la máquina
+para la que se construyó.
+
+Las dos comparten definiciones, ecuaciones, reglas de informe y fuente
+artificial palabra por palabra. Lo que cambia es el entorno, la norma base de
+la que salen los niveles y, en la parte 2, un anexo que pregunta si la sala
+sirve siquiera.
+
+```python
+from phonometry import noise_control
+
+bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+without = [96.0, 98.0, 99.0, 97.0, 94.0, 89.0]   # dB, máquina sola
+with_box = [88.0, 86.0, 81.0, 74.0, 68.0, 63.0]  # dB, con el encapsulado
+
+res = noise_control.sound_power_insulation(
+    without, with_box, frequencies=bands, band_fraction=1,
+)
+print(res.rounded())                    # [ 8 12 18 23 26 26] dB
+print(round(res.a_weighted_insulation, 1))   # 19.3 dB
+```
+
+El número ponderado A es $D_{WA}$ de la ecuación (2), y es la cifra única que
+lleva una declaración. El apartado 9.4 informa cada valor de banda redondeado
+al decibelio más próximo, que es lo que hace `.rounded()`.
+
+Las dos partes miden además un aislamiento a la **presión acústica** en una
+posición declarada, ecuaciones (3) y (4), con `sound_pressure_insulation`. Es
+otra magnitud con la misma aritmética: pertenece a una posición de micrófono, y
+por eso la norma obliga a informar de cuál.
+
+## 2. Lo que el método puede declarar
+
+La tabla 1 de las dos partes es la que se salta el lector, y es la que decide
+qué puede escribirse en la hoja de características. No toda forma de determinar
+una potencia acústica da un espectro: una determinación de control devuelve un
+valor ponderado A y nada por banda, así que de ella no puede declararse $D_W$
+en absoluto.
+
+```python
+for entry in noise_control.applicable_methods(condition="in-situ"):
+    if not entry.band_values:
+        print(entry.base_standard, entry.quantities)
+# ISO 3746 ('D_WA',)
+# ISO 11202 ('D_pA',)
+```
+
+Esas dos filas solo existen en la parte 2. La tabla de laboratorio de la parte
+1 no admite ninguna determinación de control, y su propia nota al pie va más
+lejos: cuando una norma tiene variante de grado 3, la ISO 9614-1 y la
+ISO 11204, esa variante queda excluida. Una declaración es el único sitio donde
+la medida tiene que ser al menos de ingeniería, y la tabla 1 es donde el
+documento lo dice.
+
+La tabla decide también qué fuente sustituta hay disponible. Cuando la máquina
+no puede funcionar, las dos partes la reemplazan. El apartado 1 traza el
+alcance alrededor del primer caso, no de las sustitutas: la parte se aplica sin
+restricción alguna a un encapsulado exento de menos de 2 m³, y uno mayor puede
+medirse igualmente con su fuente real mientras se cumpla el límite de volumen
+de la propia norma base. Las dos sustitutas son:
+
+- el método de **reciprocidad** de la parte 1, 7.2, que pone el encapsulado en
+  un campo difuso y mide dentro, y da $D_{pr}$. Existe solo en la parte 1, y
+  pedirlo in situ se rechaza en vez de aproximarse;
+- una fuente **artificial**, la máquina de impactos del anexo A dejada caer
+  sobre una chapa de acero sin amortiguar, usada en varias posiciones. Las
+  posiciones se promedian **aritméticamente**, que es la palabra de la propia
+  norma y no la media energética que se usa casi en todas partes en esta
+  biblioteca, así que `artificial_source_insulation` la escribe en vez de
+  tomarla prestada.
+
+## 3. ¿Sirve la sala?
+
+El anexo C de la parte 2 hace la pregunta de las normas de emisión al revés.
+Ellas preguntan cuál es la corrección ambiental $K_2$ de una sala; el anexo
+pregunta cuánta sala necesita un método. Manteniendo
+$K_2 = 10 \lg(1 + 4S/(\alpha S_V))$ en el límite que fija la tabla C.1 y
+despejando la sala queda
+
+$$
+\frac{S_V}{S} = \frac{4}{\left(10^{K_2/10} - 1\right)\alpha}
+$$
+
+que es la figura C.1 en forma cerrada: la curva que el anexo pide leer a ojo.
+`test_environment_applicability` la evalúa y la compara con la sala que se
+tiene delante.
+
+```python
+verdict = noise_control.test_environment_applicability(
+    base_standard="ISO 3744",
+    mean_absorption_coefficient=0.15,
+    room_surface_area_m2=520.0,
+    measurement_surface_area_m2=14.1,
+)
+print(round(verdict.required_area_ratio, 1))  # 45.6
+print(round(verdict.actual_area_ratio, 1))    # 36.9
+print(verdict.applicable)                     # False
+```
+
+Esa sala no puede sostener una determinación de precisión. Sí puede sostener
+una de control, que pide 6,6 en vez de 45,6, y la respuesta que devuelve es un
+valor ponderado A sin espectro detrás. Los dos hechos van juntos, y leer la
+tabla 1 después del anexo C es como siguen juntos.
+
+Cuando nadie ha medido la absorción, la tabla C.2 da siete descripciones de
+sala con sus coeficientes, de 0,05 para una sala vacía de paredes lisas y duras
+a 0,5 para una sala con techo y suelo muy absorbentes. Son
+`ROOM_ABSORPTION_ESTIMATES`, y son las mismas siete filas que la ISO 3744
+imprime en su tabla F.1.
+
+### Cómo se hace la medida
+
+Elija primero la norma base, porque la tabla 1 decide cómo se puede llamar al
+resultado: un método de control da un número ponderado A y nada por bandas, y
+ningún cuidado posterior convierte eso en un espectro. Fije la superficie de
+medida y consérvela para las dos medidas. Determine la potencia acústica de la
+máquina sin el encapsulado, monte el encapsulado sin mover ni la máquina ni los
+micrófonos, y vuelva a determinarla. Cuando la máquina no se pueda hacer
+funcionar dos veces, use el método de reciprocidad o la fuente artificial del
+anexo A, y diga cuál en el informe. En obra, pase la sala por
+`test_environment_applicability` antes que nada: a una sala que no puede cumplir
+la corrección ambiental que pide la norma base no la salva una medida cuidadosa.
+
+## 4. La cabina es el problema inverso
+
+Un encapsulado deja el ruido **dentro**. Una **cabina** lo deja **fuera**, y la
+ISO 11957 mide eso como la diferencia entre el nivel en la sala y el nivel
+dentro de la cabina vacía.
+
+$$
+D_p = (L_p)_{\text{sala}} - (L_p)_{\text{cabina}}
+$$
+
+La ecuación (1) es la magnitud de laboratorio, medida en una cámara
+reverberante conforme a la ISO 3741. La ecuación (2) es la misma aritmética
+**in situ**, donde no se exige nada a la sala, y la respuesta lleva una prima
+para decirlo: $D'_p$. La prima no es adorno. La definición 3.6 existe porque un
+número medido en una sala que nunca se cualificó no puede compararse con uno
+que sí, y el apartado 4 dice sin rodeos que solo pueden usarse datos del mismo
+método al comparar cabinas.
+
+```python
+room = [88.0, 90.0, 91.0, 89.0, 86.0, 82.0]    # dB, nivel en la sala
+inside = [76.0, 72.0, 66.0, 59.0, 52.0, 47.0]  # dB, nivel en la cabina
+
+cab = noise_control.cabin_insulation(
+    room, inside, frequencies=bands, band_fraction=1,
+    method="in-situ-loudspeaker",
+)
+print(cab.symbol, cab.rounded())   # D'_p [12 18 25 30 34 35] dB
+```
+
+Hay un tercer método, y es el que un puesto de trabajo suele querer: excitar la
+sala con el ruido que hay de verdad. Es el único método para el que la norma
+define una diferencia ponderada A, $D'_{pA}$ de la ecuación (3), y
+`cabin_insulation` rechaza calcular una con cualquier otro, porque una cifra
+rotulada $D'_{pA}$ que salió de un altavoz es una afirmación que el documento
+no hace.
+
+## 5. El recuento que se lee en la respuesta
+
+Casi todos los números de una norma de medida están fijados antes de medir:
+seis posiciones de micrófono, 2 m de la cabina, 3 m entre sí. El apartado 7.2.1
+de la ISO 11957 tiene uno que no. El número de posiciones de altavoz **será al
+menos la mayor desviación, en decibelios, de $D'_p$ entre dos cualesquiera de
+ellas**, leída en bandas de octava, empezando por tres y parando en seis.
+
+Es un criterio que juzga la medida por cuánto se contradijo a sí misma. Una
+sala donde mover el altavoz cambia la respuesta en cuatro decibelios es una
+sala donde tres posiciones no bastaron para promediarla.
+
+```python
+by_position = [
+    [12.0, 16.0, 25.0, 30.0, 34.0, 35.0],
+    [13.5, 18.0, 27.5, 32.0, 36.5, 36.0],
+    [11.0, 14.5, 23.0, 28.5, 33.0, 34.0],
+]
+check = noise_control.check_source_positions(by_position)
+print(check.max_octave_spread_db)   # 4.5
+print(check.required_positions)     # 5
+print(check.satisfied)              # False
+```
+
+Dos posiciones más, y el apartado añade que las tres usadas primero no deberían
+volver a usarse. Pasados los seis decibelios, el exceso se hace constar en el
+informe, que es lo que marca `exceeds_maximum`.
+
+Las demás reglas numéricas de los dos apartados también están.
+`check_band_flatness` es la exigencia de que los tres niveles de tercio de
+octava dentro de una octava difieran como mucho 6 dB en 125 Hz, 5 dB en 250 Hz
+y 4 dB por encima, que es lo que hace que un resultado en octavas signifique lo
+que la norma dice que significa. `minimum_cabin_clearance_m` es la distancia de
+6.2, escrita exactamente como está impresa, incluida la frase de baja
+frecuencia que la relaja en vez de apretarla. `internal_noise_level` es el
+ruido que hacen los propios ventiladores de la cabina, corregido por el fondo
+solo mientras el margen se queda entre 6 dB y 10 dB, que es una regla distinta
+de la que 6.4 aplica al aislamiento.
+
+### Cómo se hace la medida
+
+Excite la sala con un altavoz, o deje que lo haga el ruido real cuando se quiera
+el aislamiento ponderado A, porque la ecuación (3) no está definida para ninguna
+otra cosa. Compruebe el espectro de excitación con `check_band_flatness` antes
+de fiarse de un resultado en octavas. Tome el nivel en la sala y el nivel dentro
+de la cabina vacía, los dos corregidos por su propio fondo con la regla de la
+ISO 3741, y deje la cabina vacía: lo que se mide es la cabina, no lo que haya
+dentro. En obra, empiece con tres posiciones de altavoz, calcule la dispersión
+de la respuesta entre ellas con `check_source_positions` y añada posiciones
+hasta llegar al recuento que pide la cláusula. Mida aparte el nivel de ruido
+interior, con la sala en silencio, porque una cabina con ventiladores propios
+tiene su propio suelo.
+
+## 6. Un número, y lo que vale
+
+Los tres documentos delegan su número único en la ISO 717-1, poniendo su propia
+magnitud donde esa norma escribe el índice de reducción acústica.
+
+```python
+rating = noise_control.weighted_cabin_insulation(
+    cab.insulation[:5], apparent=True, band_fraction=1,
+)
+print(rating.rating, rating.c, rating.ctr)   # 28 -1 -5
+```
+
+El apartado 4 de la ISO 11957 llama a $D_{p,w}$ el número único preferente y
+acto seguido, en el mismo párrafo, avisa de no leer demasiado en él: lo que
+vale una cabina depende del espectro en el que esté. Los anexos responden a esa
+objeción directamente. Dado un espectro, el aislamiento estimado es
+
+$$
+D_{pA,e} = L_A - 10 \lg \sum_i 10^{0,1\left(L_i - A_i - D_{pi}\right)}
+$$
+
+con $L_A$ el total ponderado A de ese mismo espectro. El signo de $A_i$ es la
+trampa: el anexo imprime una atenuación, positiva donde la ponderación quita
+nivel, mientras que las correcciones por banda de una biblioteca son la
+corrección misma. Los dos términos se construyen aquí de la misma tabla, así
+que la respuesta no puede contradecir sus propias entradas, y un aislamiento
+nulo devuelve exactamente cero.
+
+```python
+spectrum = [92.0, 94.0, 95.0, 93.0, 90.0, 85.0]   # dB, el ruido real
+print(round(noise_control.estimated_cabin_noise_insulation(
+    spectrum, cab.insulation, frequencies=bands,
+), 1))                                             # 25.6 dB
+```
+
+Contra ese espectro la cabina vale 25,6 dB(A), siendo 28 su número único. Las
+dos cifras responden a preguntas distintas, y el número único no es el que hay
+que meter en un cálculo de protección auditiva.
+
+## 7. Lo que el informe tiene que decir, y lo que no puede
+
+El apartado 10 de la ISO 11957 es inusualmente franco. En laboratorio, la
+incertidumbre de la ISO 3741 se traslada de 250 Hz a 10 kHz, y solo mientras la
+sala sea al menos veinte veces el volumen de la cabina. El método del altavoz
+in situ añade unos 2 dB a la desviación típica. Para el método del ruido real
+el apartado no dice nada en absoluto y manda un valor declarado a la ISO 4871.
+
+```python
+u = noise_control.uncertainty_conditions(
+    room_volume_m3=520.0, cabin_volume_m3=18.0, method="in-situ-loudspeaker",
+)
+print(round(u.volume_ratio, 1), u.ratio_satisfied)   # 28.9 True
+print(u.excess_standard_deviation_db)                # 2.0
+```
+
+Una medida cuya sala es demasiado pequeña para la cabina sigue devolviendo un
+número. Lo que no devuelve es la declaración de incertidumbre, y un informe que
+la cite de todas formas está citando un apartado que lo excluyó.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+La aritmética de los tres documentos. De la ISO 11546-1 y -2: las ecuaciones
+(1) a (5) con `sound_power_insulation`, `sound_pressure_insulation`,
+`reciprocity_insulation` y `artificial_source_insulation`, la última
+promediando sus posiciones de fuente aritméticamente como dice el apartado; la
+tabla 1 como datos con `applicable_methods`, con las magnitudes que puede
+declarar cada fila y las filas que no dan espectro; el número único de la
+ISO 717-1 del apartado 7 con `weighted_insulation`; la estimación del anexo C
+y del anexo D con `estimated_a_weighted_insulation`; los cocientes de fuga, de
+estanquidad y de llenado de las definiciones; la distancia de la fuente de
+7.2; y el anexo C entero de la parte 2, con la tabla C.1, la tabla C.2 y la
+figura C.1 en forma cerrada con `test_environment_applicability`, contrastada
+con la corrección ambiental de la ISO 3744. De la ISO 11957: las ecuaciones
+(1), (2) y (3) con `cabin_insulation`, con la prima de la definición 3.6 y el
+rechazo a nombrar un aislamiento ponderado A fuera del método del ruido real;
+el número único de la ISO 717-1 del apartado 8; la estimación del anexo A; el
+criterio de posiciones de fuente de 7.2.1 con `check_source_positions`; la
+regla de planitud de 6.4 con `check_band_flatness`; la distancia de 6.2; el
+nivel de ruido interior de 6.7 con su propia ventana de fondo; y las
+condiciones a las que el apartado 10 ata su declaración de incertidumbre. La
+corrección por ruido de fondo que los tres remiten a la ISO 3741 es
+`emission.reverberation_background_correction`.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Aquí no se predice ningún aislamiento: el índice de reducción acústica de los
+paneles y la corrección interior que dan una pérdida por inserción de diseño
+son otra página, y esta parte de niveles que se midieron. Aquí no se construye
+ni se cualifica ningún entorno de ensayo: la cámara reverberante de la
+ISO 3741, la sala de paredes duras de la ISO 3743-1 y las mallas de micrófonos
+de la serie ISO 11200 son de sus propias normas, y el anexo de aplicabilidad lee sus
+requisitos en vez de comprobar una sala contra ellos. La fuente artificial del
+anexo A es un plano de taller, y su chapa, su caída y su separación son aquí
+constantes y nada más. El montaje, el sellado, accionar diez veces cada parte
+móvil, las clases de instrumentación y la plantilla de informe son
+procedimiento, no aritmética; lo único de los apartados de informe que calcula
+es el redondeo al decibelio más próximo. Ninguno de los tres documentos
+imprime un ejemplo numérico resuelto, así que aquí no se reproduce ninguno.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Control de ruido industrial](/phonometry/es/devices/noise-control/noise-control/):
+  la pérdida por inserción predicha de un encapsulado de máquina, que es la
+  magnitud que esta página mide en vez de calcular.
+- [Medir un silenciador](/phonometry/es/devices/noise-control/silencer-measurement/):
+  la misma distinción para un silenciador de conducto, y la medida por
+  sustitución que hay detrás de una cifra de catálogo.
+- [Potencia acústica en cámara reverberante](/phonometry/es/devices/emission/sound-power-reverberation/):
+  la determinación en la que se hace el método de laboratorio de la cabina, y
+  la corrección por ruido de fondo a la que los tres documentos delegan.
+- [Potencia acústica in situ por comparación](/phonometry/es/devices/emission/sound-power-in-situ/):
+  una de las normas base con las que la tabla 1 permite sostener una medida de
+  encapsulado in situ.
+- [Números únicos de aislamiento a ruido aéreo](/phonometry/es/buildings/insulation/insulation-ratings/):
+  la maquinaria de la ISO 717-1 que los tres documentos toman prestada para su
+  número único.
+
+</SeeAlso>

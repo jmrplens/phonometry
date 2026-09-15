@@ -7,6 +7,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **ISO 11546-1:1995 and ISO 11546-2:1995**, the insulation an enclosure gives
+  once it is built, in `phonometry.noise_control.enclosure_insulation`. The
+  quantity is a difference of two runs: determine the machine's sound power
+  without the enclosure, determine it again with the enclosure in place and
+  subtract band by band. `sound_power_insulation`, `sound_pressure_insulation`,
+  `reciprocity_insulation` and `artificial_source_insulation` are Equations (1)
+  to (5) of the two parts, `weighted_insulation` is the ISO 717-1 rating of
+  clause 7, and `estimated_a_weighted_insulation` is the annex that says what
+  the enclosure would be worth against a stated spectrum.
+
+  `applicable_methods` reads Table 1 as data, so a declaration cannot claim
+  more than its method can give: a survey-grade determination hands back an
+  A-weighted number and nothing per band, and that number is carried as the
+  A-weighted total rather than passed off as a band value. The same table is
+  read before the calculation, so a combination it does not print, such as the
+  reciprocity method in situ, is refused instead of answered. `test_environment_applicability` is
+  Annex C of part 2 in closed form, `S_V/S = 4/((10^(K2/10) - 1) alpha)`, which
+  is the curve of Figure C.1 the annex asks the reader to read off by eye, and
+  it is cross-checked against `emission.environmental_correction`.
+
+- **ISO 11957:1996**, the sound pressure insulation of a sound-protecting
+  cabin, in `phonometry.noise_control.cabin_insulation`. An enclosure keeps
+  noise in and a cabin keeps it out, and the second is measured as one
+  subtraction between the level in the room and the level inside the empty
+  cabin. `cabin_insulation` is Equations (1), (2) and (3); the in-situ methods
+  carry the prime of definition 3.6, and the A-weighted difference of Equation
+  (3) is refused under any method but the one that drives the room with the
+  actual noise, because that is the only one the standard defines it for.
+
+  The numeric acceptance rules of the clauses are here too:
+  `check_source_positions` is the criterion of 7.2.1, where the number of
+  loudspeaker positions is read off the spread of the answer itself rather
+  than fixed in advance; `check_band_flatness` is the 6, 5 and 4 dB of 6.4;
+  `minimum_cabin_clearance_m` is the clearance of 6.2; `internal_noise_level`
+  is the noise the cabin makes on its own, corrected for the background only
+  inside the window 6.7 sets; and `uncertainty_conditions` is what clause 10
+  will and will not say.
+
+- `emission.reverberation_background_correction` publishes the background
+  correction K1 of ISO 3741:2010 Equation (14) on its own, with the
+  frequency-dependent qualification of 9.1.2. It was already inside the
+  reverberation-room sound power; the standards that ask for "a correction in
+  accordance with ISO 3741", ISO 11957 four times over, now call it rather
+  than repeat it.
+
+- `emission.ROOM_ABSORPTION_ESTIMATES` is the table of approximate mean
+  absorption coefficients that ISO 3744 Table F.1, ISO 3746, ISO 11202 and
+  Table C.2 of ISO 11546-2 all print, from 0,05 for an empty room with hard
+  walls to 0,5 for a room with a highly absorptive ceiling and floor.
+
+- Ten errata entries for the three standards, all read from the page as
+  printed: a column of Table C.1 of ISO 11546-2 headed with a standard that
+  does not exist, two cross-references that point at a clause and an annex
+  where the quantity they name is not defined, a subscript on the wrong half of
+  a ratio, and, in ISO 11957, a low-frequency clearance that relaxes the rule
+  above it and a diffuser distance that restates the wall distance, plus three
+  misprints inside normative sentences.
+
 ### Changed
 
 - The documentation, the figures and the docstrings are written without the em

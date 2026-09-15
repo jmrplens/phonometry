@@ -14,6 +14,7 @@ import warnings
 from typing import TYPE_CHECKING, Any
 
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import numpy as np
 from matplotlib.colors import Normalize
 from numpy.typing import NDArray
@@ -7006,4 +7007,193 @@ def generate_silencer_measurement(output_dir: str) -> None:
 
     plt.tight_layout()
     save_figure(output_dir, "silencer_measurement.svg")
+    plt.close()
+
+
+def generate_enclosure_cabin_insulation(output_dir: str) -> None:
+    """ISO 11546 and ISO 11957: the two runs, the room, and the positions."""
+    print("Generating enclosure_cabin_insulation.svg...")
+    from phonometry import noise_control
+    from phonometry.noise_control.enclosure_insulation import (
+        ROOM_ABSORPTION_ESTIMATES,
+    )
+
+    _fig, axes = plt.subplots(1, 3, figsize=(16.4, 5.4))
+
+    # -- Left: the insulation is the gap between two determinations of the
+    # same machine, and the A-weighted number is what a declaration carries.
+    ax = axes[0]
+    bands = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+    without = np.array([96.0, 98.0, 99.0, 97.0, 94.0, 89.0])
+    with_enclosure = np.array([88.0, 86.0, 81.0, 74.0, 68.0, 63.0])
+    res = noise_control.sound_power_insulation(
+        without, with_enclosure, frequencies=bands, band_fraction=1
+    )
+    ax.fill_between(
+        bands,
+        with_enclosure,
+        without,
+        color=theme_fill(COLOR_PRIMARY, ax),
+        lw=0.0,
+        zorder=1,
+    )
+    ax.semilogx(
+        bands,
+        without,
+        color=COLOR_SECONDARY,
+        lw=1.6,
+        ls="--",
+        marker="s",
+        ms=4,
+        label="Sound power without the enclosure",
+        zorder=3,
+    )
+    ax.semilogx(
+        bands,
+        with_enclosure,
+        color=COLOR_TERTIARY,
+        lw=1.6,
+        ls="-.",
+        marker="v",
+        ms=4,
+        label="Sound power with the enclosure",
+        zorder=3,
+    )
+    ax.set_ylim(55.0, 125.0)
+    ax.set_ylabel("Sound power level [dB re 1 pW]")
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_title("The insertion loss is the gap, band by band")
+    twin = ax.twinx()
+    twin.semilogx(
+        bands,
+        res.insulation,
+        color=COLOR_PRIMARY,
+        lw=2.2,
+        marker="o",
+        ms=4.5,
+        label="Insertion loss $D_W$ of Equation (1)",
+        zorder=4,
+    )
+    twin.set_ylim(0.0, 60.0)
+    twin.set_yticks([0, 10, 20, 30])
+    twin.set_ylabel("Insertion loss [dB]", color=COLOR_PRIMARY)
+    twin.tick_params(axis="y", labelcolor=COLOR_PRIMARY)
+    twin.grid(visible=False)
+    weighted = res.a_weighted_insulation or 0.0
+    twin.annotate(
+        f"A-weighted insertion loss $D_{{WA}}$ = {weighted:.1f} dB,\n"
+        "which is the single number a declaration carries",
+        xy=(2000.0, float(res.insulation[4])),
+        xytext=(330.0, 44.0),
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "linewidth": 1.1},
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    handles, labels = ax.get_legend_handles_labels()
+    extra_handles, extra_labels = twin.get_legend_handles_labels()
+    ax.legend(
+        handles + extra_handles,
+        labels + extra_labels,
+        loc="upper left",
+        fontsize=8,
+        framealpha=1.0,
+    )
+    format_frequency_axis(ax)
+    format_frequency_axis(twin)
+    ax.grid(visible=True, which="both", color=COLOR_GRID, alpha=0.45)
+
+    # -- Middle: Annex C of part 2 asks how much room a method needs, which is
+    # the curve of Figure C.1 read as a closed form.
+    ax2 = axes[1]
+    alpha = np.linspace(0.03, 0.6, 400)
+    for limit, colour, name in (
+        (2.0, COLOR_PRIMARY, "Precision and engineering methods, $K_2 \\leq 2$ dB"),
+        (7.0, COLOR_SECONDARY, "Survey methods, $K_2 \\leq 7$ dB"),
+    ):
+        ratio = 4.0 / ((10.0 ** (limit / 10.0) - 1.0) * alpha)
+        ax2.loglog(alpha, ratio, color=colour, lw=1.9, label=name)
+    printed = np.array(sorted(ROOM_ABSORPTION_ESTIMATES))
+    ax2.loglog(
+        printed,
+        4.0 / ((10.0 ** (2.0 / 10.0) - 1.0) * printed),
+        color=COLOR_PRIMARY,
+        ls="none",
+        marker="o",
+        ms=5,
+        label="The seven room descriptions of Table C.2",
+    )
+    ax2.set_ylim(1.2, 400.0)
+    ax2.set_xticks(printed)
+    ax2.set_xticklabels([f"{value:g}" for value in printed])
+    ax2.xaxis.set_minor_formatter(mticker.NullFormatter())
+    ax2.set_xlabel("Mean sound absorption coefficient $\\alpha$")
+    ax2.set_ylabel("Required area ratio $S_V/S$")
+    ax2.set_title("How much room a method needs")
+    ax2.text(
+        0.035,
+        1.55,
+        "an empty room with hard walls needs about 140 times the\n"
+        "measurement surface for a precision method, and a well\n"
+        "absorbing one about 14",
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        va="bottom",
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax2.legend(loc="upper right", fontsize=8, framealpha=1.0)
+    ax2.grid(visible=True, which="both", color=COLOR_GRID, alpha=0.45)
+
+    # -- Right: the one acceptance criterion of ISO 11957 that is read off the
+    # answer rather than fixed in advance.
+    ax3 = axes[2]
+    spread = np.linspace(0.0, 9.0, 400)
+    required = np.clip(np.ceil(spread), 3.0, 6.0)
+    ax3.step(spread, required, where="post", color=COLOR_PRIMARY, lw=2.0)
+    ax3.axhspan(
+        6.0,
+        7.2,
+        color=theme_fill(COLOR_SECONDARY, ax3),
+        lw=0.0,
+        zorder=0,
+    )
+    ax3.axvline(6.0, color=COLOR_SECONDARY, lw=1.4, ls="--")
+    ax3.set_xlabel("Largest deviation of $D'_p$ between two positions [dB]")
+    ax3.set_ylabel("Loudspeaker positions required")
+    ax3.set_title("The count is read off the answer")
+    ax3.set_ylim(2.4, 7.2)
+    ax3.set_yticks([3, 4, 5, 6])
+    ax3.annotate(
+        "three positions to begin with, and one more for every\n"
+        "decibel the answer moves between them; past six the\n"
+        "excess is stated in the report instead",
+        xy=(6.6, 6.0),
+        xytext=(0.3, 6.55),
+        fontsize=8.5,
+        color=COLOR_FG,
+        ha="left",
+        arrowprops={"arrowstyle": "->", "color": COLOR_FG, "linewidth": 1.1},
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        zorder=6,
+    )
+    ax3.grid(visible=True, which="major", color=COLOR_GRID, alpha=0.45)
+
+    plt.tight_layout()
+    save_figure(output_dir, "enclosure_cabin_insulation.svg")
     plt.close()

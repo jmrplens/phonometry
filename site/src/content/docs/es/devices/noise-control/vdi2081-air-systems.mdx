@@ -1,6 +1,6 @@
 ---
 title: "Ruido de climatización a la alemana (VDI 2081)"
-description: "El camino de la VDI 2081 desde el punto de trabajo de un ventilador hasta el nivel en la sala: el modelo de ventilador por tipo de montaje de la Ecuación (13), la atenuación y el ruido de flujo de cada elemento del conducto, el silenciador de bafles y su ruido propio, y el paso a la sala de la Ecuación (36), todo contra la hoja resuelta de la Tabla 1 de la Parte 2."
+description: "El camino de la VDI 2081 desde el punto de trabajo de un ventilador hasta el nivel en la sala: el modelo de ventilador por tipo de montaje de la Ecuación (13), la atenuación y el ruido de flujo de cada elemento del conducto, el silenciador de láminas paralelas y su ruido propio, y el paso a la sala de la Ecuación (36), todo contra la hoja resuelta de la Tabla 1 de la Parte 2."
 references:
   - type: standard
     organization: "Verein Deutscher Ingenieure"
@@ -8,7 +8,7 @@ references:
     title: "Geräuscherzeugung und Lärmminderung in Raumlufttechnischen Anlagen"
     designation: "VDI 2081 Blatt 1:2001-07"
     primary: true
-    note: "El método: el ventilador del apartado 4.3 con las Ecuaciones (13) y (15), la atenuación de conducto del apartado 6 con las Tablas 5 y 7, el ruido de flujo de las Ecuaciones (16), (17) y (18), el silenciador de bafles y su ruido propio de la Ecuación (49), la reflexión de boca del apartado 6.6 y el paso a la sala de la Ecuación (36). Sustituida por Blatt 1:2022-04, que no está en la biblioteca."
+    note: "El método: el ventilador del apartado 4.3 con las Ecuaciones (13) y (15), la atenuación de conducto del apartado 6 con las Tablas 5 y 7, el ruido de flujo de las Ecuaciones (16), (17) y (18), el silenciador de láminas paralelas y su ruido propio de la Ecuación (49), la reflexión de boca del apartado 6.6 y el paso a la sala de la Ecuación (36). Sustituida por Blatt 1:2022-04, que no está en la biblioteca."
   - type: standard
     organization: "Verein Deutscher Ingenieure"
     year: 2005
@@ -40,7 +40,7 @@ cálculo no puede acabar medio en uno y medio en el otro.
 La Parte 2 es una tabla de veinte elementos numerados. Se lee mejor como un
 lugar.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vdi2081_sheet.svg" alt="Sección de una sala de máquinas y una oficina. En la sala de máquinas, un ventilador de impulsión, el elemento 1, que da 16 000 metros cúbicos por hora contra 600 pascales. De él sale un conducto que recorre de izquierda a derecha cuatro cajas: el elemento 2, un silenciador de bafles de cinco bafles; el elemento 3, una ramificación que toma 0,30 de 1,08 metros cuadrados; el elemento 5, cuatro metros de conducto recto de 0,5 por 0,4 metros; y el elemento 14, un codo circular de 160 milímetros. Termina en el elemento 19, dos difusores, y baja por el techo de la sala 102, donde un oyente de pie está a 1,5 metros de la boca. Una franja inferior nombra la ecuación o la tabla de la que sale el número de cada elemento." width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vdi2081_sheet.svg" alt="Sección de una sala de máquinas y una oficina. En la sala de máquinas, un ventilador de impulsión, el elemento 1, que da 16 000 metros cúbicos por hora contra 600 pascales. De él sale un conducto que recorre de izquierda a derecha cuatro cajas: el elemento 2, un silenciador de cinco láminas paralelas; el elemento 3, una ramificación que toma 0,30 de 1,08 metros cuadrados; el elemento 5, cuatro metros de conducto recto de 0,5 por 0,4 metros; y el elemento 14, un codo circular de 160 milímetros. Termina en el elemento 19, dos difusores, y baja por el techo de la sala 102, donde un oyente de pie está a 1,5 metros de la boca. Una franja inferior nombra la ecuación o la tabla de la que sale el número de cada elemento." width="100%" />
 
 *Cada caja es una fila de la Tabla 1. La franja bajo el dibujo es lo que una
 tabla de resultados no puede enseñar: de qué ecuación, tabla o medida sale cada
@@ -158,7 +158,7 @@ límite y tampoco la forma del conducto ni su tamaño. Un ensanchamiento sí los
 necesita, y a un conducto rectangular hay que darle su lado mayor, que es lo
 único que su área no dice.
 
-Un silenciador de bafles no es uno de estos: su pérdida por inserción viene de
+Un silenciador de láminas paralelas no es uno de estos: su pérdida por inserción viene de
 la medida del fabricante, según la ISO 7235, y la directriz lo dice.
 `splitter_silencer_insertion_loss` es la estimación para cuando no la hay.
 
@@ -181,8 +181,8 @@ menudo no queda otra cosa que oír. La VDI 2081 lo da en forma cerrada.
   atraviesa, y las dos figuras declaran que solo valen por encima de $St = 1$,
   así que la biblioteca no da nivel por debajo en lugar de extrapolar una curva
   que la directriz no dibuja.
-- **El ruido propio de un silenciador de bafles** (Ecuación (49)), con
-  `silencer_self_noise`, que depende de la velocidad en los huecos entre bafles
+- **El ruido propio de un silenciador de láminas paralelas** (Ecuación (49)), con
+  `silencer_self_noise`, que depende de la velocidad en los huecos entre láminas
   y de la pérdida de carga. Es la razón de que un silenciador tenga un tamaño
   óptimo: si se estrechan los huecos sube la pérdida por inserción, pero también
   la velocidad, y pasado un punto el silenciador suena más que lo que quitaba.
@@ -255,7 +255,7 @@ elemento a elemento, con todas las magnitudes intermedias impresas. Eso la
 convierte en un oráculo de una clase que el lado ASHRAE del módulo no tiene, y
 para un modelo de verdad distinto, no para una reformulación del mismo.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vdi2081_chain_cascade.svg" alt="Niveles por bandas de octava en cinco etapas del ejemplo resuelto: en el ventilador, cerca de 90 decibelios y cayendo suavemente; tras el silenciador de bafles, que quita cuarenta decibelios de las bandas medias y deja una meseta cerca de 45 decibelios por encima de 1 kilohercio; tras la ramificación, unos decibelios menos; la potencia sonora que los dos difusores meten en la sala; y el nivel de presión sonora en el oyente, de 48 decibelios a 63 hercios a 29 a 8 kilohercios. La leyenda da el total ponderado A de cada etapa, que baja de 86 a 40 decibelios A." width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/vdi2081_chain_cascade.svg" alt="Niveles por bandas de octava en cinco etapas del ejemplo resuelto: en el ventilador, cerca de 90 decibelios y cayendo suavemente; tras el silenciador de láminas, que quita cuarenta decibelios de las bandas medias y deja una meseta cerca de 45 decibelios por encima de 1 kilohercio; tras la ramificación, unos decibelios menos; la potencia sonora que los dos difusores meten en la sala; y el nivel de presión sonora en el oyente, de 48 decibelios a 63 hercios a 29 a 8 kilohercios. La leyenda da el total ponderado A de cada etapa, que baja de 86 a 40 decibelios A." width="100%" />
 
 *El silenciador hace casi todo el trabajo, y lo que deja es una meseta: pasado
 1 kHz el nivel ya no sigue al ventilador, porque lo que se oye ahí es el ruido
@@ -292,7 +292,7 @@ impresa.
   no depende, y la Figura 27 de esa misma página no tiene eje de frecuencia.
 - La Tabla 1 de la Parte 2 imprime para el elemento 2 un diámetro hidráulico
   que no es el que usa para calcular.
-- La Tabla 1 de la Parte 2 atribuye los coeficientes del silenciador de bafles
+- La Tabla 1 de la Parte 2 atribuye los coeficientes del silenciador de láminas
   del elemento 2 al apartado 7.3.2 de la Parte 1, que es el aislamiento a ruido
   aéreo de un elemento constructivo. Están impresos en el apartado 7.2.3.2.
 
@@ -306,7 +306,7 @@ resuelven ahí.
 <ScopeClaim status="covered" label="Cubierto">
 El ventilador del apartado 4.3 mediante `fan_sound_power(model="vdi2081")`, la
 atenuación de conducto, codo, cambio de sección y ramificación del apartado 6,
-el ruido de flujo de las Ecuaciones (16), (17) y (18), el silenciador de bafles y su
+el ruido de flujo de las Ecuaciones (16), (17) y (18), el silenciador de láminas paralelas y su
 ruido propio, la reflexión de boca del apartado 6.6, el paso a la sala de la
 Ecuación (36) y la curva de valoración del apartado 1.1 de la Parte 2, todo
 contra la hoja resuelta de la Tabla 1 de la Parte 2.
@@ -328,7 +328,7 @@ biblioteca no.
   la misma pregunta por la vía angloamericana, y el límite de onda plana que
   acota a las dos.
 - [Silenciadores](/phonometry/es/devices/noise-control/silencers/): qué está
-  haciendo un silenciador de bafles y cómo se mide su pérdida por inserción.
+  haciendo un silenciador de láminas paralelas y cómo se mide su pérdida por inserción.
 - [Ruido entre salas](/phonometry/es/devices/noise-control/room-to-room/): el
   camino que no va por un conducto.
 

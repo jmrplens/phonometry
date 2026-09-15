@@ -4540,12 +4540,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
 ## VDI 2081 Blatt 2:2005-05, tabla 1, elemento 2 (el diámetro hidráulico que imprime no es con el que calcula)
 
 - **Ubicación:** tabla 1, folio impreso 12 (página 12 del PDF), elemento 2, el
-  silenciador de bafles: las filas "Hydr. Durchmesser $d_\mathrm{h}$ (m)" y
+  silenciador de láminas: las filas "Hydr. Durchmesser $d_\mathrm{h}$ (m)" y
   "Strouhalzahl $St$".
 - **Lo impreso:** $d_\mathrm{h} = 0{,}171$ m, y los ocho números de Strouhal
   $0{,}9$, $1{,}7$, $3{,}4$, $6{,}8$, $13{,}5$, $27{,}0$, $54{,}0$ y $108{,}0$
   en las octavas de 63 Hz a 8 kHz, para una ranura libre $s = 0{,}100$ m, una
-  altura de bafle $H = 0{,}600$ m y una velocidad de ranura $v = 14{,}81$ m/s.
+  altura de lámina $H = 0{,}600$ m y una velocidad de ranura $v = 14{,}81$ m/s.
 - **El problema:** las dos filas se contradicen. El apartado 7.2.4.2 del
   Blatt 1 define $St = f_\mathrm{m} d_\mathrm{h} / v_\mathrm{i}$, así que el
   $d_\mathrm{h}$ impreso y el $St$ impreso se determinan mutuamente. Con los
@@ -4590,7 +4590,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   elemento constructivo, y no tiene tal tabla. Los coeficientes están impresos
   en el apartado **7.2.3.2**, "Kulissenschalldämpfer", en el folio impreso 52,
   cuya tabla da exactamente esos cuatro valores en la fila de 200 mm, que es el
-  espesor de bafle del elemento.
+  espesor de lámina del elemento.
 - **Consecuencia:** quien siga la referencia aterriza en otro capítulo. Los
   valores en sí son correctos.
 - **Evidencia:** el apartado citado y el real, leídos los dos de las páginas

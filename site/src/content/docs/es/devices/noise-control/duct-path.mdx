@@ -26,7 +26,7 @@ references:
     edition: "5.ª ed."
     publisher: "CRC Press"
     doi: "10.1201/9781351228152"
-    note: "La tabla de reflexión del extremo (§8.13), la pérdida por inserción de codos (§8.11), la reducción de un silenciador de bafles a conductos revestidos (§8.10.5, Ec. 8.241), la cámara plenum (§8.17) y el ruido generado por el flujo en conductos y codos (§8.15)."
+    note: "La tabla de reflexión del extremo (§8.13), la pérdida por inserción de codos (§8.11), la reducción de un silenciador de láminas paralelas a conductos revestidos (§8.10.5, Ec. 8.241), la cámara plenum (§8.17) y el ruido generado por el flujo en conductos y codos (§8.15)."
   - type: report
     organization: "American Society of Heating, Refrigerating and Air-Conditioning Engineers"
     year: 2019
@@ -70,7 +70,7 @@ la imagen unidimensional deja de ser exacta. La referencia de fondo es Long,
 *Architectural Acoustics* (2.ª ed.), capítulos 13 y 14, cuya Tabla 14.9 es la
 hoja resuelta sobre la que se construye esta guía, con el *HVAC Applications
 Handbook* de ASHRAE, capítulo 49, para las unidades terminales y con Bies,
-Hansen y Howard para los silenciadores de bafles y los plenums. Los
+Hansen y Howard para los silenciadores de láminas paralelas y los plenums. Los
 silenciadores reactivos de cuatro polos de
 [Silenciadores](/phonometry/es/devices/noise-control/silencers/) y el resto de métodos de
 instalación de
@@ -391,9 +391,9 @@ print(np.round(noise_control.end_reflection_loss(bandas, 0.30, method="long").va
 print(round(noise_control.equivalent_diameter(0.36 * 0.24), 3))    # 0.332 m
 ```
 
-**Silenciadores y plenums.** Un atenuador de bafles paralelos se reduce, en
+**Silenciadores y plenums.** Un atenuador de láminas paralelas se reduce, en
 el §8.10.5 de Bies, a un conjunto de conductos revestidos cuyo espesor de
-revestimiento es la mitad del espesor del bafle, combinados por la media
+revestimiento es la mitad del espesor de la lámina, combinados por la media
 energética de la Ec. 8.241 de modo que domina el paso más permeable.
 `plenum_attenuation` es el método de Wells para una cámara plenum revestida
 (Ec. (8.275) de Bies), cuyo término reverberante usa la
@@ -426,7 +426,7 @@ Elegir un elemento es una decisión sobre la *forma* (¿qué banda me compra est
 elemento?), así que todo el apartado 3 cabe en una hoja de papel mejor que en
 seis arrays impresos.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_attenuation_elements.svg" alt="Cuatro paneles por bandas de octava de 63 Hz a 8 kHz. Panel a, un tramo de 36 por 24 pulgadas y 5 pies: el conducto desnudo cayendo de 1,1 dB a 0,2, uno con manta exterior que arranca más alto, en 2,2 dB, y desaparece por encima de 500 Hz, y ese mismo tramo con 25 mm de revestimiento llegando a 12,8 dB a 1 kHz, dibujado con y sin la contribución de las paredes laterales. Panel b, un codo de 24 pulgadas en cuatro construcciones, el codo cuadrado revestido llegando a 11 dB y el circular plano en 3, con la abscisa W partido por lambda igual a uno marcada cerca de 563 Hz. Panel c, el extremo abierto de un conducto de 300 mm por la tabla de Bies y por la forma cerrada de Long, que coinciden dentro de un decibelio desde 12 dB a 63 Hz hasta cero a 1 kHz. Panel d, el modelo de silenciador de bafles de cinco pasos subiendo a 34 dB a 1 kHz, con los dos valores de baja frecuencia de la unidad que especifica la hoja de Long marcados como rombos huecos 10 y 12 dB por encima del modelo" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/duct_attenuation_elements.svg" alt="Cuatro paneles por bandas de octava de 63 Hz a 8 kHz. Panel a, un tramo de 36 por 24 pulgadas y 5 pies: el conducto desnudo cayendo de 1,1 dB a 0,2, uno con manta exterior que arranca más alto, en 2,2 dB, y desaparece por encima de 500 Hz, y ese mismo tramo con 25 mm de revestimiento llegando a 12,8 dB a 1 kHz, dibujado con y sin la contribución de las paredes laterales. Panel b, un codo de 24 pulgadas en cuatro construcciones, el codo cuadrado revestido llegando a 11 dB y el circular plano en 3, con la abscisa W partido por lambda igual a uno marcada cerca de 563 Hz. Panel c, el extremo abierto de un conducto de 300 mm por la tabla de Bies y por la forma cerrada de Long, que coinciden dentro de un decibelio desde 12 dB a 63 Hz hasta cero a 1 kHz. Panel d, el modelo de silenciador de láminas de cinco pasos subiendo a 34 dB a 1 kHz, con los dos valores de baja frecuencia de la unidad que especifica la hoja de Long marcados como rombos huecos 10 y 12 dB por encima del modelo" width="92%" />
 
 *Cuatro familias, cuatro trabajos distintos. Revestir un tramo cambia el orden
 de magnitud en las bandas medias y no hace nada a 63 Hz; un conducto desnudo con
@@ -435,7 +435,7 @@ Las tablas de codos están indexadas por $W/\lambda$, y por eso un mismo codo se
 comporta igual en conductos de tamaño distinto con una octava de diferencia. Los
 dos métodos de reflexión de extremo coinciden dentro de un decibelio en las
 bandas que ambos cubren, así que elegir entre ellos no merece una discusión. Y
-el panel de los bafles es el honrado: la regresión puramente geométrica no puede
+el panel de las láminas es el honrado: la regresión puramente geométrica no puede
 ver los 10 a 12 dB de comportamiento en baja frecuencia para el que está
 diseñada una unidad de baja frecuencia real, que es la razón de que esa fila
 salga de una hoja de características.*
@@ -1197,7 +1197,7 @@ sin revestir, `flexible_duct_insertion_loss`, `elbow_insertion_loss`,
 <ScopeClaim status="not-covered" label="No cubierto">
 No se predice ningún dato de ventilador ni de unidad terminal allí donde lo
 publica el fabricante, y esta hoja espera la cifra publicada. No hay modelo de
-revestimiento disipativo: la estimación del silenciador de bafles es una
+revestimiento disipativo: la estimación del silenciador de láminas es una
 regresión de conducto revestido y la atenuación del plenum es la forma cerrada
 de Wells. Por
 encima del primer corte los modelos de elemento se sostienen solo sobre su

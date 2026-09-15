@@ -173,6 +173,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- The Spanish pages called three different objects *bafle*, and the word is
+  right for none of them. A vocabulary settles the radiating sense: UNE
+  21302-801:2001, the Spanish adoption of IEC 60050-801, prints entry 801-27-16
+  as *pantalla acústica* with *acoustic baffle* beside it on the same line, and
+  it is the only entry in the whole of chapter 801 that carries the English
+  word. So the rigid plane a radiator sits in is a *pantalla*: *pantalla
+  infinita* wherever the English says infinite baffle, *pistón en pantalla
+  infinita* for a baffled piston, *placa en pantalla* for a baffled plate.
+  Most of the tree already said it, and the figure titles and geometry drawings
+  all did. Two guides did not: `panel-sound-insulation` read *una placa con
+  bafles perpendiculares a sus bordes más que una enrasada en un bafle
+  infinito*, and `vibration-sound-power` had *un panel sin bafle* twice.
+
+  The standard behind that first guide disagrees, and the guide now says so
+  instead of hiding it. UNE-EN ISO 12354-1:2018 writes *una placa rodeada por
+  un bafle infinito en el mismo plano* on printed folio 42, where UNE-EN
+  12354-1:2000 wrote *una placa rodeada por una pantalla infinita* in the same
+  sentence on its folio 34. The same house, the same annex, the opposite word
+  two editions apart: that is a second translation, not a decision about a
+  term, and a vocabulary outweighs the prose of an annex. A line in the guide
+  names what the edition in force prints, so a reader who opens it recognises
+  the phrase.
+
+  The divider of a dissipative duct silencer is a different object and takes a
+  different word. No Spanish standard calls it a *bafle* except UNE-EN ISO
+  11820:1997, the oldest of the three adoptions involved. UNE-EN ISO 7235:2010,
+  which is the standard the library implements and measures against, defines
+  the test object in 3.19 as *una o varias láminas paralelas* and admits
+  *divisores* in its Note 2; its normative Annex E is titled *Mediciones en
+  silenciadores de láminas paralelas grandes*, and its table of symbols glosses
+  the gap width as *separación entre láminas* and the splitter thickness as
+  *espesor de las láminas*, which are exactly `airway_widths` and
+  `splitter_thickness`. So *silenciador de bafles*, which is what thirty-seven
+  places said, becomes *silenciador de láminas paralelas*, shortened to
+  *silenciador de láminas* and *unidad de láminas* once a page has named it,
+  and *lámina* for the part. `silencers` names *divisores* once, as the synonym
+  the standard admits, and `in-situ-noise-control` names the *silenciador a
+  bafles* of its own ISO 11820. Three figures are redrawn for it:
+  `silencer_selection`, `duct_attenuation_elements` and
+  `diagram_vdi2081_sheet`.
+
+  The fourth sense keeps the word, because Spanish gives it that word: the
+  vertical absorber hung from a ceiling is a *bafle* in Perera and Avilés
+  (Section 8.3.6) and in Carrión Isbert (Section 2.2.4.6), so the four places
+  in `absorption-measurement` and `suspended-ceilings` that use it that way are
+  left alone, one of them inside a quotation from the standard. The English is
+  untouched everywhere, and so is the `baffle` argument of
+  `radiation_efficiency`.
+
 - A figure drawn in Spanish could print an English decimal point on its
   frequency axis. `k_weighting_response(48000.0).plot(language="es")` labelled
   its lowest octave `31.5`, and so did every renderer whose logarithmic

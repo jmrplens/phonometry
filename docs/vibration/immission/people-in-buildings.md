@@ -87,6 +87,19 @@ rule still be regarded as met", the standard concludes, and the verdict says
 so, with `within_uncertainty` set for anyone who wants to read it more
 strictly.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings.svg" alt="Section through a dwelling with the triaxial transducer at the middle of the floor panel, x towards the source and a fourth channel beside it; the meter's chain and ten 30 second clocks with a maximum of 0.25 and a clock maximum r.m.s. of 0.23; the day split into 8 hours of night and 16 hours of day with the rest hours; and the order of the assessment against the guide values of a residential area, with the two formulae at the foot" width="100%"></picture>
+
+**How the measurement goes.** Use a DIN 45669-1 meter, checked before and after,
+and measure on the floor of the room itself: `z` usually at the middle of the
+floor panel, `x` and `y` along the outer walls with `x` towards the source where
+possible, the three at once unless the vibration is steady, and a fourth channel
+near the source. Set down loose, a transducer holds while the peaks stay at or
+below 3 m/s², its horizontals only to 40 Hz; on a carpet it stands on the spiked
+device, about 2,5 kg with the transducer, pressed and tapped through the
+covering. Capture the characteristic exposure, form `KB_Fmax` and, where it is
+needed, `KB_FTr` by day and by night with the rest hours apart, and report the
+positions, the coupling, the meter and its settings.
+
 ## 2. The assessment vibration severity
 
 `KB_FTr` is the clock maximum r.m.s. of each stretch of exposure, weighted by
@@ -326,9 +339,12 @@ line, a construction site beyond 78 working days, a hospital next to one, and
 whatever 6.2 sends to an individual assessment are decided case by case in
 the standard, and are not decided here.
 
-**No measurement.** Where the transducers go and how long a measurement runs
-are Clause 5 and DIN 45669-2; the quantities themselves come from the meter
-of DIN 45669-1, whose page forms them from a record.
+**The measurement is described, not checked.** Where the transducers go, how
+they are coupled and how long a measurement runs are Clause 5 and
+DIN 45669-2, set out above for the person measuring. Of all that, the library
+puts a number only to the loose-mounting limits, the wax limit of Table 1 and
+the mass loading of 7.2.4, on the meter's page; the quantities themselves come
+from the meter of DIN 45669-1, which forms them from a record.
 
 ## See also
 
@@ -351,8 +367,18 @@ of DIN 45669-1, whose page forms them from a record.
   the rules by source of 6.5 with Table 2 and the interpolation of Figure 3,
   the estimate of Clause 7 with Formulae (6) and (7) and Table 3, and Annex A
   with Formulae (A.1) to (A.4). Annex C is the oracle of the conformance rows.
-  The measurement report of Clause 8 is prose.
+  Clause 5 on the measurement and the report of Clause 8 are prose, set out in
+  the measurement section.
 - Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
   The meter whose KB_Fmax and clock maxima this standard judges, and the 5.6 Hz
-  corner frequency Formula (6) carries.
+  corner frequency Formula (6) carries. The three simultaneous channels and the
+  fourth near the source of 5.1.2, the interruption and back-erasure of the
+  clock maxima of 5.1.6.4, and the check before a measurement of 6.5.
+- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
+  Teil 2: Messverfahren* (DIN 45669-2:2005-06). The floor positions of 5.1.3,
+  the directions of 5.2, the couplings of 5.3.2 and 5.3.3 with Table 1, the
+  measuring time of 6.1, the disturbances of 7.2.2 and the report of Clause 9,
+  as the measurement section describes them. The loose-mounting limits, the wax
+  limit and the mass loading are implemented on the meter's page; the rest is
+  prose.

@@ -67,6 +67,40 @@ print(vibration.train_kb_fmax(kb_ftm).round(3))  # [0.055 0.07  0.609 0.851]
 print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
 ```
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring.svg" alt="Una sección por un ferrocarril y el edificio de al lado, una tira de pasos de tren y las fórmulas. Arriba a la izquierda, un tranvía circula en superficie y un metro en un túnel bajo él, con flechas a través del terreno hasta el edificio. En la planta alta, el recinto protegido, un captador está en el centro del vano del forjado con flechas para la vertical z y las horizontales x e y, marcado con 1. Un segundo captador está sobre la cimentación en el sótano, marcado con 3, y una flecha discontinua marcada con 2 sube desde él hasta el suelo del recinto. Tres recuadros a la derecha explican los números: el punto del suelo toma z, x e y donde se espera la vibración mayor, para z casi siempre el centro del vano; la transferencia al recinto es un factor lineal o una función de transferencia dependiente de la frecuencia, a ser posible medidos, con su incertidumbre solo como cota superior; el punto sustitutivo, en la cimentación para un seguimiento de semanas o meses, cumple la DIN 45669-2. Una línea debajo dice que desde un punto sustitutivo solo se demuestra KB Fmax por debajo de A o y KB FTr por debajo de A r. En el centro, un eje de tiempo de 0 a 380 segundos lleva cuatro pasos, un metro hacia el norte y otro hacia el sur con jorobas pequeñas y un tranvía hacia el este y otro hacia el oeste con jorobas grandes, cada uno dentro de un único intervalo discontinuo dure lo que dure. Debajo, por categoría: 14 pasos que dan 0,037 y 0,055, 14 que dan 0,047 y 0,070, 9 que dan 0,406 y 0,609, y 10 que dan 0,568 y 0,851, el mayor, que es la KB Fmax del ferrocarril. Un recuadro al pie lleva las fórmulas 5, 7, 8 y 6, con notas sobre los 1920 y 960 intervalos del día y de la noche, el cero para una categoría igual o inferior a 0,1, y el vibrómetro según la DIN 45669-1, para el que en ferrocarril suele bastar un límite inferior de 4 Hz" width="100%" />
+
+En el ejemplo 8 decide la vertical, medida en el centro del vano del
+forjado, y las 2,5 h registradas se dan por representativas. El apartado 5
+del borrador dice dónde va ese punto y qué vibrómetro hace falta, y añade
+algo que la edición de 1999 no tenía: un punto en la cimentación que puede
+sustituir al recinto durante un seguimiento.
+
+### Cómo se hace la medida
+
+Usa un vibrómetro según la DIN 45669-1; junto a un ferrocarril suele bastar
+un límite inferior de 4 Hz. Coloca y acopla los captadores como pide la
+DIN 45669-2, sobre el suelo del recinto protegido, donde se espera la
+vibración más fuerte: para la vertical, casi siempre el centro del vano del
+forjado. En un ferrocarril, haz toda la medida atendiendo en particular a la
+DIN 45672-1 y la DIN 45672-2. Mide `z` y las dos horizontales `x` e `y` en
+ángulo recto, casi siempre paralelas a los muros exteriores; las horizontales
+pueden tomarse también en una pared o junto a ella. Registra cada paso
+entero y quédate con un máximo por intervalo de cada uno, repartido en
+categorías sacadas del programa de explotación o del horario, normalmente al
+menos una por vía o sentido y tipo de tren. Alarga la medida lo bastante
+para recoger la exposición típica, y marca lo atípico.
+
+En un seguimiento de semanas o meses, un punto sustitutivo, en la cimentación
+por ejemplo, puede ocupar el lugar del recinto si cumple la DIN 45669-2 y su
+transferencia al recinto, un factor lineal o una función dependiente de la
+frecuencia, se determina, a ser posible midiendo, con su incertidumbre solo
+como cota superior; desde ahí solo se demuestra `KB_Fmax < A_o` y
+`KB_FTr < A_r`, nunca con seguridad una superación. Cuenta con hasta un 15 %
+de incertidumbre en toda magnitud `KB_F`, calcula `KB_Fmax` y `KB_FTr` con al
+menos tres decimales y redondéalos a dos según la DIN 1333, e informa del
+plano de situación con puntos y direcciones, el acoplamiento, el vibrómetro y
+sus ajustes, y las condiciones de funcionamiento.
+
 ## 2. Un factor de ponderación por el tipo de tren
 
 La intensidad de valoración de un ferrocarril es la fórmula (6): cada
@@ -322,6 +356,9 @@ larga duración, y el apartado 8, el informe, son texto.
   medir.
 - [Medida de la inmisión de vibración (DIN 45669-1)](/phonometry/es/vibration/immission/vibration-meter/):
   los máximos por intervalo de los que se forman las categorías.
+- [Vibración junto a una vía férrea (DIN 45672)](/phonometry/es/vibration/immission/railway-vibration/):
+  las dos partes que hay que atender en particular al medir en un
+  ferrocarril.
 - Referencia de API:
   [`vibration.immission.train_categories`](/phonometry/es/reference/api/vibration/train-categories/)
   y [`vibration.immission.people`](/phonometry/es/reference/api/vibration/people/).

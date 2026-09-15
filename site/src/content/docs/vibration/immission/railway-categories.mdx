@@ -66,6 +66,40 @@ print(vibration.train_kb_fmax(kb_ftm).round(3))  # [0.055 0.07  0.609 0.851]
 print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
 ```
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring.svg" alt="A section through a railway and the building beside it, a strip of train passages, and the formulae. Top left, a tram runs on the surface and a metro in a tunnel below it, with arrows through the ground to the building. In the upper storey, the room to be protected, a transducer stands at the middle of the floor span with arrows for the vertical z and the horizontals x and y, marked 1. A second transducer sits on the foundation in the basement, marked 3, and a dashed arrow marked 2 rises from it to the floor of the room. Three boxes at the right explain the numbers: the floor point takes z, x and y where the vibration is expected to be strongest, for z mostly the middle of the span; the transfer to the room is a linear factor or a frequency-dependent transfer function, preferably measured, with its uncertainty only as an upper bound; the substitute point, at the foundation for monitoring over weeks or months, is held to DIN 45669-2. A line beneath says that from a substitute point only KB Fmax below A o and KB FTr below A r can be shown. In the middle, a time axis from 0 to 380 seconds carries four passages, a metro running north and one running south with small humps and a tram running east and one running west with large ones, each inside one dashed interval however long it lasts. Under them, per category: 14 passages giving 0.037 and 0.055, 14 giving 0.047 and 0.070, 9 giving 0.406 and 0.609, and 10 giving 0.568 and 0.851, the largest, which is the KB Fmax of the railway. A box at the foot carries Formulae 5, 7, 8 and 6, with notes on the 1920 and 960 intervals of the day and the night, the zero for a category at or below 0.1, and the meter to DIN 45669-1, for which a 4 Hz lower limit is usually enough at a railway" width="100%" />
+
+In Example 8 the vertical, measured at the middle of the floor span, is the
+direction that decides, and the 2,5 h recorded are taken as representative.
+Clause 5 of the draft says where that point goes and what the meter has to
+be, and it adds what the 1999 edition did not have: a point at the
+foundation that may stand in for the room during a monitoring.
+
+### How the measurement goes
+
+Use a vibration meter to DIN 45669-1; beside a railway a lower frequency
+limit of 4 Hz is usually enough. Set up and couple the transducers as
+DIN 45669-2 asks, on the floor of the room to be protected, where the
+vibration is expected to be strongest: for the vertical, mostly the middle
+of the floor span. At a railway, carry the whole measurement out with
+particular regard to DIN 45672-1 and DIN 45672-2. Take `z` and the two
+horizontals `x` and `y` at right angles, mostly parallel to the outer walls;
+the horizontals may also be taken at or near a wall. Record every passage
+whole and keep one clock maximum from it, sorted into categories from the
+operating programme or timetable, normally at least one per track or
+direction and kind of train. Measure long enough to catch the typical
+exposure, and mark anything atypical.
+
+For monitoring over weeks or months, a substitute point, at the foundation
+for instance, may stand in for the room if it meets DIN 45669-2 and its
+transfer to the room, a linear factor or a frequency-dependent function, is
+determined, preferably by measurement, with its uncertainty taken only as an
+upper bound; from there only `KB_Fmax < A_o` and `KB_FTr < A_r` can be
+shown, never reliably an exceedance. Expect up to about 15 % uncertainty on
+any `KB_F` quantity, work `KB_Fmax` and `KB_FTr` to at least three decimals
+and round them to two as DIN 1333 does, and report the site plan with points
+and directions, the coupling, the meter and its settings, and the operating
+conditions.
+
 ## 2. A weighting factor for the kind of train
 
 The assessment vibration severity of a railway is Formula (6): each
@@ -317,6 +351,9 @@ Clause 8, the report, are text.
   measure yet.
 - [Measuring vibration immission (DIN 45669-1)](/phonometry/vibration/immission/vibration-meter/):
   the clock maxima the categories are formed from.
+- [Vibration next to a railway (DIN 45672)](/phonometry/vibration/immission/railway-vibration/):
+  the two parts a railway measurement is carried out with particular regard
+  to.
 - API reference:
   [`vibration.immission.train_categories`](/phonometry/reference/api/vibration/train-categories/)
   and [`vibration.immission.people`](/phonometry/reference/api/vibration/people/).

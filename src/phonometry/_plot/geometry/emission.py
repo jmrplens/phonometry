@@ -174,6 +174,8 @@ def plot_microphone_positions(
     :param kwargs: Forwarded to the microphone ``scatter``.
     :return: The 3-D axes.
     """
+    from ..._i18n import localize_axes
+
     _check_language(language)
     pts = np.asarray(positions, dtype=np.float64)
     if pts.ndim != 2 or pts.shape[1] != 3 or pts.shape[0] == 0:  # noqa: PLR2004
@@ -254,6 +256,10 @@ def plot_microphone_positions(
     ax.set_zlabel(_t(_AXIS_Z, language))
     ax.set_title(_t("Microphone positions", language))
     ax.set_box_aspect((1.0, 1.0, 0.55 if not full_sphere else 1.0))
+    # The only geometry drawing that keeps its axes on, so the only one with
+    # tick labels to localise. The rest end in ``_finish_geometry_axes``, which
+    # turns the axes off and dimensions the drawing with its own annotations.
+    localize_axes(ax, language)
     return ax
 
 

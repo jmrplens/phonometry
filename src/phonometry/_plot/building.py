@@ -374,7 +374,7 @@ def plot_sound_reduction(
             zorder=0,
             label=_t("coincidence plateau (A to B)", language),
         )
-    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_R_INDEX_LABEL, language))
     ax.set_title(f"{_t('Predicted sound insulation', language)} ({result.model})")
@@ -408,7 +408,7 @@ def plot_aperture_transmission(
     kwargs.setdefault("label", f"{result.kind} {_t('aperture $R$', language)}")
     ax.semilogx(freq, r, **kwargs)
     ax.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
-    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_R_INDEX_LABEL, language))
     ax.set_title(_t("Aperture sound transmission (Gomperts / Wilson-Soroka)", language))
@@ -839,7 +839,8 @@ def plot_radiated_power(
         labels = [f"{_t('Band', language)} {i + 1}" for i in range(n)]
     else:
         labels = [
-            _format_freq(f) for f in np.asarray(result.frequencies, dtype=np.float64)
+            _format_freq(f, language=language)
+            for f in np.asarray(result.frequencies, dtype=np.float64)
         ]
 
     opts: dict[str, Any] = {"color": "tab:red", "alpha": 0.8, "label": "$L_W$"}
@@ -990,7 +991,7 @@ def plot_installed_structure_borne(
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     if result.frequencies is not None:
-        format_frequency_axis(ax, float(x.min()), float(x.max()))
+        format_frequency_axis(ax, float(x.min()), float(x.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -1307,7 +1308,7 @@ def plot_in_situ_element(
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -1981,7 +1982,7 @@ def plot_wall_tie_coupling(
         zorder=0,
         label=_t("isolation gained by the tie", language),
     )
-    format_frequency_axis(ax, float(freq.min()), float(freq.max()))
+    format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Coupling loss factor $\\eta_{ij}$", language))
     stiffness = (
@@ -2031,13 +2032,13 @@ def _plot_improvement_spectrum(
             color=_C_MUTED,
             ls=":",
             lw=1.2,
-            label=f"{_t(marker_label, language)} = {_format_freq(marker_frequency)} Hz",
+            label=f"{_t(marker_label, language)} = {_format_freq(marker_frequency, language=language)} Hz",
         )
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_IMPROVEMENT_LABEL, language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
 
 
 def plot_tapping_force(
@@ -2087,7 +2088,7 @@ def plot_tapping_force(
         color=_C_SECONDARY,
         ls=":",
         lw=1.2,
-        label=rf"$f_\mathrm{{co}}$ = {_format_freq(result.cut_off_frequency)} Hz",
+        label=rf"$f_\mathrm{{co}}$ = {_format_freq(result.cut_off_frequency, language=language)} Hz",
     )
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Magnitude of the peak force $|F_n|$ [N]", language))
@@ -2098,7 +2099,7 @@ def plot_tapping_force(
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -2243,7 +2244,7 @@ def plot_lining_improvement(
         color=_C_REFERENCE,
         ls="",
         label=rf"$f_\mathrm{{o}}$ = "
-        rf"{_format_freq(result.resonance_frequency)} Hz",
+        rf"{_format_freq(result.resonance_frequency, language=language)} Hz",
     )
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Sound reduction index improvement [dB]", language))
@@ -2253,7 +2254,7 @@ def plot_lining_improvement(
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")
-    format_frequency_axis(ax, float(sweep.min()), float(sweep.max()))
+    format_frequency_axis(ax, float(sweep.min()), float(sweep.max()), language=language)
     localize_axes(ax, language)
     return ax
 

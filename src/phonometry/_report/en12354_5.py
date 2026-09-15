@@ -52,6 +52,7 @@ from ._sound_power_fiche import (
     band_labels,
     d1,
     level_limit_verdict,
+    nominal_bands,
     power_value_table,
     render_sound_power_fiche,
 )
@@ -79,10 +80,9 @@ def _basis(language: str = "en") -> str:
 def _caption(result: InstalledSourceResult, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
-    total = np.atleast_1d(np.asarray(result.total_level, dtype=np.float64))
     if freqs is None:
         return t("Per-path and total normalised structure-borne SPL", language)
-    _, fraction = band_labels(freqs, total.size)
+    _, fraction = nominal_bands(freqs)
     if fraction == 1:
         return t("Octave-band normalised structure-borne SPL by path", language)
     return t("One-third-octave-band normalised structure-borne SPL by path", language)
@@ -118,7 +118,7 @@ def _value_table(
     total = np.atleast_1d(np.asarray(result.total_level, dtype=np.float64))
     paths = np.atleast_2d(np.asarray(result.path_levels, dtype=np.float64))
     n = total.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
 
     header: list[str] = [t("f [Hz]", language), "L<sub>Ws,inst</sub> [dB]"]
     show_paths = verbose and paths.shape[0] <= _MAX_PATH_COLUMNS

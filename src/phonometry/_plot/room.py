@@ -301,7 +301,8 @@ def _band_labels(
     centers = np.asarray(frequency, dtype=np.float64)
     fraction = _infer_band_fraction(centers)
     labels = [
-        _format_freq(_nominal_freq_for_band(float(f), float(fraction))) for f in centers
+        _format_freq(_nominal_freq_for_band(float(f), float(fraction)), language)
+        for f in centers
     ]
     return labels, True
 
@@ -789,7 +790,7 @@ def plot_decay_curve(
     band = result.band
     title = _t("ISO 3382 Schroeder decay curve", language)
     if band is not None:
-        fb = _format_freq(float(band))
+        fb = _format_freq(float(band), language)
         title += f"  (banda {fb} Hz)" if language == "es" else f"  ({fb} Hz band)"
     ax.set_title(title)
     ax.grid(visible=True, alpha=0.3)
@@ -888,7 +889,7 @@ def plot_noise_criterion(
     :param kwargs: Forwarded to the measured-spectrum :meth:`plot`.
     :return: The axes.
     """
-    from .._i18n import localize_axes
+    from .._i18n import decimal_comma, localize_axes
     from ..room.noise_criteria import NC_CURVES, NC_INDICES, OCTAVE_BANDS
 
     ax = ax if ax is not None else _new_axes()
@@ -926,12 +927,14 @@ def plot_noise_criterion(
             zorder=4,
             label=(
                 f"{_t('Governing band', language)} "
-                f"({_format_freq(result.governing_frequency)})"
+                f"({_format_freq(result.governing_frequency, language)})"
             ),
         )
     _freq_axis(ax, OCTAVE_BANDS, language=language)
     ax.set_ylabel(_t(_OCTAVE_BAND_SPL_LABEL, language))
-    ax.set_title(f"ANSI/ASA S12.2 {result.label}")
+    # The designation is the result's own ``:g`` label, so an interpolated
+    # rating and a 31.5 Hz governing band both carry a decimal point.
+    ax.set_title(f"ANSI/ASA S12.2 {decimal_comma(result.label, language)}")
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
     localize_axes(ax, language)
@@ -1247,7 +1250,9 @@ def plot_excitation(
         ax_f.set_ylabel(_t("Magnitude [dB]", language))
         ax_f.set_title(_t("Magnitude spectrum (flat)", language))
         ax_f.grid(visible=True, which="both", alpha=0.3)
-        format_frequency_axis(ax_f, float(freqs[1]), float(freqs[-1]))
+        format_frequency_axis(
+            ax_f, float(freqs[1]), float(freqs[-1]), language=language
+        )
         localize_axes(ax_f, language)
         return axes
 
@@ -1342,6 +1347,7 @@ def plot_image_source_reflectogram(
         )
         cbar = ax.figure.colorbar(sc, ax=ax, pad=0.02)
         cbar.set_label(_t("Reflection order", language))
+        localize_axes(cbar.ax, language)
     ax.vlines(ms[order0], -120.0, level[order0], color=_C_PRIMARY, lw=1.6, zorder=4)
     kwargs.setdefault("label", _t("Direct sound", language))
     ax.plot(ms[order0], level[order0], "o", color=_C_PRIMARY, ms=7, zorder=5, **kwargs)
@@ -1532,7 +1538,10 @@ def plot_shaped_sweep(
         axs.grid(visible=True, which="both", alpha=0.3)
         axs.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
         format_frequency_axis(
-            axs, max(f1 / 4.0, float(freqs_w[1])), min(2.0 * f2, fs / 2.0)
+            axs,
+            max(f1 / 4.0, float(freqs_w[1])),
+            min(2.0 * f2, fs / 2.0),
+            language=language,
         )
         axs.set_xlim(max(f1 / 4.0, float(freqs_w[1])), min(2.0 * f2, fs / 2.0))
         localize_axes(axs, language)

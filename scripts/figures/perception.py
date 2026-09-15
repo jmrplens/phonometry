@@ -55,7 +55,7 @@ def generate_equal_loudness_contours(output_dir: str) -> None:
     _, ax = plt.subplots(figsize=(10, 7))
     # The result's own .plot() draws the contour family plus the hearing
     # threshold on a 1k/2k-labelled log frequency axis (ISO 226:2023 Formula 1).
-    psychoacoustics.equal_loudness_contours().plot(ax=ax)
+    psychoacoustics.equal_loudness_contours().plot(ax=ax, language=_LANG)
     # Each contour is labelled at its own 1 kHz crossing, where SPL = phon by
     # definition, so the line runs straight through the middle of the letters
     # that name it. Back those with the documentation chip -- the pad is the
@@ -693,7 +693,7 @@ def generate_sharpness_pair_and_targets(output_dir: str) -> None:
     ax2.set_ylabel("Sharpness $S$ [acum]")
     ax2.set_ylim(0.0, 3.4)
     ax2.set_title("DIN 45692 Table A.2, 250 Hz to 4 kHz", pad=10)
-    format_frequency_axis(ax2)
+    format_frequency_axis(ax2, language=_LANG)
     ax2.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax2.set_axisbelow(True)
     ax2.legend(loc="upper left", fontsize=9)
@@ -794,7 +794,7 @@ def generate_tnr_pr_comparison(output_dir: str) -> None:
     ax.set_ylabel("Ratio [dB]")
     ax.set_ylim(0.0, 24.0)
     ax.set_title("One 250 Hz fan tone, two criteria", pad=10)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="upper right", fontsize=9)
@@ -909,7 +909,7 @@ def generate_two_tone_separation(output_dir: str) -> None:
         "(ISO/PAS 20065 Formula 19)",
         pad=12,
     )
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="upper left", fontsize=9)
@@ -1154,7 +1154,7 @@ def generate_erb_bandwidth(output_dir: str) -> None:
     ax.set_xlabel("Centre frequency [Hz]")
     ax.set_ylabel(r"Equivalent rectangular bandwidth $\mathrm{ERB}_\mathrm{N}$ [Hz]")
     ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
-    format_frequency_axis(ax, 50.0, 16000.0)
+    format_frequency_axis(ax, 50.0, 16000.0, language=_LANG)
     from matplotlib.ticker import FixedFormatter, FixedLocator
 
     y_ticks = [10.0, 20.0, 50.0, 100.0, 200.0, 500.0, 1000.0, 2000.0]

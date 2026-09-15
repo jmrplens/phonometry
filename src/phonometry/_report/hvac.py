@@ -42,6 +42,7 @@ from ._noise_control_fiche import (
     band_labels,
     d1,
     mean_finite,
+    nominal_bands,
     performance_verdict,
     power_value_table,
     render_noise_control_fiche,
@@ -167,8 +168,7 @@ def _element_label(result: HvacSpectrumResult, language: str = "en") -> str:
 
 def _caption(result: HvacSpectrumResult, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
-    n = np.asarray(result.values, dtype=np.float64).size
-    _, fraction = band_labels(getattr(result, "frequencies", None), n)
+    _, fraction = nominal_bands(getattr(result, "frequencies", None))
     power = _is_power(result)
     if fraction == 1:
         return (
@@ -203,7 +203,7 @@ def _value_table(
     """
     values = np.asarray(result.values, dtype=np.float64)
     n = values.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
     power = _is_power(result)
     quantity_header = "L<sub>W</sub> [dB]" if power else "D [dB]"
 

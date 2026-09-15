@@ -539,7 +539,8 @@ def _plot_hms_time_and_heatmap(
         mesh = ax_heat.pcolormesh(
             time, bark, spec_vs_time.T, cmap="magma", shading="auto"
         )
-        ax_heat.figure.colorbar(mesh, ax=ax_heat, label=heat_label)
+        cbar = ax_heat.figure.colorbar(mesh, ax=ax_heat, label=heat_label)
+        localize_axes(cbar.ax, language)
     ax_heat.set_xlabel(_t(_AXIS_TIME, language))
     ax_heat.set_ylabel(_t(_AXIS_BARK_HMS, language))
     localize_axes(ax_time, language)
@@ -822,7 +823,7 @@ def plot_tone_assessment(
     )
     ax.set_xlabel(_t(_AXIS_FREQUENCY, language))
     ax.set_ylabel(_t(ylabel, language))
-    format_frequency_axis(ax, *_TONE_RANGE_HZ)
+    format_frequency_axis(ax, *_TONE_RANGE_HZ, language=language)
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="major", alpha=0.3)
     ax.set_axisbelow(True)
@@ -993,7 +994,7 @@ def plot_tone_audibility_levels(
     ax.set_xlabel(_t(_AXIS_FREQUENCY, language))
     ax.set_ylabel(_t("Sound pressure level [dB]", language))
     ax.set_title(_t("ISO 1996-2 tone-audibility analysis", language))
-    format_frequency_axis(ax, float(f1.min()), float(f2.max()))
+    format_frequency_axis(ax, float(f1.min()), float(f2.max()), language=language)
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="major", axis="y", alpha=0.3)
     ax.set_axisbelow(True)
@@ -1056,7 +1057,7 @@ def plot_equal_loudness_contours(
     )
 
     ax.set_xlim(fmin, fmax)
-    format_frequency_axis(ax, fmin, fmax)
+    format_frequency_axis(ax, fmin, fmax, language=language)
     ax.set_xlabel(_t(_AXIS_FREQUENCY, language))
     ax.set_ylabel(_t("Sound pressure level [dB re 20 µPa]", language))
     ax.set_title(_t("ISO 226:2023 equal-loudness contours", language))

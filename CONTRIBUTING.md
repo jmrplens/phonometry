@@ -399,6 +399,65 @@ reads the value Python builds rather than the text of the file, which is the
 only way to tell the two apart. The site's own `check:math` catches it too,
 after a full build of every page.
 
+### 7b. Passing the language on
+
+A result's `.plot(language="es")` reaches the page in Spanish only if every
+helper on the way is handed the language, and every one of them defaults to
+English. A call that drops it raises nothing: the Spanish figure ships with an
+English label, or with `31.5` on its frequency axis where it should read
+`31,5`. The axis is where it cannot be caught later. `format_frequency_axis`
+writes the band centres as fixed strings, which `localize_axes` will not
+overwrite, so the comma can only be written by the call that makes the labels.
+The rule is therefore at the call: a function that has a language in scope
+passes it to every helper that takes one.
+
+A plot function ends on `localize_axes(ax, language)`, and it needs one call
+per axes it built, not one per figure: a twin axis, a colorbar and the `z` of a
+3-D panel each carry a formatter of their own, and each shipped in English
+beside a panel already in Spanish. A panel the save-time pass of
+`scripts/figures/i18n.py` cannot reach, a zoom inset made with
+`Axes.inset_axes` (a child of its host panel rather than of the figure) or a
+contour colorbar (spaced by its boundaries, so its scale is not linear), is
+localised by the generator with `figures.i18n.localize_panel`.
+
+```bash
+python scripts/check_language_forwarding.py   # or: make language-forwarding
+```
+
+The gate indexes every function and method of `src/phonometry` and `scripts`
+that takes a `language` parameter and prints `file:line` and the helper for
+each call that does not forward it, from a function that names `language` as
+a parameter or a local (or one nested in it), or from any figure generator in
+`scripts/figures`, which reads the language of its pass from `_LANG`. It
+follows a helper through the imports, a result's `.plot()` through the class of
+its receiver, and a `**kwargs` through what it can carry; a helper that takes
+`**kwargs` and hands them to one that takes the language is held to the rule
+too, and so is a helper reached through a local alias or a
+`functools.partial`. Three shapes stay out of reach and the gate says so rather
+than claiming them: a callable pulled out of a mapping, one reached by
+`getattr`, and one passed in as a `Callable` parameter. Writing `language="en"`
+in place of the caller's language counts as dropping it. A call that must stay
+English on purpose goes in `EXEMPT` at the top of the script with its reason,
+keyed by its line so one approved call cannot cover a second one written beside
+it; an entry whose call has since learned to forward the language, or that has
+moved, fails, so the table cannot rot.
+
+The untyped-receiver fallback needs every method of a name to take the
+language, so one namesake without it switches the name off for every call. That
+state is now a failure of its own, naming the outlier, unless the name belongs
+to two unrelated things and is declared in `MIXED_NAMESAKES`.
+
+The figures are read from the other end as well, after they are drawn:
+
+```bash
+python scripts/check_figure_decimal_point.py   # or: make figure-decimal-point
+```
+
+It reads every committed `*_es.svg` and fails on a tick label that is a number
+with a point in it, whichever pass was meant to write the comma. That is the
+gate that closes the class: a panel none of the three passes reached shipped
+`31.5` beside `52,4` in the same figure, and nothing else could see it.
+
 ### 8. Writing the code fences of a documentation page
 
 The Python fences of one page form **one sequential example**: a later fence

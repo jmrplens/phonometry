@@ -281,7 +281,7 @@ def plot_sii_procedure(
     # No explicit range: the tick set follows the axis limits, so overlaying a
     # second procedure that reaches lower or higher relabels the whole axis
     # instead of clipping the ticks to the first one drawn.
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     ax.grid(visible=True, alpha=0.3)

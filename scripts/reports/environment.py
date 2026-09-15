@@ -212,9 +212,20 @@ class _WithSourceEmission:
         self._result = result
         self._emission = emission
 
-    def report(self, path: str, *, metadata: ReportMetadata | None = None) -> str:
+    def report(
+        self,
+        path: str,
+        *,
+        metadata: ReportMetadata | None = None,
+        language: str = "en",
+    ) -> str:
         return str(
-            self._result.report(path, metadata=metadata, source_emission=self._emission)
+            self._result.report(
+                path,
+                metadata=metadata,
+                language=language,
+                source_emission=self._emission,
+            )
         )
 
 

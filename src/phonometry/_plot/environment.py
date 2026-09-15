@@ -203,7 +203,7 @@ def plot_atmospheric_attenuation(
     )
     fmin, fmax = float(freqs.min()), float(freqs.max())
     ax.set_xlim(fmin, fmax)
-    format_frequency_axis(ax, fmin, fmax)
+    format_frequency_axis(ax, fmin, fmax, language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(r"Attenuation coefficient $\alpha$ [dB/km]", language))
     ax.set_title(_t("ISO 9613-1 atmospheric attenuation", language))
@@ -745,7 +745,8 @@ def plot_atmospheric_pe(
             **kwargs,
         },
     )
-    ax.figure.colorbar(img, ax=ax, label=_t(_FREE_FIELD_LABEL, language))
+    cbar = ax.figure.colorbar(img, ax=ax, label=_t(_FREE_FIELD_LABEL, language))
+    localize_axes(cbar.ax, language)
     ax.plot(
         [0.0],
         [result.source_height],
@@ -1099,6 +1100,7 @@ def plot_road_device_rating(
     ax.legend(handles + extra[0], labels + extra[1], loc="best", fontsize="small")
     ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
+    localize_axes(spectrum, language)
     return ax
 
 

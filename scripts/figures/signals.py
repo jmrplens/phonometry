@@ -23,7 +23,7 @@ from scipy import signal as scipy_signal
 from phonometry import filters
 from phonometry._plot.common import format_frequency_axis, theme_fill
 
-from .i18n import _fmt_minus
+from .i18n import _LANG, _fmt_minus, localize_panel
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -795,7 +795,7 @@ def generate_parametric_eq_family(output_dir: str) -> None:
         xlim=(20, 20000),
         ylim=(-27, 9),
     )
-    format_frequency_axis(ax, 20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0, language=_LANG)
     ax.set_ylabel("Magnitude [dB]")
     ax.legend(loc="lower center", fontsize=9, ncols=2)
     save_figure(output_dir, "parametric_eq_family.png")
@@ -1452,7 +1452,7 @@ def generate_weighting_class_mask(output_dir: str) -> None:
     ax.set_xscale("log")
     ax.set_xlim(10, 20000)
     ax.set_ylim(floor, ceil)
-    format_frequency_axis(ax, 10, 20000)
+    format_frequency_axis(ax, 10, 20000, language=_LANG)
     ax.set_title("Weighting Deviation vs IEC 61672-1:2013 Table 3 Limits", pad=12)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Deviation from design goal [dB]")
@@ -1663,7 +1663,7 @@ def generate_slm_third_octave(output_dir: str) -> None:
     ax.set_ylim(-25, 78)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-")
     ax.grid(which="minor", color=COLOR_GRID, linestyle=":", alpha=0.4)
-    format_frequency_axis(ax, 11.0, 23000.0)
+    format_frequency_axis(ax, 11.0, 23000.0, language=_LANG)
     ax.legend(loc="lower left", fontsize=9)
     save_figure(output_dir, "slm_third_octave.png")
     plt.close()
@@ -2219,7 +2219,7 @@ def generate_c_minus_a_spectrum(output_dir: str) -> None:
         ax.set_ylim(-5, 82)
         ax.grid(which="major", color=COLOR_GRID, linestyle="-")
         ax.grid(which="minor", color=COLOR_GRID, linestyle=":", alpha=0.4)
-        format_frequency_axis(ax, 11.0, 23000.0)
+        format_frequency_axis(ax, 11.0, 23000.0, language=_LANG)
         ax.legend(loc="upper right", fontsize=9)
     axes[0].set_ylabel("Band level [dB]")
     fig.tight_layout()
@@ -2307,6 +2307,7 @@ def generate_pole_migration(output_dir: str) -> None:
     inset.set_ylim(-0.0045, 0.0045)
     inset.tick_params(labelsize=7)
     inset.set_title("zoom at $z = 1$", fontsize=8, pad=3)
+    localize_panel(inset)
     indicator = ax_a.indicate_inset_zoom(inset, edgecolor=COLOR_FG)
     # Of the two leaders matplotlib picks, the one from the lower-left corner
     # runs along the inset's own tick labels on its way to z = 1; the
@@ -2344,7 +2345,7 @@ def generate_pole_migration(output_dir: str) -> None:
     ax_c.set_ylabel("1 − (largest pole radius)")
     ax_c.grid(which="both", color=COLOR_GRID, linestyle="-")
     ax_c.legend(loc="lower right", fontsize=8)
-    format_frequency_axis(ax_c, 11.0, 23000.0, minor=None)
+    format_frequency_axis(ax_c, 11.0, 23000.0, minor=None, language=_LANG)
     # Eleven octave labels over a third of this figure's width: at the body
     # size "125 250 500" closes up into a single number.
     ax_c.tick_params(axis="x", labelsize=8)
@@ -2372,7 +2373,7 @@ def generate_parametric_eq_cascade(output_dir: str) -> None:
         ],
     )
     result = eq.response(f_min=20.0, f_max=20000.0)
-    result.plot(show_sections=True)
+    result.plot(show_sections=True, language=_LANG)
     # The result object drew through pyplot, so the figure it made is the
     # current one; asking the axes for it hands back a union this cannot use.
     fig = plt.gcf()
@@ -2489,7 +2490,7 @@ def generate_class_mask_architectures(output_dir: str) -> None:
             design=filters.FilterDesign(filter_type=ftype),
         )
         result = filters.verify_filter_class(bank)
-        result.plot(ax=ax)
+        result.plot(ax=ax, language=_LANG)
         verdict = result.overall_class
         ax.set_title(f"{title}   (overall_class = {verdict})", pad=10)
     fig.suptitle(
@@ -2560,7 +2561,7 @@ def generate_leakage_floor(output_dir: str) -> None:
     ax.set_ylim(5, 108)
     ax.grid(which="major", color=COLOR_GRID, linestyle="-")
     ax.grid(which="minor", color=COLOR_GRID, linestyle=":", alpha=0.4)
-    format_frequency_axis(ax, 11.0, 23000.0)
+    format_frequency_axis(ax, 11.0, 23000.0, language=_LANG)
     ax.legend(loc="upper right", fontsize=9)
     save_figure(output_dir, "filter_leakage_floor.png")
     plt.close()
@@ -2784,7 +2785,7 @@ def generate_survey_channel_average(output_dir: str) -> None:
     ax_b.set_ylabel("Energy minus\ndB average [dB]")
     ax_b.grid(which="major", color=COLOR_GRID, linestyle="-")
     ax_b.grid(which="minor", color=COLOR_GRID, linestyle=":", alpha=0.4)
-    format_frequency_axis(ax_b, 22.0, 12000.0)
+    format_frequency_axis(ax_b, 22.0, 12000.0, language=_LANG)
 
     fig.tight_layout()
     save_figure(output_dir, "survey_channel_average.png")

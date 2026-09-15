@@ -128,6 +128,16 @@ mathtext:
 docstring-math:
 	$(PYTHON) scripts/check_docstring_math.py
 
+# Every helper that takes a `language` defaults to English, so a call that does
+# not pass the caller's on raises nothing and puts an English string or decimal
+# point into the Spanish figure. On a log frequency axis nothing repairs it:
+# localize_axes skips that axis because its labels are fixed strings by then.
+# This reads the calls, following each helper through the imports, a result's
+# .plot() through the class of its receiver, and a **kwargs through what it can
+# carry. Static and dependency-free.
+language-forwarding:
+	$(PYTHON) scripts/check_language_forwarding.py
+
 # ISO 80000-2 sets a subscript by what it is, so a glyph pair can honestly take
 # both slopes: the z of the ISO 9613-2 barrier screening is a path-length
 # difference and the z of the ISO 2631-5 dose is a direction, and both
@@ -147,6 +157,17 @@ subscripts:
 # on a Spanish value that still has a point the pass will never reach.
 decimal-comma:
 	$(PYTHON) scripts/check_decimal_comma.py
+
+# The same defect read from the other end: not the labels a pass might miss but
+# the ones it did miss, in the figures as committed. Three machines write the
+# Spanish decimal comma (the library's localize_axes, format_frequency_axis
+# where a caller hands it the language, and the save-time pass), and a panel
+# none of them reached -- a zoom inset, a contour colorbar, the z of a 3-D
+# array, a log axis of distances -- shipped `31.5` beside `52,4` with every
+# gate green. This reads the committed SVGs, where matplotlib records the text
+# it drew, and fails on a label that is a number with a point in it.
+figure-decimal-point:
+	$(PYTHON) scripts/check_figure_decimal_point.py
 
 # The Python fences of a documentation page form one sequential example, and
 # one shipped page used names its own figure block defined further down --
@@ -217,6 +238,7 @@ figures:
 	$(MAKE) figure-contrast
 	$(MAKE) figure-language
 	$(MAKE) figure-annotations
+	$(MAKE) figure-decimal-point
 	$(PYTHON) scripts/check_figures.py
 
 # Regenerate the Tier-1 documentation animations (WebM for the site, GIF for
@@ -415,5 +437,6 @@ check: lint security test
 	figure-annotations figures reports \
 	animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
-	snippets snippets-static claims subscripts docstring-math fence-names decimal-comma \
-	control-characters hazards dead-constants conformance-rows parameter-units
+	snippets snippets-static claims subscripts docstring-math language-forwarding \
+	fence-names decimal-comma figure-decimal-point control-characters hazards dead-constants \
+	conformance-rows parameter-units

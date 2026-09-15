@@ -96,7 +96,7 @@ _STRINGS: dict[str, str] = {
     "Underwater propagation loss": "Pérdida de propagación submarina",
     "Signal excess": "Exceso de señal",
     r"Detection limit ($\mathrm{SE}$ = 0)": r"Límite de detección ($\mathrm{SE}$ = 0)",
-    "Figure of merit": "Cifra de mérito",
+    "Figure of merit": "Figura de mérito",
     "Signal excess [dB]": "Exceso de señal [dB]",
     "Sonar equation": "Ecuación del sonar",
     "Bottom loss": "Pérdida en el fondo",
@@ -146,7 +146,7 @@ _STRINGS: dict[str, str] = {
     "Weighted exposure vs criteria": "Exposición ponderada frente a criterios",
     "Single-strike SEL per band": "SEL por banda de un golpe",
     "Detection range": "Alcance de detección",
-    "Propagation loss vs figure of merit": "Pérdida de propagación frente a cifra de mérito",
+    "Propagation loss vs figure of merit": "Pérdida de propagación frente a figura de mérito",
 }
 
 
@@ -208,7 +208,7 @@ def plot_ship_source_level(
     twin.set_ylabel(_t(r"Surface correction $\Delta L$ [dB]", language))
     # After twinx() (it re-initialises the shared x-axis with the default log
     # locator) so the octave-band labelling is not reset back to 10^n ticks.
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
 
     lines, labels = ax.get_legend_handles_labels()
     tlines, tlabels = twin.get_legend_handles_labels()
@@ -219,6 +219,7 @@ def plot_ship_source_level(
         rf"$c$ = {format_number(result.sound_speed, language, decimals=0)} m/s)"
     )
     localize_axes(ax, language)
+    localize_axes(twin, language)
     return ax
 
 
@@ -582,7 +583,7 @@ def plot_ambient_noise(
     ax.set_title(_t("Ocean ambient noise", language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    format_frequency_axis(ax, float(f.min()), float(f.max()))
+    format_frequency_axis(ax, float(f.min()), float(f.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -618,7 +619,7 @@ def plot_ship_traffic_spectrum(
     ax.set_title(_t("Ship traffic source level", language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    format_frequency_axis(ax, float(f.min()), float(f.max()))
+    format_frequency_axis(ax, float(f.min()), float(f.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -791,6 +792,7 @@ def plot_eigenrays(
             )
             cbar = ax.figure.colorbar(sc, ax=ax, pad=0.02)
             cbar.set_label(_t("Boundary reflections", language))
+            localize_axes(cbar.ax, language)
         if np.any(direct):
             ax.vlines(t[direct], base, loss[direct], color=_C_PRIMARY, lw=1.4, zorder=4)
             kwargs.setdefault("label", _t("Refracted or direct", language))
@@ -864,7 +866,8 @@ def _plot_loss_field(
             **kwargs,
         },
     )
-    ax.figure.colorbar(img, ax=ax, label=_t(_PROPAGATION_LOSS_LABEL, language))
+    cbar = ax.figure.colorbar(img, ax=ax, label=_t(_PROPAGATION_LOSS_LABEL, language))
+    localize_axes(cbar.ax, language)
     ax.set_xlabel(_t(_RANGE_KM_LABEL, language))
     ax.set_ylabel(_t(_DEPTH_LABEL, language))
     ax.set_title(_t(title, language))
@@ -966,7 +969,9 @@ def _spectrum_axes(
     ax.set_title(_t(title, language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.set_axisbelow(True)
-    format_frequency_axis(ax, float(np.min(freqs)), float(np.max(freqs)))
+    format_frequency_axis(
+        ax, float(np.min(freqs)), float(np.max(freqs)), language=language
+    )
     return ax
 
 

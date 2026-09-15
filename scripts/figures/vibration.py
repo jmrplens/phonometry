@@ -187,7 +187,7 @@ def generate_mechanical_mobility(output_dir: str) -> None:
     ax.set_ylabel("Normalized FRF magnitude")
     ax.set_title("ISO 7626-1 Mechanical Mobility FRFs", pad=12)
     ax.set_xlim(freq[0], freq[-1])
-    format_frequency_axis(ax, float(freq[0]), float(freq[-1]))
+    format_frequency_axis(ax, float(freq[0]), float(freq[-1]), language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.legend(loc="lower center", fontsize=9, ncol=2)
 
@@ -364,7 +364,7 @@ def generate_transfer_stiffness(output_dir: str) -> None:
     )
     low.set_ylabel(r"$\eta$")
     low.set_xlabel(LABEL_FREQ_HZ)
-    format_frequency_axis(low, float(freq[0]), float(freq[-1]))
+    format_frequency_axis(low, float(freq[0]), float(freq[-1]), language=_LANG)
     low.legend(loc="upper left", fontsize=9)
     low.text(
         0.985,
@@ -467,8 +467,8 @@ def generate_rigid_mass_calibration(output_dir: str) -> None:
     ax_bot.set_xlim(freq[0], freq[-1])
     ax_bot.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
 
-    format_frequency_axis(ax_top, float(freq[0]), float(freq[-1]))
-    format_frequency_axis(ax_bot, float(freq[0]), float(freq[-1]))
+    format_frequency_axis(ax_top, float(freq[0]), float(freq[-1]), language=_LANG)
+    format_frequency_axis(ax_bot, float(freq[0]), float(freq[-1]), language=_LANG)
 
     info = [
         "calibration block $m$ = 10 kg",
@@ -741,7 +741,7 @@ def generate_multiple_shock(output_dir: str) -> None:
     ax_h.set_title("Seat-to-spine transfer function", pad=10)
     ax_h.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_h.set_axisbelow(True)
-    format_frequency_axis(ax_h, float(freq[0]), float(freq[-1]))
+    format_frequency_axis(ax_h, float(freq[0]), float(freq[-1]), language=_LANG)
     ax_h.legend(loc="upper right")
 
     # --- Right: injury probability Pi(R) with the Annex C male example. ---
@@ -1786,7 +1786,7 @@ def generate_mobility_result_lines(output_dir: str) -> None:
     low.set_yticks([-90, -45, 0, 45, 90])
     low.set_ylabel("Phase [degrees]")
     low.set_xlabel(LABEL_FREQ_HZ)
-    format_frequency_axis(low, float(f[0]), float(f[-1]))
+    format_frequency_axis(low, float(f[0]), float(f[-1]), language=_LANG)
     low.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     low.set_axisbelow(True)
     low.legend(loc="lower left", fontsize=9)
@@ -1885,7 +1885,7 @@ def generate_machine_fault_families(output_dir: str) -> None:
             for order, ratio in enumerate(side, start=1):
                 spec.add(k * gmf - order * shaft, height * ratio)
                 spec.add(k * gmf + order * shaft, height * ratio)
-        gear.within(1.0, 2400.0).plot(spectrum=spec, ax=ax)
+        gear.within(1.0, 2400.0).plot(spectrum=spec, ax=ax, language=_LANG)
         _relabel_spectrum(ax, title)
         # The block goes below the shaft end of the axis, the only stretch
         # wide enough for it: the three mesh clusters carry their dashed
@@ -1918,7 +1918,7 @@ def generate_machine_fault_families(output_dir: str) -> None:
     spec.add(motor["fsh"], 1.6e-3, width=3.0)  # rotor slot
     for sign in (-1.0, 1.0):  # ± shaft rate
         spec.add(motor["fsh"] + sign * motor["1x"], 5.5e-4, width=3.0)
-    motor.plot(spectrum=spec, ax=ax)
+    motor.plot(spectrum=spec, ax=ax, language=_LANG)
     _relabel_spectrum(ax, "Induction motor: 1x, 2x, 2fe and the rotor-slot family")
     ax.set_yscale("log")
     # Five decades and a little: the 1x line is the tallest thing in the panel
@@ -1943,7 +1943,7 @@ def generate_machine_fault_families(output_dir: str) -> None:
     spec.add(fan["BPF"], 1.0, width=0.8)
     spec.add(fan["lobe n=1 m=2"], 0.62, width=0.8)
     spec.add(fan["lobe n=1 m=10"], 0.07, width=0.8)
-    fan.plot(spectrum=spec, ax=ax)
+    fan.plot(spectrum=spec, ax=ax, language=_LANG)
     _relabel_spectrum(ax, "Ducted fan: the blade rate and its rotating lobe patterns")
     # Each block is centred in the column between two of the fan's lines: the
     # first between the shaft and the two-lobe pattern, the second between that
@@ -2201,7 +2201,7 @@ def generate_infinite_mobilities(output_dir: str) -> None:
     low.set_ylabel("Phase [degrees]")
     low.set_xlabel(LABEL_FREQ_HZ)
     low.set_xlim(float(freq[0]), float(freq[-1]))
-    format_frequency_axis(low, float(freq[0]), float(freq[-1]))
+    format_frequency_axis(low, float(freq[0]), float(freq[-1]), language=_LANG)
     low.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     low.set_axisbelow(True)
     fig.align_ylabels()
@@ -2491,7 +2491,7 @@ def generate_machine_vibration_zones(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Allowable r.m.s. velocity (mm/s)")
     ax.set_title("Evaluation Zones as a Frequency-Shaped Velocity Criterion", pad=12)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=_LANG)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
     ax.legend(loc="upper right", fontsize=8, ncol=2)
@@ -3171,7 +3171,7 @@ def generate_gear_unit_rating_curves(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Peak-to-peak displacement (µm)")
     ax.set_title("Shaft Displacement: Flat, Then 10 dB per Decade", pad=10)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=_LANG)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=8)
@@ -3208,7 +3208,7 @@ def generate_gear_unit_rating_curves(output_dir: str) -> None:
     ax2.set_ylabel("R.m.s. velocity (mm/s)")
     ax2.set_title("Housing Velocity: Formula (C.1) With Part 9's Corners", pad=10)
     ax2.set_ylim(0.4, 46.0)
-    format_frequency_axis(ax2)
+    format_frequency_axis(ax2, language=_LANG)
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax2.set_axisbelow(True)
     ax2.legend(loc="lower left", fontsize=8)
@@ -5882,7 +5882,7 @@ def generate_kb_weighting(output_dir: str) -> None:
     ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower center", fontsize=10)
-    format_frequency_axis(ax, 0.2, 800.0)
+    format_frequency_axis(ax, 0.2, 800.0, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "kb_weighting.svg")
     plt.close()
@@ -6015,7 +6015,7 @@ def generate_assessment_weighting(output_dir: str) -> None:
         ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.5)
         ax.set_axisbelow(True)
         ax.legend(loc="best", fontsize=9)
-        format_frequency_axis(ax, 1.0, 315.0)
+        format_frequency_axis(ax, 1.0, 315.0, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "assessment_weighting.svg")
     plt.close()

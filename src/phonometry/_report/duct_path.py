@@ -34,7 +34,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
-from ._i18n import t
+from ._i18n import decimal_comma, t
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
@@ -88,7 +88,7 @@ def _band_header(frequencies: np.ndarray, language: str) -> list[str]:
     from ..filters.frequencies import _format_nominal_freq
 
     return [t("Ref.", language), t("Element", language)] + [
-        _format_nominal_freq(f) for f in frequencies
+        decimal_comma(_format_nominal_freq(f), language) for f in frequencies
     ]
 
 
@@ -271,7 +271,7 @@ def _sheet_table(
     return table, len(rows)
 
 
-def _rating_designation(rating: NCResult | RCResult) -> str:
+def _rating_designation(rating: NCResult | RCResult, *, language: str = "en") -> str:
     """The room-criterion designation, at the display rounding of a fiche.
 
     The rating objects print their designation with ``:g``, which is right for
@@ -279,21 +279,24 @@ def _rating_designation(rating: NCResult | RCResult) -> str:
     it has (``NC-22.6402``). A sheet quotes one decimal, so an NC designation
     inside the Table 1 family is rebuilt here at that rounding; every other case
     (an out-of-range NC spectrum, an RC designation with its spectral tag) keeps
-    the object's own label.
+    the object's own label. ``language`` sets the decimal separator of the
+    rating and of its governing band in either case (``NC-22,6 (31,5 Hz)`` or
+    ``>NC-70 (31,5 Hz)`` on a Spanish sheet: 16 Hz and 31.5 Hz are Table 1
+    bands too), so it has to be the sheet's own.
     """
     if getattr(rating, "out_of_range", "") is None and hasattr(rating, "sil"):
         band = getattr(rating, "governing_frequency", float("nan"))
-        designation = f"NC-{fmt_num(display_round(float(rating.rating), 1))}"
+        designation = f"NC-{fmt_num(display_round(float(rating.rating), 1), language)}"
         if np.isfinite(band):
-            return f"{designation} ({band:g} Hz)"
+            return f"{designation} ({decimal_comma(f'{band:g}', language)} Hz)"
         return designation
-    return str(getattr(rating, "label", ""))
+    return decimal_comma(str(getattr(rating, "label", "")), language)
 
 
 def _rating_statement(result: DuctPathResult, language: str) -> tuple[str, list[str]]:
     """The boxed rating headline and the terms printed alongside it."""
     rating = result.rating
-    label = _rating_designation(rating)
+    label = _rating_designation(rating, language=language)
     statement = t("Room criterion <b>{label}</b>", language).format(label=label)
     extended = [
         t("Received level from {source}", language).format(source=result.source_label)
@@ -301,7 +304,8 @@ def _rating_statement(result: DuctPathResult, language: str) -> tuple[str, list[
     if result.target is not None:
         extended.append(
             t("Design criterion {criterion} {target}", language).format(
-                criterion=result.criterion, target=f"{result.target:g}"
+                criterion=result.criterion,
+                target=decimal_comma(f"{result.target:g}", language),
             )
         )
     return statement, extended
@@ -315,7 +319,8 @@ def _verdict(result: DuctPathResult, language: str) -> tuple[str, bool] | None:
     excess = np.asarray(result.exceedance, dtype=np.float64)
     worst = int(np.argmax(excess))
     margin = display_round(float(excess[worst]))
-    band = f"{result.frequencies[worst]:g}"
+    band = decimal_comma(f"{result.frequencies[worst]:g}", language)
+    target = decimal_comma(f"{result.target:g}", language)
     if passed:
         text = t(
             "no band exceeds {criterion} {target}; smallest margin "
@@ -323,7 +328,7 @@ def _verdict(result: DuctPathResult, language: str) -> tuple[str, bool] | None:
             language,
         ).format(
             criterion=result.criterion,
-            target=f"{result.target:g}",
+            target=target,
             margin=fmt_num(-margin, language),
             band=band,
         )
@@ -333,7 +338,7 @@ def _verdict(result: DuctPathResult, language: str) -> tuple[str, bool] | None:
             language,
         ).format(
             criterion=result.criterion,
-            target=f"{result.target:g}",
+            target=target,
             margin=fmt_num(margin, language),
             band=band,
         )
@@ -360,7 +365,10 @@ def _basis_strips(result: DuctPathResult, language: str) -> list[str]:
                 "band; the boxed designation is the standard's own rating of "
                 "the received spectrum.",
                 language,
-            ).format(criterion=result.criterion, target=f"{result.target:g}")
+            ).format(
+                criterion=result.criterion,
+                target=decimal_comma(f"{result.target:g}", language),
+            )
         )
     return strips
 

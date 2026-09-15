@@ -1175,20 +1175,32 @@ def _chk_annex_b_labels() -> Outcome:
     # and B.8 tabulate coordinates for the same two labels the other way round.
     as_drawn = {"W1": "beside M2", "W2": "far corner"}
     as_tabulated = {"W1": "far corner", "W2": "beside M2"}
-    drawn = 0
-    tabulated = 0
+    # Both readings are counted: each printed cell has to come back at the
+    # position the figure draws and has to miss at the one the tables give.
+    reproduced = 0
+    rejected = 0
+    misses = []
     for column, row in printed.items():
         for label, position in as_drawn.items():
             want = row[position]
-            drawn += int(abs(computed[column][position] - want) <= 0.1)
-            tabulated += int(abs(computed[column][as_tabulated[label]] - want) <= 0.1)
+            reproduced += int(abs(computed[column][position] - want) <= 0.1)
+            miss = abs(computed[column][as_tabulated[label]] - want)
+            misses.append(miss)
+            rejected += int(miss > 0.1)
+    cells = len(printed) * 2
     return count(
-        drawn,
-        len(printed) * 2,
-        subject="printed cells reproduced at the position Figure B.1 draws",
+        reproduced + rejected,
+        2 * cells,
+        subject=(
+            "readings of the six printed cells, reproduced at the positions "
+            "Figure B.1 draws and rejected at the positions Tables B.5 and B.8 "
+            "tabulate"
+        ),
         expected_label=(
-            f"6/6, against {tabulated}/6 at the positions Tables B.5 and B.8 "
-            "tabulate, which are between 0,5 dB and 1,8 dB out"
+            "12/12: the six cells within 0,1 dB at the positions Figure B.1 "
+            "draws, and the same six more than 0,1 dB out at the positions "
+            f"Tables B.5 and B.8 tabulate (nearest {min(misses):.3f} dB, "
+            f"farthest {max(misses):.3f} dB)"
         ),
     )
 

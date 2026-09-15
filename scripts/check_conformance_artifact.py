@@ -329,8 +329,13 @@ def validate(document: Mapping[str, Any]) -> list[str]:
         problems.append(
             f"schema is {document.get('schema')!r}, this checkout reads {SCHEMA}."
         )
+    # Nulls are read first and end the check: every validator below walks the
+    # document's shape, and a null where a list or a mapping belongs would make
+    # the gate raise instead of saying which field is wrong.
+    nulls = _null_problems(document)
+    if nulls:
+        return problems + nulls
     problems += _count_problems(document)
-    problems += _null_problems(document)
     seen: set[str] = set()
     for check in document["checks"]:
         if check["id"] in seen:

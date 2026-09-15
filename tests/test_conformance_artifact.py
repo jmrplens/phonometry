@@ -1300,6 +1300,20 @@ def test_a_citation_with_nothing_after_its_last_document_has_no_tail() -> None:
     assert gate._null_problems(FIXTURE) == []
 
 
+def test_a_null_where_a_list_belongs_is_reported_rather_than_raised() -> None:
+    """The validators after the null check walk lists and mappings."""
+    written = json.loads(json.dumps(FIXTURE))
+    written["checks"][0]["reference"]["documents"] = None
+    problems = [
+        problem
+        for problem in gate.validate(written)
+        if not problem.startswith(gate.OVERRIDES_PATH.name)
+    ]
+    assert [problem.split(" ", 1)[0] for problem in problems] == [
+        "checks[0].reference.documents"
+    ]
+
+
 def test_the_renderer_works_on_a_three_check_document() -> None:
     """The point of making the Markdown a pure function of the artefact."""
     markdown, passed, total = cr.render_markdown(FIXTURE)

@@ -89,12 +89,18 @@ DARK = Theme(
 #: them -- weightings, averages and exposure (Aeq, eq, EQ, EX), extremes
 #: and bounds (max, MAX, min, upper, lower, low, high, limit), qualifiers
 #: (ref, rms, tot, TOT, eff, mod, norm, spec, inst, cal, tab, cum, ss,
-#: shadow, co, tr, diff, ff, ax, SN, CS, MS), the hand-arm/whole-body
+#: shadow, co, tr, diff, ff, ax, SN, CS, MS), the indicated value and the
+#: input of ISO 8041-1, Formulae (9) and (12) (ind, in, both printed
+#: upright there beside an italic f and w), the hand-arm/whole-body
 #: vibration axes of ISO 5349 and ISO 2631 (hv, hwx, hwy, hwz, wx, wy, wz),
+#: the seat and platform weighted accelerations of ISO 10326-1 (wS, wP),
 #: the parts of a room and of a building element the building plates name
 #: (obj and air of EN 12354-6 Formulae 2 to 4, the wall/win mnemonics of
 #: its take-off inset, perp for the ⊥ of EN 12354-1 Annex E Formula E.3),
-#: the mid-frequency average of ANSI/ASA S12.2 Annex D (MF), the KB
+#: the mid-frequency average of ANSI/ASA S12.2 Annex D (MF), the
+#: level-difference paths of E DIN 45672-3:2023-02, Formulae (1) and (2)
+#: (BB, FB, DF, DB, spelled out under Formula (2) as Boden, Fundament and
+#: Decke, and printed upright there beside an italic v), the KB
 #: indications of DIN 45669-1:2010-09, 3.10.1.2 to 3.10.1.5 (Fmax, FTm,
 #: where F abbreviates "Fast", the standard's own name for τ = 0,125 s, T
 #: the clock duration and m the averaging duration, so all three letters
@@ -118,18 +124,23 @@ DARK = Theme(
 #: "unterer" of the u already here).
 #:
 #: This set is keyed on the letter run alone and knows nothing of the
-#: symbol it belongs to, so a run is upright everywhere or nowhere. Nine
+#: symbol it belongs to, so a run is upright everywhere or nowhere. Ten
 #: runs the prose sets upright somewhere are therefore deliberately absent,
 #: because the same run has to stay italic elsewhere: ``i`` and ``n``
 #: (indices in $S_i$, $L_i$, $H_n$), ``d`` and ``r`` (the direct and
 #: reflected path lengths $r_d$ and $r_r$ of the echo geometry, neither
 #: expanded anywhere), ``p`` ($L_p$), ``v`` ($L_v$), ``S`` ($w_S$), ``a``
-#: ($L_{a1}$, $L_{a2}$) and ``I`` ($L_{I0}$, the residual intensity
-#: level). Romanising those would romanise a quantity symbol or an index,
-#: which is the error the whole policy exists to avoid; those labels keep
-#: the italic default. Every other letter run inside a script is an index
-#: and is set in italic ($K_{ij}$, $η_{ij}$); extend this set only for a
-#: subscript that abbreviates a word, never for letter-indices.
+#: ($L_{a1}$, $L_{a2}$), ``I`` ($L_{I0}$, the residual intensity level)
+#: and ``B``, which DIN 4150-1:2001-06, Formula (3), prints upright in
+#: $f_B$, $k_B$ and $m_B$ for "Bauwerk", but which also names the second
+#: of the two positions of ISO 10847, Formula (1) ($L_{ref,B}$, $L_{r,B}$),
+#: where it pairs with an ``A`` this set cannot romanise, so romanising it
+#: would set the two halves of one formula in two styles. Romanising those
+#: would romanise a quantity symbol or an index, which is the error the
+#: whole policy exists to avoid; those labels keep the italic default.
+#: Every other letter run inside a script is an index and is set in italic
+#: ($K_{ij}$, $η_{ij}$); extend this set only for a subscript that
+#: abbreviates a word, never for letter-indices.
 #:
 #: Being keyed on the run alone is also why the plates sit outside the
 #: file-level rule the prose follows, where a symbol is set by what it
@@ -164,6 +175,8 @@ _ROMAN_SCRIPTS = frozenset(
         "norm",
         "spec",
         "inst",
+        "ind",
+        "in",
         "cal",
         "tab",
         "cum",
@@ -184,12 +197,20 @@ _ROMAN_SCRIPTS = frozenset(
         "wx",
         "wy",
         "wz",
+        # wS/wP: the seat and platform weighted accelerations of
+        # ISO 10326-1, printed upright.
+        "wS",
+        "wP",
         "obj",
         "air",
         "wall",
         "win",
         "perp",
         "MF",
+        "BB",
+        "FB",
+        "DF",
+        "DB",
         "AF",
         "Cpeak",
         "sa",

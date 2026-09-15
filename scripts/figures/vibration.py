@@ -2659,10 +2659,16 @@ def generate_building_frequency_prediction(output_dir: str) -> None:
         fit * (1.0 + vibration.EMPIRICAL_FREQUENCY_TOLERANCE),
         color=theme_fill(COLOR_PRIMARY, ax_fit),
         zorder=0,
-        label="$\\pm$50 %, which D.3 calls not uncommon",
+        label="$\\pm$50 %, which D.2 calls not uncommon",
     )
+    # The three rows below carry formula numbers; the fit is not a numbered
+    # formula, so it is named by the figure D.2 plots it in.
     ax_fit.plot(
-        heights, fit, color=COLOR_PRIMARY, linewidth=2.0, label="$f = 46/h$ (D.3)"
+        heights,
+        fit,
+        color=COLOR_PRIMARY,
+        linewidth=2.0,
+        label="$f = 46/h$ (Figure D.1)",
     )
     # (model, curve label, short label for the bar rows, colour, dash)
     forms = (

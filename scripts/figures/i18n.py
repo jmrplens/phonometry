@@ -410,7 +410,8 @@ _ES_EXACT = {
     "What the Choice of Code Costs, on One Building": "Lo que cuesta elegir norma, en un edificio",
     "Building height $h$ (m)": "Altura del edificio $h$ (m)",
     "Fundamental frequency $f$ (Hz)": "Frecuencia fundamental $f$ (Hz)",
-    "$\\pm$50 %, which D.3 calls not uncommon": "$\\pm$50 %, que D.3 llama nada raro",
+    "$\\pm$50 %, which D.2 calls not uncommon": "$\\pm$50 %, que D.2 llama nada raro",
+    "$f = 46/h$ (Figure D.1)": "$f = 46/h$ (figura D.1)",
     # The four readings this figure writes out. Exact entries rather than a
     # pattern: every _ES_PATTERNS entry is part of the fingerprint each clip
     # is sealed with, so adding one there restamps forty-three clips that have

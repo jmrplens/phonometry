@@ -574,7 +574,7 @@ def test_the_building_frequency_figure_puts_the_estimate_beside_the_fit() -> Non
     labels = [text.get_text() for text in ax.get_legend().get_texts()]
     assert labels == [
         "$f = 46/h$",
-        "$\\pm$50 %, which D.3 calls not uncommon",
+        "$\\pm$50 %, which D.2 calls not uncommon",
         "height model: 1.14 Hz at 40 m",
     ]
     assert ax.get_ylabel() == "Building height $h$ [m]"

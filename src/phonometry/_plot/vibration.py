@@ -31,7 +31,7 @@ _LABEL_INITIAL = "initial $A_1$"
 _LABEL_FINAL = "final $A_2$"
 _LABEL_CHANGE = "change $A_2 - A_1$"
 
-#: The ISO 4866 D.3 height fit, named once for the same reason: it is both the
+#: The ISO 4866 D.2 height fit, named once for the same reason: it is both the
 #: legend entry of the fitted line and the key its Spanish form is filed under.
 _LABEL_HEIGHT_FIT = r"$f = 46/h$"
 
@@ -249,9 +249,9 @@ _STRINGS: dict[str, str] = {
     "Long-term guideline values in the topmost floor plane (DIN 4150-3 Table 3)": "Valores de referencia de larga duración en el plano de la última planta (DIN 4150-3, tabla 3)",  # Empirical fundamental frequency of a building (ISO 4866 Figure D.1).
     "Building height $h$ [m]": "Altura del edificio $h$ [m]",
     _LABEL_HEIGHT_FIT: _LABEL_HEIGHT_FIT,
-    r"$\pm$50 %, which D.3 calls not uncommon": r"$\pm$50 %, que D.3 llama nada raro",
+    r"$\pm$50 %, which D.2 calls not uncommon": r"$\pm$50 %, que D.2 llama nada raro",
     "{model} model: {f} Hz at {h} m": "modelo de {model}: {f} Hz a {h} m",
-    "Empirical fundamental frequency of a building (ISO 4866 D.3)": "Frecuencia fundamental empírica de un edificio (ISO 4866, D.3)",
+    "Empirical fundamental frequency of a building (ISO 4866 D.2)": "Frecuencia fundamental empírica de un edificio (ISO 4866, D.2)",
     "storeys": "plantas",
     "height": "altura",
     "height_width": "altura y anchura",
@@ -1224,7 +1224,7 @@ def plot_building_frequency(
     """Figure D.1 of ISO 4866 with one estimate on it.
 
     The ``f = 46/h`` fit against building height on logarithmic axes, the
-    ± 50 % band D.3 puts around an empirical prediction, and the estimate as a
+    ± 50 % band D.2 puts around an empirical prediction, and the estimate as a
     point. A prediction from another of the annex's forms lands off the line,
     which is the comparison the figure is for.
 
@@ -1253,7 +1253,7 @@ def plot_building_frequency(
         fit * (1.0 + EMPIRICAL_FREQUENCY_TOLERANCE),
         color=_C_PRIMARY,
         alpha=0.15,
-        label=_t(r"$\pm$50 %, which D.3 calls not uncommon", language),
+        label=_t(r"$\pm$50 %, which D.2 calls not uncommon", language),
     )
     style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("marker", "D")
@@ -1273,7 +1273,7 @@ def plot_building_frequency(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Building height $h$ [m]", language))
     ax.set_title(
-        _t("Empirical fundamental frequency of a building (ISO 4866 D.3)", language)
+        _t("Empirical fundamental frequency of a building (ISO 4866 D.2)", language)
     )
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="best", fontsize="small")

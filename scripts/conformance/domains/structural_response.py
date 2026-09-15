@@ -9,8 +9,9 @@ would actually get, the error band the annex puts on any of them, and the two
 ends of the measured damping range.
 
 Oracle: ISO 4866:2010, Annex D on printed folios 24 to 26 (PDF pages 30 to
-32): Formulae (D.1), (D.2) and (D.3) with their coefficient ranges in D.2, the
-``f = 46/h`` fit and the ± 50 % of D.3, and the damping values of D.4.
+32): Formulae (D.1), (D.2) and (D.3) with their coefficient ranges in D.2,
+the ``f = 46/h`` fit D.2 closes with and the ± 50 % it admits, and the damping
+values of D.4.
 """
 
 from __future__ import annotations
@@ -23,7 +24,7 @@ from ..registry import Outcome, numeric, register
 
 _BUILDING_RESPONSE = "Building response prediction (ISO 4866)"
 
-#: D.3: ``f = 46/h`` Hz, read at three heights. A 46 m building comes to
+#: D.2: ``f = 46/h`` Hz, read at three heights. A 46 m building comes to
 #: exactly 1 Hz, which is the arithmetic the constant is chosen to make easy.
 _FIT_HEIGHTS_M = (23.0, 46.0, 92.0)
 
@@ -60,7 +61,7 @@ def _register_fit() -> None:
     for height in _FIT_HEIGHTS_M:
         register(
             _BUILDING_RESPONSE,
-            "ISO 4866:2010 D.3",
+            "ISO 4866:2010 D.2",
             f"Fundamental frequency of a {height:g} m building, f = 46/h, Hz",
         )(functools.partial(_chk_fit, height))
 
@@ -70,11 +71,11 @@ _register_fit()
 
 @register(
     _BUILDING_RESPONSE,
-    "ISO 4866:2010 D.3",
+    "ISO 4866:2010 D.2",
     "The same fit as a period, T = 0,022 h, s",
 )
 def _chk_fit_period() -> Outcome:
-    """D.3 prints the fit twice, and the two printings have to agree."""
+    """D.2 prints the fit twice, and the two printings have to agree."""
     computed = ph.vibration.HEIGHT_PERIOD_COEFFICIENT_S_PER_M * _HEIGHT_M
     return numeric(1.1, computed, _TOLERANCE, unit="s", places=4)
 
@@ -133,18 +134,18 @@ _register_code_periods()
 
 @register(
     _BUILDING_RESPONSE,
-    "ISO 4866:2010 D.3",
+    "ISO 4866:2010 D.2",
     "Upper end of the error band an empirical prediction carries, Hz",
 )
 def _chk_band_upper() -> Outcome:
-    """The ± 50 % D.3 calls not uncommon, at the top of the band."""
+    """The ± 50 % D.2 calls not uncommon, at the top of the band."""
     _, upper = ph.vibration.empirical_frequency_bounds(2.0)
     return numeric(3.0, upper, _TOLERANCE, unit="Hz", places=4)
 
 
 @register(
     _BUILDING_RESPONSE,
-    "ISO 4866:2010 D.3",
+    "ISO 4866:2010 D.2",
     "Lower end of the error band an empirical prediction carries, Hz",
 )
 def _chk_band_lower() -> Outcome:

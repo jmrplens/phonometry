@@ -8,7 +8,7 @@ references:
     title: "Mechanical vibration and shock — Vibration of fixed structures — Guidelines for the measurement of vibrations and evaluation of their effects on structures"
     designation: "ISO 4866:2010"
     primary: true
-    note: "Anexo D: la regla por plantas y las tres formas normativas del D.2 con sus intervalos de coeficiente, el ajuste f = 46/h y la exactitud del ± 50 % del D.3, y los valores de amortiguamiento medidos del D.4. La clasificación de edificios y cimentaciones del anexo B y los rangos de respuesta del anexo A se describen aquí y no se implementan."
+    note: "Anexo D: la regla por plantas y las tres formas normativas del D.2 con sus intervalos de coeficiente, el ajuste f = 46/h con el que cierra el D.2 y la exactitud del ± 50 % que admite, y los valores de amortiguamiento medidos del D.4. La clasificación de edificios y cimentaciones del anexo B y los rangos de respuesta del anexo A se describen aquí y no se implementan."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -24,10 +24,10 @@ menos dónde está esa frecuencia propia. Esta página es lo que dice ISO 4866
 cuando no puedes medirla.
 
 Mídela si puedes: eso es el cuerpo de la norma y va primero. El anexo D es el
-recurso de reserva, para cuando la excitación es demasiado débil para sacar al
-edificio, el amortiguamiento demasiado alto o los subcomponentes demasiado
-ruidosos para separar de ellos el modo fundamental. Ofrece cuatro predictores y
-es franco con todos.
+recurso de reserva, para cuando no se puede medir directamente, o un
+amortiguamiento alto, las resonancias de subcomponentes u otros problemas
+prácticos limitan lo que vale la medida. Ofrece cuatro predictores y es franco
+con todos.
 
 ## 1. Cuatro predictores, y de qué están hechos
 
@@ -59,6 +59,14 @@ el anexo no da ningún criterio para elegir dentro de él, así que
 `fundamental_period` toma el punto medio salvo que se le indique un
 coeficiente.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_building_frequency_predictors.svg" alt="Alzado de un edificio de dieciocho plantas, sesenta metros de alto y quince de ancho, dibujado a escala sobre el terreno, con cuatro flechas de fuerza horizontales contra una fachada, la anchura b acotada paralela a ellas bajo el edificio, la altura h acotada por ese mismo lado y por fuera de las flechas, y el modo fundamental de traslación dibujado como el mismo contorno desplazado en la dirección de la fuerza; una nota da h entre b igual a 4 y el factor de esbeltez, la raíz de h entre h más b, igual a 0,89. A la derecha, cuatro filas muestran qué lee cada predictor de ese edificio y qué da: la regla por plantas f = 10/n lee solo n y da 0,56 hercios, un periodo de 1,8 segundos; la Fórmula D.1, T = k1 h, lee h, con k1 de 0,014 a 0,03, y da de 0,56 a 1,19 hercios; la Fórmula D.2, T = k2 h entre la raíz de b, lee h y b, con k2 de 0,087 a 0,109, y da de 0,59 a 0,74 hercios; la Fórmula D.3, T = k3 h entre la raíz de b por el factor de esbeltez, lee también h y b, con k3 de 0,06 a 0,08, y da de 0,90 a 1,20 hercios, cada fila con su periodo al lado. Una nota dice que en este edificio los cuatro van de 0,56 a 1,20 hercios y que el D.2 no da ninguna regla para elegir dentro de un intervalo. Dos cajas al pie llevan el ajuste de la Figura D.1, f = 46/h o T = 0,022 h a partir de 163 edificios de planta rectangular, que aquí da 0,77 hercios con errores del más menos cincuenta por ciento nada raros, de 0,38 a 1,15 hercios, y el amortiguamiento del D.4, para el que no hay ningún método probado y puede ir del 0,5 % al 2,1 % del crítico, con grandes diferencias entre modos ortogonales. Dos líneas debajo dicen que el anexo es para cuando no se puede medir o un amortiguamiento alto o las resonancias de subcomponentes limitan la medida, y que un modelo de ordenador se correlaciona con la medida peor que f = 46/h, sin que a uno no probado se le deba suponer más exactitud" width="100%" />
+
+*El edificio que el código de abajo describe dos veces, y lo que cada predictor
+toma de él. Las tres formas normativas dan un periodo y un intervalo para su
+coeficiente, así que en un mismo edificio dan un tramo y no una frecuencia; el
+ajuste a la medida da un único valor, alrededor del cual errores del ± 50 % no
+son raros, y para el amortiguamiento no hay ningún método probado.*
+
 Los cuatro predictores toman argumentos distintos, así que compararlos obliga a
 describir el mismo edificio dos veces: dieciocho plantas de poco más de tres
 metros son los sesenta metros que reciben los otros tres.
@@ -80,9 +88,9 @@ for model, kwargs in (
 
 ## 2. El ajuste a la medida, y el error que admite
 
-El D.3 deja las normas a un lado y ajusta una curva a los datos: 163 edificios
-de planta rectangular dan $f = 46/h$ hercios, o lo que es lo mismo
-$T = 0{,}022\,h$ segundos. De esa recta merece la pena llevarse dos cosas.
+El D.2 cierra dejando las normas a un lado y ajustando una curva a los datos:
+163 edificios de planta rectangular dan $f = 46/h$ hercios, o lo que es lo
+mismo $T = 0{,}022\,h$ segundos. De esa recta merece la pena llevarse dos cosas.
 
 La primera es discreta y esta biblioteca la fija con un test: **0,022 es
 también el punto medio del intervalo de $k_1$** que abarcan las normas. La más
@@ -90,11 +98,11 @@ antigua y tosca de las formas normativas, tomada en el centro de su
 dispersión, es el ajuste medido.
 
 La segunda es la franqueza del anexo con la exactitud. Alrededor de esa recta,
-errores del **± 50 % no son raros**, y el D.3 dice que eso es lo típico de lo
-que puede dar una fórmula empírica. Y añade algo que el lector no espera: la
-correlación entre las frecuencias *calculadas* con un modelo estructural al uso
-y las medidas es **peor** que la correlación con $46/h$, porque un modelo vale
-lo que valga su idea de con qué está hecho el edificio.
+errores del **± 50 % no son raros**, y el D.2 dice que eso es lo típico de lo
+que puede dar una fórmula empírica. El D.3 añade después algo que el lector no
+espera: la correlación entre las frecuencias *calculadas* con un modelo
+estructural al uso y las medidas es **peor** que la correlación con $46/h$,
+porque un modelo vale lo que valga su idea de con qué está hecho el edificio.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/building_frequency_prediction.svg" alt="Dos paneles. El panel izquierdo representa la frecuencia fundamental frente a la altura del edificio en ejes logarítmicos, de seis a doscientos cincuenta metros: el ajuste f = 46/h como línea continua dentro de una banda sombreada del más menos cincuenta por ciento, con las tres formas normativas dibujadas encima, la forma en altura sobre el ajuste, y las de altura y anchura y de esbeltez cruzándolo de abajo arriba conforme crece el edificio, la de esbeltez hacia los treinta metros y la de altura y anchura hacia los ochenta. El panel derecho da, para un edificio de sesenta metros y quince de ancho, el intervalo de frecuencia que permite cada rango de coeficiente como una barra horizontal: de 0,56 a 1,19 hercios la forma en altura, de 0,59 a 0,74 la de altura y anchura y de 0,90 a 1,20 la de esbeltez, frente a una línea vertical en los 0,77 hercios que da el ajuste." width="94%" loading="eager" />
 
@@ -182,12 +190,12 @@ del D.4: un número con el que contrastar una caída medida, no uno que suponer.
 <ScopeClaim status="covered" label="Cubierto">
 Los cuatro **predictores empíricos** del anexo D: la regla por plantas del D.2,
 las tres formas normativas (D.1), (D.2) y (D.3) con los intervalos de
-coeficiente que el D.2 imprime para cada una, y el ajuste $f = 46/h$ del D.3,
-como frecuencias o como periodos.
+coeficiente que el D.2 imprime para cada una, y el ajuste $f = 46/h$ con el que
+cierra el D.2, como frecuencias o como periodos.
 </ScopeClaim>
 
 <ScopeClaim status="covered">
-El **error** que llevan esas predicciones: la banda del ± 50 % del D.3,
+El **error** que llevan esas predicciones: la banda del ± 50 % del D.2,
 publicada como constante y como cotas alrededor de cualquier predicción.
 </ScopeClaim>
 

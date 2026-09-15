@@ -104,6 +104,39 @@ de la medida en el banco añadida aparte; esa incertidumbre tiene que caber
 también dentro de la banda. Hay una segunda frase sobre incertidumbre, en 13.1
 y 14.1, y dice algo distinto; distinguir las dos es de lo que trata la
 sección 4.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench.svg" alt="Tres franjas y un recuadro de fórmulas. Arriba, el ensayo mecánico del apartado 12.11.2: un generador de señal y un amplificador de potencia mueven un excitador de vibración, y sobre su mesa el transductor del propio vibrómetro va encima de un transductor de referencia calibrado, los dos montados como describe la ISO 16063-21; un cable llega al vibrómetro, que lee la aceleración ponderada a_ind, y el otro a la referencia del laboratorio, que mide la a_in sin ponderar, y una nota recuerda que una ponderación por aplicación pasa los dos ensayos. Debajo, a la frecuencia de referencia de 15,915 Hz la lectura con limitación de banda se fija 20 dB por encima del límite inferior de linealidad, en cada tercio de octava de 0,5 Hz a 160 Hz se mantiene a_in y se anota a_ind, y un vibrómetro que lee pico, MTVV o VDV comprueba su fase en un excitador de vibración por el anexo H. En medio, el ensayo eléctrico de los apartados 12.11.3 y 12.13: un generador con una sinusoide y un diente de sierra alimenta el sustituto del transductor que da el fabricante, un punto de ensayo, un transductor ficticio o un adaptador de entrada, a través de un paso bajo de un polo con corte, por ejemplo, a 10 kHz donde el diente de sierra lo pida, y el vibrómetro vuelve a mostrar a_ind mientras se ajusta el valor de la señal de entrada u_in de 0,25 Hz a 160 Hz, con su transductor apartado. Bajo la cadena, ráfagas de diente de sierra de dos ciclos con los tiempos de cuerpo entero de la Tabla 6, la primera a 1 s, una cada 10 s y 60 s en total, con una caída de 2 ms como mucho. Abajo, un rango de funcionamiento lineal de 60 dB: los dos barridos se fijan a la frecuencia de referencia 20 dB sobre su límite inferior, las primeras ráfagas al 50 % de su límite superior y dos escalones diez veces menores por debajo, que se detienen por encima de tres veces el límite inferior, mientras desde ese mismo primer nivel un solo ciclo se sube hasta la sobrecarga. El recuadro da la Fórmula (9) con una incertidumbre expandida de 4,5 % como mucho, la Fórmula (12) con 3 % y la Fórmula (10), que suma el error del transductor a las ponderaciones ensayadas solo por vía eléctrica, calificadas frente a la Tabla 5 con 5 % como mucho" width="100%" />
+
+### Cómo se hace la medida
+
+En un ensayo de tipo (apartado 12), entrega el vibrómetro completo,
+adaptadores de entrada incluidos, con la sensibilidad ajustada según su
+documentación; el banco, con calibración trazable y cada frecuencia dentro de
+±0,2 %. En la frecuencia de referencia, toma al menos tres lecturas frente a un
+transductor de referencia calibrado en el mismo punto: a menos de un 3 % entre
+sí y con la media dentro de la Tabla 2.
+
+Por aplicación, una ponderación pasa los dos ensayos y las demás uno de ellos,
+a tercios de octava o menos sobre la Tabla 15. En el excitador, con los dos
+transductores montados como describe la ISO 16063-21, fija la lectura con
+limitación de banda 20 dB sobre el límite inferior de linealidad en la
+frecuencia de referencia, mantén esa entrada en el transductor de referencia y
+anota la lectura en cada frecuencia: Fórmula (9), con incertidumbre expandida
+de hasta 4,5 %. Por la entrada eléctrica, mantén la lectura y anota el valor de
+la señal de entrada, con señal más ruido al menos diez veces el ruido:
+Fórmula (12), hasta 3 %. El error del transductor de la ponderación ensayada
+por las dos vías completa las demás, frente a la Tabla 5, hasta 5 %. Para las
+ráfagas, lleva una sinusoide estable al 50 % del límite superior, aplica el
+diente de sierra de la Tabla 6 a cada ponderación y repite diez veces más bajo
+hasta tres veces el límite inferior. Si el vibrómetro lee pico, MTVV o VDV, la
+fase se comprueba por el anexo H; un instrumento de ejemplar único se excita a
+las frecuencias fijas de 13.10. Informa de cada configuración, condición,
+resultado e incertidumbre real, y de si el vibrómetro es conforme. La
+verificación periódica (apartado 14) es otro banco: conserva solo las
+comprobaciones mecánicas de sensibilidad, linealidad y respuesta en frecuencia,
+para un vibrómetro de cuerpo entero a 1,995, 7,943, 15,85 y 63,10 Hz a
+1,00 m/s² con U de hasta 5 %.
+
 ## 2. Las nueve ponderaciones, y la banda que se ensancha a su alrededor
 
 El objetivo de diseño no es una tabla de números, es una función de

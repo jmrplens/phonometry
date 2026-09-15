@@ -122,10 +122,13 @@ from .materials import (
     _d_insitu_subtraction,
     _d_iso354_room,
     _d_iso11654,
+    _d_metadiffuser_chain,
     _d_porous_layer,
     _d_scattering_reverb,
+    _d_slit_absorber_chain,
     _d_spot_tube,
     _d_standing_wave_tube,
+    _d_suspended_ceiling_specimen,
 )
 from .perception import (
     _d_dosimeter,
@@ -331,6 +334,11 @@ DIAGRAMS = {
         "Reverberation-room sound absorption (ISO 354)",
         730,
     ),
+    "diagram_suspended_ceiling_specimen": (
+        _d_suspended_ceiling_specimen,
+        "How a suspended ceiling is mounted for the test (EN 16487)",
+        860,
+    ),
     "diagram_standing_wave_tube": (
         _d_standing_wave_tube,
         "Standing-wave-ratio tube: probe traverse and the minima (ISO 10534-1)",
@@ -345,6 +353,11 @@ DIAGRAMS = {
         _d_diffusion_goniometer,
         "Free-field diffusion goniometer (ISO 17497-2)",
         580,
+    ),
+    "diagram_metadiffuser_chain": (
+        _d_metadiffuser_chain,
+        "How a metadiffuser is predicted, from wells to diffusion",
+        924,
     ),
     "diagram_insitu_subtraction": (
         _d_insitu_subtraction,
@@ -966,6 +979,11 @@ DIAGRAMS = {
         _d_porous_layer,
         "Porous absorber on a rigid wall: microstructure to absorption",
         590,
+    ),
+    "diagram_slit_absorber_chain": (
+        _d_slit_absorber_chain,
+        "The slit panel as a chain of transfer matrices",
+        900,
     ),
     "diagram_ground_barrier": (
         _d_ground_barrier,

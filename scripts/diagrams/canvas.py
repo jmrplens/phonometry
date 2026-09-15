@@ -111,8 +111,11 @@ DARK = Theme(
 #: both printed upright there), the train category the railway clause of
 #: E DIN 4150-2:2023-08, 6.5.3.2, groups the passages into (Zug, written
 #: out and printed upright in KBFTm,Zug, KBFmax,Zug, nZug and αZug), the
-#: saturation vapour pressure of IEC 61094-2 Annex F (sv), and the Spanish
-#: twin the i18n table sets beside them (sup for upper).
+#: saturation vapour pressure of IEC 61094-2 Annex F (sv), the Helmholtz
+#: resonator and the slit of the slow-sound absorber in Z_HR and Δl_slit
+#: (HR, slit: an abbreviation and a word, both set upright by the
+#: metamaterial-absorbers guide), and the Spanish twin the i18n table sets
+#: beside them (sup for upper).
 #:
 #: The single letters come from holding every diagram against the prose,
 #: run by run, once the prose had settled which subscripts are descriptive:
@@ -190,6 +193,8 @@ _ROMAN_SCRIPTS = frozenset(
         "cum",
         "ss",
         "sv",
+        "HR",
+        "slit",
         "shadow",
         "co",
         "tr",
@@ -296,6 +301,15 @@ _ROMAN_SCRIPTS = frozenset(
 #: The spectrum adaptation term of ISO 717-1:2020, Formulae (1) and (2), splits
 #: the other way round: in ``X_Aj`` the A is the A-weighting and printed
 #: upright, while the j counts the source spectra and stays italic.
+#:
+#: So does the end correction of a slit mouth, ``Δl`` (Jiménez et al. 2017,
+#: Sci. Rep. 7:5389, Eq. (5)), in ``M_Δl`` and ``Z_Δl``: the Δ is an operator and
+#: upright at every level, the ``l`` is the length it qualifies and italic, and
+#: :data:`_ROMAN_SCRIPTS` holds a bare ``l`` for the upright abbreviations, so
+#: without the entry the plate draws a bare vertical stroke no reader can tell
+#: from a capital I. A key that opens with a capital Greek letter is read whole
+#: in :func:`_math_tokens`, where the letter scan would otherwise stop at the
+#: change of script.
 _MIXED_SCRIPTS: dict[str, str] = {
     "Aj": "uv",
     "FE": "vu",
@@ -307,6 +321,7 @@ _MIXED_SCRIPTS: dict[str, str] = {
     "pA": "vu",
     "pS": "vu",
     "vA": "vu",
+    "Δl": "uv",
 }
 
 #: Script metrics of the ``$...$`` composer, as fractions of the font size:
@@ -467,21 +482,33 @@ def _math_tokens(run: str, s: str, *, script: bool = False) -> list[tuple[str, s
                 or (latin and run[j].isascii() and run[j].isalpha())
             ):
                 j += 1
+            mixed = _MIXED_SCRIPTS.get(run[i:j]) if script else None
+            if mixed is None and script and not latin and ch.isupper():
+                # A script that opens with a capital Greek letter and runs
+                # on in Latin is one name, though the scan above stops at
+                # the change of script: read it whole before the
+                # capital-Greek rule below sets the Greek on its own and
+                # leaves the Latin to _ROMAN_SCRIPTS.
+                k = j
+                while k < len(run) and run[k].isascii() and run[k].isalpha():
+                    k += 1
+                mixed = _MIXED_SCRIPTS.get(run[i:k])
+                if mixed is not None:
+                    j = k
+            if mixed is not None:
+                # A subscript that is part quantity and part word: emit one
+                # token per letter so each takes its own type style. The
+                # loop's own bookkeeping continues from j, so the run is
+                # consumed exactly once either way.
+                for letter, letter_kind in zip(run[i:j], mixed, strict=True):
+                    out.append(("up" if letter_kind == "u" else "var", letter))
+                i = j
+                continue
             if not latin and ch.isupper():
                 # Capital Greek is upright at every level: in this corpus
                 # it is an operator or a descriptor, never an index.
                 kind = "up"
             elif script:
-                mixed = _MIXED_SCRIPTS.get(run[i:j])
-                if mixed is not None:
-                    # A subscript that is part quantity and part word: emit one
-                    # token per letter so each takes its own type style. The
-                    # loop's own bookkeeping continues from j, so the run is
-                    # consumed exactly once either way.
-                    for letter, letter_kind in zip(run[i:j], mixed, strict=True):
-                        out.append(("up" if letter_kind == "u" else "var", letter))
-                    i = j
-                    continue
                 kind = "up" if run[i:j] in _ROMAN_SCRIPTS else "var"
             else:
                 letters = sum(1 for c in run[i:j] if c not in _COMBINING)

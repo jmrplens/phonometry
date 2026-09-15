@@ -207,6 +207,15 @@ matched when the sound entering one period is exactly consumed by it. Note the
 symbol does double duty: in section 1 $Z_0$ is the medium impedance
 $\rho_0 c_0$, here it is that impedance divided by a cross-section.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_slit_absorber_chain.svg" alt="Schematic section of one period of the slit panel, from the face on the left to the rigid backing on the right. A plane wave arrives at angle theta and leaves as the reflection R, with the air in front referred to Z0 = rho0 c0 / S0. A slit 0.978 mm high runs the 30 mm depth of the panel and is closed at the backing, and a Helmholtz resonator with a neck 3 mm wide and 1 mm long and a cavity 27 mm wide and 44.7 mm long opens into its upper wall halfway along. Labels place each matrix where it acts: M delta l at the mouth, x1 = 0; M s over each 15 mm half step either side of the neck; M HR at the resonator; and v = 0 at the backing, x1 = L, with L = N a = 30 mm for one resonator. Three panels below write the matrices out. The mouth is a series radiation mass whose slit end correction is 1.12 mm for h over d = 0.0196. The half step holds the cosine and sine of ks a/2 with the slit impedance Zs, built from the visco-thermal effective density and bulk modulus of the narrow slit, the density being 1.355 minus 0.203j kg/m³ at 300 Hz against 1.205 in free air. The resonator is a shunt admittance, 1 over ZHR, its neck and cavity treated as square visco-thermal ducts, the 1 mm neck carrying 2.08 mm of end correction, 1.18 mm towards the cavity and 0.90 mm towards the slit, and acting below its own resonance as a compliance that softens the slit without adding mass. A box multiplies the matrices into T over the N resonators, gives R of theta from T11 and T21 and the absorption as one minus the squared magnitude of R, and notes that the backing stops the particle velocity, so the face sees Z = T11 / T21. Two boxes at the foot state critical coupling, Re(Z) cos theta = Z0 and Im(Z) = 0, which puts the zero of R on the real-frequency axis so that R = 0 and alpha = 1, and the 300 Hz design at normal incidence: the slit height sets the loss, the 44.7 mm cavity sets the resonance, and the normalised impedance is 1 + 0j in a panel lambda/38 deep" width="100%" />
+
+*One period of the 300 Hz design as the chain the library multiplies: a
+radiation mass at the mouth, a lossy half step of slit either side of the
+resonator, the resonator as a shunt, and the rigid backing that turns the
+product into a surface impedance. Critical coupling is then two conditions on
+that impedance, and the design meets both with a 0.978 mm slit and a 44.7 mm
+cavity.*
+
 Watch what the solver actually changes. Given a target frequency it retunes
 the resonator's **cavity length** and solves for the **slit height**; the
 lattice step and the period stay as passed. For the 300 Hz design below the
@@ -482,9 +491,9 @@ z_hr = materials.helmholtz_resonator_impedance(
 print(np.sign(z_hr.imag))      # [-1. -1.  1.]  compliance below, mass above
 ```
 
-Below its own resonance the shunt is a compliance: it adds stiffness to the
-slit without adding moving mass, and that is exactly what lowers the phase
-speed. `materials.rectangular_duct_properties(f, side=1.0e-3)` gives the same
+Below its own resonance the shunt is a compliance: it softens the slit
+without adding moving mass, and that is exactly what lowers the phase speed.
+`materials.rectangular_duct_properties(f, side=1.0e-3)` gives the same
 effective pair for a square duct when the guiding geometry is a duct rather
 than a slit, and all three take an `AirProperties` state (speed of sound,
 density, viscosity, Prandtl number, heat-capacity ratio, atmospheric

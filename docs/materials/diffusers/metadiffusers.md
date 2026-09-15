@@ -162,6 +162,11 @@ necks and cavities included) and lets the same 2 kHz wavefront hit them: the
 
 ## 3. The design recipe: phases first, geometry second
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain.svg" alt="The metadiffuser prediction in three bands: the target quadratic residue diffuser beside the 2 cm panel at the same scale with the phase each well has to return, slit 1 enlarged with its transfer-matrix chain along the depth and the loop that tunes it, and six periods with their five grating lobes and the diffusion coefficient" width="100%"></picture>
+
+*Phases first, geometry second, the far field last. The two panels at the top
+share one scale: 27.4 cm of wells against 2 cm of slits.*
+
 Designing a metadiffuser is a two-step translation. First pick the Schroeder
 sequence exactly as for a [classical design](diffusers.md): the quadratic
 residues $s_n = n^2 \bmod N$ give the target well depths

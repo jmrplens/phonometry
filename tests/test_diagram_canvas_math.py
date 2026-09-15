@@ -361,6 +361,34 @@ def test_descriptive_subscripts_stay_upright() -> None:
     ]
 
 
+def test_a_greek_and_latin_script_splits_by_letter() -> None:
+    # Δl is the end correction of a slit mouth (Jiménez et al. 2017,
+    # Sci. Rep. 7:5389, Eq. (5)): the Δ is an operator and upright, the l
+    # is the length it qualifies and italic, though _ROMAN_SCRIPTS holds a
+    # bare l for the upright abbreviations.
+    assert _math_runs("$M_{Δl}$") == [
+        ("M", True, 0.0, 1.0),
+        ("Δ", False, 0.22, 0.70),
+        ("l", True, 0.22, 0.70),
+    ]
+    # HR abbreviates the Helmholtz resonator of the same paper, Eq. (4).
+    assert _math_runs("$Z_{HR}$") == [
+        ("Z", True, 0.0, 1.0),
+        ("HR", False, 0.22, 0.70),
+    ]
+    # A capital Greek base with a Latin script is not such a run.
+    assert _math_runs("$Δ_{SOR}$") == [
+        ("Δ", False, 0.0, 1.0),
+        ("SOR", True, 0.22, 0.70),
+    ]
+    # A Greek-plus-Latin script that is not curated keeps the old split.
+    assert _math_runs("$M_{Δlx}$") == [
+        ("M", True, 0.0, 1.0),
+        ("Δ", False, 0.22, 0.70),
+        ("lx", True, 0.22, 0.70),
+    ]
+
+
 def test_tilde_travels_with_its_letter() -> None:
     # x̃ (x + U+0303) styles as one glyph run; splitting the pair into
     # runs of different style would detach the mark from its base.

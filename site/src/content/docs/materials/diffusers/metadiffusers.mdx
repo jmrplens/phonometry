@@ -303,6 +303,15 @@ necks and cavities included) and lets the same 2 kHz wavefront hit them: the
 
 ## 3. The design recipe: phases first, geometry second
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_metadiffuser_chain.svg" alt="Three bands, top to bottom. First, one period of the target quadratic residue diffuser designed for 500 hertz, drawn in section with wells 6.9, 27.4, 27.4 and 6.9 centimetres deep and one flat well, beside a table of the sequence 1, 4, 4, 1, 0, those depths and the phase each well has to return at 2 kilohertz: plus 72, minus 72, minus 72, plus 72 and 0 degrees; at the right, at the same scale, the 35 by 2 centimetre metadiffuser with its five slits. Second, slit 1 enlarged, 14.7 millimetres tall and 20 millimetres deep, with two Helmholtz resonators 10 millimetres apart shelved into the septum, and beside it the transfer-matrix chain laid along the depth: the radiation end correction at the mouth, half a lattice step of slit either side of each resonator, the resonators as shunts and the rigid backing, which a box turns into the reflection coefficient of the slit; an arrow loops back to the table, tuning the geometry slit by slit until the phase of each reflection is its target. Third, the period repeated six times into a 2.1 metre panel under a semicircle of receivers every 5 degrees, with five grating lobes near 0, plus and minus 29 and plus and minus 78.5 degrees, and three boxes with the Fraunhofer far field, the grating directions and the diffusion coefficient normalised against a flat panel of the same width" width="100%" />
+
+*The whole prediction in one figure, for the published panel. The quadratic
+residues fix one phase per well; each slit is then tuned, through the
+transfer-matrix chain, until it returns that phase from 20 mm of depth; and
+only then do six periods go through the far field to a diffusion coefficient.
+The two panels at the top share one scale: 27.4 cm of wells against 2 cm of
+slits.*
+
 Designing a metadiffuser is a two-step translation. First pick the Schroeder
 sequence exactly as for a [classical design](/phonometry/materials/diffusers/diffusers/):
 the quadratic residues $s_n = n^2 \bmod N$ give the target well depths

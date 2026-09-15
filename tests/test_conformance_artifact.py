@@ -852,6 +852,39 @@ def test_the_year_form_files_a_known_book_or_report_as_what_it_is() -> None:
         assert _first(cite).kind is kind, cite
 
 
+def test_a_declared_work_keeps_its_kind_whatever_shape_follows_the_name() -> None:
+    """A work listed in ``_WORKS`` is what the list says, in all four shapes.
+
+    The name a citation writes is not always the designation the work is filed
+    under, and the kind table is keyed by the designation. Reading it with the
+    written name misses exactly the works whose record expands the name:
+    "NORAH2 (2015)" looked like an author with a year and came back an article
+    called "NORAH2", which is neither the kind nor the designation the rest of
+    the corpus cites. Every shape has to land on the same document.
+    """
+    kinds = references.ReferenceKind
+    for cite in (
+        "NORAH2",
+        "NORAH2 Eq. 8",
+        "NORAH2 (2015) Eq. 8",
+        "NORAH2 2e Eq. 8",
+    ):
+        document = _first(cite)
+        assert document.kind is kinds.REPORT, cite
+        assert document.designation == "NORAH2 guidance", cite
+        assert document.written == "NORAH2", cite
+
+
+def test_a_work_whose_name_is_its_designation_is_not_given_a_written_form() -> None:
+    """``written`` records an expansion, so a name that needs none stays bare.
+
+    It is what ``recompose`` puts back on the page, and a citation rebuilt with
+    a redundant written form would no longer match the string it came from.
+    """
+    for cite in ("Bies (2017) 4.9.2", "Mackenzie (1981)", "Ainslie (2010) §3.2"):
+        assert _first(cite).written is None, cite
+
+
 def test_a_report_number_joined_to_its_body_keeps_the_body_kind() -> None:
     """FHWA writes its report numbers onto the body with a hyphen."""
     document = _first("FHWA-PD-96-046 Table 3, printed folio 35 (PDF page 52)")

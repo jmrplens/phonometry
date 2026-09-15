@@ -936,6 +936,21 @@ microphone height of 1,2 m at audience seat locations, positions evenly
 distributed over all the seating, and more of them wherever a hall breaks
 into balconies and under-balcony areas.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves: the source surveyed in a free field, on a turntable or, where no turntable can be used, from seventy-two readings taken every 5 degrees, with one gliding 30 degree arc of six readings and the Table 1 limits, and a 1 000-seat hall in plan and in section with three source positions on the stage at 1,5 m, the microphone positions of Table A.2 at 1,2 m, and more under the balcony" width="100%"></picture>
+
+**How the measurement goes.** Qualify the source first: octave bands of pink
+noise in a free field, the microphone at least 1,5 m away, and the output
+averaged over gliding 30 degree arcs on a turntable or, without one, over six
+neighbouring readings taken every 5 degrees, each arc inside Table 1 against
+the 360 degree energetic average. In the hall, normally use at least three
+source positions on the stage with the acoustic centre 1,5 m up, and the
+minimum microphone positions of Table A.2 at 1,2 m at seats, spread evenly and
+added to where balconies split the seating. Hold the source at least 45 dB
+over the background without synchronous averaging, measure a marginal source
+again turned in at least three steps, and report the source and microphone
+positions with their heights, preferably on a plan, with the fifteen items
+of 9.2.
+
 ## 3. The single number, and the two exceptions in it
 
 Every quantity in Annex A gets quoted as one number, and A.5 asks for the

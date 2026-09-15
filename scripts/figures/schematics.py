@@ -4402,7 +4402,8 @@ _R717_AIRBORNE = (
     31.0,
     25.5,
 )
-#: Impact example: the ISO 717-2 Annex C L'nT spectrum of the same guide.
+#: Impact example: the ISO 717-2 Annex C Ln spectrum of the same guide, the
+#: bare heavy floor of its Table C.1.
 _R717_IMPACT = (
     62.1,
     63.2,
@@ -4687,7 +4688,7 @@ def animate_iso717_shift(output_dir: str) -> None:
         pad = 0.18 * (hi_y - lo_y)
         ax_s.set_ylim(lo_y - pad, hi_y + pad)
         ax_s.set_ylabel(
-            T("Normalized impact level $L\u2032_{\\mathrm{n}T}$ [dB]")
+            T("Normalized impact level $L_\\mathrm{n}$ [dB]")
             if impact
             else T("Sound reduction index $R$ [dB]"),
             fontsize=9,
@@ -4723,9 +4724,7 @@ def animate_iso717_shift(output_dir: str) -> None:
             lines.append(T("over the cap: shift again"))
         elif idx == track["accepted"]:
             name = (
-                T("$L\u2032_{\\mathrm{n}T,\\mathrm{w}}$")
-                if impact
-                else T(r"$R_\mathrm{w}$")
+                T("$L_{\\mathrm{n},\\mathrm{w}}$") if impact else T(r"$R_\mathrm{w}$")
             )
             lines.append(T("largest sum still under the cap"))
             lines.append(f"{name} = {track['rating']:d} dB")

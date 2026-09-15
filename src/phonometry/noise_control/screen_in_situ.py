@@ -348,6 +348,25 @@ class ScreenInSituResult:
     source_kind: str
     distance_m: float | None
 
+    def rounded(self) -> NDArray[np.int_]:
+        """The band values as 7.4 c) reports them, to the nearest integer.
+
+        :attr:`attenuation_db` keeps the unrounded difference. A tie goes to
+        the even decibel, Rule A of ISO 80000-1:2009 Annex B, as in the other
+        in-situ standards of this library.
+        """
+        return np.asarray(np.rint(self.attenuation_db), dtype=np.int_)
+
+    def rounded_a_weighted(self) -> int | None:
+        """:math:`D_{pA}` as 7.4 c) reports it, to the nearest integer.
+
+        The clause gives the A-weighted attenuation the same rounding as the
+        band values. ``None`` where no A-weighted pair was given.
+        """
+        if self.a_weighted_attenuation_db is None:
+            return None
+        return int(np.rint(self.a_weighted_attenuation_db))
+
     def plot(
         self, ax: Axes | None = None, *, language: str = "en", **kwargs: Any
     ) -> Axes:

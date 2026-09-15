@@ -157,7 +157,11 @@ ISO11820_MINIMUM_BACKGROUND_MARGIN_DB: float = 3.0
 #: Table 1: above this margin the correction is zero.
 ISO11820_NEGLIGIBLE_BACKGROUND_MARGIN_DB: float = 10.0
 
-#: 9.1.1 and 9.1.2: "the maximum correction is 3 dB".
+#: 9.1.1 and 9.1.2: "the maximum correction is 3 dB". The printed value is
+#: the correction at a 3 dB margin, the "3 -> 3" row of Table 1, which the
+#: energy subtraction writes unrounded as -10 lg(1 - 10^-0,3) = 3,0206 dB;
+#: ISO 3746:2010 8.3.3 prints the same number the same way, as 3 dB and "the
+#: value for" a 3 dB margin. The cap is therefore judged on the margin.
 MAXIMUM_EXTRANEOUS_CORRECTION_DB: float = 3.0
 
 #: 1.3 a): the octave range the standard asks for, and the wider one it would
@@ -228,6 +232,11 @@ _ANY_SIDE = "any duct, room or space"
 
 #: The three one-third-octave bands inside one octave, 9.1.5.
 _THIRDS_PER_OCTAVE = 3
+
+#: How far under the 3 dB of clause 4 the margin of two energy means may fall
+#: in floating point and still be the printed 3 dB, in decibels. Levels 3,0 dB
+#: apart come out of the two means up to 1,4e-14 dB either side of it.
+_MARGIN_TOLERANCE_DB = 1e-9
 
 
 class SilencerInSituWarning(PhonometryWarning):
@@ -429,19 +438,38 @@ def extraneous_corrected_mean_level_db(
 
     The energy route 9.1.1 and 9.1.2 offer instead of Table 1, for the case
     where the sources the silencer works on can be switched off and the
-    extraneous sound measured at the same positions.
+    extraneous sound measured at the same positions: corrections are made
+    "using table 1 or the relationship" (9.1.1, printed folio 10, PDF page 18
+    of BS EN ISO 11820:1997).
 
     The clause caps it: **the maximum correction is 3 dB**. Past that the
     quantity is not determined, and what may be stated instead is the
-    inequality of clause 4. The second return value says whether the cap was
-    reached, so that a capped number cannot be written down as a
-    determination.
+    inequality of clause 4. Clause 4.1 (folio 4, PDF page 12) ties that to a
+    correction of 3 dB that "is not sufficient", and Table 1 (folio 5, PDF
+    page 13) prints where that starts: a margin under 3 dB is invalid, and a
+    margin of 3 dB takes off 3 dB. The subtraction reaches 3,0206 dB at that
+    same margin, which is the printed 3 dB unrounded, so the cap is judged on
+    the margin of the two energy means:
+
+    .. math::
+
+       \overline{L_p} - \overline{L_e} \ge 3\ \mathrm{dB}
+
+    That is the same condition as a correction of at most
+    :math:`-10 \lg(1 - 10^{-0,3})` dB, and it keeps the two routes of the
+    standard in agreement at their shared boundary. A margin that floating
+    point leaves a few parts in :math:`10^{14}` under 3 dB counts as 3 dB.
+
+    The second return value says whether the cap was reached, so that a
+    capped number cannot be written down as a determination, and a capped
+    measurement also emits a :class:`SilencerInSituWarning`. The corrected
+    level itself is returned either way.
 
     :param levels_db: The levels with everything running, in decibels.
     :param extraneous_levels_db: The extraneous levels at the same positions,
         in decibels.
     :return: The corrected mean level in decibels, and whether the correction
-        reached the cap.
+        reached the cap, which is a margin under 3 dB.
     :raises ValueError: For inputs that do not match point for point, or an
         extraneous level at or above the level it is subtracted from.
     """
@@ -459,14 +487,26 @@ def extraneous_corrected_mean_level_db(
         )
         raise ValueError(msg)
     corrected = float(10.0 * np.log10(np.mean(difference)))
-    uncorrected = float(energy_mean(levels))
-    capped = uncorrected - corrected > MAXIMUM_EXTRANEOUS_CORRECTION_DB
+    # The cap is judged on the margin of the two energy means and not on the
+    # correction itself: the printed 3 dB is what Table 1 takes off at its
+    # 3 dB row, which the subtraction writes unrounded as 3,0206 dB. The
+    # tolerance keeps a printed 3,0 dB margin, which the two means can land a
+    # few parts in 10^14 under, on the side Table 1 accepts.
+    margin = float(energy_mean(levels)) - float(energy_mean(extraneous))
+    capped = margin < ISO11820_MINIMUM_BACKGROUND_MARGIN_DB and not math.isclose(
+        margin,
+        ISO11820_MINIMUM_BACKGROUND_MARGIN_DB,
+        rel_tol=0.0,
+        abs_tol=_MARGIN_TOLERANCE_DB,
+    )
     if capped:
         msg = (
-            f"ISO 11820 caps the extraneous correction at "
-            f"{MAXIMUM_EXTRANEOUS_CORRECTION_DB:g} dB; this one is "
-            f"{uncorrected - corrected:.1f} dB, so the level is not determined "
-            "and only the inequality of clause 4 may be stated."
+            "ISO 11820 caps the extraneous correction at "
+            f"{MAXIMUM_EXTRANEOUS_CORRECTION_DB:g} dB (9.1.1 and 9.1.2), the "
+            "correction Table 1 applies at its "
+            f"{ISO11820_MINIMUM_BACKGROUND_MARGIN_DB:g} dB row; this measurement "
+            f"stands {margin:.2f} dB over the extraneous sound, so the level is "
+            "not determined and only the inequality of clause 4 may be stated."
         )
         warnings.warn(msg, SilencerInSituWarning, stacklevel=2)
     return corrected, capped
@@ -659,10 +699,12 @@ class SilencerInSituResult:
     :ivar frequencies: Nominal band centres, in hertz, or ``None``.
     :ivar level_difference_db: :math:`D_{tps}` or :math:`D_{ips}`, the sound
         pressure level difference the loss is built on, per band.
-    :ivar area_term_db: :math:`10 \lg(S_2/S_1)` or :math:`10 \lg(S_{II}/S_I)`,
-        in decibels.
+    :ivar area_term_db: :math:`10 \lg(S_2/S_1)` or :math:`10 \lg(S_{II}/S_I)`
+        per band, in decibels. Always one value per band, even where both areas
+        were given as single values, because the area of a diffuse room moves
+        with the reverberation time from band to band.
     :ivar field_correction_difference_db: :math:`K_2 - K_1` or
-        :math:`K_{II} - K_I`, in decibels.
+        :math:`K_{II} - K_I` per band, in decibels, on the same shape.
     :ivar loss_db: :math:`D_{ts}` or :math:`D_{is}` per band, in decibels.
     :ivar quantity: ``"transmission"`` or ``"insertion"``.
     :ivar case: The installation of Figure 1 the measurement was made in, or
@@ -671,8 +713,8 @@ class SilencerInSituResult:
 
     frequencies: NDArray[np.float64] | None
     level_difference_db: NDArray[np.float64]
-    area_term_db: float
-    field_correction_difference_db: float
+    area_term_db: NDArray[np.float64]
+    field_correction_difference_db: NDArray[np.float64]
     loss_db: NDArray[np.float64]
     quantity: str
     case: InstallationCase | None
@@ -702,29 +744,54 @@ class SilencerInSituResult:
         return plot_silencer_in_situ(self, ax=ax, language=language, **kwargs)
 
 
+def _per_band(
+    values: NDArray[np.float64], name: str, shape: tuple[int, ...]
+) -> NDArray[np.float64]:
+    """One value per band, from a single value or from one given per band."""
+    if values.size != 1 and values.shape != shape:
+        msg = f"'{name}' must be one value or match the level difference band for band."
+        raise ValueError(msg)
+    return np.array(np.broadcast_to(values, shape), dtype=np.float64)
+
+
 def _loss(
     level_difference: NDArray[np.float64],
     *,
     frequencies: ArrayLike | None,
-    source_area_m2: float,
-    receiver_area_m2: float,
-    field_correction_difference_db: float,
+    source_area_m2: ArrayLike,
+    receiver_area_m2: ArrayLike,
+    field_correction_difference_db: ArrayLike,
+    names: tuple[str, str],
     quantity: str,
     case: InstallationCase | None,
 ) -> SilencerInSituResult:
-    """The body Equations (19) and (21) share."""
-    source = require_positive(source_area_m2, "source_area_m2")
-    receiver = require_positive(receiver_area_m2, "receiver_area_m2")
+    """The body Equations (19) and (21) share.
+
+    ``names`` carries the public names of the two areas, so that a refusal
+    names the argument the caller actually passed.
+    """
+    shape = level_difference.shape
+    source_name, receiver_name = names
+    source = _per_band(
+        require_positive_array(source_area_m2, source_name), source_name, shape
+    )
+    receiver = _per_band(
+        require_positive_array(receiver_area_m2, receiver_name), receiver_name, shape
+    )
+    correction = _per_band(
+        require_finite_array(
+            field_correction_difference_db, "field_correction_difference_db"
+        ),
+        "field_correction_difference_db",
+        shape,
+    )
     freqs: NDArray[np.float64] | None = None
     if frequencies is not None:
         freqs = require_positive_array(frequencies, "frequencies")
-        if freqs.shape != level_difference.shape:
+        if freqs.shape != shape:
             msg = "'frequencies' must match the level difference band for band."
             raise ValueError(msg)
-    area_term = 10.0 * math.log10(source / receiver)
-    correction = require_finite(
-        field_correction_difference_db, "field_correction_difference_db"
-    )
+    area_term = np.asarray(10.0 * np.log10(source / receiver), dtype=np.float64)
     return SilencerInSituResult(
         frequencies=freqs,
         level_difference_db=level_difference,
@@ -740,10 +807,10 @@ def in_situ_transmission_loss(
     source_levels_db: ArrayLike,
     receiver_levels_db: ArrayLike,
     *,
-    source_area_m2: float,
-    receiver_area_m2: float,
+    source_area_m2: ArrayLike,
+    receiver_area_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
-    field_correction_difference_db: float = 0.0,
+    field_correction_difference_db: ArrayLike = 0.0,
     case: int | None = None,
 ) -> SilencerInSituResult:
     r"""The transmission loss of a silencer in place, Equation (19).
@@ -758,18 +825,30 @@ def in_situ_transmission_loss(
     :func:`temperature_field_correction_db` is the correction difference two
     temperatures make.
 
+    Every term is a band quantity (3.3, printed folio 3, PDF page 11). A
+    measurement surface in a duct is one area for all bands, but where a side
+    is a room with a diffuse field its area is a quarter of the absorption,
+    :math:`(6 \ln 10) V / (c T)`, and moves with the reverberation time from
+    band to band: pass the array :func:`reverberant_surface_area_m2` returns.
+    Each area and the field correction may be one value, applied to every
+    band, or one value per band.
+
     :param source_levels_db: :math:`\overline{L_{p2}}` per band, in decibels.
     :param receiver_levels_db: :math:`\overline{L_{p1}}` per band, in decibels.
-    :param source_area_m2: :math:`S_2`, in square metres.
-    :param receiver_area_m2: :math:`S_1`, in square metres.
+    :param source_area_m2: :math:`S_2`, one value or one per band, in square
+        metres.
+    :param receiver_area_m2: :math:`S_1`, one value or one per band, in square
+        metres.
     :param frequencies: Nominal band centres, in hertz.
-    :param field_correction_difference_db: :math:`K_2 - K_1`, in decibels.
+    :param field_correction_difference_db: :math:`K_2 - K_1`, one value or one
+        per band, in decibels.
     :param case: The installation of Figure 1, 1 to 16, carried into the
         result.
     :return: The loss, as a :class:`SilencerInSituResult`.
-    :raises ValueError: For spectra that do not match, a non-positive area or
-        band centre, a field correction that is not finite, or a case that is
-        not a transmission one.
+    :raises ValueError: For spectra that do not match, an area or a field
+        correction that is neither one value nor one per band, a non-positive
+        area or band centre, a field correction that is not finite, or a case
+        that is not a transmission one.
     """
     difference = transmission_level_difference_db(source_levels_db, receiver_levels_db)
     entry = None
@@ -787,6 +866,7 @@ def in_situ_transmission_loss(
         source_area_m2=source_area_m2,
         receiver_area_m2=receiver_area_m2,
         field_correction_difference_db=field_correction_difference_db,
+        names=("source_area_m2", "receiver_area_m2"),
         quantity="transmission",
         case=entry,
     )
@@ -796,10 +876,10 @@ def in_situ_insertion_loss(
     levels_without_db: ArrayLike,
     levels_with_db: ArrayLike,
     *,
-    area_without_m2: float,
-    area_with_m2: float,
+    area_without_m2: ArrayLike,
+    area_with_m2: ArrayLike,
     frequencies: ArrayLike | None = None,
-    field_correction_difference_db: float = 0.0,
+    field_correction_difference_db: ArrayLike = 0.0,
     case: int | None = None,
 ) -> SilencerInSituResult:
     r"""The insertion loss of a silencer in place, Equation (21).
@@ -819,18 +899,30 @@ def in_situ_insertion_loss(
     A blowdown silencer can only be measured this way: there is no duct to
     measure through.
 
+    As in Equation (19), the terms are band quantities (3.4, printed folio 3,
+    PDF page 11). Where the receiver side is a diffuse room, case 18 of
+    Figure 1, both areas are a quarter of the room absorption, Equations (10)
+    and (12), and move band by band with the reverberation time of each run:
+    pass the two arrays :func:`reverberant_surface_area_m2` returns. Each area
+    and the field correction may be one value, applied to every band, or one
+    value per band.
+
     :param levels_without_db: :math:`\overline{L_{pII}}` per band, in decibels.
     :param levels_with_db: :math:`\overline{L_{pI}}` per band, in decibels.
-    :param area_without_m2: :math:`S_{II}`, in square metres.
-    :param area_with_m2: :math:`S_I`, in square metres.
+    :param area_without_m2: :math:`S_{II}`, one value or one per band, in
+        square metres.
+    :param area_with_m2: :math:`S_I`, one value or one per band, in square
+        metres.
     :param frequencies: Nominal band centres, in hertz.
-    :param field_correction_difference_db: :math:`K_{II} - K_I`, in decibels.
+    :param field_correction_difference_db: :math:`K_{II} - K_I`, one value or
+        one per band, in decibels.
     :param case: The installation of Figure 1, 17 to 20, carried into the
         result.
     :return: The loss, as a :class:`SilencerInSituResult`.
-    :raises ValueError: For spectra that do not match, a non-positive area or
-        band centre, a field correction that is not finite, or a case that is
-        not an insertion one.
+    :raises ValueError: For spectra that do not match, an area or a field
+        correction that is neither one value nor one per band, a non-positive
+        area or band centre, a field correction that is not finite, or a case
+        that is not an insertion one.
     """
     difference = insertion_level_difference_db(levels_without_db, levels_with_db)
     entry = None
@@ -848,6 +940,7 @@ def in_situ_insertion_loss(
         source_area_m2=area_without_m2,
         receiver_area_m2=area_with_m2,
         field_correction_difference_db=field_correction_difference_db,
+        names=("area_without_m2", "area_with_m2"),
         quantity="insertion",
         case=entry,
     )

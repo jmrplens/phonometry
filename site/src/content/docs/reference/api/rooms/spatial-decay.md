@@ -62,6 +62,21 @@ spectrum of a real machine by Equation (3), or onto the A-weighted pink noise of
 Table 1 by Equation (4), which is what a room gets judged by when nobody knows
 yet what will be installed in it.
 
+**The 6,2 of Equation (4).** The constant is the energy sum of the
+A-weighting curve over the six octaves, 6,23 dB, printed to one decimal, and it
+is there so that a flat curve comes back unchanged. Table 1 prints the same
+curve to one decimal weight by weight, and the six printed weights sum to
+6,251 5 dB, so the printed equation returns a flat curve 0,05 dB high.
+[`NORMALIZED_OFFSET_DB`](/phonometry/reference/api/rooms/spatial-decay/#normalized_offset_db) carries the printed 6,2 on the same rule as the
+0,3 above: four printings print it and a reader checking against the page will
+use it. Annex C was normalised exactly: its normalized column and its
+Table C.10 land inside the printed rounding under Equation (3) with the Table 1
+weights and one unit high in the last place under the printed constant, so
+every value this module normalizes stands 0,05 dB above the annex. The errata
+registry records it. Equation (3) with the Table 1 weights as the machine
+spectrum is Equation (4) normalised exactly, for whoever needs the annex's
+reading.
+
 **Annex B.** In a room whose own excess is small, what the measurement sees is
 partly the source's own directivity and the reflection off the floor rather than
 the room. The annex corrects for that with a reference curve measured for that
@@ -395,6 +410,15 @@ with $P_j$ from Table 1. It is Equation (3) with one spectrum fixed,
 and 4.2.3 says why that spectrum is a normalisation and not an average
 industrial machine: the spectra met in practice are too varied for any
 average to mean anything.
+
+The 6,2 dB is the energy sum of the A-weighting curve printed to one
+decimal, and the six printed weights of Table 1 sum to 6,251 5 dB, so the
+printed equation returns a flat curve 0,05 dB high. It is used as printed:
+the result is what a hand evaluation of the printed equation gives, which
+is 0,05 dB above Annex C, normalised exactly (see the errata registry). For
+the exact normalisation, which returns a flat curve unchanged, call
+[`spectrum_distribution_value`](/phonometry/reference/api/rooms/spatial-decay/#spectrum_distribution_value) with the values of
+[`PINK_NOISE_WEIGHTS_DB`](/phonometry/reference/api/rooms/spatial-decay/#pink_noise_weights_db) as the machine spectrum.
 
 **Parameters**
 

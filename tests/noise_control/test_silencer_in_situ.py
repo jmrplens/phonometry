@@ -181,7 +181,10 @@ def test_equation_nineteen_is_the_difference_plus_two_terms() -> None:
         field_correction_difference_db=-1.0,
     )
     area_term = 10.0 * math.log10(2.0)
-    assert res.area_term_db == pytest.approx(area_term)
+    assert res.area_term_db.shape == (2,)
+    assert np.allclose(res.area_term_db, [area_term, area_term])
+    assert res.field_correction_difference_db.shape == (2,)
+    assert np.allclose(res.field_correction_difference_db, [-1.0, -1.0])
     assert res.loss_db[0] == pytest.approx(25.0 + area_term - 1.0)
     assert res.symbol == "D_ts"
 
@@ -200,7 +203,105 @@ def test_equal_areas_leave_no_area_term() -> None:
     res = noise_control.in_situ_transmission_loss(
         [95.0], [70.0], source_area_m2=1.4, receiver_area_m2=1.4
     )
-    assert res.area_term_db == pytest.approx(0.0)
+    assert res.area_term_db.shape == (1,)
+    assert np.allclose(res.area_term_db, [0.0])
+
+
+def test_the_areas_of_a_diffuse_room_move_band_by_band() -> None:
+    """ISO 11820:1996 3.3 and 3.4, printed folio 3 (PDF page 11).
+
+    S = (6 ln 10) V/(c T) with T the reverberation time, and every level of
+    Equations (5) to (11) is "in one-third-octave or octave bands", so where a
+    side is a diffuse room its area is a band quantity. An array of areas and
+    an array of field corrections each apply band for band.
+    """
+    areas = noise_control.reverberant_surface_area_m2(200.0, [2.0, 1.0, 0.5])
+    res = noise_control.in_situ_transmission_loss(
+        [95.0, 96.0, 94.0],
+        [70.0, 68.0, 63.0],
+        source_area_m2=0.9,
+        receiver_area_m2=areas,
+        field_correction_difference_db=[0.5, 0.0, -0.5],
+    )
+    expected_terms = 10.0 * np.log10(0.9 / areas)
+    assert np.allclose(res.area_term_db, expected_terms, rtol=0.0, atol=1e-12)
+    assert res.area_term_db.shape == (3,)
+    assert np.allclose(
+        res.loss_db,
+        np.array([25.0, 28.0, 31.0]) + expected_terms + np.array([0.5, 0.0, -0.5]),
+        rtol=0.0,
+        atol=1e-12,
+    )
+
+
+def test_a_single_area_broadcasts_over_the_bands() -> None:
+    scalar = noise_control.in_situ_insertion_loss(
+        [90.0, 92.0, 88.0],
+        [72.0, 70.0, 69.0],
+        area_without_m2=2.0,
+        area_with_m2=[1.5],
+        field_correction_difference_db=0.3,
+    )
+    repeated = noise_control.in_situ_insertion_loss(
+        [90.0, 92.0, 88.0],
+        [72.0, 70.0, 69.0],
+        area_without_m2=[2.0, 2.0, 2.0],
+        area_with_m2=[1.5, 1.5, 1.5],
+        field_correction_difference_db=[0.3, 0.3, 0.3],
+    )
+    assert np.array_equal(scalar.loss_db, repeated.loss_db)
+    assert np.array_equal(scalar.area_term_db, repeated.area_term_db)
+    assert np.array_equal(
+        scalar.field_correction_difference_db,
+        repeated.field_correction_difference_db,
+    )
+    assert scalar.area_term_db.shape == (3,)
+    assert scalar.field_correction_difference_db.shape == (3,)
+
+
+def test_areas_that_do_not_match_the_bands_are_refused() -> None:
+    with pytest.raises(ValueError, match="'receiver_area_m2' must be one value"):
+        noise_control.in_situ_transmission_loss(
+            [95.0, 96.0, 94.0],
+            [70.0, 68.0, 63.0],
+            source_area_m2=0.9,
+            receiver_area_m2=[10.0, 9.0],
+        )
+    with pytest.raises(ValueError, match="'area_without_m2' must be one value"):
+        noise_control.in_situ_insertion_loss(
+            [90.0, 92.0],
+            [72.0, 70.0],
+            area_without_m2=[1.0, 1.0, 1.0],
+            area_with_m2=1.0,
+        )
+    with pytest.raises(
+        ValueError, match="'field_correction_difference_db' must be one value"
+    ):
+        noise_control.in_situ_insertion_loss(
+            [90.0, 92.0],
+            [72.0, 70.0],
+            area_without_m2=1.0,
+            area_with_m2=1.0,
+            field_correction_difference_db=[0.0, 0.1, 0.2],
+        )
+
+
+def test_a_non_positive_area_inside_an_array_is_refused() -> None:
+    for bad in (0.0, -1.0):
+        with pytest.raises(ValueError, match="source_area_m2"):
+            noise_control.in_situ_transmission_loss(
+                [95.0, 96.0],
+                [70.0, 68.0],
+                source_area_m2=[0.9, bad],
+                receiver_area_m2=1.0,
+            )
+        with pytest.raises(ValueError, match="area_with_m2"):
+            noise_control.in_situ_insertion_loss(
+                [90.0, 92.0],
+                [72.0, 70.0],
+                area_without_m2=1.0,
+                area_with_m2=[bad, 1.0],
+            )
 
 
 def test_equation_twenty_one_is_the_insertion_shape() -> None:
@@ -544,28 +645,43 @@ def test_the_thesis_insertion_loss_reproduces_its_three_printed_columns() -> Non
 
     Case 18 of Figure 1, a duct on the source side and a diffuse room on the
     receiver side, so both areas are a quarter of the room absorption and both
-    move band by band with the reverberation time. The tolerance is the
-    rounding of the printed inputs, 0,1 dB on the levels and 0,01 s on the
-    times, which together reach about 0,13 dB; the printed tenth of the D_is
-    column is out of reach from these summary columns and the thesis computed
-    it from unrounded position means.
+    move band by band with the reverberation time. The whole table goes in at
+    once, with the two areas as the band arrays reverberant_surface_area_m2
+    returns. The tolerance is the rounding of the printed inputs, 0,1 dB on
+    the levels and 0,01 s on the times, which together reach about 0,13 dB;
+    the printed tenth of the D_is column is out of reach from these summary
+    columns and the thesis computed it from unrounded position means.
     """
     for table in oracle.HOLGADO_INSERTION_TESTS.values():
-        for frequency, row in table.items():
-            time_without, level_without, time_with, level_with, printed = row
-            areas = noise_control.reverberant_surface_area_m2(
-                oracle.HOLGADO_ROOM_VOLUME_M3, [time_without, time_with]
-            )
-            result = noise_control.in_situ_insertion_loss(
-                [level_without],
-                [level_with],
-                area_without_m2=float(areas[0]),
-                area_with_m2=float(areas[1]),
-                frequencies=[frequency],
-                field_correction_difference_db=0.0,
+        rows = list(table.values())
+        area_without = noise_control.reverberant_surface_area_m2(
+            oracle.HOLGADO_ROOM_VOLUME_M3, [row[0] for row in rows]
+        )
+        area_with = noise_control.reverberant_surface_area_m2(
+            oracle.HOLGADO_ROOM_VOLUME_M3, [row[2] for row in rows]
+        )
+        result = noise_control.in_situ_insertion_loss(
+            [row[1] for row in rows],
+            [row[3] for row in rows],
+            area_without_m2=area_without,
+            area_with_m2=area_with,
+            frequencies=list(table),
+            field_correction_difference_db=0.0,
+            case=18,
+        )
+        assert result.loss_db == pytest.approx([row[4] for row in rows], abs=0.15)
+        # The same numbers as one band at a time with scalar areas.
+        for index, row in enumerate(rows):
+            band = noise_control.in_situ_insertion_loss(
+                [row[1]],
+                [row[3]],
+                area_without_m2=float(area_without[index]),
+                area_with_m2=float(area_with[index]),
                 case=18,
             )
-            assert float(result.loss_db[0]) == pytest.approx(printed, abs=0.15)
+            assert float(result.loss_db[index]) == pytest.approx(
+                float(band.loss_db[0]), abs=1e-12
+            )
 
 
 def test_the_thesis_area_term_is_not_negligible_in_every_band() -> None:
@@ -610,22 +726,73 @@ def test_the_printed_table_of_iso11820_is_not_that_subtraction() -> None:
         assert oracle.BARRON_TABLE_3_4_DB[margin] != table_value
 
 
-def test_the_extraneous_cap_trips_at_the_lowest_margin_table_one_accepts() -> None:
-    """The two routes of the standard disagree at their shared boundary.
+def test_the_two_routes_agree_at_the_three_decibel_margin() -> None:
+    """Table 1 and the energy route share their boundary.
 
-    Table 1 accepts a 3 dB margin and hands back a 3 dB correction. The energy
-    route of 9.1.1 and 9.1.2 reaches 3,0206 dB at that same margin, which is
-    over the 3 dB cap the clauses state, so it reports the level as not
-    determined. Barron's own table prints 3,0 dB there, rounded.
+    BS EN ISO 11820:1997, clause 4.1 on printed folio 4 (PDF page 12): "If
+    the measuring conditions are such that a correction of 3 dB is not
+    sufficient, then L_p1 cannot be determined", and Table 1 on folio 5 (PDF
+    page 13) prints "< 3" as invalid and "3" as a correction of 3. The energy
+    route of 9.1.1, folio 10 (PDF page 18), is offered as an alternative to
+    that table under the same "maximum correction is 3 dB". So a 3 dB margin
+    is admitted on both routes, and the 3,0206 dB the energy subtraction
+    takes off there is the printed 3 dB unrounded, which is how ISO 3746:2010
+    8.3.3, folio 15 (PDF page 24), prints the same number: "3 dB (the value
+    for dL_pA = 3 dB)". Barron's own table prints 3,0 dB there, rounded.
     """
     assert oracle.BARRON_TABLE_3_4_DB[3.0] == 3.0
     assert float(noise_control.silencer_background_correction_db([3.0])[0]) == 3.0
-    with pytest.warns(SilencerInSituWarning, match="3 dB"):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", SilencerInSituWarning)
         corrected, capped = noise_control.extraneous_corrected_mean_level_db(
             [CARRIER_DB], [CARRIER_DB - 3.0]
         )
-    assert capped is True
+    assert capped is False
     assert CARRIER_DB - corrected == pytest.approx(3.0206, abs=5e-4)
+
+
+def test_a_margin_under_three_decibels_trips_the_extraneous_cap() -> None:
+    """A tenth under the row Table 1 still accepts is past the cap."""
+    with pytest.warns(SilencerInSituWarning, match="3 dB"):
+        corrected, capped = noise_control.extraneous_corrected_mean_level_db(
+            [CARRIER_DB], [CARRIER_DB - 2.9]
+        )
+    assert capped is True
+    assert CARRIER_DB - corrected > 3.0206
+
+
+def test_no_printed_three_decibel_margin_trips_the_cap() -> None:
+    """Every level from 40 dB to 130 dB in tenths, 3,0 dB over its extraneous sound.
+
+    The two energy means of such a pair differ from 3 dB by up to 1,4e-14 dB
+    in floating point, and 111 of the 901 pairs land under it, so a bare
+    comparison with 3 would flip printed 3,0 dB margins into capped ones.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", SilencerInSituWarning)
+        for step in range(901):
+            level = round(40.0 + 0.1 * step, 10)
+            _, capped = noise_control.extraneous_corrected_mean_level_db(
+                [level], [level - 3.0]
+            )
+            assert capped is False
+
+
+def test_the_margin_window_is_the_declared_thousandth_of_a_nanodecibel() -> None:
+    """A margin two nanodecibels short of 3 dB is short of it, not equal to it.
+
+    The window that keeps a printed 3,0 dB margin out of the cap is the
+    absolute one the module declares, so a deficit larger than it caps. Only
+    a relative tolerance left at its default would widen the window to three
+    times the declared figure, the 3 dB of clause 4 being the reference.
+    """
+    for deficit, expected in ((5e-10, False), (2e-9, True), (1e-8, True)):
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", SilencerInSituWarning)
+            _, capped = noise_control.extraneous_corrected_mean_level_db(
+                [CARRIER_DB], [CARRIER_DB - (3.0 - deficit)]
+            )
+        assert capped is expected
 
 
 def test_two_worked_background_subtractions() -> None:

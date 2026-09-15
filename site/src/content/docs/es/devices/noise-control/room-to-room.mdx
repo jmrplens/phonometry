@@ -19,6 +19,12 @@ references:
     publisher: "CRC Press"
     doi: "10.1201/9781351228152"
     note: "Las relaciones de campo estacionario en recinto (apartado 6.4, Ecs. 6.43-6.44) en las que se apoyan steady_state_spl y room_constant, y la pérdida por inserción del cerramiento del apartado 7.4.2 (Ecs. 7.103, 7.111), que es el modelo de cerramiento por omisión de la biblioteca."
+  - type: book
+    authors: ["Barron, R. F."]
+    year: 2003
+    title: "Industrial noise control and acoustics"
+    publisher: "Marcel Dekker"
+    note: "El campo directo de la partición en el recinto receptor (apartado 7.5, Ecs. 7-71 y 7-72) y el Ejemplo 7-6, un operario a 1,5 m del muro, que reproduce receiver_distance_m."
   - type: standard
     organization: "American National Standards Institute"
     year: 2019
@@ -582,17 +588,81 @@ el volumen, y devuelve 163,3 Hz para ese recinto.
 En espacio: los dos niveles son **promedios espaciales del campo reverberante**.
 $L_{p2}$ es lo que informaría un micrófono paseado por el recinto receptor, no
 el nivel en la mesa arrimada a la medianera, donde el campo directo de la
-superficie radiante suma unos decibelios dentro de aproximadamente una longitud
-de onda. Lo mismo vale al revés en el lado emisor: $L_{p1}$ es el nivel
+superficie radiante suma unos decibelios (el apartado siguiente les pone cifra). Lo mismo vale al revés en el lado emisor: $L_{p1}$ es el nivel
 reverberante que excita toda la partición, y una persona de pie junto a la
 máquina está en su campo directo y oye más, así que un nivel *medido* en el
 recinto emisor hay que tomarlo lejos tanto de la máquina como del muro para que
 sea la entrada correcta. Es la razón de que las normas de campo mantengan sus
-posiciones de micrófono a media longitud de onda de toda superficie, y la razón
-de que este cálculo no pueda responder dónde colocar el puesto de trabajo dentro
-del recinto receptor; cuando esa es la pregunta, la herramienta son los métodos
-de fuentes imagen y de rayos de
+posiciones de micrófono a media longitud de onda de toda superficie. Más allá
+del campo directo de la propia partición, que viene a continuación, es también
+la razón de que este cálculo no pueda responder dónde colocar el puesto de
+trabajo dentro del recinto receptor; cuando esa es la pregunta, la herramienta
+son los métodos de fuentes imagen y de rayos de
 [Fuentes imagen y campo estacionario](/phonometry/es/buildings/rooms/room-image-sources/).
+
+### Un receptor junto a la partición
+
+Barron, *Industrial Noise Control and Acoustics* (Marcel Dekker, 2003), apartado
+7.5, lleva el campo directo de la partición al recinto receptor. Cerca del muro,
+la potencia que radia se reparte sobre su cara; más lejos, el muro se comporta
+como una fuente de directividad 2; y las dos descripciones se encuentran en
+$r^* = (S_\mathrm{w}/2\pi)^{1/2}$. Sus ecuaciones (7-71) y (7-72), escritas con
+las variables de la Ecuación (4.101), añaden un término dentro del logaritmo,
+
+$$
+\text{NR} = \text{TL}
+- 10\log_{10}\!\left[\frac{S_\mathrm{w}}{S_2 \alpha_2} + g\right],
+\qquad
+g = \begin{cases}
+1/4 & r_2 < r^* \\
+S_\mathrm{w} / (8 \pi r_2^2) & r_2 \geq r^*
+\end{cases}
+$$
+
+con $r_2$ la distancia del receptor a la partición. Las dos ramas coinciden en
+$r^*$ y la segunda se desvanece al crecer $r_2$, así que la ecuación de Norton es
+el límite lejano de la pareja de Barron. `receiver_distance_m` activa el término.
+El Ejemplo 7-6 de Barron es una fábrica de papel: un refinador Jordan con un
+nivel de potencia acústica de 105 dB está en un recinto de 900 m² de superficie
+con un coeficiente de absorción medio de 0,05, y un operario está a 1,5 m del
+muro de 16 m², de 30 dB de pérdida por transmisión, en un recinto de 100 m² a
+0,35. El refinador está a 4 m del muro con un factor de directividad de 2, lo que
+mueve el nivel que Barron imprime a su lado y no el nivel reverberante que excita
+el muro:
+
+```python
+import numpy as np
+from phonometry import noise_control, room
+
+source = noise_control.SourceRoom(
+    power_level=105.0,
+    room_constant=room.room_constant(900.0, 0.05),   # 47.37 m2
+    directivity=2.0,
+)
+receiving = room.room_constant(100.0, 0.35)          # 53.85 m2, la R2 de Barron
+
+far = noise_control.room_to_room_transmission(
+    [1000.0], 30.0, 16.0, receiving, source=source,
+)
+near = noise_control.room_to_room_transmission(
+    [1000.0], 30.0, 16.0, receiving, source=source, receiver_distance_m=1.5,
+)
+print(np.round(far.received_level, 1))    # [59.]
+print(np.round(near.received_level, 1))   # [61.6]
+```
+
+Barron imprime 61,7 dB, que son estos 61,6 dB más los 0,1 dB que suma a todo
+nivel por la impedancia característica del aire; la biblioteca no los suma, como
+tampoco lo hace `steady_state_spl`. Entre los dos números hay dos lecturas de su
+página. Escribe el término reverberante del recinto receptor sobre su constante
+de sala $R_2 = S_2\alpha_2/(1-\alpha_2)$ donde Norton escribe $S_2\alpha_2$, así
+que sus 53,85 m² entran como absorción del receptor. Y su ejemplo es de una sola
+banda, así que la frecuencia central que se da aquí sólo la etiqueta. Su $r^*$
+es de 1,60 m, el operario está dentro y recibe el cuarto entero: 2,65 dB sobre el
+nivel reverberante. A 3 m el exceso es de 0,9 dB y a 10 m de 0,1 dB, que es donde
+la Ecuación (4.101) vuelve a ser la respuesta. `required_transmission_loss` lleva
+el mismo término, así que un muro especificado con una distancia de receptor
+queda especificado para la mesa a esa distancia.
 
 ## Qué cubre esta guía
 
@@ -610,6 +680,9 @@ en la familia NC por omisión y en la familia RC Mark II con
 `.meets_target` y `.table()`; y la ecuación del cerramiento del apartado 4.10
 (Ec. 4.115) mediante `enclosure_required_transmission_loss`, en los dos
 modelos de interior, el de Norton y el de Bies, que lista `ENCLOSURE_MODELS`.
+Con `receiver_distance_m`, el campo directo de la partición en un receptor del
+recinto receptor, ecuaciones (7-71) y (7-72) de Barron (2003), en la cadena y en
+la pérdida por transmisión necesaria.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -618,7 +691,7 @@ otra parte; los flancos como trayectoria modelada en lugar de como provisión a
 tanto alzado; las fugas y aberturas de un cerramiento, que necesitan el
 compuesto de la guía de control de ruido industrial; y todo lo que quede por
 debajo de la frecuencia de Schroeder de cada recinto, o más cerca de una
-superficie que media longitud de onda.
+superficie distinta de la partición que media longitud de onda.
 </ScopeClaim>
 </Scope>
 

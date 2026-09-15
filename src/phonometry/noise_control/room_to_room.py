@@ -42,6 +42,43 @@ Norton also warns that the measured noise reduction runs a few decibels below
 the prediction because of flanking transmission through mechanical connections
 and air leaks, which ``flanking_penalty`` applies as an explicit debit.
 
+**A receiver near the partition.** Equation (4.101) balances two reverberant
+fields, so the level it gives is the one far enough from the partition that the
+direct sound the partition radiates has died away. Barron, *Industrial Noise
+Control and Acoustics* (Marcel Dekker, 2003), 7.5.1, treats the partition as a
+source of area :math:`S_\mathrm{w}` whose direct energy density is
+:math:`W / (S_\mathrm{w} c)` close to it, the radiated power spread over the
+face of the wall, and :math:`W / (2 \pi r^2 c)` farther away, where the wall
+acts as a source of directivity factor :math:`Q = 2`, the two meeting at
+:math:`r^* = (S_\mathrm{w} / 2 \pi)^{1/2}`. In 7.5.2 his Equations (7-71) and
+(7-72), printed folio 297, carry that direct field through the partition into
+the receiving room. Written over the variables of Equation (4.101) they are
+
+.. math::
+
+   \mathrm{NR} = \mathrm{TL} -
+   10 \log_{10}\!\left[\frac{S_\mathrm{w}}{S_2 \alpha_2} + g\right],
+   \qquad
+   g = \begin{cases}
+   1/4 & r_2 < r^*, \\
+   S_\mathrm{w} / (8 \pi r_2^2) & r_2 \geq r^*,
+   \end{cases}
+
+with :math:`r_2` the distance of the receiver from the partition, given as
+``receiver_distance_m``. The two branches agree at :math:`r^*` and the second
+vanishes as :math:`r_2` grows, so Equation (4.101) is the far limit of Barron's
+pair, and it is what the chain computes when no distance is given. Two things
+stand between Barron's printed numbers and the ones computed here. Barron
+writes the reverberant term of the receiving room over its room constant
+:math:`R_2 = S_2 \alpha_2 / (1 - \alpha_2)` where Norton writes
+:math:`S_2 \alpha_2`, so reproducing Barron means passing :math:`R_2` as
+``receiving_absorption``. And Barron adds
+:math:`10 \log_{10}(\rho_0 c W_\mathrm{ref} / p_\mathrm{ref}^2) = 0{,}1` dB to
+every level, which is not added here, as it is not in
+:func:`phonometry.room.steady_state_spl`. His Example 7-6, printed folio 298, an
+operator 1,5 m from a 16 m2 wall, reads 61,7 dB with that 0,1 dB; without the
+direct field of the wall the chain would give 2,65 dB less.
+
 **The source-room level.** In a plant room the receiver of interest is the
 partition, not a point near the machine, so the level that drives the
 transmission is the reverberant field alone,
@@ -61,6 +98,7 @@ partition is specified from.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -187,9 +225,13 @@ class RoomToRoomResult:
     :ivar receiving_absorption: Equivalent absorption area of the receiving
         room ``S_2 alpha_2`` per band, m2.
     :ivar noise_reduction: The delivered noise reduction ``NR`` per band, dB:
-        Equation (4.101) less :attr:`flanking_penalty`.
-    :ivar received_level: Reverberant sound pressure level in the receiving
-        room :math:`L_{p2} = L_{p1} - \mathrm{NR}`, dB.
+        Equation (4.101) less :attr:`flanking_penalty`, with the direct field
+        of the partition of Barron (2003) Equations (7-71) and (7-72) when
+        :attr:`receiver_distance_m` is set.
+    :ivar received_level: Sound pressure level in the receiving room
+        :math:`L_{p2} = L_{p1} - \mathrm{NR}`, dB: the reverberant level, or
+        the level at :attr:`receiver_distance_m` from the partition when that
+        is set.
     :ivar flanking_penalty: The debit applied to the predicted noise reduction
         for flanking transmission and air leaks, dB.
     :ivar source_power_level: The source sound power level ``L_W`` the source
@@ -199,6 +241,9 @@ class RoomToRoomResult:
     :ivar target: The design criterion value (e.g. ``45`` for NC 45), or
         ``None``.
     :ivar label: A short human label of the chain.
+    :ivar receiver_distance_m: Distance of the receiver from the partition
+        ``r_2``, m, when the direct field of the partition was added (Barron
+        2003, 7.5.2), or ``None`` for the reverberant field alone.
     """
 
     frequencies: np.ndarray
@@ -213,6 +258,7 @@ class RoomToRoomResult:
     criterion: str
     target: float | None
     label: str
+    receiver_distance_m: float | None = None
 
     def __post_init__(self) -> None:
         """Reject a chain whose rows do not all run over the same bands.
@@ -310,10 +356,12 @@ class RoomToRoomResult:
         .. math::
 
            \mathrm{TL}_\mathrm{req} = L_{p1} - L_{p2,\mathrm{target}}
-           + 10 \log_{10}(S_\mathrm{w} / S_2 \alpha_2) + \text{penalty},
+           + 10 \log_{10}(S_\mathrm{w} / S_2 \alpha_2 + g) + \text{penalty},
 
-        with :math:`L_{p2,\mathrm{target}}` the design criterion curve. The
-        ``tau S_w`` term is
+        with :math:`L_{p2,\mathrm{target}}` the design criterion curve and
+        :math:`g` the direct field of the partition at
+        :attr:`receiver_distance_m` (Barron 2003, Equations (7-71) and
+        (7-72)), zero when no distance was given. The ``tau S_w`` term is
         left out of the inverse (it depends on the answer), which is how the
         equation is used to specify a partition. ``None`` when no target was
         declared.
@@ -321,10 +369,11 @@ class RoomToRoomResult:
         curve = self.criterion_curve
         if curve is None:
             return None
+        direct = _partition_direct_field(self.partition_area, self.receiver_distance_m)
         return np.asarray(
             self.source_level
             - curve
-            + 10.0 * np.log10(self.partition_area / self.receiving_absorption)
+            + 10.0 * np.log10(self.partition_area / self.receiving_absorption + direct)
             + self.flanking_penalty,
             dtype=np.float64,
         )
@@ -445,16 +494,38 @@ def room_to_room_transmission(
     include_partition_transmission: bool = False,
     criterion: DesignCriterion | None = None,
     label: str = "Room to room",
+    receiver_distance_m: float | None = None,
 ) -> RoomToRoomResult:
     r"""Sound transmission from one room to another (Norton 2e Equation (4.101)).
 
     Computes the noise reduction the partition and the receiving room deliver
-    together, and the reverberant spectrum in the receiving room. The
+    together, and the spectrum in the receiving room: the reverberant one, or
+    the one at ``receiver_distance_m`` from the partition. The
     source-room level is either given directly as ``source.level`` or built
     from a sound power level and the source room's room constant, in which case
     the reverberant field alone is used (:func:`phonometry.room.steady_state_spl`
     at ``distance=None``), which is the level that drives the transmission
     across the partition.
+
+    With ``receiver_distance_m`` the level is the one at that distance from
+    the partition rather than the reverberant level alone: the direct field
+    the partition radiates into the receiving room is added as in Barron
+    (2003), 7.5.2, Equations (7-71) and (7-72), printed folio 297,
+
+    .. math::
+
+       \mathrm{NR} = \mathrm{TL} -
+       10 \log_{10}\!\left[\frac{S_\mathrm{w}}{S_2 \alpha_2} + g\right]
+       - \text{penalty},
+
+    with :math:`g = 1/4` closer than :math:`r^* = (S_\mathrm{w} / 2 \pi)^{1/2}`
+    and :math:`g = S_\mathrm{w} / (8 \pi r_2^2)` from :math:`r^*` on. Barron
+    writes the reverberant term over the room constant
+    :math:`R_2 = S_2 \alpha_2 / (1 - \alpha_2)` where Norton writes
+    :math:`S_2 \alpha_2`, so reproducing his Example 7-6 (printed folio 298)
+    means passing :math:`R_2` as ``receiving_absorption``; the 0,1 dB he adds
+    to every level for :math:`\rho_0 c W_\mathrm{ref} / p_\mathrm{ref}^2` is not
+    added, as it is not in :func:`phonometry.room.steady_state_spl`.
 
     :param frequencies: Octave-band centre frequencies, Hz (1-D array).
     :param transmission_loss: Transmission loss of the partition ``TL``, dB;
@@ -477,10 +548,15 @@ def room_to_room_transmission(
         family, the target curve and the flanking allowance. ``None`` is the
         default criterion, an ``"NC"`` family with no target.
     :param label: A short human label of the chain.
+    :param receiver_distance_m: Distance of the receiver from the partition
+        ``r_2``, m, to add the direct field of the partition (Barron 2003,
+        Equations (7-71) and (7-72)); ``None`` (default) for the reverberant
+        field alone, Equation (4.101) as Norton writes it.
     :return: A :class:`RoomToRoomResult`.
     :raises ValueError: If the spectra do not share one value per band, if
-        neither or both source descriptions are given, or if the criterion
-        family or the sound power model is unknown.
+        neither or both source descriptions are given, if the criterion
+        family or the sound power model is unknown, or if
+        ``receiver_distance_m`` is given and is not a positive finite number.
     """
     from ..room.steady_field import SOURCE_POWER_MODELS, steady_state_spl
 
@@ -528,11 +604,17 @@ def room_to_room_transmission(
         criterion.flanking_penalty, "criterion.flanking_penalty"
     )
     family, goal = validate_target(criterion.family, criterion.target)
+    r_2 = (
+        None
+        if receiver_distance_m is None
+        else require_positive(receiver_distance_m, "receiver_distance_m")
+    )
 
     total_absorption = absorption
     if include_partition_transmission:
         total_absorption = absorption + s_w * 10.0 ** (-tl / 10.0)
-    nr = tl - 10.0 * np.log10(s_w / total_absorption) - penalty
+    direct = _partition_direct_field(s_w, r_2)
+    nr = tl - 10.0 * np.log10(s_w / total_absorption + direct) - penalty
     return RoomToRoomResult(
         frequencies=f,
         source_level=lp1,
@@ -546,4 +628,33 @@ def room_to_room_transmission(
         criterion=family,
         target=goal,
         label=label,
+        receiver_distance_m=r_2,
     )
+
+
+def _partition_direct_field(
+    partition_area: float, receiver_distance_m: float | None
+) -> float:
+    r"""The direct field of the partition beside :math:`S_\mathrm{w} / S_2 \alpha_2`.
+
+    Barron (2003) Equations (7-71) and (7-72), printed folio 297, divided
+    through by the 4 of the reverberant term so that they add to the ratio of
+    Norton's Equation (4.101): the bracket
+    :math:`4 S_\mathrm{w} / R_2 + 1` becomes
+    :math:`S_\mathrm{w} / R_2 + 1/4` closer than
+    :math:`r^* = (S_\mathrm{w} / 2 \pi)^{1/2}`, and
+    :math:`4 S_\mathrm{w} / R_2 + S_\mathrm{w} / (2 \pi r_2^2)` becomes
+    :math:`S_\mathrm{w} / R_2 + S_\mathrm{w} / (8 \pi r_2^2)` from there on.
+    At :math:`r^*` the two branches are the same number, so which side the
+    threshold itself falls on changes nothing.
+
+    :param partition_area: Area of the partition ``S_w``, m2.
+    :param receiver_distance_m: Distance of the receiver from the partition
+        ``r_2``, m, or ``None`` for the reverberant field alone.
+    :return: The dimensionless term ``g``; ``0`` without a distance.
+    """
+    if receiver_distance_m is None:
+        return 0.0
+    if receiver_distance_m < math.sqrt(partition_area / (2.0 * math.pi)):
+        return 0.25
+    return partition_area / (8.0 * math.pi * receiver_distance_m**2)

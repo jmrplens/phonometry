@@ -6634,7 +6634,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   ruidosa de las dos, y los niveles impresos dicen que lo es. Al recalcular el
   caso A con el método de categoría 1 que prescribe el anexo, en la sala de
   20 m por 15 m por 7 m de la tabla B.2 con el coeficiente de absorción medio
-  0,15 de la tabla B.3, salen 82,09 dB en 17 m, 4 m, 1,6 m y 80,27 dB en 3 m,
+  0,15 de la tabla B.3, salen 82,10 dB en 17 m, 4 m, 1,6 m y 80,26 dB en 3 m,
   12 m, 1,6 m: los dos niveles que imprime la tabla B.6, cada uno bajo la
   etiqueta del otro puesto. La tabla B.8 se contradice en su propia fila, porque
   imprime la posición lejana para W1 y a su lado 82 dB, el nivel cercano
@@ -6645,7 +6645,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   página 28 del PDF (página impresa 18). Todo de la EN ISO 11690-3:1998 tal
   como la publica la BS EN ISO 11690-3:1999. Con el reparto de la figura los
   seis niveles de la tabla B.9 vuelven dentro de 0,07 dB, y con el de las
-  tablas los cuatro de W1 y W2 fallan entre 0,48 dB y 1,04 dB (el W3 está en
+  tablas, los cuatro de W1 y W2 fallan entre 0,48 dB y 1,04 dB (el W3 está en
   el mismo sitio en los dos), mientras que el caso A falla 1,8 dB en las dos
   filas.
 - **Consecuencia para las tablas de la propia norma:** las columnas de posición
@@ -6657,7 +6657,12 @@ dos ediciones con las mismas entradas y en el mismo orden.
   casos del anexo B leen las coordenadas impresas y nunca las etiquetas, y la
   fila "ISO 11690-3:1998 Annex B, Figure B.1 against Tables B.5 and B.8"
   registra que los resultados vuelven en las posiciones que dibuja la figura y
-  en ninguna otra.
+  en ninguna otra. Los 50 dB de fondo que la tabla B.5 imprime junto a W1
+  acompañan a esa etiqueta y no a las coordenadas que tiene al lado, así que se
+  oyen en la posición que la figura da a W1, junto a la máquina M2. Vale
+  0,004 dB: leído al revés el caso A da 82,09 dB y 80,27 dB en vez de 82,10 dB
+  y 80,26 dB, y las dos lecturas redondean a la décima que imprime la tabla
+  B.6.
 - **Estado:** no reportada.
 
 ## Propiedades de las fuentes, relacionadas, que no son erratas

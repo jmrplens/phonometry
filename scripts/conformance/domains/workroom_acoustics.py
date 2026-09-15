@@ -949,12 +949,19 @@ def _annex_b_level(
 def _annex_b_case_a() -> dict[str, float]:
     """The two levels of case A, by position."""
     return {
-        "beside M2": _annex_b_level(prediction.ANNEX_B_BESIDE_M2, (_B_M1, _B_M2)),
-        "far corner": _annex_b_level(
-            prediction.ANNEX_B_FAR_CORNER,
+        # Table B.5 prints the 50 dB of background against the label W1, and the
+        # label is the half of that table this annex gets right: Figure B.1 puts
+        # W1 beside M2, and the levels of Table B.6 come back there. So the
+        # background is heard beside M2 and not in the far corner, which is
+        # where the label W2 belongs. It is worth 0,004 dB either way, and both
+        # readings round to the printed tenth; this one is the one that agrees
+        # with the rest of the row.
+        "beside M2": _annex_b_level(
+            prediction.ANNEX_B_BESIDE_M2,
             (_B_M1, _B_M2),
             background_db=prediction.ANNEX_B_BACKGROUND_DB,
         ),
+        "far corner": _annex_b_level(prediction.ANNEX_B_FAR_CORNER, (_B_M1, _B_M2)),
     }
 
 
@@ -962,12 +969,12 @@ def _annex_b_case_b(new_machine: _Machine) -> dict[str, float]:
     """The three levels of case B for one of the two machines on offer."""
     machines = (_B_M1, _B_M2, new_machine)
     return {
-        "beside M2": _annex_b_level(prediction.ANNEX_B_BESIDE_M2, machines),
-        "far corner": _annex_b_level(
-            prediction.ANNEX_B_FAR_CORNER,
+        "beside M2": _annex_b_level(
+            prediction.ANNEX_B_BESIDE_M2,
             machines,
             background_db=prediction.ANNEX_B_BACKGROUND_DB,
         ),
+        "far corner": _annex_b_level(prediction.ANNEX_B_FAR_CORNER, machines),
         "beside the new machine": _annex_b_level(
             prediction.ANNEX_B_BESIDE_THE_NEW_MACHINE, machines
         ),
@@ -1018,10 +1025,10 @@ def _chk_annex_b_case_b() -> Outcome:
         total,
         subject="printed levels of Table B.9",
         expected_label=(
-            f"6/6: five within the 0,05 dB half step of the printed tenth "
-            f"(worst {worst:.3f} dB), and the cell beside the new machine with "
-            f"the first choice at its recorded {_B_CASE_B_EXCEPTION_DB:+.3f} dB "
-            f"(computed {exception:+.4f} dB)"
+            f"{total}/{total}: all but one within the 0,05 dB half step of "
+            f"the printed tenth (worst {worst:.3f} dB), and the cell beside the "
+            f"new machine with the first choice at its recorded "
+            f"{_B_CASE_B_EXCEPTION_DB:+.3f} dB (computed {exception:+.4f} dB)"
         ),
     )
 
@@ -1065,15 +1072,15 @@ def _chk_annex_b_labels() -> Outcome:
         reproduced + rejected,
         2 * cells,
         subject=(
-            "readings of the six printed cells, reproduced at the positions "
-            "Figure B.1 draws and rejected at the positions Tables B.5 and B.8 "
-            "tabulate"
+            f"readings of the {cells} printed cells, reproduced at the "
+            "positions Figure B.1 draws and rejected at the positions Tables "
+            "B.5 and B.8 tabulate"
         ),
         expected_label=(
-            "12/12: the six cells within 0,1 dB at the positions Figure B.1 "
-            "draws, and the same six more than 0,1 dB out at the positions "
-            f"Tables B.5 and B.8 tabulate (nearest {min(misses):.3f} dB, "
-            f"farthest {max(misses):.3f} dB)"
+            f"{2 * cells}/{2 * cells}: the {cells} cells within 0,1 dB at the "
+            f"positions Figure B.1 draws, and the same {cells} more than 0,1 dB "
+            f"out at the positions Tables B.5 and B.8 tabulate (nearest "
+            f"{min(misses):.3f} dB, farthest {max(misses):.3f} dB)"
         ),
     )
 

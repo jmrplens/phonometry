@@ -16,6 +16,7 @@ from __future__ import annotations
 import math
 
 import numpy as np
+from reference_data import workroom_prediction as barron
 
 import phonometry as ph
 
@@ -310,7 +311,7 @@ def _chk_enclosure_floor() -> Outcome:
     return numeric(10.0 * math.log10(0.3), float(res.correction[0]), 1e-3, unit="dB")
 
 
-# --- Room-to-room chain (Norton & Karczub 2e, Chapter 4 problems) ---------
+# --- Room-to-room chain (Norton & Karczub 2e Chapter 4; Barron 2003, 7.5.2) ---
 
 #: Receiving room of Norton problem 4.21: 8 x 9 x 3 m, printed absorption
 #: coefficients of the walls, floor and ceiling over 125 Hz to 4 kHz.
@@ -387,6 +388,47 @@ def _chk_room_to_room_chain() -> Outcome:
         0.1,
         unit="dB",
         expected_label="0 dB +/-0.1 (max |diff| over the 6 bands)",
+    )
+
+
+@register(
+    _NOISE_CONTROL,
+    "Barron (2003) Example 7-6 with Eqs. (7-71) and (7-72), printed folios 297 "
+    "and 298, PDF pages 309 and 310",
+    "Refiner room to an operator 1.5 m from a 16 m2 wall (inside r* = 1.596 m) "
+    "-> L_p2 = 61.7 dB",
+)
+def _chk_room_to_room_near_the_wall() -> Outcome:
+    # Barron writes the reverberant term of the receiving room over its room
+    # constant R2, so R2 is what goes in as the receiving absorption. The
+    # 0.1 dB of rho_0 c W_ref / p_ref^2 that Barron adds to every level
+    # (folio 295) is left out by the library and added back here. The example
+    # carries one number rather than a spectrum, so one band stands for it.
+    source_constant = ph.room.room_constant(
+        barron.BARRON_EXAMPLE_7_6_SOURCE_SURFACE_M2,
+        barron.BARRON_EXAMPLE_7_6_SOURCE_ABSORPTION,
+    )
+    res = ph.noise_control.room_to_room_transmission(
+        [1000.0],
+        barron.BARRON_EXAMPLE_7_6_TRANSMISSION_LOSS_DB,
+        barron.BARRON_EXAMPLE_7_6_WALL_M2,
+        ph.room.room_constant(
+            barron.BARRON_EXAMPLE_7_6_RECEIVING_SURFACE_M2,
+            barron.BARRON_EXAMPLE_7_6_RECEIVING_ABSORPTION,
+        ),
+        source=ph.noise_control.SourceRoom(
+            power_level=barron.BARRON_EXAMPLE_7_6_POWER_LEVEL_DB,
+            room_constant=source_constant,
+            directivity=barron.BARRON_EXAMPLE_7_6_DIRECTIVITY,
+        ),
+        receiver_distance_m=barron.BARRON_EXAMPLE_7_6_OPERATOR_DISTANCE_M,
+    )
+    return numeric(
+        barron.BARRON_EXAMPLE_7_6_OPERATOR_LEVEL_DB,
+        float(res.received_level[0]) + barron.BARRON_IMPEDANCE_TERM_DB,
+        0.05,
+        unit="dB",
+        places=2,
     )
 
 

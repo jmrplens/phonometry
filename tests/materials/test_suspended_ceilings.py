@@ -6,20 +6,23 @@ the specimen geometry of 4.1.1, the air-absorption cap of 4.2.1, and Table 1,
 the reproducibility of the round robin behind it.
 
 The second half of this file pins the chain 4.2.1 hangs off, on printed pages
-of four other documents and on three real laboratory reports. Each oracle names
-its document, its edition, its printed folio and its PDF page where one
-applies; the documents themselves are not in the repository, and the reports
-are cited rather than reproduced. The same numbers drive the conformance rows
-in ``scripts/conformance/domains/suspended_ceilings.py``.
+of four other documents and on three real laboratory reports. The numbers are
+in ``tests/reference_data/suspended_ceilings.py``, each with its document, its
+edition, its printed folio and its PDF page where one applies; the documents
+themselves are not in the repository, and the reports are cited rather than
+reproduced. The conformance rows in
+``scripts/conformance/domains/suspended_ceilings.py`` read the same numbers.
 """
 
 from __future__ import annotations
 
 import math
 import warnings
+from typing import Any
 
 import numpy as np
 import pytest
+from reference_data import suspended_ceilings as oracle
 
 from phonometry import environment, materials
 from phonometry.materials.absorbers.suspended_ceilings import (
@@ -30,8 +33,10 @@ from phonometry.materials.absorbers.suspended_ceilings import (
     MIN_FIXTURE_DENSITY_KG_M2,
     MIN_RELATIVE_HUMIDITY_PERCENT,
     MIN_ROOM_EDGE_ANGLE_DEG,
+    MIN_SUPPORT_SPACING_M,
     MOUNTING_TYPES,
     SUBSTRUCTURE_LIMITS_MM,
+    SUPPORT_SECTION_MM,
     TARGET_SPECIMEN_AREA_M2,
     TEST_OBJECT_SIZE_M,
     TYPE_E_DEPTH_MM,
@@ -167,10 +172,144 @@ def test_a_light_mounting_fixture_fails() -> None:
 
 
 def test_another_depth_is_allowed_but_is_not_the_ce_marking_one() -> None:
-    with pytest.warns(SuspendedCeilingWarning, match="CE marking"):
+    """4.1.1.2.3.1, printed folio 9 (PDF page 11): another depth still passes.
+
+    200 mm is "recommended", and it "shall be used for the compilation of data
+    for CE marking". Another depth is inside the test code, so the warning says
+    what the depth is not and stops there.
+    """
+    with pytest.warns(SuspendedCeilingWarning, match="CE marking") as caught:
         check = materials.check_ceiling_specimen(area_m2=10.8, depth_mm=400.0)
     assert check.satisfied is True
     assert check.ce_marking_depth is False
+    assert all("outside EN 16487" not in str(entry.message) for entry in caught)
+
+
+def test_a_limit_left_and_another_depth_are_told_apart_in_one_warning() -> None:
+    with pytest.warns(SuspendedCeilingWarning) as caught:
+        check = materials.check_ceiling_specimen(
+            area_m2=10.8, depth_mm=400.0, deflection_mm=8.0
+        )
+    (message,) = [str(entry.message) for entry in caught]
+    _, _, after = message.partition("outside EN 16487: ")
+    outside, _, rest = after.partition(". ")
+    assert outside == "the specimen deflects 8 mm, over the 5 mm of 4.1.1.2.3.5"
+    assert "CE marking" in rest
+    assert "outside" not in rest
+    assert check.satisfied is False
+
+
+def test_supports_inside_the_printed_section_and_spacing_pass() -> None:
+    """4.1.1.2.3.6, printed folio 10 (PDF page 12), both bounds met exactly."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", SuspendedCeilingWarning)
+        check = materials.check_ceiling_specimen(
+            area_m2=10.8,
+            depth_mm=200.0,
+            support_width_mm=50.0,
+            support_height_mm=50.0,
+            support_centre_distance_m=1.2,
+        )
+    assert check.supports_ok is True
+    assert check.satisfied is True
+
+
+def test_the_printed_support_limits_are_the_printed_ones() -> None:
+    assert SUPPORT_SECTION_MM == (50.0, 50.0)
+    assert MIN_SUPPORT_SPACING_M == 1.2
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("support_width_mm", 60.0), ("support_height_mm", 50.5)],
+)
+def test_a_support_over_the_printed_section_fails(field: str, value: float) -> None:
+    """4.1.1.2.3.6, printed folio 10 (PDF page 12), on each side in turn.
+
+    "The cross section of the support units shall be <= 50 mm x 50 mm".
+    """
+    dimension: dict[str, Any] = {field: value}
+    with pytest.warns(SuspendedCeilingWarning, match=r"4\.1\.1\.2\.3\.6"):
+        check = materials.check_ceiling_specimen(
+            area_m2=10.8, depth_mm=200.0, **dimension
+        )
+    assert check.supports_ok is False
+    assert check.satisfied is False
+
+
+def test_supports_closer_than_the_printed_spacing_fail() -> None:
+    """4.1.1.2.3.6: support units "at centre distances of >= 1,2 m"."""
+    with pytest.warns(SuspendedCeilingWarning, match=r"1\.2 m of 4\.1\.1\.2\.3\.6"):
+        check = materials.check_ceiling_specimen(
+            area_m2=10.8,
+            depth_mm=200.0,
+            support_width_mm=40.0,
+            support_height_mm=40.0,
+            support_centre_distance_m=1.0,
+        )
+    assert check.supports_ok is False
+    assert check.satisfied is False
+
+
+@pytest.mark.parametrize("value", [0.0, -1.2, float("nan"), float("inf")])
+def test_a_non_positive_support_spacing_is_refused(value: float) -> None:
+    with pytest.raises(ValueError, match="support_centre_distance_m"):
+        materials.check_ceiling_specimen(
+            area_m2=10.8, depth_mm=200.0, support_centre_distance_m=value
+        )
+
+
+def test_a_dry_room_fails_the_humidity_floor() -> None:
+    """4.2.2, printed folio 12 (PDF page 14), on the SRL room at 41 % and 44 %.
+
+    "The relative humidity in the room shall be at least 50 %", and 4.2.3,
+    printed folio 13 (PDF page 15), has it checked for each measurement.
+    """
+    with pytest.warns(SuspendedCeilingWarning, match=r"41 %.*50 % of 4\.2\.2"):
+        check = materials.check_ceiling_specimen(
+            area_m2=10.8, depth_mm=200.0, relative_humidity_percent=[41.0, 44.0]
+        )
+    assert check.humidity_ok is False
+    assert check.satisfied is False
+
+
+@pytest.mark.parametrize("humidity", [[62.0, 58.0], [50.0, 50.0], 55.0])
+def test_a_room_at_or_over_the_floor_passes(humidity: float | list[float]) -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", SuspendedCeilingWarning)
+        check = materials.check_ceiling_specimen(
+            area_m2=10.8, depth_mm=200.0, relative_humidity_percent=humidity
+        )
+    assert check.humidity_ok is True
+    assert check.satisfied is True
+
+
+def test_one_dry_measurement_among_humid_ones_fails() -> None:
+    with pytest.warns(SuspendedCeilingWarning, match="4.2.2"):
+        check = materials.check_ceiling_specimen(
+            area_m2=10.8, depth_mm=200.0, relative_humidity_percent=[62.0, 49.0, 58.0]
+        )
+    assert check.humidity_ok is False
+
+
+def test_an_omitted_humidity_is_not_judged() -> None:
+    check = materials.check_ceiling_specimen(area_m2=10.8, depth_mm=200.0)
+    assert check.humidity_ok is None
+    assert check.supports_ok is True
+    assert check.satisfied is True
+
+
+@pytest.mark.parametrize(
+    "humidity",
+    [[62.0, float("nan")], [], [[60.0, 60.0]], [-1.0], [101.0], "humid"],
+)
+def test_a_humidity_that_is_not_one_is_refused(humidity: object) -> None:
+    with pytest.raises(ValueError, match="relative_humidity_percent"):
+        materials.check_ceiling_specimen(
+            area_m2=10.8,
+            depth_mm=200.0,
+            relative_humidity_percent=humidity,  # type: ignore[arg-type]
+        )
 
 
 def test_the_ce_marking_depth_belongs_to_the_type_e_mounting_alone() -> None:
@@ -204,13 +343,16 @@ def test_an_unknown_mounting_letter_is_refused() -> None:
         "deflection_mm",
         "substructure_width_mm",
         "substructure_height_mm",
+        "support_width_mm",
+        "support_height_mm",
         "fixture_density_kg_m2",
     ],
 )
 def test_a_negative_geometry_is_refused_rather_than_judged(field: str) -> None:
     """An upper bound alone would let a negative length pass as conforming."""
+    negative: dict[str, Any] = {field: -1.0}
     with pytest.raises(ValueError, match=field):
-        materials.check_ceiling_specimen(area_m2=10.8, depth_mm=200.0, **{field: -1.0})
+        materials.check_ceiling_specimen(area_m2=10.8, depth_mm=200.0, **negative)
 
 
 @pytest.mark.parametrize("value", [float("-inf"), float("inf"), float("nan")])
@@ -264,96 +406,12 @@ def test_a_correction_inside_the_cap_is_silent() -> None:
 #: expected side of the correction tests owes nothing to the module under test.
 _TEN_LG_E = 10.0 * math.log10(math.e)
 
-#: ISO 9613-1:1993, Table 1, printed folio 9 (PDF page 12), in decibels per
-#: kilometre at one standard atmosphere (caption, printed folio 5). Keyed by
-#: the sub-table temperature in degrees Celsius and the humidity column in
-#: percent: (i) at 20 degC and (j) at 25 degC.
-_ISO9613_TABLE1_DB_PER_KM: dict[tuple[float, float], dict[float, float]] = {
-    (20.0, 50.0): {500.0: 2.73, 1000.0: 4.66, 2000.0: 9.86, 4000.0: 2.94e1},
-    (20.0, 60.0): {500.0: 2.79, 1000.0: 4.80, 2000.0: 9.25, 4000.0: 2.54e1},
-    (20.0, 90.0): {
-        125.0: 2.72e-1,
-        250.0: 9.66e-1,
-        500.0: 2.71,
-        1000.0: 5.30,
-        2000.0: 9.06,
-        4000.0: 2.02e1,
-    },
-    (25.0, 90.0): {
-        125.0: 2.35e-1,
-        250.0: 8.76e-1,
-        500.0: 2.80,
-        1000.0: 6.44,
-        2000.0: 1.10e1,
-        4000.0: 2.08e1,
-    },
-}
-
-#: Cox, T. J. and D'Antonio, P., *Acoustic Absorbers and Diffusers*, 3rd ed.,
-#: CRC Press 2017, Table 4.2, printed page 104 (PDF page 161): the air
-#: absorption constant at 20 degC in units of 1e-3 1/m, at the nominal octave
-#: centres 63 Hz to 8000 Hz. Only the humidity rows 4.2.2 admits are kept.
-_COX_BANDS_HZ = (63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0)
-_COX_M_MILLI: dict[float, tuple[float, ...]] = {
-    50.0: (0.028, 0.1, 0.3, 0.63, 1.07, 2.28, 6.83, 24.24),
-    60.0: (0.024, 0.088, 0.28, 0.64, 1.11, 2.14, 5.9, 20.48),
-    70.0: (0.021, 0.077, 0.26, 0.64, 1.15, 2.08, 5.32, 17.88),
-}
-
-#: Sound Research Laboratories Ltd (UKAS testing laboratory 0444), Test
-#: Certificate No. 13441, contract C/24570, 4 March 2020, page 1 of 1: a
-#: Combison dB42 suspended ceiling on an E-200 mounting measured to
-#: BS EN ISO 354:2003, at the six octave centres EN 16487 Table 1 covers.
-_SRL_BANDS_HZ = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
-_SRL_T1_S = (7.66, 6.79, 5.34, 5.39, 4.15, 2.09)
-_SRL_T2_S = (3.94, 3.44, 2.63, 2.53, 2.15, 1.46)
-_SRL_ALPHA_S = (0.56, 0.66, 0.88, 0.96, 1.03, 0.96)
-_SRL_VOLUME_M3 = 300.0
-_SRL_AREA_M2 = 10.7
-#: Degrees Celsius, percent relative humidity, millibars, for the empty room
-#: and for the room with the sample.
-_SRL_EMPTY = (17.5, 41.0, 1005.0)
-_SRL_WITH_SPECIMEN = (16.2, 44.0, 996.0)
-#: The fifteen one-third-octave coefficients the same certificate prints from
-#: 200 Hz to 5000 Hz, and the five octave ones it rated from them.
-_SRL_THIRD_OCTAVE_ALPHA_S = (
-    0.61,
-    0.66,
-    0.84,
-    0.87,
-    0.88,
-    0.93,
-    0.93,
-    0.96,
-    1.02,
-    1.02,
-    1.03,
-    1.04,
-    1.06,
-    0.96,
-    0.98,
-)
-_SRL_ALPHA_P = (0.70, 0.90, 0.95, 1.00, 1.00)
-
-#: SP Swedish National Testing and Research Institute, report P302808,
-#: Enclosure 24, 14 July 2003: an Acces C ceiling at 200 mm mounting depth,
-#: 10,8 m2 of specimen in a 200 m3 room, 20 degC / 90 % empty and
-#: 24 degC / 89 % on the object, rated alpha_w = 0,9, class A.
-_SP_VOLUME_M3 = 200.0
-_SP_AREA_M2 = 10.8
-
-#: CSTB (COFRAC 1-0305), Test Report No. AC14-26051052/10, ref. 93/149,
-#: Test 21, 14 May 2014, whose STANDARDS line reads "EN ISO 354, EN ISO 11654,
-#: prEN 16487": Hygiene Meditec A on an E-50 mounting, 10,5 m2, 18,0 degC /
-#: 62 % empty and 19,0 degC / 58 % with the sample, rated 0,70(MH), class C.
-_CSTB_AREA_M2 = 10.5
-
 
 def _m_from_printed_alpha(
     *, temperature_c: float, humidity: float, bands: tuple[float, ...]
 ) -> np.ndarray:
     """``m`` in 1/m from the printed ISO 9613-1 row, without the library."""
-    column = _ISO9613_TABLE1_DB_PER_KM[(temperature_c, humidity)]
+    column = oracle.ISO9613_1_TABLE_1_DB_PER_KM[(temperature_c, humidity)]
     alpha = np.array([column[band] for band in bands], dtype=float)
     return alpha / 1000.0 / _TEN_LG_E
 
@@ -362,16 +420,16 @@ def _library_m(
     *, temperature_c: float, humidity: float, bands: tuple[float, ...]
 ) -> np.ndarray:
     """The same ``m``, through the library's own EN ISO 354 conversion."""
-    column = _ISO9613_TABLE1_DB_PER_KM[(temperature_c, humidity)]
+    column = oracle.ISO9613_1_TABLE_1_DB_PER_KM[(temperature_c, humidity)]
     alpha = np.array([column[band] for band in bands], dtype=float)
     return np.asarray(materials.attenuation_from_alpha(alpha / 1000.0))
 
 
 def test_the_weighted_row_of_table_one_is_printed_too() -> None:
     """Table 1, printed folio 14: six bands and the weighted rating."""
-    printed = (0.23, 0.23, 0.11, 0.10, 0.10, 0.13)
+    printed = tuple(oracle.EN16487_TABLE_1_UNCERTAINTY.values())
     assert tuple(materials.reproducibility_uncertainty().tolist()) == printed
-    assert WEIGHTED_UNCERTAINTY == 0.08
+    assert WEIGHTED_UNCERTAINTY == oracle.EN16487_TABLE_1_WEIGHTED_UNCERTAINTY
 
 
 def test_the_two_coverage_factors_are_not_interchanged() -> None:
@@ -382,8 +440,11 @@ def test_the_two_coverage_factors_are_not_interchanged() -> None:
     an identity and it holds for any pair of numbers. What is checkable is that
     each document's own factor is the one the library uses for that document.
     """
-    assert EN16487_COVERAGE_FACTOR == 2.8
-    assert materials.absorption_coverage_factor(0.95) == 2.0
+    assert EN16487_COVERAGE_FACTOR == oracle.EN16487_TABLE_1_COVERAGE_FACTOR
+    assert (
+        materials.absorption_coverage_factor(0.95)
+        == oracle.ISO12999_2_TABLE_3_COVERAGE_FACTOR_95
+    )
 
 
 def test_the_printed_attenuation_of_iso9613_table_one() -> None:
@@ -394,7 +455,7 @@ def test_the_printed_attenuation_of_iso9613_table_one() -> None:
     nominal 4 kHz the same call returns 29,67 dB/km against a printed
     2,94 x 10, which no rounding of three figures covers.
     """
-    for (temperature_c, humidity), row in _ISO9613_TABLE1_DB_PER_KM.items():
+    for (temperature_c, humidity), row in oracle.ISO9613_1_TABLE_1_DB_PER_KM.items():
         bands = list(row)
         computed = (
             environment.air_attenuation(
@@ -421,7 +482,7 @@ def test_the_conversion_factor_between_alpha_and_m_is_the_printed_one() -> None:
     the factor out; Vigran prints it as 4,343.
     """
     assert 1.0 / float(materials.attenuation_from_alpha(1.0)) == pytest.approx(
-        4.343, abs=5e-4
+        oracle.VIGRAN_EQ_4_41_TEN_LG_E, abs=5e-4
     )
 
 
@@ -437,12 +498,14 @@ def test_the_air_term_carries_the_factor_of_four_the_example_prints() -> None:
     """
     with pytest.warns(SuspendedCeilingWarning, match="4.2.1"):
         correction = materials.air_absorption_correction(
-            volume_m3=100.0,
+            volume_m3=oracle.VIGRAN_EXAMPLE_VOLUME_M3,
             specimen_area_m2=TARGET_SPECIMEN_AREA_M2,
-            attenuation_with=[0.05],
+            attenuation_with=[oracle.VIGRAN_EXAMPLE_M_PER_M],
             attenuation_empty=[0.0],
         )
-    assert float(correction[0]) * TARGET_SPECIMEN_AREA_M2 == pytest.approx(20.0)
+    assert float(correction[0]) * TARGET_SPECIMEN_AREA_M2 == pytest.approx(
+        oracle.VIGRAN_EXAMPLE_AIR_ABSORPTION_M2
+    )
 
 
 def test_the_printed_air_absorption_constant_of_cox_table_four_two() -> None:
@@ -454,10 +517,10 @@ def test_the_printed_air_absorption_constant_of_cox_table_four_two() -> None:
     midband snapping is asked for; the rows below 50 % relative humidity are
     left out because 4.2.2 does not allow a room that dry.
     """
-    for humidity, row in _COX_M_MILLI.items():
+    for humidity, row in oracle.COX_TABLE_4_2_M_MILLI.items():
         computed = (
             environment.air_attenuation_m(
-                _COX_BANDS_HZ,
+                oracle.COX_TABLE_4_2_BANDS_HZ,
                 temperature_c=20.0,
                 relative_humidity_percent=humidity,
                 atmospheric_pressure_kpa=101.325,
@@ -465,7 +528,7 @@ def test_the_printed_air_absorption_constant_of_cox_table_four_two() -> None:
             * 1e3
         )
         for band, printed, got in zip(
-            _COX_BANDS_HZ, row, computed.tolist(), strict=True
+            oracle.COX_TABLE_4_2_BANDS_HZ, row, computed.tolist(), strict=True
         ):
             decimals = len(f"{printed!r}".partition(".")[2])
             assert got == pytest.approx(printed, abs=0.5 * 10.0**-decimals), (
@@ -486,12 +549,12 @@ def test_a_ten_point_humidity_swing_busts_the_cap_of_the_clause() -> None:
     bands = (500.0, 1000.0, 2000.0, 4000.0)
     printed_side = (
         4.0
-        * _SRL_VOLUME_M3
+        * oracle.SRL_13441_VOLUME_M3
         * (
             _m_from_printed_alpha(temperature_c=20.0, humidity=60.0, bands=bands)
             - _m_from_printed_alpha(temperature_c=20.0, humidity=50.0, bands=bands)
         )
-        / _SRL_AREA_M2
+        / oracle.SRL_13441_AREA_M2
     )
     assert printed_side.tolist() == pytest.approx(
         [0.0015494, 0.00361527, -0.01575226, -0.10329354], abs=5e-8
@@ -500,8 +563,8 @@ def test_a_ten_point_humidity_swing_busts_the_cap_of_the_clause() -> None:
     attenuation_empty = _library_m(temperature_c=20.0, humidity=50.0, bands=bands)
     with pytest.warns(SuspendedCeilingWarning, match="4.2.1"):
         got = materials.air_absorption_correction(
-            volume_m3=_SRL_VOLUME_M3,
-            specimen_area_m2=_SRL_AREA_M2,
+            volume_m3=oracle.SRL_13441_VOLUME_M3,
+            specimen_area_m2=oracle.SRL_13441_AREA_M2,
             attenuation_with=attenuation_with,
             attenuation_empty=attenuation_empty,
         )
@@ -524,12 +587,12 @@ def test_a_humid_room_stays_inside_the_cap_at_every_band() -> None:
     bands = (125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0)
     printed_side = (
         4.0
-        * _SP_VOLUME_M3
+        * oracle.SP_P302808_VOLUME_M3
         * (
             _m_from_printed_alpha(temperature_c=25.0, humidity=90.0, bands=bands)
             - _m_from_printed_alpha(temperature_c=20.0, humidity=90.0, bands=bands)
         )
-        / _SP_AREA_M2
+        / oracle.SP_P302808_AREA_M2
     )
     assert printed_side.tolist() == pytest.approx(
         [-0.00063108, -0.00153506, 0.00153506, 0.01944405, 0.033089, 0.01023371],
@@ -538,8 +601,8 @@ def test_a_humid_room_stays_inside_the_cap_at_every_band() -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("error", SuspendedCeilingWarning)
         got = materials.air_absorption_correction(
-            volume_m3=_SP_VOLUME_M3,
-            specimen_area_m2=_SP_AREA_M2,
+            volume_m3=oracle.SP_P302808_VOLUME_M3,
+            specimen_area_m2=oracle.SP_P302808_AREA_M2,
             attenuation_with=_library_m(temperature_c=25.0, humidity=90.0, bands=bands),
             attenuation_empty=_library_m(
                 temperature_c=20.0, humidity=90.0, bands=bands
@@ -558,29 +621,29 @@ def test_an_accredited_certificate_reproduces_from_its_printed_inputs() -> None:
     given to the library, and the six octave centres come back at the 0,01 the
     certificate prints.
     """
-    empty_temperature_c, empty_humidity, empty_pressure_mbar = _SRL_EMPTY
-    temperature_c, humidity, pressure_mbar = _SRL_WITH_SPECIMEN
+    empty_temperature_c, empty_humidity, empty_pressure_mbar = oracle.SRL_13441_EMPTY
+    temperature_c, humidity, pressure_mbar = oracle.SRL_13441_WITH_SPECIMEN
     got = materials.absorption_coefficient(
-        _SRL_T1_S,
-        _SRL_T2_S,
-        _SRL_VOLUME_M3,
-        _SRL_AREA_M2,
+        oracle.SRL_13441_T1_S,
+        oracle.SRL_13441_T2_S,
+        oracle.SRL_13441_VOLUME_M3,
+        oracle.SRL_13441_AREA_M2,
         temperature1_c=empty_temperature_c,
         temperature2_c=temperature_c,
         m1=environment.air_attenuation_m(
-            _SRL_BANDS_HZ,
+            oracle.SRL_13441_BANDS_HZ,
             temperature_c=empty_temperature_c,
             relative_humidity_percent=empty_humidity,
             atmospheric_pressure_kpa=empty_pressure_mbar / 10.0,
         ),
         m2=environment.air_attenuation_m(
-            _SRL_BANDS_HZ,
+            oracle.SRL_13441_BANDS_HZ,
             temperature_c=temperature_c,
             relative_humidity_percent=humidity,
             atmospheric_pressure_kpa=pressure_mbar / 10.0,
         ),
     )
-    assert got.tolist() == pytest.approx(list(_SRL_ALPHA_S), abs=0.005)
+    assert got.tolist() == pytest.approx(list(oracle.SRL_13441_ALPHA_S), abs=0.005)
 
 
 def test_the_air_term_is_what_makes_that_certificate_reproduce() -> None:
@@ -592,17 +655,20 @@ def test_the_air_term_is_what_makes_that_certificate_reproduce() -> None:
     certificate prints.
     """
     without_air = materials.absorption_coefficient(
-        _SRL_T1_S,
-        _SRL_T2_S,
-        _SRL_VOLUME_M3,
-        _SRL_AREA_M2,
-        temperature1_c=_SRL_EMPTY[0],
-        temperature2_c=_SRL_WITH_SPECIMEN[0],
+        oracle.SRL_13441_T1_S,
+        oracle.SRL_13441_T2_S,
+        oracle.SRL_13441_VOLUME_M3,
+        oracle.SRL_13441_AREA_M2,
+        temperature1_c=oracle.SRL_13441_EMPTY[0],
+        temperature2_c=oracle.SRL_13441_WITH_SPECIMEN[0],
     )
     missed = [
         band
         for band, value, printed in zip(
-            _SRL_BANDS_HZ, without_air.tolist(), _SRL_ALPHA_S, strict=True
+            oracle.SRL_13441_BANDS_HZ,
+            without_air.tolist(),
+            oracle.SRL_13441_ALPHA_S,
+            strict=True,
         )
         if abs(value - printed) > 0.005
     ]
@@ -623,10 +689,22 @@ def test_real_arrangements_against_the_printed_geometry() -> None:
     # consequences: the departure from 10,80 m2, and whether the arrangement
     # is the one the CE marking data rests on.
     arrangements = {
-        "SRL 13441, E-200": ((_SRL_AREA_M2, 200.0), (-0.10, True)),
-        "SP P302808, 200 mm": ((_SP_AREA_M2, 200.0), (0.00, True)),
-        "CSTB AC14-26051052/10, E-50": ((_CSTB_AREA_M2, 50.0), (-0.30, False)),
-        "van Hout 2016, E-400": ((10.8, 400.0), (0.00, False)),
+        "SRL 13441, E-200": (
+            (oracle.SRL_13441_AREA_M2, oracle.SRL_13441_DEPTH_MM),
+            (-0.10, True),
+        ),
+        "SP P302808, 200 mm": (
+            (oracle.SP_P302808_AREA_M2, oracle.SP_P302808_DEPTH_MM),
+            (0.00, True),
+        ),
+        "CSTB AC14-26051052/10, E-50": (
+            (oracle.CSTB_AC14_AREA_M2, oracle.CSTB_AC14_DEPTH_MM),
+            (-0.30, False),
+        ),
+        "van Hout 2016, E-400": (
+            (oracle.VAN_HOUT_AREA_M2, oracle.VAN_HOUT_DEPTH_MM),
+            (0.00, False),
+        ),
     }
     for report, (
         (area_m2, depth_mm),
@@ -652,22 +730,43 @@ def test_the_humidity_floor_against_real_room_climates() -> None:
     measured a suspended ceiling at 41 % and 44 %, under conditions this test
     code would not accept.
     """
+    # Report -> (area in m2, overall depth in mm) and the two printed climates,
+    # so each climate is judged together with the arrangement it was measured on.
     climates = {
-        "SRL 13441": (41.0, 44.0),
-        "CSTB AC14-26051052/10": (62.0, 58.0),
-        "SP P302808": (89.0, 90.0),
+        "SRL 13441": (
+            (oracle.SRL_13441_AREA_M2, oracle.SRL_13441_DEPTH_MM),
+            (oracle.SRL_13441_EMPTY[1], oracle.SRL_13441_WITH_SPECIMEN[1]),
+        ),
+        "CSTB AC14-26051052/10": (
+            (oracle.CSTB_AC14_AREA_M2, oracle.CSTB_AC14_DEPTH_MM),
+            (oracle.CSTB_AC14_EMPTY[1], oracle.CSTB_AC14_WITH_SPECIMEN[1]),
+        ),
+        "SP P302808": (
+            (oracle.SP_P302808_AREA_M2, oracle.SP_P302808_DEPTH_MM),
+            (oracle.SP_P302808_EMPTY[1], oracle.SP_P302808_WITH_SPECIMEN[1]),
+        ),
     }
     below_the_floor = {"SRL 13441"}
-    for report, printed in climates.items():
-        satisfied = min(printed) >= MIN_RELATIVE_HUMIDITY_PERCENT
-        assert satisfied is (report not in below_the_floor), report
+    for report, ((area_m2, depth_mm), printed) in climates.items():
+        with warnings.catch_warnings():
+            # The dry room, and the depth of the E-50, are reported by the
+            # clause, which is the verdict under test rather than a surprise.
+            warnings.simplefilter("ignore", SuspendedCeilingWarning)
+            got = materials.check_ceiling_specimen(
+                area_m2=area_m2,
+                mounting="E",
+                depth_mm=depth_mm,
+                relative_humidity_percent=printed,
+            )
+        assert got.humidity_ok is (report not in below_the_floor), report
+        assert got.satisfied is (report not in below_the_floor), report
 
 
 @pytest.mark.parametrize(
     ("report", "alpha_p", "alpha_w", "indicator", "absorption_class"),
     [
-        ("SP P302808", (0.80, 0.85, 0.85, 0.95, 0.95), 0.90, "", "A"),
-        ("CSTB AC14-26051052/10", (0.40, 0.85, 1.00, 0.95, 0.85), 0.70, "MH", "C"),
+        ("SP P302808", oracle.SP_P302808_ALPHA_P, *oracle.SP_P302808_RATING),
+        ("CSTB AC14-26051052/10", oracle.CSTB_AC14_ALPHA_P, *oracle.CSTB_AC14_RATING),
     ],
 )
 def test_the_printed_rating_of_a_real_suspended_ceiling(
@@ -700,9 +799,14 @@ def test_the_one_third_octave_step_of_the_rating_on_a_real_certificate() -> None
     octave ones it formed from them, and the rating: alpha_w = 0,95, class A,
     with no shape indicator.
     """
-    alpha_p = materials.practical_absorption_coefficient(_SRL_THIRD_OCTAVE_ALPHA_S)
-    assert alpha_p.tolist() == pytest.approx(list(_SRL_ALPHA_P), abs=5e-4)
-    rated = materials.weighted_absorption_from_third_octave(_SRL_THIRD_OCTAVE_ALPHA_S)
-    assert rated.alpha_w == pytest.approx(0.95, abs=5e-4)
-    assert rated.shape_indicator == ""
-    assert rated.absorption_class == "A"
+    alpha_p = materials.practical_absorption_coefficient(
+        oracle.SRL_13441_THIRD_OCTAVE_ALPHA_S
+    )
+    assert alpha_p.tolist() == pytest.approx(list(oracle.SRL_13441_ALPHA_P), abs=5e-4)
+    rated = materials.weighted_absorption_from_third_octave(
+        oracle.SRL_13441_THIRD_OCTAVE_ALPHA_S
+    )
+    alpha_w, indicator, absorption_class = oracle.SRL_13441_RATING
+    assert rated.alpha_w == pytest.approx(alpha_w, abs=5e-4)
+    assert rated.shape_indicator == indicator
+    assert rated.absorption_class == absorption_class

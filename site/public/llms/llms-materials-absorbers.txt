@@ -706,23 +706,38 @@ print(materials.mounting_type("E"))
 ```
 
 The area is a target and not a tolerance, so the check reports the difference
-and leaves the judgement to the laboratory. Of the rest it judges the three it
-is given: a substructure no more than 30 mm wide and 50 mm deep, a mounting
-fixture of at least 20 kg/m2, and a deflection of no more than 5 mm. Leaving one
-of those raises a `SuspendedCeilingWarning` that says which. The 0,6 m pitch of
-the substructure and the 50 mm by 50 mm supports at least 1,2 m apart are
-published as constants to build to, and describe how the specimen was hung
-rather than a measurement taken on it, so the call cannot check them.
+and leaves the judgement to the laboratory. A type E depth other than 200 mm
+passes too, with a warning that says only that the result is not the CE marking
+data. What the verdict judges is every limit of clause 4 that a dimension of the
+arrangement can be held to: a substructure no more than 30 mm wide and 50 mm
+deep, support units no larger than 50 mm by 50 mm at centre distances of at
+least 1,2 m, a mounting fixture of at least 20 kg/m2, a deflection of no more
+than 5 mm and, when `relative_humidity_percent` gives one value per measurement,
+the 50 % of 4.2.2 in every one of them. Leaving one makes `satisfied` false and
+raises a `SuspendedCeilingWarning` that says which. The 0,6 m test object, the
+10 degree edge angle and the substructure pitch of about 0,6 m are targets the
+clause asks to be aimed at, published as constants to build to and not judged.
+
+```python
+dry = materials.check_ceiling_specimen(
+    area_m2=10.8, mounting="E", depth_mm=200.0,
+    support_width_mm=40.0, support_height_mm=40.0, support_centre_distance_m=1.2,
+    relative_humidity_percent=[41.0, 44.0],
+)
+print(dry.supports_ok, dry.humidity_ok, dry.satisfied)   # True False False
+```
 
 ## How the measurement goes
 
 Build the specimen to 10,80 m2 out of whole test objects, butted together, with
 the joints unsealed and the perimeter covered by the mounting fixture. Hang it at
 200 mm overall depth if the result is to support CE marking, on a substructure
-inside the 30 mm by 50 mm section, and check the deflection at the worst point.
+inside the 30 mm by 50 mm section carried by supports inside 50 mm by 50 mm and
+at least 1,2 m apart, and check the deflection at the worst point.
 Set the specimen edges at an angle to the room walls. Measure the empty room and
 then the room with the specimen in it as EN ISO 354 prescribes, holding
-temperature and humidity steady between the two runs: the correction below is
+temperature and humidity steady between the two runs and the humidity at 50 % or
+more in each: the correction below is
 the difference between them, and it is a difference of days rather than of
 ceilings.
 

@@ -203,9 +203,10 @@ EQUIVALENT_SURROUNDINGS_RADIUS_M: float = 30.0
 REFERENCE_MICROPHONE_CLEARANCE_M: float = 1.5
 
 #: 7.2.2 NOTE: where the near end of the source region is closer than this to
-#: the barrier, in metres, the reference microphone may instead be raised
+#: the barrier, in metres, the reference microphone may be raised further,
 #: until its elevation angle exceeds the barrier's by
-#: :data:`REFERENCE_ELEVATION_INCREMENT_DEG`.
+#: :data:`REFERENCE_ELEVATION_INCREMENT_DEG`. It is never lowered under
+#: :data:`REFERENCE_MICROPHONE_CLEARANCE_M` to get there.
 CLOSE_SOURCE_DISTANCE_M: float = 15.0
 REFERENCE_ELEVATION_INCREMENT_DEG: float = 10.0
 
@@ -389,21 +390,35 @@ def reference_microphone_height_m(
     the barrier, on a vertical plane through it, so that what it hears is the
     source and not the barrier. For a barrier whose top is not a straight
     edge, a berm or a cupped profile, the clearance is measured from its
-    highest point.
+    highest point. The clause words the clearance with "shall" (printed folio
+    9, PDF page 13), and no geometry takes the microphone under it.
 
-    The NOTE adds an alternative for a source that stands close. Where the
-    near end of the source region is under
-    :data:`CLOSE_SOURCE_DISTANCE_M` from the barrier, the microphone may be
-    raised until the elevation angle from that end exceeds the angle to the
-    barrier top by :data:`REFERENCE_ELEVATION_INCREMENT_DEG`:
+    The NOTE adds a preference for a source that stands close. Where the near
+    end of the source region is under :data:`CLOSE_SOURCE_DISTANCE_M` from
+    the barrier, the microphone "may be raised as high as possible" until the
+    elevation angle from that end exceeds the angle to the barrier top by
+    :data:`REFERENCE_ELEVATION_INCREMENT_DEG`:
 
     .. math::
 
-       h = d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)
+       h = \max\left(H + 1{,}5\ \mathrm{m},\;
+       d \tan\left(\arctan\frac{H}{d} + 10^\circ\right)\right)
 
-    which is what this returns when the distance is given and falls inside
-    that range. The angle form is the NOTE's own words; the height it implies
-    is derived here rather than printed.
+    The NOTE only ever raises the microphone, so the height is the higher of
+    the two. Which one governs depends on the geometry: a 4 m barrier 10 m
+    from the source takes the angle, 6,20 m against 5,5 m, while a 3 m barrier
+    5 m from the source takes the clearance, because its 10 degrees are
+    reached at 4,34 m and the clause asks for 4,5 m. The angle form is the
+    NOTE's own words; the height it implies is derived here rather than
+    printed.
+
+    Once the barrier top stands 80 degrees or more above the near end of the
+    source region, no height reaches the increment at all, and the tangent
+    would turn negative. The microphone then keeps the clearance and a
+    :class:`BarrierInSituWarning` says that the NOTE could not be followed.
+    That is how this module treats a NOTE, as with the one to 8.2.2: a
+    preference it cannot meet is reported, and the clause it hangs from is
+    enforced.
 
     :param barrier_height_m: :math:`H`, the barrier height above the ground at
         the microphone, in metres.
@@ -414,15 +429,26 @@ def reference_microphone_height_m(
     :raises ValueError: For a non-positive height or distance.
     """
     barrier = require_positive(barrier_height_m, "barrier_height_m")
+    clearance = barrier + REFERENCE_MICROPHONE_CLEARANCE_M
     if source_to_barrier_m is None:
-        return barrier + REFERENCE_MICROPHONE_CLEARANCE_M
+        return clearance
     distance = require_positive(source_to_barrier_m, "source_to_barrier_m")
     if distance >= CLOSE_SOURCE_DISTANCE_M:
-        return barrier + REFERENCE_MICROPHONE_CLEARANCE_M
-    elevation = math.atan(barrier / distance) + math.radians(
-        REFERENCE_ELEVATION_INCREMENT_DEG
-    )
-    return distance * math.tan(elevation)
+        return clearance
+    to_the_top = math.atan(barrier / distance)
+    elevation = to_the_top + math.radians(REFERENCE_ELEVATION_INCREMENT_DEG)
+    if elevation >= math.pi / 2.0:
+        msg = (
+            "The NOTE to ISO 10847 7.2.2 raises the reference microphone "
+            f"{REFERENCE_ELEVATION_INCREMENT_DEG:g} degrees above the barrier "
+            f"top, but that top already stands {math.degrees(to_the_top):.1f} "
+            "degrees above the near end of the source region, so no height "
+            "reaches it; the microphone keeps the "
+            f"{REFERENCE_MICROPHONE_CLEARANCE_M:g} m clearance of 7.2.2."
+        )
+        warnings.warn(msg, BarrierInSituWarning, stacklevel=2)
+        return clearance
+    return max(clearance, distance * math.tan(elevation))
 
 
 def hemi_free_field_distance_m(barrier_to_receiver_m: float) -> float:

@@ -21,6 +21,8 @@ import math
 
 import numpy as np
 import pytest
+from reference_data import screen_in_situ as oracle
+from reference_data import silencer_in_situ, spatial_decay
 
 from phonometry import building, noise_control
 from phonometry.noise_control.screen_in_situ import (
@@ -277,37 +279,26 @@ def test_a_non_positive_distance_is_refused() -> None:
 # The level pairs the standard does not print itself
 # ---------------------------------------------------------------------------
 
-#: Barron (2003) Table 7-6, folio 316: the octave band centres of Example 7-9,
-#: in hertz, and the two rows printed under them, in decibels, without the
-#: barrier and with it. The case is a concrete barrier around an outdoor
-#: transformer station, which ISO 11821 sends to ISO 10847, so what it pins
-#: here is the subtraction of 5.8 and 5.9 and nothing about the method.
-BARRON_BANDS_HZ = [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
-BARRON_UNSCREENED_DB = [71.6, 75.6, 69.6, 65.6, 65.6, 59.6, 54.6, 48.6]
-BARRON_SCREENED_DB = [64.0, 66.3, 57.9, 51.2, 48.2, 39.2, 31.2, 24.4]
-
-#: IFA-LSA 01-234 (2020) Tab. 4.4, folio 17: the levels at the four positions
-#: of the worked example, in decibels, by octave band centre in hertz, from
-#: the nearest position outwards.
-IFA_LEVELS_DB = {
-    500: [79.2, 74.4, 70.2, 67.1],
-    1000: [81.9, 77.1, 73.0, 69.8],
-    2000: [80.4, 75.3, 71.0, 67.4],
-    4000: [84.3, 78.5, 73.2, 69.3],
-}
+#: Every printed level pair below is in ``tests/reference_data/screen_in_situ.py``
+#: (and the Barron Table 3-2 and 3-4 data in ``silencer_in_situ.py``), with the
+#: document, the PDF page and the folio it was read on.
 
 
 def test_barrons_level_pair_gives_the_two_printed_band_reductions() -> None:
     res = noise_control.screen_attenuation(
-        BARRON_UNSCREENED_DB,
-        BARRON_SCREENED_DB,
-        frequencies=BARRON_BANDS_HZ,
-        distance_m=20.0,
+        oracle.BARRON_TABLE_7_6_UNSCREENED_DB,
+        oracle.BARRON_TABLE_7_6_SCREENED_DB,
+        frequencies=oracle.BARRON_TABLE_7_6_BANDS_HZ,
+        distance_m=oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
-    # Folio 317 works out two of the eight bands in prose: 71.6 - 64.0 at
-    # 63 Hz and 48.6 - 24.4 at 8000 Hz.
-    assert res.attenuation_db[0] == pytest.approx(7.6)
-    assert res.attenuation_db[-1] == pytest.approx(24.2)
+    # Barron (2003) Table 7-6, folio 316, a concrete barrier around an outdoor
+    # transformer station, which ISO 11821 sends to ISO 10847: what it pins
+    # here is the subtraction of 5.8 and nothing about the method. Folio 317
+    # works out two of the eight bands in prose: 71.6 - 64.0 at 63 Hz and
+    # 48.6 - 24.4 at 8000 Hz.
+    printed = oracle.BARRON_EXAMPLE_7_9_PRINTED_REDUCTIONS_DB
+    assert res.attenuation_db[0] == pytest.approx(printed["63 Hz"])
+    assert res.attenuation_db[-1] == pytest.approx(printed["8000 Hz"])
     # The other six are the difference of two printed rows and are printed
     # nowhere, which is why they are asserted as a derivation, not as oracles.
     assert res.attenuation_db.tolist() == pytest.approx(
@@ -318,16 +309,46 @@ def test_barrons_level_pair_gives_the_two_printed_band_reductions() -> None:
 def test_barrons_a_weighted_pair_gives_the_printed_reduction() -> None:
     # Folio 315 prints 69.6 dBA without the barrier, folio 317 55.3 dBA with
     # it and the 14.3 dBA between them.
+    unscreened, screened = oracle.BARRON_EXAMPLE_7_9_A_WEIGHTED_DB
     res = noise_control.screen_attenuation(
-        BARRON_UNSCREENED_DB,
-        BARRON_SCREENED_DB,
-        frequencies=BARRON_BANDS_HZ,
+        oracle.BARRON_TABLE_7_6_UNSCREENED_DB,
+        oracle.BARRON_TABLE_7_6_SCREENED_DB,
+        frequencies=oracle.BARRON_TABLE_7_6_BANDS_HZ,
         source_kind="actual",
-        a_weighted_unscreened_level_db=69.6,
-        a_weighted_screened_level_db=55.3,
-        distance_m=20.0,
+        a_weighted_unscreened_level_db=unscreened,
+        a_weighted_screened_level_db=screened,
+        distance_m=oracle.BARRON_EXAMPLE_7_9_SCREEN_DISTANCE_M,
     )
-    assert res.a_weighted_attenuation_db == pytest.approx(14.3)
+    assert res.a_weighted_attenuation_db == pytest.approx(
+        oracle.BARRON_EXAMPLE_7_9_A_REDUCTION_DB
+    )
+    # 7.4 c) gives D_pA the same rounding as D_p.
+    assert res.rounded_a_weighted() == 14
+    assert isinstance(res.rounded_a_weighted(), int)
+
+
+def test_the_reported_integers_round_a_tie_to_the_even_decibel() -> None:
+    # ISO 11821:1997 7.4 c), printed folio 7 (PDF page 17): "rounded to the
+    # nearest integer", with nothing said about a tie. The sibling in-situ
+    # standards of this library take Rule A of ISO 80000-1:2009 Annex B, the
+    # even multiple, and so does this one. The halves are binary-exact.
+    res = noise_control.screen_attenuation([0.5, 1.5, 2.5, 3.5], [0.0, 0.0, 0.0, 0.0])
+    assert res.rounded().tolist() == [0, 2, 2, 4]
+    weighted = noise_control.screen_attenuation(
+        [80.0],
+        [70.0],
+        a_weighted_unscreened_level_db=80.5,
+        a_weighted_screened_level_db=78.0,
+    )
+    assert weighted.rounded_a_weighted() == 2
+
+
+def test_no_a_weighted_pair_reports_no_a_weighted_integer() -> None:
+    res = noise_control.screen_attenuation([78.0, 80.0], [70.0, 71.0])
+    assert res.a_weighted_attenuation_db is None
+    assert res.rounded_a_weighted() is None
+    # The raw band values are left alone by the rounding.
+    assert res.attenuation_db.tolist() == [8.0, 9.0]
 
 
 def test_the_indoor_worked_example_gives_its_printed_reduction() -> None:
@@ -335,26 +356,31 @@ def test_the_indoor_worked_example_gives_its_printed_reduction() -> None:
     # its operator, 92.3 dB down to 84.0 dB in the 1000 Hz octave. The screen
     # stands 1.00 m from the machine and the operator 3.00 m from it, so the
     # position is 2 m from the screen.
+    unscreened, screened, printed = oracle.BARRON_EXAMPLE_7_10_DB
     res = noise_control.screen_attenuation(
-        [92.3], [84.0], frequencies=[1000.0], distance_m=2.0
+        [unscreened],
+        [screened],
+        frequencies=[1000.0],
+        distance_m=oracle.BARRON_EXAMPLE_7_10_SCREEN_DISTANCE_M,
     )
-    assert res.attenuation_db[0] == pytest.approx(8.3)
+    assert res.attenuation_db[0] == pytest.approx(printed)
 
 
 def test_the_office_screen_example_rounds_to_the_printed_integers() -> None:
     # Hansen (2005) Example 6.23, folios 317 and 318: the total level at the
     # receiver with the screen out and in, over the three bands that matter.
     res = noise_control.screen_attenuation(
-        [48.8, 55.1, 52.9],
-        [39.0, 39.9, 33.3],
-        frequencies=[500.0, 1000.0, 2000.0],
+        oracle.HANSEN_EXAMPLE_6_23_UNSCREENED_DB,
+        oracle.HANSEN_EXAMPLE_6_23_SCREENED_DB,
+        frequencies=oracle.HANSEN_EXAMPLE_6_23_BANDS_HZ,
         distance_m=2.0,
     )
     assert res.attenuation_db.tolist() == pytest.approx([9.8, 15.2, 19.6])
     # Clause 7.4 c) reports D_p rounded to the nearest integer, which is the
-    # "Reduction due to barrier 10 15 20" row of folio 318. The library
-    # returns the raw difference, so the rounding is the caller's.
-    assert np.round(res.attenuation_db).tolist() == [10.0, 15.0, 20.0]
+    # "Reduction due to barrier 10 15 20" row of folio 318. The raw difference
+    # stays on the result and the reported integers come from rounded().
+    assert res.rounded().tolist() == list(oracle.HANSEN_EXAMPLE_6_23_REDUCTION_DB)
+    assert res.rounded().dtype.kind == "i"
 
 
 def test_the_single_path_levels_of_the_1991_example_subtract() -> None:
@@ -362,8 +388,9 @@ def test_the_single_path_levels_of_the_1991_example_subtract() -> None:
     # 65, 70 and 62 dB by each surviving path, and 71 dB for the three
     # together. That 71 dB is the book's decibel-addition rule of thumb and
     # not the energy sum, which is 71.687 dB and would give 8.3 dB.
+    paths = oracle.SRL_1991_SCREENED_DB
     res = noise_control.screen_attenuation(
-        [80.0, 80.0, 80.0, 80.0], [71.0, 65.0, 70.0, 62.0]
+        [oracle.SRL_1991_UNSCREENED_DB] * len(paths), list(paths.values())
     )
     assert res.attenuation_db.tolist() == pytest.approx([9.0, 15.0, 10.0, 18.0])
 
@@ -371,15 +398,17 @@ def test_the_single_path_levels_of_the_1991_example_subtract() -> None:
 def test_the_ifa_worked_example_differences_are_the_printed_ones() -> None:
     # IFA-LSA 01-234 (2020) Tab. 4.5, folio 18, read against the levels of
     # Tab. 4.4 on folio 17. A test sound source, so 5.9 forbids D_pA.
-    bands = [float(band) for band in IFA_LEVELS_DB]
+    levels = spatial_decay.IFA_LSA_01_234_LEVELS_DB
+    bands = [float(band) for band in levels]
     # Keyed by the nearer of the two positions: 0 is the "Lp1 - Lp2" row of
     # Tab. 4.5 and 2 the "Lp3 - Lp4" one. The row between them is the next
     # test, because the table misprints one of its cells.
-    printed = {0: [4.8, 4.8, 5.1, 5.8], 2: [3.1, 3.2, 3.6, 3.9]}
+    differences = spatial_decay.IFA_LSA_01_234_DIFFERENCES_DB
+    printed = {0: differences["Lp1 - Lp2"], 2: differences["Lp3 - Lp4"]}
     for step, values in printed.items():
         res = noise_control.screen_attenuation(
-            [IFA_LEVELS_DB[band][step] for band in IFA_LEVELS_DB],
-            [IFA_LEVELS_DB[band][step + 1] for band in IFA_LEVELS_DB],
+            [levels[band][step] for band in levels],
+            [levels[band][step + 1] for band in levels],
             frequencies=bands,
             source_kind="artificial",
         )
@@ -390,30 +419,42 @@ def test_the_ifa_table_misprints_one_of_its_twelve_differences() -> None:
     # Tab. 4.5 prints 4,7 dB for Lp2 - Lp3 at 2000 Hz. Its own Tab. 4.4 gives
     # 75,3 dB and 71,0 dB there, so the difference is 4,3 dB. The other eleven
     # cells of the table agree with the levels; this one does not.
+    levels = spatial_decay.IFA_LSA_01_234_LEVELS_DB
     res = noise_control.screen_attenuation(
-        [IFA_LEVELS_DB[band][1] for band in IFA_LEVELS_DB],
-        [IFA_LEVELS_DB[band][2] for band in IFA_LEVELS_DB],
-        frequencies=[float(band) for band in IFA_LEVELS_DB],
+        [levels[band][1] for band in levels],
+        [levels[band][2] for band in levels],
+        frequencies=[float(band) for band in levels],
         source_kind="artificial",
     )
     assert res.attenuation_db.tolist() == pytest.approx([4.2, 4.1, 4.3, 5.3])
-    assert res.attenuation_db[2] != pytest.approx(4.7)
+    row, band = spatial_decay.IFA_LSA_01_234_MISPRINT
+    printed = spatial_decay.IFA_LSA_01_234_DIFFERENCES_DB[row][list(levels).index(band)]
+    assert printed == pytest.approx(4.7)
+    assert res.attenuation_db[2] != pytest.approx(printed)
 
 
 def test_the_background_correction_matches_a_printed_worked_example() -> None:
     # Barron (2003) Example 3-6, folio 73: a fan read at 83 dB over a 77 dB
     # background, corrected to 81.7 dB. A 6 dB margin, the lower edge of the
     # window of 5.7, so the clause corrects rather than refusing.
-    corrected = noise_control.background_corrected_level_db([83.0], [77.0])
-    assert corrected[0] == pytest.approx(81.7, abs=0.05)
-    assert 83.0 - corrected[0] == pytest.approx(1.3, abs=0.05)
+    level, background, printed = silencer_in_situ.BARRON_EXAMPLE_3_6_DB
+    corrected = noise_control.background_corrected_level_db([level], [background])
+    assert corrected[0] == pytest.approx(printed, abs=0.05)
+    assert level - corrected[0] == pytest.approx(
+        silencer_in_situ.BARRON_TABLE_3_4_DB[level - background], abs=0.05
+    )
 
 
 def test_the_printed_correction_table_holds_across_the_window() -> None:
     # Barron (2003) Table 3-4, folio 72, the rows inside the 6 dB to 10 dB
     # window of 5.7. The table prints to 0.1 dB, so that is what reproducing
     # it means.
-    printed = {6.0: 1.3, 6.5: 1.1, 7.0: 1.0, 7.5: 0.9, 8.0: 0.7, 9.0: 0.6, 10.0: 0.5}
+    printed = {
+        margin: correction
+        for margin, correction in silencer_in_situ.BARRON_TABLE_3_4_DB.items()
+        if 6.0 <= margin <= 10.0
+    }
+    assert len(printed) == 7
     for margin, correction in printed.items():
         corrected = noise_control.background_corrected_level_db([83.0], [83.0 - margin])
         assert round(83.0 - float(corrected[0]), 1) == pytest.approx(correction)
@@ -424,9 +465,12 @@ def test_the_upper_edge_of_the_window_is_still_corrected() -> None:
     # corrects to 89.5 dB, and 86.6 dB over the same background to 85.5 dB.
     # The first margin is exactly 10 dB, so this pins the edge itself: 5.7
     # drops the correction past 10 dB, not at it.
-    corrected = noise_control.background_corrected_level_db([90.0, 86.6], [80.0, 80.0])
-    assert corrected[0] == pytest.approx(89.5, abs=0.05)
-    assert corrected[1] == pytest.approx(85.5, abs=0.05)
+    rows = oracle.HANSEN_EXAMPLE_3_25_DB
+    corrected = noise_control.background_corrected_level_db(
+        [row[0] for row in rows], [row[1] for row in rows]
+    )
+    assert corrected[0] == pytest.approx(rows[0][2], abs=0.05)
+    assert corrected[1] == pytest.approx(rows[1][2], abs=0.05)
     assert noise_control.background_corrected_level_db([90.1], [80.0])[
         0
     ] == pytest.approx(90.1)
@@ -438,7 +482,9 @@ def test_the_six_decibel_correction_is_the_one_two_standards_print() -> None:
     # boxes. Neither reads the margin as 5.7 does: both apply the value as a
     # floor below 6 dB, where ISO 11821 refuses the measurement instead.
     corrected = noise_control.background_corrected_level_db([70.0], [64.0])
-    assert 70.0 - corrected[0] == pytest.approx(1.3, abs=0.05)
+    assert 70.0 - corrected[0] == pytest.approx(
+        oracle.ISO140_3_SIX_DB_MARGIN_CORRECTION_DB, abs=0.05
+    )
     with pytest.raises(ValueError, match="unacceptable"):
         noise_control.background_corrected_level_db([70.0], [64.5])
 
@@ -450,8 +496,13 @@ def test_the_logarithmic_mean_under_the_directivity_index_is_printed() -> None:
     # reads twelve positions on a horizontal circle, so directivity_index_db
     # refuses this set; the mean it takes internally is reached here through
     # the entry point that publishes one.
-    levels = [86.0, 81.5, 82.4, 81.3, 70.9, 72.9, 68.0, 79.3, 78.5, 80.1]
-    assert building.energy_average_level(levels) == pytest.approx(80.6, abs=0.05)
-    assert building.energy_average_level(levels[1:4]) == pytest.approx(81.8, abs=0.05)
+    levels = list(silencer_in_situ.BARRON_EXAMPLE_3_3_LEVELS_DB)
+    means = oracle.BARRON_EXAMPLE_3_5_MEANS_DB
+    assert building.energy_average_level(levels) == pytest.approx(
+        means["ten positions"], abs=0.05
+    )
+    assert building.energy_average_level(levels[1:4]) == pytest.approx(
+        means["ring of three"], abs=0.05
+    )
     with pytest.raises(ValueError, match="12 positions"):
         noise_control.directivity_index_db(levels)

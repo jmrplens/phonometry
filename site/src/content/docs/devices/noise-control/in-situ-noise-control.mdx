@@ -94,14 +94,16 @@ res = noise_control.in_situ_transmission_loss(
     frequencies=bands, case=2,
 )
 print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
-print(round(res.area_term_db, 1))  # -10.8 dB
+print(res.area_term_db.round(1))   # [-10.8 -10.8 -10.8 -10.8 -10.8 -10.8] dB
 ```
 
 The area term is negative here and that is not a mistake. A duct of 0,9 m²
 discharging into a room whose quarter-absorption is 10,8 m² spreads the same
 power over twelve times the area, so the room is already quieter than the duct
 before the silencer does anything. Subtracting that is what stops the room being
-credited to the silencer.
+credited to the silencer. The term comes back once per band even here, where
+both areas were typed as single numbers, because the area of a room is not one
+number: the next section shows why.
 
 ## 2. The twenty installations
 
@@ -137,7 +139,26 @@ print(area.round(1))   # [ 8.1  9.3 10.8 11.8 13.  14.4] m^2
 ```
 
 It is a quarter of the Sabine equivalent absorption area, which is the factor
-that turns a reverberant level into a sound power.
+that turns a reverberant level into a sound power. A reverberation time is a
+band quantity, so the area is one too, and the 10,8 m² of section 1 was only its
+value at 500 Hz. Both loss functions take each area, and the field correction,
+as one value for every band or as one value per band, so the array goes in as it
+comes out:
+
+```python
+res = noise_control.in_situ_transmission_loss(
+    source, receiver,
+    source_area_m2=0.9, receiver_area_m2=area,
+    frequencies=bands, case=2,
+)
+print(res.area_term_db.round(1))   # [ -9.6 -10.1 -10.8 -11.2 -11.6 -12.1] dB
+print(res.loss_db.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
+```
+
+At 500 Hz nothing moves. Below it the room is more reverberant, its area smaller
+and the silencer credited with more, by 1,2 dB at 125 Hz; above it the other way
+round, by 1,3 dB at 4 kHz. The duct cross-section stays one number, because it
+is one.
 
 ## 3. The silencer that is quiet and blocks the duct
 
@@ -193,7 +214,15 @@ res = noise_control.screen_attenuation(
 )
 print(res.attenuation_db)                   # [ 4.  6.  9. 11. 13. 14.] dB
 print(res.a_weighted_attenuation_db)        # 9.5 dB
+print(res.rounded())                        # [ 4  6  9 11 13 14] dB
+print(res.rounded_a_weighted())             # 10 dB
 ```
+
+7.4 c) reports both to the nearest whole decibel. `rounded()` and
+`rounded_a_weighted()` give them that way, as integers, while `attenuation_db`
+keeps the unrounded difference to compute with. An exact half goes to the even
+decibel, as in the other in-situ results of the library, so the 9,5 dB above is
+reported as 10 dB.
 
 The A-weighted pair is clause 5.9, and it comes with a condition the library
 enforces rather than mentions: it may not be obtained with an artificial source.
@@ -276,15 +305,26 @@ receiver position, 0 dB in a hemi free field and 6 dB against a facade where the
 pressure doubles.
 
 The reference microphone stands at least 1,5 m above the top edge of the
-barrier, measured from its highest point where the top is not a straight edge.
-Where the near end of the source region is closer than 15 m, the NOTE of 7.2.2
-allows raising it until it looks over the top edge by 10 degrees instead:
+barrier, measured from its highest point where the top is not a straight edge,
+and 7.2.2 says so with "shall". Where the near end of the source region is
+closer than 15 m, the NOTE to 7.2.2 lets the microphone be raised further, until
+it looks over the top edge by 10 degrees. The NOTE only ever raises it, so the
+height is the higher of the two. A 4 m barrier 8 m from the source takes the
+angle; a 3 m barrier 5 m from the source reaches its 10 degrees at 4,34 m and
+keeps the 4,5 m of the clearance:
 
 ```python
 print(round(environment.reference_microphone_height_m(
     4.0, source_to_barrier_m=8.0), 2))            # 5.93 m
+print(environment.reference_microphone_height_m(
+    3.0, source_to_barrier_m=5.0))                # 4.5 m
 print(environment.reference_microphone_height_m(4.0))   # 5.5 m
 ```
+
+Where the top of the barrier already stands 80 degrees or more above the near
+end of the source region, no height reaches the 10 degrees at all. The
+microphone then keeps the clearance, and a `BarrierInSituWarning` says the NOTE
+could not be followed.
 
 ## 6. The weather is part of the measurement
 
@@ -323,8 +363,8 @@ Fix the receiver positions and the reference position first, and keep them for
 both campaigns: the subtraction means nothing otherwise. Put the reference
 microphone at least 1,5 m above the top edge of the barrier, on a vertical plane
 through it, measured from the highest point where the top is not a straight
-edge, or use the elevation rule of the NOTE where the source region comes closer
-than 15 m. Record the wind component on the source-to-receiver line, the
+edge, and higher where the source region comes closer than 15 m and the
+elevation rule of the NOTE asks for more. Record the wind component on the source-to-receiver line, the
 temperature and the cloud cover for every run, and stop when the wind passes
 5 m/s. Repeat at least three times. When the second campaign comes, check that
 the weather still matches within 2 m/s and 10 °C before anything else, because
@@ -364,7 +404,10 @@ subtraction of Equations (17) and (18), capped at 3 dB. Past the cap the quantit
 is not determined, and what may be stated instead is the inequality of clause 4.
 `extraneous_corrected_mean_level_db` returns the corrected level and whether the
 cap was reached, so that a capped number cannot be written down as a
-determination.
+determination. The cap is judged on the margin, where Table 1 draws it. At a
+margin of exactly 3 dB the subtraction takes off 3,02 dB, which is the printed
+3 dB unrounded and the correction Table 1 applies at that row, so the level is
+still determined; under 3 dB it is not.
 
 ## What this guide covers
 
@@ -373,10 +416,12 @@ determination.
 **ISO 11820:1996** in full arithmetic: the level differences of Equations (1),
 (2) and (3); the sound power of Equations (5), (7), (9) and (11) with the
 reverberant area of Equations (6), (10) and (12); the transmission loss of
-Equation (19) and the insertion loss of Equation (21) with the temperature field
-correction of Equations (20) and (22); the twenty installations of Figure 1 with
+Equation (19) and the insertion loss of Equation (21), with areas and field
+corrections one value or one per band, and the temperature field correction of
+Equations (20) and (22); the twenty installations of Figure 1 with
 the area rules of clause 9; the background table of clause 4 and the extraneous
-energy subtraction of Equations (17) and (18) with its 3 dB cap; the octave fold
+energy subtraction of Equations (17) and (18) with its 3 dB cap, judged on the
+margin; the octave fold
 of 9.1.5; the measurement distances of Equations (15) and (16); and the flow
 quantities of Equations (13), (14) and (27) to (31).
 
@@ -384,14 +429,15 @@ quantities of Equations (13), (14) and (27) to (31).
 5.9, refused with an artificial source; the boxed background correction of 5.7
 with its own window; the directivity index of definition 3.10 and the acceptance
 limit of 5.2.2; the microphone geometry of 5.5.2 with its floor; the repeat rule
-of 5.6.2.1 for an impulsive source; and the printed thresholds of the operator
+of 5.6.2.1 for an impulsive source; the whole-decibel reporting of 7.4 c); and
+the printed thresholds of the operator
 sphere, the outdoor range and the standard deviation of reproducibility.
 
 **ISO 10847:1997**: the direct method of 8.2.1 and the indirect method of 8.2.2
 with its two receiver corrections; the background table of 6.4; the wind classes
 of Table 1 and the cloud cover classes of Table 2; the short-distance test of
-6.3.1; the reference microphone height of 7.2.2 with the elevation alternative
-of its NOTE; the hemi-free-field clearance of 8.1.2; and the equivalent-site
+6.3.1; the reference microphone height of 7.2.2, raised where the elevation rule
+of its NOTE asks for more; the hemi-free-field clearance of 8.1.2; and the equivalent-site
 geometry of 6.1.
 </ScopeClaim>
 

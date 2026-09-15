@@ -908,13 +908,14 @@ res = noise_control.in_situ_transmission_loss(
     frequencies=bands, case=2,
 )
 print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
-print(round(res.area_term_db, 1))  # -10.8 dB
+print(res.area_term_db.round(1))   # [-10.8 -10.8 -10.8 -10.8 -10.8 -10.8] dB
 ```
 
 The area term is negative and that is not a mistake: a duct of 0,9 m² discharging
 into a room whose quarter-absorption is 10,8 m² spreads the same power over
 twelve times the area, and subtracting that is what stops the room being credited
-to the silencer.
+to the silencer. The term comes back once per band, because the area of a room
+is not one number either.
 
 ## The twenty installations
 
@@ -934,7 +935,20 @@ and four more are insertion measurements, and Figure 1 draws all twenty.
 `installation_case` carries the area rule clause 9 gives each side, and the two
 loss functions refuse a case that belongs to the other quantity. The room area
 itself comes from the reverberation time through Equations (6), (10) and (12),
-as a quarter of the Sabine equivalent absorption area.
+as a quarter of the Sabine equivalent absorption area, and so moves from band to
+band with it: `reverberant_surface_area_m2` returns one area per band, and both
+loss functions take each area and the field correction as one value or as one
+per band.
+
+```python
+area = noise_control.reverberant_surface_area_m2(320.0, [1.6, 1.4, 1.2, 1.1, 1.0, 0.9])
+res = noise_control.in_situ_transmission_loss(
+    source, receiver, source_area_m2=0.9, receiver_area_m2=area,
+    frequencies=bands, case=2,
+)
+print(res.area_term_db.round(1))   # [ -9.6 -10.1 -10.8 -11.2 -11.6 -12.1] dB
+print(res.loss_db.round(1))        # [16.4 20.9 26.2 29.8 30.4 26.9] dB
+```
 
 A silencer is not measured until the flow is measured too. Clause 9 is here in
 full: the total pressure loss of Equation (13), the static difference behind a
@@ -958,7 +972,10 @@ run. `screen_attenuation` is the difference between the two runs, and the
 A-weighted pair of 5.9 is refused with an artificial source, because then the
 spectrum weighted is the loudspeaker's. An artificial source has its own test to
 pass first, the twelve-position directivity index of definition 3.10 with the
-8 dB limit of 5.2.2.
+8 dB limit of 5.2.2. 7.4 c) reports the attenuation and its A-weighted value to
+the nearest whole decibel: `rounded()` and `rounded_a_weighted()` give them that
+way, with an exact half going to the even decibel, while `attenuation_db` keeps
+the unrounded difference.
 
 ```python
 print(noise_control.microphone_distances_m(3.0))   # [1.  1.5 3.  6. ] m
@@ -976,8 +993,10 @@ nearest, which is why all four are asked for rather than an average.
 
 **How the measurement goes.** Fix the receiver and reference positions first and
 keep them for both campaigns. Reference microphone at least 1,5 m above the top
-edge on a vertical plane through it, or the elevation rule of the NOTE for a
-source region closer than 15 m. Record the wind component, the temperature and
+edge on a vertical plane through it, which 7.2.2 states with "shall", and higher
+where the source region comes closer than 15 m and the elevation rule of the
+NOTE asks for more: the NOTE only ever raises it, so a 3 m barrier 5 m from the
+source keeps 4,5 m although its 10 degrees are reached at 4,34 m. Record the wind component, the temperature and
 the cloud cover for every run, stop above 5 m/s, repeat at least three times,
 and check before the second campaign that the weather still matches within
 2 m/s and 10 °C.
@@ -1032,14 +1051,16 @@ implementations for that reason, and a conformance check holds them against each
 other at the margin where they part. ISO 11820 offers a second route for
 switchable extraneous sources, the energy subtraction of Equations (17) and (18),
 capped at 3 dB; past the cap the quantity is not determined and only the
-inequality of clause 4 may be stated.
+inequality of clause 4 may be stated. The cap is judged on the margin, where
+Table 1 draws it: a margin of exactly 3 dB takes off 3,02 dB, the printed 3 dB
+unrounded, and still determines the level.
 
 ## What this guide covers
 
 Implemented: the whole arithmetic of ISO 11820, from the level differences of
 Equations (1) to (3) to the flow quantities of Equations (27) to (31), with the
 twenty installations of Figure 1; the attenuation, background window, directivity
-test, microphone geometry and impulse rule of ISO 11821; and the direct and
+test, microphone geometry, impulse rule and reporting rounding of ISO 11821; and the direct and
 indirect methods, background table, wind and cloud classes, short-distance test,
 reference microphone height and hemi-free-field clearance of ISO 10847. Two
 defects in the print of ISO 10847 are recorded in the

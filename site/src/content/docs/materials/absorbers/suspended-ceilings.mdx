@@ -84,7 +84,9 @@ For that type E mounting, 4.1.1.2.3.1 fixes the overall depth of construction at
 **200 mm**, and says in as many words that this is the depth the data for CE
 marking is compiled at. Another depth may be measured and reported, but the
 result is then a measurement of that arrangement rather than the one the
-marking rests on.
+marking rests on. The check passes it and its one warning says only that: the
+depth is not the one CE marking data is compiled from, which is not the same as
+leaving the test code.
 
 ```python
 import warnings
@@ -98,26 +100,49 @@ print(len(raised))              # 1
 ```
 
 The rest of the arrangement carries numbers too: a substructure no more than
-30 mm wide and 50 mm deep on a 0,6 m pitch, supports of 50 mm by 50 mm at least
-1,2 m apart, a mounting fixture of solid material at 20 kg/m² or more, and a
-specimen that deflects no more than 5 mm anywhere. The three the check is given,
-the substructure section, the fixture density and the deflection, are judged,
-and leaving one raises a `SuspendedCeilingWarning` that says which. The pitch of
-the substructure and the section and spacing of the supports are published as
-`SUBSTRUCTURE_SPACING_M`, `SUPPORT_SECTION_MM` and `MIN_SUPPORT_SPACING_M` to
-build to: they describe how the specimen was hung rather than a measurement
-taken on it, so nothing in the call can check them.
+30 mm wide and 50 mm deep on a pitch of about 0,6 m, support units under it no
+larger than 50 mm by 50 mm in cross-section at centre distances of at least
+1,2 m, a mounting fixture of solid material at 20 kg/m² or more, and a specimen
+that deflects no more than 5 mm anywhere. Every one of those limits that a
+dimension of the arrangement as built can be held to is judged: the substructure
+section, the support section and centre distance, the fixture density and the
+deflection. Leaving one makes `satisfied` false and raises a
+`SuspendedCeilingWarning` that says which.
+
+```python
+with warnings.catch_warnings(record=True) as raised:
+    warnings.simplefilter("always")
+    hung = materials.check_ceiling_specimen(
+        area_m2=10.8, mounting="E", depth_mm=200.0,
+        substructure_width_mm=24.0, substructure_height_mm=38.0,
+        support_width_mm=60.0, support_height_mm=40.0,
+        support_centre_distance_m=1.0,
+    )
+print(hung.substructure_ok)     # True
+print(hung.supports_ok)         # False
+print(hung.satisfied)           # False
+```
+
+A substructure and supports are what the clause allows rather than requires, so
+their dimensions default to none at all and the centre distance is judged only
+when it is given. Three printed figures are not judged, because the clause does
+not make them limits: the 0,6 m test object, which "should" be that size and
+otherwise the closest in the product range; the 10° edge angle, which "should be
+aimed at"; and the substructure pitch of "approx. 0,6 m". They are published as
+`TEST_OBJECT_SIZE_M`, `MIN_ROOM_EDGE_ANGLE_DEG` and `SUBSTRUCTURE_SPACING_M` to
+build to.
 
 ### How the measurement goes
 
 Build the specimen to 10,80 m² out of whole test objects, butted together, with
 the joints unsealed and the perimeter covered by the mounting fixture. Hang it
 at 200 mm overall depth if the result is to support CE marking, on a
-substructure inside the 30 mm by 50 mm section, and check the deflection at the
-worst point. Set the specimen edges at an angle to the room walls. Measure the
+substructure inside the 30 mm by 50 mm section, carried by supports inside
+50 mm by 50 mm and at least 1,2 m apart, and check the deflection at the worst
+point. Set the specimen edges at an angle to the room walls. Measure the
 empty room first and then the room with the specimen in it, as EN ISO 354
 prescribes, holding the temperature and the humidity steady between the two
-runs: the correction below is the difference between them, and it is a
+runs and the humidity at 50 % or more in each: the correction below is the difference between them, and it is a
 difference of days rather than of ceilings.
 
 ## 3. The air in the room is part of the answer
@@ -136,7 +161,22 @@ $$
 
 and the test conditions "shall be so chosen" that it does not exceed 0,05 at any
 frequency. 4.2.2 adds the practical half of that: at least 50 % relative
-humidity in the room.
+humidity in the room, which 4.2.3 asks to be checked for each measurement. The
+specimen check takes one humidity per measurement and judges the driest:
+
+```python
+with warnings.catch_warnings(record=True) as raised:
+    warnings.simplefilter("always")
+    dry = materials.check_ceiling_specimen(
+        area_m2=10.8, mounting="E", depth_mm=200.0,
+        relative_humidity_percent=[41.0, 44.0],   # empty room, then with the specimen
+    )
+print(dry.humidity_ok)          # False
+print(dry.satisfied)            # False
+```
+
+Leave the humidity out and `humidity_ok` is `None`: the verdict then covers the
+specimen and says nothing about the room.
 
 ```python
 correction = materials.air_absorption_correction(
@@ -180,9 +220,10 @@ raft or a free-hanging unit is outside them.
 <ScopeClaim status="covered" label="Covered">
 
 - **EN 16487:2014**: the specimen geometry of 4.1.1.1, the four mountings of
-  4.1.1.2 with the type E depth of 4.1.1.2.3.1, the substructure and deflection
-  limits of 4.1.1.2.3.4 and 4.1.1.2.3.5, the air-absorption correction and cap
-  of 4.2.1, the humidity of 4.2.2, and Table 1 with its coverage factor.
+  4.1.1.2 with the type E depth of 4.1.1.2.3.1, the substructure, deflection and
+  support unit limits of 4.1.1.2.3.4 to 4.1.1.2.3.6, the mounting fixture of
+  4.1.1.1.6, the air-absorption correction and cap of 4.2.1, the humidity of
+  4.2.2 judged for each measurement, and Table 1 with its coverage factor.
 
 </ScopeClaim>
 <ScopeClaim status="not-covered" label="Not covered">

@@ -74,12 +74,16 @@ export const domains = counts.domains;
  */
 export const standards = counts.standards;
 /**
- * Distinct normative *documents*, from the split citation. Smaller than
+ * Distinct normative *documents*, from the split citation: every document a
+ * citation names, wherever in it the citation names it. Smaller than
  * `standards`, because seven clauses of one standard are one document here and
  * seven "standards" there.
  */
 export const designations = counts.designations;
-/** Distinct further cited works: books, articles, reports, datasets. */
+/**
+ * Distinct further cited works: books, articles, reports, datasets, counted
+ * the same way, over every document a citation names.
+ */
 export const sources = counts.sources;
 
 /** "427 / 427", for the landing-page stat tile. */

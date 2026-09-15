@@ -201,6 +201,13 @@ const t =
 					'by-design': 'Por diseño',
 					'not-applicable': 'No aplica',
 				} as Record<string, string>,
+				relations: {
+					corroborates: 'corroborado por',
+					compares: 'comparado con',
+					via: 'leído vía',
+					supplies: 'resuelto con',
+					mentions: 'nombra además',
+				} as Record<string, string>,
 				closest: 'Las diez comprobaciones más cerca de su límite publicado',
 				closestNote:
 					'Fracción de la tolerancia publicada que consume cada comprobación. El 100 % cae justo en el límite y un guion significa que el apartado no fija tolerancia de dos lados para esa magnitud, así que no hay margen que gastar. Un valor alto no es un fallo: es el margen con el que se cumple, y nunca decide el veredicto, que se resuelve a precisión completa antes de redondear.',
@@ -243,6 +250,13 @@ const t =
 					fail: 'Fail',
 					'by-design': 'By design',
 					'not-applicable': 'n/a',
+				} as Record<string, string>,
+				relations: {
+					corroborates: 'corroborated by',
+					compares: 'compared with',
+					via: 'read via',
+					supplies: 'run with',
+					mentions: 'also names',
 				} as Record<string, string>,
 				closest: 'The ten checks closest to their published limit',
 				closestNote:
@@ -287,6 +301,27 @@ const t =
  */
 const verdictWord = (verdict: string) => t.verdicts[verdict] ?? verdict;
 
+/** The qualifier a citation writes inside the connector: " (coupler, " is "coupler". */
+const QUALIFIER = /^ \(([a-z][a-z ]*), $/;
+
+/**
+ * What the connector says, with the words the citation writes inside it.
+ *
+ * Two citations of ISO 389-1 say what the second document is for, in the only
+ * place a citation has to say it: "Table 1 (coupler, IEC 60303)" and "Table 2
+ * (artificial ear, IEC 60318)". Splitting the citation into documents moved
+ * those words out of the clause and into the connector, and a cell that
+ * rendered the relation alone dropped them from the page, leaving the reader
+ * with two rows that name a second standard and no longer say which part of
+ * the ear simulator it is. The words belong to the citation rather than to
+ * this page, so they are printed as the citation writes them.
+ */
+function relationText(document: { relation?: string; lead?: string }) {
+	const word = t.relations[document.relation ?? ''] ?? document.relation ?? '';
+	const qualifier = QUALIFIER.exec(document.lead ?? '')?.[1];
+	return qualifier ? `${word} (${qualifier})` : word;
+}
+
 /** The marks the page actually draws, so the legend explains those and no others. */
 const legendVerdicts = ['pass', 'fail', 'by-design', 'not-applicable'].filter(
 	(verdict) =>
@@ -297,11 +332,18 @@ const legendVerdicts = ['pass', 'fail', 'by-design', 'not-applicable'].filter(
 /** How much of the bar is green. Whole percent; the figures beside it are exact. */
 const passedShare = counts.checks ? (100 * counts.passing) / counts.checks : 100;
 
-/** Everything one row can be searched by, lowercased once at build time. */
+/**
+ * Everything one row can be searched by, lowercased once at build time.
+ *
+ * Every document the citation names, and the place in each. Searching for
+ * "iso 16283-3" used to find one row of the nine that cite it, because the
+ * other eight write it as "-3:2016" inside the clause of part 1.
+ */
 const searchable = (row: (typeof rows)[number]) =>
 	[
 		row.check.reference.cite,
-		row.check.reference.designation,
+		...row.check.reference.documents.map((document) => document.designation),
+		...row.check.reference.documents.map((document) => document.clause ?? ''),
 		row.check.quantity,
 		row.check.unit ?? '',
 	]
@@ -543,13 +585,16 @@ const searchable = (row: (typeof rows)[number]) =>
 										{verdictWord(row.check.verdict)}
 									</td>
 									<td>
-										<span class="designation">{row.check.reference.designation}</span>
-										{row.check.reference.edition && (
-											<span class="edition">{row.check.reference.edition}</span>
-										)}
-										{row.check.reference.clause && (
-											<span class="clause">{row.check.reference.clause}</span>
-										)}
+										{row.check.reference.documents.map((document) => (
+											<span class="document">
+												{document.relation && (
+													<span class="relation">{relationText(document)}</span>
+												)}
+												<span class="designation">{document.designation}</span>
+												{document.edition && <span class="edition">{document.edition}</span>}
+												{document.clause && <span class="clause">{document.clause}</span>}
+											</span>
+										))}
 									</td>
 									<td>{row.check.quantity}</td>
 									<td>{sideText(row.check.expected, row.check)}</td>
@@ -692,7 +737,23 @@ const searchable = (row: (typeof rows)[number]) =>
 
 	/* The designation leads, the edition and clause follow it as metadata: the
 	   citation string used to be one run of text in which the document and the
-	   place inside it were indistinguishable. */
+	   place inside it were indistinguishable. A citation that names two or
+	   three documents gives each one a line of its own, introduced by what the
+	   citation says about it. */
+	.conformance .document {
+		display: block;
+	}
+
+	.conformance .document + .document {
+		margin-top: 0.35em;
+	}
+
+	.conformance .relation {
+		display: block;
+		font-size: 0.85em;
+		color: var(--sl-color-gray-3);
+	}
+
 	.conformance .designation {
 		font-weight: 600;
 	}

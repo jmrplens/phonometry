@@ -12,10 +12,11 @@ Two modes, because they cost two very different things.
 
 ``--validate`` (the default) reads the committed document and checks that it is
 internally consistent - the counts agree with the rows, every leaf is a
-built-in type, no two checks share an id, every unit is in the vocabulary, and
-every citation still rebuilds from its split. It runs no check and needs no
-scientific stack, so it is cheap enough to run beside every other read-only
-gate. It is what catches a truncated write, a hand-edit and a numpy scalar.
+built-in type and none is null, no two checks share an id, every unit is in the
+vocabulary, and every citation still rebuilds from its split. It runs no check
+and needs no scientific stack, so it is cheap enough to run beside every other
+read-only gate. It is what catches a truncated write, a hand-edit and a numpy
+scalar.
 
 ``--regenerate`` runs all the checks and compares the result against the
 committed document. This is the authoritative staleness gate, and it costs the
@@ -36,7 +37,17 @@ if str(_SCRIPTS) not in sys.path:
 
 from conformance.artifact import SCHEMA, build_document, load
 from conformance.compare import document_problems
-from conformance.references import OVERRIDES_PATH, Reference, ReferenceKind, recompose
+from conformance.references import (
+    OVERRIDES_PATH,
+    Cited,
+    Reference,
+    ReferenceKind,
+    Relation,
+    expansion_of,
+    recompose,
+    relation_for,
+    work_kinds,
+)
 from conformance.registry import Kind, Verdict
 from conformance.units import UNITS
 
@@ -86,6 +97,41 @@ def _count_problems(document: Mapping[str, Any]) -> list[str]:
     return problems
 
 
+def _null_problems(value: object, path: str = "") -> list[str]:
+    """No field may be null: a field a check does not have is left out.
+
+    The builder drops every null-valued key before the document is written, so
+    a citation with nothing after its last document has no ``tail`` at all
+    rather than a null one. The site reads the document through a schema that
+    declares each of those fields optional and none of them nullable, which
+    makes ``null`` a value the documentation build rejects, and without this
+    the first place to say so would be that build, far from the check that
+    wrote it.
+
+    :param value: The document, or any branch of it.
+    :param path: Where ``value`` sits in the document, for the message.
+    :return: One problem per null, naming its path.
+    """
+    if value is None:
+        return [
+            f"{path} is null. Leave the key out instead: the site schema reads "
+            "an absent field and rejects a null one."
+        ]
+    if isinstance(value, dict):
+        return [
+            problem
+            for key, inner in value.items()
+            for problem in _null_problems(inner, f"{path}.{key}" if path else key)
+        ]
+    if isinstance(value, list):
+        return [
+            problem
+            for index, item in enumerate(value)
+            for problem in _null_problems(item, f"{path}[{index}]")
+        ]
+    return []
+
+
 def _type_problems(check: Mapping[str, Any]) -> list[str]:
     """Every numeric leaf of one check must be a built-in ``float``."""
     problems = []
@@ -120,32 +166,104 @@ def _vocabulary_problems(check: Mapping[str, Any]) -> list[str]:
 
 
 def _reference_problems(check: Mapping[str, Any]) -> list[str]:
-    """The split must still rebuild the citation it came from.
+    """The documents must still rebuild the citation they came from.
 
-    The whole reference split rests on this: three fields that cannot be
-    reassembled into the original string have lost or moved something, and the
-    designation count is then counting the wrong thing.
+    The whole reference split rests on this: a list that cannot be reassembled
+    into the original string, connectors included, has lost or moved
+    something, and the designation count is then counting the wrong thing.
+    Because the rebuild walks the citation left to right, it is also what
+    proves the documents cover it in order and do not overlap.
+
+    Three things the rebuild cannot see are asked separately: the expanded
+    designation behind a shorthand, which is written out and therefore not in
+    the string; the relation, which is read off the connector; and the kind,
+    which is a judgement about the document rather than about the text and is
+    asked of the whole artefact at once in :func:`_work_kind_problems`.
     """
     reference = check["reference"]
-    if reference["kind"] not in tuple(ReferenceKind):
-        return [f"{check['id']}.reference.kind is {reference['kind']!r}."]
+    problems = [
+        f"{check['id']}.reference.documents[{index}].kind is {document['kind']!r}."
+        for index, document in enumerate(reference["documents"])
+        if document["kind"] not in tuple(ReferenceKind)
+    ]
+    problems += [
+        f"{check['id']}.reference.documents[{index}].relation is "
+        f"{document['relation']!r}."
+        for index, document in enumerate(reference["documents"])
+        if document.get("relation") is not None
+        and document["relation"] not in tuple(Relation)
+    ]
+    if problems:
+        return problems
+    cited = [_cited(document) for document in reference["documents"]]
+    problems += _relation_problems(check, cited)
+    problems += _written_problems(check, cited)
     rebuilt = recompose(
         Reference(
-            kind=ReferenceKind(reference["kind"]),
-            designation=reference["designation"],
-            edition=reference.get("edition"),
-            clause=reference.get("clause"),
             cite=reference["cite"],
+            documents=tuple(cited),
+            tail=reference.get("tail") or "",
         )
     )
-    if rebuilt == reference["cite"] or reference["cite"] in _overridden():
-        return []
+    # The ratchet lines are exempt from the rebuild, and they have to be: the
+    # CNOSSOS-EU rows name a clause of Annex II, and the directive the clause
+    # belongs to appears nowhere in the citation, so nothing rebuilt from the
+    # record can reproduce the string.
+    if rebuilt != reference["cite"] and reference["cite"] not in _overridden():
+        problems.append(
+            f"{check['id']}: the citation split does not rebuild its citation. "
+            f"{[document['designation'] for document in reference['documents']]} "
+            f"does not reproduce {reference['cite']!r}. "
+            f"Fix the parser, or record the split in {OVERRIDES_PATH.name}."
+        )
+    return problems
+
+
+def _cited(document: Mapping[str, Any]) -> Cited:
+    """One stored document, read back as the parser writes it."""
+    relation = document.get("relation")
+    return Cited(
+        kind=ReferenceKind(document["kind"]),
+        designation=document["designation"],
+        edition=document.get("edition"),
+        clause=document.get("clause"),
+        lead=document.get("lead") or "",
+        relation=None if relation is None else Relation(relation),
+        written=document.get("written"),
+    )
+
+
+def _relation_problems(check: Mapping[str, Any], cited: list[Cited]) -> list[str]:
+    """Each document must say what the words that introduced it say."""
     return [
-        f"{check['id']}: the citation split does not rebuild its citation. "
-        f"{reference['designation']!r} + {reference.get('edition')!r} + "
-        f"{reference.get('clause')!r} does not reproduce {reference['cite']!r}. "
-        f"Fix the parser, or record the split in {OVERRIDES_PATH.name}."
+        f"{check['id']}.reference.documents[{index}]: lead {document.lead!r} "
+        f"reads as {relation_for(document.lead)!r}, but the document records "
+        f"{document.relation!r}."
+        for index, document in enumerate(cited)
+        if document.relation is not relation_for(document.lead)
     ]
+
+
+def _written_problems(check: Mapping[str, Any], cited: list[Cited]) -> list[str]:
+    """A shorthand must expand to the designation it names.
+
+    ``-3:2016`` is ISO 16283-3 only because ISO 16283-1 opened the citation,
+    and ``NORAH2`` is the NORAH2 guidance because the reader says so. Either
+    way the expanded designation is not in the citation string, so the rebuild
+    cannot see it and this asks instead.
+    """
+    problems = []
+    for index, document in enumerate(cited[1:], start=1):
+        if document.written is None:
+            continue
+        expected = expansion_of(document.written, cited[index - 1])
+        if document.designation != expected:
+            problems.append(
+                f"{check['id']}.reference.documents[{index}]: "
+                f"{document.written!r} after {cited[index - 1].designation!r} "
+                f"is {expected!r}, not {document.designation!r}."
+            )
+    return problems
 
 
 @functools.cache
@@ -162,6 +280,33 @@ def _overridden() -> frozenset[str]:
         for line in OVERRIDES_PATH.read_text(encoding="utf8").splitlines()
         if line.strip() and not line.startswith("#")
     )
+
+
+def _work_kind_problems(document: Mapping[str, Any]) -> list[str]:
+    """A work the reader knows by name is filed as one sort of document.
+
+    The kind is the one field the rebuild cannot see: it is a judgement about
+    the document rather than about the text, so nothing else in this gate
+    compares it against anything. A name the reader lists is also readable by
+    the rules that need no list, and those judge by shape, so the same work
+    could be filed two ways in the same artefact and no gate would say a word.
+    It was: Mackenzie was an article where the citation wrote the year and a
+    book where it did not, and the NORAH2 guidance was a book where the parser
+    read it and a report where the override file did.
+    """
+    declared = work_kinds()
+    recorded: dict[tuple[str, str], str] = {}
+    for check in document["checks"]:
+        for cited in check["reference"]["documents"]:
+            if cited["designation"] in declared:
+                key = (cited["designation"], cited["kind"])
+                recorded.setdefault(key, check["reference"]["cite"])
+    return [
+        f"{designation!r} is recorded as {kind!r} in {cite!r}, and the reader "
+        f"declares it {str(declared[designation])!r}."
+        for (designation, kind), cite in sorted(recorded.items())
+        if kind != str(declared[designation])
+    ]
 
 
 def _ratchet_problems(document: Mapping[str, Any]) -> list[str]:
@@ -184,6 +329,12 @@ def validate(document: Mapping[str, Any]) -> list[str]:
         problems.append(
             f"schema is {document.get('schema')!r}, this checkout reads {SCHEMA}."
         )
+    # Nulls are read first and end the check: every validator below walks the
+    # document's shape, and a null where a list or a mapping belongs would make
+    # the gate raise instead of saying which field is wrong.
+    nulls = _null_problems(document)
+    if nulls:
+        return problems + nulls
     problems += _count_problems(document)
     seen: set[str] = set()
     for check in document["checks"]:
@@ -193,6 +344,7 @@ def validate(document: Mapping[str, Any]) -> list[str]:
         problems += _type_problems(check)
         problems += _vocabulary_problems(check)
         problems += _reference_problems(check)
+    problems += _work_kind_problems(document)
     problems += _ratchet_problems(document)
     return problems
 

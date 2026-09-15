@@ -221,6 +221,99 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- A citation that named two or three documents was filed under the first one,
+  and the others never appeared as cited at all. `ISO 16283-1:2014 Clause 8.1 /
+  -2:2020 Clause 8.1 / -3:2016 Clause 7.3.1` was recorded as part 1 with the
+  other two parts sitting inside its clause, and the same reading put ANSI
+  S1.11 inside a clause of IEC 61260, BS 5969 inside one of IEC 651, and the
+  NASA table the numbers were actually read from inside one of a withdrawn IEC
+  537. Nothing caught it: the only verification was that the split rebuilds the
+  citation string, and a second document left in the clause rebuilds perfectly.
+
+  A citation now carries every document it names, `reference.documents`, in the
+  order it writes them, each with the connector that introduces it and what
+  that connector says: corroborates for `/` and `+`, compares for `vs` and
+  `against`, via for `via`, `per`, `(via` and `in`, supplies for `with` and for
+  the `and` that continues such a list, mentions for a bracket, for `, as` and
+  for the `;` that opens a second printing inside one. There is no headline
+  document to read instead, and that is the point, because a consumer that does
+  not iterate now fails where before it quietly reported the first. The rebuild
+  is stricter with it, since every document has to account for its own span of
+  the string rather than one of them holding whatever is left. A connector is a
+  split only where what follows it opens like a document, so `ISO 7196:1995
+  Table 2 / A.3` and `Normal modes vs ideal waveguide`, `Ver and Beranek (2006)
+  Example 4.2` and `Noise Control in Industry 3e` still name one thing each.
+  Reading a sibling part against the series before it is what makes `-3:2016`
+  ISO 16283-3 in the count and in the bibliography while the citation goes on
+  writing `-3`. Three series the reader cut in the wrong place are fixed
+  alongside it, `JIS A 1418-2`, `EBU R 98` and `NASA CR-3406`, the last by
+  anchoring an edition to a century, a document number and a year being written
+  the same way. A national printing is read as the document it is for the same
+  reason: `BS EN 16487:2014` and the `UNE-EN ISO 14257:2002` a citation names
+  beside the BS one kept their number in the clause while the bare body stood
+  as the designation. A citation may also write a work by the name a reader
+  would know it by and leave the rest of the title off, as `(NORAH2 Eq. 8)`
+  does for the NORAH2 guidance, and that shorthand is expanded the same way
+  `-3` is: the record names the document, the citation goes on writing what it
+  wrote.
+
+  93 citations name more than one document, across 102 checks. The count of
+  distinct normative designations the report publishes goes from 163 to 179,
+  taking in ANSI S1.11, ASTM E1414, BS 5969, EBU R 98, IEC 60303, IEC 60318,
+  ISO 140-3, ISO 14163, JIS A 1418-2, the two ASHRAE tables, the two EN
+  adoptions an EN 16487 row works through, and the three national printings a
+  citation names as the copy its numbers were read on. The further sources go
+  from 101 to 114: sixteen come in, NASA CR-3406, Osses et al., Johnson et al.,
+  Glasberg & Moore, Doutres et al. and Foret et al. among them, together with
+  the books and the thesis the in situ rows read a worked example from and the
+  three accredited test reports a cabin row is checked against, and three works
+  that never existed go out, `Fastl & Zwicker Ch. 10 / Osses et al.` among
+  them, which is what a book, a separator and a second author read as one
+  designation look like. The published figure of 460 standards does not move:
+  it counts citation groups and always has. Searching the conformance page for
+  a document now finds every row that cites it, where "iso 16283-3" found one
+  row of nine.
+
+  The conformance table prints every document a citation names, with what its
+  connector says in front of it: corroborated by, compared with, read via, run
+  with and also names, and corroborado por, comparado con, leído vía, resuelto
+  con and nombra además in Spanish. A qualifier written inside a bracket is
+  printed as the citation writes it, so `Table 1 (coupler, IEC 60303)` still
+  says which part of the ear simulator the second standard is. The site
+  restates these vocabularies twice, in the schema that validates the artefact
+  into its content collection and in the label maps that word a verdict and a
+  relation in each language, and nothing compared either restatement with the
+  enums that produce them: a relation the schema does not accept refuses the
+  whole artefact, and one with no label prints raw beside the words that have
+  one. `scripts/check_conformance_vocabulary.py` compares all five closed
+  vocabularies with both restatements, in both directions, so a value added to
+  an enum and missing from the site, or left in the site after nothing produces
+  it, fails beside the other conformance gates rather than in a site build.
+
+  The artefact is `schema` 2, and `designations` and `sources` now mean
+  documents named anywhere in a citation rather than documents that open one. A
+  test holds the class shut, over every document of every check: no clause and
+  no designation may carry a body with a document number, a sibling part, an
+  author with a date, a connector, or any designation the artefact itself
+  records for another citation, whole or written the short way in front of a
+  place in it. The connectors written as ordinary words are left out of the
+  question asked of a designation, because `Ver and Beranek` and `Noise Control
+  in Industry` are names and not two documents each.
+
+  What sort of document a named work is is now declared once and gated. The
+  rules that read a work from its shape alone disagreed with each other about
+  four of them, so Mackenzie was an article where a citation wrote the year and
+  a book where it did not, Ainslie and Hopkins and Vigran were books read as
+  articles, and the NORAH2 guidance was a book to the reader and a report to
+  the file that records what the reader cannot. One work, one kind, and the
+  artefact gate fails on a record that says otherwise. The table of works cited
+  by author and year gains the ones a split makes visible for the first time:
+  `Fuchs (2013)`, `Hansen (2005)`, `Ver and Beranek (2006)` and `Bies, Hansen
+  and Howard (2017)` are monographs the year form would file as papers, `INSHT
+  NTP 668 (2004)` and the three accredited laboratory reports are reports. The
+  published counts do not move: the split that decides them separates standards
+  from everything else, and none of these ever was a standard.
+
 - One room description of `ROOM_ABSORPTION_ESTIMATES` was transcribed short.
   Table C.2 of ISO 11546-2 closes its 0,25 row with a worked example of what it
   means, "(e.g. partially absorptive ceiling)", and the table arrived in the

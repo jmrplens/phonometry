@@ -73,9 +73,9 @@ def test_a_verdict_change_leads_the_comment(head: dict) -> None:
 def test_a_reworded_quantity_is_a_rename_not_a_delete_and_an_add(head: dict) -> None:
     """The id is derived from the quantity, so rewording one renames the row.
 
-    Matching on the unchanged (domain, designation, clause) is what keeps that
-    from reading as an unrelated check appearing beside an unrelated one
-    vanishing.
+    Matching on the domain and on every document the citation names, with the
+    place in each, is what keeps that from reading as an unrelated check
+    appearing beside an unrelated one vanishing.
     """
     base = _copy(head)
     base["checks"][0]["id"] += "-as-it-used-to-be-worded"
@@ -258,3 +258,41 @@ def test_a_test_row_shows_a_mark_and_still_says_the_word(
         f"![Fail](https://raw.githubusercontent.com/jmrplens/phonometry/{SHA}" in table
     )
     assert "Failed" in table
+
+
+def test_a_base_written_to_an_older_schema_is_not_read(
+    head: dict, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """During a pull request that moves the shape, the base branch still
+    carries the shape before it.
+
+    Read as though it were current, the first check the comment looked at
+    would raise inside the workflow job. The comment already knows how to
+    manage with no baseline at all, and says so in the body, so an
+    unrecognised schema takes that path.
+    """
+    stale = _copy(head)
+    monkeypatch.setenv("GITHUB_BASE_REF", "main")
+    monkeypatch.setattr(
+        cpr.subprocess,
+        "run",
+        lambda *args, **kwargs: subprocess.CompletedProcess(
+            args, 0, json.dumps(stale).encode("utf8"), b""
+        ),
+    )
+    stale["schema"] = cpr.SCHEMA - 1
+    assert cpr.base_document() is None
+    stale["schema"] = cpr.SCHEMA
+    assert cpr.base_document() is not None
+
+
+def test_the_schema_this_script_reads_is_the_one_the_artefact_writes() -> None:
+    """The number is written out here rather than imported, so it is asked.
+
+    Importing it would pull the artefact module, and with it the scientific
+    stack the ``pr-comment`` job deliberately does not install. A copy that
+    drifted would silently drop the baseline from every comment.
+    """
+    from conformance.artifact import SCHEMA
+
+    assert cpr.SCHEMA == SCHEMA

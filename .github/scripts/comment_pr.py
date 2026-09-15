@@ -58,6 +58,13 @@ CLOSEST_ROWS = 5
 
 ARTIFACT = "docs/conformance.json"
 
+#: The artefact shape this script knows how to read. It is the number declared
+#: in ``scripts/conformance/artifact.py``, written out again rather than
+#: imported: this job has no pip step, and importing that module would pull the
+#: whole scientific stack in behind it. ``tests/test_comment_pr.py`` fails if
+#: the two ever disagree.
+SCHEMA = 2
+
 
 def parse_test_results(test_dir: str, ref: str) -> tuple[str, int, int]:
     """The per-version test table, its total and its failure count.
@@ -155,9 +162,12 @@ def head_document() -> dict[str, Any] | None:
 def base_document() -> dict[str, Any] | None:
     """The artefact on the base branch, or ``None`` if it cannot be reached.
 
-    A fork, a first pull request after the artefact landed, or a checkout that
-    never fetched the base all end here. None of those is an error: the comment
-    falls back to totals and says so.
+    A fork, a first pull request after the artefact landed, a checkout that
+    never fetched the base, and a base written to an older schema all end
+    here. None of those is an error: the comment falls back to totals and says
+    so. The schema is the one that would otherwise fail inside the comment
+    job rather than beside it, because a pull request that moves the shape is
+    read against a base that still has the old one.
     """
     base = os.environ.get("GITHUB_BASE_REF")
     if not base:
@@ -173,9 +183,10 @@ def base_document() -> dict[str, Any] | None:
         )
         if result.returncode == 0:
             try:
-                return json.loads(result.stdout.decode("utf-8"))
+                document: dict[str, Any] = json.loads(result.stdout.decode("utf-8"))
             except ValueError:
                 return None
+            return document if document.get("schema") == SCHEMA else None
     return None
 
 
@@ -183,14 +194,20 @@ def _by_id(document: dict[str, Any]) -> dict[str, dict[str, Any]]:
     return {check["id"]: check for check in document["checks"]}
 
 
-def _identity(check: dict[str, Any]) -> tuple[str, str, str]:
+def _identity(check: dict[str, Any]) -> tuple[str, tuple[str, ...], tuple[str, ...]]:
     """What a check is about, independent of how its quantity is worded.
 
     Renames are matched on this, so rewording a quantity shows up as one moved
-    row rather than as a deletion beside an unrelated-looking addition.
+    row rather than as a deletion beside an unrelated-looking addition. Every
+    document the citation names, because a check of ISO 16283-1, -2 and -3 is
+    not the same check as one of part 1 alone.
     """
-    reference = check["reference"]
-    return (check["domain"], reference["designation"], reference.get("clause") or "")
+    documents = check["reference"]["documents"]
+    return (
+        check["domain"],
+        tuple(document["designation"] for document in documents),
+        tuple(document.get("clause") or "" for document in documents),
+    )
 
 
 def _moved(before: dict[str, Any], after: dict[str, Any]) -> bool:

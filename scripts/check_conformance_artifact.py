@@ -12,10 +12,11 @@ Two modes, because they cost two very different things.
 
 ``--validate`` (the default) reads the committed document and checks that it is
 internally consistent - the counts agree with the rows, every leaf is a
-built-in type, no two checks share an id, every unit is in the vocabulary, and
-every citation still rebuilds from its split. It runs no check and needs no
-scientific stack, so it is cheap enough to run beside every other read-only
-gate. It is what catches a truncated write, a hand-edit and a numpy scalar.
+built-in type and none is null, no two checks share an id, every unit is in the
+vocabulary, and every citation still rebuilds from its split. It runs no check
+and needs no scientific stack, so it is cheap enough to run beside every other
+read-only gate. It is what catches a truncated write, a hand-edit and a numpy
+scalar.
 
 ``--regenerate`` runs all the checks and compares the result against the
 committed document. This is the authoritative staleness gate, and it costs the
@@ -94,6 +95,41 @@ def _count_problems(document: Mapping[str, Any]) -> list[str]:
             f"{len(document['domains'])} domains."
         )
     return problems
+
+
+def _null_problems(value: object, path: str = "") -> list[str]:
+    """No field may be null: a field a check does not have is left out.
+
+    The builder drops every null-valued key before the document is written, so
+    a citation with nothing after its last document has no ``tail`` at all
+    rather than a null one. The site reads the document through a schema that
+    declares each of those fields optional and none of them nullable, which
+    makes ``null`` a value the documentation build rejects, and without this
+    the first place to say so would be that build, far from the check that
+    wrote it.
+
+    :param value: The document, or any branch of it.
+    :param path: Where ``value`` sits in the document, for the message.
+    :return: One problem per null, naming its path.
+    """
+    if value is None:
+        return [
+            f"{path} is null. Leave the key out instead: the site schema reads "
+            "an absent field and rejects a null one."
+        ]
+    if isinstance(value, dict):
+        return [
+            problem
+            for key, inner in value.items()
+            for problem in _null_problems(inner, f"{path}.{key}" if path else key)
+        ]
+    if isinstance(value, list):
+        return [
+            problem
+            for index, item in enumerate(value)
+            for problem in _null_problems(item, f"{path}[{index}]")
+        ]
+    return []
 
 
 def _type_problems(check: Mapping[str, Any]) -> list[str]:
@@ -294,6 +330,7 @@ def validate(document: Mapping[str, Any]) -> list[str]:
             f"schema is {document.get('schema')!r}, this checkout reads {SCHEMA}."
         )
     problems += _count_problems(document)
+    problems += _null_problems(document)
     seen: set[str] = set()
     for check in document["checks"]:
         if check["id"] in seen:

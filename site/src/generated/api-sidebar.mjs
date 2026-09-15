@@ -306,6 +306,8 @@ export const apiSections = {
       'reference/api/noise_control/duct-path',
       'reference/api/noise_control/duct-modes',
       'reference/api/noise_control/enclosures',
+      'reference/api/noise_control/enclosure-insulation',
+      'reference/api/noise_control/cabin-insulation',
       'reference/api/noise_control/room-to-room',
       'reference/api/noise_control/valves',
       'reference/api/noise_control/valves-hydrodynamic',

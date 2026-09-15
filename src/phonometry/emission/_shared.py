@@ -318,3 +318,30 @@ def _background_exposure(
         msg = "'background_levels' must contain only finite values."
         raise ValueError(msg)
     return np.asarray(bg + 10.0 * np.log10(t / _T0), dtype=np.float64)
+
+
+#: Approximate mean sound absorption coefficient of a room by description,
+#: the table ISO 3744:2010 Table F.1, ISO 3746:2010 Table A.1,
+#: ISO 11202:2010 and ISO 11546-2:1995 Table C.2 all print with the same
+#: seven rows. It answers the question those annexes ask first: what is
+#: ``alpha`` in this room, when nobody measured it. The keys are the
+#: coefficients themselves, so a caller reads the value it needs and the
+#: description says what it stands for.
+ROOM_ABSORPTION_ESTIMATES: dict[float, str] = {
+    0.05: (
+        "Nearly empty room with smooth hard walls made of concrete, brick, "
+        "plaster or tile"
+    ),
+    0.1: "Partly empty room; room with smooth walls",
+    0.15: "Room with furniture; rectangular machinery room; rectangular industrial room",
+    0.2: (
+        "Irregularly shaped room with furniture; irregularly shaped machinery "
+        "room or industrial room"
+    ),
+    0.25: (
+        "Room with upholstered furniture; machinery or industrial room with a "
+        "small amount of sound-absorbing material on ceiling or walls"
+    ),
+    0.35: "Room with sound-absorbing materials on both ceiling and walls",
+    0.5: "Room with large amounts of sound-absorbing materials on ceiling and walls",
+}

@@ -85,6 +85,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike, NDArray
 
     from .._report.metadata import ReportMetadata
 
@@ -92,7 +93,9 @@ from .._internal.levels_math import energy_mean, energy_sum
 from .._internal.validation import (
     check_engine,
     require_choice,
+    require_finite_array,
     require_positive,
+    require_positive_array,
     require_ranks,
     require_same_length,
 )
@@ -342,6 +345,46 @@ def _k1_eq14(delta: np.ndarray, frequencies: np.ndarray) -> tuple[np.ndarray, bo
     k1 = -10.0 * np.log10(1.0 - 10.0 ** (-0.1 * clamped))
     k1 = np.where(delta >= _K1_UPPER_DB, 0.0, k1)
     return np.asarray(k1, dtype=np.float64), bool(np.any(delta < low))
+
+
+def reverberation_background_correction(
+    levels: ArrayLike,
+    background_levels: ArrayLike,
+    frequencies: ArrayLike,
+) -> NDArray[np.float64]:
+    r"""Background-noise correction :math:`K_1`, ISO 3741:2010 Equation (14).
+
+    :math:`K_1 = -10 \lg (1 - 10^{-0,1 \Delta L_p})`, the decibels to take off
+    a band level measured with the background in it. The qualification of
+    clause 9.1.2 is frequency dependent: a margin of 15 dB or more needs no
+    correction at all, and below the lower criterion, 6 dB for the bands at or
+    under 200 Hz and at or over 6,3 kHz and 10 dB between them, the correction
+    is held at the criterion value and the corrected level is an upper bound.
+
+    Other standards reach for this one by name rather than repeat it:
+    ISO 11957:1996 asks for a correction "in accordance with ISO 3741" four
+    times over, and :mod:`phonometry.noise_control.cabin_insulation` calls
+    this.
+
+    :param levels: Band levels measured with the background present, in
+        decibels.
+    :param background_levels: Background levels in the same bands, in decibels.
+    :param frequencies: Nominal band centre frequencies, in hertz.
+    :return: :math:`K_1` per band, in decibels, to be subtracted from
+        ``levels``.
+    :raises ValueError: For inputs that do not match band for band, that are
+        not finite, or a band centre that is not strictly positive.
+    """
+    signal = require_finite_array(levels, "levels")
+    background = require_finite_array(background_levels, "background_levels")
+    freqs = require_positive_array(frequencies, "frequencies")
+    if signal.shape != background.shape or signal.shape != freqs.shape:
+        msg = (
+            "'levels', 'background_levels' and 'frequencies' must match band for band."
+        )
+        raise ValueError(msg)
+    k1, _ = _k1_eq14(signal - background, freqs)
+    return k1
 
 
 def _background_corrected_mean(

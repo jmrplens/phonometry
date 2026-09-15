@@ -2928,6 +2928,100 @@ def _d_vdi2081_sheet(s: SVG, th: Theme) -> None:
         s.text(x + 26, yy, source, 11, th.muted, anchor="start")
 
 
+def _d_enclosure_cabin_measurement(s: SVG, th: Theme) -> None:
+    """The two runs of ISO 11546 and the one subtraction of ISO 11957.
+
+    An enclosure keeps noise in and a cabin keeps it out, and the two are
+    measured as mirror images of each other. The enclosure is a difference of
+    two determinations of the same machine, one without the box and one with
+    it, which is Equation (1) of both parts. The cabin is one subtraction
+    between the level in the room and the level inside the empty cabin, which
+    is Equation (1) of ISO 11957, with the loudspeaker positions of 7.2.1 read
+    off the spread of the answer itself.
+    """
+    floor = 300.0
+
+    s.text(
+        232, 96, "ISO 11546: two runs of the same machine", 15, th.primary, bold=True
+    )
+    s.text(232, 128, "the measurement surface is the same in both", 13, th.muted)
+    for x0, label, boxed in (
+        (60.0, "without the enclosure", False),
+        (270.0, "with the enclosure", True),
+    ):
+        s.ground(floor, x0 - 5, x0 + 176)
+        s.rect(x0 + 55, floor - 56, 60, 56, th.panel, th.fg, rx=5, sw=2.2)
+        s.circle(x0 + 85, floor - 28, 12, th.fg)
+        s.circle(x0 + 85, floor - 28, 5, th.bg)
+        if boxed:
+            s.rect(x0 + 40, floor - 84, 90, 84, "none", th.primary, rx=4, sw=2.6)
+        # The measurement surface stands outside whatever is being measured,
+        # which is the whole point of the two runs having the same one.
+        s.rect(
+            x0 + 8, floor - 128, 154, 128, "none", th.muted, rx=6, sw=1.3, dash="6,4"
+        )
+        s.mic(x0 + 8, floor - 98, floor, scale=0.6)
+        s.mic(x0 + 162, floor - 98, floor, scale=0.6)
+        for j in range(2):
+            s.circle(x0 + 52 + 60 * j, floor - 128, 5, th.fg)
+        if boxed:
+            s.text(x0 + 85, floor - 144, "the enclosure", 13, th.primary, bold=True)
+        s.text(x0 + 85, floor + 30, label, 13, th.muted)
+        s.text(
+            x0 + 85,
+            floor + 52,
+            "$L_{W,without}$" if not boxed else "$L_{W,with}$",
+            14,
+            th.primary,
+        )
+
+    s.text(690, 96, "ISO 11957: one room, one cabin", 15, th.secondary, bold=True)
+    s.ground(floor, 520, 860)
+    s.rect(535, floor - 150, 310, 150, "none", th.fg, rx=4, sw=2.0)
+    s.text(
+        690,
+        floor - 164,
+        "the room, driven by a loudspeaker or by the work itself",
+        13,
+        th.muted,
+    )
+    s.rect(700, floor - 96, 130, 96, th.panel, th.secondary, rx=4, sw=2.6)
+    s.text(765, floor + 30, "the cabin, empty", 13, th.secondary)
+    for j in range(3):
+        s.mic(560 + 44 * j, floor - 116, floor, scale=0.6)
+    for j in range(2):
+        s.mic(735 + 52 * j, floor - 78, floor, scale=0.6)
+    s.text(620, floor + 30, "in the room", 13, th.muted)
+    s.text(620, floor + 52, "$L_{p,room}$", 14, th.secondary)
+    s.text(765, floor + 52, "$L_{p,cabin}$", 14, th.secondary)
+
+    s.rect(70, 400, 760, 66, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(270, 428, "$D_W = L_{W,without} - L_{W,with}$", 17, th.primary)
+    s.text(660, 428, "$D_p = L_{p,room} - L_{p,cabin}$", 17, th.secondary)
+    s.text(
+        450,
+        452,
+        "one quantity kept in, one kept out, and the same arithmetic both ways",
+        13,
+        th.muted,
+    )
+
+    s.text(
+        450,
+        500,
+        "the machine that cannot be run twice has two substitutes: the reciprocity method and the artificial source of Annex A",
+        13,
+        th.muted,
+    )
+    s.text(
+        450,
+        524,
+        "and in situ the number of loudspeaker positions is read off how much the answer moved between them",
+        13,
+        th.muted,
+    )
+
+
 def _d_open_end_solid_angles(s: SVG, th: Theme) -> None:
     """The five mounting configurations of ISO 7235 Table B.1.
 

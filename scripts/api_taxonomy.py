@@ -356,6 +356,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.noise_control.duct_path",
             "phonometry.noise_control.duct_modes",
             "phonometry.noise_control.enclosures",
+            "phonometry.noise_control.enclosure_insulation",
+            "phonometry.noise_control.cabin_insulation",
             "phonometry.noise_control.room_to_room",
             "phonometry.noise_control.valves",
             "phonometry.noise_control.valves_hydrodynamic",
@@ -441,6 +443,14 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "DEFAULT_CO2_MOLE_FRACTION": "phonometry.fluids.air",
     "DEFAULT_RELATIVE_HUMIDITY_PERCENT": "phonometry.fluids.air",
     "DEFAULT_STATIC_PRESSURE_PA": "phonometry.fluids.air",
+    # The band ranges, the leak ratio and the seal ratio are printed in the
+    # same words by ISO 11546 and ISO 11957, so they are defined once and
+    # re-exported by both modules, and a plain scan sees them twice. The
+    # enclosure is the older document and owns them.
+    "MANDATORY_BAND_RANGE_HZ": "phonometry.noise_control.enclosure_insulation",
+    "PREFERRED_BAND_RANGE_HZ": "phonometry.noise_control.enclosure_insulation",
+    "leak_ratio": "phonometry.noise_control.enclosure_insulation",
+    "seal_ratio": "phonometry.noise_control.enclosure_insulation",
     # The two sound speeds and the jet diameter are owned by the aerodynamic
     # valve module and imported by the hydrodynamic one, which IEC 60534-8-4
     # sends to IEC 60534-8-3 for all three, so a plain scan sees them twice.

@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1108/1108 conformance checks pass** across 83 domains and 415 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1123/1123 conformance checks pass** across 84 domains and 418 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1684,6 +1684,29 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | Norton & Karczub 2e 4.6/4.9 (problem 4.18 answer) | Blower in a plant room to the operator room -> 72.3/60.4/41.4/41.0/33.8/30.7 dB | 0 dB +/-0.1 (max \|diff\| over the 6 bands) | 0.0682 dB | 0.0682 dB | 68 % | ![Pass][cv-pass] Pass |
 | Norton & Karczub 2e Eq. (4.115) (problem 4.16 answer) | Lined compressor enclosure against NC-45 -> required TL 14.4/25.2/28.9/34.4/35.2/34.7/34.7/31.6 dB | 0 dB +/-0.15 (max \|diff\| over the 8 bands) | 0.1099 dB | 0.1099 dB | 73 % | ![Pass][cv-pass] Pass |
 | Norton & Karczub 2e Table 4.5 (constant-volume source power) | Source in the intersection of two flat surfaces (Q = 4) -> +10 lg 4 = 6.02 dB | 6.0206 dB (+/-0 dB) | 6.0206 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Enclosure and cabin insulation</b>: 100% (15/15)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 11546-1:1995 Eq. (1) / ISO 11546-2:1995 Eq. (1) | D_W is the difference of the two sound power determinations, and a level shift common to both leaves it alone | 0 dB (+/-0 dB) | max absolute difference 0.000 dB over 18 bands | 0 dB | 1 % | ![Pass][cv-pass] Pass |
+| ISO 11546-1:1995 Annex C / ISO 11546-2:1995 Annex D | D_WA,e of the annex equals the difference of the two A-weighted totals computed from the same assumed spectrum | 16.3145 dB (+/-0 dB) | 16.3145 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11546-1:1995 Annex C / ISO 11546-2:1995 Annex D | An enclosure of no insulation at all estimates exactly 0 dB, which is the sign test of the A-weighting term A_i | 0 dB (+/-0 dB) | 0 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11546-2:1995 Figure C.1 | The area ratio S_V/S the closed form returns puts K_2 back on the Table C.1 limit, at every absorption coefficient of Table C.2 | 0 dB (+/-0 dB) | max deviation 4.44e-16 dB over the 7 rows of Table C.2 | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11546-2:1995 Table C.1 | Environmental correction ceiling K_2 and background margin dL of the nine columns | ISO 3743-1 dL = 6 dB; ISO 3744 K2 = 2 dB; ISO 3744 dL = 6 dB; ISO 3746 K2 = 7 dB; ISO 3746 dL = 3 dB; ISO 3747 dL = 3 dB; ISO 11201 K2 = 2 dB; ISO 11201 dL = 6 dB; ISO 11202 K2 = 7 dB; ISO 11202 dL = 3 dB; ISO 11204 K2 = 7 dB; ISO 11204 dL = 6 dB | ISO 3743-1 dL = 6 dB; ISO 3744 K2 = 2 dB; ISO 3744 dL = 6 dB; ISO 3746 K2 = 7 dB; ISO 3746 dL = 3 dB; ISO 3747 dL = 3 dB; ISO 11201 K2 = 2 dB; ISO 11201 dL = 6 dB; ISO 11202 K2 = 7 dB; ISO 11202 dL = 3 dB; ISO 11204 K2 = 7 dB; ISO 11204 dL = 6 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11546-2:1995 Table C.2 | The seven mean absorption coefficients of the room descriptions | 7/7 rows of Table C.2 | 7/7 rows of Table C.2 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11546-2:1995 Table 1 | The survey methods give an A-weighted value only, so no band quantity may be declared from them | ISO 3744 bands, ISO 3746 none, ISO 11202 none, ISO 11204 bands | ISO 3744 bands, ISO 3746 none, ISO 11202 none, ISO 11204 bands | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11546-1:1995 Table 1 | The laboratory table carries no survey-grade row, and its footnote 2 excludes the grade 3 variant of ISO 9614-1 and ISO 11204 | no survey row, the three reverberation rows, footnote 2 on two | 3/3 readings of Table 1 | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11957:1996 Eq. (1) and Eq. (2) | D_p and D'_p are the same subtraction, and only the method decides whether the answer carries the prime | 0 dB (+/-0 dB) | max absolute difference 0.000 dB, D_p and D'_p | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11957:1996 Annex A | D_pA,e of the annex equals the difference of the two A-weighted totals, the same identity as the enclosure annexes | 19.7652 dB (+/-0 dB) | 19.7652 dB | 0 dB | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11957:1996 6.2 | Cabin clearance: half a wavelength at 100 Hz is 1,715 m at 343 m/s, and the 50 Hz to 80 Hz range takes a flat 2 m | 100 Hz = 1.715 m; 80 Hz = 2 m; 63 Hz = 2 m; 50 Hz = 2 m | 100 Hz = 1.715 m; 80 Hz = 2 m; 63 Hz = 2 m; 50 Hz = 2 m | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11957:1996 6.4 and 7.2.1 | Source-spectrum flatness: 6 dB in the 125 Hz octave, 5 dB in the 250 Hz octave and 4 dB above | 125 Hz = 6 dB; 250 Hz = 5 dB; 500 Hz = 4 dB | 125 Hz = 6 dB; 250 Hz = 5 dB; 500 Hz = 4 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11957:1996 7.2.1 | Source positions: at least the largest deviation of D'_p between any two positions in octave bands, three at least and six at most | 6 positions for a 9,5 dB spread, capped at six | 6 positions for 9.5 dB | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11957:1996 6.7 | The internal noise level is corrected for the background only while the margin lies between 6 dB and 10 dB | margin 8 dB = 59.2506 dB; margin 15 dB = 60 dB | margin 8 dB = 59.2506 dB; margin 15 dB = 60 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11957:1996 clause 10 | The stated uncertainty needs a room at least 20 times the volume of the cabin, and the loudspeaker method in situ adds about 2 dB | volume ratio = 20; excess deviation = 2 | volume ratio = 20; excess deviation = 2 | exact | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

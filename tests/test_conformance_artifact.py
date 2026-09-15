@@ -1266,7 +1266,8 @@ def test_a_citation_with_nothing_after_its_last_document_has_no_tail() -> None:
     """Absent, never null, because the site reads the document that way.
 
     The site schema declares ``tail`` an optional string of at least one
-    character, like every field a check may not have, and rejects ``null``.
+    character, and no field of a check there is nullable, so ``null`` is
+    rejected wherever it appears.
     A reference keeps an empty tail, which the builder writes as ``None`` and
     then drops along with every other null-valued key, so the key is left out
     of the file. The bracket a citation does close on is still written.
@@ -1285,7 +1286,13 @@ def test_a_citation_with_nothing_after_its_last_document_has_no_tail() -> None:
     written = json.loads(json.dumps(FIXTURE))
     written["checks"][0]["reference"]["tail"] = None
     written["checks"][1]["reference"]["documents"][0]["lead"] = None
-    nulls = [problem.split(" ", 1)[0] for problem in gate._null_problems(written)]
+    # Through validate(), not only the helper: a gate that stopped calling it
+    # would otherwise accept the nulls with every test still green.
+    nulls = [
+        problem.split(" ", 1)[0]
+        for problem in gate.validate(written)
+        if not problem.startswith(gate.OVERRIDES_PATH.name)
+    ]
     assert nulls == [
         "checks[0].reference.tail",
         "checks[1].reference.documents[0].lead",

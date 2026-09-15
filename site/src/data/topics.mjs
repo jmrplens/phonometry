@@ -211,6 +211,7 @@ export const topics = [
           'buildings/rooms/reporting-and-qualification',
           'buildings/rooms/open-plan-acoustics',
           'buildings/rooms/room-image-sources',
+          'buildings/rooms/workroom-sound-decay',
           'buildings/rooms/room-noise',
           'buildings/rooms/reverberation-prediction',
           'buildings/rooms/enclosed-space-absorption',
@@ -265,6 +266,7 @@ export const topics = [
         items: [
           { slug: 'materials/absorbers', label: 'Overview', translations: { es: 'Resumen' } },
           'materials/absorbers/absorption-measurement',
+          'materials/absorbers/suspended-ceilings',
           'materials/absorbers/airflow-resistance',
           'materials/absorbers/impedance-tube',
           'materials/absorbers/porous-absorbers',

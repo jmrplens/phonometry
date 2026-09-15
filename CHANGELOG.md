@@ -47,6 +47,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   inside the window 6.7 sets; and `uncertainty_conditions` is what clause 10
   will and will not say.
 
+- **ISO 14257:2001**, the spatial sound distribution curve of a workroom, in
+  `phonometry.room.spatial_decay`. Put a known source in a room, walk away from
+  it with a meter, and the level falls off somewhere between the 6 dB per
+  distance doubling of a free field and the nothing at all of a perfectly
+  diffuse one. `sound_distribution_value` is Equation (1), the level less the
+  source's own sound power, so the curve belongs to the room;
+  `spatial_decay_rate` is the least-squares slope of Equation (5) and
+  `mean_level_excess` the trapezoidal mean of Equation (7), which are the two
+  numbers a workroom is judged by. `corrected_distribution_value` is Annex B,
+  which swaps the source's measured free-field-over-a-reflecting-plane curve for
+  the theoretical one so that what is left is the room rather than the
+  loudspeaker.
+
+  The worked example of Annex C is reproduced end to end: the 66 printed values
+  of the corrected curve to 0,09 dB, the 18 decay rates of Table C.7 to 0,05 dB,
+  the 18 level excesses of Table C.9 to 0,06 dB, and the two A-weighted
+  pink-noise tables with them.
+
+- **ISO 11690-3:1998**, choosing a prediction method for a workroom and reading
+  what one machine adds at its own workstation, in
+  `phonometry.room.workroom_prediction`. The document prints almost no
+  arithmetic: what it prints is Tables 1 to 4 and E.1, a way of deciding which
+  of the four categories of method the data in hand can feed, and
+  `detail_is_sufficient` reads that table in both directions.
+  `workstation_level_increase` is Annex C, which turns out to be the
+  environmental correction of ISO 3744 drawn as a flow chart, and reproduces
+  seven of the eight rows of its own Table C.2 within the half decibel the
+  diagram is drawn to.
+
+- **EN 16487:2014**, the test code for measuring a suspended ceiling in a
+  reverberation room, in `phonometry.materials.absorbers.suspended_ceilings`.
+  EN ISO 354 leaves the laboratory a good deal of latitude and for a suspended
+  ceiling those choices move the answer by more than the measurement
+  uncertainty; this code closes them. `check_ceiling_specimen` is the geometry
+  of 4.1.1, `air_absorption_correction` is the part of the EN ISO 354 formulae
+  that comes from the air rather than the specimen, which 4.2.1 caps at 0,05,
+  and `reproducibility_uncertainty` is Table 1, the round robin behind the
+  numbers, with the coverage factor of 2,8 that produced them.
+
+- Three errata entries for the two ISO documents, all read from the page as
+  printed: an informative annex that applies its own normative correction to one
+  of its two results and not to the other, a conversion factor printed rounded
+  on one page and exact on the next, and a table row that reports the top edge
+  of the diagram it says it was read from.
+
 - **ISO 11820:1996**, a silencer measured where it stands, in
   `phonometry.noise_control.silencer_in_situ`. The laboratory method of ISO
   7235 asks for a test duct and a known termination; this one asks for the

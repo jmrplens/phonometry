@@ -19,7 +19,7 @@
 
 ## Numerical conformance report
 
-**1145/1145 conformance checks pass** across 85 domains and 421 standards - filters class 1 - weightings within IEC 61672-1 class 1.
+**1161/1161 conformance checks pass** across 86 domains and 424 standards - filters class 1 - weightings within IEC 61672-1 class 1.
 
 <sub><b>&#916;</b> is the difference between the computed value and the one the standard publishes. <b>Used</b> is how much of that clause's published tolerance the difference consumes: 100 % means it sits exactly on the limit, 5 % means it uses a twentieth of the allowance, and a dash means the clause states no two-sided tolerance for the quantity, so there is no budget to spend. It is reported and never used to decide a verdict, which is settled at full precision before any rounding.</sub>
 
@@ -1737,6 +1737,30 @@ Only **Butterworth** (the library default) and **Chebyshev-II** are class-compli
 | ISO 10847:1997 6.3.1 | The short-distance ratio is strict at 0,1, and the after case needs both of its two inequalities | 0,1 exactly is not short, and both halves must hold | 1/1 readings of 6.3.1 | exact | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10847:1997 7.2.2 and 8.1.2 a) | The reference microphone clears the barrier top by 1,5 m, or takes the 10 degree rule for a source under 15 m away | 0 m (+/-0 m) | 0 m | 0 m | 0 % | ![Pass][cv-pass] Pass |
 | ISO 10847:1997 3.10 | The far field falls 6 dB per doubling for a point source and 3 dB for an incoherent line source | 6,02 dB and 3,01 dB, printed rounded to 6 and 3 | 6 dB and 3 dB | 0.0206 dB | 98 % | ![Pass][cv-pass] Pass |
+
+</details>
+
+<details>
+<summary><b>Spatial sound decay and prediction in workrooms</b>: 100% (16/16)</summary>
+
+| Standard | Quantity | Expected (norm) | Computed | &#916; | Used | Status |
+|:---|:---|:---|:---|:---|:---:|:---:|
+| ISO 14257:2001 Eq. (2) | The free-field reference curve falls 6 dB per distance doubling and passes 11 dB under the source power at 1 m | at 1 m = -11 dB; per doubling = 6.02 dB | at 1 m = -11 dB; per doubling = 6.02 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Annex C, Table C.6 EXAMPLE | The Annex B correction reproduces all 66 printed values of the corrected distribution curve | 66/66 (worst departure 0.09 dB) | 66/66 printed values within the rounding of the table | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Annex C, Table C.6 last column | The A-weighted pink-noise normalisation of Eq. (4) reproduces the eleven printed values | every value within the printed rounding | worst departure 0.09 dB over 11 positions | 0.092 dB | 92 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Eq. (5) / Annex C, Table C.7 EXAMPLE | The rate of spatial decay reproduces all 18 printed values, in three distance ranges and six octave bands | 18/18 (worst departure 0.05 dB) | 18/18 printed values of DL2 within the rounding of the table | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Eqs. (6) and (7) / Annex C, Table C.9 EXAMPLE | The excess of sound pressure level reproduces all 18 printed values from the uncorrected curve of Table C.5 | 18/18 (worst departure 0.06 dB) | 18/18 printed values of DLf within the rounding of the table | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Annex C (C.1 against Tables C.7 and C.9) | The annex applies its own Annex B correction to DL2 and not to DLf, which the two tables disagree about by more than a decibel | 28 of the 36 printed results leave the rounding of their own table when the other table's curve is used | 28 of 36, 14 in each table | 0 | 0 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Eq. (5) against Eq. (8) | The factor Eq. (5) prints, 0,3, is the logarithm of two rounded, which Eq. (8) prints in full one page later | lg 2 = 0,301 03 | the printed 0,3, which is 0,34 % smaller | -0.001 | 50 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Table 1 | The A-weighted pink-noise spectrum weights the six octave bands the way Table 1 prints them | 125 Hz = -16.1 dB; 250 Hz = -8.6 dB; 500 Hz = -3.2 dB; 1 kHz = 0 dB; 2 kHz = 1.2 dB; 4 kHz = 1 dB | 125 Hz = -16.1 dB; 250 Hz = -8.6 dB; 500 Hz = -3.2 dB; 1 kHz = 0 dB; 2 kHz = 1.2 dB; 4 kHz = 1 dB | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 14257:2001 Annex B, Eq. (B.4) | A source with its acoustical centre on the floor radiates into a half space, which is 3 dB over the free field | the 3 dB Eq. (B.4) prints | 3.0103 dB | 0.0103 dB | 52 % | ![Pass][cv-pass] Pass |
+| ISO 11690-3:1998 Annex C, Table C.2 EXAMPLE | The level increase at a machine's own workstation is the ISO 3744 environmental correction, which reproduces seven of the eight rows | 7/7 (worst departure 0.39 dB) | 7/7 rows within the half decibel the diagram is drawn to | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11690-3:1998 Annex C, Figure C.1 (the eighth machine) | M8 needs more increase than the diagram can show, and the table prints the edge of the diagram instead | 12,4 dB, against the 10 dB the table prints and the 10 dB the diagram ends at | 12.3789 dB | -0.0211 dB | 21 % | ![Pass][cv-pass] Pass |
+| ISO 11690-3:1998 Table E.1 | Each category of prediction method admits the levels of detail Table E.1 lists and refuses the rest | 5/5 combinations judged as printed | 5/5 combinations judged as printed | exact | 0 % | ![Pass][cv-pass] Pass |
+| ISO 11690-3:1998 4.3 against ISO 14257 Annex C | The middle-range decay of the worked example falls inside the 2 dB to 5 dB the guidance says to expect | five of the six octave bands, the 4 kHz one running 0,4 dB over the 5 dB top of the range 4.3 leads one to expect | 5 of 6 inside 2 dB to 5 dB | 0 | 0 % | ![Pass][cv-pass] Pass |
+| EN 16487:2014 Table 1 | The reproducibility uncertainty of the absorption coefficient is the printed spectrum, and a coverage factor of 2,8 over its standard deviation | 125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13 | 125 Hz = 0.23; 250 Hz = 0.23; 500 Hz = 0.11; 1 kHz = 0.1; 2 kHz = 0.1; 4 kHz = 0.13 | exact | 0 % | ![Pass][cv-pass] Pass |
+| EN 16487:2014 Table 1 NOTE | The printed uncertainty is a reproducibility standard deviation times the coverage factor of 2,8 that ISO 5725-6 applies | 0,10 at 1 kHz, which is 2,8 times 0,0357 | 0.1 | 0 | 0 % | ![Pass][cv-pass] Pass |
+| EN 16487:2014 4.2.1 | The air-absorption correction is four room volumes of attenuation difference spread over the specimen | 4V(m2 - m1)/S with V = 200 m3, S = 10,80 m2 | 0.1481 | 0 | 0 % | ![Pass][cv-pass] Pass |
 
 </details>
 

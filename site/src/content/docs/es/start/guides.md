@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 135 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 137 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento treinta y cinco guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento treinta y siete guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -349,10 +349,10 @@ ISO 389-7, ISO 1999 e ISO 9612.
 Parámetros de sala, ruido de fondo, aislamiento en campo y laboratorio, y
 predicción a partir de datos de elementos. Dos preguntas recorren el área: qué
 hace una sala con el sonido que se produce dentro, y cuánto del sonido que se
-produce al lado consigue pasar. Implementa ISO 3382-1/-2/-3,
-ISO 16283-1/-2/-3, ISO 10140, ISO 10848, ISO 15186-1/-2, ISO 16251-1,
-ISO 717-1/-2, EN 12354-1 a -6, ISO 18233, ISO 12999-1, ISO 10052,
-ANSI/ASA S12.2 y ASTM E413/E1414.
+produce al lado consigue pasar. Implementa ISO 3382-1/-2/-3, ISO 14257,
+ISO 11690-3, ISO 16283-1/-2/-3, ISO 10140, ISO 10848, ISO 15186-1/-2,
+ISO 16251-1, ISO 717-1/-2, EN 12354-1 a -6, ISO 18233, ISO 12999-1,
+ISO 10052, ANSI/ASA S12.2 y ASTM E413/E1414.
 
 **[Acústica de salas](/phonometry/es/buildings/rooms/)**
 
@@ -381,6 +381,9 @@ ANSI/ASA S12.2 y ASTM E413/E1414.
   la respuesta al impulso determinista por fuentes imagen de una sala
   rectangular, la constante de sala, la distancia crítica y la frecuencia de
   Schroeder.
+- [Descenso espacial del sonido en locales de trabajo](/phonometry/es/buildings/rooms/workroom-sound-decay/):
+  cuánto cae el nivel al alejarse de una máquina, el exceso sobre el campo libre,
+  y las categorías de predicción que casan con los datos que uno tiene.
 - [Criterios de ruido de salas (NC / RC Mark II)](/phonometry/es/buildings/rooms/room-noise/):
   el índice NC de ANSI/ASA S12.2 por el método de tangencia, y el índice RC
   Mark II con su etiqueta de retumbo, siseo o neutro.
@@ -464,14 +467,18 @@ ANSI/ASA S12.2 y ASTM E413/E1414.
 Absorción, resistencia al flujo de aire, tubo de impedancia, modelos porosos
 y de metamaterial, difusores y dispersión. Qué le hace una superficie al
 sonido que le llega, medido en laboratorio o predicho a partir de los
-parámetros del material. Implementa ISO 354, ISO 11654, ISO 10534-1/-2,
-ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1 e ISO 12999-2.
+parámetros del material. Implementa ISO 354, ISO 11654, EN 16487,
+ISO 10534-1/-2, ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1
+e ISO 12999-2.
 
 **[Absorbentes](/phonometry/es/materials/absorbers/)**
 
 - [Medida y clasificación de la absorción sonora](/phonometry/es/materials/absorbers/absorption-measurement/):
   la medición en cámara reverberante ISO 354, la valoración ponderada con su
   clase y la incertidumbre de medida de ambas.
+- [Techos suspendidos: el código de ensayo EN 16487](/phonometry/es/materials/absorbers/suspended-ceilings/):
+  el tamaño de la muestra, la profundidad de montaje y el tope de absorción del
+  aire que hacen comparable una medida de techo con otra.
 - [Resistencia al flujo de aire](/phonometry/es/materials/absorbers/airflow-resistance/):
   la determinación estática y alterna de la resistencia y la resistividad al
   flujo de aire.

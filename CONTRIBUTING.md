@@ -382,6 +382,23 @@ by standard: one plotting module holds the figures of a dozen of them, so the
 file is not the scope in which a letter has one meaning. The guide that embeds
 the figure is, and its snippets are read here.
 
+The other half of the same subject is the backslash, and it has its own gate:
+
+```bash
+python scripts/check_docstring_math.py   # or: make docstring-math
+```
+
+`generate_api_docs.py` copies the mathematics of a docstring to the site
+verbatim, so KaTeX reads what the docstring actually holds. A doubled
+backslash is not a command: `\\mathrm` is a line break with a `mathrm` after
+it, which KaTeX refuses, and the page still ships with everything after the
+bad block swallowed. What makes it invisible in review is that the same four
+characters are right in one kind of docstring and wrong in the other: a raw
+docstring (`r"""`) takes `\mathrm`, a plain one takes `\\mathrm`. The gate
+reads the value Python builds rather than the text of the file, which is the
+only way to tell the two apart. The site's own `check:math` catches it too,
+after a full build of every page.
+
 ### 8. Writing the code fences of a documentation page
 
 The Python fences of one page form **one sequential example**: a later fence

@@ -5935,6 +5935,100 @@ in the same order.
   shows which was applied to which campaign.
 - **Status:** not reported.
 
+## ISO 14257:2001, Annex C (an example that corrects one of its two results)
+
+- **Location:** C.1 on printed page 17 (PDF page 27), against Tables C.7 and
+  C.9 on printed page 23 (PDF page 33) and Tables C.8 and C.10 on printed pages
+  23 and 24 (PDF pages 33 and 34).
+- **The print:** C.1 lists the four things that hold in the example, the second
+  of which is that "the experimental reference curve of the sound source is
+  known and used for correcting the values measured in the workroom". Table C.5
+  is then headed "Values of $D = L_p - L_W$, in octave bands (corrected for
+  background noise)" and Table C.6 "Values of $D = L_p - L_W$ ... corrected for
+  background noise **and using the experimental reference curves of the
+  source**".
+- **The problem:** the four result tables are not all computed from the same
+  curve. Every value of $\mathrm{DL}_2$ in Tables C.7 and C.8 follows from the
+  corrected curve of Table C.6, and every value of $\mathrm{DL}_\mathrm{f}$ in
+  Tables C.9 and C.10 follows from the uncorrected curve of Table C.5. Swap
+  either one for the other and 28 of the 36 printed results leave the rounding
+  of the table they are printed in.
+- **Evidence:** the two curves are printed in full, so both routes can be run.
+  Taking Table C.6 as printed, the middle range at 1 kHz gives
+  $\mathrm{DL}_2$ = 4,39 dB against the printed 4,4 and
+  $\mathrm{DL}_\mathrm{f}$ = 6,73 dB against the printed 7,3; taking Table C.5
+  instead gives 4,73 dB and 7,29 dB. The same split holds in all three distance
+  ranges and all six octave bands, and in the two A-weighted pink-noise tables.
+  Verified on PDF pages 27, 31 and 33 (printed pp. 17, 21 and 23) of
+  EN ISO 14257:2001 as published in BS EN ISO 14257:2001.
+- **Consequence for the standard's own tables:** none for
+  $\mathrm{DL}_2$, which is a slope and is barely moved by a correction that is
+  nearly constant with distance. For $\mathrm{DL}_\mathrm{f}$, which is a
+  level, the difference reaches 1,4 dB in the near range.
+- **Library behaviour:**
+  [`corrected_distribution_value`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py)
+  applies Annex B when it is asked to and never on its own, so the caller
+  chooses which curve each descriptor is taken from. The conformance row "ISO
+  14257:2001 Annex C (C.1 against Tables C.7 and C.9)" pins the split, and
+  `test_the_annex_corrects_the_decay_but_not_the_excess` in
+  [`tests/room/test_spatial_decay.py`](https://github.com/jmrplens/phonometry/blob/main/tests/room/test_spatial_decay.py)
+  holds both numbers so that neither can drift.
+- **Status:** not reported.
+
+## ISO 14257:2001, Equation (5) against Equation (8) (a rounded logarithm)
+
+- **Location:** Equation (5) of 6.3 on printed page 9 (PDF page 19) and
+  Equation (8) of 6.4.3 on printed page 10 (PDF page 20).
+- **The print:** Equation (5) opens with the factor $-0,3$ in front of the
+  least-squares slope; Equation (8), one page later, divides
+  $\mathrm{DL}_2(r_n,r_m)$ by $\lg 2$.
+- **The problem:** the two are the same conversion, from a rate per decade to a
+  rate per distance doubling, written twice with different precision. $\lg 2$
+  is 0,301 03, so the printed 0,3 is 0,34 % small, and a document that prints
+  the exact form on one page has no reason to round it on the previous one.
+- **Evidence:** the two equations on facing pages, both reproduced in the
+  entry above from the printed tables. Verified on PDF pages 19 and 20 (printed
+  pp. 9 and 10) of EN ISO 14257:2001.
+- **Consequence for the standard's own tables:** none that the printed rounding
+  can show: the worked example of Annex C is tabulated to one decimal and 0,34 %
+  of a 4 dB slope is 0,014 dB.
+- **Library behaviour:**
+  [`DECADE_TO_DOUBLING`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) carries the
+  printed 0,3, because the printed constant is what reproduces the printed
+  results, and
+  [`level_excess_at`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) divides by
+  $\lg 2$ where Equation (8) prints it. Do not unify them.
+- **Status:** not reported.
+
+## ISO 11690-3:1998, Table C.2 (a value read off the edge of its own diagram)
+
+- **Location:** Table C.2 on printed page 20 (PDF page 30), against Figure C.1
+  on printed page 19 (PDF page 29).
+- **The print:** the row for machine M8 gives $L_{WA} - L_{pA}$ = 29 dB,
+  $\Delta L_A$ = 10 dB and $L'_{pA}$ = 88 dB, in a room whose equivalent
+  absorption area C.2.2 puts at 195 m2.
+- **The problem:** Figure C.1, the diagram the annex says to read $\Delta L_A$
+  off, has a vertical axis that ends at 10 dB, and the curve for a 29 dB
+  difference leaves the top of it well before 195 m2. The 10 dB in the table is
+  the edge of the diagram rather than a reading of it, and the level it carries
+  into the last column is 2,4 dB low.
+- **Evidence:** the axis of Figure C.1 runs 0 dB to 10 dB, and the closed form
+  the diagram draws, the environmental correction
+  $\Delta L_A = 10 \lg(1 + 4S/A)$ of ISO 3744 with
+  $S/S_0 = 10^{(L_{WA}-L_{pA})/10}$, gives 12,4 dB for that row. The same
+  expression reproduces the other seven rows of the table within 0,4 dB, which
+  is the half decibel the diagram is drawn to. Verified on PDF pages 29 and 30
+  (printed pp. 19 and 20) of EN ISO 11690-3:1998 as published in
+  BS EN ISO 11690-3:1999.
+- **Consequence for the standard's own tables:** the last column of that one
+  row. Nothing else in the document computes with it.
+- **Library behaviour:**
+  [`workstation_level_increase`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/workroom_prediction.py)
+  evaluates the expression and has no ceiling, so it returns 12,4 dB where the
+  table prints 10. The conformance row "ISO 11690-3:1998 Annex C, Figure C.1
+  (the eighth machine)" pins it.
+- **Status:** not reported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

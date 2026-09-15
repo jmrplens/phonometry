@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 135 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 137 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and thirty-five guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and thirty-seven guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -334,9 +334,10 @@ ISO 9612.
 Room parameters, background noise, field and laboratory insulation, and
 prediction from element data. Two questions run through the area: how a room
 treats the sound made inside it, and how much of the sound made next door gets
-through. Implements ISO 3382-1/-2/-3, ISO 16283-1/-2/-3, ISO 10140, ISO 10848,
-ISO 15186-1/-2, ISO 16251-1, ISO 717-1/-2, EN 12354-1 to -6, ISO 18233,
-ISO 12999-1, ISO 10052, ANSI/ASA S12.2 and ASTM E413/E1414.
+through. Implements ISO 3382-1/-2/-3, ISO 14257, ISO 11690-3,
+ISO 16283-1/-2/-3, ISO 10140, ISO 10848, ISO 15186-1/-2, ISO 16251-1,
+ISO 717-1/-2, EN 12354-1 to -6, ISO 18233, ISO 12999-1, ISO 10052,
+ANSI/ASA S12.2 and ASTM E413/E1414.
 
 **[Room acoustics](/phonometry/buildings/rooms/)**
 
@@ -364,6 +365,9 @@ ISO 12999-1, ISO 10052, ANSI/ASA S12.2 and ASTM E413/E1414.
 - [Image sources and the steady-state room field](/phonometry/buildings/rooms/room-image-sources/):
   the deterministic image-source impulse response of a rectangular room, the
   room constant, critical distance and Schroeder frequency.
+- [Spatial Sound Decay in Workrooms](/phonometry/buildings/rooms/workroom-sound-decay/):
+  how far the level falls as you walk away from a machine, the excess over a
+  free field, and the prediction categories that match the data you have.
 - [Room-noise criteria (NC / RC Mark II)](/phonometry/buildings/rooms/room-noise/): the
   ANSI/ASA S12.2 Noise Criteria rating by tangency, and the Room Criteria
   Mark II rating with its rumble, hiss or neutral tag.
@@ -444,14 +448,17 @@ ISO 12999-1, ISO 10052, ANSI/ASA S12.2 and ASTM E413/E1414.
 Absorption, airflow resistance, the impedance tube, porous and metamaterial
 models, diffusers and scattering. What a surface does to the sound that
 reaches it, measured in a laboratory or predicted from the material
-parameters. Implements ISO 354, ISO 11654, ISO 10534-1/-2, ISO 9053-1/-2,
-ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1 and ISO 12999-2.
+parameters. Implements ISO 354, ISO 11654, EN 16487, ISO 10534-1/-2,
+ISO 9053-1/-2, ISO 17497-1/-2, ISO 13472-1/-2, EN 29052-1 and ISO 12999-2.
 
 **[Absorbers](/phonometry/materials/absorbers/)**
 
 - [Sound Absorption Measurement and Rating](/phonometry/materials/absorbers/absorption-measurement/):
   the ISO 354 reverberation-room measurement, the weighted rating and its
   class, and the measurement uncertainty of both.
+- [Suspended Ceilings: the EN 16487 Test Code](/phonometry/materials/absorbers/suspended-ceilings/):
+  the specimen size, the mounting depth and the air-absorption cap that make one
+  ceiling measurement comparable with another.
 - [Airflow Resistance](/phonometry/materials/absorbers/airflow-resistance/): the static
   and alternating determination of airflow resistance and resistivity.
 - [Impedance Tube](/phonometry/materials/absorbers/impedance-tube/): the normal-incidence

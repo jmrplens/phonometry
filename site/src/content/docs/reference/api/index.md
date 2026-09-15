@@ -125,6 +125,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`room.steady_field`](/phonometry/reference/api/rooms/steady-field/) | Steady-state sound field in a room: room constant, critical distance, level. |
 | [`room.modes`](/phonometry/reference/api/rooms/modes/) | Normal modes of a rectangular room: frequencies, kinds, count and density. |
 | [`room.crowd_noise`](/phonometry/reference/api/rooms/crowd-noise/) | Crowd self-noise in a restaurant: the cocktail-party equilibrium. |
+| [`room.spatial_decay`](/phonometry/reference/api/rooms/spatial-decay/) | Spatial sound distribution curves in workrooms (ISO 14257:2001). |
+| [`room.workroom_prediction`](/phonometry/reference/api/rooms/workroom-prediction/) | Predicting sound propagation in a workroom (ISO 11690-3:1998). |
 
 ## Building acoustics
 
@@ -169,6 +171,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`materials.absorbers.layered`](/phonometry/reference/api/materials/layered/) | Declarative layer stacks and the transfer-matrix absorber solver. |
 | [`materials.absorbers.biot`](/phonometry/reference/api/materials/biot/) | Biot poroelastic layers: the three waves and the 6x6 transfer matrix. |
 | [`materials.absorbers.slow_sound`](/phonometry/reference/api/materials/slow-sound/) | Slow-sound slit panels loaded with Helmholtz resonators (perfect absorbers). |
+| [`materials.absorbers.suspended_ceilings`](/phonometry/reference/api/materials/suspended-ceilings/) | Suspended ceilings in a reverberation room: EN 16487:2014. |
 | [`materials.diffusers.scattering_diffusion`](/phonometry/reference/api/materials/scattering-diffusion/) | Directional and random-incidence diffusion coefficients in a free field. |
 | [`materials.diffusers.reverberation_room_scattering`](/phonometry/reference/api/materials/reverberation-room-scattering/) | Random-incidence scattering coefficient in a reverberation room. |
 | [`materials.diffusers.design`](/phonometry/reference/api/materials/design/) | Far-field polar response and diffusion coefficient predicted from a diffuser design. |

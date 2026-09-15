@@ -8,7 +8,7 @@
     "failing": 0,
     "domains": 87,
     "standards": 461,
-    "citations": 863,
+    "citations": 862,
     "designations": 179,
     "sources": 114
   },
@@ -17318,16 +17318,16 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-23-m-building-f-46-h-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/fundamental-frequency-of-a-23-m-building-f-46-h-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
-        "cite": "ISO 4866:2010 D.3",
+        "cite": "ISO 4866:2010 D.2",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 4866",
             "edition": "2010",
-            "clause": "D.3"
+            "clause": "D.2"
           }
         ]
       },
@@ -17351,16 +17351,16 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-46-m-building-f-46-h-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/fundamental-frequency-of-a-46-m-building-f-46-h-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
-        "cite": "ISO 4866:2010 D.3",
+        "cite": "ISO 4866:2010 D.2",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 4866",
             "edition": "2010",
-            "clause": "D.3"
+            "clause": "D.2"
           }
         ]
       },
@@ -17384,16 +17384,16 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/fundamental-frequency-of-a-92-m-building-f-46-h-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/fundamental-frequency-of-a-92-m-building-f-46-h-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
-        "cite": "ISO 4866:2010 D.3",
+        "cite": "ISO 4866:2010 D.2",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 4866",
             "edition": "2010",
-            "clause": "D.3"
+            "clause": "D.2"
           }
         ]
       },
@@ -17417,16 +17417,16 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/the-same-fit-as-a-period-t-0-022-h-s",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/the-same-fit-as-a-period-t-0-022-h-s",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
-        "cite": "ISO 4866:2010 D.3",
+        "cite": "ISO 4866:2010 D.2",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 4866",
             "edition": "2010",
-            "clause": "D.3"
+            "clause": "D.2"
           }
         ]
       },
@@ -17681,16 +17681,16 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/upper-end-of-the-error-band-an-empirical-prediction-carries-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/upper-end-of-the-error-band-an-empirical-prediction-carries-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
-        "cite": "ISO 4866:2010 D.3",
+        "cite": "ISO 4866:2010 D.2",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 4866",
             "edition": "2010",
-            "clause": "D.3"
+            "clause": "D.2"
           }
         ]
       },
@@ -17714,16 +17714,16 @@
       "verdict": "pass"
     },
     {
-      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-3/lower-end-of-the-error-band-an-empirical-prediction-carries-hz",
+      "id": "building-response-prediction-iso-4866/iso-4866-2010-d-2/lower-end-of-the-error-band-an-empirical-prediction-carries-hz",
       "domain": "building-response-prediction-iso-4866",
       "reference": {
-        "cite": "ISO 4866:2010 D.3",
+        "cite": "ISO 4866:2010 D.2",
         "documents": [
           {
             "kind": "standard",
             "designation": "ISO 4866",
             "edition": "2010",
-            "clause": "D.3"
+            "clause": "D.2"
           }
         ]
       },

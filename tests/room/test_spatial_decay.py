@@ -8,6 +8,17 @@ levels measured in the room (Table C.4), the two sound distribution curves
 (Tables C.5 and C.6) and the four result tables (C.7 to C.10), which is enough
 to check Equations (1), (2), (4), (5), (6), (7), (B.1) and (B.4) against printed
 numbers rather than against themselves.
+
+Annex C is printed in the document that defines the method, so it cannot say
+whether the method was read right. Three published sources can, and the second
+half of this file is theirs. Suva 66008.f, a Swiss guide for industrial
+workrooms, prints a 21 position curve and the 42 descriptors its own analysis
+program read off it, without ever naming ISO 14257: it takes the two quantities
+from VDI 3760 and EN ISO 11690-1. IFA-LSA 01-234, a German guidance sheet,
+prints four levels at four distances and the decay rate they give. And BAuA
+research report Fb 1083 prints the fitting density an independent VDI 3760 tool
+computed for surveyed workrooms, which is the quantity the prediction of
+ISO 11690-3 takes instead of the fittings themselves.
 """
 
 from __future__ import annotations
@@ -17,11 +28,17 @@ import pytest
 
 from phonometry import room
 from phonometry.room.spatial_decay import (
+    ADJACENT_BAND_LIMIT_DB,
     DECADE_TO_DOUBLING,
     EVALUATION_DISTANCES_M,
+    FREE_FIELD_OFFSET_DB,
     ISO14257_REFERENCE_DISTANCE_M,
+    MAX_DIRECTIVITY_INDEX_DB,
     NORMALIZED_OFFSET_DB,
+    OMNIDIRECTIONAL_RAMP_HZ,
+    OMNIDIRECTIONAL_TOLERANCE_DB,
     PINK_NOISE_WEIGHTS_DB,
+    STABILITY_TOLERANCE_DB,
     TYPICAL_FAR_LIMIT_M,
     TYPICAL_NEAR_LIMIT_M,
 )
@@ -396,3 +413,400 @@ def test_the_spanish_plot_translates_its_title() -> None:
     drawn = res.plot(ax=ax, language="es")
     assert "espacial" in drawn.get_title()
     plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# Annex A, and the source Annex C qualified against it
+# ---------------------------------------------------------------------------
+
+
+def test_the_annex_a_limits_are_the_printed_ones() -> None:
+    """A.1 on printed folio 14, A.2 and A.4 on printed folio 15."""
+    assert MAX_DIRECTIVITY_INDEX_DB == 8.0
+    assert OMNIDIRECTIONAL_TOLERANCE_DB == (2.0, 8.0)
+    assert OMNIDIRECTIONAL_RAMP_HZ == (630.0, 1000.0)
+    assert ADJACENT_BAND_LIMIT_DB == 8.0
+    assert STABILITY_TOLERANCE_DB == {(100.0, 160.0): 1.0, (200.0, 5000.0): 0.5}
+
+
+def test_the_annex_c_source_is_inside_the_limits_it_is_declared_against() -> None:
+    """C.3 on printed folio 19, which prints the declaration and then "OK".
+
+    The annex gives one maximum directivity index with no band attached, so it
+    says nothing about the ramp of A.1: 4,4 dB would fail the +/- 2 dB the ramp
+    allows at or below 630 Hz, and the annex still passes the source. Only the
+    8 dB cap and the adjacent-band step can be read off this declaration.
+    """
+    assert 4.4 <= MAX_DIRECTIVITY_INDEX_DB
+    assert 6.5 <= ADJACENT_BAND_LIMIT_DB
+
+
+def test_the_a_weighted_source_power_reproduces_table_c2() -> None:
+    """Table C.2 on printed folio 18 prints 115,7 dB in its last column.
+
+    Equation (4) is the energy sum under the Table 1 weights less 6,2 dB, so
+    adding the offset back leaves the plain A-weighted total. This is the one
+    printed figure of Annex C that the Table C.6 chain never touches.
+    """
+    total = (
+        room.normalized_distribution_value(list(SOURCE_POWER_DB.values()))
+        + NORMALIZED_OFFSET_DB
+    )
+    assert total == pytest.approx(115.7, abs=0.05)
+
+
+# ---------------------------------------------------------------------------
+# Equation (8) against Tables C.11 and C.12
+# ---------------------------------------------------------------------------
+
+#: Table C.11: the excess read off the fitted line at the conventional distance
+#: of each region, in decibels, by nominal octave centre in hertz.
+PRINTED_EXCESS_AT_DB = {
+    "near": {125: 6.2, 250: 4.0, 500: 4.4, 1000: 5.2, 2000: 5.3, 4000: 3.9},
+    "middle": {125: 7.8, 250: 5.4, 500: 6.4, 1000: 6.9, 2000: 7.7, 4000: 5.8},
+    "far": {125: 10.6, 250: 7.4, 500: 9.3, 1000: 7.2, 2000: 9.2, 4000: 6.1},
+}
+
+#: Table C.12: the same three figures for A-weighted pink noise, in decibels.
+PRINTED_EXCESS_AT_NORMALIZED_DB = {"near": 4.8, "middle": 6.8, "far": 8.0}
+
+#: Table C.5 on printed folio 21 (PDF page 31): the uncorrected curve
+#: D = L_p - L_W as printed, in decibels, by nominal octave centre in hertz.
+PRINTED_D_TABLE_C5 = {
+    125: [-11.9, -15.1, -16.8, -19.3, -20.5, -22.2, -23.9, -26.3, -27.2, -30.3, -31.9],
+    250: [-13.7, -16.7, -19.0, -20.8, -20.7, -24.3, -26.5, -28.3, -28.8, -33.6, -35.1],
+    500: [-12.4, -16.5, -18.6, -20.4, -21.7, -23.4, -25.4, -25.9, -30.2, -31.7, -33.1],
+    1000: [-11.9, -15.7, -17.8, -18.8, -19.8, -22.9, -25.0, -27.3, -29.3, -33.8, -35.2],
+    2000: [-11.5, -15.2, -17.7, -19.0, -20.2, -21.6, -24.6, -26.2, -30.1, -31.8, -34.5],
+    4000: [-13.6, -16.2, -19.1, -20.6, -21.7, -23.1, -27.0, -29.3, -32.5, -34.9, -36.9],
+}
+
+
+def test_equation_eight_does_not_give_tables_c11_and_c12() -> None:
+    """The annex is inconsistent here, and it is not a misprint.
+
+    Equation (8) is read over printed curves only, so what is pinned is the
+    annex against itself and not a curve this library rebuilt. Over the
+    printed D of Table C.5, the curve the excess of Table C.9 is computed on
+    and the basis of the errata entry, it misses 15 of the 18 figures of Table
+    C.11, by as much as 1,55 dB; over the one printed A-weighted curve, the
+    last column of Table C.6, it misses all three of Table C.12. The departures
+    carry no systematic sign. The BS printing of ISO 14257:2001 (printed folio
+    24) and the AENOR printing UNE-EN ISO 14257:2002 (printed folio 30) carry
+    the same digits, so neither is a corrupted copy of the other and the two
+    tables cannot be used as an oracle of Equation (8).
+    """
+    # The transcription of Table C.5 is checked against the two printed tables
+    # it is the difference of before it is used.
+    for band, printed in PRINTED_D_TABLE_C5.items():
+        difference = np.asarray(ROOM_LEVELS_DB[band]) - SOURCE_POWER_DB[band]
+        assert difference == pytest.approx(printed, abs=1e-9), band
+    band_departures = []
+    for region, row in PRINTED_EXCESS_AT_DB.items():
+        keep = _select(*EXAMPLE_RANGES_M[region])
+        for band, want in row.items():
+            got = room.level_excess_at(
+                np.asarray(PRINTED_D_TABLE_C5[band])[keep],
+                DISTANCES_M[keep],
+                EVALUATION_DISTANCES_M[region],
+            )
+            band_departures.append(got - want)
+    assert sum(abs(value) > 0.05 for value in band_departures) == 15
+    assert min(band_departures) == pytest.approx(-0.408, abs=0.005)
+    assert max(band_departures) == pytest.approx(1.546, abs=0.005)
+    normalized = np.asarray(CORRECTED_NORMALIZED_DB)
+    weighted_departures = []
+    for region, want in PRINTED_EXCESS_AT_NORMALIZED_DB.items():
+        keep = _select(*EXAMPLE_RANGES_M[region])
+        got = room.level_excess_at(
+            normalized[keep], DISTANCES_M[keep], EVALUATION_DISTANCES_M[region]
+        )
+        weighted_departures.append(got - want)
+    assert weighted_departures == pytest.approx([-0.350, -0.272, 0.453], abs=0.005)
+
+
+# ---------------------------------------------------------------------------
+# Suva 66008.f, 8th revised edition, August 2006
+# ---------------------------------------------------------------------------
+#
+# Walter Lips, "Acoustique des locaux industriels. Informations pour
+# projeteurs, architectes et ingenieurs", Suva (Caisse nationale suisse
+# d'assurance en cas d'accidents), reference 66008.f. Tableau 2 and the
+# "Parametres resumes" summary inside Figure 7 are on PDF page 13, printed
+# page 11; the distance ranges and the measurement radii are on PDF page 11,
+# printed page 9.
+
+#: The seven columns Tableau 2 and the Figure 7 summary are both printed in.
+#: The last is the total the instrument printed and not Equation (4) over the
+#: other six, which runs 0,02 dB to 0,57 dB above it.
+SUVA_COLUMNS = ("125 Hz", "250 Hz", "500 Hz", "1 kHz", "2 kHz", "4 kHz", "total")
+
+#: Tableau 2: the sound distribution curve, printed as "SAK en dB", which is
+#: D = Lp - Lw of Equation (1), in decibels. One entry per printed row: the
+#: distance in metres against the seven columns above.
+SUVA_CURVE_DB: dict[float, tuple[float, ...]] = {
+    1.0: (-9.9, -10.2, -8.0, -10.5, -8.1, -9.1, -8.9),
+    2.0: (-15.0, -11.7, -13.1, -15.0, -12.2, -11.3, -13.0),
+    3.0: (-21.7, -12.1, -15.0, -16.2, -12.6, -14.0, -14.2),
+    4.0: (-19.2, -14.6, -15.4, -16.3, -13.3, -15.1, -14.9),
+    5.0: (-19.4, -15.9, -15.9, -17.9, -13.8, -15.3, -15.6),
+    6.0: (-20.5, -16.1, -14.9, -17.8, -14.1, -16.0, -15.6),
+    7.0: (-20.0, -15.3, -16.4, -18.3, -15.3, -16.1, -16.4),
+    8.0: (-19.5, -16.4, -17.3, -19.1, -15.5, -16.7, -17.0),
+    9.0: (-20.3, -15.3, -18.2, -19.6, -15.8, -16.9, -17.4),
+    10.0: (-22.1, -17.4, -18.1, -19.7, -16.0, -17.0, -17.6),
+    12.0: (-21.0, -16.3, -18.9, -19.9, -16.7, -18.3, -18.2),
+    14.0: (-23.3, -18.1, -19.7, -20.5, -16.3, -18.3, -18.4),
+    16.0: (-23.1, -18.0, -20.4, -20.3, -17.4, -19.0, -19.0),
+    18.0: (-22.4, -19.2, -18.6, -20.6, -16.9, -19.3, -18.7),
+    20.0: (-22.3, -17.8, -21.5, -22.7, -18.4, -20.5, -20.3),
+    24.0: (-24.5, -21.4, -21.6, -23.6, -19.2, -21.6, -21.2),
+    28.0: (-25.0, -20.3, -21.3, -24.2, -19.7, -22.6, -21.5),
+    32.0: (-24.7, -22.6, -23.7, -24.4, -20.7, -23.4, -22.7),
+    36.0: (-24.9, -22.9, -22.7, -24.7, -21.5, -23.9, -23.0),
+    40.0: (-26.4, -24.4, -23.0, -25.5, -21.1, -24.4, -23.2),
+    48.0: (-26.5, -25.1, -24.7, -25.7, -22.3, -25.3, -24.2),
+}
+
+#: The Figure 7 summary: the decay rate the survey's own analysis program read
+#: off that curve, in decibels per distance doubling. The printed rows are
+#: labelled "pres", "moyen" and "loin".
+SUVA_DECAY_DB: dict[str, tuple[float, ...]] = {
+    "near": (4.5, 2.3, 3.4, 3.0, 2.4, 2.9, 2.8),
+    "middle": (2.2, 1.4, 3.1, 1.7, 2.0, 2.2, 2.1),
+    "far": (2.6, 4.7, 2.9, 3.4, 3.4, 4.1, 3.5),
+}
+
+#: The same summary: the excess of sound pressure level, in decibels.
+SUVA_EXCESS_DB: dict[str, tuple[float, ...]] = {
+    "near": (1.7, 5.8, 5.0, 3.3, 6.3, 5.7, 5.1),
+    "middle": (9.0, 13.5, 12.4, 10.8, 14.4, 13.0, 12.8),
+    "far": (15.4, 18.5, 17.9, 16.1, 20.1, 17.5, 18.2),
+}
+
+#: 2.6.2: the three ranges, printed with both bounds, in metres. The path stops
+#: at 48 m, so the far range is evaluated over 16 m to 48 m.
+SUVA_RANGES_M = {"near": (1.0, 5.0), "middle": (5.0, 16.0), "far": (16.0, 64.0)}
+
+#: 2.6.3: the radii the same page tells a surveyor to stand at, in metres.
+SUVA_RADII_M = (
+    1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 12.0, 14.0, 16.0, 18.0,
+    20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 48.0, 56.0, 64.0,
+)  # fmt: skip
+
+
+def _suva_range(column: str, region: str) -> tuple[np.ndarray, np.ndarray]:
+    """One printed column over one printed range, as values and distances."""
+    index = SUVA_COLUMNS.index(column)
+    low, high = SUVA_RANGES_M[region]
+    radii = [radius for radius in SUVA_CURVE_DB if low <= radius <= high]
+    values = [SUVA_CURVE_DB[radius][index] for radius in radii]
+    return np.array(values, dtype=float), np.array(radii, dtype=float)
+
+
+@pytest.mark.parametrize("region", ["near", "middle", "far"])
+@pytest.mark.parametrize("column", SUVA_COLUMNS)
+def test_the_suva_decay_rates_reproduce(column: str, region: str) -> None:
+    """Equation (5) over a curve this project had no part in measuring.
+
+    The tolerance is 0,06 dB rather than the 0,05 dB the printed tenth would
+    suggest, for two of the 21 values: DL2 in the far range at 250 Hz and at
+    2 kHz land 0,001 dB the wrong side of the rounding boundary. That is
+    Equation (5) printing 0,3 where the survey's program used lg 2, which is
+    the same 0,3 % the errata registry records.
+    """
+    want = SUVA_DECAY_DB[region][SUVA_COLUMNS.index(column)]
+    got = room.spatial_decay_rate(*_suva_range(column, region))
+    assert got == pytest.approx(want, abs=0.06)
+
+
+@pytest.mark.parametrize("region", ["near", "middle", "far"])
+@pytest.mark.parametrize("column", SUVA_COLUMNS)
+def test_the_suva_excesses_reproduce(column: str, region: str) -> None:
+    """Equations (6) and (7) over the same curve, every value to the tenth."""
+    want = SUVA_EXCESS_DB[region][SUVA_COLUMNS.index(column)]
+    got = room.mean_level_excess(*_suva_range(column, region))
+    assert got == pytest.approx(want, abs=0.05)
+
+
+def test_the_suva_excesses_pin_the_free_field_reference() -> None:
+    """A wrong offset in Equation (2) shifts every DLf by the same constant.
+
+    So the mean of the 21 residuals says which reference the other program
+    measured its excess against. It is the whole sphere, 10 lg(4 pi), not the
+    hemisphere a source standing on the floor would suggest and not an Annex B
+    correction.
+    """
+    residuals = [
+        room.mean_level_excess(*_suva_range(column, region))
+        - SUVA_EXCESS_DB[region][index]
+        for region in SUVA_RANGES_M
+        for index, column in enumerate(SUVA_COLUMNS)
+    ]
+    implied = FREE_FIELD_OFFSET_DB - float(np.mean(residuals))
+    assert implied == pytest.approx(float(10.0 * np.log10(4.0 * np.pi)), abs=0.02)
+    assert abs(implied - 8.0) > 2.0
+
+
+@pytest.mark.parametrize("radius_m", SUVA_RADII_M)
+def test_every_printed_radius_lands_in_a_range_that_admits_it(radius_m: float) -> None:
+    """The survey prints the partition as numbers, which 6.2 never does.
+
+    It prints the three ranges as closed intervals, so 5 m and 16 m are each
+    named by two of them, and 6.2 writes "from 1 m to d1", "from d1 to d2" and
+    "from d2" without saying which side owns a boundary. Neither page pins it,
+    so what is checked is that every radius lands in a range that admits it.
+    """
+    admitted = [
+        name for name, (low, high) in SUVA_RANGES_M.items() if low <= radius_m <= high
+    ]
+    assert room.distance_region(radius_m) in admitted
+
+
+# ---------------------------------------------------------------------------
+# IFA-LSA 01-234, DGUV, April 2020
+# ---------------------------------------------------------------------------
+#
+# Laermschutz-Arbeitsblatt IFA-LSA 01-234, "Raumakustik in industriellen
+# Arbeitsraeumen". Tab. 4.4 and Equation (4.4) are on PDF page 17, printed
+# folio 17; the worked 500 Hz line, Equation (4.5) and Tab. 4.5 are on PDF
+# page 18, printed folio 18.
+
+#: Tab. 4.4: the four positions of the path, in metres.
+IFA_DISTANCES_M = np.array([0.75, 1.50, 3.00, 6.00])
+
+#: Tab. 4.4: the sound pressure levels measured there, in decibels. They are
+#: bare Lp rather than D = Lp - Lw, which Equation (5) does not mind, and the
+#: sheet feeds its own printed formula the same bare levels for the same
+#: reason.
+IFA_LEVELS_DB = {
+    "500 Hz": [79.2, 74.4, 70.2, 67.1],
+    "1 kHz": [81.9, 77.1, 73.0, 69.8],
+    "2 kHz": [80.4, 75.3, 71.0, 67.4],
+    "4 kHz": [84.3, 78.5, 73.2, 69.3],
+}
+
+#: Tab. 4.5: the decay rate the sheet prints for each band, in decibels per
+#: distance doubling, identical under its two printed methods.
+IFA_DECAY_DB = {"500 Hz": 4.0, "1 kHz": 4.0, "2 kHz": 4.3, "4 kHz": 5.0}
+
+
+@pytest.mark.parametrize("band", ["500 Hz", "1 kHz", "2 kHz", "4 kHz"])
+def test_the_ifa_decay_rates_reproduce(band: str) -> None:
+    """Equation (5) against a second worked example, from a second country.
+
+    The sheet's own Equation (4.4) is not Equation (5) verbatim: it is that
+    regression specialised to these four fixed distances, with the sum of the
+    logarithms rounded to 1,306 and 20 lg 2 rounded to 6. It therefore runs
+    0,34 % high, which is far under the tenth of a decibel the sheet prints, so
+    this example cannot tell the printed 0,3 of Equation (5) from lg 2.
+    """
+    got = room.spatial_decay_rate(IFA_LEVELS_DB[band], IFA_DISTANCES_M)
+    assert got == pytest.approx(IFA_DECAY_DB[band], abs=0.05)
+
+
+def test_a_constant_offset_leaves_the_decay_rate_alone() -> None:
+    """Which is what lets Equation (5) be fed bare levels instead of D."""
+    levels = IFA_LEVELS_DB["2 kHz"]
+    plain = room.spatial_decay_rate(levels, IFA_DISTANCES_M)
+    shifted = room.spatial_decay_rate(np.asarray(levels) - 95.0, IFA_DISTANCES_M)
+    assert shifted == pytest.approx(plain, abs=1e-12)
+
+
+def test_the_ifa_result_table_prints_one_difference_its_own_data_denies() -> None:
+    """Tab. 4.5 prints Lp2 - Lp3 = 4,7 dB at 2 kHz; Tab. 4.4 gives 4,3 dB.
+
+    The regression settles which cell is right. With the 71,0 dB Tab. 4.4
+    prints at the third position, Equation (5) gives the 4,3 dB Tab. 4.5 prints
+    for the decay rate; with the 70,6 dB the printed difference would need, it
+    gives 4,4 dB and contradicts it. Eleven of the twelve difference cells
+    reproduce, so the defect is that one cell and it touches nothing else.
+    """
+    want = IFA_DECAY_DB["2 kHz"]
+    printed = room.spatial_decay_rate(IFA_LEVELS_DB["2 kHz"], IFA_DISTANCES_M)
+    implied = list(IFA_LEVELS_DB["2 kHz"])
+    implied[2] = implied[1] - 4.7
+    assert printed == pytest.approx(want, abs=0.05)
+    assert room.spatial_decay_rate(implied, IFA_DISTANCES_M) == pytest.approx(
+        4.355, abs=0.005
+    )
+
+
+# ---------------------------------------------------------------------------
+# W. Probst, BAuA Schriftenreihe Fb 1083, 2006
+# ---------------------------------------------------------------------------
+#
+# "Gestaltung laermarmer Fertigungsstaetten in metallverarbeitenden Betrieben",
+# Forschung Fb 1083, Dortmund/Berlin/Dresden 2006. Anh. 1 prints one table per
+# surveyed workroom, headed "Streukoerperberechnung nach VDI 3760, 1996"; in
+# this copy the PDF page number equals the printed folio. The fitting density
+# is the quantity a category 2a or 2b prediction of ISO 11690-3 takes instead
+# of the fittings themselves, which is why it is anchored beside the curve it
+# feeds.
+
+#: Anh. 1: the room, the fittings and the density each table prints. The room
+#: is its length, breadth and height in metres followed by the volume it prints
+#: in cubic metres; each fitting is a count and three dimensions in metres; the
+#: last two entries are the cumulative fitting surface in square metres and the
+#: density in reciprocal metres.
+PROBST_ROOMS = {
+    "Tab. 3, folio 79": (
+        (14.0, 20.0, 4.5, 1260.0),
+        ((5, 4.0, 2.0, 2.0), (1, 5.0, 5.0, 5.0), (10, 0.3, 0.3, 3.0)),
+        321.9,
+        0.064,
+    ),
+    "Tab. 6, folio 82": (
+        (14.0, 22.0, 6.0, 1848.0),
+        ((2, 3.0, 1.0, 2.0), (3, 6.0, 1.0, 2.0)),
+        140.0,
+        0.019,
+    ),
+    "Tab. 13, folio 93": (
+        (23.0, 20.0, 6.0, 2760.0),
+        ((5, 4.0, 2.0, 2.0),),
+        160.0,
+        0.014,
+    ),
+    "Tab. 22, folio 105": (
+        (18.0, 11.0, 3.5, 693.0),
+        ((1, 4.0, 3.0, 3.0),),
+        54.0,
+        0.019,
+    ),
+}
+
+
+@pytest.mark.parametrize("table", list(PROBST_ROOMS))
+def test_the_probst_fitting_densities_reproduce(table: str) -> None:
+    """q = S/(4V) against an independent VDI 3760 tool, from printed S and V.
+
+    The density is printed to three decimals, which at these magnitudes is two
+    significant figures, so what this pins is the form of the quotient and the
+    factor 4 rather than a tight tolerance.
+    """
+    room_data, _fittings, surface_m2, printed = PROBST_ROOMS[table]
+    got = room.fitting_density(surface_area_m2=surface_m2, volume_m3=room_data[3])
+    assert got == pytest.approx(printed, abs=0.0005)
+
+
+@pytest.mark.parametrize("table", list(PROBST_ROOMS))
+def test_the_probst_fitting_surfaces_are_the_envelope_without_the_base(
+    table: str,
+) -> None:
+    """Which surface rule the report summed is nowhere printed on those pages.
+
+    It was read off the cumulative column, and the enveloping surface without
+    the base area reproduces every one of them, including the mixed geometry of
+    Tab. 3. This test says so out loud, so that the inference is visible rather
+    than buried in the number the density row consumes. The printed volume is
+    the product of the printed dimensions in all four rooms.
+    """
+    room_data, fittings, surface_m2, _printed = PROBST_ROOMS[table]
+    length_m, breadth_m, height_m, volume_m3 = room_data
+    assert length_m * breadth_m * height_m == pytest.approx(volume_m3)
+    envelope = sum(
+        count * (2.0 * long_m * tall_m + 2.0 * wide_m * tall_m + long_m * wide_m)
+        for count, long_m, wide_m, tall_m in fittings
+    )
+    assert envelope == pytest.approx(surface_m2)

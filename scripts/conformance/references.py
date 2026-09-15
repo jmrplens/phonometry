@@ -121,6 +121,7 @@ _BODIES = (
     "ECAC Doc",
     "ECAC",
     "FAA",
+    "FHWA",
     "EASA",
     "WHO",
     "NIOSH",
@@ -138,7 +139,29 @@ _BODIES = (
 
 #: Bodies whose documents are reports rather than standards: they are published
 #: findings, not normative texts, and the bibliography types them accordingly.
-_REPORT_BODIES = frozenset({"NASA", "ECAC", "FAA", "EASA", "WHO", "NIOSH", "OSHA"})
+_REPORT_BODIES = frozenset(
+    {"NASA", "ECAC", "FAA", "FHWA", "EASA", "WHO", "NIOSH", "OSHA"}
+)
+
+#: Works cited as ``Author (year)`` or ``Series number (year)`` whose kind the
+#: citation string cannot say. The year form reads as an article, which is
+#: right for a paper and wrong for a book or a published report, and nothing in
+#: "Barron (2003)" tells the two apart. Keyed by designation and edition, so
+#: that one author's book and paper stay apart: "Harris 1978" is the windows
+#: paper and "Harris (1991)" the noise control manual. An entry names a work
+#: whose kind was read off the document itself.
+_WORK_KINDS: dict[tuple[str, str], ReferenceKind] = {
+    ("Barron", "(2003)"): ReferenceKind.BOOK,
+    ("Harris", "(1991)"): ReferenceKind.BOOK,
+    ("Schirmer", "(2006)"): ReferenceKind.BOOK,
+    ("Vigran", "(2008)"): ReferenceKind.BOOK,
+    ("IFA-LSA 01-234", "(2020)"): ReferenceKind.REPORT,
+    ("IFA-LSA 01-243", "(2014)"): ReferenceKind.REPORT,
+    ("NPL CIRA(EXT) 009", "(1996)"): ReferenceKind.REPORT,
+    ("Probst", "(2006)"): ReferenceKind.REPORT,
+    ("Suva 66008.f", "(2006)"): ReferenceKind.REPORT,
+    ("Suva 66026.d", "(2010)"): ReferenceKind.REPORT,
+}
 
 _BODY_ALTERNATION = "|".join(re.escape(body) for body in _BODIES)
 
@@ -215,7 +238,7 @@ _CLAUSE_OPENERS = (
 )
 
 _CLAUSE_START = re.compile(
-    r"^(?P<designation>.+?)\s+(?P<clause>(?:"
+    r"^(?P<designation>.+?),?\s+(?P<clause>(?:"
     + "|".join(re.escape(word) for word in _CLAUSE_OPENERS)
     + r")\b.*|§.*)$"
 )
@@ -258,12 +281,17 @@ _JOINERS: tuple[tuple[str, str], ...] = (
     (":", ", "),
     ("-", ", "),
     (" ", " / "),
+    (", ", ", "),
 )
 
 
 def _kind_for(designation: str) -> ReferenceKind:
-    """Classify a designation that opens with a known issuing body."""
-    body = designation.split(" ", 1)[0]
+    """Classify a designation that opens with a known issuing body.
+
+    The body ends at a space or at the hyphen a report number is joined to it
+    with, as in ``FHWA-PD-96-046``.
+    """
+    body = re.split(r"[ -]", designation, maxsplit=1)[0]
     if body in _REPORT_BODIES:
         return ReferenceKind.REPORT
     return ReferenceKind.STANDARD
@@ -298,12 +326,18 @@ def _as_edition(cite: str) -> Reference | None:
 
 
 def _as_year(cite: str) -> Reference | None:
-    """Split ``Author 1999 Eq. (17)`` or ``Author (2010) §11.4.6``."""
+    """Split ``Author 1999 Eq. (17)`` or ``Author (2010) §11.4.6``.
+
+    The kind is an article unless :data:`_WORK_KINDS` knows the work to be a
+    book or a report.
+    """
     match = _YEAR.match(cite)
     if match is None:
         return None
     return Reference(
-        kind=ReferenceKind.ARTICLE,
+        kind=_WORK_KINDS.get(
+            (match["designation"], match["edition"]), ReferenceKind.ARTICLE
+        ),
         designation=match["designation"],
         edition=match["edition"],
         clause=match["clause"],
@@ -344,7 +378,11 @@ def parse(cite: str, overrides: dict[str, Reference] | None = None) -> Reference
         return recorded
     for parser in _parsers():
         reference = parser(cite)
-        if reference is not None and recompose(reference) == cite:
+        if (
+            reference is not None
+            and _is_whole(reference.designation)
+            and recompose(reference) == cite
+        ):
             return reference
     # No split survives the round trip, so the citation is one indivisible
     # name: a closed-form derivation, or a work whose title is the whole of it.
@@ -355,6 +393,31 @@ def parse(cite: str, overrides: dict[str, Reference] | None = None) -> Reference
         clause=None,
         cite=cite,
     )
+
+
+#: The tail a designation is left with when a split cuts it inside a phrase:
+#: the comma or the conjunction that was joining it to what follows.
+_CUT_TAIL = re.compile(r"(?:,|\s(?:and|or|against|with))$")
+
+
+def _is_whole(designation: str) -> bool:
+    """Whether a split left the designation a whole name.
+
+    A split that rebuilds the citation can still cut it in the wrong place.
+    "Poiseuille limit (Stinson 1991)" splits at the year into "Poiseuille
+    limit (Stinson" and "1991)", and "Suva 66008.f, 8th revised edition,
+    August 2006, Tableau 2 and Figure 7" splits at the clause word into a
+    designation that ends in "and". Neither is a document. A designation with a
+    parenthesis it never closes, or one that ends in a comma or a conjunction,
+    is refused, and the next splitter, or in the end the whole string, is
+    taken instead.
+
+    :param designation: The document half of a candidate split.
+    :return: ``False`` when the split cut the name.
+    """
+    if designation.count("(") != designation.count(")"):
+        return False
+    return _CUT_TAIL.search(designation) is None
 
 
 @functools.cache

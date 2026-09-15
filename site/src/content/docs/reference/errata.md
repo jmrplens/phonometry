@@ -5876,6 +5876,62 @@ in the same order.
   warning names the margin that was actually reached.
 - **Status:** not reported.
 
+## ISO 11820:1996, Equations (20) and (22) (a temperature ratio the wrong way up)
+
+- **Location:** Equation (20) of 9.1.3 on printed page 11 (PDF page 19) and
+  Equation (22) of 9.1.4 on printed page 12 (PDF page 20).
+- **The print:**
+  $K_2 - K_1 = 5 \lg\!\left(\dfrac{273 + \theta_1}{273 + \theta_2}\right)$ dB,
+  with $\theta_1$ "the temperature, in degrees Celsius, on the receiver side"
+  and $\theta_2$ "on the source side"; and, for the insertion loss,
+  $K_\mathrm{II} - K_\mathrm{I} = 5 \lg\!\left(\dfrac{273 + \theta_\mathrm{I}}
+  {273 + \theta_\mathrm{II}}\right)$ dB, with $\theta_\mathrm{I}$ the
+  temperature with the silencer and $\theta_\mathrm{II}$ without it. The
+  sentence under Equation (20) explains it: "The different temperatures
+  determine different sound velocities which result in different conversion
+  factors from squared sound pressure to sound power."
+- **The problem:** the ratio is inverted, and the sentence says why. The field
+  correction $K$ is a conversion from squared sound pressure to sound power,
+  and the standard fixes its sign on its own page: Equations (5) and (7) on
+  printed page 3 add it, $L_{W1} = \overline{L_{p1}} + 10\lg(S_1/S_0)$ dB
+  $+\ K_1$ and $L_{W2} = \overline{L_{p2}} + 10\lg(S_2/S_0)$ dB $+\ K_2$, with
+  subscript 1 the receiver side and subscript 2 the source side, the same
+  assignment Equation (20) keys. So $K = -10\lg(\rho c / (\rho c)_0)$ + const.
+  The sentence counts only the change in $c$, which rises as $\sqrt{T}$, and
+  forgets that the density falls: the standard's own Equation (29) on printed
+  page 12 gives $\rho_\mathrm{u} = M\,p_\mathrm{amb}/[R(273 + \theta_
+  \mathrm{u})]$, so at one ambient pressure $\rho c$ falls as $T^{-1/2}$ and
+  $K$ rises as $+5 \lg T$. Hotter gas therefore needs the *more* positive
+  correction, and the difference is
+  $5 \lg[(273 + \theta_2)/(273 + \theta_1)]$, the reciprocal of the print. Both
+  printed forms carry the same inversion, so this is the equation and not a
+  misprinted subscript in one of them.
+- **Evidence:** the three equations and the two keys read on the page.
+  Equation (20) with its key and the explanatory sentence, and Equations (18)
+  and (19), are on PDF page 19 (printed p. 11); Equations (5), (7) and their
+  keys are on PDF page 11 (printed p. 3); Equation (22) with its key and
+  Equation (29) with $R$ = 8 314,4 N·m/(kmol·K) are on PDF page 20 (printed
+  p. 12). All of BS EN ISO 11820:1997, which prints EN ISO 11820:1996. A second
+  ISO document prints the same quantity the other way up: the reference
+  quantity correction of ISO 3741:2010, which its key calls "a function of the
+  characteristic impedance of the air", is
+  $C_1 = -10\lg(p_\mathrm{s}/p_{\mathrm{s},0})$ dB
+  $+\ 5\lg[(273{,}15 + \theta)/\theta_0]$ dB, added to $L_W$ in Equation (20)
+  on PDF page 31 (printed p. 22) of BS EN ISO 3741:2010, and it rises with
+  temperature.
+- **Consequence for the standard's own tables:** ISO 11820 prints no worked
+  example, so nothing in the document is wrong on its face. In use the sign
+  costs twice the correction: with a receiver at 20 °C and a source at 200 °C
+  the print gives -1,04 dB where the impedance gives +1,04 dB, so both the
+  transmission loss of Equation (19) and the insertion loss of Equation (21)
+  come out 2,08 dB low.
+- **Library behaviour:**
+  [`temperature_field_correction_db`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/noise_control/silencer_in_situ.py)
+  returns the equation as printed, because a reader holding ISO 11820 has to
+  find the standard's own number, and its docstring names this entry. The
+  conformance row "ISO 11820:1996 Eqs. (20) and (22)" pins the printed form.
+- **Status:** not reported.
+
 ## ISO 10847:1997, Table 1 (an upwind class printed with a positive lower bound)
 
 - **Location:** Table 1, "Class of wind conditions", on printed page 6 (PDF
@@ -6000,6 +6056,77 @@ in the same order.
   $\lg 2$ where Equation (8) prints it. Do not unify them.
 - **Status:** not reported.
 
+## ISO 14257:2001, Equation (4) against Table 1 (a second rounded constant)
+
+- **Location:** Equation (4) of 4.2.3 and Table 1 immediately beneath it, both
+  on printed page 4 (PDF page 14).
+- **The print:** Equation (4) closes
+  $D_\text{Norm} = 10\lg\!\left(\sum_j 10^{(D_j + P_j)/10}\right)$ dB
+  $-\ 6,2$ dB, and Table 1 gives the $P_j$ of the A-weighted pink-noise
+  reference spectrum as $-16{,}1$; $-8{,}6$; $-3{,}2$; $0$; $1{,}2$; $1$ dB at
+  125 Hz to 4 kHz.
+- **The problem:** the 6,2 dB is the energy sum of that same printed table,
+  which is what normalizes the weighted spectrum back to unit total, and the
+  sum of the six printed $P_j$ is 6,251 dB. The printed constant is 0,051 dB
+  small. It is the same slip as the rounded $\lg 2$ of the entry above, in the
+  other direction: a constant the document could have printed exactly, rounded
+  to one decimal in the one place it appears.
+- **Evidence:** Equation (4), its key and Table 1 read on the page, PDF page 14
+  (printed p. 4) of EN ISO 14257:2001.
+- **Consequence for the standard's own tables:** 0,051 dB on every
+  frequency-normalized value the annex tabulates, which is half the last digit
+  Tables C.6, C.10 and C.12 print, so it can move a printed cell by one in the
+  last place but never by more.
+- **Library behaviour:**
+  [`NORMALIZED_OFFSET_DB`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) carries the
+  printed 6,2, on the same rule as the entry above: the printed constant is
+  what a reader checking against the page will use. The conformance row
+  "ISO 14257:2001 Annex C, Table C.6 last column" judges the result against the
+  annex at the tenth the annex prints.
+- **Status:** not reported.
+
+## ISO 14257:2001, Annex C, Tables C.11 and C.12 (results Equation (8) does not give)
+
+- **Location:** Tables C.11 and C.12 on printed page 24 (PDF page 34), against
+  Equation (8) of 6.4.3 on printed page 10 (PDF page 20) and Table C.5 on
+  printed page 21 (PDF page 31).
+- **The print:** Table C.11 gives $\text{DL}'_\text{fr}$ in six octave bands at
+  4 m, 10 m and 30 m from the source: 6,2; 4,0; 4,4; 5,2; 5,3; 3,9 at 4 m;
+  7,8; 5,4; 6,4; 6,9; 7,7; 5,8 at 10 m; and 10,6; 7,4; 9,3; 7,2; 9,2; 6,1 at
+  30 m. Table C.12 gives 4,8; 6,8; 8,0 dB for the A-weighted pink-noise
+  spectrum at the same three distances.
+- **The problem:** Equation (8) is the only thing in the document that defines
+  $\text{DL}'_\text{fr}$, and it does not produce these numbers. Evaluated over
+  the three distance ranges the same annex uses, 2 m to 5 m, 5 m to 24 m and
+  24 m to 48 m, on the printed $D$ of Table C.5, it departs from Table C.11 by
+  up to 1,55 dB, and the printed rows are not an Equation (8) result for any
+  decay rate: solving the equation for the $\text{DL}_2$ the middle row would
+  need gives values from -28,9 dB to +20,7 dB per distance doubling. What the
+  three rows are is a reading of the printed measurement at a microphone
+  position, through Equation (6) rather than Equation (8): the 4 m row is
+  Equation (6) at the 4 m position of Table C.5, in all six bands; the 10 m row
+  is the mean of Equation (6) at the 8 m and 12 m positions that bracket it, in
+  all six bands; and the 30 m row is Equation (6) at the 32 m position with
+  $20\lg 32$ entered as 30 dB rather than 30,103 dB, in five bands of six.
+- **Evidence:** Tables C.10, C.11 and C.12 read on PDF page 34 (printed p. 24),
+  Tables C.5 and C.6 on PDF page 31 (printed p. 21) and Equations (6), (7) and
+  (8) with their keys on PDF page 20 (printed p. 10), all of
+  EN ISO 14257:2001. Seventeen of the
+  eighteen cells of Table C.11 come back from the printed $D$ of Table C.5 by
+  the reading above, to the tenth the table prints; the exception is the
+  125 Hz cell of the 30 m row, which prints 10,6 where that reading gives 10,7.
+  The same digits are printed in the Spanish adoption, UNE-EN ISO 14257:2002,
+  Tabla C.11 on printed p. 30, so this is the annex and not one printing of it.
+- **Consequence for the standard's own tables:** Tables C.11 and C.12 only. The
+  decay rates and excesses of Tables C.7 to C.10 are unaffected, and nothing
+  downstream computes with C.11.
+- **Library behaviour:**
+  [`level_excess_at`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) implements
+  Equation (8) as printed and returns the values above rather than the table's.
+  The conformance row "ISO 14257:2001 Annex C, Tables C.11 and C.12" records
+  the departure so the table is not mistaken for an oracle of Equation (8).
+- **Status:** not reported.
+
 ## ISO 11690-3:1998, Table C.2 (a value read off the edge of its own diagram)
 
 - **Location:** Table C.2 on printed page 20 (PDF page 30), against Figure C.1
@@ -6027,6 +6154,47 @@ in the same order.
   evaluates the expression and has no ceiling, so it returns 12,4 dB where the
   table prints 10. The conformance row "ISO 11690-3:1998 Annex C, Figure C.1
   (the eighth machine)" pins it.
+- **Status:** not reported.
+
+## ISO 11690-3:1998, Annex B (two workstations whose positions and results are interchanged)
+
+- **Location:** Tables B.5 and B.8 on printed page 18 (PDF page 28), against
+  Figure B.1 on printed page 16 (PDF page 26) and the immission columns of
+  Tables B.6 and B.9 on printed page 18.
+- **The print:** Table B.5 puts workstation W1 at $x$ = 3 m, $y$ = 12 m,
+  $z$ = 1,6 m and W2 at 17 m, 4 m, 1,6 m, and Table B.8 repeats those two
+  positions for case B. Table B.6 then gives, after the two machines are
+  installed, $L_p$ = 82,1 dB at W1 and 80,3 dB at W2; Table B.9 gives 86,2 dB
+  at W1 and 85,7 dB at W2 with the first-choice machine, and 83,8 dB and
+  82,8 dB with the second. Figure B.1 draws the same two workstations the other
+  way round: W1 beside machine M2 on the right of the room, and W2 alone at the
+  top left.
+- **The problem:** the results belong to the figure's assignment and not to the
+  tables'. Machine M2 stands at 17 m, 3 m, 1 m, so the position Table B.5 calls
+  W2 is one metre from it and the position it calls W1 is eleven metres from
+  the nearer machine. The far position cannot be the louder of the two, and the
+  printed levels say it is. Recomputing case A by the category 1 method the
+  annex prescribes, in the 20 m by 15 m by 7 m room of Table B.2 at the mean
+  absorption coefficient 0,15 of Table B.3, gives 82,09 dB at 17 m, 4 m, 1,6 m
+  and 80,27 dB at 3 m, 12 m, 1,6 m: the two levels Table B.6 prints, each
+  against the other workstation's label. Table B.8 contradicts itself on its own
+  row, since it prints the far position for W1 and 82 dB, the rounded near
+  level, beside it.
+- **Evidence:** Figure B.1 with Tables B.2 and B.3 read on PDF page 26 (printed
+  p. 16); Table B.4 with the machine positions on PDF page 27 (printed p. 17);
+  Tables B.5 to B.9 on PDF page 28 (printed p. 18). All of EN ISO 11690-3:1998
+  as published in BS EN ISO 11690-3:1999. Under the figure's assignment the six
+  levels of Table B.9 come back within 0,06 dB, and under the tables' they miss
+  by 0,08 dB to 0,14 dB while case A misses by 1,8 dB on both rows.
+- **Consequence for the standard's own tables:** the Position columns of Tables
+  B.5 and B.8 against the labels of Tables B.6 and B.9, in both cases of the
+  annex. The prose of case A follows the tables, calling W2 "the workstation of
+  M2", so it is on the same side of the contradiction. The numbers themselves
+  are right.
+- **Library behaviour:** the conformance rows for the two cases of Annex B read
+  the printed coordinates and never the labels, and the row "ISO 11690-3:1998
+  Annex B, Figure B.1 against Tables B.5 and B.8" records that the results
+  reproduce at the positions the figure draws and at no other.
 - **Status:** not reported.
 
 ## Related source properties that are not errata

@@ -7,6 +7,15 @@ that makes the Annex A estimate agree with the A-weighted totals of its own
 inputs; the ISO 3741 background correction the clauses delegate to, checked
 against its own closed form; and the printed thresholds of 6.2, 6.4, 6.7,
 7.2.1 and clause 10.
+
+Two clauses compute nothing of their own, and those have printed arithmetic
+behind them: 6.4 sends the background correction to ISO 3741, whose 9.1.2
+prints the value of its own Equation (14) at the two margins it clamps at, and
+clause 8 sends the single number to ISO 717-1, whose Annex C works a full
+example. Three accredited laboratories have published cabin measurements rated
+to clause 8, and Example 7-8 of Barron carries the A-weighted sum of Annex A
+through a spectrum of its own. The last section of this file is those, and each
+test names the document its numbers were read from.
 """
 
 from __future__ import annotations
@@ -15,6 +24,7 @@ import warnings
 
 import numpy as np
 import pytest
+from reference_data import ISO717_1_ANNEX_C_R as _ANNEX_C_R
 
 from phonometry import noise_control
 from phonometry.emission import reverberation_background_correction
@@ -593,3 +603,290 @@ def test_the_tolerance_never_reaches_the_neighbouring_band() -> None:
         noise_control.check_band_flatness(
             [80.0, 82.0, 81.0], frequencies=[225.0, 250.0, 315.0]
         )
+
+
+# ---------------------------------------------------------------------------
+# Numbers borrowed from the documents ISO 11957 delegates to, and from three
+# published cabin measurements. The standard itself prints no worked example;
+# what follows pins the arithmetic of the clauses that send their work
+# elsewhere, and the clause 8 rating of three real cabins.
+# ---------------------------------------------------------------------------
+
+#: ISO 3741:2010 9.1.2, the clause 6.4 of ISO 11957 sends the background
+#: correction to. It prints Equation (14) on PDF p. 28, printed folio 19, and
+#: evaluates it at two arguments on PDF p. 29, printed folio 20: "K1i shall be
+#: set to 1,26 dB (the value for dLpi = 6 dB)" at 200 Hz and below and at
+#: 6 300 Hz and above, and "to 0,46 dB (the value for dLpi = 10 dB)" from
+#: 250 Hz to 5 000 Hz.
+K1_CLAMP_BANDS_HZ = np.array([100.0, 1000.0, 6300.0])
+K1_CLAMP_MARGIN_DB = np.array([6.0, 8.0, 6.0])
+PRINTED_K1_DB = np.array([1.26, 0.46, 1.26])
+
+#: Half of the last digit those two values are printed to. The library clamps
+#: the margin and re-evaluates Equation (14) rather than taking the rounded
+#: constant, so it lands 0,004 dB under 1,26 and 0,002 dB under 0,46.
+PRINTED_K1_TOLERANCE_DB = 0.005
+
+#: ISO 717-1:2013 Annex C, Table C.1 (PDF p. 24, printed folio 16): the two
+#: A-weighted spectra the adaptation terms are formed against, in decibels.
+ISO717_SPECTRUM_ONE_DB = np.array(
+    [-29.0, -26.0, -23.0, -21.0, -19.0, -17.0, -15.0, -13.0]
+    + [-12.0, -11.0, -10.0, -9.0, -9.0, -9.0, -9.0, -9.0]
+)
+ISO717_SPECTRUM_TWO_DB = np.array(
+    [-20.0, -20.0, -18.0, -16.0, -15.0, -14.0, -13.0, -12.0]
+    + [-11.0, -9.0, -8.0, -9.0, -10.0, -11.0, -13.0, -15.0]
+)
+
+#: The "-10 lg sum" the same table prints under each spectrum, in decibels.
+#: Both are truncated rather than rounded, which the ellipsis of the table
+#: marks: "sum = 147,619 9 ... x 10-5", "-10 lg sum = 28,308...".
+ISO717_PRINTED_SUM_TERM_DB = (28.308, 26.859)
+
+#: ISO 3744:2010 Annex E, Table E.1 (PDF p. 69, printed folio 60): the
+#: one-third-octave C_k over the rating bands. Annex A of ISO 11957 takes the
+#: spectrum unweighted and an attenuation A_i that is positive where the
+#: weighting takes level away, so A_i = -C_k and the printed A-weighted
+#: spectra are de-weighted with these before they are handed over.
+ISO3744_TABLE_E1_CK_DB = np.array(
+    [-19.1, -16.1, -13.4, -10.9, -8.6, -6.6, -4.8, -3.2]
+    + [-1.9, -0.8, 0.0, 0.6, 1.0, 1.2, 1.3, 1.2]
+)
+
+#: SGS-CSTC Standards Technical Services, Shunde Branch, test report
+#: SDHL260400706101HI of 7 May 2026, PDF p. 3, folio "Page 3 of 4": D_p of a
+#: meeting pod measured in a 200 m3 reverberation room, in decibels. The report
+#: also prints 36.2 dB at 4 000 Hz and 36.4 dB at 5 000 Hz, outside the rating
+#: range, and rates the spectrum at D_p,w = 32 dB.
+SGS_POD_DP_DB = np.array(
+    [11.0, 22.5, 24.0, 26.0, 29.3, 32.1, 28.3, 30.6]
+    + [31.9, 34.9, 34.5, 33.2, 32.1, 33.7, 32.6, 33.2]
+)
+
+#: AGH University, Department of Mechanics and Vibroacoustics, report 5.5.130.
+#: of August 2023, PDF p. 10, folio "Strona 10 z 10": D of an acoustic booth
+#: measured in a 180,4 m3 reverberation room, in decibels, rated there at
+#: D_p,w = 22 dB. The printed table runs 50 Hz to 10 kHz; the eight bands
+#: outside the rating range play no part in the rating.
+AGH_BOOTH_DP_DB = np.array(
+    [10.0, 20.1, 14.7, 19.3, 20.6, 19.9, 23.2, 20.4]
+    + [17.6, 19.1, 18.8, 20.2, 21.8, 24.4, 26.8, 28.3]
+)
+
+#: AGH University, Laboratorium Akustyki Technicznej, report 5.5.130.680 of
+#: October 2017, PDF p. 11, folio "Strona 11 z 12": D_p of a telephone booth
+#: measured in the same room, tabulated to whole decibels and rated there at
+#: D_p,w = 30 dB.
+EURONOVA_BOOTH_DP_DB = np.array(
+    [12.0, 18.0, 14.0, 15.0, 20.0, 25.0, 28.0, 31.0]
+    + [31.0, 33.0, 34.0, 34.0, 31.0, 30.0, 32.0, 33.0]
+)
+
+#: Barron, Industrial Noise Control and Acoustics, Marcel Dekker, New York,
+#: 2003, ISBN 0-8247-0701-X. Example 7-8 of Section 7.6, Table 7-5 on printed
+#: folio 308: an enclosure around a production machine, in octave bands.
+BARRON_BANDS_HZ = np.array([125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0])
+BARRON_OPEN_DB = np.array([93.4, 98.5, 102.9, 104.6, 102.8, 95.5])
+BARRON_ENCLOSED_DB = np.array([82.4, 84.9, 85.9, 85.8, 83.9, 71.2])
+BARRON_INSERTION_LOSS_DB = np.array([11.0, 13.6, 17.0, 18.8, 18.9, 24.3])
+
+#: The two A-weighted totals the same example prints, on folios 309 and 311:
+#: "L_A^o = 108.4 dBA (without the enclosure)" and "L_A = 89.8 dBA (with the
+#: enclosure)". Each is printed to a tenth, so their difference carries a tenth
+#: of uncertainty of its own and no test on it may be tighter than that.
+BARRON_OPEN_TOTAL_DB = 108.4
+BARRON_ENCLOSED_TOTAL_DB = 89.8
+BARRON_TOLERANCE_DB = 0.1
+
+
+def _a_weighted_total(spectrum_db: np.ndarray) -> float:
+    """The A-weighted total of an already A-weighted spectrum, in closed form.
+
+    Annex A needs ``L_A`` and Table C.1 of ISO 717-1 does not print it, because
+    its own spectra sit within a hundredth of 0 dB and the adaptation term
+    needs the sum alone. It is closed in here from the same printed integers,
+    with no help from the library, so the expected value stays independent of
+    what is being tested.
+    """
+    return float(10.0 * np.log10(np.sum(10.0 ** (0.1 * spectrum_db))))
+
+
+def test_the_background_correction_matches_the_printed_clamps_of_iso_3741() -> None:
+    """ISO 3741:2010 9.1.2, folios 19 and 20, read through clause 6.4.
+
+    Three bands take the 6 dB rule, then the 10 dB one, then the 6 dB rule
+    again, so one call crosses both band-edge thresholds. The middle band is
+    given a margin of 8 dB, under its own 10 dB threshold, which is the clamp
+    itself rather than Equation (14).
+    """
+    levels = np.full(K1_CLAMP_BANDS_HZ.size, 80.0)
+    correction = reverberation_background_correction(
+        levels, levels - K1_CLAMP_MARGIN_DB, K1_CLAMP_BANDS_HZ
+    )
+    assert correction == pytest.approx(PRINTED_K1_DB, abs=PRINTED_K1_TOLERANCE_DB)
+
+
+def test_the_internal_noise_level_carries_the_printed_correction() -> None:
+    """The two edges of the window of 6.7, against 80 - 1,26 and 80 - 0,46 dB.
+
+    The window of 6.7 and the band thresholds of ISO 3741 share the numbers 6
+    and 10 and are not the same rule. What is pinned here is the value of K_1
+    at those two arguments, not where the window itself comes from.
+    """
+    for margin, printed in ((6.0, 80.0 - 1.26), (10.0, 80.0 - 0.46)):
+        answer = noise_control.internal_noise_level(
+            [80.0, 80.0, 80.0], background_level=80.0 - margin
+        )
+        assert answer == pytest.approx(printed, abs=PRINTED_K1_TOLERANCE_DB)
+
+
+def test_the_cabin_insulation_carries_the_printed_correction() -> None:
+    """The same two corrections, reached through Equation (1) instead."""
+    cabin = np.full(K1_CLAMP_BANDS_HZ.size, 60.0)
+    res = noise_control.cabin_insulation(
+        np.full(K1_CLAMP_BANDS_HZ.size, 90.0),
+        cabin,
+        frequencies=K1_CLAMP_BANDS_HZ,
+        method="laboratory",
+        cabin_background_levels=cabin - K1_CLAMP_MARGIN_DB,
+    )
+    printed = 30.0 + PRINTED_K1_DB
+    assert res.insulation == pytest.approx(printed, abs=PRINTED_K1_TOLERANCE_DB)
+
+
+def test_a_margin_of_fifteen_decibels_takes_no_correction() -> None:
+    """Folio 19: "If dLpi >= 15 dB, K1i is assumed to be zero"."""
+    answer = noise_control.internal_noise_level(
+        [80.0, 80.0, 80.0], background_level=65.0
+    )
+    assert answer == pytest.approx(80.0)
+
+
+def test_clause_eight_rates_the_printed_example_of_iso_717_1() -> None:
+    """ISO 717-1:2013 Annex C, Table C.1, PDF p. 24, printed folio 16.
+
+    Clause 8 of ISO 11957 defines no arithmetic of its own: it says to use
+    ISO 717-1 with D_p in place of R. The substitution is nominal, so the
+    printed example of ISO 717-1 exercises the whole of clause 8. This is that
+    example, not a measured cabin spectrum.
+    """
+    rating = noise_control.weighted_cabin_insulation(_ANNEX_C_R)
+    assert rating.rating == 30
+    assert rating.c == -2
+    assert rating.ctr == -3
+    assert rating.unfavourable_sum == pytest.approx(31.8, abs=0.05)
+    assert rating.apparent is False
+
+
+def test_the_prime_changes_nothing_but_the_name() -> None:
+    """The same printed example under the in-situ flag: four identical
+    numbers, and only the symbol the clause attaches to them moves.
+    """
+    laboratory = noise_control.weighted_cabin_insulation(_ANNEX_C_R)
+    in_situ = noise_control.weighted_cabin_insulation(_ANNEX_C_R, apparent=True)
+    assert (in_situ.rating, in_situ.c, in_situ.ctr) == (
+        laboratory.rating,
+        laboratory.c,
+        laboratory.ctr,
+    )
+    assert in_situ.unfavourable_sum == pytest.approx(laboratory.unfavourable_sum)
+    assert in_situ.apparent is True
+
+
+def test_the_annex_a_estimate_reproduces_the_printed_sums() -> None:
+    """ISO 717-1:2013 Table C.1 read as the summation term of Annex A.
+
+    The table prints the 16 summands, their total and its ``-10 lg`` for two
+    spectra, which is the second term of the Annex A estimate with D_p written
+    where ISO 717-1 writes R. The total D_pA,e is not printed anywhere, so L_A
+    is closed in from the same printed integers and taken back off.
+    """
+    for spectrum, printed in zip(
+        (ISO717_SPECTRUM_ONE_DB, ISO717_SPECTRUM_TWO_DB),
+        ISO717_PRINTED_SUM_TERM_DB,
+        strict=True,
+    ):
+        estimate = noise_control.estimated_cabin_noise_insulation(
+            spectrum - ISO3744_TABLE_E1_CK_DB,
+            _ANNEX_C_R,
+            frequencies=RATING_BANDS,
+        )
+        summation = estimate - _a_weighted_total(spectrum)
+        # The printed value is a truncation, so a correct answer sits at or
+        # just above it and never below.
+        assert printed <= summation < printed + 0.001
+
+
+def test_the_spectra_of_table_c1_are_normalised_to_about_zero() -> None:
+    """Why the table can print the sum alone and never name L_A."""
+    for spectrum in (ISO717_SPECTRUM_ONE_DB, ISO717_SPECTRUM_TWO_DB):
+        assert abs(_a_weighted_total(spectrum)) < 0.02
+
+
+def test_the_sgs_meeting_pod_rates_as_its_laboratory_published_it() -> None:
+    """SGS-CSTC report SDHL260400706101HI, PDF p. 3, folio "Page 3 of 4".
+
+    The report prints the rating and no adaptation terms, so C and Ctr are not
+    anchored by it and are deliberately not asserted here.
+    """
+    rating = noise_control.weighted_cabin_insulation(SGS_POD_DP_DB)
+    assert rating.rating == 32
+    assert rating.unfavourable_sum <= 32.0
+
+
+def test_the_agh_acoustic_booth_rates_as_its_laboratory_published_it() -> None:
+    """AGH report 5.5.130. of August 2023, PDF p. 10, folio "Strona 10 z 10"."""
+    rating = noise_control.weighted_cabin_insulation(AGH_BOOTH_DP_DB)
+    assert rating.rating == 22
+    assert rating.unfavourable_sum <= 32.0
+
+
+def test_the_euronova_telephone_booth_rates_as_its_laboratory_published_it() -> None:
+    """AGH report 5.5.130.680 of October 2017, PDF p. 11, folio "Strona 11 z 12".
+
+    The plotted curve on the same card carries finer values than the table, so
+    the laboratory rated unrounded data. Rating the published integers reaches
+    the same 30 dB, which is the claim: the published spectrum rates as its
+    laboratory published it, not that the shift is pinned to a fine tolerance.
+    """
+    rating = noise_control.weighted_cabin_insulation(EURONOVA_BOOTH_DP_DB)
+    assert rating.rating == 30
+    assert rating.unfavourable_sum <= 32.0
+
+
+def test_a_spectrum_outside_the_rating_bands_cannot_leak_into_the_rating() -> None:
+    """The SGS report prints 4 000 Hz and 5 000 Hz beside the 16 rating bands."""
+    with pytest.raises(ValueError, match="16 bands"):
+        noise_control.weighted_cabin_insulation([*SGS_POD_DP_DB, 36.2, 36.4])
+
+
+def test_the_annex_a_estimate_reproduces_the_barron_worked_example() -> None:
+    """Barron (2003) Example 7-8, Table 7-5 and folios 309 and 311.
+
+    A machine enclosure predicted by the book's own model rather than a cabin
+    measured to ISO 11957, so what it anchors is the arithmetic of Annex A: the
+    A-weighted total of a spectrum with a per-band insulation taken off it,
+    against the one without. The two totals are printed to a tenth each, so the
+    difference is good to a tenth and no test on it may ask for more.
+    """
+    estimate = noise_control.estimated_cabin_noise_insulation(
+        BARRON_OPEN_DB, BARRON_INSERTION_LOSS_DB, frequencies=BARRON_BANDS_HZ
+    )
+    printed = BARRON_OPEN_TOTAL_DB - BARRON_ENCLOSED_TOTAL_DB
+    assert estimate == pytest.approx(printed, abs=BARRON_TOLERANCE_DB)
+
+
+def test_the_printed_insertion_loss_is_the_difference_of_the_two_printed_rows() -> None:
+    """Table 7-5 checked against itself before it is used as an oracle."""
+    assert BARRON_INSERTION_LOSS_DB == pytest.approx(
+        BARRON_OPEN_DB - BARRON_ENCLOSED_DB, abs=0.05
+    )
+    with_rows = noise_control.estimated_cabin_noise_insulation(
+        BARRON_OPEN_DB,
+        BARRON_OPEN_DB - BARRON_ENCLOSED_DB,
+        frequencies=BARRON_BANDS_HZ,
+    )
+    with_printed_loss = noise_control.estimated_cabin_noise_insulation(
+        BARRON_OPEN_DB, BARRON_INSERTION_LOSS_DB, frequencies=BARRON_BANDS_HZ
+    )
+    assert with_rows == pytest.approx(with_printed_loss)

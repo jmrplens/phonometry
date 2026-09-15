@@ -465,7 +465,7 @@ at all.
 *Constant* (`dict`).
 
 ```python
-ROOM_ABSORPTION_ESTIMATES = {0.05: 'Nearly empty room with smooth hard walls made of concrete, brick, plaster or tile', 0.1: 'Partly empty room; room with smooth walls', 0.15: 'Room with furniture; rectangular machinery room; rectangular industrial room', 0.2: 'Irregularly shaped room with furniture; irregularly shaped machinery room or industrial room', 0.25: 'Room with upholstered furniture; machinery or industrial room with a small amount of sound-absorbing material on ceiling or walls', 0.35: 'Room with sound-absorbing materials on both ceiling and walls', 0.5: 'Room with large amounts of sound-absorbing materials on ceiling and walls'}
+ROOM_ABSORPTION_ESTIMATES = {0.05: 'Nearly empty room with smooth hard walls made of concrete, brick, plaster or tile', 0.1: 'Partly empty room; room with smooth walls', 0.15: 'Room with furniture; rectangular machinery room; rectangular industrial room', 0.2: 'Irregularly shaped room with furniture; irregularly shaped machinery room or industrial room', 0.25: 'Room with upholstered furniture; machinery or industrial room with a small amount of sound-absorbing material on ceiling or walls (e.g. partially absorptive ceiling)', 0.35: 'Room with sound-absorbing materials on both ceiling and walls', 0.5: 'Room with large amounts of sound-absorbing materials on ceiling and walls'}
 ```
 
 ## seal_ratio

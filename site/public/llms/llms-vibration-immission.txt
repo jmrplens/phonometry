@@ -453,6 +453,8 @@ disturbances have to be kept out of it. Nearly all of it is judgement written
 down. The little that is a number is here, because a number a measurement is
 planned by belongs where the plan is checked.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling.svg" alt="Section through a building with transducers on the top floor ceiling, at mid-span of a floor, on the foundation facing the source and in the ground near it, with the directions of DIN 45669-2, three insets for coupling on a hard surface, on a soft covering and in the ground, and the DIN 45669-1 chain along the foot" width="100%"></picture>
+
 A transducer set down without fastening walks or lifts off when the vibration
 is strong, and a coupling that is not force-locked resonates against the
 surface. Clauses 5.3.2 and 5.3.3 fix both limits: a loose transducer measures
@@ -501,12 +503,23 @@ that the coupling alone can move the reading by up to 15 dB, and that the
 horizontal components suffer most. Which of the four methods of Table 2 to
 use is the one judgement Part 2 leaves entirely to the reader.
 
+**How the measurement goes.** Use a DIN 45669-1 meter with three channels, plus
+a fourth near the source when its signal has to be told apart, and check the
+chain on site. Measure on the foundation nearest the source, no higher than
+0,5 m above ground, and on the top floor ceiling next to the outer wall for the
+building; at mid-span of their floors for the people in it; on the building plot
+for a building still to be built. Point `z` up and `x` preferably towards the
+source, couple the transducer as the diagram shows, measure over the assessment
+time or stretches that represent it, and judge vibration from other sources with
+and without the source running.
+
 ## 7. What this page is not
 
 Measurement positions, directions, durations and the list of disturbances are
-the text of DIN 45669-2, and none of that is here. What is here is the
-instrument the two parts describe between them, the quantities it is required
-to produce, and the limits a measurement with it is planned by.
+the text of DIN 45669-2: section 6 describes them, and none of it is computed
+here. What is here is the instrument the two parts describe between them, the
+quantities it is required to produce, and the limits a measurement with it is
+planned by.
 
 ## What this guide covers
 
@@ -538,10 +551,10 @@ The numbers of **DIN 45669-2**: the loose-mounting limits of 5.3.2 and 5.3.3
 as a verdict, the wax limit of Table 1, the mass loading of 7.2.4 and the
 instrument confidence limits of Table 3.
 
-**No measurement procedure.** Measurement positions, directions, durations,
-the choice of a ground coupling and the treatment of disturbances are the
-text of DIN 45669-2, and the assessment of what was measured is DIN 4150-2
-and DIN 4150-3.
+**No measurement procedure in code.** Measurement positions, directions,
+durations, the choice of a ground coupling and the treatment of disturbances
+are the text of DIN 45669-2, described in section 6 and not computed, and the
+assessment of what was measured is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
@@ -568,9 +581,9 @@ and DIN 4150-3.
   of 5.2.2, the amplitude response tolerances of Tables 2 and 3 with the
   deviation of Formula (7), the reference conditions of 5.2.10 and the reference
   indications of 6.2.3.12 with Table 9, the dominant frequency methods of Annex
-  D and the assessment weightings and guideline values of Annex E with Tables
-  E.1 and E.2. The design and type-test clauses that need a bench are not
-  implemented.
+  D, the assessment weightings and guideline values of Annex E with Tables
+  E.1 and E.2, and the channel count of 5.1.2 and the on-site checks of 6.5. The
+  design and type-test clauses that need a bench are not implemented.
 - Deutsches Institut für Normung. (2012). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1*
   (DIN 45669-1 Ber 1:2012-12).
@@ -585,8 +598,8 @@ and DIN 4150-3.
   implemented.
 - Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil 3:
   Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
-  Table 1, whose guideline curve the Annex E weightings invert, and the three
-  building classes they are written for.
+  Table 1, whose guideline curve the Annex E weightings invert, the three
+  building classes they are written for, and the measuring points of 5.4.
 
 ---
 
@@ -986,13 +999,34 @@ and dropping below 20 % of that value further on. Rail traffic, and the
 measurements that read the speeds, strain the ground around `10⁻⁶`, so the
 modulus measured is the one that applies.
 
-## 8. What this page is not
+## 8. Where the record comes from
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_cross_section_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_cross_section.svg" alt="A cross-section at right angles to a railway line. On the left a train stands end-on on its track at ground level, the track axis drawn through it, and a coordinate cross beside it gives x along the track out of the page, y across the track and z vertical. On the ground to the right, transducers stand 8, 16, 32, 64 and 128 metres from the track axis, each with an arrow for the vertical direction: the first, preferably in undisturbed ground, is the emission point and the other four are transmission points, the distance doubling at each step. Further right a two-storey building is the immission area, with one transducer on the floor slab measuring vertically along z prime and one at the foot of the wall facing the track, at ground level, measuring at right angles to it along y prime, these immission points on foundations and floors chosen after DIN 45669-2, DIN 4150-2 and DIN 4150-3. Three insets follow. In plan, three cross-sections run at right angles to the track, in the middle of a straight test section 100 to 200 metres long where a track form is what is being studied, and a building turned by the angle alpha carries x prime along its wall. An embankment and a cutting carry their points at projected distances of 8, 16 and 32 metres. A rectangular tunnel with two tracks has points on the invert at a track centre and between the tracks, on the wall 1.5 metres above the rail, at the middle of the roof, on the ground above it with the cover between, and on the ground beside it, about two thirds of the cover out from the track axis but at least 8 metres. Under the insets, a thirty-second record of one passage carries its three stretches: T3 over the whole event, T2 from where the amplitude reaches about a quarter of the most frequent maxima to where it falls back to it, and T1 of about four seconds with the largest values near its middle. Two boxes at the foot give the minimum test-track length, l MG equals l Z plus r times v Z over v R, and the event value, v E equals v tilde 3 times the square root of T3 over 3600 seconds. Two notes close the plate: a meter to DIN 45669-1 from 4 hertz to 315 hertz, with every point recorded at once where possible, and a record without a train, at the same points and through the same chain, to show the background" width="100%"></picture>
+
+Part 1 says where the transducers go and what a record has to be before Part 2
+may reduce it: a cross-section at right angles to the track (6.1), the emission
+point on the ground 8 m from the track axis (6.2.1.2), the transmission points
+at twice the distance each time out to 128 m (6.2.2), and the immission points
+that DIN 45669-2, DIN 4150-2 and DIN 4150-3 place (6.2.3).
+
+**How the measurement goes.** Use a meter to DIN 45669-1 working from 4 Hz to
+315 Hz and check it after every set-up. Put the emission point on the ground 8 m
+from the track axis, or on the invert in a tunnel, and the transmission points at
+16 m, 32 m, 64 m and 128 m, with the distances projected on an embankment or in a
+cutting; the building points go where DIN 45669-2, DIN 4150-2 and DIN 4150-3 put
+them. Record several passages of each kind of train, every point at once where
+possible, then the same points with no train for the background, and cut each
+record into `T₁`, `T₂` and `T₃`.
+
+## 9. What this page is not
 
 DIN 45672-1 is a measuring method: measurement points on the way from the
 track to the building, directions, coupling, the trains to record and the
-report to write. None of that is arithmetic and none of it is here, and the
-coupling it points to is DIN 45669-2. Nor is any assessment: the numbers this
-page produces are compared with something only in DIN 4150-2 and DIN 4150-3.
+report to write. None of that is arithmetic and the library computes none of
+it, but that procedure is what decides what a record is worth, so it is set out
+above; the coupling it points to is DIN 45669-2. Nor is any assessment: the
+numbers this page produces are compared with something only in DIN 4150-2 and
+DIN 4150-3.
 
 ## What this guide covers
 
@@ -1019,9 +1053,10 @@ printed forms registered as errata.
 a narrow-band analyser, with and without a Hanning window; the library's
 density is correct by construction and has nothing to calibrate.
 
-**No measuring procedure and no verdict.** Measurement points, directions,
-coupling and the choice of trains are DIN 45672-1 and DIN 45669-2; what the
-numbers mean for people and buildings is DIN 4150-2 and DIN 4150-3.
+**No measuring procedure is checked, and no verdict.** The measurement points,
+directions, coupling and choice of trains of DIN 45672-1 and DIN 45669-2 are
+summarised above, but nothing here checks them; what the numbers mean for
+people and buildings is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
@@ -1054,7 +1089,9 @@ numbers mean for people and buildings is DIN 4150-2 and DIN 4150-3.
   Formula (3), the shear strain of Formula (4) and the moduli of Formula (5),
   with Formulae (1) and (5) in the corrected form registered in the errata. The
   measuring procedure of the rest of the standard is not arithmetic and is not
-  implemented.
+  implemented; the measuring conditions of Clause 6, the operating states of
+  Clause 7, the execution of Clause 8 and the report of Clause 10 are set out in
+  the measurement section.
 - Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
   The meter a railway measurement is made with, in its 4 Hz to 315 Hz working
@@ -1152,6 +1189,19 @@ the 15 % a measurement of `KB_F` is uncertain by: the requirement "can as a
 rule still be regarded as met", the standard concludes, and the verdict says
 so, with `within_uncertainty` set for anyone who wants to read it more
 strictly.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings.svg" alt="Section through a dwelling with the triaxial transducer at the middle of the floor panel, x towards the source and a fourth channel beside it; the meter's chain and ten 30 second clocks with a maximum of 0.25 and a clock maximum r.m.s. of 0.23; the day split into 8 hours of night and 16 hours of day with the rest hours; and the order of the assessment against the guide values of a residential area, with the two formulae at the foot" width="100%"></picture>
+
+**How the measurement goes.** Use a DIN 45669-1 meter, checked before and after,
+and measure on the floor of the room itself: `z` usually at the middle of the
+floor panel, `x` and `y` along the outer walls with `x` towards the source where
+possible, the three at once unless the vibration is steady, and a fourth channel
+near the source. Set down loose, a transducer holds while the peaks stay at or
+below 3 m/s², its horizontals only to 40 Hz; on a carpet it stands on the spiked
+device, about 2,5 kg with the transducer, pressed and tapped through the
+covering. Capture the characteristic exposure, form `KB_Fmax` and, where it is
+needed, `KB_FTr` by day and by night with the rest hours apart, and report the
+positions, the coupling, the meter and its settings.
 
 ## 2. The assessment vibration severity
 
@@ -1392,9 +1442,12 @@ line, a construction site beyond 78 working days, a hospital next to one, and
 whatever 6.2 sends to an individual assessment are decided case by case in
 the standard, and are not decided here.
 
-**No measurement.** Where the transducers go and how long a measurement runs
-are Clause 5 and DIN 45669-2; the quantities themselves come from the meter
-of DIN 45669-1, whose page forms them from a record.
+**The measurement is described, not checked.** Where the transducers go, how
+they are coupled and how long a measurement runs are Clause 5 and
+DIN 45669-2, set out above for the person measuring. Of all that, the library
+puts a number only to the loose-mounting limits, the wax limit of Table 1 and
+the mass loading of 7.2.4, on the meter's page; the quantities themselves come
+from the meter of DIN 45669-1, which forms them from a record.
 
 ## See also
 
@@ -1417,11 +1470,21 @@ of DIN 45669-1, whose page forms them from a record.
   the rules by source of 6.5 with Table 2 and the interpolation of Figure 3,
   the estimate of Clause 7 with Formulae (6) and (7) and Table 3, and Annex A
   with Formulae (A.1) to (A.4). Annex C is the oracle of the conformance rows.
-  The measurement report of Clause 8 is prose.
+  Clause 5 on the measurement and the report of Clause 8 are prose, set out in
+  the measurement section.
 - Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
   The meter whose KB_Fmax and clock maxima this standard judges, and the 5.6 Hz
-  corner frequency Formula (6) carries.
+  corner frequency Formula (6) carries. The three simultaneous channels and the
+  fourth near the source of 5.1.2, the interruption and back-erasure of the
+  clock maxima of 5.1.6.4, and the check before a measurement of 6.5.
+- Deutsches Institut für Normung. (2005). *Messung von Schwingungsimmissionen —
+  Teil 2: Messverfahren* (DIN 45669-2:2005-06). The floor positions of 5.1.3,
+  the directions of 5.2, the couplings of 5.3.2 and 5.3.3 with Table 1, the
+  measuring time of 6.1, the disturbances of 7.2.2 and the report of Clause 9,
+  as the measurement section describes them. The loose-mounting limits, the wax
+  limit and the mass loading are implemented on the meter's page; the rest is
+  prose.
 
 ---
 
@@ -1474,6 +1537,22 @@ print([round(v, 3) for v in kb_ftm])  # [0.037, 0.047, 0.406, 0.568]
 print(vibration.train_kb_fmax(kb_ftm).round(3))  # [0.055 0.07  0.609 0.851]
 print(round(vibration.railway_kb_fmax(kb_ftm), 3))  # 0.851
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_monitoring.svg" alt="A section through a railway and the building beside it, a strip of train passages, and the formulae. Top left, a tram runs on the surface and a metro in a tunnel below it, with arrows through the ground to the building. In the upper storey, the room to be protected, a transducer stands at the middle of the floor span with arrows for the vertical z and the horizontals x and y, marked 1. A second transducer sits on the foundation in the basement, marked 3, and a dashed arrow marked 2 rises from it to the floor of the room. Three boxes at the right explain the numbers: the floor point takes z, x and y where the vibration is expected to be strongest, for z mostly the middle of the span; the transfer to the room is a linear factor or a frequency-dependent transfer function, preferably measured, with its uncertainty only as an upper bound; the substitute point, at the foundation for monitoring over weeks or months, is held to DIN 45669-2. A line beneath says that from a substitute point only KB Fmax below A o and KB FTr below A r can be shown. In the middle, a time axis from 0 to 380 seconds carries four passages, a metro running north and one running south with small humps and a tram running east and one running west with large ones, each inside one dashed interval however long it lasts. Under them, per category: 14 passages giving 0.037 and 0.055, 14 giving 0.047 and 0.070, 9 giving 0.406 and 0.609, and 10 giving 0.568 and 0.851, the largest, which is the KB Fmax of the railway. A box at the foot carries Formulae 5, 7, 8 and 6, with notes on the 1920 and 960 intervals of the day and the night, the zero for a category at or below 0.1, and the meter to DIN 45669-1, for which a 4 Hz lower limit is usually enough at a railway" width="100%"></picture>
+
+**How the measurement goes.** Use a vibration meter to DIN 45669-1, where a
+lower limit of 4 Hz is usually enough beside a railway, and couple the
+transducers as DIN 45669-2 asks on the floor of the room to be protected,
+where the vibration is expected to be strongest: for `z` mostly the middle of
+the floor span, with `x` and `y` horizontal and at right angles. Carry the
+whole measurement out with particular regard to DIN 45672-1 and DIN 45672-2.
+Record every passage whole and keep one clock maximum from it, sorted into
+categories of normally at least one per track or direction and kind of
+train, and mark anything atypical. For monitoring over weeks or months a
+substitute point at the foundation may stand in, through a transfer
+determined preferably by measurement, but only to show `KB_Fmax < A_o` and
+`KB_FTr < A_r`. Expect up to about 15 % uncertainty, and report the points,
+directions, coupling and meter.
 
 ## 2. A weighting factor for the kind of train
 
@@ -1712,6 +1791,9 @@ Clause 8, the report, are text.
   measure yet.
 - [Measuring vibration immission (DIN 45669-1)](https://jmrplens.github.io/phonometry/vibration/immission/vibration-meter/):
   the clock maxima the categories are formed from.
+- [Vibration next to a railway (DIN 45672)](https://jmrplens.github.io/phonometry/vibration/immission/railway-vibration/):
+  the two parts a railway measurement is carried out with particular regard
+  to.
 - API reference:
   [`vibration.immission.train_categories`](https://jmrplens.github.io/phonometry/reference/api/vibration/train-categories/)
   and [`vibration.immission.people`](https://jmrplens.github.io/phonometry/reference/api/vibration/people/).

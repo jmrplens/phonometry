@@ -322,6 +322,8 @@ disturbances have to be kept out of it. Nearly all of it is judgement written
 down. The little that is a number is here, because a number a measurement is
 planned by belongs where the plan is checked.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling.svg" alt="Section through a building with transducers on the top floor ceiling, at mid-span of a floor, on the foundation facing the source and in the ground near it, with the directions of DIN 45669-2, three insets for coupling on a hard surface, on a soft covering and in the ground, and the DIN 45669-1 chain along the foot" width="100%"></picture>
+
 A transducer set down without fastening walks or lifts off when the vibration
 is strong, and a coupling that is not force-locked resonates against the
 surface. Clauses 5.3.2 and 5.3.3 fix both limits: a loose transducer measures
@@ -370,12 +372,23 @@ that the coupling alone can move the reading by up to 15 dB, and that the
 horizontal components suffer most. Which of the four methods of Table 2 to
 use is the one judgement Part 2 leaves entirely to the reader.
 
+**How the measurement goes.** Use a DIN 45669-1 meter with three channels, plus
+a fourth near the source when its signal has to be told apart, and check the
+chain on site. Measure on the foundation nearest the source, no higher than
+0,5 m above ground, and on the top floor ceiling next to the outer wall for the
+building; at mid-span of their floors for the people in it; on the building plot
+for a building still to be built. Point `z` up and `x` preferably towards the
+source, couple the transducer as the diagram shows, measure over the assessment
+time or stretches that represent it, and judge vibration from other sources with
+and without the source running.
+
 ## 7. What this page is not
 
 Measurement positions, directions, durations and the list of disturbances are
-the text of DIN 45669-2, and none of that is here. What is here is the
-instrument the two parts describe between them, the quantities it is required
-to produce, and the limits a measurement with it is planned by.
+the text of DIN 45669-2: section 6 describes them, and none of it is computed
+here. What is here is the instrument the two parts describe between them, the
+quantities it is required to produce, and the limits a measurement with it is
+planned by.
 
 ## What this guide covers
 
@@ -407,10 +420,10 @@ The numbers of **DIN 45669-2**: the loose-mounting limits of 5.3.2 and 5.3.3
 as a verdict, the wax limit of Table 1, the mass loading of 7.2.4 and the
 instrument confidence limits of Table 3.
 
-**No measurement procedure.** Measurement positions, directions, durations,
-the choice of a ground coupling and the treatment of disturbances are the
-text of DIN 45669-2, and the assessment of what was measured is DIN 4150-2
-and DIN 4150-3.
+**No measurement procedure in code.** Measurement positions, directions,
+durations, the choice of a ground coupling and the treatment of disturbances
+are the text of DIN 45669-2, described in section 6 and not computed, and the
+assessment of what was measured is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
@@ -437,9 +450,9 @@ and DIN 4150-3.
   of 5.2.2, the amplitude response tolerances of Tables 2 and 3 with the
   deviation of Formula (7), the reference conditions of 5.2.10 and the reference
   indications of 6.2.3.12 with Table 9, the dominant frequency methods of Annex
-  D and the assessment weightings and guideline values of Annex E with Tables
-  E.1 and E.2. The design and type-test clauses that need a bench are not
-  implemented.
+  D, the assessment weightings and guideline values of Annex E with Tables
+  E.1 and E.2, and the channel count of 5.1.2 and the on-site checks of 6.5. The
+  design and type-test clauses that need a bench are not implemented.
 - Deutsches Institut für Normung. (2012). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen, Berichtigung 1*
   (DIN 45669-1 Ber 1:2012-12).
@@ -454,5 +467,5 @@ and DIN 4150-3.
   implemented.
 - Deutsches Institut für Normung. (1999). *Erschütterungen im Bauwesen — Teil 3:
   Einwirkungen auf bauliche Anlagen* (DIN 4150-3:1999-02).
-  Table 1, whose guideline curve the Annex E weightings invert, and the three
-  building classes they are written for.
+  Table 1, whose guideline curve the Annex E weightings invert, the three
+  building classes they are written for, and the measuring points of 5.4.

@@ -8,13 +8,19 @@ references:
     title: "Erschütterungen im Bauwesen — Teil 2: Einwirkungen auf Menschen in Gebäuden"
     designation: "DIN 4150-2:1999-06"
     primary: true
-    note: "Las magnitudes de valoración del apartado 6.1, el procedimiento del 6.2 con la figura 2, los valores de referencia de la tabla 1, la intensidad de valoración de las fórmulas (4a), (4b) y (5), las reglas por fuente del 6.5 con la tabla 2 y la interpolación de la figura 3, la estimación del apartado 7 con las fórmulas (6) y (7) y la tabla 3, y el anexo A con las fórmulas (A.1) a (A.4). El anexo C es el oráculo de las filas de conformidad. El informe de medida del apartado 8 es texto."
+    note: "Las magnitudes de valoración del apartado 6.1, el procedimiento del 6.2 con la figura 2, los valores de referencia de la tabla 1, la intensidad de valoración de las fórmulas (4a), (4b) y (5), las reglas por fuente del 6.5 con la tabla 2 y la interpolación de la figura 3, la estimación del apartado 7 con las fórmulas (6) y (7) y la tabla 3, y el anexo A con las fórmulas (A.1) a (A.4). El anexo C es el oráculo de las filas de conformidad. El apartado 5 sobre la medida y el informe del apartado 8 son texto, descritos en la sección de la medida."
   - type: standard
     organization: "Deutsches Institut für Normung"
     year: 2010
     title: "Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen"
     designation: "DIN 45669-1:2010-09"
-    note: "El vibrómetro cuyos KB_Fmax y máximos por intervalo valora esta norma, y la frecuencia de esquina de 5,6 Hz que lleva la fórmula (6)."
+    note: "El vibrómetro cuyos KB_Fmax y máximos por intervalo valora esta norma, y la frecuencia de esquina de 5,6 Hz que lleva la fórmula (6). Los tres canales simultáneos y el cuarto junto a la fuente del 5.1.2, la interrupción y el borrado hacia atrás de los máximos por intervalo del 5.1.6.4, y la comprobación antes de medir del 6.5."
+  - type: standard
+    organization: "Deutsches Institut für Normung"
+    year: 2005
+    title: "Messung von Schwingungsimmissionen — Teil 2: Messverfahren"
+    designation: "DIN 45669-2:2005-06"
+    note: "La sección de la medida: los puntos sobre el forjado del 5.1.3, las direcciones del 5.2, los acoplamientos del 5.3.2 y el 5.3.3 con la tabla 1, el tiempo de medida del 6.1, las perturbaciones del 7.2.2 y el informe del apartado 9. Los límites del apoyo suelto, el de la cera y la carga de masa están implementados en la página del vibrómetro; el resto es texto."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -106,6 +112,36 @@ con una `KB_Fmax` por encima de `A_u` en menos del 15 % de incertidumbre de
 una medida de `KB_F`: el requisito «por regla general puede darse todavía por
 cumplido», concluye la norma, y el veredicto lo dice así, con
 `within_uncertainty` activado para quien quiera leerlo con más rigor.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_people_in_buildings.svg" alt="Izquierda: sección de un edificio de dos plantas, con una fuente apoyada en el terreno fuera de él y tres arcos discontinuos que se propagan desde ella por el terreno. En la planta alta, un captador triaxial sobre una pequeña base de tres pies está en el centro del paño de forjado, que marcan dos cotas de media luz bajo la losa; su flecha z apunta hacia arriba, x apunta hacia la fuente e y sale de la sección como una diagonal en escorzo, y a su lado hay una persona de pie. Un segundo captador está en el hueco de ventana del muro exterior, donde también pueden tomarse las horizontales, y un tercero en el terreno junto a la fuente es el cuarto canal. Notas debajo: sobre el suelo de la propia sala, x e y según los muros exteriores con x hacia la fuente si se puede, tres canales a la vez, apoyo suelto mientras los picos no pasen de 3 metros por segundo al cuadrado y con las horizontales solo hasta 40 hercios, y el útil de puntas, unos 2,5 kilogramos con el captador, sobre moqueta. Derecha: la cadena del vibrómetro, del límite de banda de 1 hercio a 80 hercios a la ponderación KB con su esquina de 5,6 hercios y al valor eficaz móvil con constante de tiempo de 0,125 segundos; después, diez intervalos de 30 segundos de un registro estacionario en x, con el máximo de cada intervalo dibujado como un escalón sobre una línea discontinua en 0,1; el mayor máximo es 0,25 y el eficaz de los máximos por intervalo es 0,23 en diez intervalos. Debajo, una barra de un día de 22:00 a 22:00, 8 horas de noche y 16 horas de día con las horas de descanso de 6 a 7 y de 19 a 22 sombreadas, y los valores de referencia de una zona residencial: 0,15, 3 y 0,07 de día, 0,1, 0,2 y 0,05 de noche. Abajo, a todo lo ancho, el orden de la valoración: KB F max igual o inferior a A u, que 0,25 no cumple; igual o inferior a A o, que sí cumple; sucesos raros y breves, hasta 3 al día, que una fuente estacionaria no es; después se forma KB FTr a partir de KB FTm y del tiempo de exposición y se compara con A r, cumplido solo si la exposición dura 1,5 horas o menos. La caja del pie da el eficaz de los máximos por intervalo como la raíz de la media de sus cuadrados, y la intensidad de valoración como KB FTm por la raíz de T e entre T r" width="100%" />
+
+### Cómo se hace la medida
+
+Usa un vibrómetro conforme a la DIN 45669-1, de 1 Hz a 80 Hz, y comprueba la
+cadena antes y después de medir, con un calibrador, una prueba de golpeo o la
+vibración presente. Mide sobre el suelo de la propia sala, donde se espera la
+vibración más fuerte; para la vertical suele ser el centro del paño de forjado.
+Toma `z` y dos horizontales según los muros exteriores, `x` hacia la fuente si
+se puede; las horizontales pueden ir junto a un muro o en el hueco de una
+puerta o ventana. Registra las tres a la vez, o una tras otra solo si la
+vibración es estacionaria, con un cuarto canal junto a la fuente que la separe
+de otras perturbaciones. Prefiere una superficie dura: apoyado suelto, el
+captador aguanta con picos de hasta 3 m/s², y las horizontales hasta 40 Hz;
+sobre moqueta va en el útil de puntas, unos 2,5 kg con el captador, apretado y
+golpeado hasta atravesar el revestimiento. Mide lo bastante para captar la
+exposición característica, marca como tal un estado atípico y forma `KB_Fmax`
+y, si hace falta, `KB_FTr` por separado de día y de noche, con las horas de
+descanso aparte. Los máximos por intervalo de 0,1 o menos cuentan como cero,
+porque una vibración tan débil por regla general no se percibe, y ese intervalo
+sigue contando en `N`. Una perturbación se deja fuera interrumpiendo los
+máximos por intervalo, borrando como mucho el intervalo en curso y el anterior,
+y se juzga, si se puede, con la fuente en marcha y parada. El informe recoge la
+institución y el responsable, el objeto de la medida, la fecha y los tiempos de
+medida, las fuentes y cómo funcionaban, un plano de situación y las condiciones
+de propagación, el punto de medida y el de inmisión, las direcciones y el
+acoplamiento, el vibrómetro con marca, tipo y número, sus ajustes y el resto
+del equipo, las magnitudes medidas, las perturbaciones y las observaciones
+subjetivas.
 
 ## 2. La intensidad de valoración
 
@@ -359,9 +395,12 @@ deciden caso a caso en la norma, y aquí no se deciden.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**Ninguna medida.** Dónde van los captadores y cuánto dura una medida son el
-apartado 5 y la DIN 45669-2; las magnitudes vienen del vibrómetro de la
-DIN 45669-1, cuya página las forma a partir de un registro.
+**La medida se describe, no se comprueba.** Dónde van los captadores, cómo se
+acoplan y cuánto dura una medida son el apartado 5 y la DIN 45669-2,
+explicados arriba para quien mide. De todo eso, la biblioteca solo pone número
+a los límites del apoyo suelto, al límite de la cera de la tabla 1 y a la carga
+de masa del 7.2.4, en la página del vibrómetro; las magnitudes vienen del
+vibrómetro de la DIN 45669-1, que las forma a partir de un registro.
 </ScopeClaim>
 
 </Scope>

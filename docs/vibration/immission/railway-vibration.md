@@ -392,13 +392,34 @@ and dropping below 20 % of that value further on. Rail traffic, and the
 measurements that read the speeds, strain the ground around `10⁻⁶`, so the
 modulus measured is the one that applies.
 
-## 8. What this page is not
+## 8. Where the record comes from
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_cross_section_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_railway_cross_section.svg" alt="A cross-section at right angles to a railway line. On the left a train stands end-on on its track at ground level, the track axis drawn through it, and a coordinate cross beside it gives x along the track out of the page, y across the track and z vertical. On the ground to the right, transducers stand 8, 16, 32, 64 and 128 metres from the track axis, each with an arrow for the vertical direction: the first, preferably in undisturbed ground, is the emission point and the other four are transmission points, the distance doubling at each step. Further right a two-storey building is the immission area, with one transducer on the floor slab measuring vertically along z prime and one at the foot of the wall facing the track, at ground level, measuring at right angles to it along y prime, these immission points on foundations and floors chosen after DIN 45669-2, DIN 4150-2 and DIN 4150-3. Three insets follow. In plan, three cross-sections run at right angles to the track, in the middle of a straight test section 100 to 200 metres long where a track form is what is being studied, and a building turned by the angle alpha carries x prime along its wall. An embankment and a cutting carry their points at projected distances of 8, 16 and 32 metres. A rectangular tunnel with two tracks has points on the invert at a track centre and between the tracks, on the wall 1.5 metres above the rail, at the middle of the roof, on the ground above it with the cover between, and on the ground beside it, about two thirds of the cover out from the track axis but at least 8 metres. Under the insets, a thirty-second record of one passage carries its three stretches: T3 over the whole event, T2 from where the amplitude reaches about a quarter of the most frequent maxima to where it falls back to it, and T1 of about four seconds with the largest values near its middle. Two boxes at the foot give the minimum test-track length, l MG equals l Z plus r times v Z over v R, and the event value, v E equals v tilde 3 times the square root of T3 over 3600 seconds. Two notes close the plate: a meter to DIN 45669-1 from 4 hertz to 315 hertz, with every point recorded at once where possible, and a record without a train, at the same points and through the same chain, to show the background" width="100%"></picture>
+
+Part 1 says where the transducers go and what a record has to be before Part 2
+may reduce it: a cross-section at right angles to the track (6.1), the emission
+point on the ground 8 m from the track axis (6.2.1.2), the transmission points
+at twice the distance each time out to 128 m (6.2.2), and the immission points
+that DIN 45669-2, DIN 4150-2 and DIN 4150-3 place (6.2.3).
+
+**How the measurement goes.** Use a meter to DIN 45669-1 working from 4 Hz to
+315 Hz and check it after every set-up. Put the emission point on the ground 8 m
+from the track axis, or on the invert in a tunnel, and the transmission points at
+16 m, 32 m, 64 m and 128 m, with the distances projected on an embankment or in a
+cutting; the building points go where DIN 45669-2, DIN 4150-2 and DIN 4150-3 put
+them. Record several passages of each kind of train, every point at once where
+possible, then the same points with no train for the background, and cut each
+record into `T₁`, `T₂` and `T₃`.
+
+## 9. What this page is not
 
 DIN 45672-1 is a measuring method: measurement points on the way from the
 track to the building, directions, coupling, the trains to record and the
-report to write. None of that is arithmetic and none of it is here, and the
-coupling it points to is DIN 45669-2. Nor is any assessment: the numbers this
-page produces are compared with something only in DIN 4150-2 and DIN 4150-3.
+report to write. None of that is arithmetic and the library computes none of
+it, but that procedure is what decides what a record is worth, so it is set out
+above; the coupling it points to is DIN 45669-2. Nor is any assessment: the
+numbers this page produces are compared with something only in DIN 4150-2 and
+DIN 4150-3.
 
 ## What this guide covers
 
@@ -425,9 +446,10 @@ printed forms registered as errata.
 a narrow-band analyser, with and without a Hanning window; the library's
 density is correct by construction and has nothing to calibrate.
 
-**No measuring procedure and no verdict.** Measurement points, directions,
-coupling and the choice of trains are DIN 45672-1 and DIN 45669-2; what the
-numbers mean for people and buildings is DIN 4150-2 and DIN 4150-3.
+**No measuring procedure is checked, and no verdict.** The measurement points,
+directions, coupling and choice of trains of DIN 45672-1 and DIN 45669-2 are
+summarised above, but nothing here checks them; what the numbers mean for
+people and buildings is DIN 4150-2 and DIN 4150-3.
 
 ## See also
 
@@ -460,7 +482,9 @@ numbers mean for people and buildings is DIN 4150-2 and DIN 4150-3.
   Formula (3), the shear strain of Formula (4) and the moduli of Formula (5),
   with Formulae (1) and (5) in the corrected form registered in the errata. The
   measuring procedure of the rest of the standard is not arithmetic and is not
-  implemented.
+  implemented; the measuring conditions of Clause 6, the operating states of
+  Clause 7, the execution of Clause 8 and the report of Clause 10 are set out in
+  the measurement section.
 - Deutsches Institut für Normung. (2010). *Messung von Schwingungsimmissionen —
   Teil 1: Schwingungsmesser — Anforderungen und Prüfungen* (DIN 45669-1:2010-09).
   The meter a railway measurement is made with, in its 4 Hz to 315 Hz working

@@ -8,7 +8,7 @@ references:
     title: "Messung von Schwingungsimmissionen — Teil 1: Schwingungsmesser — Anforderungen und Prüfungen"
     designation: "DIN 45669-1:2010-09"
     primary: true
-    note: "Los rangos de trabajo del 5.2.3.1, la limitación de banda y la ponderación frecuencial de las fórmulas (3) a (6), el valor eficaz móvil de la fórmula (1) y el eficaz de los máximos por intervalo de la fórmula (2), las magnitudes de indicación del 5.1.6, los límites de detección del 5.2.2, las tolerancias de la respuesta en amplitud de las tablas 2 y 3 con la desviación de la fórmula (7), las condiciones de referencia del 5.2.10 y las indicaciones de referencia del 6.2.3.12 con la tabla 9, los métodos de frecuencia dominante del anexo D y las ponderaciones de valoración y valores de referencia del anexo E con las tablas E.1 y E.2. Los apartados de diseño y de ensayo de tipo que exigen banco de ensayo no están implementados."
+    note: "Los rangos de trabajo del 5.2.3.1, la limitación de banda y la ponderación frecuencial de las fórmulas (3) a (6), el valor eficaz móvil de la fórmula (1) y el eficaz de los máximos por intervalo de la fórmula (2), las magnitudes de indicación del 5.1.6, los límites de detección del 5.2.2, las tolerancias de la respuesta en amplitud de las tablas 2 y 3 con la desviación de la fórmula (7), las condiciones de referencia del 5.2.10 y las indicaciones de referencia del 6.2.3.12 con la tabla 9, los métodos de frecuencia dominante del anexo D, las ponderaciones de valoración y valores de referencia del anexo E con las tablas E.1 y E.2, y el número de canales del 5.1.2 y las comprobaciones en obra del 6.5. Los apartados de diseño y de ensayo de tipo que exigen banco de ensayo no están implementados."
   - type: standard
     organization: "Deutsches Institut für Normung"
     year: 2012
@@ -26,7 +26,7 @@ references:
     year: 1999
     title: "Erschütterungen im Bauwesen — Teil 3: Einwirkungen auf bauliche Anlagen"
     designation: "DIN 4150-3:1999-02"
-    note: "La tabla 1, cuya curva de valores de referencia invierten las ponderaciones del anexo E, y las tres clases de edificio para las que están escritas."
+    note: "La tabla 1, cuya curva de valores de referencia invierten las ponderaciones del anexo E, las tres clases de edificio para las que están escritas, y los puntos de medida del 5.4."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -362,6 +362,8 @@ fuera. Casi todo es criterio puesto por escrito. Lo poco que es un número está
 aquí, porque un número con el que se planifica una medida pertenece al sitio
 donde se comprueba el plan.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vibration_meter_coupling.svg" alt="Sección de un edificio de dos plantas sobre zapatas corridas, con una máquina sobre su propio bloque de cimentación a la derecha como fuente. Unos captadores rojos con flechas verdes de dirección marcan cuatro puntos de medida: en el último forjado junto al muro exterior, horizontal x e y; en el centro del vano del primer forjado, vertical z; en el muro de cimentación del lado de la fuente, a no más de 0,5 metros sobre el terreno, con x apuntando a la fuente; y sobre una pica en el terreno cerca de la fuente, a una distancia fijada de ella y apartada de un pozo de registro al menos 1,5 veces su mayor dimensión, con una nota de que junto a una vía la distancia es por ejemplo 8 metros desde la vía más próxima. Un recuadro define las direcciones: z vertical, x e y horizontales en ángulo recto según los ejes principales del edificio, x preferiblemente hacia la fuente, y la DIN 45672-1 distinta junto a una vía. Tres detalles muestran los acoplamientos: un disco de 150 milímetros sobre tres pies redondeados en una superficie dura, suelto hasta 100 hercios en vertical y 40 hercios en horizontal mientras los picos no pasen de 3 metros por segundo al cuadrado, y con cera en baldosa o parqué las horizontales hasta 80 hercios; el mismo disco sobre tres puntas de acero templado de 15 milímetros apretadas y golpeadas a través de un pavimento blando, de unos 35 milímetros de alto y unos 2,5 kilogramos con el captador; y una pica de unos 500 milímetros hecha con dos angulares, afilada en 150 milímetros, bajo una placa de 60 milímetros, con una nota de que los acoplamientos al terreno usuales pueden desviarse hasta 15 decibelios. Al pie corre la cadena de la DIN 45669-1 para el rango de 1 a 80 hercios: limitación de banda en 0,8 y 100 hercios, ponderación KB en 5,6 hercios, un eficaz móvil con constante de tiempo de 0,125 segundos, intervalos de 30 segundos con un máximo cada uno, y las indicaciones KB F max y KB FTm, con un recuadro que da KB FTm como el valor eficaz de los máximos por intervalo, donde un máximo de 0,1 o menos cuenta como cero pero sigue contando en N" width="100%" />
+
 Un captador apoyado sin sujeción se desplaza o se despega cuando la vibración es
 fuerte, y un acoplamiento sin unión de fuerza resuena contra la superficie. Los
 apartados 5.3.2 y 5.3.3 fijan los dos límites: un captador suelto mide sin
@@ -413,13 +415,43 @@ las componentes horizontales son las que más lo sufren. Cuál de los cuatro
 procedimientos de la tabla 2 usar es el único juicio que la parte 2 deja por
 entero a quien lee.
 
+### Cómo se hace la medida
+
+Usa un vibrómetro conforme a la DIN 45669-1, de tres canales simultáneos para
+las tres direcciones, y un cuarto cerca de la fuente si hay que distinguir su
+señal. En obra, haz al menos una comprobación de la cadena tras el tiempo de
+puesta en marcha que indique el fabricante: con un calibrador de vibración, una
+prueba de golpeo o una señal eléctrica en la entrada frente a las indicaciones
+de referencia, esta última siempre junto con una de las otras; si la
+comprobación eléctrica se desvía más del 10 %, averigua por qué.
+
+Elige los puntos según la pregunta: para el edificio, la cimentación más próxima
+a la fuente, a no más de 0,5 m sobre el terreno, y el último forjado junto al
+muro exterior; para sus ocupantes, sus forjados en el centro del vano; para un
+edificio por construir, el terreno de la parcela donde irá; para caracterizar lo
+que emite la fuente, el terreno cerca de ella a una distancia fijada y al menos
+a 1,5 veces la mayor dimensión de un pozo u otro cuerpo perturbador. Orienta
+`z` hacia arriba y `x` e `y` según los ejes principales del edificio, `x`
+preferiblemente hacia la fuente. Acopla el captador como en los detalles, sin
+que él y su útil pasen de una centésima de la masa que vibra con el objeto, y
+tiende cable coaxial de bajo ruido fijo respecto al objeto.
+
+Mide todo el tiempo de valoración o tramos representativos; la DIN 4150-2 valora
+a las personas en 16 h de día y 8 h de noche. La DIN 45669-2 no da corrección
+por fondo: la vibración de otras fuentes se juzga, cuando se puede, comparando
+las indicaciones con la fuente en marcha y sin ella, con ayuda de un análisis en
+frecuencia o del canal junto a la fuente. Informa del propósito, los equipos,
+los puntos sobre un plano, las direcciones, el acoplamiento, los tiempos, la
+fuente, los resultados, las perturbaciones y lo que se percibió o hizo vibrar
+objetos.
+
 ## 7. Lo que esta página no es
 
 Los puntos de medida, las direcciones, las duraciones y la lista de
-perturbaciones son el texto de la DIN 45669-2, y nada de eso está aquí. Lo que
-hay aquí es el instrumento que las dos partes describen entre las dos, las
-magnitudes que se le exige producir y los límites con los que se planifica una
-medida con él.
+perturbaciones son el texto de la DIN 45669-2: el apartado 6 los describe, y
+nada de ello se calcula aquí. Lo que hay aquí es el instrumento que las dos
+partes describen entre las dos, las magnitudes que se le exige producir y los
+límites con los que se planifica una medida con él.
 
 <Scope>
 
@@ -467,10 +499,11 @@ Los números de la **DIN 45669-2**: los límites de montaje suelto del 5.3.2 y e
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">
-**Ningún procedimiento de medida.** Los puntos de medida, las direcciones, las
-duraciones, la elección del acoplamiento al terreno y el tratamiento de las
-perturbaciones son el texto de la DIN 45669-2, y la valoración de lo medido son
-la DIN 4150-2 y la DIN 4150-3.
+**Ningún procedimiento de medida en código.** Los puntos de medida, las
+direcciones, las duraciones, la elección del acoplamiento al terreno y el
+tratamiento de las perturbaciones son el texto de la DIN 45669-2, descrito en el
+apartado 6 y no calculado, y la valoración de lo medido son la DIN 4150-2 y la
+DIN 4150-3.
 </ScopeClaim>
 
 </Scope>

@@ -482,7 +482,7 @@ def generate_floating_floor_prediction(output_dir: str) -> None:
     )
 
     ax.set_xscale("log")
-    format_frequency_axis(ax, 40.0, 5000.0)
+    format_frequency_axis(ax, 40.0, 5000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Improvement of impact sound insulation [dB]")
     ax.set_ylim(-5.0, 100.0)
@@ -610,7 +610,7 @@ def generate_soft_covering_prediction(output_dir: str) -> None:
         label="two-line estimate (0 dB, 12 dB/oct)",
     )
     ax.set_xscale("log")
-    format_frequency_axis(ax, 50.0, 5000.0)
+    format_frequency_axis(ax, 50.0, 5000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Improvement of impact sound insulation [dB]")
     ax.set_ylim(-5.0, 80.0)
@@ -952,7 +952,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()), language=_LANG)
 
     # (b) Double wall: mass-spring-mass resonance and cavity gain.
     dw = building.double_wall_transmission_loss(bands, 12.0, 12.0, 0.075)
@@ -982,7 +982,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()), language=_LANG)
 
     # (c) Radiation efficiency of a bending plate.
     sigma = vibration.radiation_efficiency(bands, 1.5, 1.25, fc)
@@ -1003,7 +1003,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()), language=_LANG)
 
     # (d) Composite wall with a small aperture (open-area cap).
     wall = sharp.transmission_loss
@@ -1051,7 +1051,7 @@ def generate_panel_insulation_concept(output_dir: str) -> None:
     ax.set_xlabel("Frequency [Hz]")
     ax.legend(loc="upper left", fontsize=9)
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(bands.min()), float(bands.max()))
+    format_frequency_axis(ax, float(bands.min()), float(bands.max()), language=_LANG)
 
     fig.suptitle(
         "Theoretical panel sound insulation (Bies / Hopkins / Cremer)",
@@ -2110,7 +2110,7 @@ def generate_radiation_efficiency_panels(output_dir: str) -> None:
         },
     )
 
-    big.plot_geometry(ax=ax_r)
+    big.plot_geometry(ax=ax_r, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "radiation_efficiency_panels.svg")
     plt.close()

@@ -45,7 +45,13 @@ from ._layout import (
     two_panel_body,
     verdict_flow,
 )
-from ._sound_power_fiche import band_labels, d1, metadata_pairs, power_value_table
+from ._sound_power_fiche import (
+    band_labels,
+    d1,
+    metadata_pairs,
+    nominal_bands,
+    power_value_table,
+)
 
 if TYPE_CHECKING:
     from reportlab.platypus import Table
@@ -60,6 +66,7 @@ __all__ = [
     "band_labels",
     "d1",
     "mean_finite",
+    "nominal_bands",
     "performance_verdict",
     "power_value_table",
     "render_noise_control_fiche",

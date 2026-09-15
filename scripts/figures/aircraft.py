@@ -22,7 +22,7 @@ from phonometry._plot.common import (
     theme_line,
 )
 
-from .i18n import _fmt_minus
+from .i18n import _LANG, _fmt_minus, localize_panel
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -137,7 +137,7 @@ def generate_aircraft_atmospheric_absorption(output_dir: str) -> None:
     ax.set_title("Aircraft Atmospheric Absorption (SAE ARP 5534)", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=_LANG)
     ax.legend(loc="upper left", fontsize=9)
     ax.text(
         0.5,
@@ -230,7 +230,7 @@ def generate_airport_contour(output_dir: str) -> None:
         x=np.linspace(-2500.0, 20000.0, 56),
         y=np.linspace(-6000.0, 6000.0, 44),
     )
-    ax = res.plot()
+    ax = res.plot(language=_LANG)
     plt.gcf().set_size_inches(10, 5.5)
     ax.set_title("Aircraft Departure SEL Contour (ECAC Doc 29)", pad=12)
     plt.tight_layout()
@@ -374,7 +374,7 @@ def generate_rotorcraft_ground_effect(output_dir: str) -> None:
     ax.set_title("Rotorcraft Ground Effect (ECAC Doc 32, Chien-Soroka)", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
     ax.set_axisbelow(True)
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=_LANG)
     ax.legend(loc="lower left", fontsize=9)
     ax.text(
         0.98,
@@ -499,7 +499,7 @@ def generate_rotorcraft_terrain_screening(output_dir: str) -> None:
     _fig, (ax, ax2) = plt.subplots(
         2, 1, figsize=(10, 8), gridspec_kw={"height_ratios": [1.1, 1.0]}
     )
-    res.plot(ax=ax)  # the user-facing section geometry
+    res.plot(ax=ax, language=_LANG)  # the user-facing section geometry
     ax.set_title("Rotorcraft Terrain Screening (ECAC Doc 32 / NORAH2)", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
     ax.set_axisbelow(True)
@@ -529,7 +529,7 @@ def generate_rotorcraft_terrain_screening(output_dir: str) -> None:
     ax2.set_ylabel("Ground and screening adjustment [dB]")
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
     ax2.set_axisbelow(True)
-    format_frequency_axis(ax2, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax2, float(freqs.min()), float(freqs.max()), language=_LANG)
     ax2.legend(loc="lower left", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "rotorcraft_terrain_screening.svg")
@@ -635,7 +635,7 @@ def generate_anp_npd(output_dir: str) -> None:
     curves = airframe.npd_curves("D", "SEL")
 
     _fig, ax = plt.subplots(figsize=(10, 6))
-    curves.plot(ax=ax)
+    curves.plot(ax=ax, language=_LANG)
     ax.set_title(f"ANP NPD Curves - {airframe.description} (SEL, departure)", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
@@ -662,7 +662,7 @@ def generate_anp_profile(output_dir: str) -> None:
     profile = airframe.profile("D", stage_length=1)
 
     _fig, ax = plt.subplots(figsize=(10, 6))
-    profile.plot(ax=ax)
+    profile.plot(ax=ax, language=_LANG)
     ax.set_title(f"ANP Default Departure Profile - {airframe.description}", pad=12)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
@@ -718,7 +718,7 @@ def generate_anp_procedural_profile(output_dir: str) -> None:
     cutback = end_of_roll + int(np.argmin(airborne)) + 1
 
     fig, ax = plt.subplots(figsize=(10, 6))
-    profile.plot(ax=ax)
+    profile.plot(ax=ax, language=_LANG)
     # The result's own plot draws the thrust on a twin of the height axes, so
     # that twin is the second and last axes of the figure. Its autoscale spans
     # only the 8000 lb the thrust actually covers, which magnifies every ripple
@@ -831,7 +831,7 @@ def generate_airport_segment_breakdown(output_dir: str) -> None:
     top = int(np.argmax(seg))
 
     _fig, ax = plt.subplots(figsize=(10, 6))
-    res.plot(ax=ax)
+    res.plot(ax=ax, language=_LANG)
     # The ground-roll segments are hatched in place: the bars are already the
     # result's own, so only their fill changes.
     for i, patch in enumerate(ax.patches[: seg.size]):
@@ -1042,7 +1042,7 @@ def generate_anp_contour(output_dir: str) -> None:
     flyover = record.event_level([3000.0, 500.0, 0.0], "D")
 
     _fig, ax = plt.subplots(figsize=(10, 5.5))
-    contour.plot(ax=ax)
+    contour.plot(ax=ax, language=_LANG)
     # The plot works in kilometres, and the default profile runs 39 km
     # downrange: the overlays are clipped to the grid the contour covers.
     roll_end = float(profile.path[int(np.sum(profile.ground_roll)), 0]) / 1000.0
@@ -1162,7 +1162,7 @@ def generate_rotorcraft_hemisphere(output_dir: str) -> None:
         (630.0, COLOR_PRIMARY),
         (4000.0, COLOR_SECONDARY),
     ):
-        h.plot(ax=ax, band=band, color=color, lw=2.0)
+        h.plot(ax=ax, band=band, language=_LANG, color=color, lw=2.0)
     # The result's own xlabel and legend, restated with the composed angles
     # so both panels of this figure write them the same way. The legend keeps
     # the band frequencies exactly as the library snapped them (631, 3981).
@@ -1210,7 +1210,8 @@ def generate_rotorcraft_hemisphere(output_dir: str) -> None:
         ls="--",
     )
     ax2.text(90.0, 66.0, "measured coverage", ha="center", fontsize=9, color=COLOR_FG)
-    ax2.figure.colorbar(cs, ax=ax2, label="Source level at 60 m [dB]")
+    cbar = ax2.figure.colorbar(cs, ax=ax2, label="Source level at 60 m [dB]")
+    localize_panel(cbar.ax)
     spread = float(np.nanmax(grid) - np.nanmin(grid))
     ax2.set_xlabel(r"Polar angle $\theta$ [°]")
     ax2.set_ylabel(r"Azimuth $\varphi$ [°]")
@@ -1369,7 +1370,7 @@ def generate_rotorcraft_contour(output_dir: str) -> None:
             metric="exposure",
             ground=ground,
         )
-        res.plot(ax=ax)
+        res.plot(ax=ax, language=_LANG)
         # The contour plot works in kilometres; so must its overlays.
         ax.plot(
             track[:, 0] / 1000.0,
@@ -1425,7 +1426,7 @@ def generate_rotorcraft_mean_ground_plane(output_dir: str) -> None:
     _fig, (ax, ax2) = plt.subplots(
         2, 1, figsize=(10, 8), gridspec_kw={"height_ratios": [1.0, 1.0]}
     )
-    plane.plot(ax=ax)
+    plane.plot(ax=ax, language=_LANG)
     # The result's own legend entry, restated with the composed slope symbol
     # so it matches the equivalent-height annotations beside it.
     for line in ax.get_lines():
@@ -1496,7 +1497,7 @@ def generate_rotorcraft_mean_ground_plane(output_dir: str) -> None:
     ax2.set_ylabel(r"Ground-effect adjustment $\Delta L_\mathrm{g}$ [dB]")
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
     ax2.set_axisbelow(True)
-    format_frequency_axis(ax2, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax2, float(freqs.min()), float(freqs.max()), language=_LANG)
     ax2.legend(loc="lower right", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "rotorcraft_mean_ground_plane.svg")
@@ -1676,7 +1677,7 @@ def generate_rotorcraft_kinematics(output_dir: str) -> None:
         (ax2, t_fine, smooth, "Smoothing spline resampled to 0.5 s"),
     ):
         kin = aircraft.flight_path_kinematics(times, pos)
-        kin.plot(ax=axis)
+        kin.plot(ax=axis, language=_LANG)
         axis.set_title(title, pad=10)
         axis.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
         axis.set_axisbelow(True)

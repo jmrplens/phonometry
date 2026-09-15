@@ -41,6 +41,7 @@ from ._noise_control_fiche import (
     band_labels,
     d1,
     mean_finite,
+    nominal_bands,
     performance_verdict,
     power_value_table,
     render_noise_control_fiche,
@@ -80,10 +81,9 @@ def _prediction_statement(language: str = "en") -> str:
 def _caption(result: EnclosureResult, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
-    n = np.asarray(result.insertion_loss, dtype=np.float64).size
     if freqs is None:
         return t("Insertion loss per band", language)
-    _, fraction = band_labels(freqs, n)
+    _, fraction = nominal_bands(freqs)
     if fraction == 1:
         return t("Octave-band insertion loss", language)
     return t("One-third-octave-band insertion loss", language)
@@ -100,7 +100,7 @@ def _value_table(
     c = np.asarray(result.correction, dtype=np.float64)
     il = np.asarray(result.insertion_loss, dtype=np.float64)
     n = il.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
 
     if not verbose:
         header = [

@@ -20,7 +20,7 @@ from phonometry._plot.common import (
     theme_line,
 )
 
-from .i18n import _fmt_minus
+from .i18n import _LANG, _fmt_minus
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -89,7 +89,7 @@ def generate_psd_confidence_smoothing(output_dir: str) -> None:
     ax.set_ylabel("PSD [dB re 1/Hz]")
     ax.set_title("Calibrated Spectral Density of Pink Noise (Bendat & Piersol)", pad=12)
     ax.set_xlim(20.0, 20000.0)
-    format_frequency_axis(ax, 20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9)
@@ -189,7 +189,7 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
         "Thomson Multitaper Density of a Short Record (Percival & Walden)", pad=12
     )
     ax.set_xlim(20.0, 20000.0)
-    format_frequency_axis(ax, 20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9)
@@ -234,7 +234,7 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
     ax_hd.set_ylabel("PSD [dB re 1/Hz]")
     ax_hd.set_title("A 60 dB tone over a pink floor, and what it costs", pad=12)
     ax_hd.set_xlim(200.0, 5000.0)
-    format_frequency_axis(ax_hd, 200.0, 5000.0)
+    format_frequency_axis(ax_hd, 200.0, 5000.0, language=_LANG)
     ax_hd.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_hd.set_axisbelow(True)
     ax_dof = ax_hd.twinx()
@@ -249,7 +249,7 @@ def generate_multitaper_psd_confidence(output_dir: str) -> None:
     ax_dof.set_ylabel("Equivalent degrees of freedom")
     ax_dof.set_ylim(0.0, 2.4 * float(np.max(m_hd.degrees_of_freedom[hb])))
     # The twin axis carries its own x formatter, which would print 10^n.
-    format_frequency_axis(ax_dof, 200.0, 5000.0)
+    format_frequency_axis(ax_dof, 200.0, 5000.0, language=_LANG)
     handles, labels = ax_hd.get_legend_handles_labels()
     h2, l2 = ax_dof.get_legend_handles_labels()
     ax_hd.legend(handles + h2, labels + l2, loc="upper left", fontsize=8.5)
@@ -409,7 +409,7 @@ def generate_noise_colors(output_dir: str) -> None:
         )
     ax.set_xlim(20.0, 20000.0)
     ax.set_ylim(-42.0, 48.0)
-    format_frequency_axis(ax, 20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("PSD re its own 1 kHz level [dB]")
     ax.set_title("The five colours of noise_signal, over three decades", pad=12)
@@ -708,7 +708,7 @@ def generate_miso_coherence(output_dir: str) -> None:
         color=COLOR_FG,
     )
     for ax in (ax_top, ax_bot):
-        format_frequency_axis(ax, 20.0, 4000.0)
+        format_frequency_axis(ax, 20.0, 4000.0, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "miso_coherence.svg")
     plt.close()
@@ -772,7 +772,7 @@ def generate_cross_spectral_density_delay(output_dir: str) -> None:
     for ax in (ax_m, ax_p):
         ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
         ax.set_axisbelow(True)
-        format_frequency_axis(ax, 20.0, 3500.0)
+        format_frequency_axis(ax, 20.0, 3500.0, language=_LANG)
     ax_m.set_title("Cross-Spectral Density of a 2 ms Delay Path", pad=12)
     plt.tight_layout()
     save_figure(output_dir, "cross_spectral_density.svg")
@@ -841,7 +841,7 @@ def generate_coherent_output_snr(output_dir: str) -> None:
     for ax in (ax_g, ax_s):
         ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
         ax.set_axisbelow(True)
-        format_frequency_axis(ax, 20.0, 20000.0)
+        format_frequency_axis(ax, 20.0, 20000.0, language=_LANG)
     ax_g.set_title(
         "Coherent Output Spectrum and Spectral SNR (Bendat & Piersol 9.2.2)", pad=12
     )

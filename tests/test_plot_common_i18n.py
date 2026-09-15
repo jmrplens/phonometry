@@ -301,7 +301,7 @@ def _two_run_axes(language: str) -> Axes:
 
 
 def test_the_twin_frequency_axis_reaches_spanish() -> None:
-    """``localize_axes`` skips a logarithmic axis, so the formatter must be told.
+    """``localize_axes`` cannot reach a pinned frequency axis, so the formatter must be told.
 
     The frequency ticks are written by ``format_frequency_axis`` and by nothing
     else, so a Spanish figure keeps 31.5 for 31,5 unless the caller forwards

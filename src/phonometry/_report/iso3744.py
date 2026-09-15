@@ -147,7 +147,7 @@ def _value_table(
     lp = np.asarray(result.surface_pressure_level, dtype=np.float64)
     lp_mean = np.asarray(result.mean_pressure_level, dtype=np.float64)
     n = lw.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
 
     if verbose and not _is_precision(result):
         k1 = np.asarray(result.background_correction, dtype=np.float64)

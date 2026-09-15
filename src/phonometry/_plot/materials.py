@@ -593,7 +593,7 @@ def plot_impedance_tube(
     # A continuous logarithmic frequency axis with band-centre labels (1k, 2k)
     # matches the working plane-wave range of the tube and the rest of the
     # library's spectrum plots (never a power-of-ten log formatter).
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Coefficient", language))
     ax.set_ylim(0.0, 1.05)
@@ -741,7 +741,7 @@ def _absorption_spectrum_axes(
     ax.set_ylim(0.0, 1.05)
     ax.set_title(title)
     ax.grid(visible=True, which="both", alpha=0.3)
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -818,7 +818,7 @@ def plot_porous_medium(
     )
     ax.loglog(freqs, kn.real, color=_C_REFERENCE, label=r"$\mathrm{Re}(k)/k_0$")
     ax.loglog(freqs, -kn.imag, ls="--", color=_C_MUTED, label=r"$-\mathrm{Im}(k)/k_0$")
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Normalised characteristic value", language))
     ax.set_title(
@@ -892,7 +892,7 @@ def plot_biot_waves(
         color=_C_REFERENCE,
         label=_t("Shear", language) + _BIOT_REAL_PART,
     )
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Wavenumber [rad/m]", language))
     ax.set_title(_t("Biot waves in a poroelastic layer", language))
@@ -1130,7 +1130,7 @@ def plot_transfer_matrix(
     )
     twin.set_ylim(0.0, 1.05)
     twin.set_ylabel(_t(_HARD_BACKED_ALPHA_LABEL, language))
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(r"Transmission loss $TL_\mathrm{n}$ [dB]", language))
     ax.set_ylim(bottom=0.0)

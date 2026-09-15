@@ -194,7 +194,7 @@ def plot_k_weighting_response(
     ax.axhline(
         4.0, color=theme_line(_C_REFERENCE, ax, quiet=0.6), linestyle="-", linewidth=0.8
     )
-    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()))
+    format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=language)
     ax.set_xlabel(_t("Frequency [Hz]", language))
     ax.set_ylabel(_t("Magnitude [dB]", language))
     ax.set_title(_t("K-weighting frequency response (ITU-R BS.1770)", language))

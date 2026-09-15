@@ -50,6 +50,7 @@ from ._sound_power_fiche import (
     band_labels,
     d1,
     level_limit_verdict,
+    nominal_bands,
     power_value_table,
     render_sound_power_fiche,
 )
@@ -74,10 +75,9 @@ def _basis(language: str = "en") -> str:
 def _caption(result: StructureBornePowerResult, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
-    n = np.asarray(result.power_level, dtype=np.float64).size
     if freqs is None:
         return t("Structure-borne sound power levels per band", language)
-    _, fraction = band_labels(freqs, n)
+    _, fraction = nominal_bands(freqs)
     if fraction == 1:
         return t("Octave-band structure-borne sound power levels", language)
     return t("One-third-octave-band structure-borne sound power levels", language)
@@ -104,7 +104,7 @@ def _value_table(
     lws = np.asarray(result.power_level, dtype=np.float64)
     lv = np.asarray(result.velocity_level, dtype=np.float64)
     n = lws.size
-    labels, fraction = band_labels(getattr(result, "frequencies", None), n)
+    labels, fraction = band_labels(getattr(result, "frequencies", None), n, language)
 
     if not verbose:
         header = [t("f [Hz]", language), "L<sub>v</sub> [dB]", "L<sub>Ws</sub> [dB]"]

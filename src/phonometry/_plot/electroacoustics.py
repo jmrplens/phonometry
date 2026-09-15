@@ -201,7 +201,7 @@ def plot_harmonic_distortion(
     thd_f = decimal_comma(f"{result.thd_f * 100.0:.3g}", language)
     thd_r = decimal_comma(f"{result.thd_r * 100.0:.3g}", language)
     sinad = format_number(result.sinad_db, language, decimals=1)
-    freq = decimal_comma(_format_freq(result.fundamental), language)
+    freq = _format_freq(result.fundamental, language=language)
     ax.set_title(
         f"IEC 60268-3 THD = {thd_f}% (F), "
         f"{thd_r}% (R); SINAD = {sinad} dB "
@@ -314,8 +314,8 @@ def plot_modulation_distortion(
     d2 = decimal_comma(f"{result.d2 * 100.0:.3g}", language)
     d3 = decimal_comma(f"{result.d3 * 100.0:.3g}", language)
     smpte = decimal_comma(f"{result.smpte * 100.0:.3g}", language)
-    f_low = decimal_comma(_format_freq(float(result.f_low)), language)
-    f_high = decimal_comma(_format_freq(float(result.f_high)), language)
+    f_low = _format_freq(float(result.f_low), language=language)
+    f_high = _format_freq(float(result.f_high), language=language)
     ax.set_title(
         f"IEC 60268-3 $d_2$ = {d2}%, $d_3$ = {d3}%; SMPTE = {smpte}% "
         f"($f_1$ = {f_low}Hz, $f_2$ = {f_high}Hz)"
@@ -369,7 +369,7 @@ def plot_frequency_response(
         _magnitude(ax)
         ax.set_xlabel(_t(_FREQ_LABEL, language))
         ax.set_title(f"{_t('Frequency response', language)} ({result.estimator})")
-        format_frequency_axis(ax, fmin, fmax)
+        format_frequency_axis(ax, fmin, fmax, language=language)
         localize_axes(ax, language)
         return ax
 
@@ -388,7 +388,7 @@ def plot_frequency_response(
     axes[2].set_ylim(0.0, 1.05)
     axes[2].grid(visible=True, which="both", alpha=0.3)
     for axf in axes:
-        format_frequency_axis(axf, fmin, fmax)
+        format_frequency_axis(axf, fmin, fmax, language=language)
         localize_axes(axf, language)
     return axes
 
@@ -437,7 +437,7 @@ def plot_swept_sine_distortion(
         _thd_panel(ax)
         ax.set_xlabel(_t(_EXCITATION_FREQ_LABEL, language))
         ax.set_title(_t("Swept-sine THD (Farina / Novak)", language))
-        format_frequency_axis(ax)
+        format_frequency_axis(ax, language=language)
         localize_axes(ax, language)
         return ax
 
@@ -471,11 +471,11 @@ def plot_swept_sine_distortion(
     )
     axes[0].grid(visible=True, which="both", alpha=0.3)
     axes[0].legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
-    format_frequency_axis(axes[0])
+    format_frequency_axis(axes[0], language=language)
     localize_axes(axes[0], language)
     _thd_panel(axes[1])
     axes[1].set_xlabel(_t(_EXCITATION_FREQ_LABEL, language))
-    format_frequency_axis(axes[1])
+    format_frequency_axis(axes[1], language=language)
     localize_axes(axes[1], language)
     return axes
 
@@ -694,7 +694,7 @@ def _draw_loudspeaker_response(
     ax.set_ylabel(_t(_SPL_LABEL, language))
     ax.set_title(_t(_ON_AXIS_RESPONSE, language))
     _grid(ax)
-    format_frequency_axis(ax, float(np.min(f)), float(np.max(f)))
+    format_frequency_axis(ax, float(np.min(f)), float(np.max(f)), language=language)
     ax.legend(loc=_LEGEND_LOWER_CENTER, fontsize="small", ncol=2, framealpha=0.85)
 
 
@@ -725,7 +725,7 @@ def _draw_impedance(
     _grid(ax)
     ax.set_title(_t("Impedance", language))
     ax.legend(loc="upper right", fontsize="small")
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=language)
 
 
 def _draw_loudspeaker_thd(
@@ -738,7 +738,7 @@ def _draw_loudspeaker_thd(
     ax.set_ylim(bottom=0.0)
     _grid(ax)
     ax.set_title(_t(_THD_TITLE, language))
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=language)
 
 
 def _draw_datasheet_polar(
@@ -816,7 +816,7 @@ def _draw_microphone_response(
     ax.set_ylabel(_t("Relative response [dB]", language))
     ax.set_title(_t(_FREE_FIELD_RESPONSE, language))
     _grid(ax)
-    format_frequency_axis(ax, float(np.min(f)), float(np.max(f)))
+    format_frequency_axis(ax, float(np.min(f)), float(np.max(f)), language=language)
     ax.legend(loc=_LEGEND_LOWER_CENTER, fontsize="small", ncol=2, framealpha=0.85)
 
 
@@ -831,7 +831,7 @@ def _draw_noise_spectrum(
     ax.set_ylabel(_t("Band level [dB]", language))
     _grid(ax)
     ax.set_title(_t("Inherent noise spectrum", language))
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=language)
 
 
 def _draw_microphone_distortion(

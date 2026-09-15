@@ -14,6 +14,7 @@ from scipy import signal as scipy_signal
 
 from phonometry._plot.common import format_frequency_axis, theme_fill
 
+from .i18n import _LANG
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -138,7 +139,7 @@ def generate_regularized_inversion(output_dir: str) -> None:
     )
     ax.set_xlim(20.0, fs / 2.0)
     ax.set_ylim(-50.0, 15.0)
-    format_frequency_axis(ax, 20.0, fs / 2.0)
+    format_frequency_axis(ax, 20.0, fs / 2.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Magnitude [dB]")
     ax.set_title(
@@ -241,7 +242,7 @@ def generate_shaped_sweep(output_dir: str) -> None:
     )
     axes[1].set_xlim(20.0, 20000.0)
     axes[1].set_ylim(-60.0, 8.0)
-    format_frequency_axis(axes[1], 20.0, 20000.0)
+    format_frequency_axis(axes[1], 20.0, 20000.0, language=_LANG)
     axes[1].set_xlabel(LABEL_FREQ_HZ)
     axes[1].set_ylabel("Level re in-band max [dB]")
     axes[1].grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
@@ -306,7 +307,7 @@ def generate_resampling_antialias(output_dir: str) -> None:
     )
     ax.set_xlim(f_lo, f_hi)
     ax.set_ylim(-170.0, 10.0)
-    format_frequency_axis(ax, f_lo, f_hi)
+    format_frequency_axis(ax, f_lo, f_hi, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Magnitude [dB]")
     ax.set_title(

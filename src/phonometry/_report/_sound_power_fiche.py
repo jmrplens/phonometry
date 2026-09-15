@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Any, Protocol
 
 import numpy as np
 
-from ._i18n import format_number, t
+from ._i18n import decimal_comma, format_number, t
 from ._layout import (
     _ACCENT_HEX,
     _LIGHT_HEX,
@@ -127,25 +127,50 @@ def d1(value: float, language: str = "en") -> str:
     return format_number(float(value), language, decimals=1)
 
 
-def band_labels(frequencies: np.ndarray | None, n: int) -> tuple[list[str], int]:
-    """Return the nominal band labels and the band fraction (1, 3 or 0).
+def nominal_bands(
+    frequencies: np.ndarray | None,
+) -> tuple[list[float] | None, int]:
+    """Return the nominal band centres in hertz and the fraction (1, 3 or 0).
 
     A per-band result is labelled by its nominal octave/one-third-octave
     mid-band frequency (IEC 61260), not the exact base-ten centre, matching the
-    band axis of the embedded spectrum. A result without band frequencies
-    (a directly measured broadband level) is labelled ``Band 1``, ``Band 2``,
-    ... and reports fraction ``0`` (no octave grouping).
+    band axis of the embedded spectrum. ``None`` for a result without band
+    frequencies (a directly measured broadband level), which reports fraction
+    ``0`` (no octave grouping).
+
+    This is the numbers, :func:`band_labels` the text a sheet prints. Anything
+    that reads a band centre back as a quantity, such as the ISO 9614-3 table
+    of standard deviations, asks here: the printed label carries a decimal
+    comma on a Spanish sheet and is no longer a number ``float`` accepts.
     """
     if frequencies is None:
-        return [f"Band {i + 1}" for i in range(n)], 0
+        return None, 0
     from ..filters.frequencies import _infer_band_fraction, _nominal_freq_for_band
 
     freqs = np.asarray(frequencies, dtype=np.float64)
     fraction = (
         _infer_band_fraction(freqs) if freqs.size >= _MIN_BANDS_TO_INFER_FRACTION else 1
     )
-    labels = [f"{_nominal_freq_for_band(f, float(fraction)):g}" for f in freqs]
-    return labels, fraction
+    return [_nominal_freq_for_band(f, float(fraction)) for f in freqs], fraction
+
+
+def band_labels(
+    frequencies: np.ndarray | None, n: int, language: str = "en"
+) -> tuple[list[str], int]:
+    """Return the nominal band labels and the band fraction (1, 3 or 0).
+
+    The label of a band centre is a number, so on a Spanish sheet it is written
+    with a decimal comma (``31,5``), the separator the level beside it in the
+    same row already uses. A result without band frequencies (a directly
+    measured broadband level) is labelled ``Band 1``, ``Band 2``, ... in the
+    sheet's own language.
+    """
+    centres, fraction = nominal_bands(frequencies)
+    if centres is None:
+        return [
+            t("Band {number}", language).format(number=i + 1) for i in range(n)
+        ], fraction
+    return [decimal_comma(f"{centre:g}", language) for centre in centres], fraction
 
 
 def range_str(values: np.ndarray, language: str = "en", decimals: int = 1) -> str:
@@ -326,10 +351,9 @@ def level_limit_verdict(
 def fraction_caption(result: SoundPowerLike, language: str = "en") -> str:
     """The caption declaring the analysis band set above the table."""
     freqs = getattr(result, "frequencies", None)
-    n = np.asarray(result.sound_power_level, dtype=np.float64).size
     if freqs is None:
         return t("Sound power levels per band", language)
-    _, fraction = band_labels(freqs, n)
+    _, fraction = nominal_bands(freqs)
     if fraction == 1:
         return t("Octave-band sound power levels", language)
     return t("One-third-octave-band sound power levels", language)

@@ -22,7 +22,7 @@ from scipy import signal as scipy_signal
 
 from phonometry._plot.common import format_frequency_axis, theme_fill, theme_line
 
-from .i18n import _LANG, _fmt_minus, lookup
+from .i18n import _LANG, _fmt_minus, localize_panel, lookup
 from .theme import (
     COLOR_FG,
     COLOR_GRID,
@@ -393,7 +393,7 @@ def generate_frequency_response(output_dir: str) -> None:
         ax_coh.set_axisbelow(True)
         ax_coh.legend(loc="lower center", fontsize=8)
         for _axf in (ax_mag, ax_coh):
-            format_frequency_axis(_axf, 20.0, fs / 2.0)
+            format_frequency_axis(_axf, 20.0, fs / 2.0, language=_LANG)
     axes[0][0].set_ylabel("Magnitude [dB]")
     _fig.suptitle("Choosing Between $H_1$ and $H_2$ (Bendat & Piersol)", fontsize=13)
     plt.tight_layout()
@@ -470,7 +470,7 @@ def generate_swept_sine_thd(output_dir: str) -> None:
     ax.set_title("Swept-Sine Harmonic Distortion by Order (Farina / Novak)", pad=12)
     ax.set_xlim(30.0, 2800.0)
     ax.set_ylim(0.05, 20.0)
-    format_frequency_axis(ax, 30.0, 2800.0)
+    format_frequency_axis(ax, 30.0, 2800.0, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9)
@@ -1514,7 +1514,7 @@ def generate_in_duct_flow_correction(output_dir: str) -> None:
         zorder=5,
     )
     axf.axhline(0.0, color=COLOR_GRID, linewidth=1.0, zorder=1)
-    format_frequency_axis(axf, 45.0, 24000.0)
+    format_frequency_axis(axf, 45.0, 24000.0, language=_LANG)
     axf.set_xlim(45.0, 24000.0)
     axf.set_ylim(-3.0, 25.0)
     axf.set_xlabel(LABEL_FREQ_HZ)
@@ -2127,7 +2127,7 @@ def generate_silencer_expansion_chamber(output_dir: str) -> None:
     ax.set_title("Expansion-chamber transmission loss (Bies Eq. 8.111)", pad=10)
     ax.set_xlim(20.0, 2000.0)
     ax.set_ylim(0.0, 20.0)
-    format_frequency_axis(ax, 20.0, 2000.0)
+    format_frequency_axis(ax, 20.0, 2000.0, language=_LANG)
     ax.grid(visible=True, which="both", alpha=0.4)
     ax.legend(
         loc="upper right",
@@ -2317,7 +2317,7 @@ def generate_silencer_selection(output_dir: str) -> None:
     )
     ax.set_xlim(40.0, 8000.0)
     ax.set_ylim(0.0, 48.0)
-    format_frequency_axis(ax, 40.0, 8000.0)
+    format_frequency_axis(ax, 40.0, 8000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Attenuation [dB]")
     ax.set_title("Choosing the family: where each one is worth having", pad=10)
@@ -2463,7 +2463,7 @@ def generate_modulation_distortion(output_dir: str) -> None:
     # The result's own .plot() draws the carrier (0 dB reference) and the four
     # modulation sidebands at f2 +/- f1 and f2 +/- 2 f1, annotated with the
     # per-order d2/d3 and the SMPTE combined RMS.
-    res.plot(ax=ax)
+    res.plot(ax=ax, language=_LANG)
     ax.set_xlim(6600.0, 7400.0)
     plt.tight_layout()
     save_figure(output_dir, "modulation_distortion.svg")
@@ -2483,7 +2483,7 @@ def generate_piston_radiation_impedance(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6))
     # The result's own .plot() draws the normalized radiation resistance R1 and
     # reactance X1 against ka (the classic Beranek & Mellow figure).
-    res.plot(ax=ax)
+    res.plot(ax=ax, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "piston_radiation_impedance.svg")
     plt.close()
@@ -3127,7 +3127,7 @@ def generate_spacer_bandwidth(output_dir: str) -> None:
     )
     axb.set_title("Low end: doubling the spacer is worth 3 dB of margin", pad=10)
     axb.grid(which="both", color=COLOR_GRID, linestyle="-")
-    format_frequency_axis(axb)
+    format_frequency_axis(axb, language=_LANG)
 
     plt.tight_layout()
     save_figure(output_dir, "spacer_bandwidth.svg")
@@ -3462,7 +3462,7 @@ def generate_field_indicators(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6))
     # The result's own .plot() draws F2 and F3 per band, the dynamic
     # capability Ld (criterion 1: adequate where Ld > F2) and F4 on a twin axis.
-    fi.plot(ax=ax, dynamic_capability=ld)
+    fi.plot(ax=ax, dynamic_capability=ld, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "field_indicators.svg")
     plt.close()
@@ -3540,7 +3540,7 @@ def generate_silencer_side_branch(output_dir: str) -> None:
             ax.axvline(float(resonances[0]), color=COLOR_TERTIARY, ls=":", lw=1.0)
     ax.set_xlim(20.0, 600.0)
     ax.set_ylim(0.0, 50.0)
-    format_frequency_axis(ax, 20.0, 600.0)
+    format_frequency_axis(ax, 20.0, 600.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Transmission loss [dB]")
     ax.set_title(
@@ -3577,7 +3577,7 @@ def generate_hvac_end_reflection(output_dir: str) -> None:
         )
     ax.set_xlim(50.0, 2500.0)
     ax.set_ylim(bottom=0.0)
-    format_frequency_axis(ax, 50.0, 2500.0)
+    format_frequency_axis(ax, 50.0, 2500.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("End reflection loss [dB]")
     ax.set_title("Duct end reflection loss (ASHRAE Table 8.14)", pad=10)
@@ -3737,7 +3737,7 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
         for ax in row:
             ax.set_xlim(50.0, 10000.0)
             ax.set_ylim(bottom=0.0)
-            format_frequency_axis(ax, 50.0, 10000.0)
+            format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
             ax.grid(visible=True, which="both", alpha=0.4)
             ax.legend(loc="upper left", fontsize="x-small")
     plt.tight_layout()
@@ -3823,7 +3823,7 @@ def generate_duct_sheet_verification(output_dir: str) -> None:
             f"{title}  (worst $\\Delta$ {worst:.0f} dB)", fontsize="medium", pad=7
         )
         ax.set_xlim(50.0, 10000.0)
-        format_frequency_axis(ax, 50.0, 10000.0)
+        format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
         ax.grid(visible=True, which="both", alpha=0.4)
         ax.legend(loc="best", fontsize="x-small")
     for ax in axes[1]:
@@ -3934,7 +3934,7 @@ def generate_duct_regenerated_noise(output_dir: str) -> None:
 
     for ax in axes:
         ax.set_xlim(50.0, 10000.0)
-        format_frequency_axis(ax, 50.0, 10000.0)
+        format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
         ax.set_xlabel(LABEL_FREQ_HZ)
         ax.grid(visible=True, which="both", alpha=0.4)
     plt.tight_layout()
@@ -4019,7 +4019,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
     )
     ax.set_xlim(50.0, 10000.0)
     ax.set_ylim(-4.0, 116.0)
-    format_frequency_axis(ax, 50.0, 10000.0)
+    format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Level [dB]")
     ax.set_title(
@@ -4047,6 +4047,7 @@ def generate_fan_sound_power(output_dir: str) -> None:
     inset.set_ylabel("$C_{\\mathrm{EFF}}$ [dB]", fontsize="x-small")
     inset.tick_params(labelsize="x-small")
     inset.grid(visible=True, alpha=0.4)
+    localize_panel(inset)
     plt.tight_layout()
     save_figure(output_dir, "fan_sound_power.svg")
     plt.close()
@@ -4091,7 +4092,7 @@ def generate_hvac_elbow_flow_noise(output_dir: str) -> None:
     )
     ax.set_xlim(50.0, 10000.0)
     ax.set_ylim(bottom=0.0)
-    format_frequency_axis(ax, 50.0, 10000.0)
+    format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Insertion loss [dB per bend]")
     ax.set_title("Elbow insertion loss (ASHRAE Table 8.11)", pad=10)
@@ -4136,7 +4137,7 @@ def generate_hvac_elbow_flow_noise(output_dir: str) -> None:
     ax.set_xlim(50.0, 10000.0)
     ax.set_ylim(-16.0, 76.0)
     ax.set_yticks(np.arange(-10.0, 71.0, 10.0))
-    format_frequency_axis(ax, 50.0, 10000.0)
+    format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
     ax.set_title("Flow-generated sound power (VDI 2081, Bies Eq. 8.252)", pad=10)
@@ -4469,7 +4470,7 @@ def generate_room_to_room_partitions(output_dir: str) -> None:
         arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 1.0},
     )
     ax.set_ylim(0.0, 82.0)
-    format_frequency_axis(ax, 110.0, 4600.0)
+    format_frequency_axis(ax, 110.0, 4600.0, language=_LANG)
     ax.set_xlim(110.0, 4600.0)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Area [m²]")
@@ -4586,7 +4587,7 @@ def generate_enclosure_insertion_loss(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10, 6))
     # The result's own .plot() draws the panel R, the interior correction C
     # and the net insertion loss IL = R - C.
-    enc.plot(ax=ax)
+    enc.plot(ax=ax, language=_LANG)
     plt.tight_layout()
     save_figure(output_dir, "enclosure_insertion_loss.svg")
     plt.close()
@@ -4618,7 +4619,7 @@ def generate_phase_decomposition(output_dir: str) -> None:
     res = signals.phase_decomposition(np.fft.rfft(ir), fs)
     # The result's own .plot() draws three stacked panels: |H|, the measured /
     # minimum / excess phases and the total and excess group delays.
-    res.plot()
+    res.plot(language=_LANG)
     plt.gcf().set_size_inches(9.0, 8.0)
     plt.tight_layout()
     save_figure(output_dir, "phase_decomposition.svg")
@@ -4659,7 +4660,7 @@ def generate_loudness_gating(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10.5, 5.8))
     # The result's own .plot() draws the momentary and short-term traces, the
     # integrated line and the LRA band.
-    res.plot(ax=ax)
+    res.plot(ax=ax, language=_LANG)
     # The library legend carries "Integrated -23.0 LUFS" assembled with
     # ``format``: restate its sign before the legend below is drawn.
     for line in ax.get_lines():
@@ -4696,7 +4697,7 @@ def generate_loudness_range(output_dir: str) -> None:
     _fig, ax = plt.subplots(figsize=(10.5, 5.8))
     # The result's own .plot() shades the loudness range between its 10th and
     # 95th percentile edges under the momentary / short-term / integrated traces.
-    res.plot(ax=ax)
+    res.plot(ax=ax, language=_LANG)
     # Its legend reads "Integrated -22.6 LUFS" assembled with ``format``:
     # restate the sign with the typographic minus of the axes.
     legend = ax.get_legend()
@@ -4780,7 +4781,7 @@ def generate_itu_r_468_weighting(output_dir: str) -> None:
     ax.set_title("The ITU-R BS.468-4 Network and Its CCIR-RMS Form", pad=12)
     ax.set_xlim(20.0, 20000.0)
     ax.set_ylim(-45.0, 20.0)
-    format_frequency_axis(ax, 20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower right", fontsize=9)
@@ -5107,7 +5108,7 @@ def generate_microphone_noise_weightings(output_dir: str) -> None:
     ax_top.set_xlabel(LABEL_FREQ_HZ)
     ax_top.set_title("One Noise Voltage, Two Networks (IEC 60268-4 17.2)", pad=12)
     ax_top.set_xlim(20.0, 20000.0)
-    format_frequency_axis(ax_top, 20.0, 20000.0)
+    format_frequency_axis(ax_top, 20.0, 20000.0, language=_LANG)
     ax_top.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_top.set_axisbelow(True)
     ax_top.legend(loc="lower left", fontsize=9)
@@ -5216,7 +5217,7 @@ def generate_swept_sine_harmonic_responses(output_dir: str) -> None:
     ax.set_title("The Separated Harmonic Frequency Responses (Farina / Novak)", pad=12)
     ax.set_xlim(20.0, 20000.0)
     ax.set_ylim(-70.0, 6.0)
-    format_frequency_axis(ax, 20.0, 20000.0)
+    format_frequency_axis(ax, 20.0, 20000.0, language=_LANG)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=9)
@@ -5335,7 +5336,7 @@ def generate_swept_sine_methods(output_dir: str) -> None:
     ax_ph.set_xlabel(LABEL_FREQ_HZ)
     for axis in (ax_mag, ax_ph):
         axis.set_xlim(40.0, 20000.0)
-        format_frequency_axis(axis, 40.0, 20000.0)
+        format_frequency_axis(axis, 40.0, 20000.0, language=_LANG)
         axis.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
         axis.set_axisbelow(True)
         axis.legend(loc="lower left", fontsize=9)
@@ -5660,7 +5661,7 @@ def generate_vdi2081_fan_assemblies(output_dir: str) -> None:
     ax.set_ylabel("Sound power level (dB)")
     ax.set_title("The Same Duty Point, Three Assemblies", pad=10)
     ax.set_ylim(56.0, 107.0)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=_LANG)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=8)
@@ -5715,7 +5716,7 @@ def generate_vdi2081_fan_assemblies(output_dir: str) -> None:
     ax2.set_title("One Parabola, Moved Along by $c_3$", pad=10)
     ax2.set_xlim(45.0, 11000.0)
     ax2.set_ylim(-32.0, 1.0)
-    format_frequency_axis(ax2)
+    format_frequency_axis(ax2, language=_LANG)
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax2.set_axisbelow(True)
     ax2.legend(loc="lower center", fontsize=8)
@@ -5825,7 +5826,7 @@ def generate_vdi2081_chain_cascade(output_dir: str) -> None:
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Level (dB)")
     ax.set_title("One Supply Duct, Element by Element", pad=12)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=_LANG)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=8.5)
@@ -5888,7 +5889,7 @@ def generate_vdi2081_room_step(output_dir: str) -> None:
     ax.set_ylabel("$L_W - L_p$ (dB)")
     ax.set_title("A Directivity That Moves With Frequency", pad=10)
     ax.set_ylim(3.1, 6.1)
-    format_frequency_axis(ax)
+    format_frequency_axis(ax, language=_LANG)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax.set_axisbelow(True)
     ax.legend(loc="lower left", fontsize=8)
@@ -6064,7 +6065,7 @@ def generate_vdi2081_section_change(output_dir: str) -> None:
     ax2.set_ylabel("Reflection loss (dB)")
     ax2.set_title("The Same 0.88 dB, on Two Different Rules", pad=10)
     ax2.set_ylim(-0.15, 1.3)
-    format_frequency_axis(ax2)
+    format_frequency_axis(ax2, language=_LANG)
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax2.set_axisbelow(True)
     ax2.legend(loc="upper right", fontsize=8)
@@ -6198,7 +6199,7 @@ def generate_vdi2081_flow_noise(output_dir: str) -> None:
     ax2.set_xlabel(LABEL_FREQ_HZ)
     ax2.set_ylabel("Band sound power level (dB)")
     ax2.set_title("Faster Air Is Louder, and Flatter", pad=10)
-    format_frequency_axis(ax2)
+    format_frequency_axis(ax2, language=_LANG)
     ax2.grid(color=COLOR_GRID, linestyle="--", alpha=0.5, which="both")
     ax2.set_axisbelow(True)
     ax2.legend(loc="lower left", fontsize=8.5)
@@ -6522,7 +6523,7 @@ def generate_valve_cavitation_noise(output_dir: str) -> None:
             ha=side,
             va="bottom",
         )
-    format_frequency_axis(ax2, 50.0, 20000.0)
+    format_frequency_axis(ax2, 50.0, 20000.0, language=_LANG)
     ax2.set_ylim(60.0, 165.0)
     ax2.set_ylabel("Sound pressure level [dB]")
     ax2.set_title("Two humps, weighted by two efficiencies")
@@ -6721,7 +6722,7 @@ def generate_control_valve_noise(output_dir: str) -> None:
         label="One metre outside, $L_{pe,1m}(f_i)$",
     )
     ax2.axvline(result.peak_frequency, color=COLOR_MUTED, ls=":", lw=1.4)
-    format_frequency_axis(ax2, 12.5, 20000.0)
+    format_frequency_axis(ax2, 12.5, 20000.0, language=_LANG)
     ax2.set_ylim(0.0, 160.0)
     ax2.set_ylabel("Sound pressure level [dB]")
     ax2.set_title("A wall worth a hundred decibels")
@@ -6766,7 +6767,7 @@ def generate_control_valve_noise(output_dir: str) -> None:
             color=COLOR_MUTED,
             va="bottom",
         )
-    format_frequency_axis(ax3, 12.5, 20000.0)
+    format_frequency_axis(ax3, 12.5, 20000.0, language=_LANG)
     ax3.set_ylim(-100.0, -30.0)
     ax3.set_ylabel("Pipe transmission loss [dB]")
     ax3.set_title("The pipe is the loudspeaker")
@@ -6923,7 +6924,7 @@ def generate_silencer_measurement(output_dir: str) -> None:
     ax2.set_title("What the mouth keeps in")
     ax2.grid(color=COLOR_GRID, ls="--", alpha=0.5, which="both")
     ax2.set_axisbelow(True)
-    format_frequency_axis(ax2)
+    format_frequency_axis(ax2, language=_LANG)
     ax2.legend(loc="upper right", fontsize=8.5)
     ax2.annotate(
         "the solid angle is in the numerator, so an\nunbaffled mouth keeps more in, not less:\n"
@@ -6986,7 +6987,7 @@ def generate_silencer_measurement(output_dir: str) -> None:
     ax3.set_title("How repeatable the number is")
     ax3.grid(color=COLOR_GRID, ls="--", alpha=0.5, which="both")
     ax3.set_axisbelow(True)
-    format_frequency_axis(ax3)
+    format_frequency_axis(ax3, language=_LANG)
     ax3.legend(loc="upper left", fontsize=8.5)
     ax3.annotate(
         "only the insertion-loss column came from\ntests; a column that does not move with\n"
@@ -7105,8 +7106,8 @@ def generate_enclosure_cabin_insulation(output_dir: str) -> None:
         fontsize=8,
         framealpha=1.0,
     )
-    format_frequency_axis(ax)
-    format_frequency_axis(twin)
+    format_frequency_axis(ax, language=_LANG)
+    format_frequency_axis(twin, language=_LANG)
     ax.grid(visible=True, which="both", color=COLOR_GRID, alpha=0.45)
 
     # -- Middle: Annex C of part 2 asks how much room a method needs, which is

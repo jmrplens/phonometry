@@ -68,16 +68,16 @@ _STRINGS: dict[str, str] = {
     "Aircraft atmospheric absorption (SAE ARP 5534)": "Absorción atmosférica de aeronaves (SAE ARP 5534)",
     "Tabulated": "Tabulados",
     _SLANT_DISTANCE_LABEL: "Distancia oblicua [m]",
-    _EVENT_LEVEL_LABEL: "Nivel del evento [dB]",
+    _EVENT_LEVEL_LABEL: "Nivel de evento [dB]",
     "Noise-power-distance curve (ECAC Doc 29)": "Curva ruido-potencia-distancia (ECAC Doc 29)",
     "Segment index": "Índice de segmento",
-    "Segment {metric} [dB]": "{metric} por segmento [dB]",
+    "Segment {metric} [dB]": "{metric} del segmento [dB]",
     "Single-event segment contributions (ECAC Doc 29)": "Contribuciones por segmento de un evento único (ECAC Doc 29)",
     "Polar angle $\\theta$ [°]  (0° forward → 180° rearward)": "Ángulo polar $\\theta$ [°]  (0° adelante → 180° atrás)",
     "Source level at {distance} m [dB]": "Nivel de fuente a {distance} m [dB]",
     "Rotorcraft noise hemisphere directivity (ECAC Doc 32)": "Directividad del hemisferio de ruido de rotorcraft (ECAC Doc 32)",
     "Aircraft noise contour (ECAC Doc 29)": "Curvas de ruido de aeronaves (ECAC Doc 29)",
-    "Airspeed $V_\\mathrm{A}$": "Velocidad del aire $V_\\mathrm{A}$",
+    "Airspeed $V_\\mathrm{A}$": "Velocidad aerodinámica $V_\\mathrm{A}$",
     "Ground speed $V_\\mathrm{g}$": "Velocidad respecto al suelo $V_\\mathrm{g}$",
     "Speed [m/s]": "Velocidad [m/s]",
     "Path angle $\\gamma$": "Ángulo de trayectoria $\\gamma$",
@@ -90,12 +90,12 @@ _STRINGS: dict[str, str] = {
     "Rotorcraft noise contour (ECAC Doc 32)": "Curvas de ruido de rotorcraft (ECAC Doc 32)",
     _TERRAIN_PROFILE_LABEL: "Perfil del terreno",
     "Mean ground plane": "Plano medio del suelo",
-    _SECTION_DISTANCE_LABEL: "Distancia de la sección [m]",
+    _SECTION_DISTANCE_LABEL: "Distancia en la sección [m]",
     _HEIGHT_LABEL: "Altura [m]",
     "Mean ground plane (NORAH2 guidance Eq. 36-40)": "Plano medio del suelo (guía NORAH2 Ec. 36-40)",
     "Line of sight": "Línea de visión",
-    "Diffracted path": "Trayectoria difractada",
-    "Diffraction edges": "Bordes de difracción",
+    "Diffracted path": "Camino difractado",
+    "Diffraction edges": "Aristas de difracción",
     "Terrain screening (ECAC Doc 32 / NORAH2 guidance)": "Apantallamiento por terreno (ECAC Doc 32 / guía NORAH2)",
     # ANP fleet database (moved here with its renderers: _plot holds one
     # module per domain). The two axis labels it shares with the Doc 29 NPD
@@ -233,7 +233,7 @@ def plot_aircraft_band_attenuation(
     ax.set_title(_t("Aircraft atmospheric absorption (SAE ARP 5534)", language))
     ax.grid(visible=True, which="both", alpha=0.3)
     ax.legend(loc="upper left", fontsize="small")
-    format_frequency_axis(ax, float(f.min()), float(f.max()))
+    format_frequency_axis(ax, float(f.min()), float(f.max()), language=language)
     localize_axes(ax, language)
     return ax
 
@@ -412,7 +412,8 @@ def plot_noise_contour(
     )
     ax.contour(x, y, masked, levels=levels, colors="k", linewidths=0.4, alpha=0.5)
     metric = "SEL" if result.metric == "exposure" else r"$L_\mathrm{Amax}$"
-    ax.figure.colorbar(cf, ax=ax, label=f"{metric} [dB]")
+    cbar = ax.figure.colorbar(cf, ax=ax, label=f"{metric} [dB]")
+    localize_axes(cbar.ax, language)
     ax.set_xlabel("$x$ [km]")
     ax.set_ylabel("$y$ [km]")
     ax.set_title(_t("Aircraft noise contour (ECAC Doc 29)", language))
@@ -494,6 +495,7 @@ def plot_flight_path_kinematics(
     ax.set_title(_t("Rotorcraft flight-path kinematics (ECAC Doc 32)", language))
     ax.grid(visible=True, alpha=0.3)
     localize_axes(ax, language)
+    localize_axes(ax2, language)
     return ax
 
 
@@ -588,7 +590,8 @@ def plot_rotorcraft_noise_contour(
     )
     ax.contour(x, y, masked, levels=levels, colors="k", linewidths=0.4, alpha=0.5)
     metric = "SEL" if result.metric == "exposure" else r"$L_\mathrm{ASmax}$"
-    ax.figure.colorbar(cf, ax=ax, label=f"{metric} [dB(A)]")
+    cbar = ax.figure.colorbar(cf, ax=ax, label=f"{metric} [dB(A)]")
+    localize_axes(cbar.ax, language)
     ax.set_xlabel("$x$ [km]")
     ax.set_ylabel("$y$ [km]")
     ax.set_title(_t("Rotorcraft noise contour (ECAC Doc 32)", language))

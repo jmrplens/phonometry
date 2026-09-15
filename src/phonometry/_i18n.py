@@ -114,10 +114,12 @@ def decimal_comma(value: str, language: str = "en") -> str:
 def localize_axes(ax: Axes, language: str = "en") -> None:
     """Localise the tick-label decimal separator of ``ax`` for the language.
 
-    For Spanish, both axes' major tick labels are reformatted so decimals use a
-    comma (e.g. ``2.5 -> 2,5``); logarithmic and category axes that already emit
-    plain labels are left alone. English is a no-op, so English figures are
-    unchanged. Call it at the end of a plot function, after the data is drawn.
+    For Spanish, every major tick label of ``ax`` is reformatted so decimals use
+    a comma (e.g. ``2.5 -> 2,5``); labels that were written as text rather than
+    computed from a number are left alone. English is a no-op, so English
+    figures are unchanged. Call it at the end of a plot function, after the data
+    is drawn, once per axes: a twin axis and a colorbar each carry their own,
+    and a 3-D panel's ``z`` is reached here along with ``x`` and ``y``.
     """
     if language != "es":
         return
@@ -135,14 +137,21 @@ def localize_axes(ax: Axes, language: str = "en") -> None:
         def __call__(self, x: float, pos: int | None = None) -> str:
             return super().__call__(x, pos).replace(".", ",")
 
-    for axis in (ax.xaxis, ax.yaxis):
-        # Only reformat axes still using matplotlib's default auto numeric
-        # formatter. Skip logarithmic / symlog axes (a LogFormatter) and category
-        # axes whose text labels were installed by ``set_xticklabels`` (a
-        # FuncFormatter that maps tick positions to fixed strings), which the
-        # comma formatter would otherwise overwrite with bare positions.
-        if axis.get_scale() != "linear":
+    axes = (ax.xaxis, ax.yaxis, getattr(ax, "zaxis", None))
+    for axis in axes:
+        if axis is None:
             continue
-        if not isinstance(axis.get_major_formatter(), ScalarFormatter):
+        # Only reformat an axis still using matplotlib's default auto numeric
+        # formatter, which is the one that writes a decimal separator of its
+        # own. The formatter is what decides this, not the scale: a log axis
+        # given a plain ScalarFormatter (a decade axis of distances, say) writes
+        # ``0.10 1.00 10.00`` and needs the comma exactly as a linear one does,
+        # while a log axis left with its LogFormatter, a category axis whose
+        # text was installed by ``set_xticklabels`` (a FuncFormatter mapping
+        # positions to fixed strings) and a frequency axis whose octave centres
+        # were pinned by ``format_frequency_axis`` all emit text the comma
+        # formatter would overwrite with bare positions. Testing the exact type
+        # also leaves an already localised axis alone.
+        if type(axis.get_major_formatter()) is not ScalarFormatter:
             continue
         axis.set_major_formatter(_CommaScalarFormatter())

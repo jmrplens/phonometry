@@ -1843,3 +1843,304 @@ def _d_stoi_bench(s: SVG, th: Theme) -> None:
         11,
         th.muted,
     )
+
+
+# ---------------------------------------------------------------------------
+# ISO 4869-2: from the subjects' attenuation to the effective A-weighted level
+# ---------------------------------------------------------------------------
+
+
+def _d_hearing_protector_chain(s: SVG, th: Theme) -> None:
+    """The ISO 4869-2 estimation chain, from the subjects to the effective level.
+
+    ISO 4869-1 measures one attenuation per subject per band: one-third-octave
+    bands of pink noise at the octave centres (4.1), sixteen subjects (4.4.1),
+    each threshold taken open and occluded and the difference kept (4.6). ISO
+    4869-2 reduces that grid three ways, and only the first goes through the
+    assumed protection value. The octave-band method takes the mean less
+    alpha standard deviations band by band (Clause 5) and needs the spectrum
+    of the noise (Clause 6). The HML and SNR methods rate each subject first,
+    against the eight reference noises of Table 2 or the pink noise of
+    Table 3, and take the same reduction over those ratings (Formulae (3) to
+    (5) and (19)), so they need only the C- and A-weighted levels (7.1) or the
+    C-weighted level alone (8.1). One protection performance, one alpha
+    (Table 1), serves all three.
+
+    The dots are the attenuations of one protector model drawn to size, and
+    the numbers are what it gives in one machine-hall noise. The bars of the
+    first column are the assumed protection values as the worked example
+    prints them, which take the mean and the standard deviation already
+    rounded to a tenth; recomputing them from the grid gives three of the
+    eight a tenth lower, so they are quoted rather than derived. The mean and
+    the standard deviation of Formula (1) stay in words: their f is the band,
+    and _ROMAN_SCRIPTS pins a lone f upright. The A of L_p,A sets italic,
+    which leaves the weighting unexpanded rather than claiming a wrong slope.
+    """
+    attenuation = (
+        (4, 8, 13, 18, 20, 30, 35, 30),
+        (6, 12, 16, 21, 29, 35, 47, 35),
+        (10, 16, 17, 23, 25, 32, 48, 37),
+        (3, 7, 12, 18, 20, 25, 33, 30),
+        (8, 10, 16, 16, 25, 27, 43, 32),
+        (4, 7, 10, 15, 19, 32, 35, 31),
+        (5, 5, 9, 16, 20, 25, 30, 28),
+        (15, 15, 21, 26, 25, 38, 46, 38),
+        (5, 6, 10, 13, 19, 22, 29, 28),
+        (9, 9, 10, 19, 20, 27, 37, 31),
+        (9, 16, 18, 24, 25, 35, 44, 39),
+        (5, 6, 11, 12, 17, 20, 28, 28),
+        (7, 10, 17, 22, 25, 35, 41, 44),
+        (6, 8, 16, 18, 19, 19, 30, 33),
+        (10, 12, 17, 25, 28, 33, 45, 40),
+        (12, 13, 17, 27, 29, 38, 49, 41),
+    )
+    apv84 = (4.1, 6.4, 10.8, 15.0, 18.8, 23.4, 31.4, 28.9)
+    noise = (75.0, 84.0, 86.0, 88.0, 97.0, 99.0, 97.0, 96.0)
+    bands = ("63", "125", "250", "500", "1k", "2k", "4k", "8k")
+
+    # ---- ISO 4869-1: the grid the whole standard starts from -------------
+    s.rect(40, 52, 820, 188, th.panel, th.muted, rx=8, sw=1.6)
+    s.text(
+        58,
+        78,
+        "ISO 4869-1: one protector model, 16 subjects, 7 or 8 test bands",
+        15,
+        th.fg,
+        "start",
+        bold=True,
+    )
+    # A head wearing the protector.
+    hx, hy = 90.0, 146.0
+    s.circle(hx, hy, 22, th.bg, th.fg, 1.8)
+    s.path(
+        f"M {hx - 25} {hy - 4} Q {hx} {hy - 48} {hx + 25} {hy - 4}",
+        stroke=th.secondary,
+        sw=2.4,
+    )
+    s.rect(hx - 31, hy - 12, 11, 26, th.secondary, rx=4)
+    s.rect(hx + 20, hy - 12, 11, 26, th.secondary, rx=4)
+    s.text(hx, hy + 46, "two thresholds", 11, th.muted)
+    s.text(hx, hy + 62, "per subject", 11, th.muted)
+
+    # The per-subject grid: one dot per subject per band, radius by value.
+    gx0, pitch = 156.0, 25.0
+    gy0, row = 102.0, 7.0
+    for j, subject in enumerate(attenuation):
+        for k, a in enumerate(subject):
+            colour = th.muted if k == 0 else th.primary
+            s.circle(gx0 + pitch * k, gy0 + row * j, 0.9 + 2.5 * a / 49.0, colour)
+    s.text(gx0 - 12, gy0 + 4, "1", 11, th.muted, "end")
+    s.text(gx0 - 12, gy0 + 15 * row + 4, "16", 11, th.muted, "end")
+    for k, label in enumerate(bands):
+        s.text(gx0 + pitch * k, 228, label, 11, th.muted if k == 0 else th.fg)
+    s.text(gx0 + pitch * 7 + 16, 228, "Hz", 11, th.muted, "start")
+
+    tx = 376.0
+    for y, label in (
+        (106, "one-third-octave bands of pink noise at the octave centres,"),
+        (124, "125 Hz to 8 kHz, with 63 Hz optional"),
+        (150, "a threshold with open ears and one with the protector fitted,"),
+        (168, "half the subjects open first and half occluded first"),
+    ):
+        s.text(tx, y, label, 13, th.fg, "start")
+    s.text(
+        tx,
+        198,
+        "$a_{jf(k)}$ = occluded threshold − open threshold",
+        15,
+        th.primary,
+        "start",
+        bold=True,
+    )
+    s.text(
+        tx,
+        222,
+        "one dot per subject and band, larger for more attenuation",
+        12,
+        th.muted,
+        "start",
+    )
+
+    # ---- the one choice every route shares --------------------------------
+    s.rect(40, 256, 820, 36, th.bg, th.fg, rx=18, sw=1.4)
+    s.text(
+        450,
+        280,
+        "one protection performance $x$ for all three (Table 1): "
+        "84 % takes $α$ = 1, 98 % takes $α$ = 2",
+        14,
+        th.fg,
+    )
+
+    cols = (
+        (175.0, th.primary, "Octave-band method", "Clause 6"),
+        (450.0, th.secondary, "HML method", "Clause 7"),
+        (725.0, th.accent, "SNR method", "Clause 8"),
+    )
+    half = 125.0
+    inner = 2 * half - 16
+    for cx, colour, name, clause in cols:
+        s.arrow(cx, 294, cx, 310, th.fg, 1.6)
+        s.text(
+            cx,
+            330,
+            name,
+            s.fit_size([name], (16, 15, 14), 2 * half - 12, bold=True),
+            colour,
+            bold=True,
+        )
+        s.text(cx, 348, clause, 12, th.muted)
+        s.rect(cx - half, 360, 2 * half, 116, th.panel, colour, rx=8, sw=1.8)
+        s.text(cx, 494, "+", 18, th.fg, bold=True)
+        s.rect(cx - half, 500, 2 * half, 110, th.bg, th.muted, rx=8, sw=1.4, dash="6,4")
+        s.arrow(cx, 612, cx, 626, th.fg, 1.6)
+        s.rect(cx - half, 628, 2 * half, 92, th.bg, colour, rx=8, sw=2.4)
+
+    # ---- what the protector is reduced to ---------------------------------
+    reduced = (
+        ("the spread taken out band by band", ""),
+        (
+            "each subject against 8 reference noises,",
+            "the spread taken out over the subjects",
+        ),
+        (
+            "each subject against one pink noise,",
+            "the spread taken out over the subjects",
+        ),
+    )
+    size = s.fit_size([t for pair in reduced for t in pair if t], (12, 11), inner)
+    for (cx, _, _, _), (first, second) in zip(cols, reduced, strict=True):
+        s.text(cx, 380, first, size, th.fg)
+        if second:
+            s.text(cx, 396, second, size, th.fg)
+
+    cx = cols[0][0]
+    base = 446.0
+    for k, v in enumerate(apv84):
+        x = cx - 91 + 26 * k
+        s.rect(
+            x - 7,
+            base - 1.4 * v,
+            14,
+            1.4 * v,
+            th.muted if k == 0 else th.primary,
+            rx=1.5,
+        )
+    s.text(cx, 466, "$APV_{fx}$, one per band", 12, th.primary)
+
+    cx = cols[1][0]
+    for dx, symbol, value in (
+        (-72, "$H_{84}$", "24"),
+        (0, "$M_{84}$", "18"),
+        (72, "$L_{84}$", "13"),
+    ):
+        s.text(cx + dx, 424, symbol, 14, th.secondary)
+        s.text(cx + dx, 448, value, 20, th.secondary, bold=True)
+    s.text(cx, 468, "rounded to whole decibels", 11, th.muted)
+
+    cx = cols[2][0]
+    s.text(cx, 424, "$SNR_{84}$", 14, th.accent)
+    s.text(cx, 448, "21", 20, th.accent, bold=True)
+    s.text(cx, 468, "rounded to whole decibels", 11, th.muted)
+
+    # ---- what each route needs from the noise ------------------------------
+    floor = 588.0
+    scale = 1.0  # px per dB above 60 dB
+
+    def bar(x: float, level: float) -> float:
+        h = scale * (level - 60.0)
+        s.rect(x - 7, floor - h, 14, h, th.fg, rx=1.5)
+        return floor - h
+
+    needs = (
+        "the octave-band levels of the noise",
+        "the C- and A-weighted levels",
+        "the C-weighted level alone",
+    )
+    size = s.fit_size(list(needs), (12, 11), inner)
+    for (cx, _, _, _), label in zip(cols, needs, strict=True):
+        s.text(cx, 520, label, size, th.fg)
+
+    cx = cols[0][0]
+    for k, level in enumerate(noise):
+        bar(cx - 91 + 26 * k, level)
+    s.text(cx - 91, 601, "63 Hz", 11, th.muted)
+    s.text(cx + 91, 601, "8 kHz", 11, th.muted)
+
+    cx = cols[1][0]
+    for dx, level, label in ((-30, 103.0, "C"), (30, 104.0, "A")):
+        top = bar(cx + dx, level)
+        s.text(cx + dx, top - 6, f"{level:.0f} dB", 11, th.fg)
+        s.text(cx + dx + 12, floor - 3, label, 12, th.muted, "start")
+
+    cx = cols[2][0]
+    top = bar(cx - 60, 103.0)
+    s.text(cx - 60, top - 6, "103 dB", 11, th.fg)
+    s.text(cx - 48, floor - 3, "C", 12, th.muted, "start")
+    # Formula (24): the same subtraction from an A-weighted measurement.
+    s.text(cx - 18, 560, "or $L_{p,A}$ and a known", 11, th.muted, "start")
+    s.text(cx - 18, 576, "$L_{p,C} − L_{p,A}$", 11, th.muted, "start")
+
+    # ---- the effective A-weighted level -------------------------------------
+    cx = cols[0][0]
+    lines = ("A-weight each band, subtract $APV_{fx}$,", "and sum the bands on energy")
+    size = s.fit_size(list(lines), (12, 11), inner)
+    s.text(cx, 650, lines[0], size, th.fg)
+    s.text(cx, 667, lines[1], size, th.fg)
+    s.text(cx, 704, "$L′_{p,A84}$ = 81 dB", 18, th.primary, bold=True)
+
+    for cx, formula, note, colour in (
+        (
+            cols[1][0],
+            "$L′_{p,Ax} = L_{p,A} − PNR_x$",
+            "$PNR_x$ on two lines that meet at +2 dB",
+            th.secondary,
+        ),
+        (
+            cols[2][0],
+            "$L′_{p,Ax} = L_{p,C} − SNR_x$",
+            "the same rating whatever the spectrum",
+            th.accent,
+        ),
+    ):
+        s.text(cx, 652, formula, 14, th.fg)
+        s.text(cx, 670, note, s.fit_size([note], (11, 10), inner), th.muted)
+        s.text(cx, 704, "$L′_{p,A84}$ = 82 dB", 18, colour, bold=True)
+
+    # ---- foot: the one reduction, three places ------------------------------
+    s.rect(40, 740, 820, 104, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        450, 770, "$APV_{fx}$ = mean attenuation − $α$ · standard deviation", 17, th.fg
+    )
+    s.text(
+        450,
+        798,
+        "$H_x = H_m − α H_s$    $M_x = M_m − α M_s$    $L_x = L_m − α L_s$    "
+        "$SNR_x = SNR_m − α SNR_s$",
+        15,
+        th.fg,
+    )
+    s.text(
+        450,
+        826,
+        "the same reduction in all three: over each band's subjects, "
+        "or over the subjects' own ratings",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        866,
+        "HML and SNR start at 125 Hz; the octave-band sum takes in 63 Hz only when "
+        "the noise and the protector both have it",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        888,
+        "each answer is rounded to the nearest integer, and the unweighted level may "
+        "stand in for the C-weighted one",
+        12,
+        th.muted,
+    )

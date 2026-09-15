@@ -342,7 +342,7 @@ ISO 389-7, ISO 1999 e ISO 9612.
   $L_\mathrm{EX,8h}$, con el balance de incertidumbre y el límite superior.
 - [Protectores auditivos (ISO 4869-2)](/phonometry/es/perception/hearing/hearing-protectors/):
   los métodos por bandas de octava, HML y SNR que dicen lo que un protector deja
-  en el oído, y el valor de protección supuesta del que parten los tres.
+  en el oído, y el único rendimiento de protección al que se fijan los tres.
 
 ## [Salas y edificación](/phonometry/es/buildings/)
 

@@ -1,6 +1,6 @@
 ---
 title: "Protectores auditivos (ISO 4869-2)"
-description: "Los tres métodos de la ISO 4869-2 que convierten la atenuación medida de un protector auditivo en el nivel efectivo ponderado A que queda en el oído: el método por bandas de octava, los valores HML y el índice de número único, todos construidos sobre el valor de protección supuesta."
+description: "Los tres métodos de la ISO 4869-2 que convierten la atenuación medida de un protector auditivo en el nivel efectivo ponderado A: el método por bandas de octava, los valores HML y el índice de número único, los tres con un mismo rendimiento de protección."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -8,14 +8,14 @@ references:
     title: "Acoustics — Hearing protectors — Part 2: Estimation of effective A-weighted sound pressure levels when hearing protectors are worn"
     designation: "ISO 4869-2:2018"
     url: "https://www.iso.org/standard/65582.html"
-    note: "La norma implementada: el valor de proteccion supuesta del apartado 5, el metodo por bandas de octava del apartado 6, el metodo HML del apartado 7 y el metodo SNR del apartado 8, validados contra los ejemplos trabajados de los anexos A a D."
+    note: "La norma implementada: el valor de protección supuesta del apartado 5, el método por bandas de octava del apartado 6, el método HML del apartado 7 y el método SNR del apartado 8, validados contra los ejemplos trabajados de los anexos A a D."
   - type: standard
     organization: "International Organization for Standardization"
     year: 2018
     title: "Acoustics — Hearing protectors — Part 1: Subjective method for the measurement of sound attenuation"
     designation: "ISO 4869-1:2018"
     url: "https://www.iso.org/standard/65581.html"
-    note: "De donde salen las atenuaciones por sujeto: la atenuacion en oido real en el umbral, medida sobre al menos 16 sujetos, que es la entrada de la que parte todo metodo de esta pagina."
+    note: "De dónde salen las atenuaciones por sujeto: la atenuación en oído real en el umbral, medida sobre 16 sujetos, que es la entrada de la que parte todo método de esta página."
 ---
 
 import Scope from '../../../../../components/Scope.astro';
@@ -24,7 +24,7 @@ import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
 Un protector auditivo no se mide sobre un acoplador. La ISO 4869-1 lo coloca a
-un mínimo de dieciséis personas y registra el desplazamiento del umbral que
+dieciséis personas y registra el desplazamiento del umbral que
 consigue cada una, así que lo que vuelve del laboratorio es una
 **distribución**: una atenuación por sujeto y banda de octava, con una
 dispersión que a menudo es un tercio de la media. La ISO 4869-2 es la norma que
@@ -33,8 +33,10 @@ primero que hace es negarse a usar la media.
 
 ## Primero la distribución (apartado 5)
 
-Todos los métodos parten del valor de protección supuesta, la atenuación media
-reducida en un múltiplo de su propia dispersión:
+Los tres métodos toman una media menos un múltiplo de su propia dispersión, y se
+diferencian en sobre qué la toman. El método por bandas de octava la toma sobre
+las atenuaciones de cada banda, y el resultado es el valor de protección
+supuesta:
 
 $$
 APV_{fx} = m_f - \alpha\, s_f
@@ -45,6 +47,12 @@ rendimiento de protección $x$ (Tabla 1), así que $APV_{f84}$ con $\alpha = 1$
 es la atenuación que alcanza o supera el 84 % de los usuarios, y $APV_{f98}$
 con $\alpha = 2$ es la que alcanzan todos menos uno de cada cincuenta. Citar un
 protector por su media sería describir a un usuario que no existe.
+
+Los métodos HML y SNR no llegan a formar ese valor. Calculan antes un índice por
+sujeto, frente a los ocho ruidos de referencia de la Tabla 2 o frente al ruido
+rosa de la Tabla 3, y aplican la misma reducción sobre esos índices (Fórmulas
+(3) a (5) y (19)). Lo que comparten los tres es la elección de $x$ y de su
+$\alpha$.
 
 ```python
 import numpy as np
@@ -111,6 +119,14 @@ plt.show()
 </details>
 
 ## Tres métodos, en orden decreciente de lo que necesitan saber
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_protector_chain.svg" alt="Cadena de cálculo en cuatro niveles. Arriba, el ensayo de la ISO 4869-1: una cabeza con orejeras junto a una rejilla de dieciséis filas de puntos, una por sujeto, a lo largo de las frecuencias centrales de octava desde 63 Hz, en gris por opcional, hasta 8 kHz, con cada punto del tamaño de la atenuación de ese sujeto, de modo que crecen hacia 4 kHz; el texto de al lado nombra las bandas de tercio de octava de ruido rosa, los umbrales libre y ocluido tomados en los dos órdenes y la atenuación como umbral ocluido menos umbral libre. Una banda de lado a lado fija un mismo rendimiento de protección para los tres métodos, 84 % con alfa 1 o 98 % con alfa 2. Siguen tres columnas, cada una con una caja del protector, una del ruido y una del resultado. El método por bandas de octava del apartado 6 descuenta la dispersión banda a banda en ocho valores de protección supuesta dibujados como barras, añade el espectro por bandas de octava del ruido y suma en energía las bandas protegidas hasta 81 dB. El método HML del apartado 7 calcula un índice por sujeto frente a ocho ruidos de referencia y los reduce a H 24, M 18 y L 13, añade los niveles ponderados C y A de 103 dB y 104 dB y resta la reducción prevista del nivel de ruido hasta 82 dB. El método SNR del apartado 8 calcula un índice por sujeto frente a un ruido rosa, da SNR 21, añade solo el nivel ponderado C de 103 dB, o el ponderado A con una diferencia conocida, y resta el índice hasta 82 dB. Una caja al pie da el valor de protección supuesta como la atenuación media menos alfa por la desviación típica, con la misma reducción escrita para H, M, L y SNR, y dos notas dicen que HML y SNR empiezan en 125 Hz y que cada resultado se redondea al entero más próximo, y que el nivel sin ponderar puede sustituir al ponderado C" width="100%" />
+
+*Un modelo de protector sobre dieciséis sujetos, reducido de tres maneras y
+enfrentado a un mismo ruido. Solo el método por bandas de octava pasa por el
+valor de protección supuesta; HML y SNR calculan antes un índice por sujeto y
+descuentan la dispersión sobre esos índices, y los tres quedan a un decibelio
+unos de otros.*
 
 ### El método por bandas de octava (apartado 6)
 
@@ -189,6 +205,10 @@ print(por_snr.reported_level)             # 82
 print(hearing.snr_protected_level(snr, l_p_a=104.0, c_minus_a=-1.0).reported_level)  # 82
 ```
 
+El apartado 8.3 admite además el nivel sin ponderar en lugar del ponderado C, y
+el apartado 7.3 dice lo mismo para HML. Con ruido de mucho contenido en muy
+baja frecuencia queda alto, así que es un recurso y no un equivalente.
+
 Como el ruido de referencia es fijo, el índice no dice nada de la forma del
 ruido con el que se va a encontrar, que es justo lo que recuperan los tres
 valores del método HML.
@@ -197,11 +217,11 @@ valores del método HML.
 
 Los tres métodos responden a la misma pregunta y rara vez coinciden exactamente.
 Con el ejemplo de arriba, el mismo protector en el mismo ruido da **81 dB,
-82 dB y 82 dB**, y la propia NOTA del apartado 1 sitúa las diferencias de 3 dB
-o menos entre protectores comparables por debajo de la resolución del
-ejercicio. El orden no es una clasificación: el método por bandas de octava usa
-más información y es el preferible cuando se tiene el espectro, mientras que
-HML y SNR existen precisamente para cuando no se tiene.
+82 dB y 82 dB**, y la NOTA con la que cierra la introducción sitúa las
+diferencias de 3 dB o menos entre protectores comparables por debajo de la
+resolución del ejercicio. El orden no es una clasificación: el método por
+bandas de octava usa más información y es el preferible cuando se tiene el
+espectro, mientras que HML y SNR existen precisamente para cuando no se tiene.
 
 El método por bandas de octava arranca en 63 Hz cuando el ruido y el protector
 tienen dato ahí, y en 125 Hz cuando alguno no lo tiene (apartado 6). Los

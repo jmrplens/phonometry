@@ -1,0 +1,22 @@
+/*
+ * The `standards` metadata field is written for the index, not for the reader.
+ *
+ * src/components/Head.astro puts the designations a page declares into a <meta>
+ * that Pagefind reads as a custom metadata field, so a search for "ISO 3744"
+ * ranks the guides written to ISO 3744 first. The default result list prints
+ * every metadata field other than title, image, image_alt and url as a visible
+ * tag under the result, which would put a line of run-together tokens
+ * ("iso 3744 37442010 iso 3745 ...") under every guide in the search panel.
+ *
+ * Only our own field is hidden, by name, so a field added later still shows.
+ * The second rule folds the tag list away when hiding ours has left it empty,
+ * which is the usual case: without it the list keeps its own margin and the
+ * results sit further apart than they used to.
+ */
+li[data-pagefind-ui-meta='standards'] {
+  display: none;
+}
+
+.pagefind-ui__result-tags:not(:has(li:not([data-pagefind-ui-meta='standards']))) {
+  display: none;
+}

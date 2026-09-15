@@ -274,6 +274,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a document now finds every row that cites it, where "iso 16283-3" found one
   row of nine.
 
+  The conformance table prints every document a citation names, with what its
+  connector says in front of it: corroborated by, compared with, read via, run
+  with and also names, and corroborado por, comparado con, leído vía, resuelto
+  con and nombra además in Spanish. A qualifier written inside a bracket is
+  printed as the citation writes it, so `Table 1 (coupler, IEC 60303)` still
+  says which part of the ear simulator the second standard is. The site
+  restates these vocabularies twice, in the schema that validates the artefact
+  into its content collection and in the label maps that word a verdict and a
+  relation in each language, and nothing compared either restatement with the
+  enums that produce them: a relation the schema does not accept refuses the
+  whole artefact, and one with no label prints raw beside the words that have
+  one. `scripts/check_conformance_vocabulary.py` compares all five closed
+  vocabularies with both restatements, in both directions, so a value added to
+  an enum and missing from the site, or left in the site after nothing produces
+  it, fails beside the other conformance gates rather than in a site build.
+
   The artefact is `schema` 2, and `designations` and `sources` now mean
   documents named anywhere in a citation rather than documents that open one. A
   test holds the class shut, over every document of every check: no clause and

@@ -786,8 +786,10 @@ para elegir:
   que es el régimen donde gana la cámara reactiva; en alta frecuencia el
   sonido se colima por el conducto libre y pasa de largo sobre el
   revestimiento, así que la atenuación de las dos familias se desploma y solo
-  las geometrías de bafles (pasos estrechos, más perímetro revestido por
-  unidad de superficie) siguen funcionando.
+  las geometrías de láminas paralelas (pasos estrechos, más perímetro revestido
+  por unidad de superficie) siguen funcionando. La UNE-EN ISO 7235:2010 admite
+  «divisores» como sinónimo de «láminas paralelas» en la NOTA 2 de su apartado
+  3.19.
 - **Tipo de espectro.** Una fuente tonal, un armónico de encendido de un motor
   o una frecuencia de paso de álabes, es la presa natural de un resonador; el
   ruido de ventilador o de flujo, de banda ancha, pide la banda disipativa.
@@ -807,7 +809,7 @@ Son tres afirmaciones que dependen de la frecuencia, así que aquí están sobre
 mismo eje, con todas las curvas calculadas con los modelos que se distribuyen y
 no dibujadas a mano.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_selection.svg" alt="Atenuación de 40 Hz a 8 kHz de cinco dispositivos. En azul, la familia reactiva: la cámara de expansión de 0,3 m, una joroba ancha que llega a 6,5 dB con un cero en 572 Hz, y una rama de Helmholtz sintonizada a 100 Hz, un pico de unos pocos hercios de ancho que llega a 18 dB y nada en el resto. En verde, 1,5 m de conducto revestido de 36 por 24 pulgadas con 25 mm y con 50 mm de revestimiento, que suben por las bandas medias hasta 12,6 y 13,6 dB y caen despacio por encima. En rojo, una unidad de bafles de cinco pasos, de 10,7 dB a 63 Hz a 40 dB a 500 Hz y de vuelta a 12,1 dB a 8 kHz. Una línea vertical de puntos en 891 Hz marca el primer corte del conducto, más allá del cual no se dibujan las curvas azules de cuatro polos" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/silencer_selection.svg" alt="Atenuación de 40 Hz a 8 kHz de cinco dispositivos. En azul, la familia reactiva: la cámara de expansión de 0,3 m, una joroba ancha que llega a 6,5 dB con un cero en 572 Hz, y una rama de Helmholtz sintonizada a 100 Hz, un pico de unos pocos hercios de ancho que llega a 18 dB y nada en el resto. En verde, 1,5 m de conducto revestido de 36 por 24 pulgadas con 25 mm y con 50 mm de revestimiento, que suben por las bandas medias hasta 12,6 y 13,6 dB y caen despacio por encima. En rojo, una unidad de láminas de cinco pasos, de 10,7 dB a 63 Hz a 40 dB a 500 Hz y de vuelta a 12,1 dB a 8 kHz. Una línea vertical de puntos en 891 Hz marca el primer corte del conducto, más allá del cual no se dibujan las curvas azules de cuatro polos" width="88%" />
 
 *La regla de selección, dibujada. El resonador solo gana donde está el tono, y
 es transparente dos semitonos más allá. La cámara vale unos pocos decibelios en
@@ -815,7 +817,7 @@ una banda baja ancha y nada en absoluto en sus propias caídas de media onda. Un
 revestimiento realista casi no hace nada a 63 Hz — 1,2 dB con 25 mm sobre 1,5 m
 — y doblar el espesor del revestimiento aporta 7 dB a 500 Hz y nada por encima
 de 1 kHz, porque ahí el sonido ya se colima por el paso libre. Solo la unidad de
-bafles, que estrecha el paso y multiplica el perímetro revestido, mantiene 30 dB
+láminas, que estrecha el paso y multiplica el perímetro revestido, mantiene 30 dB
 en toda la zona media. Las curvas azules se cortan en 891 Hz porque es donde se
 corta su modelo.*
 
@@ -846,7 +848,7 @@ Las curvas disipativas salen de los modelos de instalación de los
 módulo: `hvac.lined_rectangular_duct_attenuation(bands, 36 in, 24 in, 1.5 m, t,
 include_unlined=True)` para los dos revestimientos, y
 `hvac.splitter_silencer_insertion_loss(bands, 24 in, 5 ft, [4 in] * 5, 8 in)`
-para la unidad de bafles.
+para la unidad de láminas.
 
 phonometry modela la familia reactiva en forma cerrada en esta página. El
 lado disipativo entra a nivel de instalación, por los

@@ -3704,7 +3704,7 @@ _ES_EXACT = {
     "Choosing the family: where each one is worth having": "Elegir la familia: dónde compensa cada una",
     "Reactive: 0.3 m expansion chamber, $m = 4$": "Reactivo: cámara de expansión de 0,3 m, $m = 4$",
     "Reactive: Helmholtz branch tuned to 100 Hz": "Reactivo: rama de Helmholtz sintonizada a 100 Hz",
-    "Dissipative: five-airway splitter unit, 5 ft": "Disipativo: unidad de bafles de cinco pasos, 5 ft",
+    "Dissipative: five-airway splitter unit, 5 ft": "Disipativo: unidad de láminas de cinco pasos, 5 ft",
     # silencer_extended_tube: the buried quarter-wave branches
     "Extended-tube chamber: quarter-wave branches buried inside": "Cámara de tubos extendidos: ramas de cuarto de onda "
     "enterradas dentro",
@@ -3722,7 +3722,7 @@ _ES_EXACT = {
     "(a) 36 × 24 in run, 5 ft": "(a) Tramo de 36 × 24 in, 5 ft",
     "(b) One bend, $W$ = 24 in": "(b) Un codo, $W$ = 24 in",
     "(c) Open end, 300 mm flush": "(c) Extremo abierto, 300 mm enrasado",
-    "(d) Splitter silencer": "(d) Silenciador de bafles",
+    "(d) Splitter silencer": "(d) Silenciador de láminas",
     "Bare": "Desnudo",
     "Externally wrapped": "Con manta exterior",
     "25 mm lining, insertion loss": "Revestimiento de 25 mm, pérdida por inserción",

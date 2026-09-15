@@ -110,8 +110,9 @@ DARK = Theme(
 #: of DIN 45672-1:2009-12, the note to 7.3.1 (MG for Messgleis, Z for Zug,
 #: both printed upright there), the train category the railway clause of
 #: E DIN 4150-2:2023-08, 6.5.3.2, groups the passages into (Zug, written
-#: out and printed upright in KBFTm,Zug, KBFmax,Zug, nZug and αZug), and
-#: the Spanish twin the i18n table sets beside them (sup for upper).
+#: out and printed upright in KBFTm,Zug, KBFmax,Zug, nZug and αZug), the
+#: saturation vapour pressure of IEC 61094-2 Annex F (sv), and the Spanish
+#: twin the i18n table sets beside them (sup for upper).
 #:
 #: The single letters come from holding every diagram against the prose,
 #: run by run, once the prose had settled which subscripts are descriptive:
@@ -188,6 +189,7 @@ _ROMAN_SCRIPTS = frozenset(
         "tab",
         "cum",
         "ss",
+        "sv",
         "shadow",
         "co",
         "tr",

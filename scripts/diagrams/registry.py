@@ -112,6 +112,7 @@ from .environment import (
     _d_wind_turbine,
     _d_wind_turbine_board,
 )
+from .fluids import _d_humid_air_chain
 from .materials import (
     _d_airflow,
     _d_astm_tube,
@@ -1090,6 +1091,11 @@ DIAGRAMS = {
         _d_bank_dataflow,
         "Inside a band: the decimation decision and the biquad cascade",
         680,
+    ),
+    "diagram_humid_air_chain": (
+        _d_humid_air_chain,
+        "Humid air from four inputs, step by step (IEC 61094-2 Annex F)",
+        938,
     ),
 }
 

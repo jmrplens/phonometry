@@ -26,6 +26,8 @@ Those are the conditions of the first row of Table F.1, and the numbers are
 the ones the annex prints. Every one of the ten figures it tabulates comes
 back inside the rounding of its last printed digit.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_humid_air_chain.svg" alt="The humid-air model as a chain: four conditions in, the water vapour mole fraction first, then the compressibility factor and the density, the speed of sound, the ratio of specific heats and the viscosity, and the thermal diffusivity built from the density and the two expressions of Clause F.6, with the five properties Table F.1 prints a value for marked apart from the two it does not" width="88%"></picture>
+
 ## The three conditions are not equally important
 
 The library asks for the temperature and assumes the other two. That is not

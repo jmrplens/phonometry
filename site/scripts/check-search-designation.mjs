@@ -266,6 +266,14 @@ const UNTOUCHED = [
   'CTE DB-HR',
   'dB(A)',
   'mV/Pa',
+  // Typed without capitals, a word is read as an issuer only in front of a
+  // number, so the lowercase forms of ordinary words keep their single term,
+  // and a unit with a capital inside it is never an issuer wherever it stands.
+  'mv/pa',
+  'db/oct',
+  'input/output',
+  'itu-r',
+  'sensitivity in mV/Pa to IEC 61094-4',
 ];
 for (const query of UNTOUCHED) {
   const got = normalizeDesignationQuery(query);
@@ -281,6 +289,14 @@ const REWRITTEN = [
   ['Recomendación UIT-R BS.468-4', 'Recomendación UIT BS.468-4'],
   ['ECMA-418-2:2025 (4.ª ed.)', 'ECMA-418-2:2025'],
   ['ANSI S3.5-1997 (R2017)', 'ANSI S3.5-1997'],
+  // The same designations typed in lowercase or capitalised, as a reader does.
+  ['ansi/asa s12.2-2019', 'ansi asa s12.2-2019'],
+  ['Ansi/Asa S12.2-2019', 'Ansi Asa S12.2-2019'],
+  ['iso/ts 7849-1:2009', 'iso ts 7849-1:2009'],
+  ['ecac.ceac doc 29', 'ecac ceac doc 29'],
+  ['recommendation itu-r bs.1770-5 (11/2023)', 'recommendation itu bs.1770-5'],
+  ['Itu-R BS.1770-5', 'Itu BS.1770-5'],
+  ['recomendación uit-r bs.468-4', 'recomendación uit bs.468-4'],
 ];
 for (const [query, want] of REWRITTEN) {
   const got = normalizeDesignationQuery(query);
@@ -324,6 +340,25 @@ for (const designation of designations) {
     const want = normalizeDesignationQuery(bare);
     if (got !== want) {
       fail(`normalizer: ${JSON.stringify(typed)} gave ${JSON.stringify(got)}, want the measured query ${JSON.stringify(want)}`);
+    }
+  }
+}
+
+// Every designation in the corpus, typed in lowercase or capitalised, must
+// search for the same terms as the capitals the bibliography prints. Pagefind
+// lowercases the terms, so that is how they are compared. A note in brackets is
+// taken off first: without capitals, an alternative designation in brackets
+// cannot be told from an edition note, and it is dropped, which only searches
+// for fewer of the terms the index carries.
+const capitalised = (text) => text.replace(/[A-Za-z]+/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+for (const designation of designations) {
+  for (const printed of new Set([designation.replace(/\s*\([^)]*\)/g, ''), bareDesignation(designation)])) {
+    const want = normalizeDesignationQuery(printed).toLowerCase();
+    for (const typed of [printed.toLowerCase(), capitalised(printed)]) {
+      const got = normalizeDesignationQuery(typed);
+      if (got.toLowerCase() !== want) {
+        fail(`normalizer: ${JSON.stringify(typed)} gave ${JSON.stringify(got)}, want ${JSON.stringify(want)} as for ${JSON.stringify(printed)}`);
+      }
     }
   }
 }

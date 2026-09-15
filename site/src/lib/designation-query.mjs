@@ -152,19 +152,55 @@ const EUROPEAN_BEFORE_INTERNATIONAL = new RegExp(`^\\s*EN${SEP}+${INTERNATIONAL}
 const BRACKETED_NOTE = /([0-9][^\s()]*)\s*\(([^)]*)\)/g;
 
 /**
+ * An issuer as a reader may type it: "ANSI", "ansi" or "Ansi". Two letters or
+ * more, and no lowercase letter followed by a capital, which is where
+ * segmentsOf cuts a word in two: "mV" and "dB" are not one word to the index,
+ * let alone an issuer.
+ */
+const ISSUER_AS_TYPED = '(?=[A-Za-z]{2})[A-Z]*[a-z]*';
+
+/**
  * Issuers printed glued together by a slash or a dot: ISO/TS, ANSI/ASA,
  * ECAC.CEAC. Pagefind would search for the single term `ansiasa`, which the
- * index never carries: it keeps each issuer as a word of its own. Only words in
- * capitals as typed are split, which is the same test the index uses to tell an
- * issuer from an ordinary word, so "mV/Pa" and "dB/oct" are left alone.
+ * index never carries: it keeps each issuer as a word of its own.
  */
-const GLUED_ISSUERS = /(^|\s)([A-Z]{2,}(?:[/.][A-Z]{2,})+)(?=\s|$)/g;
+const GLUED_ISSUERS = new RegExp(`^${ISSUER_AS_TYPED}(?:[/.]${ISSUER_AS_TYPED})+$`);
 
 /**
  * The sector letter of an ITU recommendation, ITU-R or UIT-T. Pagefind would
  * search for `itur`; the index keeps the issuer and drops a single letter.
  */
-const SECTOR_LETTER = /(^|\s)([A-Z]{2,})-[A-Z](?=\s|$)/g;
+const SECTOR_LETTER = new RegExp(`^(${ISSUER_AS_TYPED})-[A-Za-z]$`);
+
+/**
+ * Split glued issuers and drop the sector letter, for the words of the query
+ * that are issuers.
+ *
+ * The index tells an issuer from an ordinary word by two rules: it is written
+ * in capitals, and it stands in front of its number. A query in capitals is
+ * read by the first rule alone, as it always was. A query typed in lowercase,
+ * or capitalised, has lost that evidence, so it is read by the second: "ansi/asa
+ * s12.2-2019" and "itu-r bs.1770-5" are split because a number follows them,
+ * while "mv/pa" or "input/output" with no number after them stay the single term
+ * the reader typed.
+ *
+ * @param {string} text
+ * @returns {string}
+ */
+function separateIssuers(text) {
+  // Whitespace is kept at the odd indices, so joining restores the query.
+  const words = text.split(/(\s+)/);
+  // Not findLastIndex, which the older Safari this panel still serves lacks.
+  const lastNumber = words.map((word) => /[0-9]/.test(word)).lastIndexOf(true);
+  return words
+    .map((word, i) => {
+      if (/[a-z]/.test(word) && i >= lastNumber) return word;
+      if (GLUED_ISSUERS.test(word)) return word.split(/[/.]/).join(' ');
+      const sector = SECTOR_LETTER.exec(word);
+      return sector ? sector[1] : word;
+    })
+    .join('');
+}
 
 /**
  * The edition at the end of a designation: ":2015", "-2015" or the German
@@ -218,8 +254,5 @@ export function normalizeDesignationQuery(query) {
     .replace(NATIONAL_BEFORE_INTERNATIONAL, '$1')
     .replace(NATIONAL_BEFORE_EUROPEAN, '$1EN ');
   if (text !== unbracketed) text = text.replace(TRAILING_EDITION, '$1');
-  return text
-    .replace(EUROPEAN_BEFORE_INTERNATIONAL, '')
-    .replace(GLUED_ISSUERS, (_match, lead, word) => `${lead}${word.split(/[/.]/).join(' ')}`)
-    .replace(SECTOR_LETTER, '$1$2');
+  return separateIssuers(text.replace(EUROPEAN_BEFORE_INTERNATIONAL, ''));
 }

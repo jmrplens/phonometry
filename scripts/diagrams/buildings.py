@@ -10,6 +10,7 @@ put the two together before anything is built.
 
 from __future__ import annotations
 
+import math
 from typing import TYPE_CHECKING
 
 from .parts import _accel, _accel_wall, _rot_arrow, _spring_v
@@ -3970,5 +3971,147 @@ def _d_room_second_microphone(s: SVG, th: Theme) -> None:
         "These four give what the room does to a listener, and each of them "
         "needs its own setup.",
         13,
+        th.muted,
+    )
+
+
+def _d_workroom_path(s: SVG, th: Theme) -> None:
+    """The ISO 14257 measurement: one path, ten points, two numbers.
+
+    Everything here is clause 5: the path parallel to the floor and beginning
+    on the source (5.3.1), the recommended distribution of points (5.3.2), the
+    clearances the source and the last point need (5.1.3 and 5.3.1), the 10 dB
+    the source has to hold over the background (5.1.4), and the three distance
+    ranges the curve is read in (6.2). What comes out of the walk is the pair
+    of numbers in the boxes at the foot.
+    """
+    floor = 330.0
+    ceiling = 168.0
+    wall_l, wall_r = 45.0, 872.0
+    path_y = 250.0  # 1,55 m up, which is where a standing person hears
+    x_src = 150.0
+    x_first, span = 215.0, 597.0
+    decade = math.log10(24.0)
+
+    def at(r: float) -> float:
+        return x_first + span * math.log10(r / 2.0) / decade
+
+    s.text(
+        450, 92, "One path from the source, and ten points on it", 17, th.fg, bold=True
+    )
+
+    # The hall: floor, ceiling and the two walls the clearances are measured to.
+    s.ground(floor, wall_l, wall_r)
+    s.line(wall_l, ceiling, wall_r, ceiling, th.fg, 2.2)
+    s.line(wall_l, ceiling, wall_l, floor, th.fg, 2.2)
+    s.line(wall_r, ceiling, wall_r, floor, th.fg, 2.2)
+
+    # The source, on the floor, and the clearance it needs from the wall.
+    s.rect(x_src - 30, floor - 44, 60, 44, th.panel, th.fg, rx=5, sw=2.2)
+    s.circle(x_src, floor - 22, 13, th.fg)
+    s.circle(x_src, floor - 22, 5, th.bg)
+    s.text(x_src, floor + 34, "the test source", 13, th.muted)
+    s.text(x_src, floor + 54, "on the floor, or above 0.5 m", 12, th.muted)
+    s.dim(wall_l + 4, floor - 14, x_src - 30, floor - 14, "≥ 3 m", size=13)
+
+    # The path itself: parallel to the floor, beginning on the source.
+    s.line(x_src, path_y, at(48.0) + 18, path_y, th.primary, 2.2, dash="7,5")
+
+    # The ten points of the second recommended distribution.
+    for r in (2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0):
+        x = at(r)
+        s.circle(x, path_y, 5.5, th.primary)
+        s.text(x, path_y - 16, f"{r:.0f}", 12, th.primary)
+    s.text(
+        at(8.0),
+        path_y - 58,
+        "2 m, 3 m, 4 m, 6 m, 8 m, 12 m, 16 m, 24 m, 32 m, 48 m",
+        13,
+        th.fg,
+    )
+    s.text(
+        at(8.0),
+        path_y - 38,
+        "measured from the acoustical centre of the source",
+        12,
+        th.muted,
+    )
+
+    # One microphone drawn in full, and the person whose ears it stands in for.
+    s.mic(at(6.0), path_y + 4, floor, scale=0.9)
+    s.person(at(12.0), floor, h=floor - path_y)
+    s.text(
+        at(16.0),
+        floor + 34,
+        "the path runs 1.55 m up, standing height, or 1.2 m for a seated workplace",
+        12,
+        th.muted,
+    )
+
+    # The last point, and the clearance it needs from the far wall.
+    s.dim(at(48.0), floor - 14, wall_r - 4, floor - 14, "≥ 1.5 m", size=13)
+
+    # The three distance ranges of clause 6.2, drawn under the floor.
+    band_y = floor + 74
+    for x0, x1, colour, label in (
+        (at(2.0), at(5.0), th.accent, "near region"),
+        (at(5.0), at(16.0), th.primary, "middle region"),
+        (at(16.0), at(48.0), th.secondary, "far region"),
+    ):
+        s.rect(x0, band_y, x1 - x0, 26, th.panel, colour, rx=4, sw=1.8)
+        s.text((x0 + x1) / 2, band_y + 18, label, 13, colour)
+    s.text(at(5.0), band_y + 46, "$d_1$, typically 5 m", 12, th.muted)
+    s.text(at(16.0), band_y + 46, "$d_2$, typically 16 m", 12, th.muted)
+    s.text(
+        at(28.0),
+        band_y + 68,
+        "take the middle region to 24 m when the room allows it",
+        12,
+        th.muted,
+    )
+
+    # What the walk is worth once the levels are in.
+    box_y = 520.0
+    s.rect(52, box_y, 386, 84, th.panel, th.primary, rx=6, sw=1.8)
+    s.text(
+        245, box_y + 26, "$DL_2$: the slope, per doubling", 14, th.primary, bold=True
+    )
+    s.text(245, box_y + 50, "6 dB is the free field, and a workroom", 12, th.fg)
+    s.text(245, box_y + 70, "gives 2 dB to 5 dB in the middle region", 12, th.fg)
+
+    s.rect(462, box_y, 386, 84, th.panel, th.secondary, rx=6, sw=1.8)
+    s.text(
+        655,
+        box_y + 26,
+        "$DL_f$: the excess over a free field",
+        14,
+        th.secondary,
+        bold=True,
+    )
+    s.text(655, box_y + 50, "$D_{ref} = 20 lg(r_0/r) − 11$ dB, so what is", 12, th.fg)
+    s.text(655, box_y + 70, "left is what the room adds back", 12, th.fg)
+
+    s.text(
+        450,
+        640,
+        "six octave bands from 125 Hz to 4 kHz, a class 1 instrument and an "
+        "omnidirectional microphone",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        662,
+        "the source at least 10 dB over the background, and between 6 dB and "
+        "10 dB the ISO 3744 correction",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        684,
+        "no obstacle on the floor below the path, nothing large within 1.5 m "
+        "of either side, and a second path, orthogonal to this one",
+        12,
         th.muted,
     )

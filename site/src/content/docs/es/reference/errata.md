@@ -6335,6 +6335,103 @@ dos ediciones con las mismas entradas y en el mismo orden.
   muestre cuál se aplicó a cada campaña.
 - **Estado:** no reportada.
 
+## ISO 14257:2001, anexo C (un ejemplo que corrige uno de sus dos resultados)
+
+- **Ubicación:** C.1 en la página impresa 17 (página 27 del PDF), frente a las
+  tablas C.7 y C.9 en la página impresa 23 (página 33 del PDF) y las tablas C.8
+  y C.10 en las páginas impresas 23 y 24 (páginas 33 y 34 del PDF).
+- **Lo impreso:** C.1 enumera las cuatro cosas que se cumplen en el ejemplo, y
+  la segunda es que "the experimental reference curve of the sound source is
+  known and used for correcting the values measured in the workroom". La tabla
+  C.5 se titula después "Values of $D = L_p - L_W$, in octave bands (corrected
+  for background noise)" y la C.6 "Values of $D = L_p - L_W$ ... corrected for
+  background noise **and using the experimental reference curves of the
+  source**".
+- **El problema:** las cuatro tablas de resultados no salen todas de la misma
+  curva. Todos los valores de $\mathrm{DL}_2$ de las tablas C.7 y C.8 salen de
+  la curva corregida de la tabla C.6, y todos los de
+  $\mathrm{DL}_\mathrm{f}$ de las tablas C.9 y C.10 salen de la curva sin
+  corregir de la tabla C.5. Si se cambia una por la otra, 28 de los 36
+  resultados impresos se salen del redondeo de la tabla en la que están.
+- **Evidencia:** las dos curvas están impresas enteras, así que se pueden
+  recorrer los dos caminos. Partiendo de la tabla C.6 tal como está, el rango
+  medio a 1 kHz da $\mathrm{DL}_2$ = 4,39 dB frente a los 4,4 impresos y
+  $\mathrm{DL}_\mathrm{f}$ = 6,73 dB frente a los 7,3; partiendo de la C.5 se
+  obtienen 4,73 dB y 7,29 dB. La misma división se da en los tres rangos de
+  distancia y en las seis bandas de octava, y en las dos tablas del espectro
+  rosa ponderado A. Verificado en las páginas 27, 31 y 33 del PDF (páginas
+  impresas 17, 21 y 23) de la EN ISO 14257:2001 publicada como
+  BS EN ISO 14257:2001.
+- **Consecuencia para las tablas de la propia norma:** ninguna para
+  $\mathrm{DL}_2$, que es una pendiente y apenas se mueve con una corrección
+  casi constante con la distancia. Para $\mathrm{DL}_\mathrm{f}$, que es un
+  nivel, la diferencia llega a 1,4 dB en el rango cercano.
+- **Comportamiento de la biblioteca:**
+  [`corrected_distribution_value`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py)
+  aplica el anexo B cuando se le pide y nunca por su cuenta, así que es quien
+  llama el que elige de qué curva sale cada descriptor. La fila de conformidad
+  "ISO 14257:2001 Annex C (C.1 against Tables C.7 and C.9)" fija la división, y
+  `test_the_annex_corrects_the_decay_but_not_the_excess` en
+  [`tests/room/test_spatial_decay.py`](https://github.com/jmrplens/phonometry/blob/main/tests/room/test_spatial_decay.py)
+  guarda los dos números para que ninguno se mueva.
+- **Estado:** no reportada.
+
+## ISO 14257:2001, ecuación (5) frente a la ecuación (8) (un logaritmo redondeado)
+
+- **Ubicación:** la ecuación (5) de 6.3 en la página impresa 9 (página 19 del
+  PDF) y la ecuación (8) de 6.4.3 en la página impresa 10 (página 20 del PDF).
+- **Lo impreso:** la ecuación (5) abre con el factor $-0,3$ delante de la
+  pendiente de mínimos cuadrados; la ecuación (8), una página después, divide
+  $\mathrm{DL}_2(r_n,r_m)$ entre $\lg 2$.
+- **El problema:** las dos son la misma conversión, de una tasa por década a
+  una tasa por duplicación de distancia, escrita dos veces con distinta
+  precisión. $\lg 2$ es 0,301 03, así que el 0,3 impreso se queda un 0,34 %
+  corto, y un documento que imprime la forma exacta en una página no tiene por
+  qué redondearla en la anterior.
+- **Evidencia:** las dos ecuaciones en páginas enfrentadas, las dos
+  reproducidas en la entrada anterior a partir de las tablas impresas.
+  Verificado en las páginas 19 y 20 del PDF (páginas impresas 9 y 10) de la
+  EN ISO 14257:2001.
+- **Consecuencia para las tablas de la propia norma:** ninguna que el redondeo
+  impreso pueda mostrar: el ejemplo del anexo C se tabula con un decimal y un
+  0,34 % de una pendiente de 4 dB son 0,014 dB.
+- **Comportamiento de la biblioteca:**
+  [`DECADE_TO_DOUBLING`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) lleva el 0,3
+  impreso, porque la constante impresa es la que reproduce los resultados
+  impresos, y
+  [`level_excess_at`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/spatial_decay.py) divide entre
+  $\lg 2$ donde lo imprime la ecuación (8). No hay que unificarlos.
+- **Estado:** no reportada.
+
+## ISO 11690-3:1998, tabla C.2 (un valor leído en el borde de su propio ábaco)
+
+- **Ubicación:** la tabla C.2 en la página impresa 20 (página 30 del PDF),
+  frente a la figura C.1 en la página impresa 19 (página 29 del PDF).
+- **Lo impreso:** la fila de la máquina M8 da $L_{WA} - L_{pA}$ = 29 dB,
+  $\Delta L_A$ = 10 dB y $L'_{pA}$ = 88 dB, en una sala cuya área de absorción
+  equivalente fija C.2.2 en 195 m2.
+- **El problema:** la figura C.1, el ábaco del que el anexo dice que se lee
+  $\Delta L_A$, tiene un eje vertical que se acaba en 10 dB, y la curva de una
+  diferencia de 29 dB se sale por arriba mucho antes de los 195 m2. El 10 dB de
+  la tabla es el borde del ábaco y no una lectura suya, y el nivel que arrastra
+  a la última columna se queda 2,4 dB corto.
+- **Evidencia:** el eje de la figura C.1 va de 0 dB a 10 dB, y la forma cerrada
+  que dibuja el ábaco, la corrección ambiental
+  $\Delta L_A = 10 \lg(1 + 4S/A)$ de la ISO 3744 con
+  $S/S_0 = 10^{(L_{WA}-L_{pA})/10}$, da 12,4 dB para esa fila. Esa misma
+  expresión reproduce las otras siete filas de la tabla dentro de 0,4 dB, que es
+  el medio decibelio con el que está dibujado el ábaco. Verificado en las
+  páginas 29 y 30 del PDF (páginas impresas 19 y 20) de la EN ISO 11690-3:1998
+  publicada como BS EN ISO 11690-3:1999.
+- **Consecuencia para las tablas de la propia norma:** la última columna de esa
+  única fila. Nada más en el documento calcula con ella.
+- **Comportamiento de la biblioteca:**
+  [`workstation_level_increase`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/room/workroom_prediction.py)
+  evalúa la expresión y no tiene techo, así que devuelve 12,4 dB donde la tabla
+  imprime 10. La fila de conformidad "ISO 11690-3:1998 Annex C, Figure C.1 (the
+  eighth machine)" lo fija.
+- **Estado:** no reportada.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

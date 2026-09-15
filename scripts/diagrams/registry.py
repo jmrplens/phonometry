@@ -53,6 +53,7 @@ from .buildings import (
     _d_room_second_microphone,
     _d_survey_sweep,
     _d_sweep_budget,
+    _d_workroom_path,
 )
 from .canvas import _write
 from .devices import (
@@ -493,6 +494,11 @@ DIAGRAMS = {
         _d_open_plan,
         "Open-plan office spatial decay of speech (ISO 3382-3)",
         500,
+    ),
+    "diagram_workroom_path": (
+        _d_workroom_path,
+        "How a workroom is measured, path and points (ISO 14257)",
+        710,
     ),
     "diagram_open_plan_setup": (
         _d_open_plan_setup,

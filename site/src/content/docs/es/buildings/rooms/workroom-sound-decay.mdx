@@ -1,0 +1,325 @@
+---
+title: "Descenso espacial del sonido en locales de trabajo"
+description: "Cuánto cae el nivel al alejarse de una máquina, y qué dice eso de la sala: la curva de distribución espacial del sonido de la ISO 14257, sus dos descriptores DL2 y DLf, la corrección del anexo B que descuenta la curva propia de la fuente, y los métodos de predicción que la ISO 11690-3 empareja con los datos que uno tiene de verdad."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2001
+    title: "Acoustics — Measurement and parametric description of spatial sound distribution curves in workrooms for evaluation of their acoustical performance"
+    designation: "ISO 14257:2001"
+    primary: true
+    note: "La medida y los dos descriptores: el valor de distribución sonora de la ecuación (1), la referencia de campo libre de la ecuación (2), los números únicos de las ecuaciones (3) y (4), el descenso espacial por duplicación de la ecuación (5), el exceso de las ecuaciones (6) a (8), los rangos de distancia de 6.2, los requisitos de fuente del anexo A y la corrección del anexo B. Leída de la BS EN ISO 14257:2001."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1998
+    title: "Acoustics — Recommended practice for the design of low-noise workplaces containing machinery — Part 3: Sound propagation and noise prediction in workrooms"
+    designation: "ISO 11690-3:1998"
+    note: "Qué cabe esperar de los dos descriptores (4.3), las cuatro categorías de método de predicción de la tabla 4, los niveles de detalle de las tablas 1 a 3 con el emparejamiento de la tabla E.1, y el incremento en el puesto de trabajo del anexo C."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2012
+    title: "Acoustics — Measurement of room acoustic parameters — Part 3: Open plan offices"
+    designation: "ISO 3382-3:2012"
+    note: "La misma idea para la palabra en una oficina: una línea de posiciones, un descenso espacial y un nivel a una distancia fija."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2010
+    title: "Acoustics — Determination of sound power levels and sound energy levels of noise sources using sound pressure — Engineering methods for an essentially free field over a reflecting plane"
+    designation: "ISO 3744:2010"
+    note: "La corrección por ruido de fondo que pide la ISO 14257 cuando el margen cae entre 6 dB y 10 dB."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2016
+    title: "Acoustics — Determination of sound power levels of noise sources — Requirements for the performance and calibration of reference sound sources"
+    designation: "ISO 6926:2016"
+    note: "La calibración de la fuente, que el anexo A de la ISO 14257 aprieta después en directividad y estabilidad."
+---
+
+import Scope from '../../../../../components/Scope.astro';
+import ScopeClaim from '../../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../../components/ThemeImage.astro';
+
+Un tiempo de reverberación dice lo que una sala le hace a un decaimiento en el
+tiempo. Dice bastante poco sobre lo que una nave industrial le hace a quien está
+a 20 m de una prensa. Ahí la pregunta es una pregunta sobre la **distancia**:
+cuánto baja el nivel al alejarse, y cuánto más alto está que al aire libre.
+
+La ISO 14257 responde a las dos con una sola medida. Una fuente calibrada se
+coloca donde estaría una máquina, un micrófono se aleja de ella siguiendo un
+trayecto recto, y la curva de nivel frente a distancia es la firma de la sala.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/workroom_spatial_decay.svg" alt="Tres paneles. Izquierda: el valor de distribución sonora frente a la distancia, de dos a cuarenta y ocho metros, en tres bandas de octava, con las tres curvas muy por encima de la línea discontinua de campo libre que cae seis decibelios por duplicación, y el hueco entre la curva de un kilohercio y esa línea sombreado. Centro: diagrama de barras del descenso espacial en tres bandas para los rangos cercano, medio y lejano, todas por debajo de la línea punteada de seis decibelios del campo libre, con la franja de dos a cinco decibelios que espera la norma de diseño sombreada a lo ancho. Derecha: la corrección del anexo B frente a la distancia en dos bandas, mayor cerca de la fuente, con unos dos decibelios a un kilohercio, y decreciente con la distancia, mientras la curva de cuatro kilohercios se queda cerca de cero hasta la última posición" width="100%" />
+
+*La curva, lo que da rango a rango, y la corrección que descuenta la
+directividad propia de la fuente. Los datos son la nave de astillero del
+anexo C.*
+
+## 1. La curva: un nivel referido a la potencia que lo produjo
+
+Un nivel por sí solo no se puede comparar entre dos salas, porque depende de lo
+fuerte que sonara la fuente. Por eso la ISO 14257 trabaja con el **valor de
+distribución sonora**, la ecuación (1): el nivel en una posición, menos el nivel
+de potencia sonora de la fuente que lo produjo.
+
+$$
+D_j(r) = L_{p,j}(r) - L_{W,j}
+$$
+
+En campo libre esa magnitud se conoce exactamente. Una fuente puntual sobre un
+plano reflectante da la ecuación (2), que es la línea contra la que se lee toda
+curva medida:
+
+$$
+D_{\mathrm{ref}}(r) = 20 \lg \frac{r_0}{r} - 11 \ \mathrm{dB}
+$$
+
+con $r_0 = 1$ m. Los 11 dB son $10 \lg (4 \pi r_0^2)$, redondeado.
+
+```python
+from phonometry import room
+
+distances = [2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0]
+levels = [98.9, 95.1, 93.0, 92.0, 91.0, 87.9, 85.8, 83.5, 81.5, 77.0, 75.6]
+
+d = room.sound_distribution_value(levels, 110.8)
+print(d[:3].round(1))                                          # [-11.9 -15.7 -17.8]
+print(room.reference_distribution_value([2.0, 4.0]).round(2))  # [-17.02 -23.04]
+```
+
+A 2 m la curva medida ya está 5 dB por encima del campo libre, y el hueco crece
+con la distancia: eso es la sala, sosteniendo el nivel mucho después de que el
+sonido directo haya caído.
+
+## 2. Dos descriptores, y para qué sirve cada uno
+
+El apartado 6 lee dos números sobre la curva, en un rango de distancias
+declarado.
+
+**DL2, el descenso espacial por duplicación de la distancia**, ecuación (5), es
+la pendiente: el ajuste por mínimos cuadrados de $D$ frente a $\lg r$, pasado de
+década a duplicación y con el signo puesto para que un descenso sea positivo. El
+campo libre da 6 dB. Cualquier sala da menos, y cuánto menos es el número útil.
+
+**DLf, el exceso sobre el campo libre**, ecuaciones (6) a (8), es la altura:
+cuánto por encima del aire libre está la sala. Es lo que le dice a un proyectista
+que una nave tiene 10 dB de más en los puestos alejados.
+
+```python
+res = room.spatial_decay_curve(d, distances, region="middle", far_limit_m=24.0)
+print(round(res.decay_rate_db, 2))    # 4.73 dB por duplicación
+print(round(res.mean_excess_db, 2))   # 7.33 dB
+print(res.region)                     # middle
+```
+
+Responden a preguntas de diseño distintas y no se sustituyen. Una sala puede
+caer deprisa y seguir siendo ruidosa, y una sala con un buen techo absorbente
+puede ser silenciosa en los puestos cercanos y no caer casi nada más allá.
+
+Los rangos de distancia son 6.2: **cercano** de 1 m a $d_1$, **medio** de $d_1$ a
+$d_2$, **lejano** más allá de $d_2$, con 5 m y 16 m como par típico. El rango
+medio es el que lee el trabajo de prevención, y el apartado pide llevarlo hasta
+24 m siempre que la sala dé para ello, que es lo que hace `far_limit_m` arriba.
+
+```python
+print(room.distance_region(12.0))         # middle
+print(room.typical_decay_range("middle")) # (2.0, 5.0)
+print(room.typical_excess_range("middle"))# (2.0, 10.0)
+```
+
+Esos dos últimos rangos son la ISO 11690-3, 4.3: lo que suele dar un local de
+trabajo. Un DL2 de 4,7 dB por duplicación y un exceso de 7,3 dB en el rango medio
+dejan a esta nave dentro de los dos.
+
+## 3. De dónde salen los números
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workroom_path.svg" alt="Sección de una nave industrial. Una fuente de ensayo se apoya en el suelo a tres metros por lo menos de la pared, y un trayecto discontinuo sale de ella paralelo al suelo a un metro cincuenta y cinco, con diez puntos de medida marcados a dos, tres, cuatro, seis, ocho, doce, dieciséis, veinticuatro, treinta y dos y cuarenta y ocho metros. Sobre el trayecto hay un micrófono en su trípode y una persona de pie, y el último punto guarda metro y medio con la pared del fondo. Bajo el suelo, tres cajas marcan las regiones cercana, media y lejana con d1 a cinco metros y d2 a dieciséis. Dos cajas al pie llevan el descenso espacial y el exceso sobre el campo libre" width="100%" />
+
+El trayecto es 5.3.1: paralelo al suelo, empezando en la fuente, a 1,55 m para un
+puesto de pie o a 1,2 m para uno sentado, sin obstáculos en el suelo por debajo y
+sin nada grande a menos de 1,5 m a cada lado. Los puntos son una de las dos
+distribuciones que recomienda 5.3.2, y la de aquí es la logarítmica, que es lo
+que hace sensato ajustar por mínimos cuadrados frente a $\lg r$.
+
+### Cómo se hace la medida
+
+Coloca la fuente donde estaría una máquina, con su centro acústico en el suelo o
+al menos a 0,5 m de altura, y a 3 m como mínimo de cualquier pared u otro objeto
+reflectante. Ponla en marcha y comprueba el margen sobre el ruido de fondo en
+todas las posiciones y en cada una de las seis bandas de octava de 125 Hz a
+4 kHz: con 10 dB o más no hay nada que corregir, entre 6 dB y 10 dB se aplica la
+corrección de la ISO 3744, y por debajo de 6 dB no hay medida que hacer. Recorre
+el trayecto alejándote de la fuente y toma un espectro en cada una de las
+distancias recomendadas, medidas desde el centro acústico y no desde la carcasa.
+Deja el último punto a 1,5 m por lo menos de cualquier pared. Después, si la sala
+lo permite, recorre un segundo trayecto perpendicular al primero: un trayecto
+describe una dirección, y dos describen una sala. Anota la altura del trayecto,
+la posición de la fuente y cualquier obstáculo que no hayas podido evitar, porque
+el informe es lo que hace reproducible la curva.
+
+La propia fuente tiene que cualificarse antes. El anexo A pide más que la
+ISO 6926: su índice de directividad debe quedarse dentro de ± 2 dB hasta 630 Hz,
+subiendo a ± 8 dB en 1 kHz y manteniéndose ahí hasta 5 kHz, su espectro no puede
+saltar más de 8 dB entre tercios de octava contiguos, y su emisión debe ser
+estable en 0,5 dB durante la medida.
+
+```python
+print(room.omnidirectionality_tolerance_db(630.0))   # 2.0
+print(room.omnidirectionality_tolerance_db(800.0))   # 5.0
+print(room.omnidirectionality_tolerance_db(1000.0))  # 8.0
+```
+
+El valor de 800 Hz es una lectura y no una cita: el apartado dice que la
+tolerancia sube «linealmente» entre 630 Hz y 1 kHz sin decir lineal en qué, y el
+índice de banda es la única lectura con la que los dos extremos caen en bandas
+impresas.
+
+## 4. Descontar la curva propia de la fuente
+
+Cerca de la fuente, buena parte de lo que oye el micrófono no es la sala: es la
+directividad propia de la fuente y la reflexión en el suelo bajo ella. El anexo B
+quita las dos. Mide esa misma fuente sobre un plano reflectante, al aire libre o
+en una sala grande, y luego cambia esa curva medida por la teórica de las
+ecuaciones (B.2) a (B.4):
+
+$$
+D_{\mathrm{floor,ref}}(r) = D_{\mathrm{ref}}(r)
++ 10 \lg \left( 1 + \frac{r^2}{r^2 + 4 h_S h_P} \right) \ \mathrm{dB}
+$$
+
+que para una fuente en el suelo se queda en los 3 dB planos de un semiespacio. La
+ecuación (B.1) hace el cambio en energía.
+
+```python
+free_field = [98.8, 94.7, 92.3, 90.3, 88.7, 86.1, 82.6, 79.8, 75.7, 73.7, 67.8]
+reference = room.sound_distribution_value(free_field, 110.8)
+corrected = room.corrected_distribution_value(d, reference, distances)
+
+fixed = room.spatial_decay_curve(corrected, distances, region="middle", far_limit_m=24.0)
+print(round(fixed.decay_rate_db, 2))    # 4.39 dB por duplicación
+print(round(fixed.mean_excess_db, 2))   # 6.73 dB
+```
+
+La corrección mueve la pendiente 0,3 dB por duplicación y el nivel 0,6 dB, que es
+su forma general: inclina poco una curva y la desplaza mucho, porque es mayor
+justo donde empieza la medida.
+
+Esa diferencia es además como la biblioteca encontró un error en el anexo. El
+anexo C imprime 4,4 dB por duplicación para esta banda y este rango, que es la
+cifra **corregida**, y 7,3 dB de exceso, que es la **sin corregir**. Aplicar la
+corrección a un descriptor y no al otro no puede estar bien, y 28 de los 36
+resultados impresos del anexo se salen de su propio redondeo si se intercambian
+los dos. La entrada del registro está en
+[Erratas](/phonometry/es/reference/errata/).
+
+## 5. Un número para seis bandas
+
+Seis bandas de octava son seis números, y un informe suele querer uno. La
+ecuación (3) pondera la curva con el espectro de la máquina que va a estar ahí de
+verdad, y la ecuación (4) fija ese espectro como ruido rosa ponderado A, la
+tabla 1, para poder comparar dos salas sin ninguna máquina en la cabeza.
+
+```python
+by_band = [-11.9, -13.6, -12.5, -11.9, -12.4, -13.6]   # de 125 Hz a 4 kHz
+print(round(room.normalized_distribution_value(by_band), 2))   # -12.58
+```
+
+El apartado 4.2.3 dice por qué el espectro fijo es una normalización y no una
+máquina media: los espectros que se encuentran en la industria son demasiado
+variados para que una media de ellos signifique algo.
+
+## 6. De la medida al diseño
+
+La ISO 11690-3 es la otra mitad del asunto: predecir, antes de construir la nave,
+la curva que mediría la ISO 14257 en ella. Ordena las formas de hacerlo en cuatro
+categorías, una de campo difuso y tres geométricas, y empareja cada una con el
+nivel de detalle con el que hay que alimentarla.
+
+```python
+print(room.prediction_method("2b").family)          # geometrical
+print(room.ROOM_DETAIL_LEVELS[1])
+# the volume and the mean absorption coefficient of the surfaces
+
+print(room.detail_is_sufficient("1", room_detail=3,
+                                fitting_detail=3, source_detail=1).satisfied)   # False
+print(room.detail_is_sufficient("2b", room_detail=3,
+                                fitting_detail=3, source_detail=1).satisfied)   # True
+```
+
+La tabla E.1 se lee en los dos sentidos, que es lo aprovechable. Quien no tiene
+más que un volumen y un coeficiente de absorción medio se queda en el método de
+campo difuso, y quien quiere trazar rayos sobre la forma real de la sala tiene
+que ir a levantar antes una descripción con ese detalle.
+
+El mobiliario y las máquinas son parte de la sala, y 6.2.2 los mide por densidad,
+$q = S/4V$: la superficie de todo lo que hay en la nave partido por cuatro veces
+su volumen. El anexo C responde después a la pregunta más estrecha de cuánto
+añade la sala en el puesto de la propia máquina.
+
+```python
+print(round(room.fitting_density(480.0, 1200.0), 2))    # 0.1
+print(round(room.workstation_level(sound_power_level_db=95.0,
+                                   emission_level_db=85.0,
+                                   absorption_area_m2=200.0), 2))   # 85.79
+print(round(room.total_workstation_level([86.0, 83.0, 80.0]), 2))   # 88.44
+```
+
+El incremento es $10 \lg (1 + 4S/A)$, con $S$ el área que implica la propia
+emisión de la máquina. Es pequeño en una nave bien absorbida y grande en una
+desnuda, y es el término que convierte un catálogo de máquinas silenciosas en un
+taller ruidoso.
+
+## Qué cubre esta guía
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+
+- **ISO 14257:2001**: el valor de distribución sonora de la ecuación (1) y la
+  referencia de campo libre de la ecuación (2); los números únicos de las
+  ecuaciones (3) y (4) con las ponderaciones de la tabla 1; el descenso espacial
+  de la ecuación (5); el exceso de las ecuaciones (6), (7) y (8) con las
+  distancias de evaluación de 6.4.3; los rangos de distancia de 6.2; los
+  requisitos de fuente del anexo A; la corrección del anexo B, ecuaciones (B.1) a
+  (B.4); y las condiciones del apartado 5 como constantes.
+- **ISO 11690-3:1998**: los niveles de detalle de las tablas 1, 2 y 3; las cuatro
+  categorías de la tabla 4 con el emparejamiento de la tabla E.1; los rangos
+  típicos de 4.3; la densidad de mobiliario de 6.2.2; y el incremento en el
+  puesto de trabajo del anexo C.
+- El ejemplo resuelto del anexo C de la ISO 14257 se reproduce banda a banda en
+  la [evidencia de conformidad](/phonometry/es/reference/conformance/).
+
+</ScopeClaim>
+<ScopeClaim status="not-covered" label="No cubierto">
+
+- Predecir la curva. La ISO 11690-3 describe qué tiene que modelar un método de
+  predicción y cuánto detalle necesita; no imprime ninguno, y aquí no hay ni
+  trazado de rayos ni radiosidad.
+- La calibración de la fuente en cámara reverberante, que es la ISO 6926 y la
+  ISO 3741, y el barrido de directividad del anexo A, que necesita un plato
+  giratorio y no una fórmula.
+- La lista completa de contenido del informe del apartado 7, que es una relación
+  de lo que se declara y no una magnitud que calcular.
+
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## Véase también
+
+- [Acústica de oficinas diáfanas](/phonometry/es/buildings/rooms/open-plan-acoustics/):
+  la misma forma de medida, una línea de posiciones y un descenso espacial,
+  preguntada sobre la palabra y no sobre la maquinaria.
+- [Acústica de salas](/phonometry/es/buildings/rooms/room-acoustics/): lo que una
+  sala le hace a un decaimiento en el tiempo, que es la otra mitad de la
+  descripción.
+- [Fuentes imagen y el campo estacionario de la sala](/phonometry/es/buildings/rooms/room-image-sources/):
+  la constante de sala y la distancia crítica, el modelo clásico que esta medida
+  contradice tantas veces.
+- [Techos suspendidos](/phonometry/es/materials/absorbers/suspended-ceilings/): el
+  código de ensayo de producto que hay detrás de la absorción con la que se vende
+  un techo de nave.
+- [Erratas](/phonometry/es/reference/errata/): el defecto de la corrección del
+  anexo C descrito arriba, con la página en la que se leyó.
+
+</SeeAlso>

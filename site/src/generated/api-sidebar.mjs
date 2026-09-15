@@ -121,6 +121,8 @@ export const apiSections = {
       'reference/api/rooms/steady-field',
       'reference/api/rooms/modes',
       'reference/api/rooms/crowd-noise',
+      'reference/api/rooms/spatial-decay',
+      'reference/api/rooms/workroom-prediction',
     ],
   },
   'building': {
@@ -169,6 +171,7 @@ export const apiSections = {
       'reference/api/materials/layered',
       'reference/api/materials/biot',
       'reference/api/materials/slow-sound',
+      'reference/api/materials/suspended-ceilings',
       'reference/api/materials/scattering-diffusion',
       'reference/api/materials/reverberation-room-scattering',
       'reference/api/materials/design',

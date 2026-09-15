@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1145 numerical conformance checks against 421 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1161 numerical conformance checks against 424 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1145 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 85 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1161 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 86 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -137,6 +137,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)
 - [Open-Plan Office Acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/)
 - [Image sources and the steady-state room field (Kuttruff / Vorländer / Bies)](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/)
+- [Spatial sound decay in workrooms (ISO 14257, ISO 11690-3)](https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/)
 - [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/)
 - [Reverberation-time prediction (Sabine · Eyring · Fitzroy · Arau-Puchades)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/)
 - [Sound absorption in enclosed spaces (EN 12354-6)](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/)
@@ -186,6 +187,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/materials/absorbers/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-materials-absorbers.txt)
 - [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/)
+- [Suspended ceilings: the EN 16487 test code](https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/)
 - [Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/)
 - [Impedance Tube](https://jmrplens.github.io/phonometry/materials/absorbers/impedance-tube/)
 - [Porous and Multilayer Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/)
@@ -525,6 +527,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [materials/slow-sound](https://jmrplens.github.io/phonometry/reference/api/materials/slow-sound/)
 - [materials/sound-absorption](https://jmrplens.github.io/phonometry/reference/api/materials/sound-absorption/)
 - [materials/standing-wave](https://jmrplens.github.io/phonometry/reference/api/materials/standing-wave/)
+- [materials/suspended-ceilings](https://jmrplens.github.io/phonometry/reference/api/materials/suspended-ceilings/)
 - [materials/uncertainty](https://jmrplens.github.io/phonometry/reference/api/materials/uncertainty/)
 - [metrology/calibration](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/)
 - [metrology/data-qualification](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/)
@@ -578,7 +581,9 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [rooms/noise-criteria](https://jmrplens.github.io/phonometry/reference/api/rooms/noise-criteria/)
 - [rooms/open-plan](https://jmrplens.github.io/phonometry/reference/api/rooms/open-plan/)
 - [rooms/reverberation-prediction](https://jmrplens.github.io/phonometry/reference/api/rooms/reverberation-prediction/)
+- [rooms/spatial-decay](https://jmrplens.github.io/phonometry/reference/api/rooms/spatial-decay/)
 - [rooms/steady-field](https://jmrplens.github.io/phonometry/reference/api/rooms/steady-field/)
+- [rooms/workroom-prediction](https://jmrplens.github.io/phonometry/reference/api/rooms/workroom-prediction/)
 - [signals/cepstrum](https://jmrplens.github.io/phonometry/reference/api/signals/cepstrum/)
 - [signals/correlation](https://jmrplens.github.io/phonometry/reference/api/signals/correlation/)
 - [signals/envelope](https://jmrplens.github.io/phonometry/reference/api/signals/envelope/)
@@ -10441,6 +10446,11 @@ mirrored sources, its steady-state level from the room constant, and, below the
 Schroeder frequency where both of those give out, the discrete normal modes of
 the shoebox itself.
 
+[Spatial Sound Decay in Workrooms](https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/)
+asks the question a factory hall raises instead: not how long a decay lasts, but
+how far the level falls as you walk away from a machine, and how far above open
+air the room sits while it does.
+
 Before the two prediction pages, one page answers a different question about the
 same room.
 [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/)
@@ -10511,6 +10521,10 @@ speech intelligibility a room affords is quantified by the
   and Schroeder frequency (Bies), and the rectangular-room normal modes with
   their axial, tangential and oblique families, mode count and modal density
   (Long).
+- [Spatial Sound Decay in Workrooms](https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/):
+  the spatial sound distribution curve of a workroom with its two descriptors,
+  the Annex B correction for the source's own curve, and the prediction
+  categories and detail levels that match them at design time.
 - [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/):
   the ANSI/ASA S12.2-2019 NC tangency and RC Mark II ratings.
 - [Reverberation-time prediction (Sabine, Eyring, Arau)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/):
@@ -14025,6 +14039,155 @@ ISO 3382-2:2008 prints as its Equation (A.4). Validated against closed-form
 window geometries and the printed coefficients in the
 [conformance report](https://jmrplens.github.io/phonometry/reference/conformance/); the two integration limits the
 prose of Annex C leaves out are in the [errata register](https://jmrplens.github.io/phonometry/reference/errata/).
+
+---
+
+
+<!-- source: docs/buildings/rooms/workroom-sound-decay.md | canonical: https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/ -->
+Source: https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/
+
+# Spatial sound decay in workrooms (ISO 14257, ISO 11690-3)
+
+A reverberation time says what a room does to a decay in time. It says very
+little about what a factory hall does to a worker standing 20 m from a press.
+The question there is about distance: how much quieter does it get as you walk
+away, and how much louder is it than open air would be? ISO 14257 answers both
+with one measurement. A calibrated source stands where a machine would, a
+microphone walks away from it along a straight path, and the curve of level
+against distance is the room's own signature.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/workroom_spatial_decay_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/workroom_spatial_decay.svg" alt="Three panels: the sound distribution value against distance in three octave bands against the free-field line, the rate of spatial decay by distance range, and the Annex B correction against distance" width="88%"></picture>
+
+## The curve, and the line it is read against
+
+A level on its own cannot be compared between rooms, because it depends on how
+loud the source was. Equation (1) works with the sound distribution value
+`D = L_p - L_W`, the level at a position referred to the sound power of the
+source that produced it. The free field is then known exactly: Equation (2) is
+`D_ref = 20 lg(r_0/r) - 11 dB` with `r_0 = 1 m`, where the 11 dB is
+`10 lg(4 pi r_0^2)` rounded.
+
+```python
+from phonometry import room
+
+distances = [2.0, 3.0, 4.0, 5.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0]
+levels = [98.9, 95.1, 93.0, 92.0, 91.0, 87.9, 85.8, 83.5, 81.5, 77.0, 75.6]
+
+d = room.sound_distribution_value(levels, 110.8)
+print(d[:3].round(1))                                          # [-11.9 -15.7 -17.8]
+print(room.reference_distribution_value([2.0, 4.0]).round(2))  # [-17.02 -23.04]
+```
+
+## Two descriptors, and what each is for
+
+DL2, Equation (5), is the slope: the least-squares fit of `D` against `lg r`,
+converted from a decade to a doubling and signed so a decay is positive. A free
+field gives 6 dB and any room gives less. DLf, Equations (6) to (8), is the
+height: how far above open air the room sits. A room can decay steeply and
+still be loud, so the two do not substitute for each other.
+
+```python
+res = room.spatial_decay_curve(d, distances, region="middle", far_limit_m=24.0)
+print(round(res.decay_rate_db, 2))    # 4.73 dB per doubling
+print(round(res.mean_excess_db, 2))   # 7.33 dB
+```
+
+The ranges are clause 6.2: near from 1 m to `d1`, middle from `d1` to `d2`, far
+beyond `d2`, with 5 m and 16 m the typical pair and the middle range taken to
+24 m whenever the room allows. ISO 11690-3, 4.3, says what to expect there:
+2 dB to 5 dB per doubling and an excess of 2 dB to 10 dB.
+
+## How the measurement goes
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workroom_path_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_workroom_path.svg" alt="Section through a factory hall: the test source on the floor, the measurement path parallel to the floor with ten points on it, the clearances at each end, and the three distance ranges under the floor" width="88%"></picture>
+
+Put the source where a machine would stand, with its acoustical centre on the
+floor or at least 0,5 m above it, and at least 3 m from any wall or other
+reflecting object. Check the margin over the background at every position and in
+every one of the six octave bands from 125 Hz to 4 kHz: 10 dB or more needs no
+correction, between 6 dB and 10 dB takes the ISO 3744 correction, and under 6 dB
+there is no measurement. Walk the path from the source outwards at 1,55 m for a
+standing workplace or 1,2 m for a seated one, with no obstacle on the floor below
+it and nothing large within 1,5 m of either side, taking a band spectrum at each
+of the distances 5.3.2 recommends, measured from the acoustical centre. Stop the
+last point 1,5 m short of any wall, then walk a second path at right angles if
+the room allows it. The source has to qualify first: Annex A asks for a
+directivity index inside ± 2 dB up to 630 Hz, rising to ± 8 dB at 1 kHz.
+
+```python
+print(room.omnidirectionality_tolerance_db(800.0))   # 5.0
+```
+
+## Taking the source's own curve back out
+
+Close to the source, much of what the microphone hears is the source's own
+directivity and the floor reflection under it. Annex B swaps the measured
+free-field curve of that source for the theoretical one of Equations (B.2) to
+(B.4), which for a source on the floor is the flat 3 dB of a half space.
+
+```python
+free_field = [98.8, 94.7, 92.3, 90.3, 88.7, 86.1, 82.6, 79.8, 75.7, 73.7, 67.8]
+reference = room.sound_distribution_value(free_field, 110.8)
+corrected = room.corrected_distribution_value(d, reference, distances)
+
+fixed = room.spatial_decay_curve(corrected, distances, region="middle", far_limit_m=24.0)
+print(round(fixed.decay_rate_db, 2))    # 4.39 dB per doubling
+print(round(fixed.mean_excess_db, 2))   # 6.73 dB
+```
+
+Annex C prints 4,4 dB per doubling, which is the corrected figure, and 7,3 dB of
+excess, which is the uncorrected one. Applying the correction to one descriptor
+and not to the other cannot be right, and 28 of the 36 printed results leave
+their own rounding if the two are swapped; the entry is in
+[Errata](https://jmrplens.github.io/phonometry/reference/errata/).
+
+## One number, and the design half
+
+Equation (3) weights the six bands by the spectrum of the machine that will
+stand there, and Equation (4) fixes that spectrum as A-weighted pink noise so
+two rooms can be compared without a machine in mind.
+
+```python
+by_band = [-11.9, -13.6, -12.5, -11.9, -12.4, -13.6]   # 125 Hz to 4 kHz
+print(round(room.normalized_distribution_value(by_band), 2))   # -12.58
+```
+
+ISO 11690-3 sorts prediction into four categories, one diffuse-field and three
+geometrical, and pairs each with the detail it has to be fed. Table E.1 reads in
+both directions: a reader with a volume and one mean absorption coefficient is
+limited to the diffuse-field method, and ray tracing over the real shape needs a
+description gathered at that level first.
+
+```python
+print(room.detail_is_sufficient("1", room_detail=3,
+                                fitting_detail=3, source_detail=1).satisfied)   # False
+print(round(room.fitting_density(480.0, 1200.0), 2))                           # 0.1
+print(round(room.workstation_level(sound_power_level_db=95.0,
+                                   emission_level_db=85.0,
+                                   absorption_area_m2=200.0), 2))              # 85.79
+```
+
+## What this page does not cover
+
+Predicting the curve. ISO 11690-3 says what a prediction method must model and
+how much detail it needs; it prints none, and neither ray tracing nor radiosity
+is implemented here. Nor the reverberation-room calibration of the source, which
+is ISO 6926 and ISO 3741, nor the directivity survey of Annex A, which needs a
+turntable rather than a formula, nor the reporting checklist of clause 7.
+
+## See also
+
+- [Open-plan office acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/): the same
+  shape of measurement asked about speech rather than machinery.
+- [Room acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/): what a room does to a decay in time.
+- [Image sources and the steady-state room field](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/): the
+  room constant and the critical distance this measurement so often contradicts.
+- [Suspended ceilings (EN 16487)](https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/):
+  the product test code behind the absorption a workroom ceiling is sold on.
+- [Errata in published sources](https://jmrplens.github.io/phonometry/reference/errata/): the Annex C correction defect
+  above, and the two constants of Equations (5) and (8) that differ by 0,3 %.
+- API reference: [`room.spatial_decay`](https://jmrplens.github.io/phonometry/reference/api/rooms/spatial-decay/)
+  and [`room.workroom_prediction`](https://jmrplens.github.io/phonometry/reference/api/rooms/workroom-prediction/).
 
 ---
 
@@ -31877,6 +32040,12 @@ letter class that absorber datasheets quote, and the ISO 12999-2 measurement
 uncertainty of both. It also answers the recurring question of when a
 reverberation-room number and a tube number can, and cannot, be compared.
 
+[Suspended Ceilings: the EN 16487 Test Code](https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/)
+is what that product scale needs to be reproducible for one product family: the
+specimen size, the mounting and the plenum depth a ceiling is measured at, the
+air-absorption correction the room has to stay under, and the reproducibility
+between laboratories that following all of it buys.
+
 [Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/) is the material
 scale: the ISO 9053-1 static and ISO 9053-2 alternating determination of the
 airflow resistance, specific resistance and resistivity σ, the parameter that
@@ -31909,6 +32078,9 @@ meshed cell.
 - [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/):
   the ISO 354 reverberation-room measurement, the ISO 11654 weighted rating
   and class, and the ISO 12999-2 measurement uncertainty.
+- [Suspended Ceilings: the EN 16487 Test Code](https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/):
+  the specimen geometry, the type E mounting depth, the air-absorption cap and
+  Table 1, the reproducibility between European laboratories.
 - [Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/): the ISO 9053
   static and alternating methods for the airflow resistance and resistivity.
 - [Impedance Tube](https://jmrplens.github.io/phonometry/materials/absorbers/impedance-tube/): normal-incidence
@@ -33158,6 +33330,121 @@ ISO 10534-1/-2 and ASTM E2611 for the [impedance tube](https://jmrplens.github.i
 ISO 354 / ISO 11654 for
 [random-incidence absorption and rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/)) live in
 their own guides.
+
+---
+
+
+<!-- source: docs/materials/absorbers/suspended-ceilings.md | canonical: https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/ -->
+Source: https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/
+
+# Suspended ceilings: the EN 16487 test code
+
+EN ISO 354 measures the sound absorption of a specimen in a reverberation room
+and leaves a good deal to the laboratory: how large the specimen is, how it is
+mounted, how much air is behind it. For most materials those choices move the
+answer by less than the measurement uncertainty. For a suspended ceiling they do
+not: a tile absorbs partly by itself and partly through the plenum behind it, so
+a laboratory that hangs it 400 mm below the ceiling has measured a different
+product from one that hangs it at 150 mm. EN 16487 is a test code; it adds no
+measurement of its own and fixes the arrangement so the one EN ISO 354 describes
+gives the same answer everywhere.
+
+## The specimen is a fixed size, and the mounting is the product
+
+4.1.1.1.1 asks for a specimen as close to 10,80 m2 as the product allows, built
+from test objects of 0,6 m by 0,6 m butted together with no seal in the joints,
+the exposed face level with the top of the mounting fixture and the edges at
+10 degrees or more to the nearest room wall. For the type E mounting a ceiling
+actually uses, 4.1.1.2.3.1 fixes the overall depth of construction at 200 mm and
+says that this is the depth the data for CE marking is compiled at.
+
+```python
+from phonometry import materials
+
+check = materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=200.0)
+print(check.satisfied)            # True
+print(check.ce_marking_depth)     # True
+print(materials.mounting_type("E"))
+# suspended from a hard surface with an air space behind it
+```
+
+The area is a target and not a tolerance, so the check reports the difference
+and leaves the judgement to the laboratory. Of the rest it judges the three it
+is given: a substructure no more than 30 mm wide and 50 mm deep, a mounting
+fixture of at least 20 kg/m2, and a deflection of no more than 5 mm. Leaving one
+of those raises a `SuspendedCeilingWarning` that says which. The 0,6 m pitch of
+the substructure and the 50 mm by 50 mm supports at least 1,2 m apart are
+published as constants to build to, and describe how the specimen was hung
+rather than a measurement taken on it, so the call cannot check them.
+
+## How the measurement goes
+
+Build the specimen to 10,80 m2 out of whole test objects, butted together, with
+the joints unsealed and the perimeter covered by the mounting fixture. Hang it at
+200 mm overall depth if the result is to support CE marking, on a substructure
+inside the 30 mm by 50 mm section, and check the deflection at the worst point.
+Set the specimen edges at an angle to the room walls. Measure the empty room and
+then the room with the specimen in it as EN ISO 354 prescribes, holding
+temperature and humidity steady between the two runs: the correction below is
+the difference between them, and it is a difference of days rather than of
+ceilings.
+
+## The air in the room is part of the answer
+
+The absorption coefficient comes from two reverberation times measured on two
+occasions, so a change of temperature or humidity between them shows up as
+absorption the specimen never had. 4.2.1 caps the whole effect: the correction
+`4V(m_2 - m_1)/S` shall not exceed 0,05 at any frequency, and 4.2.2 asks for at
+least 50 % relative humidity.
+
+```python
+correction = materials.air_absorption_correction(
+    volume_m3=200.0,
+    specimen_area_m2=10.8,
+    attenuation_with=[0.0011, 0.0013, 0.0018, 0.0028, 0.0055, 0.0170],
+    attenuation_empty=[0.0010, 0.0012, 0.0016, 0.0025, 0.0050, 0.0160],
+)
+print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
+```
+
+That last band is over the cap and the library says so rather than returning it
+quietly: the answer is a second measurement of the empty room, which is what 6.3
+asks for.
+
+## What the whole thing buys
+
+Table 1 is the point of the exercise: the reproducibility between European
+laboratories from the round robin of Annex A.
+
+```python
+print(materials.reproducibility_uncertainty().round(2))
+# [0.23 0.23 0.11 0.1  0.1  0.13]
+print(materials.WEIGHTED_UNCERTAINTY)       # 0.08
+print(materials.EN16487_COVERAGE_FACTOR)    # 2.8
+```
+
+Two things are worth reading twice. The figures are an expanded uncertainty, with
+the note under the table multiplying the ISO 5725-6 reproducibility standard
+deviation by 2,8 rather than by the usual 2. And 6.2 says plainly that they hold
+for a plane absorber with the type E mounting at 200 mm and that nothing has been
+investigated for any other absorber or mounting, which leaves a baffle, a raft or
+a free-hanging unit outside them.
+
+## What this page does not cover
+
+The measurement itself, which is EN ISO 354; discrete absorbers, baffles and
+rafts measured as objects rather than as a plane; and the product requirements of
+EN 13964 beyond the definitions and the CE marking depth this code refers to.
+
+## See also
+
+- [Measuring sound absorption](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/): the reverberation-room
+  method this code constrains, with the Sabine coefficient and its rating.
+- [Spatial sound decay in workrooms](https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/):
+  what an absorbing ceiling is bought for, measured in the finished hall.
+- [Room-noise criteria](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/): the target the
+  absorption is chosen against.
+- API reference: [`materials.absorbers.suspended_ceilings`](https://jmrplens.github.io/phonometry/reference/api/materials/suspended-ceilings/).
 
 ---
 
@@ -40445,6 +40732,22 @@ documents, one page per module.
 | `CrowdNoiseResult` | `dataclass` | **Crowd self-noise result.**<br>• `talkers`, `absorption_areas`, `levels` [dB] (areas × talkers)<br>• `signal_level` [dB], `communication_level` [dB], `distance`, `sound_power_level`, `directivity`<br>• `speech_to_noise()` [dB]<br>• `.plot()`: level vs occupancy per absorption | `c.levels, c.signal_level`<br>`c.plot()` |
 | `speech_direct_level` / `crowd_noise_level` / `speech_to_noise_ratio` / `absorption_per_table` | `function` | **Crowd-noise building blocks (Long Eqs. 17.50–17.54).**<br>• `speech_direct_level(r)` = `Lw + 10 lg(Q/4πr²)` [dB]<br>• `crowd_noise_level(N, A)` = `Lw + 10 lg N + 10 lg(4/A)` [dB]<br>• `speech_to_noise_ratio(r, A_tab)` [dB]<br>• `absorption_per_table(r, L_SN)` [m²]: the inverse | `crowd_noise_level(20, 20.0)  # 76`<br>`absorption_per_table(1.0, -6.0)  # 6.31` |
 | `NORMAL_VOICE_POWER_LEVEL` / `TALKER_DIRECTIVITY` / `COMMUNICATION_SNR` / `PRIVACY_SNR` | `constant` | **Crowd-noise defaults (Long Ch. 17).**<br>• 70 dB re 1 pW per talker, Q = 2<br>• −6 dB communication limit (Eq. 17.53), −9 dB privacy limit (Eq. 17.54) | `absorption_per_table(1.0, COMMUNICATION_SNR)` |
+| `sound_distribution_value` / `reference_distribution_value` / `ISO14257_REFERENCE_DISTANCE_M` / `FREE_FIELD_OFFSET_DB` | `function` / `constant` | **The curve a workroom is judged by, ISO 14257 Eqs. (1) and (2).**<br>• `sound_distribution_value(levels, power_levels)`: D = L_p − L_W, the level at a position referred to the power of the source that made it<br>• `reference_distribution_value(distances)`: D_ref = 20 lg(r_0/r) − 11 dB, the free field the same source would give, with r_0 = 1 m<br>• the 11 dB is 10 lg(4 π r_0²) rounded, which is why a free field slopes 6 dB per doubling and starts where it does | `d = room.sound_distribution_value(levels, 110.8)`<br>`room.reference_distribution_value([2.0, 4.0])  # -17.02, -23.04` |
+| `spectrum_distribution_value` / `normalized_distribution_value` / `PINK_NOISE_WEIGHTS_DB` / `NORMALIZED_OFFSET_DB` | `function` / `mapping` / `constant` | **The six bands collapsed into one number, Eqs. (3) and (4).**<br>• `spectrum_distribution_value(values, machine_power_levels)`: the curve weighted by the spectrum of the machine that will stand there<br>• `normalized_distribution_value(values)`: the same sum with A-weighted pink noise fixed as the spectrum, Table 1, minus 6,2 dB<br>• 4.2.3 says why that spectrum is a normalisation and not an average machine: real spectra are too varied for an average to mean anything | `room.normalized_distribution_value(d_by_band)` |
+| `spatial_decay_rate` / `DECADE_TO_DOUBLING` | `function` / `constant` | **DL2, the rate of spatial decay per distance doubling, Eq. (5).**<br>• the least-squares slope of D against lg r, times 0,3, sign flipped so a decay is positive<br>• 6 dB is the free field; a workroom gives less, and how much less is what the room is worth<br>• `DECADE_TO_DOUBLING` is the printed 0,3, which is lg 2 rounded | `room.spatial_decay_rate(d, distances)  # 4.39` |
+| `level_excess` / `mean_level_excess` / `level_excess_at` / `EVALUATION_DISTANCES_M` | `function` / `mapping` | **DLf, how far the room sits above a free field, Eqs. (6) to (8).**<br>• `level_excess`: D − D_ref at every position<br>• `mean_level_excess`: the average of Eq. (7), a trapezoid over lg r, so the wide gaps of a logarithmic distribution weigh what they should<br>• `level_excess_at`: the height of the fitted line over the free-field line at one distance, which a single outlying position moves much less<br>• `EVALUATION_DISTANCES_M`: 4 m, 10 m and 30 m, the conventional distances 6.4.3 reads the line at | `room.mean_level_excess(d, distances)  # 6.73` |
+| `spatial_decay_curve` / `SpatialDecayResult` | `function` / `dataclass` | **One region of the path, with both descriptors, clause 6.**<br>• `region`: 'near', 'middle', 'far' or 'whole'; `near_limit_m` d₁ and `far_limit_m` d₂ place the boundaries<br>• result: `distances_m`, `distribution_values_db`, `reference_values_db`, `level_excess_db`, `decay_rate_db`, `mean_excess_db`, `region`, `band_hz`<br>• `.plot()`: the curve, the free field it is judged by, and the fitted slope | `res = room.spatial_decay_curve(d, distances, region="middle")`<br><br>• `res.decay_rate_db`, `res.mean_excess_db` |
+| `distance_region` / `NEAR_REGION_START_M` / `TYPICAL_NEAR_LIMIT_M` / `TYPICAL_FAR_LIMIT_M` / `PREFERRED_MIDDLE_LIMIT_M` | `function` / `constant` | **The three distance ranges of 6.2.**<br>• near from 1 m to d₁, middle from d₁ to d₂, far beyond d₂, with 5 m and 16 m the typical pair<br>• the middle region is the one health and safety work reads, and 6.2 b) asks for it to reach 24 m whenever the room allows<br>• distances are measured from the acoustical centre of the source | `room.distance_region(12.0)  # 'middle'` |
+| `floor_reference_value` / `corrected_distribution_value` / `SOURCE_ON_FLOOR_HEIGHT_M` | `function` / `constant` | **Taking the source's own curve back out, Annex B.**<br>• `floor_reference_value(distances, source_height_m=…, path_height_m=…)`: D_ref plus 10 lg(1 + r²/(r² + 4 h_S h_P)), which is Eq. (B.4)'s 3 dB for a source on the floor<br>• `corrected_distribution_value(values, measured_reference, distances, …)`: Eq. (B.1) swaps the measured free-field curve of that source for the theoretical one, so what is left is the room<br>• a source is "on the floor" at 0,5 m or under, which is where the half-space form applies | `room.corrected_distribution_value(d, d_free, distances, source_height_m=0.0)` |
+| `omnidirectionality_tolerance_db` / `OMNIDIRECTIONAL_TOLERANCE_DB` / `OMNIDIRECTIONAL_RAMP_HZ` / `MAX_DIRECTIVITY_INDEX_DB` / `ADJACENT_BAND_LIMIT_DB` / `STABILITY_TOLERANCE_DB` | `function` / `constant` / `mapping` | **What makes a source fit for the test, Annex A.**<br>• ± 2 dB up to 630 Hz, a linear rise to ± 8 dB at 1 kHz and ± 8 dB from there to 5 kHz, taken across the three one-third-octave bands that span the rise<br>• the source's own spectrum may not step more than 8 dB between adjacent one-third octaves, and its output must hold to 1 dB below 160 Hz and 0,5 dB above 200 Hz | `room.omnidirectionality_tolerance_db(800.0)  # 5.0` |
+| `SPATIAL_DECAY_BANDS_HZ` / `ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB` / `ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB` / `MIN_SOURCE_TO_WALL_M` | `constant` | **The conditions of clause 5, as numbers.**<br>• the six octave bands from 125 Hz to 4 kHz the curve is measured in<br>• the source at least 10 dB over the background at every position; between 6 dB and 10 dB an ISO 3744 correction is made, and under 6 dB there is no measurement<br>• the acoustical centre of the source at least 3 m from any wall or reflecting object other than the floor | `room.SPATIAL_DECAY_BANDS_HZ  # (125.0, ..., 4000.0)` |
+| `SpatialDecayWarning` | `warning class` | **The measurement is outside a condition ISO 14257 states.**<br>• fewer positions in a region than the regression wants, a background margin under what 5.1.4 asks, a path that leaves the distances the annex works in | `warnings.simplefilter('error', SpatialDecayWarning)` |
+| `prediction_method` / `PREDICTION_METHODS` / `PredictionMethod` | `function` / `mapping` / `dataclass` | **The four ways ISO 11690-3 lets you predict a workroom, Table 4.**<br>• '1' is the diffuse-field method, for a room whose field may be treated as diffuse; '2a', '2b' and '2c' are geometrical, in growing order of what they model<br>• `PredictionMethod`: `category`, `family`, `rooms`, and the detail levels Table E.1 asks it to be fed (`room_detail`, `fitting_detail`, `source_detail`) | `room.prediction_method("2b").family  # 'geometrical'` |
+| `detail_is_sufficient` / `DetailVerdict` / `RECOMMENDED_DETAIL` | `function` / `dataclass` / `mapping` | **Whether the data in hand is what the method asks for, Table E.1.**<br>• `detail_is_sufficient(category, room_detail=…, fitting_detail=…, source_detail=…)`<br>• verdict: `satisfied`, and `room_ok` / `fittings_ok` / `sources_ok` so a refusal says which of the three is short<br>• the annex is a recommendation, so this reports rather than raises | `room.detail_is_sufficient("2c", room_detail=2, fitting_detail=2, source_detail=1)` |
+| `ROOM_DETAIL_LEVELS` / `FITTING_DETAIL_LEVELS` / `SOURCE_DETAIL_LEVELS` | `mapping` | **How much of the room, the fittings and the sources a model carries, Tables 1 to 3.**<br>• room: from the volume and one mean absorption coefficient up to the actual shape with absorption distributed over it<br>• fittings: from ignored up to their real shape and location, with shielding and reflection<br>• sources: omnidirectional points, points with a directivity, complex sources | `room.ROOM_DETAIL_LEVELS[2]` |
+| `fitting_density` | `function` | **q = S/4V, the density of the fittings, NOTE 3 of 6.2.2.**<br>• `surface_area_m2`: the total surface of everything standing in the room<br>• `volume_m3`: the volume they stand in | `room.fitting_density(480.0, 1200.0)  # 0.1` |
+| `workstation_level_increase` / `workstation_level` / `total_workstation_level` | `function` | **What the room adds at the machine's own workstation, Annex C.**<br>• `workstation_level_increase(sound_power_level_db=…, emission_level_db=…, absorption_area_m2=…)`: 10 lg(1 + 4S/A) with S = 10^((L_WA − L_pA)/10), the room reflecting back what the machine emits<br>• `workstation_level`: the emission level with that increase on it<br>• `total_workstation_level(contributions, existing_level_db=…)`: the energy sum of every machine, and of what was already there | `room.workstation_level(sound_power_level_db=95.0, emission_level_db=85.0, absorption_area_m2=200.0)` |
+| `typical_decay_range` / `typical_excess_range` / `TYPICAL_DECAY_RANGE_DB` / `TYPICAL_EXCESS_RANGE_DB` | `function` / `mapping` | **What 4.3 says the two descriptors usually are, region by region.**<br>• DL2: 5 dB to 6 dB near, 2 dB to 5 dB in the middle, over 6 dB far away<br>• DLf: 2 dB to 10 dB in the middle region, which is the one the clause prints a range for<br>• an open bound comes back as `None`, so a range is a pair to read rather than a limit to enforce | `room.typical_decay_range("middle")  # (2.0, 5.0)` |
 | `airborne_insulation` | `function` | **Field airborne insulation (ISO 16283-1).**<br>• `l1`/`l2`: Source/receiving levels [dB], 1D or (positions, bands)<br>• `t2`: Receiving-room T per band [s]<br>• `area`: Partition S [m²] (for R')<br>• `volume`: Receiving V [m³] (for R')<br>• `t0`: Reference T0 [s] (Default: 0.5)<br>• `frequencies` [Hz] (required with either low-frequency argument)<br>• `source_low_frequency` / `receiver_low_frequency`: `LowFrequencyProcedure` per room (ISO 16283-1 Clause 8)<br>• Warns (`LowFrequencyWarning`) when `volume` rounds below 25 m³, `frequencies` names 50/63/80 Hz and no `receiver_low_frequency` is given | `ins = building.airborne_insulation(l1, l2, t2, area=10, volume=50)`<br><br>• `AirborneInsulationResult` |
 | `weighted_rating` | `function` | **Single-number rating + C/Ctr (ISO 717-1).**<br>• `values_by_band`: 16 thirds or 5 octaves [dB]<br>• `bands`: 'third-octave', 'octave' or None | `w = building.weighted_rating(R)`<br><br>• `WeightedRatingResult` (Rw, C, Ctr) |
 | `weighted_rating_extended` | `function` | **Rating + enlarged-range terms (ISO 717-1 Annex B).**<br>• `values_by_band` [dB] with `frequencies` [Hz] (None = the 16 core bands)<br>• `one_decimal`: 0.1 dB shift + one-decimal reductions for uncertainty statements (Default: False) | `ext = building.weighted_rating_extended(r, freqs)`<br><br>• `ExtendedWeightedRatingResult` (rating, c, ctr, c_50_3150 … ctr_100_5000) |
@@ -41603,6 +41906,11 @@ documents, one page per module.
 | `OCTAVE_BANDS` | `tuple` | **ISO 11654 octave rating bands [Hz].**<br>(250, 500, 1000, 2000, 4000) | `OCTAVE_BANDS  # (250, ..., 4000)` |
 | `THIRD_OCTAVE_BANDS` | `tuple` | **ISO 11654 one-third-octave input bands [Hz].**<br>200 Hz to 5000 Hz (15 bands) | `THIRD_OCTAVE_BANDS[0]  # 200` |
 | `REFERENCE_CURVE` | `mapping` | **ISO 11654 Figure 1 reference curve (read-only).**<br>Keyed by octave band [Hz] → coefficient | `REFERENCE_CURVE[250]  # 0.8` |
+| `check_ceiling_specimen` / `CeilingSpecimenCheck` / `TARGET_SPECIMEN_AREA_M2` / `TEST_OBJECT_SIZE_M` / `TYPE_E_DEPTH_MM` / `MAX_DEFLECTION_MM` | `function` / `dataclass` / `constant` | **The test arrangement EN 16487 fixes, 4.1.1.**<br>• 10,80 m² of specimen, laid out in 0,6 m by 0,6 m objects, so a laboratory's own room does not change the answer<br>• mounting type E hangs it 200 mm below the ceiling; the panels may sag no more than 5 mm<br>• check: `area_error_m2`, `deflection_ok`, `substructure_ok`, `fixture_ok`, `ce_marking_depth`, `satisfied` | `materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=200.0)` |
+| `mounting_type` / `MOUNTING_TYPES` / `SUBSTRUCTURE_LIMITS_MM` / `SUBSTRUCTURE_SPACING_M` / `SUPPORT_SECTION_MM` / `MIN_SUPPORT_SPACING_M` / `MIN_FIXTURE_DENSITY_KG_M2` / `MIN_ROOM_EDGE_ANGLE_DEG` | `function` / `mapping` / `constant` | **How the specimen hangs, and on what.**<br>• the four mountings of EN ISO 354 Annex B this code uses: A against a hard surface, B glued with a 3 mm space, E suspended, J a discrete absorber<br>• the exposed substructure at most 30 mm wide and 50 mm deep, on a 0,6 m grid, hung from 50 mm by 50 mm supports at least 1,2 m apart<br>• a fixture counts as part of the specimen from 20 kg/m², and the specimen edges sit at least 10° off the room's own | `materials.mounting_type("E")` |
+| `air_absorption_correction` / `AIR_CORRECTION_LIMIT` / `MIN_RELATIVE_HUMIDITY_PERCENT` | `function` / `constant` | **What the air in the room absorbs, 4.2.1.**<br>• 4V(m₂ − m₁)/S, as an absorption coefficient, from the attenuation with and without the specimen<br>• over 0,05 the result is not reported: the air is doing too much of the absorbing to attribute it to the ceiling<br>• the room is held at 50 % relative humidity or more, which is what keeps that term small at 4 kHz | `materials.air_absorption_correction(volume_m3=200.0, specimen_area_m2=10.8, attenuation_with=m2, attenuation_empty=m1)` |
+| `reproducibility_uncertainty` / `CEILING_UNCERTAINTY` / `WEIGHTED_UNCERTAINTY` / `EN16487_COVERAGE_FACTOR` | `function` / `mapping` / `constant` | **What two laboratories will differ by, Table 1.**<br>• the reproducibility standard deviation band by band: 0,23 at 125 Hz and 250 Hz, then 0,11, 0,10, 0,10 and 0,13 up to 4 kHz<br>• 0,08 for the weighted single number α_w<br>• expanded with k = 2,8, which is the factor the standard prints rather than the usual 2 | `materials.reproducibility_uncertainty()  # one per octave band` |
+| `SuspendedCeilingWarning` | `warning class` | **The test arrangement is outside a condition EN 16487 states.**<br>• a deflection over 5 mm, a substructure over 30 mm by 50 mm, a fixture under 20 kg/m², a type E plenum that is not 200 mm, an air correction over 0,05<br>• the specimen area is not one of them: 4.1.1.1.1 asks for "as close to 10,80 m² as possible", which is a target rather than a tolerance, so the check reports the difference and leaves the judgement to the laboratory | `warnings.simplefilter('error', SuspendedCeilingWarning)` |
 | `speed_of_sound_iso17497` | `function` | **Speed of sound (ISO 17497-1 Eq. 2).**<br>• `temperature_c` t [°C] | `speed_of_sound_iso17497(temperature_c=20.0)  # 343.2`<br><br>• 343.2 √((273.15 + t)/293.15) [m/s] |
 | `air_attenuation_coefficient` | `function` | **Energy attenuation m from ISO 9613-1 α (ISO 17497-1 Eq. 3).**<br>• `pressure_attenuation_db_per_m`: α [dB/m] | `air_attenuation_coefficient(0.005)  # 0.00115`<br><br>• m ≈ α/4.343 [1/m] |
 | `random_incidence_absorption` | `function` | **Random-incidence absorption αs (ISO 17497-1 Eq. 1).**<br>• `volume` V [m³], `area` S [m²]<br>• `c1`/`T1`: static base plate, no sample<br>• `c2`/`T2`: with the test sample<br>• `m1`/`m2`: air attenuation [1/m] (Default: 0) | `a_s = materials.random_incidence_absorption(200.0, 10.8, c1=343.0, t1=2.5, c2=343.2, t2=1.8)  # 0.463` |
@@ -56131,7 +56439,7 @@ the normative PDF fiche.
 - [Filter Architecture Gallery](https://jmrplens.github.io/phonometry/signals/filters/filter-gallery/): choose an architecture and inspect responses
 - [Calibration and dBFS](https://jmrplens.github.io/phonometry/signals/metrology/calibration/): get real-world SPL values
 - [Why phonometry](https://jmrplens.github.io/phonometry/start/why-phonometry/): the conformance-first design philosophy
-- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1145 checks
+- [Conformance report](https://jmrplens.github.io/phonometry/reference/conformance/): the expected and computed value of all 1161 checks
 - [API Reference](https://jmrplens.github.io/phonometry/reference/api/): every parameter of every function
 - [Bibliography](https://jmrplens.github.io/phonometry/reference/bibliography/): the books and papers behind every guide, each with a verified link
 
@@ -56814,7 +57122,7 @@ sample from the metrology core:
 | IEC 61252:1993 | The personal sound exposure quantities, `sound_exposure()` and the normalized 8 h level `lex_8h()`; IEC 61252:2025 has since superseded this print, and the transcription still targets the 1993+A2 text | `tests/signals/test_levels.py` |
 
 The same discipline applies far beyond the metrology core: today the suite runs
-1145 numerical conformance checks across 85 domains and 421 standards, covering
+1161 numerical conformance checks across 86 domains and 424 standards, covering
 psychoacoustics and speech intelligibility, room, building and materials
 acoustics, human and machine vibration, environmental, aircraft, rotorcraft
 and underwater noise, electroacoustics, broadcast loudness, industrial noise

@@ -1,0 +1,213 @@
+---
+title: "Suspended Ceilings: the EN 16487 Test Code"
+description: "Why two laboratories measuring the same ceiling tile used to disagree, and what EN 16487 fixes to stop it: a specimen of 10,80 square metres in 0,6 metre objects, a type E mounting 200 millimetres deep, a substructure and a deflection with limits, an air-absorption correction capped at 0,05, and Table 1, the reproducibility the whole thing buys."
+references:
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2014
+    title: "Acoustics — Test code for ceilings — Application of absorption products"
+    designation: "EN 16487:2014"
+    primary: true
+    note: "The test code: the specimen geometry of 4.1.1, the mountings of 4.1.1.2, the air-absorption cap of 4.2.1 and the humidity of 4.2.2, and Table 1, the reproducibility of the round robin of Annex A. Read from BS EN 16487:2014."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2003
+    title: "Acoustics — Measurement of sound absorption in a reverberation room"
+    designation: "EN ISO 354:2003"
+    note: "The measurement this code constrains, and the source of the mounting letters A, B, E and J of Annex B and of the air-absorption correction of Formulae (8) and (9)."
+  - type: standard
+    organization: "European Committee for Standardization"
+    year: 2014
+    title: "Suspended ceilings — Requirements and test methods"
+    designation: "EN 13964:2014"
+    note: "The product standard the definitions come from, and the CE marking the 200 mm depth is fixed for."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Sound absorbers for use in buildings — Rating of sound absorption"
+    designation: "ISO 11654:1997"
+    note: "The weighted rating the reproducibility of 0,08 applies to."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+
+EN ISO 354 measures the sound absorption of a specimen in a reverberation room,
+and leaves a good deal to the laboratory: how large the specimen is, how it is
+mounted, how much air is behind it. For most materials those choices move the
+answer by less than the measurement uncertainty. For a suspended ceiling they do
+not. A ceiling tile absorbs partly by itself and partly through the plenum
+behind it, so a laboratory that hangs it 400 mm below the ceiling gets a
+different product from one that hangs it at 150 mm.
+
+EN 16487 closes those choices. It is a **test code**: it adds no measurement of
+its own, it fixes the arrangement so that the one EN ISO 354 describes gives the
+same answer in Bregenz as in Bilbao.
+
+## 1. The specimen is a fixed size
+
+4.1.1.1.1 asks for a specimen area as close to 10,80 m² as the product allows,
+built from test objects of 0,6 m by 0,6 m butted together with no seal in the
+joints. The exposed face sits level with the top of the mounting fixture, the
+joint between the two is taped, and the edges of the specimen are set at an
+angle of at least 10° to the nearest room wall, so that the specimen and the
+room do not share a direction.
+
+```python
+from phonometry import materials
+
+check = materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=200.0)
+print(check.satisfied)            # True
+print(check.ce_marking_depth)     # True
+print(check.area_error_m2)        # 0.0
+```
+
+The area is a target and not a tolerance: the clause says "as close to 10,80 m²
+as possible", so the check reports how far off you are and leaves the judgement
+to the laboratory. A 9,6 m² specimen comes back satisfied, with the 1,2 m²
+shortfall reported as a number rather than as a refusal.
+
+## 2. The mounting is the product
+
+Four mountings of EN ISO 354 Annex B are used here, and a ceiling normally uses
+the fourth of them.
+
+```python
+print(materials.mounting_type("A"))
+# attached directly against a hard surface, with no air space
+print(materials.mounting_type("E"))
+# suspended from a hard surface with an air space behind it
+```
+
+For that type E mounting, 4.1.1.2.3.1 fixes the overall depth of construction at
+**200 mm**, and says in as many words that this is the depth the data for CE
+marking is compiled at. Another depth may be measured and reported, but the
+result is then a measurement of that arrangement rather than the one the
+marking rests on.
+
+```python
+import warnings
+
+with warnings.catch_warnings(record=True) as raised:
+    warnings.simplefilter("always")
+    deep = materials.check_ceiling_specimen(area_m2=10.8, mounting="E", depth_mm=400.0)
+print(deep.satisfied)           # True
+print(deep.ce_marking_depth)    # False
+print(len(raised))              # 1
+```
+
+The rest of the arrangement carries numbers too: a substructure no more than
+30 mm wide and 50 mm deep on a 0,6 m pitch, supports of 50 mm by 50 mm at least
+1,2 m apart, a mounting fixture of solid material at 20 kg/m² or more, and a
+specimen that deflects no more than 5 mm anywhere. The three the check is given,
+the substructure section, the fixture density and the deflection, are judged,
+and leaving one raises a `SuspendedCeilingWarning` that says which. The pitch of
+the substructure and the section and spacing of the supports are published as
+`SUBSTRUCTURE_SPACING_M`, `SUPPORT_SECTION_MM` and `MIN_SUPPORT_SPACING_M` to
+build to: they describe how the specimen was hung rather than a measurement
+taken on it, so nothing in the call can check them.
+
+### How the measurement goes
+
+Build the specimen to 10,80 m² out of whole test objects, butted together, with
+the joints unsealed and the perimeter covered by the mounting fixture. Hang it
+at 200 mm overall depth if the result is to support CE marking, on a
+substructure inside the 30 mm by 50 mm section, and check the deflection at the
+worst point. Set the specimen edges at an angle to the room walls. Measure the
+empty room first and then the room with the specimen in it, as EN ISO 354
+prescribes, holding the temperature and the humidity steady between the two
+runs: the correction below is the difference between them, and it is a
+difference of days rather than of ceilings.
+
+## 3. The air in the room is part of the answer
+
+The reverberation time of an empty room depends on the air in it, and at 4 kHz
+in a dry room the air absorbs a great deal. Since the absorption coefficient is
+obtained from two reverberation times measured on two occasions, a change in
+temperature or humidity between them shows up as absorption that the specimen
+never had.
+
+4.2.1 caps the whole effect. The correction is
+
+$$
+\Delta\alpha = \frac{4V(m_2 - m_1)}{S}
+$$
+
+and the test conditions "shall be so chosen" that it does not exceed 0,05 at any
+frequency. 4.2.2 adds the practical half of that: at least 50 % relative
+humidity in the room.
+
+```python
+correction = materials.air_absorption_correction(
+    volume_m3=200.0,
+    specimen_area_m2=10.8,
+    attenuation_with=[0.0011, 0.0013, 0.0018, 0.0028, 0.0055, 0.0170],
+    attenuation_empty=[0.0010, 0.0012, 0.0016, 0.0025, 0.0050, 0.0160],
+)
+print(correction.round(3))     # [0.007 0.007 0.015 0.022 0.037 0.074]
+```
+
+That last band is over the cap, and the library says so rather than returning it
+quietly: the answer is a second measurement of the empty room, which is what 6.3
+asks for.
+
+## 4. What the whole thing buys
+
+Table 1 is the point of the exercise. It is the reproducibility between European
+laboratories, from the round robin reported in Annex A: the spread you should
+expect when the same ceiling is measured in two places that both follow this
+code.
+
+```python
+print(materials.reproducibility_uncertainty().round(2))
+# [0.23 0.23 0.11 0.1  0.1  0.13]
+print(materials.WEIGHTED_UNCERTAINTY)       # 0.08
+print(materials.EN16487_COVERAGE_FACTOR)    # 2.8
+```
+
+Two things are worth reading twice. The figures are an **expanded** uncertainty:
+ISO 5725-6 gives a reproducibility standard deviation, and the note under the
+table multiplies it by 2,8 rather than by the usual 2, so the standard deviation
+at 1 kHz is 0,036 rather than 0,10. And 6.2 says plainly that the figures hold
+for a plane absorber with the type E mounting at 200 mm overall depth, and that
+nothing has been investigated for any other absorber or mounting. A baffle, a
+raft or a free-hanging unit is outside them.
+
+## What this guide covers
+
+<Scope>
+<ScopeClaim status="covered" label="Covered">
+
+- **EN 16487:2014**: the specimen geometry of 4.1.1.1, the four mountings of
+  4.1.1.2 with the type E depth of 4.1.1.2.3.1, the substructure and deflection
+  limits of 4.1.1.2.3.4 and 4.1.1.2.3.5, the air-absorption correction and cap
+  of 4.2.1, the humidity of 4.2.2, and Table 1 with its coverage factor.
+
+</ScopeClaim>
+<ScopeClaim status="not-covered" label="Not covered">
+
+- The measurement itself, which is EN ISO 354 and lives in
+  [Measuring Sound Absorption](/phonometry/materials/absorbers/absorption-measurement/).
+- Discrete absorbers, baffles and rafts measured as objects rather than as a
+  plane, which the code covers in outline and the reproducibility of Table 1
+  does not cover at all.
+- The product requirements of EN 13964 beyond the definitions and the CE
+  marking depth this code refers to.
+
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## See also
+
+- [Measuring Sound Absorption](/phonometry/materials/absorbers/absorption-measurement/):
+  the reverberation-room method this code constrains, with the Sabine
+  coefficient and its rating.
+- [Spatial Sound Decay in Workrooms](/phonometry/buildings/rooms/workroom-sound-decay/):
+  what an absorbing ceiling is bought for, measured in the finished hall.
+- [Room Noise Criteria](/phonometry/buildings/rooms/room-noise/): the target the
+  absorption is chosen against.
+
+</SeeAlso>

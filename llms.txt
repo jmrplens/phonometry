@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1145 numerical conformance checks against 421 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1161 numerical conformance checks against 424 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1145 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 85 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1161 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 86 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -137,6 +137,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Room Acoustics](https://jmrplens.github.io/phonometry/buildings/rooms/room-acoustics/)
 - [Open-Plan Office Acoustics (ISO 3382-3)](https://jmrplens.github.io/phonometry/buildings/rooms/open-plan-acoustics/)
 - [Image sources and the steady-state room field (Kuttruff / Vorländer / Bies)](https://jmrplens.github.io/phonometry/buildings/rooms/room-image-sources/)
+- [Spatial sound decay in workrooms (ISO 14257, ISO 11690-3)](https://jmrplens.github.io/phonometry/buildings/rooms/workroom-sound-decay/)
 - [Room-noise criteria (NC / RC Mark II)](https://jmrplens.github.io/phonometry/buildings/rooms/room-noise/)
 - [Reverberation-time prediction (Sabine · Eyring · Fitzroy · Arau-Puchades)](https://jmrplens.github.io/phonometry/buildings/rooms/reverberation-prediction/)
 - [Sound absorption in enclosed spaces (EN 12354-6)](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/)
@@ -186,6 +187,7 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 
 - [Overview](https://jmrplens.github.io/phonometry/materials/absorbers/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-materials-absorbers.txt)
 - [Sound Absorption Measurement and Rating](https://jmrplens.github.io/phonometry/materials/absorbers/absorption-measurement/)
+- [Suspended ceilings: the EN 16487 test code](https://jmrplens.github.io/phonometry/materials/absorbers/suspended-ceilings/)
 - [Airflow Resistance](https://jmrplens.github.io/phonometry/materials/absorbers/airflow-resistance/)
 - [Impedance Tube](https://jmrplens.github.io/phonometry/materials/absorbers/impedance-tube/)
 - [Porous and Multilayer Absorbers](https://jmrplens.github.io/phonometry/materials/absorbers/porous-absorbers/)
@@ -525,6 +527,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [materials/slow-sound](https://jmrplens.github.io/phonometry/reference/api/materials/slow-sound/)
 - [materials/sound-absorption](https://jmrplens.github.io/phonometry/reference/api/materials/sound-absorption/)
 - [materials/standing-wave](https://jmrplens.github.io/phonometry/reference/api/materials/standing-wave/)
+- [materials/suspended-ceilings](https://jmrplens.github.io/phonometry/reference/api/materials/suspended-ceilings/)
 - [materials/uncertainty](https://jmrplens.github.io/phonometry/reference/api/materials/uncertainty/)
 - [metrology/calibration](https://jmrplens.github.io/phonometry/reference/api/metrology/calibration/)
 - [metrology/data-qualification](https://jmrplens.github.io/phonometry/reference/api/metrology/data-qualification/)
@@ -578,7 +581,9 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [rooms/noise-criteria](https://jmrplens.github.io/phonometry/reference/api/rooms/noise-criteria/)
 - [rooms/open-plan](https://jmrplens.github.io/phonometry/reference/api/rooms/open-plan/)
 - [rooms/reverberation-prediction](https://jmrplens.github.io/phonometry/reference/api/rooms/reverberation-prediction/)
+- [rooms/spatial-decay](https://jmrplens.github.io/phonometry/reference/api/rooms/spatial-decay/)
 - [rooms/steady-field](https://jmrplens.github.io/phonometry/reference/api/rooms/steady-field/)
+- [rooms/workroom-prediction](https://jmrplens.github.io/phonometry/reference/api/rooms/workroom-prediction/)
 - [signals/cepstrum](https://jmrplens.github.io/phonometry/reference/api/signals/cepstrum/)
 - [signals/correlation](https://jmrplens.github.io/phonometry/reference/api/signals/correlation/)
 - [signals/envelope](https://jmrplens.github.io/phonometry/reference/api/signals/envelope/)

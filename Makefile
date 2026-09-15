@@ -119,6 +119,15 @@ figure-contrast:
 mathtext:
 	$(PYTHON) scripts/check_mathtext.py
 
+# generate_api_docs copies the mathematics of a docstring to the site verbatim,
+# and KaTeX reads what the docstring actually holds: `\\mathrm` is a line break
+# with a `mathrm` after it, which it refuses, swallowing the rest of the block.
+# The spelling is right in one kind of docstring and wrong in the other, so this
+# reads the VALUE Python builds rather than the text of the file. The site's own
+# check catches it after a full build; this costs a second.
+docstring-math:
+	$(PYTHON) scripts/check_docstring_math.py
+
 # ISO 80000-2 sets a subscript by what it is, so a glyph pair can honestly take
 # both slopes: the z of the ISO 9613-2 barrier screening is a path-length
 # difference and the z of the ISO 2631-5 dose is a direction, and both
@@ -406,5 +415,5 @@ check: lint security test
 	figure-annotations figures reports \
 	animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
-	snippets snippets-static claims subscripts fence-names decimal-comma \
+	snippets snippets-static claims subscripts docstring-math fence-names decimal-comma \
 	control-characters hazards dead-constants conformance-rows parameter-units

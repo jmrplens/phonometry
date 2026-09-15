@@ -35627,7 +35627,7 @@
       "verdict": "pass"
     },
     {
-      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-6-10-and-12-ver-and-beranek-2006-example-4-2-pdf-pages-95-and-96-folios-90-and-91/a-quarter-of-the-printed-sabine-absorption-area-of-a-200-m3-room-at-21-4-c-where-the-speed-of-sound-is-344-m-s",
+      "id": "in-situ-measurement-of-silencers-screens-and-barriers/iso-11820-1996-eqs-6-10-and-12-ver-and-beranek-2006-example-4-2-pdf-pages-95-and-96-folios-90-and-91/the-printed-sabine-absorption-area-of-a-200-m3-room-at-21-4-c-where-the-speed-of-sound-is-344-m-s",
       "domain": "in-situ-measurement-of-silencers-screens-and-barriers",
       "reference": {
         "cite": "ISO 11820:1996 Eqs. (6), (10) and (12) / Ver and Beranek (2006) Example 4.2, PDF pages 95 and 96, folios 90 and 91",
@@ -35648,7 +35648,7 @@
           }
         ]
       },
-      "quantity": "A quarter of the printed Sabine absorption area of a 200 m3 room at 21,4 C, where the speed of sound is 344 m/s",
+      "quantity": "The printed Sabine absorption area of a 200 m3 room at 21,4 C, where the speed of sound is 344 m/s",
       "kind": "scalar",
       "expected": {
         "value": 10.7
@@ -36777,10 +36777,12 @@
       "quantity": "Mixing a hemi-free-field receiver with a facade one moves the answer by exactly the 6 dB of the pressure doubling",
       "kind": "scalar",
       "expected": {
-        "value": 6.0
+        "value": 0.0,
+        "label": "6 dB in every band"
       },
       "computed": {
-        "value": 6.0
+        "value": 0.0,
+        "label": "max absolute departure 0.000 dB over the three bands"
       },
       "unit": "dB",
       "tolerance": {
@@ -37331,11 +37333,12 @@
       "quantity": "The 6 dB of C'_r read off a page outside the standard: the pressure doubling at a receiver held against a reflecting surface",
       "kind": "scalar",
       "expected": {
-        "value": 6.0,
-        "label": "6 dB, the 20 lg 2 of a pressure doubling as the page prints it"
+        "value": 0.0,
+        "label": "6 dB in every band, the 20 lg 2 of a pressure doubling as the page prints it"
       },
       "computed": {
-        "value": 6.0
+        "value": 0.0,
+        "label": "max absolute departure 0.000 dB over the three bands"
       },
       "unit": "dB",
       "tolerance": {

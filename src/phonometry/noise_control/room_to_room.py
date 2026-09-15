@@ -222,8 +222,9 @@ class RoomToRoomResult:
         ``L_p1``, dB.
     :ivar transmission_loss: Transmission loss of the partition ``TL``, dB.
     :ivar partition_area: Area of the partition ``S_w``, m2.
-    :ivar receiving_absorption: Equivalent absorption area of the receiving
-        room ``S_2 alpha_2`` per band, m2.
+    :ivar receiving_absorption: What the reverberant term of the receiving
+        room is written over, per band, m2: ``S_2 alpha_2`` as Norton writes
+        it, or the room constant ``R_2`` for Barron's form of the same term.
     :ivar noise_reduction: The delivered noise reduction ``NR`` per band, dB:
         Equation (4.101) less :attr:`flanking_penalty`, with the direct field
         of the partition of Barron (2003) Equations (7-71) and (7-72) when
@@ -532,9 +533,12 @@ def room_to_room_transmission(
         a scalar or one value per band. Measured, tabulated, or predicted by
         :mod:`phonometry.building.prediction.panel_transmission`.
     :param partition_area: Area of the partition between the rooms ``S_w``, m2.
-    :param receiving_absorption: Equivalent absorption area of the receiving
-        room ``S_2 alpha_2`` per band, m2; e.g. from
-        :func:`phonometry.room.equivalent_absorption_area`.
+    :param receiving_absorption: What the reverberant term of the receiving
+        room is written over, per band, m2: the equivalent absorption area
+        ``S_2 alpha_2`` as Norton writes it, e.g. from
+        :func:`phonometry.room.equivalent_absorption_area`, or the room
+        constant :math:`R_2` from :func:`phonometry.room.room_constant` for
+        Barron's form of the same term, as above.
     :param source: The source room (:class:`SourceRoom`): its level, or its
         sound power level with the room constant, directivity and sound power
         model that turn it into one. Exactly one of the two descriptions is

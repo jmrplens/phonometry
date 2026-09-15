@@ -174,7 +174,7 @@ added, as it is not in [`phonometry.room.steady_state_spl`](/phonometry/referenc
 | `frequencies` | Octave-band centre frequencies, Hz (1-D array). |
 | `transmission_loss` | Transmission loss of the partition `TL`, dB; a scalar or one value per band. Measured, tabulated, or predicted by [`phonometry.building.prediction.panel_transmission`](/phonometry/reference/api/building/panel-transmission/). |
 | `partition_area` | Area of the partition between the rooms `S_w`, m2. |
-| `receiving_absorption` | Equivalent absorption area of the receiving room `S_2 alpha_2` per band, m2; e.g. from [`phonometry.room.equivalent_absorption_area`](/phonometry/reference/api/rooms/enclosed-space-absorption/#equivalent_absorption_area). |
+| `receiving_absorption` | What the reverberant term of the receiving room is written over, per band, m2: the equivalent absorption area `S_2 alpha_2` as Norton writes it, e.g. from [`phonometry.room.equivalent_absorption_area`](/phonometry/reference/api/rooms/enclosed-space-absorption/#equivalent_absorption_area), or the room constant $R_2$ from [`phonometry.room.room_constant`](/phonometry/reference/api/rooms/steady-field/#room_constant) for Barron's form of the same term, as above. |
 | `source` | The source room ([`SourceRoom`](/phonometry/reference/api/noise_control/room-to-room/#sourceroom)): its level, or its sound power level with the room constant, directivity and sound power model that turn it into one. Exactly one of the two descriptions is required, so the empty default is rejected. |
 | `include_partition_transmission` | When `True` the `tau S_w` term of Equation (4.101) is added to the receiving-room absorption, with $\tau = 10^{-\mathrm{TL}/10}$. Default `False`, the form hand calculations use. |
 | `criterion` | The design criterion ([`DesignCriterion`](/phonometry/reference/api/noise_control/room-to-room/#designcriterion)): the family, the target curve and the flanking allowance. `None` is the default criterion, an `"NC"` family with no target. |
@@ -224,7 +224,7 @@ the receiving room deliver together, and what arrives.
 | `source_level` | Reverberant sound pressure level in the source room `L_p1`, dB. |
 | `transmission_loss` | Transmission loss of the partition `TL`, dB. |
 | `partition_area` | Area of the partition `S_w`, m2. |
-| `receiving_absorption` | Equivalent absorption area of the receiving room `S_2 alpha_2` per band, m2. |
+| `receiving_absorption` | What the reverberant term of the receiving room is written over, per band, m2: `S_2 alpha_2` as Norton writes it, or the room constant `R_2` for Barron's form of the same term. |
 | `noise_reduction` | The delivered noise reduction `NR` per band, dB: Equation (4.101) less `flanking_penalty`, with the direct field of the partition of Barron (2003) Equations (7-71) and (7-72) when `receiver_distance_m` is set. |
 | `received_level` | Sound pressure level in the receiving room $L_{p2} = L_{p1} - \mathrm{NR}$, dB: the reverberant level, or the level at `receiver_distance_m` from the partition when that is set. |
 | `flanking_penalty` | The debit applied to the predicted noise reduction for flanking transmission and air leaks, dB. |

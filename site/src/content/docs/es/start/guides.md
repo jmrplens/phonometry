@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 134 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 135 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -111,7 +111,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento treinta y cuatro guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento treinta y cinco guías repartidas en doce temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -807,6 +807,9 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 y EBU R 128.
   la diferencia de dos determinaciones que dice lo que vale un encapsulado ya
   construido, el anexo que pregunta si la sala es bastante buena, y la cabina
   cuyo recuento de posiciones de fuente se lee en su propia respuesta.
+- [Silenciadores, pantallas y barreras in situ](/phonometry/es/devices/noise-control/in-situ-noise-control/):
+  tres normas que miden un dispositivo donde ya está, y las tres correcciones
+  distintas por ruido de fondo que no se deben fundir nunca.
 - [Ruido por conductos: del ventilador a la sala](/phonometry/es/devices/noise-control/duct-path/):
   el cálculo completo del ventilador a la sala frente a un criterio de ruido de
   fondo, y el corte de modos superiores que limita todo método de onda plana.

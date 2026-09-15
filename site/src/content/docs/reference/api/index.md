@@ -211,6 +211,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.sources.cnossos_road`](/phonometry/reference/api/environment/cnossos-road/) | CNOSSOS-EU road traffic source emission (Directive 2002/49/EC Annex II, 2.2). |
 | [`environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/) | Spherical-wave ground effect and advanced barrier diffraction. |
 | [`environment.propagation.noise_reducing_devices`](/phonometry/reference/api/environment/noise-reducing-devices/) | Single-number ratings of noise reducing devices (EN 1793, EN 16272). |
+| [`environment.propagation.barrier_in_situ`](/phonometry/reference/api/environment/barrier-in-situ/) | What a barrier by the road is worth, measured (ISO 10847:1997). |
 | [`environment.propagation.refraction`](/phonometry/reference/api/environment/refraction/) | Atmospheric refraction: ray tracing and the parabolic equation (PE). |
 | [`environment.propagation.air_absorption`](/phonometry/reference/api/environment/air-absorption/) | Atmospheric absorption of sound: ISO 9613-1:1993. |
 | [`environment.sources.cnossos_rail`](/phonometry/reference/api/environment/cnossos-rail/) | CNOSSOS-EU railway source emission (Directive 2002/49/EC Annex II, 2.3). |
@@ -294,6 +295,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`noise_control.enclosures`](/phonometry/reference/api/noise_control/enclosures/) | Insertion loss of a close or free-standing machine enclosure. |
 | [`noise_control.enclosure_insulation`](/phonometry/reference/api/noise_control/enclosure-insulation/) | What an enclosure is worth, measured rather than predicted (ISO 11546). |
 | [`noise_control.cabin_insulation`](/phonometry/reference/api/noise_control/cabin-insulation/) | What a cabin keeps out, measured in the room it stands in (ISO 11957). |
+| [`noise_control.silencer_in_situ`](/phonometry/reference/api/noise_control/silencer-in-situ/) | What a silencer does where it was installed (ISO 11820:1996). |
+| [`noise_control.screen_in_situ`](/phonometry/reference/api/noise_control/screen-in-situ/) | What a screen on the shop floor is worth (ISO 11821:1997). |
 | [`noise_control.room_to_room`](/phonometry/reference/api/noise_control/room-to-room/) | Room-to-room noise reduction: source room, partition, receiving room, criterion. |
 | [`noise_control.valves`](/phonometry/reference/api/noise_control/valves/) | Control valve aerodynamic noise (IEC 60534-8-3:2010). |
 | [`noise_control.valves_hydrodynamic`](/phonometry/reference/api/noise_control/valves-hydrodynamic/) | Control valve hydrodynamic noise (IEC 60534-8-4:2005). |

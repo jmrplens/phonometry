@@ -21,6 +21,7 @@ from .common import (
     _field_cmap,
     _freq_axis,
     _new_axes,
+    _plot_two_runs,
     format_frequency_axis,
 )
 
@@ -34,6 +35,9 @@ if TYPE_CHECKING:
         TonalCorrectionResult,
     )
     from ..environment.propagation.air_absorption import AtmosphericAttenuation
+    from ..environment.propagation.barrier_in_situ import (
+        MeasuredBarrierInsertionLoss,
+    )
     from ..environment.propagation.ground_barriers import (
         BarrierInsertionLoss,
         SphericalGroundResult,
@@ -61,6 +65,9 @@ _HEIGHT_LABEL = "Height [m]"
 _RANGE_LABEL = "Range [m]"
 _TOTAL_A_LABEL = "$A$, total"
 _FREE_FIELD_LABEL = "Level re free field [dB]"
+#: The y label three barrier plots share, named once so the translation
+#: table and the axes cannot drift apart.
+_INSERTION_LOSS_LABEL = "Insertion loss [dB]"
 _LT_LABEL = "$L_\\mathrm{t}$ [dB]"
 
 _STRINGS: dict[str, str] = {
@@ -107,8 +114,15 @@ _STRINGS: dict[str, str] = {
     "exact": "exacto",
     "ground": "suelo",
     "Grazing limit (5 dB)": "Límite rasante (5 dB)",
-    "Insertion loss [dB]": "Pérdida por inserción [dB]",
+    _INSERTION_LOSS_LABEL: "Pérdida por inserción [dB]",
+    "Sound pressure level [dB]": "Nivel de presión acústica [dB]",
+    "Band": "Banda",
     "Barrier insertion loss": "Pérdida por inserción de barrera",
+    "Receiver level before the barrier": "Nivel en el receptor antes de la barrera",
+    "Receiver level after the barrier": "Nivel en el receptor después de la barrera",
+    "Measured insertion loss $D_{IL}$": "Pérdida por inserción medida $D_{IL}$",
+    "Measured insertion loss $D'_{IL}$": "Pérdida por inserción medida $D'_{IL}$",
+    "A barrier measured where it stands": "Una barrera medida donde está",
     "Effective sound speed [m/s]": "Velocidad efectiva del sonido [m/s]",
     _HEIGHT_LABEL: "Altura [m]",
     _RANGE_LABEL: "Distancia [m]",
@@ -604,7 +618,7 @@ def plot_barrier_insertion_loss(
         5.0, color=_C_MUTED, ls=":", lw=0.9, label=_t("Grazing limit (5 dB)", language)
     )
     _freq_axis(ax, freqs, language=language)
-    ax.set_ylabel(_t("Insertion loss [dB]", language))
+    ax.set_ylabel(_t(_INSERTION_LOSS_LABEL, language))
     ax.set_title(_t("Barrier insertion loss", language))
     ax.legend(loc="best", fontsize="small")
     ax.grid(visible=True, which="both", alpha=0.3)
@@ -1086,3 +1100,48 @@ def plot_road_device_rating(
     ax.grid(visible=True, axis="y", alpha=0.3)
     localize_axes(ax, language)
     return ax
+
+
+def plot_barrier_in_situ(
+    result: MeasuredBarrierInsertionLoss,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The two receiver spectra of ISO 10847 and the insertion loss between them.
+
+    The reference position does not appear as a curve: its whole job is to
+    normalise the two receiver spectra against each other, and it has already
+    done that by the time the result exists.
+
+    :param result: A
+        :class:`~phonometry.environment.propagation.barrier_in_situ.MeasuredBarrierInsertionLoss`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the insertion-loss ``Axes.plot``.
+    :return: The axes.
+    """
+    symbol = (
+        "Measured insertion loss $D_{IL}$"
+        if result.method == "direct"
+        else "Measured insertion loss $D'_{IL}$"
+    )
+    return _plot_two_runs(
+        ax,
+        None if result.frequencies is None else np.asarray(result.frequencies),
+        np.asarray(result.receiver_before_db, dtype=np.float64),
+        np.asarray(result.receiver_after_db, dtype=np.float64),
+        np.asarray(result.insertion_loss_db, dtype=np.float64),
+        labels=(
+            _t("Receiver level before the barrier", language),
+            _t("Receiver level after the barrier", language),
+            _t(symbol, language),
+        ),
+        ylabel=_t("Sound pressure level [dB]", language),
+        difference_label=_t(_INSERTION_LOSS_LABEL, language),
+        frequency_label=_t(_FREQ_LABEL, language),
+        band_label=_t("Band", language),
+        title=_t("A barrier measured where it stands", language),
+        language=language,
+        kwargs=kwargs,
+    )

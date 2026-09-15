@@ -1,0 +1,431 @@
+---
+title: "Silencers, Screens and Barriers In Situ"
+description: "Three standards that measure a noise control device where it already stands: the silencer in the duct it was fitted to, the screen that can be wheeled away for one run, and the outdoor barrier that was built years ago. What each of them can still determine, what each of them refuses, and why their three corrections for background noise must never be merged into one."
+references:
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Measurements of noise from silencers in situ"
+    designation: "ISO 11820:1996"
+    primary: true
+    note: "The silencer measured in the installation it was fitted to: the twenty installations of Figure 1, the transmission loss of Equation (19), the insertion loss of Equation (21), the stepped background table of clause 4 and the flow quantities of clause 9. Read from BS EN ISO 11820:1997, which endorses it without modification."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — Measurement of the in situ sound attenuation of a removable screen"
+    designation: "ISO 11821:1997"
+    note: "The screen that can be taken away for one of the two runs: the attenuation of 5.8 and 5.9, the boxed background formula of 5.7, the directivity test an artificial source has to pass, and the microphone geometry of 5.5.2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1997
+    title: "Acoustics — In-situ determination of insertion loss of outdoor noise barriers of all types"
+    designation: "ISO 10847:1997"
+    note: "The barrier already built: the direct method of 8.2.1, the indirect method of 8.2.2 with its equivalent site, the wind and weather classes of clause 6, and the reference microphone of 7.2.2."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 2003
+    title: "Acoustics — Measurement procedures for ducted silencers and air-terminal units — Insertion loss, flow noise and total pressure loss"
+    designation: "ISO 7235:2003"
+    note: "The laboratory method ISO 11820 exists as the alternative to: a test duct, a known termination and a substitution measurement."
+  - type: standard
+    organization: "International Organization for Standardization"
+    year: 1996
+    title: "Acoustics — Attenuation of sound during propagation outdoors — Part 2: General method of calculation"
+    designation: "ISO 9613-2:1996"
+    note: "The barrier attenuation term a prediction computes, which ISO 10847 measures instead."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+import SeeAlso from '../../../../components/SeeAlso.astro';
+import ThemeImage from '../../../../components/ThemeImage.astro';
+
+A laboratory measurement of a noise control device answers one question: what is
+this product worth, under conditions chosen so that two products can be
+compared. It is the right question when there is a catalogue to write. It is the
+wrong one when the silencer is already welded into the duct, the screen has been
+standing between the press and the bench for a year, and the barrier was built
+before anyone thought of measuring it.
+
+These three standards ask the other question. Each of them measures a device
+**where it already stands**, in the installation it belongs to, with whatever is
+around it.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/in_situ_noise_control.svg" alt="Three panels. Left: the decibels each of three standards removes from a measured level against the margin over the background, drawn as two staircases and one curve; the ISO 11820 table falls from three decibels at a margin of three to half a decibel at nine and ten, the ISO 10847 table from two decibels at four to one decibel from six to nine, and the ISO 11821 energy subtraction runs smoothly from about one and a quarter decibels at six down towards zero, with the regions under each table's own threshold shaded to mark the refusals. Middle: the four microphone distances a screen measurement uses against the screen height, four straight rays for a quarter, a half, once and twice the height, with the quarter-height ray flattened onto the one-metre floor below four metres and the half-height one below two, the band where either is held out shaded. Right: the height of the reference microphone of a barrier measurement against the distance from the near end of the source to the barrier, a curve that dips to five point seven metres near five metres and rises to seven at fifteen, where it drops back to the flat one point five metres above the four-metre top edge that holds at any greater distance" width="100%" />
+
+*Three standards, three answers to the same question about background noise; the
+microphone positions a screen measurement uses; and the one microphone whose
+whole job is to hear the source rather than the device.*
+
+## 1. What in situ costs, and what it buys
+
+The laboratory buys two things: a controlled environment, and a **substitution**
+measurement. ISO 7235 measures a duct silencer by running a source into a test
+duct with the silencer in place, then with a straight replacement section of the
+same length, so that the two runs differ by the silencer alone.
+
+In situ neither is available. The environment is whatever room, duct or open
+space the device sits in, and there is no replacement section to swap in. What
+is left is the pair of levels the installation allows, and the arithmetic that
+turns them into a quantity: the ratio of the two measurement areas, and the
+difference of the two field corrections.
+
+$$
+D_{ts} = D_{tps} + 10 \lg \frac{S_2}{S_1} + K_2 - K_1
+$$
+
+That is Equation (19) of ISO 11820, and it is the whole idea of measuring in
+situ. The level difference is what a meter reads. The area term converts each
+side's mean level into the sound power it stands for, because the source side
+may be a duct cross-section while the receiver side is a room. The field
+corrections carry whatever the two sides do not share.
+
+```python
+from phonometry import noise_control
+
+bands = [125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0]
+source = [98.0, 99.0, 97.0, 95.0, 92.0, 88.0]     # dB, in the duct
+receiver = [72.0, 68.0, 60.0, 54.0, 50.0, 49.0]   # dB, in the room it feeds
+
+res = noise_control.in_situ_transmission_loss(
+    source, receiver,
+    source_area_m2=0.9,      # the duct cross-section
+    receiver_area_m2=10.8,   # a quarter of the room absorption at 500 Hz
+    frequencies=bands, case=2,
+)
+print(res.loss_db.round(1))        # [15.2 20.2 26.2 30.2 31.2 28.2] dB
+print(round(res.area_term_db, 1))  # -10.8 dB
+```
+
+The area term is negative here and that is not a mistake. A duct of 0,9 m²
+discharging into a room whose quarter-absorption is 10,8 m² spreads the same
+power over twelve times the area, so the room is already quieter than the duct
+before the silencer does anything. Subtracting that is what stops the room being
+credited to the silencer.
+
+## 2. The twenty installations
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_silencer_in_situ.svg" alt="Section through a duct run: the machine, the duct, the silencer with its splitters, and the room the duct discharges into. A dashed plane upstream of the silencer marks the source-side measurement surface, the duct cross-section, with three microphone positions across it; a second dashed plane downstream marks the receiver-side surface, a quarter of the room absorption, with three microphone positions in the room. The upstream distance is one and a half equivalent diameters and the downstream one is twelve times the root of the downstream area less ten times the root of the free area. A box at the foot carries the transmission loss as the level difference plus the ratio of the two areas plus the difference of the two field corrections" width="100%" />
+
+A silencer sits between two of four things: a duct, a room with a diffuse field,
+a room without one, and open space. Sixteen pairs of those are transmission
+measurements and four more are insertion measurements, and Figure 1 draws all
+twenty. The area rule for each side follows from what that side is, and clause 9
+states it.
+
+```python
+case = noise_control.installation_case(2)
+print(case.source_side, case.receiver_side)   # duct diffuse_room
+print(case.quantity)                          # transmission
+print(case.receiver_area_rule)
+# one-quarter of the absorption of the receiver room
+```
+
+Naming the case is not decoration. `in_situ_transmission_loss` refuses a case
+that belongs to the insertion set and `in_situ_insertion_loss` refuses the
+opposite, because Equations (19) and (21) are two quantities and Figure 1 is
+what says which one an installation can give.
+
+The room area itself comes from the reverberation time, through Equations (6),
+(10) and (12), which are the same expression written three times:
+
+```python
+area = noise_control.reverberant_surface_area_m2(
+    320.0, [1.6, 1.4, 1.2, 1.1, 1.0, 0.9],
+)
+print(area.round(1))   # [ 8.1  9.3 10.8 11.8 13.  14.4] m^2
+```
+
+It is a quarter of the Sabine equivalent absorption area, which is the factor
+that turns a reverberant level into a sound power.
+
+## 3. The silencer that is quiet and blocks the duct
+
+A silencer has not been measured until the flow has been measured too. ISO 11820
+devotes clause 9 to it, and the library carries the whole chain: the total
+pressure loss of Equation (13), the static difference behind a change of area of
+Equation (14), the velocity pressure and the velocity it stands for, the gas
+density of Equation (29), and the velocity inside the silencer of Equation (31),
+which is the one the regenerated noise answers to.
+
+```python
+print(round(noise_control.gas_density_kg_m3(temperature_c=120.0), 3))   # 0.887
+print(round(noise_control.silencer_flow_velocity_m_s(
+    8.0, upstream_area_m2=0.9, free_area_m2=0.45), 1))                  # 16.0
+```
+
+The measurement surfaces have their own geometry. Upstream, one and a half
+equivalent diameters of the measurement cross-section; downstream,
+$12\sqrt{S_d} - 10\sqrt{S_f}$, which for a silencer whose free area is most of
+the duct can fall to zero or below. The standard has its own escape for that, which is
+agreement between the parties, and the case is reported rather than returned as
+a distance nobody can stand at.
+
+### How the measurement goes
+
+Choose the installation from Figure 1 and read off which area rule each side
+takes. Place the source-side surface one and a half equivalent diameters
+upstream of the silencer and the receiver-side surface at the distance Equation
+(16) gives, or agree on one when that expression falls to zero. Run the machine,
+measure the mean level on each surface, and measure the extraneous sound with
+the switchable sources off if you can, because the energy route of Equations
+(17) and (18) is better than the stepped table and both refuse under 3 dB
+anyway. Record the temperature on both sides: where they differ, the field
+correction of Equations (20) and (22) is not zero. Then measure the flow, the
+total pressure loss across the silencer and the velocity profile in the duct,
+which 9.2 asks to be uniform within 10 %.
+
+## 4. The screen you can take away
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_screen_in_situ.svg" alt="Section through a workshop: the machine on the left, the screen standing on the floor, and four microphones behind it at a quarter, a half, once and twice the screen height, the nearest one held out to the one-metre floor. An operator stands at the third position, and the microphone height is the operator height of one metre fifty-five plus or minus seven and a half centimetres. A box at the foot carries the attenuation as the difference between the run without the screen and the run with it" width="100%" />
+
+ISO 11821 has the one thing the other two lack: the device can be removed for a
+run. A removable screen is wheeled aside, the room is measured, the screen is
+wheeled back, and the difference is the attenuation.
+
+```python
+res = noise_control.screen_attenuation(
+    [78.0, 80.0, 81.0, 79.0, 76.0, 72.0],   # dB, screen away
+    [74.0, 74.0, 72.0, 68.0, 63.0, 58.0],   # dB, screen in place
+    frequencies=bands,
+    a_weighted_unscreened_level_db=84.1,
+    a_weighted_screened_level_db=74.6,
+)
+print(res.attenuation_db)                   # [ 4.  6.  9. 11. 13. 14.] dB
+print(res.a_weighted_attenuation_db)        # 9.5 dB
+```
+
+The A-weighted pair is clause 5.9, and it comes with a condition the library
+enforces rather than mentions: it may not be obtained with an artificial source.
+An A-weighted number weights a spectrum, and with a loudspeaker standing in for
+the machine the spectrum weighted is the loudspeaker's. Asking for one anyway
+raises `ValueError` rather than returning a number that would be reported as the
+machine's.
+
+An artificial source has a test of its own to pass first. Definition 3.10 reads
+the directivity index at twelve positions evenly spaced on a horizontal circle
+of about 1,5 m radius, as the logarithmic mean less the position, and 5.2.2
+accepts the source while no position falls more than 8 dB below the mean.
+
+Where the microphones stand is 5.5.2: a quarter, a half, once and twice the
+screen height, never closer than 1 m. Under 4 m the quarter-height position
+falls inside that floor and is pushed out to it, and at 2 m and under the
+half-height one is pushed out too, so the two nearest positions coincide and
+the measurement is made at three distances. That is the printed rule rather
+than an oversight.
+
+```python
+print(noise_control.microphone_distances_m(3.0))   # [1.  1.5 3.  6. ] m
+```
+
+NOTE 2 says what the spread of those four answers means: the smallest
+attenuation is found at the most remote position and the largest at the nearest,
+which is why the standard asks for all four rather than for an average.
+
+### How the measurement goes
+
+Put the microphones on the line perpendicular to the screen, at a quarter, a
+half, once and twice its height, and push the ones that fall inside 1 m out to
+1 m. Set each of them at the operator height where the workplace does not fix
+one. Run the machine with the screen in place, take the levels, wheel the screen
+away without touching anything else, and take them again. Measure the background
+with the machine off at the same positions: over 10 dB of margin needs no
+correction, between 6 dB and 10 dB takes the boxed formula of 5.7, and under
+6 dB the conditions are not acceptable and the answer is to come back on a
+quieter day. For an impulsive source, at least three repeats with the S time
+weighting, and the arithmetic mean of them.
+
+## 5. The barrier that was built years ago
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_barrier_in_situ.svg" alt="Two sections of the same site. The upper one is the campaign before the barrier, with the source region on the left, a reference microphone standing where the top edge will be and a receiver microphone at one metre twenty or more; the lower one is the campaign after, with the barrier built, the reference microphone one and a half metres above its top edge, and the diffracted path curving over the top to the receiver. A box at the foot carries the insertion loss as the change at the reference less the change at the receiver, and the weather the two campaigns have to share" width="100%" />
+
+An outdoor barrier cannot be removed and usually cannot be measured before it
+exists. ISO 10847 offers two ways out, and is honest about what each is worth.
+
+The **direct method** needs the site before the barrier was built. Both
+campaigns use the same receiver positions and the same reference microphone, and
+the reference term normalises the source: whatever ran differently on the second
+day, the reference microphone heard it too.
+
+$$
+D_{IL} = \left(L_{\text{ref},A} - L_{\text{ref},B}\right)
+       - \left(L_{r,A} - L_{r,B}\right)
+$$
+
+```python
+from phonometry import environment
+
+res = environment.measured_insertion_loss_direct(
+    [76.0, 74.0, 71.0, 67.0, 62.0, 56.0],   # reference, before
+    [78.0, 76.0, 73.0, 69.0, 64.0, 58.0],   # reference, after
+    [63.0, 61.0, 58.0, 54.0, 49.0, 43.0],   # receiver, before
+    [58.0, 53.0, 47.0, 41.0, 35.0, 29.0],   # receiver, after
+    frequencies=bands,
+)
+print(res.insertion_loss_db)   # [ 7. 10. 13. 15. 16. 16.] dB
+```
+
+The source was 2 dB louder on the second day in every band, and the answer does
+not contain those 2 dB. That invariance is the reason the reference microphone
+exists.
+
+The **indirect method** borrows the "before" campaign from a substitute site
+judged equivalent in terrain, ground and source, which makes it an estimate and
+the standard says so. Each campaign carries a correction for the kind of
+receiver position, 0 dB in a hemi free field and 6 dB against a facade where the
+pressure doubles.
+
+The reference microphone stands at least 1,5 m above the top edge of the
+barrier, measured from its highest point where the top is not a straight edge.
+Where the near end of the source region is closer than 15 m, the NOTE of 7.2.2
+allows raising it until it looks over the top edge by 10 degrees instead:
+
+```python
+print(round(environment.reference_microphone_height_m(
+    4.0, source_to_barrier_m=8.0), 2))            # 5.93 m
+print(environment.reference_microphone_height_m(4.0))   # 5.5 m
+```
+
+## 6. The weather is part of the measurement
+
+Two campaigns separated by months are two different days of weather, and clause
+6 spends most of its length on that. The wind enters as the vector component of
+the average velocity on the line from the source to the receiver, positive
+downwind. Table 1 gives a downwind class and a calm one over any distance, and
+adds an upwind class over short distances alone.
+
+```python
+print(environment.wind_class(2.5))                        # downwind
+print(environment.wind_class(-2.0, short_distance=True))  # upwind
+print(environment.wind_class(-2.0))                       # None
+```
+
+Whether the geometry is a short distance is not a matter of opinion either. 6.3.1
+prints one inequality for the "before" campaign and two for the "after" one, all
+against the same ratio of 0,1, and the two campaigns can disagree:
+
+```python
+print(environment.is_short_distance(
+    source_height_m=1.0, receiver_height_m=1.5, barrier_height_m=4.0,
+    source_to_barrier_m=10.0, barrier_to_receiver_m=20.0,
+))   # (False, True)
+```
+
+Above 5 m/s in absolute value no measurement is made at all, which is a refusal
+rather than a class. The two campaigns must also agree within 2 m/s on the
+component and within 10 °C on the temperature, and the cloud cover is recorded
+in the four classes of Table 2, because the temperature gradient that bends a
+ray outdoors is not measured directly and the sky is the best proxy available.
+
+### How the measurement goes
+
+Fix the receiver positions and the reference position first, and keep them for
+both campaigns: the subtraction means nothing otherwise. Put the reference
+microphone at least 1,5 m above the top edge of the barrier, on a vertical plane
+through it, measured from the highest point where the top is not a straight
+edge, or use the elevation rule of the NOTE where the source region comes closer
+than 15 m. Record the wind component on the source-to-receiver line, the
+temperature and the cloud cover for every run, and stop when the wind passes
+5 m/s. Repeat at least three times. When the second campaign comes, check that
+the weather still matches within 2 m/s and 10 °C before anything else, because
+nothing downstream can repair a mismatch there.
+
+## 7. One correction, three standards, three answers
+
+All three documents face the same problem: the measured level contains sound
+that did not come from the source. All three answer it differently, and the
+differences are not rounding.
+
+**ISO 11820** prints a stepped table, positive, to be **subtracted**: 3 dB at a
+margin of 3 dB, falling to 0,5 dB at 9 and 10, nothing above, and under 3 dB the
+measurements are invalid. **ISO 10847** prints a stepped table, negative, to be
+**added**: 2 dB at a margin of 4 or 5, 1 dB from 6 to 9, nothing from 10 up, and
+under 4 dB the results are not valid. **ISO 11821** prints no table at all and
+boxes the energy subtraction, correcting only inside a window from 6 dB to 10 dB
+and refusing anything narrower, because the background it names includes
+wind-generated noise and the remedy for that is a quieter day.
+
+```python
+print(noise_control.silencer_background_correction_db([9.0]))   # [0.5] dB off
+print(environment.barrier_background_correction_db([9.0]))      # [-1.] dB added
+print(round(80.0 - noise_control.background_corrected_level_db(
+    [80.0], [71.0])[0], 2))                                     # 0.58 dB off
+```
+
+Three standards, one margin of 9 dB, three answers: 0,5 dB, 1 dB and 0,58 dB.
+They are kept as three implementations for that reason, and a conformance check
+holds them against each other at the margin where they part. The two tables and
+their opposite signs are recorded in the errata registry as a difference that is
+**not** an erratum, so that nobody merges them into one helper.
+
+ISO 11820 offers a second route around extraneous sound, for the case where the
+sources it works on can be switched off and measured on their own: the energy
+subtraction of Equations (17) and (18), capped at 3 dB. Past the cap the quantity
+is not determined, and what may be stated instead is the inequality of clause 4.
+`extraneous_corrected_mean_level_db` returns the corrected level and whether the
+cap was reached, so that a capped number cannot be written down as a
+determination.
+
+## What this guide covers
+
+<Scope>
+<ScopeClaim status="covered" label="Covered">
+**ISO 11820:1996** in full arithmetic: the level differences of Equations (1),
+(2) and (3); the sound power of Equations (5), (7), (9) and (11) with the
+reverberant area of Equations (6), (10) and (12); the transmission loss of
+Equation (19) and the insertion loss of Equation (21) with the temperature field
+correction of Equations (20) and (22); the twenty installations of Figure 1 with
+the area rules of clause 9; the background table of clause 4 and the extraneous
+energy subtraction of Equations (17) and (18) with its 3 dB cap; the octave fold
+of 9.1.5; the measurement distances of Equations (15) and (16); and the flow
+quantities of Equations (13), (14) and (27) to (31).
+
+**ISO 11821:1997**: the attenuation of 5.8 and the A-weighted attenuation of
+5.9, refused with an artificial source; the boxed background correction of 5.7
+with its own window; the directivity index of definition 3.10 and the acceptance
+limit of 5.2.2; the microphone geometry of 5.5.2 with its floor; the repeat rule
+of 5.6.2.1 for an impulsive source; and the printed thresholds of the operator
+sphere, the outdoor range and the standard deviation of reproducibility.
+
+**ISO 10847:1997**: the direct method of 8.2.1 and the indirect method of 8.2.2
+with its two receiver corrections; the background table of 6.4; the wind classes
+of Table 1 and the cloud cover classes of Table 2; the short-distance test of
+6.3.1; the reference microphone height of 7.2.2 with the elevation alternative
+of its NOTE; the hemi-free-field clearance of 8.1.2; and the equivalent-site
+geometry of 6.1.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="Not covered">
+Nothing here predicts. The insertion loss a barrier is designed to give and the
+attenuation a silencer is selected for are computed elsewhere, from geometry and
+from catalogue data; this page starts from levels that were measured on site.
+Nothing here qualifies an instrument or a test environment: the sound level
+meter classes, the windscreen, the calibration intervals and the microphone
+mounting are procedure. The equivalence of a substitute site is a judgement the
+standard asks two parties to make, and the radius and the sector it states are
+carried here as the numbers they are rather than as a test a program can run.
+The report templates are prose. No worked numeric example is printed in any of
+the three documents, so nothing here reproduces one.
+</ScopeClaim>
+</Scope>
+
+<SeeAlso>
+
+## See also
+
+- [Enclosures and cabins measured](/phonometry/devices/noise-control/enclosure-cabin-insulation/):
+  the same in-situ habit of mind applied to a box around a machine and a cabin
+  around an operator.
+- [Measuring a silencer](/phonometry/devices/noise-control/silencer-measurement/):
+  the laboratory method of ISO 7235, with the test duct and the substitution run
+  that ISO 11820 does without.
+- [Industrial noise control](/phonometry/devices/noise-control/noise-control/):
+  the predicted insertion loss of a screen or an enclosure, which is the quantity
+  these standards measure rather than compute.
+- [Outdoor sound propagation](/phonometry/environment/propagation/outdoor-propagation/):
+  the ISO 9613-2 barrier attenuation term a prediction computes for the barrier
+  ISO 10847 measures.
+- [Sound power in situ by comparison](/phonometry/devices/emission/sound-power-in-situ/):
+  the other way of determining a quantity in a room that was never built for it.
+
+</SeeAlso>

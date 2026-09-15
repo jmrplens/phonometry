@@ -468,6 +468,7 @@ export const topics = [
           'devices/noise-control/silencers',
           'devices/noise-control/silencer-measurement',
           'devices/noise-control/enclosure-cabin-insulation',
+          'devices/noise-control/in-situ-noise-control',
           'devices/noise-control/duct-path',
           'devices/noise-control/vdi2081-air-systems',
           'devices/noise-control/control-valve-noise',

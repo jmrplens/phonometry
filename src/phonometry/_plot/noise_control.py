@@ -16,6 +16,7 @@ from .common import (
     _C_SECONDARY_LIGHT,
     _C_TERTIARY,
     _new_axes,
+    _plot_two_runs,
     format_frequency_axis,
     style_default,
     theme_fill,
@@ -31,12 +32,15 @@ if TYPE_CHECKING:
     from ..noise_control.enclosures import EnclosureResult
     from ..noise_control.hvac import HvacSpectrumResult
     from ..noise_control.room_to_room import RoomToRoomResult
+    from ..noise_control.screen_in_situ import ScreenInSituResult
+    from ..noise_control.silencer_in_situ import SilencerInSituResult
     from ..noise_control.silencer_measurement import OperatingLine
     from ..noise_control.silencers import ReactiveSilencerResult
 
 _FREQ_LABEL = "Frequency [Hz]"
 _LEVEL_LABEL = "Level [dB]"
 _TL_LABEL = "Transmission loss"
+_ATTENUATION_LABEL = "Attenuation [dB]"
 
 #: Spanish translations of the fixed labels/titles/legends rendered by the
 #: noise-control ``.plot()`` renderers, keyed by their verbatim English
@@ -59,7 +63,7 @@ _STRINGS: dict[str, str] = {
     "Loss [dB]": "Pérdida [dB]",
     "Reactive silencer": "Silenciador reactivo",
     "Sound power level [dB re 1 pW]": "Nivel de potencia acústica [dB re 1 pW]",
-    "Attenuation [dB]": "Atenuación [dB]",
+    _ATTENUATION_LABEL: "Atenuación [dB]",
     "Panel $R$": "$R$ del panel",
     "Interior correction $C$": "Corrección interior $C$",
     "Insertion loss ($R - C$)": "Pérdida por inserción ($R - C$)",
@@ -87,6 +91,16 @@ _STRINGS: dict[str, str] = {
     "Cabin insulation": "Aislamiento de la cabina",
     "Insulation [dB]": "Aislamiento [dB]",
     "Sound pressure level [dB]": "Nivel de presión acústica [dB]",
+    "Level difference $D_{tps}$": "Diferencia de niveles $D_{tps}$",
+    "Level difference $D_{ips}$": "Diferencia de niveles $D_{ips}$",
+    "Transmission loss $D_{ts}$": "Pérdida por transmisión $D_{ts}$",
+    "Insertion loss $D_{is}$": "Pérdida por inserción $D_{is}$",
+    "A silencer measured where it stands": "Un silenciador medido donde está",
+    "Level and loss [dB]": "Nivel y pérdida [dB]",
+    "Unscreened level $L_{p1}$": "Nivel sin apantallar $L_{p1}$",
+    "Screened level $L_{p2}$": "Nivel apantallado $L_{p2}$",
+    "Attenuation $D_p$": "Atenuación $D_p$",
+    "A screen measured where it stands": "Una pantalla medida donde está",
 }
 
 
@@ -178,7 +192,7 @@ def plot_hvac_spectrum(
     ax.set_ylabel(
         _t("Sound power level [dB re 1 pW]", language)
         if is_power
-        else _t("Attenuation [dB]", language)
+        else _t(_ATTENUATION_LABEL, language)
     )
     ax.set_title(result.label)
     ax.grid(visible=True, which="both", alpha=0.3)
@@ -613,106 +627,6 @@ _ENCLOSURE_SYMBOLS = {
 }
 
 
-def _plot_two_runs(
-    ax: Axes | None,
-    frequencies: np.ndarray | None,
-    upper: np.ndarray,
-    lower: np.ndarray,
-    insulation: np.ndarray,
-    *,
-    labels: tuple[str, str, str],
-    ylabel: str,
-    title: str,
-    language: str,
-    kwargs: dict[str, Any],
-) -> Axes:
-    """Two measured spectra, the area between them, and their difference.
-
-    The shape ISO 11546 and ISO 11957 share: a run without the barrier, a run
-    with it, and the insulation that is the vertical gap between the two. The
-    gap is washed in so that the difference is visible as an area, and the
-    difference itself is drawn against its own axis, because it starts at zero
-    while the levels do not.
-
-    :param ax: Existing axes, or ``None`` to create a figure.
-    :param frequencies: Band centres in hertz, or ``None`` for band indices.
-    :param upper: The louder run: without the enclosure, or in the room.
-    :param lower: The quieter run: with the enclosure, or inside the cabin.
-    :param insulation: The difference between them, in decibels.
-    :param labels: The legend entries for ``upper``, ``lower`` and
-        ``insulation``, already localised.
-    :param ylabel: The label of the level axis, already localised.
-    :param title: The title, already localised.
-    :param language: Label language, for the axis localisation pass.
-    :param kwargs: Forwarded to the insulation ``Axes.plot``.
-    :return: The axes carrying the levels.
-    """
-    from .._i18n import localize_axes
-
-    ax = ax if ax is not None else _new_axes()
-    continuous = frequencies is not None
-    x = (
-        np.asarray(frequencies, dtype=np.float64)
-        if continuous
-        else np.arange(upper.size, dtype=np.float64)
-    )
-    ax.fill_between(x, lower, upper, color=theme_fill(_C_PRIMARY, ax), lw=0.0)
-    ax.plot(
-        x,
-        upper,
-        color=_C_REFERENCE,
-        lw=1.4,
-        ls="--",
-        marker="s",
-        ms=3,
-        label=labels[0],
-    )
-    ax.plot(
-        x,
-        lower,
-        color=_C_SECONDARY,
-        lw=1.4,
-        ls="-.",
-        marker="v",
-        ms=3,
-        label=labels[1],
-    )
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
-    ax.grid(visible=True, which="both", alpha=0.3)
-
-    twin = ax.twinx()
-    style_default(kwargs, "color", _C_TERTIARY)
-    style_default(kwargs, "lw", 2.0)
-    style_default(kwargs, "marker", "o")
-    style_default(kwargs, "ms", 3.5)
-    style_default(kwargs, "label", labels[2])
-    twin.plot(x, insulation, **kwargs)
-    twin.set_ylabel(_t(_INSULATION_LABEL, language), color=_C_TERTIARY)
-    twin.tick_params(axis="y", labelcolor=_C_TERTIARY)
-    twin.grid(visible=False)
-    handles, names = ax.get_legend_handles_labels()
-    extra_handles, extra_names = twin.get_legend_handles_labels()
-    ax.legend(
-        handles + extra_handles,
-        names + extra_names,
-        loc="best",
-        fontsize="small",
-        framealpha=1.0,
-    )
-    # The twin axis resets the shared x-axis, so the ticks are set last.
-    if continuous:
-        ax.set_xlabel(_t(_FREQ_LABEL, language))
-        format_frequency_axis(ax)
-        format_frequency_axis(twin)
-    else:
-        ax.set_xlabel(_t("Band", language))
-        ax.set_xticks(x)
-    localize_axes(ax, language)
-    localize_axes(twin, language)
-    return ax
-
-
 def plot_enclosure_insulation(
     result: EnclosureInsulationResult,
     ax: Axes | None = None,
@@ -745,6 +659,9 @@ def plot_enclosure_insulation(
             _ENCLOSURE_SYMBOLS[result.quantity],
         ),
         ylabel=_t(level_label, language),
+        difference_label=_t(_INSULATION_LABEL, language),
+        frequency_label=_t(_FREQ_LABEL, language),
+        band_label=_t("Band", language),
         title=_t("Enclosure insulation", language),
         language=language,
         kwargs=kwargs,
@@ -779,7 +696,116 @@ def plot_cabin_insulation(
             symbol,
         ),
         ylabel=_t(_PRESSURE_LEVEL_LABEL, language),
+        difference_label=_t(_INSULATION_LABEL, language),
+        frequency_label=_t(_FREQ_LABEL, language),
+        band_label=_t("Band", language),
         title=_t("Cabin insulation", language),
+        language=language,
+        kwargs=kwargs,
+    )
+
+
+def plot_silencer_in_situ(
+    result: SilencerInSituResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The level difference of ISO 11820 and the loss it becomes.
+
+    :param result: A
+        :class:`~phonometry.noise_control.silencer_in_situ.SilencerInSituResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the loss ``Axes.plot``.
+    :return: The axes.
+    """
+    from .._i18n import localize_axes
+
+    ax = ax if ax is not None else _new_axes()
+    difference = np.asarray(result.level_difference_db, dtype=np.float64)
+    loss = np.asarray(result.loss_db, dtype=np.float64)
+    continuous = result.frequencies is not None
+    x = (
+        np.asarray(result.frequencies, dtype=np.float64)
+        if continuous
+        else np.arange(difference.size, dtype=np.float64)
+    )
+    transmission = result.quantity == "transmission"
+    difference_label = _t(
+        "Level difference $D_{tps}$" if transmission else "Level difference $D_{ips}$",
+        language,
+    )
+    loss_label = _t(
+        "Transmission loss $D_{ts}$" if transmission else "Insertion loss $D_{is}$",
+        language,
+    )
+    ax.fill_between(
+        x, difference, loss, color=theme_fill(_C_TERTIARY, ax), lw=0.0, zorder=1
+    )
+    ax.plot(
+        x,
+        difference,
+        color=_C_SECONDARY,
+        lw=1.5,
+        ls="--",
+        marker="s",
+        ms=3,
+        label=difference_label,
+        zorder=3,
+    )
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 2.0)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.5)
+    style_default(kwargs, "label", loss_label)
+    kwargs.setdefault("zorder", 4)
+    ax.plot(x, loss, **kwargs)
+    ax.set_ylabel(_t("Level and loss [dB]", language))
+    ax.set_title(_t("A silencer measured where it stands", language))
+    ax.grid(visible=True, which="both", alpha=0.3)
+    ax.legend(loc="best", fontsize="small", framealpha=1.0)
+    if continuous:
+        ax.set_xlabel(_t(_FREQ_LABEL, language))
+        format_frequency_axis(ax, language=language)
+    else:
+        ax.set_xlabel(_t("Band", language))
+        ax.set_xticks(x)
+    localize_axes(ax, language)
+    return ax
+
+
+def plot_screen_in_situ(
+    result: ScreenInSituResult,
+    ax: Axes | None = None,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The two levels of ISO 11821 and the attenuation between them.
+
+    :param result: A
+        :class:`~phonometry.noise_control.screen_in_situ.ScreenInSituResult`.
+    :param ax: Existing axes, or ``None`` to create a figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to the attenuation ``Axes.plot``.
+    :return: The axes.
+    """
+    return _plot_two_runs(
+        ax,
+        None if result.frequencies is None else np.asarray(result.frequencies),
+        np.asarray(result.unscreened_levels_db, dtype=np.float64),
+        np.asarray(result.screened_levels_db, dtype=np.float64),
+        np.asarray(result.attenuation_db, dtype=np.float64),
+        labels=(
+            _t("Unscreened level $L_{p1}$", language),
+            _t("Screened level $L_{p2}$", language),
+            _t("Attenuation $D_p$", language),
+        ),
+        ylabel=_t(_PRESSURE_LEVEL_LABEL, language),
+        difference_label=_t(_ATTENUATION_LABEL, language),
+        frequency_label=_t(_FREQ_LABEL, language),
+        band_label=_t("Band", language),
+        title=_t("A screen measured where it stands", language),
         language=language,
         kwargs=kwargs,
     )

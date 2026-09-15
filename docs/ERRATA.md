@@ -5850,6 +5850,65 @@ in the same order.
   warning names the margin that was actually reached.
 - **Status:** not reported.
 
+## ISO 10847:1997, Table 1 (an upwind class printed with a positive lower bound)
+
+- **Location:** Table 1, "Class of wind conditions", on printed page 6 (PDF
+  page 10).
+- **The print:** the short-distance block of the table lists three classes
+  against the vector component of the wind velocity in m/s: "Downwind + 1 to
+  + 5", "Calm − 1 to + 1" and "Upwind + 1 to − 5".
+- **The problem:** "+ 1 to − 5" is not an interval. Its two ends run the wrong
+  way round, and its lower end is the value at which the downwind class two
+  rows above begins, so read literally the upwind class would start inside the
+  downwind one and reach backwards through calm. The sign of the lower bound
+  is the character at fault: the upwind class is − 1 to − 5, the mirror of the
+  downwind row, which is also what the word "upwind" means for a component
+  that 6.3.1 defines as positive along the source-to-receiver line.
+- **Evidence:** the three short-distance rows read together on printed page 6,
+  against the all-distances block above them, which prints the same downwind
+  and calm rows and no upwind one at all. Verified on PDF page 10 (printed
+  p. 6) of ISO 10847:1997.
+- **Consequence for the standard's own tables:** none. No other clause
+  computes with the interval.
+- **Library behaviour:**
+  [`WIND_CLASSES`](../src/phonometry/environment/propagation/barrier_in_situ.py)
+  carries the upwind class as − 5 m/s to − 1 m/s and
+  [`wind_class`](../src/phonometry/environment/propagation/barrier_in_situ.py)
+  returns it for negative components over a short distance alone, which is
+  where the table prints it.
+- **Status:** not reported.
+
+## ISO 10847:1997, 8.2.2 (one prime asked to mean two different things)
+
+- **Location:** the two level-difference equations of 8.2.2 and the list of
+  symbols under them, on printed page 11 (PDF page 15).
+- **The print:** $\Delta L_B = L_{\mathrm{ref},B} - (L_{r,B} - C_r)$ and
+  $\Delta L_A = L_{\mathrm{ref},A} - (L_{r,A} - C'_r)$, and then "$C_r$ and
+  $C'_r$ are correction factors for the type of receiver position; for "hemi
+  free-field": $C_r$ = 0 dB; for "on reflecting surfaces": $C'_r$ = 6 dB".
+- **The problem:** the prime carries two meanings in the same clause. In the
+  equations it separates the "before" campaign from the "after" one, since
+  every other symbol in them is subscripted B or A. In the definitions it
+  separates one kind of receiver position from the other. Taken literally the
+  two readings combine into a rule nothing else in the standard states: that
+  the "before" campaign is made in a hemi free field and the "after" one
+  against a reflecting surface.
+- **Evidence:** the two equations and the symbol list on printed page 11,
+  settled by the NOTE that closes the same clause, "It is preferable to choose
+  receiver positions where corrections $C_r$ and $C'_r$ are essentially the
+  same", which is advice only if each campaign's correction follows its own
+  receiver position rather than being fixed by the campaign. Verified on PDF
+  page 15 (printed p. 11) of ISO 10847:1997.
+- **Consequence for the standard's own tables:** none.
+- **Library behaviour:**
+  [`measured_insertion_loss_indirect`](../src/phonometry/environment/propagation/barrier_in_situ.py)
+  takes `receiver_type_before` and `receiver_type_after`, each of them
+  'hemi_free_field' or 'reflecting_surface' and each defaulting to the former,
+  and reads its correction out of `RECEIVER_CORRECTIONS_DB`, which holds the
+  printed 0 dB and 6 dB. The result carries both corrections so that a report
+  shows which was applied to which campaign.
+- **Status:** not reported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the
@@ -6020,3 +6079,26 @@ published sources:
   implements as printed and `test_eq8_omnidirectional_shields` in
   [`tests/emission/test_sound_power_in_duct.py`](../tests/emission/test_sound_power_in_duct.py)
   pins.
+
+- **ISO 11820:1996 Table 1 and ISO 10847:1997 Table 3, two background
+  corrections that disagree:** both tables take a margin between the level
+  with the source and the level without it and answer with a correction in
+  decibels, and they answer differently. ISO 11820 refuses under 3 dB and then
+  takes off 3, 2, 2, 1, 1, 1, 0,5 and 0,5 dB up to a margin of 10 dB; ISO
+  10847 refuses under 4 dB and then takes off 2, 2, 1, 1, 1 and 1 dB up to the
+  same margin. At a margin of 9 dB the first takes off 0,5 dB and the second
+  1 dB. The signs differ as well, because the ISO 11820 column reads
+  "corrections to be subtracted from sound pressure level measured with sound
+  source operating" and prints its values positive, while the ISO 10847 column
+  reads "correction to be made to the measured sound pressure level" and
+  prints them negative. Neither is an erratum: they are two committees'
+  tabulations of the same physical subtraction, rounded differently and
+  written from opposite ends. Read on PDF page 13 (printed p. 5) of EN ISO
+  11820:1996 and on PDF page 11 (printed p. 7) of ISO 10847:1997. The library
+  keeps them apart as
+  [`silencer_background_correction_db`](../src/phonometry/noise_control/silencer_in_situ.py)
+  and
+  [`barrier_background_correction_db`](../src/phonometry/environment/propagation/barrier_in_situ.py),
+  each with its own sign convention and its own refusal, and a conformance
+  check holds them against each other at the margin where they part. Do not
+  merge them into one helper.

@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 134 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 135 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -110,7 +110,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and thirty-four guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and thirty-five guides sit in twelve topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -766,6 +766,9 @@ IEC 60268-3/-4/-5, ITU-R BS.1770-5 and EBU R 128.
   the difference of two determinations that says what a built enclosure is
   worth, the annex that asks whether the room is good enough, and the cabin
   whose source-position count is read off its own answer.
+- [Silencers, Screens and Barriers In Situ](/phonometry/devices/noise-control/in-situ-noise-control/):
+  three standards that measure a device where it already stands, and the three
+  different corrections for background noise that must never be merged.
 - [Duct-Borne Noise: Fan to Room](/phonometry/devices/noise-control/duct-path/): the
   end-to-end fan-to-room calculation against a room criterion, and the
   higher-order-mode cut-on that limits every plane-wave method.

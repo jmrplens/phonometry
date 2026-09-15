@@ -335,39 +335,61 @@ def _area_members() -> dict[str, list[str]]:
 #: the standard itself keeps apart from the decay analysis of its normative
 #: body. Those four carve out.
 #:
-#: ``devices/noise-control`` has eight, and two of them are throttling-valve
-#: noise: a different source, a different standard family (IEC 60534-8) and a
-#: different reader from the fan-to-room duct chain and the elements it calls.
-#: Those two carve out.
+#: ``devices/noise-control`` has nine, and it divides twice. Two of them are
+#: throttling-valve noise: a different source, a different standard family
+#: (IEC 60534-8) and a different reader from the fan-to-room duct chain and the
+#: elements it calls. Three more measure a device that was already built rather
+#: than predicting one that is being designed, which is the division the
+#: standards themselves make: a catalogue figure comes from a laboratory
+#: substitution, an acceptance figure comes from the installation. A folder may
+#: therefore carry several splits, and each is a grouping the domain already
+#: makes rather than a cut chosen to fit the budget.
 #:
-#: In both, the leaf names are guide filenames and the label mirrors the
+#: In all of them, the leaf names are guide filenames and the label mirrors the
 #: heading. The carved-out shard has no page of its own, so its Overview link
 #: still resolves to the parent folder (see _shard_folders and _shard_label
 #: below).
-MANUAL_SPLITS: dict[str, tuple[str, str, tuple[str, ...]]] = {
+MANUAL_SPLITS: dict[str, tuple[tuple[str, str, tuple[str, ...]], ...]] = {
     "buildings/insulation": (
-        "buildings-insulation-ratings",
-        "Insulation ratings and the envelope",
-        ("insulation-ratings", "facade-insulation", "spanish-building-code"),
+        (
+            "buildings-insulation-ratings",
+            "Insulation ratings and the envelope",
+            ("insulation-ratings", "facade-insulation", "spanish-building-code"),
+        ),
     ),
     "devices/emission": (
-        "devices-emission-intensity",
-        "Sound intensity and sound power from it",
-        ("intensity", "sound-power-intensity"),
+        (
+            "devices-emission-intensity",
+            "Sound intensity and sound power from it",
+            ("intensity", "sound-power-intensity"),
+        ),
     ),
     "devices/noise-control": (
-        "devices-noise-control-valves",
-        "Control valve noise (IEC 60534-8)",
-        ("control-valve-noise", "valve-cavitation"),
+        (
+            "devices-noise-control-valves",
+            "Control valve noise (IEC 60534-8)",
+            ("control-valve-noise", "valve-cavitation"),
+        ),
+        (
+            "devices-noise-control-measured",
+            "Measuring a device that is already built",
+            (
+                "silencer-measurement",
+                "enclosure-cabin-insulation",
+                "in-situ-noise-control",
+            ),
+        ),
     ),
     "buildings/rooms": (
-        "buildings-rooms-auditorium",
-        "Auditorium measures of the ISO 3382-1 annexes",
         (
-            "sound-strength",
-            "spatial-impression",
-            "stage-and-uncertainty",
-            "reporting-and-qualification",
+            "buildings-rooms-auditorium",
+            "Auditorium measures of the ISO 3382-1 annexes",
+            (
+                "sound-strength",
+                "spatial-impression",
+                "stage-and-uncertainty",
+                "reporting-and-qualification",
+            ),
         ),
     ),
 }
@@ -389,8 +411,9 @@ def _shard_folders() -> dict[str, str]:
             if path.parent != CONTENT / topic:
                 folder = path.parent.relative_to(CONTENT).as_posix()
                 folders[folder.replace("/", "-")] = folder
-    for folder, (slug, _label, _leaves) in MANUAL_SPLITS.items():
-        folders[slug] = folder
+    for folder, splits in MANUAL_SPLITS.items():
+        for slug, _label, _leaves in splits:
+            folders[slug] = folder
     return folders
 
 
@@ -438,9 +461,7 @@ def _shard_members() -> dict[str, list[str]]:
         if not found:
             continue
         claimed.update(found)
-        split = MANUAL_SPLITS.get(folder)
-        if split is not None:
-            split_slug, _label, leaves = split
+        for split_slug, _label, leaves in MANUAL_SPLITS.get(folder, ()):
             split_routes = {f"{folder}/{leaf}" for leaf in leaves}
             missing = sorted(split_routes - set(found))
             if missing:
@@ -492,7 +513,8 @@ def _shard_label(slug: str) -> str:
         return labels[slug]
     split_labels = {
         split_slug: label
-        for _folder, (split_slug, label, _leaves) in MANUAL_SPLITS.items()
+        for splits in MANUAL_SPLITS.values()
+        for split_slug, label, _leaves in splits
     }
     if slug in split_labels:
         return split_labels[slug]
@@ -869,7 +891,7 @@ def build_shards() -> dict[str, str]:
         shards["theory"] = emit("Theory and reference", theory)
 
     manual_split_slugs = {
-        slug for _folder, (slug, _label, _leaves) in MANUAL_SPLITS.items()
+        slug for splits in MANUAL_SPLITS.values() for slug, _label, _leaves in splits
     }
     for slug, routes in members.items():
         overview = _shard_folders().get(slug, slug)

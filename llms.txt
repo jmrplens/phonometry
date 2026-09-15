@@ -1,8 +1,8 @@
 # phonometry
 
-> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1123 numerical conformance checks against 418 standards enforced in CI.
+> Acoustic measurement, analysis and prediction in Python. Sound level metrology, psychoacoustics, room and building acoustics, materials, vibration, environmental and transport noise, underwater acoustics, electroacoustics and wave simulation, with every metric implemented from the text of its governing standard and 1145 numerical conformance checks against 421 standards enforced in CI.
 
-phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1123 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 84 domains.
+phonometry v4.0.0rc1 is a pure-Python library built on NumPy/SciPy (Python >= 3.13). Each result is a typed, frozen dataclass that carries the inputs it was computed from, draws its own figure with a one-line `.plot()` in English or Spanish, and, where a standard defines a reporting format, renders that format as a PDF with `.report()`. The conformance report pins each of the 1145 checks to a standard, a clause or table, the normative expected value and the value the library computes, across 85 domains.
 
 The project was published as **PyOctaveBand** until version 3.0.0. Third-party references and dependency pins still using that name refer to this library.
 
@@ -327,9 +327,14 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Room to room: partition, receiving room, criterion](https://jmrplens.github.io/phonometry/devices/noise-control/room-to-room/)
 - [Silencers](https://jmrplens.github.io/phonometry/devices/noise-control/silencers/)
 - [Industrial noise control: HVAC and enclosures](https://jmrplens.github.io/phonometry/devices/noise-control/noise-control/)
+- [HVAC noise the German way (VDI 2081)](https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/)
+
+### Measuring a device that is already built
+
+- [Overview](https://jmrplens.github.io/phonometry/devices/noise-control/) · [full text](https://jmrplens.github.io/phonometry/llms/llms-devices-noise-control-measured.txt)
 - [Measuring a silencer (ISO 7235 and ISO 11691)](https://jmrplens.github.io/phonometry/devices/noise-control/silencer-measurement/)
 - [Enclosures and cabins measured (ISO 11546, ISO 11957)](https://jmrplens.github.io/phonometry/devices/noise-control/enclosure-cabin-insulation/)
-- [HVAC noise the German way (VDI 2081)](https://jmrplens.github.io/phonometry/devices/noise-control/vdi2081-air-systems/)
+- [Silencers, screens and barriers in situ (ISO 11820, ISO 11821, ISO 10847)](https://jmrplens.github.io/phonometry/devices/noise-control/in-situ-noise-control/)
 
 ### Control valve noise (IEC 60534-8)
 
@@ -420,6 +425,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Electroacoustics](https://jmrplens.github.io/phonometry/llms/llms-devices-electroacoustics.txt)
 - [Broadcast](https://jmrplens.github.io/phonometry/llms/llms-devices-broadcast.txt)
 - [Noise control](https://jmrplens.github.io/phonometry/llms/llms-devices-noise-control.txt)
+- [Measuring a device that is already built](https://jmrplens.github.io/phonometry/llms/llms-devices-noise-control-measured.txt)
 - [Control valve noise (IEC 60534-8)](https://jmrplens.github.io/phonometry/llms/llms-devices-noise-control-valves.txt)
 - [Wave simulation](https://jmrplens.github.io/phonometry/llms/llms-simulation.txt)
 - [Reference](https://jmrplens.github.io/phonometry/llms/llms-reference.txt)
@@ -476,6 +482,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [electroacoustics/sound-reinforcement](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/sound-reinforcement/)
 - [electroacoustics/swept-sine](https://jmrplens.github.io/phonometry/reference/api/electroacoustics/swept-sine/)
 - [environment/air-absorption](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/)
+- [environment/barrier-in-situ](https://jmrplens.github.io/phonometry/reference/api/environment/barrier-in-situ/)
 - [environment/cnossos-rail](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-rail/)
 - [environment/cnossos-road](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-road/)
 - [environment/ground-barriers](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/)
@@ -529,6 +536,8 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [noise_control/enclosures](https://jmrplens.github.io/phonometry/reference/api/noise_control/enclosures/)
 - [noise_control/hvac](https://jmrplens.github.io/phonometry/reference/api/noise_control/hvac/)
 - [noise_control/room-to-room](https://jmrplens.github.io/phonometry/reference/api/noise_control/room-to-room/)
+- [noise_control/screen-in-situ](https://jmrplens.github.io/phonometry/reference/api/noise_control/screen-in-situ/)
+- [noise_control/silencer-in-situ](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-in-situ/)
 - [noise_control/silencer-measurement](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencer-measurement/)
 - [noise_control/silencers](https://jmrplens.github.io/phonometry/reference/api/noise_control/silencers/)
 - [noise_control/valves](https://jmrplens.github.io/phonometry/reference/api/noise_control/valves/)

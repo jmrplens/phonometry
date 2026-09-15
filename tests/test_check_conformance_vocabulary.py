@@ -122,6 +122,14 @@ def test_a_value_the_schema_refuses_is_reported_with_what_it_costs() -> None:
     assert any("'supplies'" in problem and "10 rows" in problem for problem in problems)
 
 
+def test_the_cost_agrees_with_its_count() -> None:
+    """One row carries it, several rows carry it, and none yet is its own case."""
+    counts = collections.Counter({"one": 1, "many": 10})
+    assert gate._cost(counts, "one") == "1 row of the artefact carries it"
+    assert gate._cost(counts, "many") == "10 rows of the artefact carry it"
+    assert gate._cost(counts, "absent") == "no row carries it yet"
+
+
 def test_a_value_no_check_can_produce_fails_in_both_places() -> None:
     """A vocabulary that shrinks moves everywhere, or the leftovers mislead."""
     dead = frozenset(str(value) for value in gate.Relation) | {"retired"}

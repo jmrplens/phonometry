@@ -243,7 +243,9 @@ def _cost(counts: collections.Counter[str], value: str) -> str:
     rows = counts[value]
     if not rows:
         return "no row carries it yet"
-    return f"{rows} row{'' if rows == 1 else 's'} of the artefact carry it"
+    if rows == 1:
+        return "1 row of the artefact carries it"
+    return f"{rows} rows of the artefact carry it"
 
 
 def _schema_problems(

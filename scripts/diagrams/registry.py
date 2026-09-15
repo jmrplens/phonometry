@@ -61,6 +61,7 @@ from .devices import (
     _d_distortion_bench,
     _d_duct_path,
     _d_enclosure_cabin_measurement,
+    _d_in_duct_rig,
     _d_intensity_scan,
     _d_loudspeaker_freefield,
     _d_loudspeaker_polar,
@@ -68,10 +69,12 @@ from .devices import (
     _d_methods,
     _d_microphone_references,
     _d_noise_control,
+    _d_noise_declaration_chain,
     _d_open_end_solid_angles,
     _d_pp_probe,
     _d_precision_anechoic,
     _d_program_loudness,
+    _d_quasi_peak_test,
     _d_radiation_factor,
     _d_residual_intensity_check,
     _d_reverberation_power,
@@ -79,6 +82,7 @@ from .devices import (
     _d_screen_in_situ,
     _d_silencer_in_situ,
     _d_silencer_iso7235,
+    _d_sound_power_in_situ,
     _d_surfaces,
     _d_sweep_bench,
     _d_swept_sine,
@@ -270,6 +274,11 @@ DIAGRAMS = {
         560,
     ),
     "sound_power_methods": (_d_methods, "Sound power methods compared", 944),
+    "diagram_noise_declaration_chain": (
+        _d_noise_declaration_chain,
+        "Declaring and verifying a sound power level (ISO 4871)",
+        736,
+    ),
     "diagram_flanking_paths": (
         _d_flanking,
         "Direct and flanking transmission paths (EN 12354)",
@@ -339,6 +348,11 @@ DIAGRAMS = {
         _d_reverberation_power,
         "ISO 3741 reverberation test room",
         600,
+    ),
+    "diagram_sound_power_in_situ": (
+        _d_sound_power_in_situ,
+        "How sound power is measured in situ (ISO 3747)",
+        744,
     ),
     "diagram_box_array": (
         _d_box_array,
@@ -896,6 +910,11 @@ DIAGRAMS = {
         "Programme loudness: the BS.1770 / R 128 metering chain",
         670,
     ),
+    "diagram_quasi_peak_test": (
+        _d_quasi_peak_test,
+        "How a quasi-peak meter is tested (ITU-R BS.468-4)",
+        900,
+    ),
     "diagram_reverberation_prediction": (
         _d_reverberation_prediction,
         "Predicting the reverberation time: Sabine against Eyring",
@@ -1005,6 +1024,11 @@ DIAGRAMS = {
         _d_workstation_microphone,
         "Where the microphone goes at a work station (ISO 11201 Clause 9)",
         600,
+    ),
+    "diagram_in_duct_rig": (
+        _d_in_duct_rig,
+        "How a fan is measured in its duct (ISO 5136)",
+        800,
     ),
     "diagram_valve_noise_place": (
         _d_valve_noise_place,

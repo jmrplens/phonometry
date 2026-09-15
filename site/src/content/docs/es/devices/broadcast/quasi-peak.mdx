@@ -245,6 +245,12 @@ inseparables. Cambia una y hay que reajustar las tres constantes.
 
 ## 5. Conformidad
 
+<ThemeImage
+  src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_quasi_peak_test.svg"
+  alt="Diagrama de bloques del equipo de medida de la UIT-R BS.468-4 sobre una tabla con las comprobaciones a las que lo somete el apartado 2. Un generador alimenta los bornes de entrada, marcados con una impedancia de entrada de al menos 20 kilohmios y una terminación de 600 ohmios con un 1 por ciento de tolerancia cuando la hay. Dentro de un contorno de trazos la señal pasa por la red de ponderación y su amplificador, 0 decibelios en 1 kilohercio y más 12,2 decibelios en 6,3 kilohercios, luego por un atenuador cuyas escalas fijan, reajustan y bajan los ensayos 2.1 a 2.3, luego por el detector de cuasipico, definido por sus lecturas y no por una constante de tiempo, y luego por un indicador de aguja graduado en dBqps, en el que 0,775 voltios marcan 0 decibelios. Un camino rojo de trazos alrededor de la red es el modo sin ponderar, que solo usa el ensayo de reversibilidad. Debajo, una fila para la calibración y una por cada método de medida, cada una con un esbozo de su estímulo: un tono permanente de 1 kilohercio a 0,775 voltios que debe marcar 0 decibelios; ráfagas aisladas de 5 kilohercios de periodos enteros, de 1 a 200 milisegundos, con la de 5 milisegundos marcando del 34 al 46 por ciento del tono permanente; trenes de ráfagas de 5 milisegundos a 2, 10 y 100 por segundo con sus ventanas de la Tabla 3; ráfagas aisladas de 0,6 milisegundos bajadas 20 decibelios por escalones, con las lecturas siguiendo los escalones con 1 decibelio de tolerancia en total; impulsos rectangulares de 1 milisegundo y los mismos invertidos, cuyas lecturas no pueden diferir más de 0,5 decibelios, la única fila en modo sin ponderar; y un tono de 1 kilohercio aplicado de golpe, cuyo exceso momentáneo de lectura debe quedar por debajo de 0,3 decibelios. Un recuadro al pie da las lecturas de la tabla como 20 lg de la lectura sobre la lectura permanente, con el 40 por ciento de la Tabla 2 impreso como menos 8,0 decibelios, y el nivel en dBqps como 20 lg de la lectura sobre 0,775 voltios"
+  width="100%"
+/>
+
 `verify_quasi_peak_dynamics` construye los estímulos de los apartados 2.1 y 2.2
 tal como se especifican (una sinusoide de 5 kHz que empieza en un paso por cero
 y dura un número entero de periodos completos, a través de la red de
@@ -289,6 +295,26 @@ terminación de 600 Ω son hardware del instrumento. También lo es el «80 % de
 fondo de escala», que restringe dónde se coloca una aguja real durante el
 ensayo y no la magnitud, y por eso esta biblioteca no modela ningún fondo de
 escala.
+
+### Cómo se hace la medida
+
+Calibra primero según el 2.6: un tono permanente de 1 kHz a 0,775 V eficaces,
+con distorsión armónica total bajo el 1 %, debe marcar 0,775 V, 0 dB. La
+impedancia de entrada debe ser de al menos 20 kΩ, y la terminación, si la hay,
+de 600 Ω ±1 %. Todo ensayo salvo el 2.4 pasa por la red de ponderación. Para el
+2.1, fija el nivel al que un tono permanente de 5 kHz marcaría el 80 % del fondo
+de escala y aplica ráfagas aisladas de periodos enteros desde un paso por cero,
+una por duración de la Tabla 2, leídas con atenuadores fijos y luego reajustados
+en cada duración al 80 %. Para el 2.2, aplica ráfagas de 5 ms a 2, 10 y 100 por
+segundo a ese nivel, con atenuadores fijos, y comprueba la Tabla 3 en todas las
+escalas. Para el 2.3, lleva ráfagas aisladas de 0,6 ms al fondo de la escala más
+sensible y bájalas 20 dB en total por escalones: las lecturas deben seguirlos
+con ±1 dB en total, escala a escala. Para el 2.4, en modo sin ponderar, aplica
+impulsos rectangulares de c.c. de 1 ms, hasta 100 por segundo, que marquen el
+80 % del fondo de escala, e invierte su polaridad: las lecturas no pueden
+diferir más de 0,5 dB. Para el 2.5, conecta de golpe el tono de 1 kHz a 0 dB: el
+exceso momentáneo de lectura debe quedar por debajo de 0,3 dB. El ruido medido
+con un instrumento conforme se expresa en dBqps.
 
 ## 6. Lo que ningún oráculo puede comprobar
 

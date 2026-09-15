@@ -5,16 +5,16 @@
 Some machines never travel to a test room: a compressor bolted to the floor
 of the plant, a press line, a packaging machine wired into the rest of the
 line. ISO 3747 determines their sound power where they stand, by comparison.
-A reference sound source (RSS) of calibrated band sound power is set beside
-the machine, the same three or four microphones listen to each source in
-turn from the reverberant part of the room, and because both sources see the
-same room the room cancels: the sound power of the source under test is the
-calibrated power of the reference source carried across by the difference of
-the two mean levels. The method reaches engineering grade 2 where the field
-is reverberant enough and the source not too directional, and survey grade 3
-otherwise; an impulsive source gets a sound energy level instead of a sound
-power level by the same route. Which route fits which job is weighed in
-[Sound Power](sound-power.md).
+A reference sound source (RSS) of calibrated band sound power is run in the
+same room as the machine, the same three or four microphones listen to each
+source in turn from the reverberant part of the room, and because both
+sources see the same room the room cancels: the sound power of the source
+under test is the calibrated power of the reference source carried across by
+the difference of the two mean levels. The method reaches engineering grade 2
+where the field is reverberant enough and the source not too directional, and
+survey grade 3 otherwise; an impulsive source gets a sound energy level
+instead of a sound power level by the same route. Which route fits which job
+is weighed in [Sound Power](sound-power.md).
 
 ## 1. The comparison in situ (ISO 3747)
 
@@ -22,15 +22,23 @@ The microphone positions must lie where the field is **reverberant**, which
 the standard measures as the excess of sound pressure level over the free
 field, $\Delta L_f \ge 7$ dB (clause 4.1, Annex A). Three or four positions
 are used, at least 2 m apart, none closer than 0,5 m to any boundary,
-distributed as evenly as possible round the machine (clause 7.4.1); the
-reference source stands alongside the machine, never closer than 0,5 m to
-its reference box, and where the machine is long it is run at several
-locations along the sides (clause 7.3). Both sources and the background are
-read at the same positions, the reference source for 30 s (clause 7.5), in
-**octave bands from 125 Hz to 8 kHz** (clause 3.11); Table D.1 tabulates a
-63 Hz row besides, for use only where the environment and the instrumentation
-are satisfactory there (footnote a), which is why the API accepts that band
-too.
+distributed as evenly as possible round the machine, each either in sight of
+every sound-emitting area or screened from all of them (clause 7.4.1); the
+reference source goes as close to the acoustic centre as it can, on top of a
+directional machine where it cannot simulate the emission pattern and
+alongside only failing that, where positions closer than 0,5 m to the
+reference box are to be avoided. One location is normally enough; where the
+largest dimension of the reference box exceeds the measurement distance, the
+source is run at several, along the sides one measurement distance apart when
+the machine is omnidirectional and one per clearly definable emission area
+when it has them, and where that dimension does not exceed the measurement
+distance and an omnidirectional machine cannot take the source on top, four
+locations are used, one adjacent to each vertical side of the box
+(clause 7.3). Both sources and the background are read at the same positions,
+the reference source for 30 s (clause 7.5), in **octave bands from 125 Hz
+to 8 kHz** (clause 3.11); Table D.1 tabulates a 63 Hz row besides, for use
+only where the environment and the instrumentation are satisfactory there
+(footnote a), which is why the API accepts that band too.
 
 The background is corrected **position by position** before anything is
 averaged (clause 8.1, Eq. 7):
@@ -170,6 +178,34 @@ print(two.reference_levels.shape)               # (2, 7): mean level per locatio
 print(np.round(two.sound_power_level, 1))       # [89.1 92.  93.  92.2 89.3 85.1 78.9]
 print(round(two.sound_power_level_a, 1))        # 96.5 dB(A)
 ```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ.svg" alt="Plan of a corner of a workroom: the machine inside its dashed reference box, the reference sound source on the side it emits towards and 0.5 m clear of the box, four microphone positions 1.5 m out tagged with their zones from Table 1, the three readings taken at every position, the rules for several source locations, and Equation 11 with the Annex A excess over the free field" width="100%"></picture>
+
+**How the measurement goes.** Apply a class 1 calibrator to every microphone
+before and after each series, and discard the series if the two readings differ
+by more than 0,5 dB. Listen to the machine first: where the sound from one
+component predominates, the geometric centre of that component is the acoustic
+centre, and the reference box is drawn just round that component, down to the
+floor it stands on; where no component sounds more than the rest, leave out any
+component that clearly emits nothing and take the geometric centre and the box
+of what is left. Survey the directivity 1 m from the reference box:
+within ±2 dB the machine counts as omnidirectional, and beyond ±7 dB the result
+stays at survey grade. Set the reference source as close to the acoustic centre
+as you can: for a directional machine, where it simulates the emission pattern,
+otherwise on top, and only failing that alongside, avoiding positions closer
+than 0,5 m to the reference box. One location normally does. Where the largest
+dimension of the reference box is greater than the measurement distance, use
+several: along the sides, one measurement distance apart, for an
+omnidirectional machine, and one per area for a machine with clearly definable
+emission areas. Where that dimension does not exceed the measurement distance
+and an omnidirectional machine cannot take the source on top, use four
+locations, one adjacent to each vertical side of the box. Place three or four
+microphones round the machine, at least 2 m apart and 0,5 m from every
+boundary, where $\Delta L_f \ge 7$ dB, seeking positions as far from the source
+as from the box, within 10 %. At each position read the machine, the reference
+source for about 30 s and the background just before or after, correct each
+position for background, and report the band and A-weighted levels to 0,1 dB
+with the grade and the expanded uncertainty.
 
 ### `sound_power_in_situ()` parameters
 

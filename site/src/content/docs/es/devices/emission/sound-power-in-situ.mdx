@@ -24,43 +24,50 @@ import SeeAlso from '../../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../../components/ThemeImage.astro';
 
 Algunas máquinas nunca viajan a una sala de ensayo: un compresor atornillado
-al suelo de la planta, una línea de prensas, una envasadora cableada al
-resto de la línea. ISO 3747 determina su potencia acústica donde están, por
-comparación. Se coloca junto a la máquina una fuente sonora de referencia
-(RSS) de potencia acústica por bandas calibrada, los mismos tres o cuatro
-micrófonos escuchan a cada fuente por turnos desde la parte reverberante de
-la sala y, como ambas fuentes ven la misma sala, la sala se cancela: la
-potencia acústica de la fuente en ensayo es la potencia calibrada de la
-fuente de referencia trasladada por la diferencia de los dos niveles medios.
-El método alcanza el grado 2 (ingeniería) donde el campo es lo bastante
-reverberante y la fuente no es demasiado directiva, y el grado 3 (control)
-en caso contrario; una fuente impulsiva recibe un nivel de energía acústica
-en lugar de un nivel de potencia acústica por la misma vía. Esta guía cubre
-la corrección por ruido de fondo posición a posición con sus reglas de 6 dB
-y 15 dB, las formas con una y con varias ubicaciones, la vía de suceso
-aislado, el grado de la Tabla 2, la incertidumbre del apartado 9 y las
-condiciones de referencia del Anexo C. Qué vía encaja con qué trabajo se
+al suelo de la planta, una línea de prensas, una envasadora cableada al resto
+de la línea. ISO 3747 determina su potencia acústica donde están, por
+comparación. En la misma sala que la máquina se hace funcionar una fuente
+sonora de referencia (RSS) de potencia acústica por bandas calibrada, los
+mismos tres o cuatro micrófonos escuchan a cada fuente por turnos desde la
+parte reverberante de la sala y, como ambas fuentes ven la misma sala, la
+sala se cancela: la potencia acústica de la fuente en ensayo es la potencia
+calibrada de la fuente de referencia trasladada por la diferencia de los dos
+niveles medios. El método alcanza el grado 2 (ingeniería) donde el campo es
+lo bastante reverberante y la fuente no es demasiado directiva, y el grado 3
+(control) en caso contrario; una fuente impulsiva recibe un nivel de energía
+acústica en lugar de un nivel de potencia acústica por la misma vía. Esta
+guía cubre la corrección por ruido de fondo posición a posición con sus
+reglas de 6 dB y 15 dB, las formas con una y con varias ubicaciones, la vía
+de suceso aislado, el grado de la Tabla 2, la incertidumbre del apartado 9 y
+las condiciones de referencia del Anexo C. Qué vía encaja con qué trabajo se
 sopesa en [Potencia acústica](/phonometry/es/devices/emission/sound-power/).
 
 ## 1. La comparación in situ (ISO 3747)
 
-El entorno es todo el método, así que la norma empieza por él. Las
-posiciones de micrófono deben estar donde el campo es **reverberante**, lo
-que la norma mide como el exceso de nivel de presión acústica sobre el campo
-libre, $\Delta L_f \ge 7$ dB (apartado 4.1, Anexo A): el nivel que la fuente
-de referencia produce en un micrófono debe estar al menos 7 dB por encima
-del que produciría en campo libre a esa distancia. Se usan tres o cuatro
+El entorno es todo el método, así que la norma empieza por él. Las posiciones
+de micrófono deben estar donde el campo es **reverberante**, lo que la norma
+mide como el exceso de nivel de presión acústica sobre el campo libre,
+$\Delta L_f \ge 7$ dB (apartado 4.1, Anexo A): el nivel que la fuente de
+referencia produce en un micrófono debe estar al menos 7 dB por encima del
+que produciría en campo libre a esa distancia. Se usan tres o cuatro
 posiciones, separadas al menos 2 m, ninguna a menos de 0,5 m de cualquier
 contorno, repartidas lo más uniformemente posible alrededor de la máquina y
-cada una con línea de visión a las mismas zonas emisoras (apartado 7.4.1);
-la fuente de referencia se sitúa al lado de la máquina, nunca a menos de
-0,5 m de su caja de referencia, y cuando la máquina es larga se hace
-funcionar en varias ubicaciones a lo largo de los lados (apartado 7.3).
-Ambas fuentes y el ruido de fondo se leen en las **mismas posiciones con las
-mismas orientaciones de micrófono**, la fuente de referencia durante 30 s
-(apartado 7.5), y toda la determinación se hace en **bandas de octava de
-125 Hz a 8 kHz** (apartado 3.11); la Tabla D.1 tabula además una fila de
-63 Hz, para usarla solo donde el entorno y la instrumentación sean
+cada una viendo todas las zonas emisoras o ninguna (apartado 7.4.1); la
+fuente de referencia se coloca lo más cerca que se pueda del centro acústico,
+en una máquina directiva donde imite su patrón de emisión, encima cuando eso
+no sea practicable y al lado solo si tampoco es posible, evitando quedar a
+menos de 0,5 m de la caja de referencia. Normalmente basta una ubicación;
+cuando la mayor dimensión de la caja supera la distancia de medición se hace
+funcionar en varias, por los lados y separadas esa distancia si la máquina es
+omnidireccional, y una por cada zona emisora definida si las tiene, y cuando
+esa dimensión no supera la distancia de medición y una máquina
+omnidireccional no admite la fuente encima, se usan cuatro ubicaciones, una
+junto a cada lado vertical de la caja (apartado 7.3). Ambas fuentes y el
+ruido de fondo se leen en las **mismas posiciones con las mismas
+orientaciones de micrófono**, la fuente de referencia durante 30 s
+(apartado 7.5), y toda la determinación se hace en **bandas de octava
+de 125 Hz a 8 kHz** (apartado 3.11); la Tabla D.1 tabula además una fila
+de 63 Hz, para usarla solo donde el entorno y la instrumentación sean
 satisfactorios en esa banda (nota a), y por eso la API la acepta también.
 
 El ruido de fondo se corrige **posición a posición** antes de promediar nada
@@ -120,7 +127,10 @@ referencia sobreestima fuertemente la máquina, una que ve la fuente de
 referencia pero no la máquina la subestima fuertemente, y donde ambas están
 a la vista el signo del error sigue a cuál de las dos está más cerca, y se
 anula cuando las dos distancias de medición coinciden dentro del 10 %. Las
-posiciones que hay que elegir son las de esa última zona. La biblioteca no
+posiciones que hay que elegir son las de esa última zona. Cuando no pueden
+estar todas ahí, el apartado 7.4.3 equilibra el conjunto: una posición en una
+zona +, una en una zona +/− y una o dos en zonas −, y el Anexo B recomienda
+una sola posición en la zona que la máquina apantalla. La biblioteca no
 evalúa nada de esto: toma los niveles que se le dan y asume que las
 posiciones se eligieron bien.
 
@@ -242,6 +252,44 @@ print(two.reference_levels.shape)               # (2, 7): nivel medio por ubicac
 print(np.round(two.sound_power_level, 1))       # [89.1 92.  93.  92.2 89.3 85.1 78.9]
 print(round(two.sound_power_level_a, 1))        # 96.5 dB(A)
 ```
+
+### Cómo se hace la medida
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_sound_power_in_situ.svg" alt="Planta de una esquina de un local de trabajo, con una pared rayada arriba y a la izquierda. En el centro está la máquina dentro de su caja de referencia discontinua, de 2,2 m por 1,4 m, con una flecha que sale de su lado superior rotulada emisión principal. Un anillo de puntos a 1 m de la caja marca el barrido de directividad, que se hace antes y a 1,5 m de altura, y cuyo rango de ±4 dB hace directiva a la máquina. La fuente sonora de referencia está en ese lado emisor, a 0,5 m como mínimo de la caja. Cuatro posiciones de micrófono numeradas se sitúan a 1,5 m de la caja, cada una rotulada con su zona de la Tabla 1 de la norma. La posición 1, sobre la esquina derecha, se une con una línea discontinua a la caja y con otra a la fuente de referencia, 1,5 m y 1,6 m, iguales dentro del 10 %, que es la zona más o menos; la posición 2, en el mismo lado pero más cerca de la fuente, es una zona menos; la posición 3, a la izquierda de la máquina, está más cerca de la máquina que de la fuente, una zona más; la posición 4, debajo de la máquina, tiene su línea a la fuente cortada por la máquina, la zona sin visión donde el Anexo B recomienda una sola posición. Las posiciones 1 y 2 están separadas al menos 2 m, y la posición 3 guarda al menos 0,5 m con la pared. Los rótulos bajo la planta piden tres o cuatro posiciones, cada una viendo todas las zonas emisoras o ninguna, y nombran las cuatro zonas. A la derecha, un panel enumera las tres lecturas que se toman en cada posición con la misma orientación: la máquina en marcha, la fuente de referencia durante 30 s y el ruido de fondo justo antes o después. Un segundo panel muestra una máquina más larga que la distancia de medición, con ubicaciones de la fuente de referencia a lo largo de ambos lados separadas una distancia de medición, y da las tres reglas para varias ubicaciones: una máquina omnidireccional lleva ubicaciones por los lados separadas una distancia de medición, una máquina con zonas emisoras definidas una ubicación por zona, y una máquina omnidireccional cuya mayor dimensión no supera la distancia de medición, cuando no cabe nada encima, una ubicación junto a cada lado vertical; con una sola zona emisora, como aquí, basta una ubicación. Una caja al pie lleva la Ecuación 11, el nivel de potencia acústica como la potencia calibrada de la fuente de referencia menos su nivel medio más el nivel medio de la máquina, y el exceso sobre el campo libre del Anexo A, al menos 7 dB donde están los micrófonos. Tres líneas debajo dan la corrección por ruido de fondo según el margen, los instrumentos y la calibración de clase 1 y las condiciones del grado 2" width="100%" />
+
+Usa instrumentos y filtros de clase 1 y un calibrador de clase 1 en cada
+micrófono antes y después de cada serie, que se descarta si la lectura cambia
+más de 0,5 dB. Escucha primero la máquina: si el sonido de un componente
+predomina, su centro geométrico es el centro acústico y la caja de referencia
+se traza justo alrededor de ese componente, hasta el suelo sobre el que se
+apoya; si ningún componente suena más que los demás, deja fuera los que
+claramente no emiten y toma el centro geométrico y la caja de lo que queda.
+Haz después el barrido de directividad a 1 m de la caja de referencia,
+normalmente a 1,5 m de altura y a intervalos de 2 m o menos por cada lado:
+dentro de ±2 dB la máquina es omnidireccional y, pasado ±7 dB, el resultado
+queda en grado de control. Acerca la fuente de referencia cuanto puedas al
+centro acústico: en una máquina directiva, donde imite su patrón de emisión;
+si no, encima; y solo si tampoco es posible, al lado, evitando quedar a menos
+de 0,5 m de la caja de referencia. Normalmente basta una ubicación. Cuando la
+mayor dimensión de la caja supera la distancia de medición hacen falta varias:
+por los lados y separadas esa distancia si la máquina es omnidireccional, y
+una por zona si tiene zonas emisoras definidas. Cuando esa dimensión no supera
+la distancia de medición y una máquina omnidireccional no admite la fuente
+encima, usa cuatro ubicaciones, una junto a cada lado vertical de la caja.
+Reparte tres o cuatro micrófonos alrededor, separados al menos 2 m y a no
+menos de 0,5 m de todo contorno, donde el Anexo A dé $\Delta L_f \ge 7$ dB,
+buscando posiciones a igual distancia, dentro del 10 %, de la caja y de la
+fuente; si no pueden estar todas ahí, una más cerca de la caja, otra a igual
+distancia y una o dos más cerca de la fuente. En cada posición, con la misma
+orientación, mide la máquina, la fuente de referencia unos 30 s y el ruido de
+fondo justo antes o después, en bandas de octava de 125 Hz a 8 kHz, y cinco
+sucesos o más si es impulsiva. Corrige el fondo por posición según el margen:
+más de 15 dB, nada; de 6 dB a 15 dB, la Ec. 7; menos de 6 dB, 1,3 dB como
+mucho y una cota superior que el informe declara. Anota lo que hayas oído en
+la escucha previa, las dimensiones de la caja de referencia, la distancia de
+medición, las posiciones, las ubicaciones de la fuente y $\Delta L_f$, y da
+los niveles por banda y ponderados A a 0,1 dB con el grado, $U$ y su factor de
+cobertura y probabilidad.
 
 ### Parámetros de `sound_power_in_situ()`
 

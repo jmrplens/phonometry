@@ -10,8 +10,9 @@ Predicting the fundamental frequency of a building (ISO 4866 Annex D).
 A vibration measurement on a building is read against the building's own
 response, and that response starts with one number: the lowest natural
 frequency of the fundamental translation mode. Measure it when you can, says
-ISO 4866; Annex D is what to do when you cannot, because the excitation is too
-weak, the damping too high or the subcomponents too loud to separate.
+ISO 4866; Annex D is what to do when a direct measurement cannot be made, or
+when high damping, subcomponent resonances or other practical problems limit
+how useful it is.
 
 The annex offers four empirical predictors and is candid about all of them.
 The simplest is the storey count, $f = 10/n$ hertz, the same rule
@@ -29,11 +30,11 @@ in metres. The coefficients range over 0,014 to 0,03, over 0,087 to 0,109 and
 over 0,06 to 0,08 respectively, so the choice of code moves the answer by more
 than a factor of two in the first form alone.
 
-Fitting one curve to measurements instead of to codes, D.3 quotes
+D.2 closes by fitting one curve to measurements instead of to codes:
 $f = 46/h$ hertz ($T = 0{,}022\,h$ seconds) from a sample of 163
-rectangular-plan buildings, and prints the fit with the data around it: errors
-of **± 50 %** are not uncommon, and the annex says that is typical of what an
-empirical formula can do. It also says something worth repeating, since it is
+rectangular-plan buildings, printed as Figure D.1 with the data around it.
+Errors of **± 50 %** are not uncommon, and D.2 says that is typical of what an
+empirical formula can do. D.3 then says something worth repeating, since it is
 the opposite of what a reader expects: computer models correlate *worse* with
 measured frequencies than $46/h$ does, because the model is only as good
 as its idea of what the building is made of.
@@ -78,7 +79,7 @@ One predicted fundamental frequency, with the error it carries.
 
 *property*
 
-The ± 50 % band of D.3 around `frequency_hz`.
+The ± 50 % band of D.2 around `frequency_hz`.
 
 ### BuildingFrequencyEstimate.plot()
 
@@ -127,7 +128,7 @@ DAMPING_RATIO_RANGE = (0.005, 0.021)
 empirical_frequency_bounds(frequency_hz: float) -> tuple[float, float]
 ```
 
-The ± 50 % band D.3 puts around an empirical prediction, in hertz.
+The ± 50 % band D.2 puts around an empirical prediction, in hertz.
 
 **Parameters**
 
@@ -274,10 +275,10 @@ HEIGHT_FREQUENCY_CONSTANT_HZ_M = 46.0
 height_fundamental_frequency(height: ArrayLike) -> np.ndarray | float
 ```
 
-The `f = 46/h` fit of D.3, in hertz.
+The `f = 46/h` fit D.2 closes with, in hertz.
 
 Fitted to 163 rectangular-plan buildings rather than taken from a code,
-which is why it is here on its own: D.3 also reports that computed
+which is why it is here on its own: D.3 goes on to report that computed
 frequencies correlate with measurement *worse* than this line does.
 
 **Parameters**

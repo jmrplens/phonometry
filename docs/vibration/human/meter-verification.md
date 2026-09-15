@@ -76,6 +76,22 @@ of the bench measurement added on top; that uncertainty has to fit inside the
 band as well. There is a second sentence about uncertainty, in 13.1 and 14.1,
 and it says something different; section 4 is about telling the two apart.
 
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_meter_verification_bench.svg" alt="Three bands: the meter's transducer on a calibrated reference on a vibration exciter, with the two readings Formula (9) compares; a generator feeding the maker's substitute for the transducer, with the saw-tooth bursts of Table 6; and where the sweeps and the bursts sit in a 60 dB linear operating range, above a box with Formulae (9), (12) and (10)" width="100%"></picture>
+
+**How the measurement goes.** In a pattern evaluation (clause 12), mount the
+meter's transducer and a calibrated reference transducer on the exciter as
+ISO 16063-21 describes, set the band-limited reading 20 dB above the lower
+linearity limit at the reference frequency, and in one-third-octave steps over
+Table 15 hold that input on the reference and note the reading: Formula (9).
+Repeat through the electrical input, holding the reading and noting the input
+signal value, Formula (12), and add the transducer error of the weighting
+tested both ways to the ones tested only electrically before grading against
+Table 5. For the bursts, start from a steady sine at 50 % of the upper
+linearity limit, apply the Table 6 saw-tooth to every weighting, and step down
+tenfold to three times the lower limit. A one-off instrument is shaken at the
+fixed frequencies of 13.10 instead, and a periodic verification (clause 14)
+keeps only the mechanical checks.
+
 ## 2. The nine weightings, and the band that widens around them
 
 The design goal is not a table of numbers, it is a transfer function. Clause

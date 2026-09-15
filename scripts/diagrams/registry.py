@@ -182,6 +182,7 @@ from .underwater import (
     _d_underwater_waveguide,
 )
 from .vibration import (
+    _d_building_frequency_predictors,
     _d_fault_kinematics,
     _d_hand_arm_vibration,
     _d_human_vibration,
@@ -189,15 +190,19 @@ from .vibration import (
     _d_junction_rig,
     _d_machine_diagnostics,
     _d_machine_vibration_positions,
+    _d_meter_verification_bench,
     _d_mobility_rig,
     _d_multiple_shock,
     _d_people_in_buildings,
     _d_power_injection_rig,
     _d_railway_cross_section,
     _d_railway_monitoring,
+    _d_railway_prediction_chain,
+    _d_seat_test_rig,
     _d_structural_damage_points,
     _d_transfer_stiffness_rig,
     _d_vibration_meter_coupling,
+    _d_vibration_prediction_path,
 )
 
 DIAGRAMS = {
@@ -360,6 +365,11 @@ DIAGRAMS = {
         "Hand-transmitted vibration: where the accelerometer goes",
         660,
     ),
+    "diagram_meter_verification_bench": (
+        _d_meter_verification_bench,
+        "Pattern evaluation of a human-vibration meter (ISO 8041-1)",
+        1054,
+    ),
     "diagram_speech_intelligibility": (
         _d_speech_intelligibility,
         "Speech Intelligibility Index computation flow (ANSI S3.5-1997)",
@@ -459,6 +469,11 @@ DIAGRAMS = {
         _d_iso2631_5_setup,
         "Getting the record (ISO 2631-5, clauses 5.1.2 and 5.1.4)",
         600,
+    ),
+    "diagram_seat_test_rig": (
+        _d_seat_test_rig,
+        "How a seat is tested on a vibration simulator (ISO 10326-1)",
+        790,
     ),
     "diagram_en12354_6": (
         _d_enclosed_space_absorption,
@@ -670,6 +685,21 @@ DIAGRAMS = {
         _d_machine_vibration_positions,
         "Where machine vibration is measured (ISO 20816-1)",
         700,
+    ),
+    "diagram_building_frequency_predictors": (
+        _d_building_frequency_predictors,
+        "What a building's own frequency is predicted from (ISO 4866 Annex D)",
+        790,
+    ),
+    "diagram_vibration_prediction_path": (
+        _d_vibration_prediction_path,
+        "The path a vibration prediction follows (DIN 4150-1)",
+        880,
+    ),
+    "diagram_railway_prediction_chain": (
+        _d_railway_prediction_chain,
+        "A railway prediction, track to floor (E DIN 45672-3)",
+        758,
     ),
     "diagram_structural_damage_points": (
         _d_structural_damage_points,

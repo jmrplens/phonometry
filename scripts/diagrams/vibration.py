@@ -375,6 +375,408 @@ def _d_hand_arm_vibration(s: SVG, th: Theme) -> None:
         s.text(556, 540 + 14 * i, rule, 12, th.fg, "start")
 
 
+def _d_meter_verification_bench(s: SVG, th: Theme) -> None:
+    """ISO 8041-1 clause 12: one meter, fed two ways, and where each test sits.
+
+    The top band is the mechanical frequency-response test of 12.11.2: the
+    meter's own transducer and a calibrated laboratory reference on a
+    vibration exciter, mounted to the ISO 16063-21 calibration procedure and
+    stacked as Figure H.3 draws them, the input held constant on the
+    reference while the meter's weighted reading is noted, which is
+    Formula (9); the phase check of Annex H runs on an exciter of its own.
+    The middle band is the electrical test of 12.11.3, the maker's substitute
+    for the transducer (5.1) fed by a generator whose input signal value is
+    adjusted to hold the reading, which is Formula (12), and the saw-tooth
+    bursts of 12.13 with the Table 6 timing of Figure 3. The strip under them
+    places every level those clauses name, each of them a band-limited
+    indication at the reference frequency, inside the 60 dB linear operating
+    range 5.7 asks for, and the box combines the two errors as 12.11.4 does,
+    through Formula (10). The example is a whole-body meter: the 15,915 Hz
+    reference frequency of Table 1, the Table 15 ranges, and the 100 Hz
+    band-limiting corner of Table 3 behind the 2 ms fall time. Periodic
+    verification is clause 14 and a different bench; this plate is the
+    pattern evaluation, which is what its title says.
+    """
+    x_l = 40.0
+    rx0, rw = 500.0, 210.0  # the column the meter's readings sit in
+
+    # ------------------------------------------------------------------
+    # 1. Mechanical: 12.11.2, with the phase check of Annex H beside it.
+    # ------------------------------------------------------------------
+    s.text(
+        x_l,
+        72,
+        "Mechanical test: the whole meter on a vibration exciter (12.11.2)",
+        15,
+        th.primary,
+        anchor="start",
+        bold=True,
+    )
+    ex = 350.0
+    s.text(
+        ex + 40,
+        102,
+        "both transducers mounted as ISO 16063-21 describes",
+        12,
+        th.muted,
+    )
+    cab = 186.0
+    s.rect(x_l, cab - 24, 100, 48, th.panel, th.fg, rx=6, sw=1.8)
+    s.path(
+        f"M {x_l + 18} {cab} C {x_l + 30} {cab - 22}, {x_l + 40} {cab - 22}, "
+        f"{x_l + 50} {cab} S {x_l + 70} {cab + 22}, {x_l + 82} {cab}",
+        stroke=th.primary,
+        sw=2.0,
+    )
+    s.text(x_l + 50, cab + 44, "signal generator", 12, th.muted)
+    s.arrow(x_l + 100, cab, 176, cab, th.fg, 1.8)
+    # Annex H lists the exciter "with power amplifier" (H.2.3.3 d).
+    s.path(
+        f"M 178 {cab - 22} L 178 {cab + 22} L 214 {cab} Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=1.8,
+    )
+    s.text(196, cab + 44, "power", 12, th.muted)
+    s.text(196, cab + 62, "amplifier", 12, th.muted)
+    s.line(214, cab, 250, cab, th.fg, 1.8)
+    s.line(250, cab, 250, 232, th.fg, 1.8)
+    s.arrow(250, 232, 286, 232, th.fg, 1.8)
+
+    # The exciter: body, base and the moving table.
+    s.rect(ex - 62, 198, 124, 70, th.panel, th.primary, rx=8, sw=2.2)
+    s.rect(ex - 76, 268, 152, 10, th.panel, th.fg, rx=2, sw=1.6)
+    s.rect(ex - 34, 180, 68, 18, th.panel, th.fg, rx=2, sw=1.8)
+    s.text(ex, 298, "vibration exciter", 12, th.muted)
+    _motion_arrows(s, ex, 233, 17, th.secondary, 2.0)
+    # Figure H.3 stacks them: the meter's transducer on the reference, and
+    # 12.11.2 mounts both to the ISO 16063-21 calibration procedure.
+    s.rect(ex - 15, 152, 30, 28, th.accent, th.fg, rx=2.5, sw=1.4)
+    s.rect(ex - 12, 126, 24, 26, th.primary, th.fg, rx=2.5, sw=1.4)
+    s.text(ex - 30, 136, "the meter's transducer", 12, th.primary, anchor="end")
+    s.text(ex - 30, 162, "calibrated reference", 12, th.accent, anchor="end")
+    s.line(ex - 26, 132, ex - 13, 139, th.muted, 0.9)
+    s.line(ex - 26, 158, ex - 16, 164, th.muted, 0.9)
+
+    # The two readings Formula (9) compares.
+    s.line(ex + 12, 139, rx0, 139, th.primary, 1.6)
+    s.line(ex + 15, 166, 466, 166, th.accent, 1.6)
+    s.line(466, 166, 466, 220, th.accent, 1.6)
+    s.line(466, 220, rx0, 220, th.accent, 1.6)
+    s.rect(rx0, 112, rw, 56, th.panel, th.primary, rx=8, sw=2.0)
+    s.text(rx0 + rw / 2, 135, "human-vibration meter", 13, th.fg, bold=True)
+    s.text(rx0 + rw / 2, 156, "reads $a_{ind}$, weighted", 12, th.fg)
+    s.rect(rx0, 192, rw, 56, th.panel, th.accent, rx=8, sw=2.0)
+    s.text(rx0 + rw / 2, 215, "laboratory reference", 13, th.fg, bold=True)
+    s.text(rx0 + rw / 2, 236, "measures $a_{in}$, unweighted", 12, th.fg)
+    for k, line in enumerate(
+        ("one weighting per", "application takes", "both tests", "(12.11.1)")
+    ):
+        s.text(790, 162 + 18 * k, line, 12, th.muted)
+
+    s.text(
+        x_l,
+        328,
+        "at $f_{ref}$ = 15.915 Hz, the band-limited reading 20 dB over the lower "
+        "linearity limit fixes the input $a_{in}$",
+        13,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        x_l,
+        350,
+        "in one-third-octave steps from 0.5 Hz to 160 Hz (Table 15, whole-body): "
+        "$a_{in}$ held on the reference, $a_{ind}$ noted",
+        13,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        x_l,
+        372,
+        "phase, where a peak, an MTVV or a VDV is read: on a vibration exciter, "
+        "directly or by a tone and its third harmonic (Annex H)",
+        12,
+        th.muted,
+        anchor="start",
+    )
+    s.line(x_l, 390, 860, 390, th.muted, 1.0, dash="6,6")
+
+    # ------------------------------------------------------------------
+    # 2. Electrical: 12.11.3, and the signal bursts of 12.13.
+    # ------------------------------------------------------------------
+    s.text(
+        x_l,
+        420,
+        "Electrical test: a generator in place of the transducer (12.11.3, 12.13)",
+        15,
+        th.secondary,
+        anchor="start",
+        bold=True,
+    )
+    cab2 = 498.0
+    # One generator, a sine for the sweep and a saw-tooth for the bursts.
+    s.rect(x_l, cab2 - 24, 100, 48, th.panel, th.fg, rx=6, sw=1.8)
+    s.path(
+        f"M {x_l + 10} {cab2} C {x_l + 17} {cab2 - 16}, {x_l + 23} {cab2 - 16}, "
+        f"{x_l + 28} {cab2} S {x_l + 40} {cab2 + 16}, {x_l + 46} {cab2}",
+        stroke=th.primary,
+        sw=1.8,
+    )
+    s.path(
+        f"M {x_l + 54} {cab2} L {x_l + 62} {cab2 - 14} L {x_l + 62} {cab2 + 14} "
+        f"L {x_l + 78} {cab2 - 14} L {x_l + 78} {cab2 + 14} L {x_l + 86} {cab2}",
+        stroke=th.secondary,
+        sw=1.8,
+    )
+    s.text(x_l + 50, cab2 + 44, "signal generator", 12, th.muted)
+    s.arrow(x_l + 100, cab2, 184, cab2, th.fg, 1.8)
+    # 12.13 puts the single-pole low-pass against the saw-tooth's switching
+    # transients only, and prints its cut-off as an example.
+    s.rect(186, cab2 - 22, 76, 44, th.panel, th.fg, rx=5, sw=1.6)
+    s.path(
+        f"M 198 {cab2 - 6} L 226 {cab2 - 6} Q 238 {cab2 - 6}, 250 {cab2 + 12}",
+        stroke=th.fg,
+        sw=1.6,
+    )
+    s.text(
+        224,
+        cab2 - 52,
+        "single-pole low-pass for the saw-tooth, if needed",
+        12,
+        th.muted,
+    )
+    s.text(224, cab2 - 34, "e.g. 100 $f_2$ = 10 kHz", 12, th.muted)
+    s.arrow(262, cab2, 294, cab2, th.fg, 1.8)
+    # 5.1 NOTE: the three substitutes a maker may provide.
+    s.rect(296, cab2 - 30, 160, 60, th.panel, th.secondary, rx=6, sw=2.0)
+    s.text(376, cab2 - 10, "test point,", 12, th.fg)
+    s.text(376, cab2 + 6, "dummy transducer", 12, th.fg)
+    s.text(376, cab2 + 22, "or input adapter", 12, th.fg)
+    s.text(376, cab2 + 48, "the maker's substitute (5.1)", 12, th.muted)
+    s.arrow(456, cab2, rx0 - 2, cab2, th.fg, 1.8)
+    s.text(478, cab2 - 10, "$u_{in}$", 13, th.secondary)
+    s.rect(rx0, cab2 - 28, rw, 56, th.panel, th.primary, rx=8, sw=2.0)
+    s.text(rx0 + rw / 2, cab2 - 5, "human-vibration meter", 13, th.fg, bold=True)
+    s.text(rx0 + rw / 2, cab2 + 16, "shows $a_{ind}$ again", 12, th.fg)
+    s.text(rx0 + rw / 2, cab2 - 38, "into its electrical input facility", 12, th.muted)
+    s.line(rx0 + rw, cab2, 776, cab2, th.muted, 1.2, dash="4,3")
+    s.rect(776, cab2 - 13, 26, 26, "none", th.muted, rx=2.5, sw=1.4, dash="4,3")
+    s.text(789, cab2 + 38, "no transducer", 12, th.muted)
+
+    # The saw-tooth bursts as Figure 3 draws them: two cycles, a linear rise
+    # and a vertical fall, starting and ending on the baseline. Not to
+    # scale, as Figure 3 is not.
+    by = 614.0
+    amp, per = 15.0, 20.0
+    start = x_l + 40.0
+    rep = 130.0
+
+    def burst(x0: float) -> float:
+        half = per / 2
+        x = x0 + half + per
+        s.path(
+            f"M {x0} {by} L {x0 + half} {by - amp} L {x0 + half} {by + amp} "
+            f"L {x} {by - amp} L {x} {by + amp} L {x + half} {by}",
+            stroke=th.secondary,
+            sw=1.8,
+        )
+        return x + half
+
+    s.text(
+        x_l,
+        by - 30,
+        "two-cycle bursts, as Figure 3 draws them",
+        12,
+        th.muted,
+        anchor="start",
+    )
+    s.line(x_l, by, start, by, th.secondary, 1.8)
+    e1 = burst(start)
+    s.line(e1, by, start + rep, by, th.secondary, 1.8)
+    e2 = burst(start + rep)
+    s.line(e2, by, e2 + 22, by, th.secondary, 1.8)
+    s.text(e2 + 34, by + 5, "//", 12, th.secondary)
+    s.line(e2 + 46, by, e2 + 70, by, th.secondary, 1.8)
+    e3 = burst(e2 + 70)
+    s.line(e3, by, e3 + 14, by, th.secondary, 1.8)
+    s.line(x_l, by - 22, x_l, by + 50, th.muted, 0.9, dash="3,3")
+    s.line(e3 + 14, by - 22, e3 + 14, by + 50, th.muted, 0.9, dash="3,3")
+    s.dim(x_l, by + 26, start, by + 26, "1 s", size=12)
+    s.dim(start, by + 26, start + rep, by + 26, "10 s", size=12)
+    s.dim(x_l, by + 50, e3 + 14, by + 50, "60 s", size=12)
+
+    tx = 470.0
+    s.text(
+        tx,
+        by - 26,
+        "Table 6, whole-body: saw-tooth at 15.915 Hz",
+        12,
+        th.fg,
+        anchor="start",
+        bold=True,
+    )
+    s.text(tx, by - 6, "bursts of 1, 2, 4, 8 or 16 cycles", 12, th.fg, anchor="start")
+    s.text(
+        tx,
+        by + 14,
+        "the first at 1 s, one every 10 s, 60 s in all",
+        12,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        tx,
+        by + 34,
+        "Table 8: what each weighting reads, within 10 % (VDV 12 %)",
+        12,
+        th.fg,
+        anchor="start",
+    )
+
+    s.text(
+        x_l,
+        700,
+        "at $f_{ref}$ the band-limited reading is again 20 dB over the lower limit, "
+        "and the weighted one is $a_{ind}$",
+        13,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        x_l,
+        722,
+        "in one-third-octave steps from 0.25 Hz to 160 Hz: $u_{in}$ set to show "
+        "$a_{ind}$ again, signal plus noise at least 10 times the noise",
+        13,
+        th.fg,
+        anchor="start",
+    )
+    s.text(
+        x_l,
+        744,
+        "bursts on every time and frequency weighting after a steady sine at 50 % "
+        "of the upper limit; fall time ≤ 1/(5 $f_2$) = 2 ms",
+        13,
+        th.fg,
+        anchor="start",
+    )
+    s.line(x_l, 762, 860, 762, th.muted, 1.0, dash="6,6")
+
+    # ------------------------------------------------------------------
+    # 3. Where each level sits in the linear operating range (5.7, 12.11,
+    #    12.13), drawn for the 60 dB that 5.7 sets as the least. Every
+    #    marker is a band-limited indication at the reference frequency.
+    # ------------------------------------------------------------------
+    s.text(
+        450,
+        790,
+        "Where each test sits in a linear operating range of 60 dB, "
+        "the least 5.7 allows",
+        14,
+        th.fg,
+        bold=True,
+    )
+    bar_y = 840.0
+    x0db, px_db = 150.0, 10.0
+
+    def at(db: float) -> float:
+        return x0db + px_db * db
+
+    s.rect(at(0), bar_y - 7, at(60) - at(0), 14, th.panel, th.fg, rx=3, sw=1.4)
+    s.text(at(0) - 10, bar_y + 5, "lower limit", 12, th.muted, anchor="end")
+    s.text(at(60) + 10, bar_y + 5, "upper limit", 12, th.muted, anchor="start")
+    # Both frequency-response tests are set here, at the reference frequency.
+    s.line(at(20), bar_y - 7, at(20), bar_y - 20, th.primary, 2.2)
+    s.circle(at(20), bar_y, 5, th.primary)
+    s.text(
+        at(20),
+        bar_y - 26,
+        "at $f_{ref}$, 20 dB over the lower limit: both sweeps set",
+        12,
+        th.primary,
+    )
+    # The bursts: 50 % of the upper limit (-6.02 dB), then tenfold steps down
+    # while the reading stays at least 3 times the lower limit (+9.54 dB):
+    # 53.98, 33.98 and 13.98 dB, and the next, -6.02 dB, is out.
+    first = 60.0 - 20.0 * 0.30103
+    for k in range(3):
+        s.circle(at(first - 20.0 * k), bar_y, 5, th.secondary)
+    s.line(at(first), bar_y - 7, at(first), bar_y - 20, th.secondary, 2.2)
+    s.text(
+        at(first),
+        bar_y - 26,
+        "50 % of the upper limit: first bursts",
+        12,
+        th.secondary,
+    )
+    for k in range(2):
+        xa, xb = at(first - 20.0 * k) - 8, at(first - 20.0 * (k + 1)) + 8
+        s.arrow(xa, bar_y + 20, xb, bar_y + 20, th.secondary, 1.4)
+        s.text((xa + xb) / 2, bar_y + 38, "÷ 10", 12, th.secondary)
+    floor_db = 20.0 * 0.47712
+    s.line(
+        at(floor_db), bar_y - 7, at(floor_db), bar_y + 22, th.secondary, 1.4, dash="3,2"
+    )
+    s.text(at(floor_db), bar_y + 38, "3 × the lower limit", 12, th.secondary)
+    # 12.13 raises the single-cycle bursts from that same level to overload.
+    s.arrow(at(first) + 8, bar_y + 20, at(60) + 56, bar_y + 20, th.secondary, 1.4)
+    s.text(
+        860, bar_y + 38, "a single cycle up to overload", 12, th.secondary, anchor="end"
+    )
+
+    # ------------------------------------------------------------------
+    # 4. Formulas (9) and (12), and how 12.11.4 joins them.
+    # ------------------------------------------------------------------
+    box = 896.0
+    s.rect(x_l, box, 820, 94, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(
+        x_l + 20,
+        box + 26,
+        "(9)  $ε(f) = [a_{ind}(f) − a_{in} w(f)] / [a_{in} w(f)] × 100 %$",
+        14,
+        th.primary,
+        anchor="start",
+    )
+    s.text(x_l + 800, box + 26, "mechanical, $U$ ≤ 4.5 %", 12, th.muted, anchor="end")
+    s.text(
+        x_l + 20,
+        box + 54,
+        "(12)  $ε_{e}(f) = [u_{in}(f_{ref}) w(f_{ref}) / (u_{in}(f) w(f)) − 1] × 100 %$",
+        14,
+        th.secondary,
+        anchor="start",
+    )
+    s.text(x_l + 800, box + 54, "electrical, $U$ ≤ 3 %", 12, th.muted, anchor="end")
+    s.text(
+        x_l + 20,
+        box + 80,
+        "(10)  $ε(f) = ε_{t}(f) + ε_{e}(f)$, with $ε_{t}$ taken from the weighting "
+        "tested both ways: inside Table 5 with $U$ ≤ 5 % (12.11.4)",
+        12,
+        th.fg,
+        anchor="start",
+    )
+
+    s.text(
+        450,
+        1012,
+        "frequencies within ± 0.2 %, total distortion at most 5 % on the exciter "
+        "and 0.1 % through the input (12.2)",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        1034,
+        "one-off instrument (clause 13): frequency response on the exciter only, "
+        "11 frequencies from 0.631 Hz to 125.9 Hz at 1.00 m/s², $U$ ≤ 4 %",
+        12,
+        th.muted,
+    )
+
+
 def _d_iso2631_5_setup(s: SVG, th: Theme) -> None:
     """Getting the record ISO 2631-5 works on (clauses 5.1.2 and 5.1.4)."""
     import math
@@ -512,6 +914,202 @@ def _d_iso2631_5_setup(s: SVG, th: Theme) -> None:
     for i, rule in enumerate(rules):
         s.circle(62, 542 + 21 * i - 5, 3.4, th.secondary)
         s.text(76, 542 + 21 * i, rule, 12, th.fg, "start")
+
+
+def _d_seat_test_rig(s: SVG, th: Theme) -> None:
+    """The ISO 10326-1 laboratory test: two accelerometers and one ratio.
+
+    The side view is the arrangement of Figures 1 and 3: the seat on the
+    simulator platform, the test person on the semi-rigid disc of 5.2.3, the
+    platform accelerometer inside the 200 mm circle 5.2.2 centres directly
+    below the seat accelerometer, the backrest of 8.1.4 and the feet support
+    of 8.2. The section is Figure 2. Both points go through the same weighted
+    r.m.s. chain (5.1, 5.3), the seat runs have to agree within ± 5 % of their
+    mean (10.2.1), and the boxed line is Formula (2) with the correction of
+    Formula (4).
+    """
+    floor = 560.0
+    plat_x, plat_w, plat_top, plat_h = 50.0, 316.0, 460.0, 26.0
+    cushion_top = 346.0
+    # The seat accelerometer sits midway between the ischial tuberosities, and
+    # the platform one 36 px (90 mm at this scale) off the vertical through it.
+    x_s, x_p = 244.0, 208.0
+
+    s.text(
+        450,
+        92,
+        "Where the vibration enters the seat, and where it reaches the person",
+        17,
+        th.fg,
+        bold=True,
+    )
+
+    # --- Left: the rig from the side (Figures 1 and 3) ----------------------
+    s.text(262, 136, "The seat on the simulator, from the side", 14, th.fg, bold=True)
+    s.ground(floor, 40, 530)
+
+    # The simulator under the platform, driving it along z.
+    _exciter(s, 300, plat_top + plat_h, stinger=26, w=100, h=48, up=True)
+    s.text(300, 541, "simulator", 12, th.muted)
+    _motion_arrows(s, 88, 523, 22, th.secondary)
+    s.text(100, 528, "$z$", 14, th.secondary, "start", bold=True)
+    s.rect(plat_x, plat_top, plat_w, plat_h, th.panel, th.primary, rx=3, sw=2.2)
+    s.text(plat_x + 12, plat_top + 18, "platform", 12, th.primary, "start")
+    s.text(
+        285,
+        586,
+        "$z$: the input and its $a_{wP}$ are set by the application standard (9.2)",
+        12,
+        th.muted,
+    )
+
+    # Seat base, suspension (a spring and a damper), pan and cushion.
+    s.rect(222, 450, 116, 10, th.panel, th.fg, rx=2, sw=1.8)
+    _spring_v(s, 258, 386, 450, th.fg, coils=4, width=10, sw=2.0)
+    s.line(312, 386, 312, 414, th.fg, 2.0)
+    s.rect(305, 410, 14, 34, th.panel, th.fg, rx=2, sw=1.6)
+    s.line(312, 444, 312, 450, th.fg, 2.0)
+    s.text(236, 414, "suspension", 12, th.muted, "end")
+    s.rect(170, 374, 190, 12, th.panel, th.fg, sw=2.0)
+    s.rect(170, cushion_top, 190, 28, th.panel, th.fg, rx=9, sw=2.0)
+
+    # The backrest, 10° back from the vertical through its foot (8.1.4):
+    # 148 px tall, so its top sits 148·tan 10° = 26 px further back.
+    s.path(
+        "M 170 346 L 188 346 L 162 198 L 144 198 Z", fill=th.panel, stroke=th.fg, sw=2.0
+    )
+    # The angle is marked at the top rear corner, the one place where a
+    # vertical through a backrest edge stays clear of the outline.
+    s.line(144, 198, 144, 300, th.muted, 1.0, dash="4,4")
+    s.path("M 144 258 A 60 60 0 0 0 154.4 257.1", stroke=th.muted, sw=1.2)
+    s.text(136, 262, "10° ± 5°", 12, th.muted, "end")
+
+    # The feet support stands beside the platform, as Figure 3 draws it.
+    s.rect(376, 492, 96, 8, th.panel, th.fg, rx=2, sw=1.6)
+    s.line(388, 500, 388, floor, th.fg, 1.8)
+    s.line(460, 500, 460, floor, th.fg, 1.8)
+
+    # The test person, in the posture of Figure 3: the knee near 100°, the
+    # ankle near 90°, the hand resting on the thigh, and the thigh clear of
+    # the front of the cushion (8.2).
+    s.ellipse(238, 326, 24, 9, th.muted)
+    s.line(228, 318, 190, 226, th.muted, 3.4)
+    s.circle(188, 216, 13, th.muted)
+    s.line(200, 250, 242, 288, th.muted, 2.6)
+    s.line(242, 288, 302, 324, th.muted, 2.6)
+    s.line(230, 322, 362, 328, th.muted, 3.4)
+    s.line(362, 328, 383, 490.5, th.muted, 3.0)
+    s.line(383, 490.5, 428, 490.5, th.muted, 3.0)
+    s.text(300, 232, "the test person", 12, th.muted, "start")
+
+    # The semi-rigid disc on the cushion, its accelerometers at the centre.
+    s.path(
+        f"M 194 {cushion_top} L 194 342 C 222 342 228 336 {x_s} 336 "
+        f"C 260 336 266 342 294 342 L 294 {cushion_top} Z",
+        fill=th.secondary,
+        stroke=th.fg,
+        sw=1.4,
+    )
+    s.text(204, 334, "S", 14, th.secondary, bold=True)
+
+    # The vertical through S, and P on the platform within 100 mm of it
+    # (5.2.2 and the ≤ 100 of Figure 1).
+    s.line(x_s, 336, x_s, plat_top, th.muted, 1.1, dash="9,3,2,3")
+    s.rect(x_p - 7, plat_top - 14, 14, 14, th.primary, th.fg, rx=2.5, sw=1.3)
+    s.line(x_p, plat_top - 14, x_p, plat_top - 22, th.fg, 1.3)
+    s.text(x_p - 14, plat_top - 6, "P", 14, th.primary, "end", bold=True)
+    y_dim = plat_top + plat_h + 22
+    s.line(x_p, plat_top + plat_h, x_p, y_dim + 4, th.muted, 0.9, dash="3,3")
+    s.line(x_s, plat_top + plat_h, x_s, y_dim + 4, th.muted, 0.9, dash="3,3")
+    s.arrow(x_p + 18, y_dim, x_p, y_dim, th.muted, 1.2)
+    s.arrow(x_s - 18, y_dim, x_s, y_dim, th.muted, 1.2)
+    s.text(x_p - 8, y_dim + 5, "≤ 100 mm", 12, th.fg, "end")
+
+    # --- Right, top: the disc in section (Figure 2) -------------------------
+    # Across it is drawn at 1.1 px/mm and up at 4 px/mm, so the 12 mm can be
+    # seen at all.
+    s.text(715, 136, "The mounting disc, in section", 14, th.fg, bold=True)
+    yb = 236.0
+    s.path(
+        f"M 578 {yb} L 578 224 C 650 224 670 188 715 188 "
+        f"C 760 188 780 224 852 224 L 852 {yb} Z",
+        fill=th.panel,
+        stroke=th.secondary,
+        sw=2.0,
+    )
+    s.rect(690, 204, 50, 26, th.bg, th.secondary, rx=8, sw=1.4)
+    s.rect(706, 209, 18, 21, th.secondary, th.fg, rx=2, sw=1.3)
+    s.rect(674, 230, 82, 6, th.fg, th.fg, sw=1.0)
+    s.line(724, 210, 764, 176, th.muted, 1.0)
+    s.text(770, 176, "accelerometers", 12, th.muted, "start")
+    # The metal disc is 82 px across and its label 81, so the label goes
+    # beside the dimension rather than between its witness lines.
+    s.dim(674, yb, 756, yb, "", offset=26, size=12)
+    s.text(764, 266, "Ø 75 ± 5 mm", 12, th.fg, "start")
+    s.dim(578, yb, 852, yb, "Ø 250 ± 50 mm", offset=54, size=13)
+    s.line(566, 188, 700, 188, th.muted, 0.9, dash="3,3")
+    s.dim(566, 188, 566, yb, "≤ 12 mm", size=12)
+    body = "metal disc 1.5 ± 0.2 mm thick, rim 3 ± 1 mm"
+    material = "rubber or plastics, 80 to 90 durometer (A)"
+    size = s.fit_size([body, material], (12, 11), 300)
+    s.text(715, 312, body, size, th.muted)
+    s.text(715, 330, material, size, th.muted)
+
+    # --- Right, middle: the same chain at both points (5.1, 5.3, 10.2.1) ----
+    s.text(715, 360, "The same chain at both points", 14, th.fg, bold=True)
+    for cx, label, colour in (
+        (637.0, "P: platform", th.primary),
+        (795.0, "S: seat pan", th.secondary),
+    ):
+        s.rect(cx - 75, 376, 150, 34, th.panel, colour, rx=8, sw=1.8)
+        s.text(cx, 398, label, 13, colour, bold=True)
+        s.arrow(cx, 410, cx, 430, th.fg, 1.6)
+        s.arrow(cx, 468, cx, 488, th.fg, 1.6)
+    s.rect(562, 430, 308, 38, th.panel, th.fg, rx=8, sw=1.6)
+    s.text(716, 454, "weighted r.m.s., to ISO 8041 (5.3)", 13, th.fg)
+    for cx, symbol, first, second, colour in (
+        (
+            637.0,
+            "$a_{wP}$",
+            "mean of the same runs,",
+            "input within tolerance",
+            th.primary,
+        ),
+        (795.0, "$a_{wS}$", "mean of 3 runs, each", "within ± 5 % of it", th.secondary),
+    ):
+        s.rect(cx - 75, 488, 150, 72, th.panel, colour, rx=8, sw=1.8)
+        s.text(cx, 512, symbol, 16, colour, bold=True)
+        size = s.fit_size([first, second], (11, 10), 136)
+        s.text(cx, 532, first, size, th.muted)
+        s.text(cx, 548, second, size, th.muted)
+
+    # --- Foot: the conditions, then the two formulae ------------------------
+    notes = (
+        "P on the platform, inside a 200 mm circle centred directly below S, "
+        "aligned with the platform motion (5.2.2)",
+        "S at the centre of the disc, the disc taped so S sits midway between "
+        "the ischial tuberosities, axes within 15° (5.2.3)",
+        "the seat run in first under a 75 kg inert mass; a warm-up of up to "
+        "10 min before each series helps (8.1.2, 10.2.1)",
+        "two test persons, weighed before each series; the feet support set so "
+        "the thighs do not press the cushion front (8.2)",
+    )
+    for i, note in enumerate(notes):
+        y = 616 + 20 * i
+        s.circle(52, y - 5, 3.4, th.secondary)
+        s.text(64, y, note, 12, th.fg, "start")
+
+    s.rect(70, 700, 760, 72, th.panel, th.fg, rx=6, sw=1.6)
+    s.text(290, 732, "$SEAT = a_{wS} / a_{wP}$", 18, th.fg)
+    s.text(640, 732, "$a^*_{wS} = SEAT · a^*_{wP}$", 18, th.fg)
+    s.text(
+        450,
+        758,
+        "Formula (2), and Formula (4) for the magnitude corrected to the "
+        "intended input (10.2.3)",
+        13,
+        th.muted,
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -2887,6 +3485,635 @@ def _d_structural_damage_points(s: SVG, th: Theme) -> None:
         830,
         "one horizontal axis along a side wall; a large footprint takes several "
         "points at once, a higher mode several storeys at once",
+        12,
+        th.muted,
+    )
+
+
+def _d_vibration_prediction_path(s: SVG, th: Theme) -> None:
+    """The geometry DIN 4150-1 predicts along, from the source to the floor.
+
+    Clause 4.2 splits the ground at the reference distance of Formula (1),
+    counted from the centre of the source: nearer than it nothing the clause
+    gives holds, beyond it the amplitude falls by Formula (2) with the exponent
+    Figure 1 reads off three questions and the damping of the ground. Clause
+    4.3 then takes the building as one mass on the ground's spring, Formula
+    (3), passes the ground's amplitude through the foundation and up to the
+    floors with a maximum transfer value for each, and gives the storey
+    formula, Formula (4), for the lowest horizontal frequency. The drawing is
+    not to scale; the numbers in the panels are the ones the clauses print.
+    """
+    gy = 320.0  # the ground surface
+    xc = 120.0  # the centre of the source, where R and R_1 are counted from
+    xa0, xa1 = 80.0, 160.0  # the extent a along the direction of propagation
+    xr1 = 340.0  # the far-field boundary R_1
+    xr = 560.0  # a point in the far field at distance R
+    xb0, xb1 = 640.0, 800.0  # the walls of the building
+
+    s.text(
+        450,
+        74,
+        "Through the ground to the building, and up to its floors",
+        17,
+        th.fg,
+        bold=True,
+    )
+
+    # The near field, shaded first so everything in it is drawn over it.
+    s.rect(xc, 176, xr1 - xc, gy - 176, th.panel)
+    s.text((xc + xr1) / 2, 196, "near field", 14, th.muted, bold=True)
+    s.text((xc + xr1) / 2, 216, "$R < R_1$", 13, th.muted)
+    s.text((xc + xr1) / 2, 236, "the approximations do not hold", 12, th.muted)
+
+    # The ground, broken under the building, where it is drawn as a spring.
+    s.ground(gy, 30, xb0 - 10)
+    s.ground(gy, xb1 + 10, 870)
+
+    # The source and its extent along the path.
+    s.text(xc, 256, "the source", 13, th.fg)
+    s.rect(xa0, gy - 32, xa1 - xa0, 32, th.panel, th.fg, rx=4, sw=2.2)
+    s.circle(xc, gy - 16, 9, th.fg)
+    s.circle(xc, gy - 16, 4, th.bg)
+    s.dim(xa0, 282, xa1, 282, "$a$", size=14)
+
+    # The boundary of Formula (1).
+    s.line(xr1, 176, xr1, 392, th.secondary, 2.0, dash="7,5")
+    s.text(xr1, 166, "$R_1$", 15, th.secondary, bold=True)
+
+    # The far field and the decay of Formula (2), drawn to the plate's own
+    # dimension chain: the geometric part is the exponent 1 counted from the
+    # centre of the source, with a little material damping on top; the arrows
+    # are velocity amplitudes.
+    s.text(490, 196, "far field", 14, th.primary, bold=True)
+    s.text(490, 216, "$R > R_1$, Formula (2)", 13, th.muted)
+    s.text(490, 236, "a source near the surface", 12, th.muted)
+    s.text(490, 252, "sends mostly a Rayleigh wave", 12, th.muted)
+    x0, h0 = xr1 + 14, 50.0
+
+    def height(x: float) -> float:
+        return h0 * (x0 - xc) / (x - xc) * math.exp(-(x - x0) / 900.0)
+
+    steps = int((xr - x0) / 4)
+    envelope = [(x0 + 4.0 * k, gy - 4 - height(x0 + 4.0 * k)) for k in range(steps + 1)]
+    s.path(
+        "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in envelope),
+        stroke=th.primary,
+        sw=1.4,
+        dash="5,4",
+    )
+    s.arrow(x0, gy - 2, x0, gy - 4 - height(x0), th.primary, 2.4)
+    s.text(x0, gy - 12 - height(x0), "$v̄_1$", 15, th.primary)
+    s.arrow(450.0, gy - 2, 450.0, gy - 4 - height(450.0), th.primary, 2.4)
+    s.arrow(xr, gy - 2, xr, gy - 4 - height(xr), th.primary, 2.4)
+    s.text(xr + 8, gy + 2 - height(xr), "$v̄$", 15, th.primary, "start")
+
+    # Body waves under the surface, as fronts centred on the source and cut
+    # at a common depth so they clear the dimension chain.
+    for rx, sweep in ((290.0, 32.0), (360.0, 25.0), (430.0, 20.5)):
+        front = [
+            (
+                xc + rx * math.cos(math.radians(sweep * k / 12)),
+                gy + 2 + 0.45 * rx * math.sin(math.radians(sweep * k / 12)),
+            )
+            for k in range(13)
+        ]
+        s.path(
+            "M " + " L ".join(f"{x:.1f} {y:.1f}" for x, y in front),
+            stroke=th.muted,
+            sw=1.4,
+            dash="4,4",
+        )
+    s.text(428, 408, "body waves: compression and shear", 12, th.muted)
+
+    # Formula (1) as a chain of dimensions from the centre of the source.
+    s.line(xc, gy - 32, xc, 448, th.muted, 0.9, dash="3,3")
+    s.line(xa1, gy, xa1, 356, th.muted, 0.9, dash="3,3")
+    s.line(xr, gy, xr, 448, th.muted, 0.9, dash="3,3")
+    s.dim(xc, 350, xa1, 350, "$a/2$", size=13)
+    s.dim(xa1, 350, xr1, 350, "$λ_R$", size=14)
+    s.dim(xc, 384, xr1, 384, "$R_1 = a/2 + λ_R$", size=14)
+    s.dim(xc, 440, xr, 440, "$R$", size=14)
+    s.text(340, 464, "$R_1$ is counted from the centre of the source", 12, th.muted)
+
+    # The building of 4.3: five storeys on a foundation, one floor bending.
+    top, storey = 138.0, 34.0
+    xm = (xb0 + xb1) / 2
+    s.rect(xb0 - 10, 308, xb1 - xb0 + 20, 12, th.panel, th.fg, sw=2.0)
+    s.line(xb0, top, xb0, 308, th.fg, 2.2)
+    s.line(xb1, top, xb1, 308, th.fg, 2.2)
+    for k in range(5):
+        y = top + k * storey
+        if k == 2:
+            s.path(
+                f"M {xb0} {y} Q {xm} {y + 14} {xb1} {y}", stroke=th.secondary, sw=2.6
+            )
+        else:
+            s.line(xb0, y, xb1, y, th.fg, 2.6)
+    s.arrow(xm, top + 2 * storey + 4, xm, top + 2 * storey + 22, th.secondary, 2.0)
+    s.text(xb0 - 10, top + 2 * storey + 6, "$V_D$", 15, th.secondary, "end")
+    s.text(xm, top + 3.5 * storey + 5, "$m_B$", 15, th.fg)
+    s.text(xb0 - 18, 312, "$V_F$", 15, th.secondary, "end")
+
+    # Formula (4): the lowest horizontal natural frequency, a sway at the roof.
+    s.arrow(xb1 + 14, top, xb1 + 52, top, th.accent, 2.0)
+    s.arrow(xb1 + 52, top, xb1 + 14, top, th.accent, 2.0)
+    s.text(xb1 + 33, top - 10, "$f_1$", 15, th.accent)
+
+    # Formula (3): the ground under the building as a spring with the system
+    # damping of the building on it.
+    base = 366.0
+    s.ground(base, xb0 - 10, xb1 + 10)
+    for xs in (xb0 + 25, xb1 - 25):
+        _spring_v(s, xs, gy, base, th.accent, coils=3, width=8.0, sw=1.8)
+    s.line(xm, gy, xm, 338, th.accent, 1.8)
+    s.line(xm - 8, 338, xm + 8, 338, th.accent, 2.4)
+    s.path(
+        f"M {xm - 11} 330 L {xm - 11} 352 L {xm + 11} 352 L {xm + 11} 330",
+        stroke=th.accent,
+        sw=1.8,
+    )
+    s.line(xm, 352, xm, base, th.accent, 1.8)
+    s.text(xb0 + 12, 348, "$k_B$", 14, th.accent, "end")
+    s.text(xm + 18, 348, "$D_0$", 14, th.accent, "start")
+    s.text(xm, 396, "five storeys, the ground a spring", 12, th.muted)
+    s.text(xm, 414, "under a mass moving in phase", 12, th.muted)
+
+    # Three panels: Figure 1, the attenuation of 4.2, and the building of 4.3.
+    py, ph = 492.0, 196.0
+    for x, pw, colour in (
+        (30.0, 256.0, th.primary),
+        (295.0, 270.0, th.accent),
+        (574.0, 296.0, th.secondary),
+    ):
+        s.rect(x, py, pw, ph, th.panel, colour, rx=6, sw=1.8)
+
+    x, pw = 30.0, 256.0
+    s.text(x + pw / 2, py + 26, "the exponent $n$, Figure 1", 14, th.primary, bold=True)
+    s.line(x + pw / 2, py + 40, x + pw / 2, py + 124, th.muted, 1.0)
+    s.text(x + 64, py + 52, "adds 0", 12, th.muted)
+    s.text(x + 192, py + 52, "adds 0.5", 12, th.muted)
+    for k, (plain, more) in enumerate(
+        (
+            ("line source", "point source"),
+            ("harmonic", "impulsive"),
+            ("surface wave", "body wave"),
+        )
+    ):
+        s.text(x + 64, py + 78 + 20 * k, plain, 13, th.fg)
+        s.text(x + 192, py + 78 + 20 * k, more, 13, th.fg)
+    s.text(x + pw / 2, py + 152, "$n$ = 0, 0.5, 1 or 1.5", 14, th.fg)
+    s.text(x + pw / 2, py + 176, "a train of point sources: 0.3 to 0.5", 12, th.muted)
+
+    x, pw = 295.0, 270.0
+    s.text(
+        x + pw / 2, py + 26, "the attenuation coefficient $α$", 14, th.accent, bold=True
+    )
+    s.text(x + pw / 2, py + 54, "$α ≈ 2πD/λ$, with $λ = c/f$", 14, th.fg)
+    s.text(x + pw / 2, py + 80, "a first estimate on loose ground:", 12, th.fg)
+    s.text(x + pw / 2, py + 98, "$D$ ≤ 0.01, more has to be proven", 12, th.fg)
+    s.text(x + pw / 2, py + 124, "higher frequencies are damped more", 12, th.fg)
+    s.text(x + pw / 2, py + 158, "$D$ = 0.01 and $λ$ = 12.5 m", 12, th.muted)
+    s.text(x + pw / 2, py + 176, "give $α$ = 0.005 1/m", 12, th.muted)
+
+    x, pw = 574.0, 296.0
+    s.text(
+        x + pw / 2, py + 26, "the building on its ground", 14, th.secondary, bold=True
+    )
+    for dy, row in (
+        (48, "$f_B$: about 15 Hz for 1 to 2 storeys,"),
+        (65, "8 Hz to 12 Hz for 2 to 6 storeys,"),
+        (82, "under 8 Hz for more than 6,"),
+        (99, "medium-stiff ground, $c_s$ = 150 m/s to 200 m/s"),
+        (123, "$V_F$ at $f_B$: at most 2 on loose ground,"),
+        (140, "a mean of 0.5 above $f_B$, no reduction on rock"),
+        (164, "$V_D$: 10 to 25 at the floor resonance,"),
+        (181, "with $0.02 < D_1 < 0.05$ in reinforced concrete"),
+    ):
+        s.text(x + pw / 2, py + dy, row, 12, th.fg)
+
+    # The formulae the whole path is built from.
+    by = 710.0
+    s.rect(30, by, 405, 100, th.panel, th.primary, rx=6, sw=1.8)
+    s.text(232, by + 30, "$R_1 = a/2 + λ_R$", 15, th.primary)
+    s.text(232, by + 60, "$v̄ = v̄_1 · (R/R_1)^{−n} · exp[−α(R − R_1)]$", 15, th.primary)
+    s.text(232, by + 86, "Formulae (1) and (2), for the far field", 12, th.muted)
+    s.rect(465, by, 405, 100, th.panel, th.secondary, rx=6, sw=1.8)
+    s.text(572, by + 30, "$f_B = √(k_B/m_B)/2π$", 15, th.secondary)
+    s.text(770, by + 30, "$f_1 ≈ 10/n$ Hz, $n ≥ 5$", 15, th.secondary)
+    s.text(572, by + 60, "$V_F = 1/(2D_0)$", 15, th.secondary)
+    s.text(770, by + 60, "$V_D = 1/(2D_1)$", 15, th.secondary)
+    s.text(
+        667,
+        by + 86,
+        "Formulae (3) and (4), and the transfer values of 4.3",
+        12,
+        th.muted,
+    )
+
+    s.text(
+        450,
+        838,
+        "the transfer values assume the whole building excited in phase by "
+        "predominantly harmonic vibration;",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        858,
+        "a source close by, moving or impulsive leaves them on the safe side",
+        12,
+        th.muted,
+    )
+
+
+# ---------------------------------------------------------------------------
+# E DIN 45672-3: the prediction chain from the track to a floor
+# ---------------------------------------------------------------------------
+
+
+def _d_railway_prediction_chain(s: SVG, th: Theme) -> None:
+    """E DIN 45672-3 Formula (1) drawn over the place it describes.
+
+    The section is Figure 1 of the draft with the four points the terms of
+    Formula (1) run between: the emission at a known distance from the track
+    centre (5.2), a point of the ground in front of the building (5.3), the
+    foundation (5.4.2) and the middle of a storey floor, vertical (3.3 and
+    5.1). Those four points are the general case of 5.1 to 5.4, not the
+    worked example, whose emission spectrum is taken at the foundation, so
+    that its ground-to-foundation term drops out; what the example does give
+    the plate are its numbers: 50 km/h, 7 m from the track centre to the
+    building, concrete floors at 20 Hz, 0.7 as the weighting factor. The
+    ground term is Formula (6) with the Annex B change of exponent for an
+    exponent measured with a point excitation, the building terms are the
+    six tables of Annex A, and the mitigation is the term 5.5 adds. The foot
+    is Clause 7, the two quantities E DIN 4150-2 judges.
+    """
+    gy = 300.0  # the street surface, with the rails flush in it
+    x_track = 150.0  # the track centre
+    x_e = 280.0  # the emission point, at r_0
+    x_b = 470.0  # the ground point in front of the building
+    bx0, bx1 = 500.0, 860.0  # the building's outer walls
+    storey = 72.0
+    y_roof = gy - 2 * storey  # 156: basement, ground floor, first floor
+    y_base = gy + storey  # 372: the basement floor
+    mid = (bx0 + bx1) / 2  # 680: mid-span of the floors
+
+    s.text(
+        450,
+        70,
+        "One emission, and what the ground and the building do to it",
+        17,
+        th.fg,
+        bold=True,
+    )
+    s.text(
+        40,
+        112,
+        "$L_{v,E}$ at a tunnel floor or wall, a point in the ground or a foundation",
+        12,
+        th.muted,
+        anchor="start",
+    )
+    s.text(
+        40,
+        132,
+        "within 25 m of a tram line on the surface, Table 1 recommends a prediction",
+        12,
+        th.muted,
+        anchor="start",
+    )
+
+    # The street, the track bed with its rails flush, and the tram on it. The
+    # section is transverse, as Figure 1 is, so one wheel stands on each rail.
+    s.ground(gy, 40, bx0)
+    s.rect(x_track - 60, gy, 120, 22, th.panel, th.muted, sw=1.4)
+    for dx in (-28.0, 28.0):
+        s.rect(x_track + dx - 5, gy - 4, 10, 8, th.fg)
+    s.rect(x_track - 72, gy - 70, 144, 52, th.panel, th.fg, rx=9, sw=2.0)
+    s.rect(x_track - 60, gy - 60, 120, 18, th.bg, th.muted, rx=3, sw=1.2)
+    for dx in (-28.0, 28.0):
+        s.circle(x_track + dx, gy - 11, 7, th.fg)
+    s.text(x_track - 10, gy - 80, "tram, 50 km/h", 13, th.fg, anchor="end")
+    s.line(x_track, y_roof + 14, x_track, gy + 44, th.muted, 1.2, dash="12,4,3,4")
+
+    # Where a mitigation would go: in the track, which 5.5 names first. The
+    # top edge is the railhead, so the box holds the rails and the track bed
+    # and leaves the vehicle above it out.
+    s.rect(
+        x_track - 70, gy - 4, 140, 36, "none", th.secondary, rx=4, sw=1.8, dash="6,4"
+    )
+    s.text(x_track, gy + 56, "$D_e$", 15, th.secondary, bold=True)
+
+    # The building: a basement, a ground floor and a first floor.
+    s.path(
+        f"M {bx0 - 8} {y_roof} L {mid} {y_roof - 44} L {bx1 + 8} {y_roof} Z",
+        fill=th.panel,
+        stroke=th.fg,
+        sw=2.0,
+    )
+    s.rect(bx0, y_roof, bx1 - bx0, y_base + 8 - y_roof, "none", th.fg, sw=2.2)
+    for y in (y_roof, gy - storey, gy, y_base):
+        s.rect(bx0, y, bx1 - bx0, 8, th.panel, th.fg, sw=1.4)
+    # The first floor's own mode, which is what its natural frequency is.
+    s.path(
+        f"M {bx0} {gy - storey + 8} Q {mid} {gy - storey + 34} {bx1} {gy - storey + 8}",
+        stroke=th.accent,
+        sw=1.6,
+        dash="6,4",
+    )
+    s.text(bx1 - 10, gy - 30, "concrete floors, $f_e$ = 20 Hz", 13, th.fg, anchor="end")
+    s.text(
+        bx1 - 10,
+        gy - 12,
+        "one prediction per $f_e$, never the envelope",
+        12,
+        th.muted,
+        anchor="end",
+    )
+    s.text(bx1 - 10, y_base - 12, "basement", 12, th.muted, anchor="end")
+
+    # The four points the levels of Formula (1) belong to.
+    _accel(s, x_e, gy)
+    _accel(s, x_b, gy)
+    _accel(s, bx0 + 26, y_base)
+    _accel(s, mid, gy - storey)
+    _motion_arrows(s, mid + 26, gy - storey - 14, 12, th.primary)
+    s.text(x_e + 14, gy - 34, "$L_{v,E}$", 15, th.primary, anchor="start", bold=True)
+    s.text(x_e + 14, gy - 16, "Max Hold", 12, th.muted, anchor="start")
+    s.text(x_b + 22, gy - 30, "in front of the building", 12, th.muted, anchor="end")
+    s.text(bx0 + 42, y_base - 12, "foundation", 12, th.muted, anchor="start")
+    s.text(mid, y_roof + 32, "$L_v$: mid-span, vertical", 15, th.primary, bold=True)
+
+    # The two distances, both from the track centre.
+    s.line(x_e, gy - 30, x_e, y_roof + 52, th.muted, 0.9, dash="3,3")
+    s.dim(x_track, y_roof + 52, x_e, y_roof + 52, "$r_0$", size=14)
+    s.dim(x_track, y_roof + 24, bx0, y_roof + 24, "7 m to the building", size=13)
+
+    # The ground: Formula (6), and what Annex B takes off a point excitation.
+    # The head continues the curve along its own end tangent, so the arc and
+    # the arrow read as one stroke rather than as a line and a stub.
+    s.path(
+        f"M {x_e + 6} {gy + 6} Q {(x_e + x_b) / 2} {gy + 70} {x_b - 18} {gy + 16}",
+        stroke=th.primary,
+        sw=2.0,
+    )
+    s.arrow(x_b - 18, gy + 16, x_b - 6.5, gy + 8, th.primary, 2.0)
+    s.text((x_e + x_b) / 2, gy + 64, "$ΔL_{v,BB}$", 15, th.primary, bold=True)
+    s.text(300, gy + 90, "$v(r)/v(r_0) = (r/r_0)^{−n}$, $n$ per band", 13, th.fg)
+    s.text(
+        300,
+        gy + 110,
+        "from a point excitation: $n$ − 0.5 up to $R_0 ≈ L^2/λ$",
+        12,
+        th.muted,
+    )
+
+    # Into the foundation, then up to the middle of the floor.
+    s.path(
+        f"M {x_b + 6} {gy + 8} Q {bx0 - 10} {y_base - 6} {bx0 + 8} {y_base - 6}",
+        stroke=th.accent,
+        sw=2.0,
+    )
+    s.arrow(bx0 + 8, y_base - 6, bx0 + 19, y_base - 6, th.accent, 2.0)
+    s.text(bx0 + 42, gy + 36, "$ΔL_{v,FB}$", 15, th.accent, anchor="start", bold=True)
+    s.path(
+        f"M {bx0 + 26} {y_base - 26} L {bx0 + 26} {gy - storey + 40} "
+        f"Q {bx0 + 26} {gy - storey - 10} {mid - 30} {gy - storey - 10}",
+        stroke=th.accent,
+        sw=2.0,
+    )
+    s.arrow(mid - 38, gy - storey - 10, mid - 24, gy - storey - 10, th.accent, 2.0)
+    s.text(bx0 + 40, gy - 30, "$ΔL_{v,DF}$", 15, th.accent, anchor="start", bold=True)
+
+    # Formula (1), term by term, with where each term's numbers come from.
+    eq_y = 490.0
+    s.rect(40, eq_y - 66, 820, 144, th.panel, th.fg, rx=6, sw=1.6)
+    for x, symbol, first, second, third in (
+        (108.0, "$L_v$", "on the floor", "vertical, per band", ""),
+        (
+            232.0,
+            "$L_{v,E}$",
+            "Max Hold at $r_0$",
+            "4 Hz to 250 Hz",
+            "+ 20 lg($v_2/v_1$), up to 30 %",
+        ),
+        (372.0, "$ΔL_{v,BB}$", "the ground", "Formula (5) or (6)", ""),
+        (
+            512.0,
+            "$ΔL_{v,FB}$",
+            "into the foundation",
+            "Table A.3 or A.4",
+            "zero when $L_{v,E}$ is at a foundation",
+        ),
+        (652.0, "$ΔL_{v,DF}$", "up to the floor", "Table A.5 or A.6", ""),
+        (786.0, "$D_e$", "mitigation", "DIN SPEC 45673-2, -3", ""),
+    ):
+        s.text(x, eq_y, symbol, 18, th.fg)
+        s.text(x, eq_y + 24, first, 12, th.muted)
+        s.text(x, eq_y + 42, second, 12, th.muted)
+        if third:
+            s.text(x, eq_y + 60, third, 12, th.muted)
+    for x, sign in (
+        (170.0, "="),
+        (300.0, "+"),
+        (442.0, "+"),
+        (582.0, "+"),
+        (718.0, "+"),
+    ):
+        s.text(x, eq_y, sign, 18, th.fg)
+    # Formula (2): the two building terms in one, from Tables A.1 and A.2.
+    s.line(458, eq_y - 32, 706, eq_y - 32, th.secondary, 1.4)
+    s.line(458, eq_y - 32, 458, eq_y - 24, th.secondary, 1.4)
+    s.line(706, eq_y - 32, 706, eq_y - 24, th.secondary, 1.4)
+    s.text(
+        582,
+        eq_y - 42,
+        "or in one step, $ΔL_{v,DB}$: Table A.1 or A.2, by $f_e$",
+        12,
+        th.secondary,
+    )
+
+    # Clause 7: the spectrum as the two quantities E DIN 4150-2 judges.
+    box_y = 586.0
+    s.rect(40, box_y, 400, 108, th.panel, th.primary, rx=6, sw=1.8)
+    s.text(
+        240,
+        box_y + 26,
+        "$KB_{FTm,Zug}$, one per category of train",
+        14,
+        th.primary,
+        bold=True,
+    )
+    s.text(
+        240, box_y + 50, "Table 2 weighting, energy sum from 4 Hz to 80 Hz,", 12, th.fg
+    )
+    s.text(240, box_y + 72, "$c_{T1}$ = 1, $v_0 = 5·10^{−5}$ mm/s", 12, th.fg)
+    s.text(
+        240,
+        box_y + 94,
+        "$KB_{Fmax,Zug} = 1.5 · KB_{FTm,Zug}$, $v_{max} = 3 · KB_{Fmax,Zug}$",
+        12,
+        th.fg,
+    )
+
+    s.rect(460, box_y, 400, 108, th.panel, th.secondary, rx=6, sw=1.8)
+    s.text(
+        660, box_y + 26, "$KB_{FTr}$, over the timetable", 14, th.secondary, bold=True
+    )
+    s.text(
+        660,
+        box_y + 52,
+        "$KB_{FTr} = √(Σ n_{Zug}/N_r · (α_{Zug} · KB_{FTm,Zug})^2)$",
+        13,
+        th.fg,
+    )
+    s.text(660, box_y + 74, "$N_r$ = 1920 by day, 960 by night", 12, th.fg)
+    s.text(660, box_y + 94, "$α_{Zug}$ = 0.7 for a tram on the surface", 12, th.fg)
+
+    s.text(
+        450,
+        718,
+        "E DIN 4150-2 holds $KB_{Fmax}$, the largest $KB_{Fmax,Zug}$, "
+        "and $KB_{FTr}$ to its Table 1,",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        738,
+        "with a category at or below 0.1 counting as zero in $KB_{FTr}$",
+        12,
+        th.muted,
+    )
+
+
+def _d_building_frequency_predictors(s: SVG, th: Theme) -> None:
+    """What a building's own frequency is predicted from (ISO 4866 Annex D).
+
+    One building drawn to scale, with the three things the predictors read
+    off it (n, h, and b parallel to the force), and the four predictors of
+    D.2 laid out from them with the coefficient range D.2 prints for each
+    and what that range gives on this building. The two boxes at the foot
+    are the fit of Figure D.1 with the ± 50 % D.2 calls not uncommon, and
+    the damping of D.4, for which no proven method exists.
+    """
+    s.text(450, 92, "What each predictor reads off one building", 17, th.fg, bold=True)
+
+    # --- The building, an elevation at 5 px per metre -----------------------
+    ground_y, roof_y = 500.0, 200.0
+    x_l, x_r = 200.0, 275.0
+    storeys, sway = 18, 26.0
+    s.rect(x_l, roof_y, x_r - x_l, ground_y - roof_y, th.panel, th.fg, sw=2.2)
+    for k in range(1, storeys):
+        y = ground_y - k * (ground_y - roof_y) / storeys
+        s.line(x_l + 1.5, y, x_r - 1.5, y, th.muted, 1.0)
+    # The mode the whole annex predicts: the same outline swayed, fixed at
+    # the base, drawn dashed because it is what nobody here has measured.
+    s.path(
+        f"M {x_l} {ground_y} C {x_l} 380 {x_l + 8} 280 {x_l + sway} {roof_y} "
+        f"L {x_r + sway} {roof_y} C {x_r + 8} 280 {x_r} 380 {x_r} {ground_y}",
+        "none",
+        th.primary,
+        sw=1.8,
+        dash="6,4",
+    )
+    s.text(252, 184, "the fundamental translation mode", 12, th.primary)
+    for y in (250.0, 320.0, 390.0, 460.0):
+        s.arrow(150, y, 194, y, th.secondary, 2.2)
+    s.text(173, 236, "force", 13, th.secondary)
+    # Both dimensions before the ground: the witness line of the height runs
+    # along the ground line, and would read as a break in it if drawn over.
+    s.dim(x_l, roof_y, x_l, ground_y, "$h$ = 60 m", offset=-60, size=14)
+    s.dim(x_l, ground_y, x_r, ground_y, "$b$ = 15 m", offset=36, size=14)
+    s.ground(ground_y, 90, 370)
+    s.text(237, 562, "$n$ = 18 storeys, each about 3.3 m", 13, th.fg)
+    s.text(237, 582, "$b$ is the width parallel to the force", 12, th.muted)
+    s.text(237, 602, "$h/b$ = 4, so $√(h/(h + b))$ = 0.89", 12, th.muted)
+
+    # --- One row per predictor: what it reads, its form, what it gives ------
+    s.text(416, 138, "reads", 12, th.muted)
+    s.text(476, 138, "the form, and its coefficient range", 12, th.muted, "start")
+    s.text(860, 138, "this building, $f = 1/T$", 12, th.muted, "end")
+    rows = (
+        (
+            th.fg,
+            "$n$",
+            "$f = 10/n$",
+            "D.2: the simplest, no coefficient range",
+            "0.56 Hz",
+            "$T = 0.1 n$ = 1.8 s",
+        ),
+        (
+            th.primary,
+            "$h$",
+            "$T = k_1 h$",
+            "Formula (D.1): $k_1$ from 0.014 to 0.03",
+            "0.56 to 1.19 Hz",
+            "$T$ = 0.84 s to 1.80 s",
+        ),
+        (
+            th.primary,
+            "$h$, $b$",
+            "$T = k_2 h/√b$",
+            "Formula (D.2): $k_2$ from 0.087 to 0.109",
+            "0.59 to 0.74 Hz",
+            "$T$ = 1.35 s to 1.69 s",
+        ),
+        (
+            th.primary,
+            "$h$, $b$",
+            "$T = (k_3 h/√b) √(h/(h + b))$",
+            "Formula (D.3): $k_3$ from 0.06 to 0.08",
+            "0.90 to 1.20 Hz",
+            "$T$ = 0.83 s to 1.11 s",
+        ),
+    )
+    for i, (colour, reads, form, rng, f_span, t_span) in enumerate(rows):
+        top = 150.0 + 88.0 * i
+        s.rect(384, top, 488, 76, th.panel, colour, rx=6, sw=1.6)
+        s.rect(392, top + 23, 50, 30, th.bg, colour, rx=15, sw=1.4)
+        s.text(417, top + 43, reads, 14, colour)
+        s.arrow(446, top + 38, 468, top + 38, th.muted, 1.6)
+        s.text(476, top + 33, form, 15, colour, "start")
+        s.text(476, top + 57, rng, 12, th.muted, "start")
+        s.text(860, top + 33, f_span, 14, colour, "end", bold=True)
+        s.text(860, top + 57, t_span, 12, th.muted, "end")
+    s.text(
+        628,
+        530,
+        "on this building the four predictors span 0.56 Hz to 1.20 Hz",
+        12,
+    )
+    s.text(628, 552, "and D.2 gives no rule for choosing inside a range", 12, th.muted)
+
+    # --- What the annex closes with: the fit, and the damping it cannot -----
+    box_y = 632.0
+    fit_title = "$f = 46/h$: the fit of Figure D.1, 0.77 Hz here"
+    damping_title = "D.4: no proven method predicts damping"
+    size = s.fit_size([fit_title, damping_title], (14, 13), 380, bold=True)
+    s.rect(40, box_y, 400, 84, th.panel, th.accent, rx=6, sw=1.8)
+    s.text(240, box_y + 26, fit_title, size, th.accent, bold=True)
+    s.text(240, box_y + 50, "$T = 0.022 h$ s, from 163 rectangular-plan buildings", 12)
+    s.text(240, box_y + 70, "errors of ± 50 % are not uncommon: 0.38 Hz to 1.15 Hz", 12)
+    s.rect(460, box_y, 400, 84, th.panel, th.secondary, rx=6, sw=1.8)
+    s.text(660, box_y + 26, damping_title, size, th.secondary, bold=True)
+    s.text(660, box_y + 50, "0.5 % to 2.1 % of critical can occur (Figure D.2)", 12)
+    s.text(660, box_y + 70, "with large differences between orthogonal modes", 12)
+
+    s.text(
+        450,
+        748,
+        "D.1: for when a measurement cannot be made, or high damping "
+        "or subcomponent resonances limit it",
+        12,
+        th.muted,
+    )
+    s.text(
+        450,
+        770,
+        "D.3: a computer model correlates with measurement worse than "
+        "$f = 46/h$, and an unproven one should not be assumed more accurate",
         12,
         th.muted,
     )

@@ -357,9 +357,10 @@ def _d_zwicker(s: SVG, th: Theme) -> None:
         th.primary,
     )
     # The corrections line stays plain: ISO 532-1:2017 prints ΔL_DF and
-    # L_TQ (Tables A.5/A.6) with upright DF/TQ subscripts the roman list
-    # does not carry, and composing only the a₀ beside them would split one
-    # enumeration into two styles.
+    # L_TQ (Tables A.5/A.6) with upright DF/TQ subscripts, and the roman
+    # list carries DF but not TQ, so composing the pair would set one of
+    # them italic; composing only the a₀ beside them would split one
+    # enumeration into two styles as well.
     _step(
         218,
         "Core loudness of the 20 critical bands  (Tables A.4-A.7)",

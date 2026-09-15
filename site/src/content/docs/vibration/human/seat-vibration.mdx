@@ -45,11 +45,14 @@ ride worse than no seat at all, which is not a hypothetical: it is
 what a suspension does when the machine's dominant frequency lands on its
 resonance.
 
-Both accelerations are the arithmetic mean of **three consecutive runs whose
-values lie within ± 5 % of that mean** (10.2.1). The library treats that as a
-condition rather than a footnote: `mean_of_test_runs` refuses a set that does
-not meet the spread, because a mean of runs that disagree by more is not a
-measurement this standard recognises.
+$a_\mathrm{wS}$ is the arithmetic mean of **three consecutive runs whose seat
+values lie within ± 5 % of that mean**, and $a_\mathrm{wP}$ the mean of the
+platform values from those same runs, which have to stay inside the input
+tolerances rather than inside the 5 % (10.2.1). The library treats the
+agreement as a condition rather than a footnote: `mean_of_test_runs` refuses a
+set that does not meet the spread, because a mean of runs that disagree by more
+is not a measurement this standard recognises. `seat_transmission` puts both
+sets through it, so on the platform side it is stricter than the clause.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seat_vibration_test.svg" alt="Two panels. The left panel gives three test runs as paired bars, the platform near 1,00 and the seat near 0,71 metres per second squared, with the mean of each set drawn as a dashed line and a double arrow between the two means labelled SEAT = 0,71. The right panel gives four bars for the correction of clause 10.2.3: the input delivered at 1,00, the input intended at 1,10, the magnitude measured on the seat at 0,71 and the corrected magnitude at 0,78, over the formula a*wS = SEAT times a*wP." width="94%" loading="eager" />
 
@@ -81,6 +84,31 @@ except ValueError as error:
 *One test, and the ratio it exists to produce. The three runs agree to well
 inside the tolerance, so their means are the two numbers the SEAT factor is
 built from.*
+
+### How the measurement goes
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig.svg" alt="Laboratory arrangement for testing a vehicle seat. On the left, from the side: a suspension seat with a spring and a damper on the platform of a vibration simulator that drives it vertically from below, its backrest leaning back ten degrees plus or minus five, and a test person sitting on it with the feet on a separate support and the thighs clear of the front of the cushion. The mounting disc lies on the cushion under the person's pelvis and carries the seat accelerometer S; a dash-dot line drops from S to the platform, where the platform accelerometer P stands no more than 100 millimetres from it. On the right, the disc in section, 250 plus or minus 50 millimetres across and no more than 12 millimetres high, with the accelerometers in a central cavity on a metal disc of 75 plus or minus 5 millimetres and 1.5 plus or minus 0.2 millimetres thick, a rim of 3 plus or minus 1 millimetres, in rubber or plastics of 80 to 90 durometer. Below it, P and S go through the same weighted r.m.s. chain to ISO 8041: a_wP is the mean of the runs with the input within tolerance, and a_wS the mean of three runs, each within 5 percent of it. Four notes give the platform circle, the disc position with its 15 degree axis tolerance, the 75 kilogram run-in and the warm-up, and the two test persons with the feet support. A box at the foot carries SEAT equals a_wS over a_wP, and the corrected magnitude a*_wS equals SEAT times a*_wP" width="100%" />
+
+Use a measuring chain that meets ISO 8041, alike at the platform and at the
+seat, and calibrate it to ISO 16063-1 before and after each test series. Mount
+the seat, check the safety requirements of ISO 13090-1, and, if the seat has a
+suspension, run it in: a 75 kg inert mass on the cushion, the seat adjusted for
+a 100 kg operator, and a sine near the natural frequency of the suspension at
+75 % of its full amplitude, until the seat settles. Set the ride height as 8.1.3
+describes and an adjustable backrest to about 10° back. Fix the platform
+accelerometer inside a 200 mm circle centred directly below the seat
+accelerometer, and tape the disc to the cushion so its accelerometers lie
+midway between the ischial tuberosities. Train the test persons in preliminary
+runs until they hold a normal, still posture throughout. Weigh each of them
+just before their series, set the feet support so the thighs do not press on
+the front of the cushion, and drive the prescribed input without a break
+through each run; a warm-up of up to 10 min helps. Repeat until three
+consecutive runs give seat values within ± 5 % of their mean, with the platform
+inside its input tolerances. The mean of those seat values is $a_\mathrm{wS}$
+and the mean of the platform values from the same runs is $a_\mathrm{wP}$, one
+pair per test person, since Clause 11 asks each of them to pass. Report the
+run-in duration, the disc, the masses of the test persons and the SEAT factor
+or the corrected magnitude.
 
 ## 2. Correcting to the input that was intended
 

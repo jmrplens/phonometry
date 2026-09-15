@@ -31,11 +31,14 @@ ride worse than no seat at all, which is not a hypothetical: it is
 what a suspension does when the machine's dominant frequency lands on its
 resonance.
 
-Both accelerations are the arithmetic mean of **three consecutive runs whose
-values lie within ± 5 % of that mean** (10.2.1). The library treats that as a
-condition rather than a footnote: `mean_of_test_runs` refuses a set that does
-not meet the spread, because a mean of runs that disagree by more is not a
-measurement this standard recognises.
+$a_\mathrm{wS}$ is the arithmetic mean of **three consecutive runs whose seat
+values lie within ± 5 % of that mean**, and $a_\mathrm{wP}$ the mean of the
+platform values from those same runs, which have to stay inside the input
+tolerances rather than inside the 5 % (10.2.1). The library treats the
+agreement as a condition rather than a footnote: `mean_of_test_runs` refuses a
+set that does not meet the spread, because a mean of runs that disagree by more
+is not a measurement this standard recognises. `seat_transmission` puts both
+sets through it, so on the platform side it is stricter than the clause.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seat_vibration_test_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/seat_vibration_test.svg" alt="Two panels. The left panel gives three test runs as paired bars, the platform near 1,00 and the seat near 0,71 metres per second squared, with the mean of each set drawn as a dashed line and a double arrow between the two means labelled SEAT = 0,71. The right panel gives four bars for the correction of clause 10.2.3: the input delivered at 1,00, the input intended at 1,10, the magnitude measured on the seat at 0,71 and the corrected magnitude at 0,78, over the formula a*wS = SEAT times a*wP." width="94%"></picture>
 
@@ -67,6 +70,21 @@ except ValueError as error:
 *One test, and the ratio it exists to produce. The three runs agree to well
 inside the tolerance, so their means are the two numbers the SEAT factor is
 built from.*
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_seat_test_rig.svg" alt="Side view of a suspension seat on a vibration simulator with a test person on the mounting disc, the seat accelerometer S under the person and the platform accelerometer P within 100 mm of the vertical through it; the disc of Figure 2 in section; the same weighted r.m.s. chain at both points; and SEAT = a_wS / a_wP with the corrected magnitude at the foot" width="100%"></picture>
+
+**How the measurement goes.** Calibrate the chain to ISO 16063-1 before and
+after each series, check the safety requirements of ISO 13090-1, and run a
+suspension seat in under a 75 kg inert mass first. Fix the platform
+accelerometer inside a 200 mm circle centred directly below the seat
+accelerometer, and tape the disc to the cushion so its accelerometers lie
+midway between the ischial tuberosities. Train the test persons in preliminary
+runs until they hold a normal, still posture, weigh each of them, set the feet
+support so the thighs do not press on the front of the cushion, and drive the
+prescribed input until three consecutive runs give seat values within ± 5 % of
+their mean, with the platform inside its input tolerances. The mean of those
+seat values is $a_\mathrm{wS}$ and the mean of the platform values from the
+same runs is $a_\mathrm{wP}$, one pair per test person.
 
 ## 2. Correcting to the input that was intended
 

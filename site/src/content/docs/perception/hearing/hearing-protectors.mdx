@@ -1,6 +1,6 @@
 ---
 title: "Hearing Protectors (ISO 4869-2)"
-description: "The three ISO 4869-2 methods that turn a hearing protector's measured attenuation into the effective A-weighted level left at the ear: the octave-band method, the HML values and the single number rating, all built on the assumed protection value."
+description: "The three ISO 4869-2 methods that turn a hearing protector's measured attenuation into the effective A-weighted level: the octave-band method, the HML values and the single number rating, all three set to one protection performance."
 references:
   - type: standard
     organization: "International Organization for Standardization"
@@ -15,7 +15,7 @@ references:
     title: "Acoustics — Hearing protectors — Part 1: Subjective method for the measurement of sound attenuation"
     designation: "ISO 4869-1:2018"
     url: "https://www.iso.org/standard/65581.html"
-    note: "Where the per-subject attenuation values come from: the real-ear attenuation at threshold measured on at least 16 subjects, which is the input every method here starts from."
+    note: "Where the per-subject attenuation values come from: the real-ear attenuation at threshold measured on 16 subjects, which is the input every method here starts from."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -23,8 +23,8 @@ import ScopeClaim from '../../../../components/ScopeClaim.astro';
 import SeeAlso from '../../../../components/SeeAlso.astro';
 import ThemeImage from '../../../../components/ThemeImage.astro';
 
-A hearing protector is not measured on a coupler. ISO 4869-1 seats it on at
-least sixteen people and records the threshold shift each of them gets, so what
+A hearing protector is not measured on a coupler. ISO 4869-1 seats it on
+sixteen people and records the threshold shift each of them gets, so what
 comes back from the laboratory is a **distribution**: one attenuation per
 subject per octave band, with a spread that is often a third of the mean.
 ISO 4869-2 is the standard that turns that distribution into a number someone
@@ -32,8 +32,9 @@ can act on, and the first thing it does is refuse to use the mean.
 
 ## The distribution first (Clause 5)
 
-Every method starts from the assumed protection value, the mean attenuation
-reduced by a multiple of its own spread:
+All three methods take a mean less a multiple of its own spread, and differ in
+what they take it over. The octave-band method takes it over the attenuations
+of each band, and the result is the assumed protection value:
 
 $$
 APV_{fx} = m_f - \alpha\, s_f
@@ -44,6 +45,11 @@ protection performance $x$ (Table 1), so $APV_{f84}$ with $\alpha = 1$ is the
 attenuation 84 % of wearers reach or beat, and $APV_{f98}$ with $\alpha = 2$ is
 what all but one in fifty reach. Quoting a protector at its mean would describe
 a wearer who does not exist.
+
+The HML and SNR methods never form that value. They rate each subject first,
+against the eight reference noises of Table 2 or the pink noise of Table 3, and
+take the same reduction over those ratings (Formulae (3) to (5) and (19)). What
+the three share is the choice of $x$ and its $\alpha$.
 
 ```python
 import numpy as np
@@ -109,6 +115,13 @@ plt.show()
 </details>
 
 ## Three methods, in decreasing order of what they need
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_hearing_protector_chain.svg" alt="Calculation chain in four tiers. Top: the ISO 4869-1 test, drawn as a head wearing earmuffs beside a grid of sixteen rows of dots, one row per subject, across the octave centre frequencies from 63 Hz, greyed as optional, to 8 kHz, each dot sized by that subject's attenuation so that the dots grow towards 4 kHz; the text beside it names the one-third-octave bands of pink noise, the open and occluded thresholds taken in both orders, and the attenuation as the occluded threshold minus the open one. A band across the page sets one protection performance for all three methods, 84 % with alpha 1 or 98 % with alpha 2. Three columns follow, each with a protector box, a noise box and a result box. The octave-band method of Clause 6 takes the spread out band by band into eight assumed protection values drawn as bars, adds the octave-band spectrum of the noise, and sums the protected bands on energy to 81 dB. The HML method of Clause 7 rates each subject against eight reference noises and reduces the ratings to H 24, M 18 and L 13, adds the C- and A-weighted levels of 103 dB and 104 dB, and subtracts the predicted noise level reduction to reach 82 dB. The SNR method of Clause 8 rates each subject against a pink noise, gives SNR 21, adds the C-weighted level of 103 dB alone, or the A-weighted level with a known difference, and subtracts the rating to reach 82 dB. A box at the foot gives the assumed protection value as the mean attenuation less alpha times the standard deviation, with the same reduction written for H, M, L and SNR, and two notes say that HML and SNR start at 125 Hz and that every answer is rounded to the nearest integer, with the unweighted level allowed in place of the C-weighted one" width="100%" />
+
+*One protector model on sixteen subjects, reduced three ways and met with one
+noise. Only the octave-band method goes through the assumed protection value;
+HML and SNR rate each subject first and take the spread out over those ratings,
+and the three land within a decibel of each other.*
 
 ### The octave-band method (Clause 6)
 
@@ -186,6 +199,10 @@ print(by_snr.reported_level)              # 82
 print(hearing.snr_protected_level(snr, l_p_a=104.0, c_minus_a=-1.0).reported_level)  # 82
 ```
 
+Clause 8.3 also allows the unweighted level in place of the C-weighted one,
+and Clause 7.3 says the same for HML. It reads high for noise with a lot of
+very low frequency content, so it is a fallback rather than an equivalent.
+
 Because the reference noise is fixed, the rating says nothing about the shape
 of the noise it will meet, which is exactly what the HML method's three values
 recover.
@@ -194,11 +211,11 @@ recover.
 
 The three methods answer the same question and rarely agree exactly. On the
 worked example above the same protector in the same noise gives **81 dB, 82 dB
-and 82 dB**, and Clause 1's own NOTE puts differences of 3 dB or less between
-comparable protectors below the resolution of the exercise. The ordering is
-not a ranking: the octave-band method uses more information and is the one to
-prefer when the spectrum is available, while HML and SNR exist precisely for
-when it is not.
+and 82 dB**, and the NOTE that closes the Introduction puts differences of 3 dB
+or less between comparable protectors below the resolution of the exercise. The
+ordering is not a ranking: the octave-band method uses more information and is
+the one to prefer when the spectrum is available, while HML and SNR exist
+precisely for when it is not.
 
 The octave-band method starts at 63 Hz when both the noise and the protector
 have data there and at 125 Hz when either does not (Clause 6). The HML and SNR

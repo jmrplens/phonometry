@@ -7,13 +7,13 @@ sidebar:
 
 What a hearing protector leaves at the ear (ISO 4869-2:2018).
 
-A protector is measured on people, not on a coupler: ISO 4869-1 seats it on at
-least 16 subjects and records the threshold shift it produces in each octave
-band. What comes out is a **distribution**, one attenuation per subject per
-band, and ISO 4869-2 is the standard that turns that distribution into a level
-someone can act on.
+A protector is measured on people, not on a coupler: ISO 4869-1 seats it on
+16 subjects and records the threshold shift it produces in each octave band.
+What comes out is a **distribution**, one attenuation per subject per band, and
+ISO 4869-2 is the standard that turns that distribution into a level someone
+can act on.
 
-**The distribution first (Clause 5).** Every method here starts from the
+**The distribution first (Clause 5).** The octave-band method starts from the
 assumed protection value, the mean attenuation reduced by a multiple of its own
 spread (Formula (1)):
 
@@ -26,6 +26,11 @@ distribution at the protection performance $x$ (Table 1), so
 $APV_{f84}$ with $\alpha = 1$ is the attenuation 84 % of wearers
 reach or beat, and $APV_{f98}$ with $\alpha = 2$ is what all but
 one in fifty reach. A protector is never quoted at its mean.
+
+The HML and SNR methods never form that value. They rate each subject first,
+against the eight reference noises of Table 2 or the pink noise of Table 3, and
+take the same reduction over those ratings (Formulas (3) to (5) and (19)), so
+what the three share is the choice of $x$ and its $\alpha$.
 
 **Then one of three methods**, in decreasing order of what they need to know
 about the noise:
@@ -42,8 +47,8 @@ about the noise:
 
 The three answer the same question and rarely agree exactly: on the worked
 example of Annexes B, C and D the same protector in the same noise gives 81 dB,
-82 dB and 82 dB. Clause 1's own NOTE puts differences of 3 dB or less between
-comparable protectors below the resolution of the exercise.
+82 dB and 82 dB. The NOTE that closes the Introduction puts differences of 3 dB
+or less between comparable protectors below the resolution of the exercise.
 
 The octave-band method starts at 63 Hz when both the noise and the protector
 have data there and at 125 Hz when either does not (Clause 6). The `HML`

@@ -6556,9 +6556,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   en la página 27 del PDF (página impresa 17); las tablas B.5 a B.9 en la
   página 28 del PDF (página impresa 18). Todo de la EN ISO 11690-3:1998 tal
   como la publica la BS EN ISO 11690-3:1999. Con el reparto de la figura los
-  seis niveles de la tabla B.9 vuelven dentro de 0,06 dB, y con el de las
-  tablas fallan entre 0,08 dB y 0,14 dB, mientras que el caso A falla 1,8 dB en
-  las dos filas.
+  seis niveles de la tabla B.9 vuelven dentro de 0,07 dB, y con el de las
+  tablas los cuatro de W1 y W2 fallan entre 0,48 dB y 1,04 dB (el W3 está en
+  el mismo sitio en los dos), mientras que el caso A falla 1,8 dB en las dos
+  filas.
 - **Consecuencia para las tablas de la propia norma:** las columnas de posición
   de las tablas B.5 y B.8 frente a las etiquetas de las tablas B.6 y B.9, en
   los dos casos del anexo. El texto del caso A sigue a las tablas, porque llama

@@ -33004,12 +33004,12 @@
       "quantity": "The results of Annex B belong to the positions Figure B.1 draws, and not to the ones the two workstation tables put the same labels on",
       "kind": "count",
       "expected": {
-        "value": 6.0,
-        "label": "6/6, against 0/6 at the positions Tables B.5 and B.8 tabulate, which are between 0,5 dB and 1,8 dB out"
+        "value": 12.0,
+        "label": "12/12: the six cells within 0,1 dB at the positions Figure B.1 draws, and the same six more than 0,1 dB out at the positions Tables B.5 and B.8 tabulate (nearest 0.477 dB, farthest 1.832 dB)"
       },
       "computed": {
-        "value": 6.0,
-        "label": "6/6 printed cells reproduced at the position Figure B.1 draws"
+        "value": 12.0,
+        "label": "12/12 readings of the six printed cells, reproduced at the positions Figure B.1 draws and rejected at the positions Tables B.5 and B.8 tabulate"
       },
       "tolerance": {
         "mode": "absolute",

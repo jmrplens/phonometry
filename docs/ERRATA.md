@@ -6158,8 +6158,9 @@ in the same order.
   p. 16); Table B.4 with the machine positions on PDF page 27 (printed p. 17);
   Tables B.5 to B.9 on PDF page 28 (printed p. 18). All of EN ISO 11690-3:1998
   as published in BS EN ISO 11690-3:1999. Under the figure's assignment the six
-  levels of Table B.9 come back within 0,06 dB, and under the tables' they miss
-  by 0,08 dB to 0,14 dB while case A misses by 1,8 dB on both rows.
+  levels of Table B.9 come back within 0,07 dB, and under the tables' the four
+  at W1 and W2 miss by 0,48 dB to 1,04 dB (W3 stands in the same place in both)
+  while case A misses by 1,8 dB on both rows.
 - **Consequence for the standard's own tables:** the Position columns of Tables
   B.5 and B.8 against the labels of Tables B.6 and B.9, in both cases of the
   annex. The prose of case A follows the tables, calling W2 "the workstation of

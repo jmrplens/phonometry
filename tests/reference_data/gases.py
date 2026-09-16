@@ -33,8 +33,11 @@ HOPKINS_A1_GASES: tuple[tuple[str, float, float, float, float], ...] = (
 HOPKINS_A1_IDEAL_DENSITY_GASES = ("Air (dry)", "Argon", "Nitrogen", "Oxygen")
 
 #: How far the closure is from the printed density for the two heavy
-#: molecules, as a fraction: carbon dioxide and sulphur hexafluoride. This is
-#: the compressibility factor, not an error in the arithmetic.
+#: molecules, as a fraction of the printed value: carbon dioxide and sulphur
+#: hexafluoride. It is ``1 - Z``, the compressibility factor's distance from
+#: unity, because a real gas has ``rho = p M / (Z R T)`` and the ideal density
+#: is therefore ``Z`` times the real one. It is not an error in the
+#: arithmetic.
 HOPKINS_A1_COMPRESSIBILITY_GAP = {
     "Carbon dioxide": 0.007,
     "Sulphur hexafluoride": 0.021,

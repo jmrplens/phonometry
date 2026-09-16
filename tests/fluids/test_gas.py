@@ -5,9 +5,11 @@ Hopkins Table A1 prints four columns for six gases: the ratio of specific heats
 and the molar mass, which is what :func:`phonometry.fluids.ideal_gas` takes, and
 the phase velocity and density at stated conditions, which is what it returns.
 That makes the table an oracle and a ruler at once, because the two rows it
-fails are the interesting ones: carbon dioxide and sulphur hexafluoride miss
-their printed density by 0,7 and 2,1 per cent, which is the compressibility
-factor and not an error in the arithmetic.
+fails are the interesting ones: carbon dioxide and sulphur hexafluoride come
+out 0,7 and 2,1 per cent light against their printed density, which is ``1 -
+Z`` and not an error in the arithmetic. The ideal density is ``Z`` times the
+real one, so the fraction missing is the compressibility factor's distance
+from unity.
 
 So these tests pin both halves: that the closure reproduces the table where it
 is meant to, and that it misses it by the stated amount where it is not, which
@@ -78,7 +80,12 @@ def test_the_light_gases_reproduce_their_printed_density(
 
 @pytest.mark.parametrize("gas", sorted(ref.HOPKINS_A1_COMPRESSIBILITY_GAP))
 def test_the_heavy_molecules_miss_by_the_amount_the_model_states(gas: str) -> None:
-    """The docstring claims 0,7 % and 2 %; this is what holds it to that."""
+    """The docstring claims 0,7 % and 2 %; this is what holds it to that.
+
+    The sign is the other half of the claim. The ideal gas is ``Z`` times the
+    real density and ``Z`` is below 1 for both of these, so the closure is
+    always the lighter of the two and never the heavier.
+    """
     row = next(r for r in ref.HOPKINS_A1_GASES if r[0] == gas)
     _, gamma, molar_mass, _, printed_density = row
     got = _at_table_conditions(gamma, molar_mass).density

@@ -15,14 +15,18 @@ so a caller who has a gas that is not air or water can still have a
 
 How far the closure goes
 ------------------------
-Against Hopkins (2007) Table A1, PDF page 634 (printed p. 607), which prints
-both columns for six gases at the 20 degC and 1,013e5 Pa its own footnote
-states, the speeds land within 0,5 m/s for all six and the densities within
-0,002 kg/m3 for the four light ones. Carbon dioxide is 0,7 % low and sulphur
-hexafluoride 2 % low, which is the compressibility factor and not an error in
-the arithmetic: SF6 is a heavy molecule whose attraction is not negligible at
-room conditions, and it is exactly the gas a demonstration reaches for. The
-model says so in :data:`IDEAL_GAS_VALIDITY` rather than pretending otherwise.
+Hopkins (2007) Table A1, PDF page 634 (printed p. 607), prints both columns
+for six gases at 20 degC and 1,013e5 Pa, as its own footnote states. Against
+it, the speeds land within 0,5 m/s for all six and the densities within
+0,002 kg/m3 for the four light ones. Carbon dioxide comes out 0,7 % light and
+sulphur hexafluoride 2 % light.
+
+That shortfall is not an error in the arithmetic, it is the compressibility
+factor: a real gas has ``rho = p M / (Z R T)``, so the ideal density is ``Z``
+times the real one and the fraction missing is ``1 - Z``. It grows with the
+molecule, and SF6, a heavy one whose attraction is not negligible at room
+conditions, is exactly the gas a demonstration reaches for. The model says so
+in :data:`IDEAL_GAS_VALIDITY` rather than pretending otherwise.
 
 What it does not give
 ---------------------
@@ -55,9 +59,10 @@ MOLAR_GAS_CONSTANT = 8.31446261815324
 #: fluid it gets back.
 IDEAL_GAS_VALIDITY = (
     "ideal gas: exact for a dilute gas and within about 1 % of a printed table "
-    "for the light gases at room conditions. The error is the compressibility "
-    "factor and it grows with the molecule: carbon dioxide is 0,7 % and "
-    "sulphur hexafluoride 2 % against Hopkins Table A1."
+    "for the light gases at room conditions. The density comes out light by "
+    "1 - Z, the compressibility factor's distance from unity, and that grows "
+    "with the molecule: carbon dioxide is 0,7 % light and sulphur hexafluoride "
+    "2 % against Hopkins Table A1, where the speeds still land within 0,5 m/s."
 )
 
 #: Celsius-to-kelvin offset, in kelvin.

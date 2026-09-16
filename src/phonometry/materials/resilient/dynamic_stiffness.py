@@ -99,6 +99,22 @@ _LOW_RESISTIVITY = 10.0
 _TWO_PI = 2.0 * np.pi
 _FOUR_PI_SQ = 4.0 * np.pi**2
 
+#: Where every row of :data:`PUBLISHED_RESILIENT_LAYERS` was read, written once
+#: because fifteen rows come off one page and a citation repeated fifteen times
+#: is fifteen chances to mistype it.
+_TABLE_A3 = "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)"
+
+#: What the four rebond-foam cells of that table print under the material name.
+_HOPKINS_AND_HALL = "Hopkins and Hall (2006)"
+
+#: The three material names Table A3 prints once and spans over four rows each.
+#: Written here rather than in the rows for the same reason as the citation
+#: above: the table groups them, and four copies of a name are four chances to
+#: part one row from its group.
+_MINERAL_WOOL_ROCK = "Mineral wool, rock"
+_MINERAL_WOOL_GLASS = "Mineral wool, glass"
+_REBOND_FOAM = "Rebond foam (reconstituted open cell foam)"
+
 
 class DynamicStiffnessWarning(PhonometryWarning):
     """Advisory when the enclosed-gas term makes ``s'`` unresolvable (clause 8.2)."""
@@ -252,6 +268,256 @@ def natural_frequency(
         msg = "'dynamic_stiffness' must be positive."
         raise ValueError(msg)
     return as_float_or_array(np.sqrt(s / mass_per_area) / _TWO_PI)
+
+
+# ---------------------------------------------------------------------------
+# Published resilient layers
+#
+# Source and authorship. Hopkins, C. (2007). "Sound insulation",
+# Butterworth-Heinemann, ISBN 978-0-7506-6526-1, listed in
+# docs/reference/bibliography.md. The book is not redistributed with this
+# library and no page of it is reproduced here.
+#
+# Contents. One table, Table A3, of the four the book's appendix prints. Its
+# three data columns are transcribed row by row and the stiffness is converted
+# from the printed MN/m3 into the N/m3 the functions above take, so what is
+# stored is the argument list rather than the printed table.
+#
+# Holdings from this one source, counted so the statement below is about what
+# is actually here: Table A3 entire (fifteen rows, three columns) here;
+# Table A4 entire (four rows, two columns) in
+# building/prediction/masonry_cavity_wall.py, where it has shipped since before
+# this table existed; and Table A2 as an oracle of the coincidence frequency,
+# in tests/reference_data/building.py, which is test data and ships in no
+# wheel. Three of the four tables of one appendix, two of them whole.
+#
+# Basis. Each row is a measured property of a named specimen, cited to the
+# document, table, PDF page and printed folio it was read on, and credited in
+# `attributed_to` wherever the book credits it to someone else. Two of the
+# three tables above are short enough that taking the columns a function needs
+# takes the table, and that is stated rather than stepped around: what is taken
+# is a list of measured facts, in this library's units and keyed by this
+# library's spelling, and no prose, figure, derivation or arrangement of the
+# appendix comes with it. This repository's MIT licence covers the code, not
+# the values, which remain the author's to describe.
+#
+# Removal policy. Withdrawing this table costs no capability: every function
+# here takes `s'` as an explicit argument and none of them defaults to a
+# published layer, which the test suite asserts. Requests go through the
+# contact in SECURITY.md.
+#
+# Admission rule for a row that is not here yet:
+#
+# 1. A row enters only when a published function consumes it. No caller, no
+#    row: that is the brake that stops this growing into the material database
+#    this library does not ship.
+# 2. A row enters only after its page has been read as a rendered image, and it
+#    carries document, table, PDF page and printed folio, plus `attributed_to`
+#    wherever the book credits the number to someone else.
+# 3. Values are stored in library units. The printed unit is stated in the
+#    banner and the conversion is pinned by an assertion against
+#    `tests/reference_data`, never left as a comment.
+# 4. A row whose table already ships anywhere in the tree does not ship twice;
+#    where it overlaps, it is tied to the existing constant by an explicit
+#    consistency assertion.
+# 5. One key, one dimension, one spelling. A quantity that appears in two
+#    dimensions gets two field names: the stiffness per unit area here is N/m3
+#    and the per-tie stiffness of Table A4 is N/m, and they are two names.
+# 6. The copyright decision is reopened by how much of one source is here,
+#    not by how many of its tables are touched: when the rows from a single
+#    source stop being the arguments a published function takes and start
+#    being a collection worth consulting for its own sake, the next form is a
+#    data directory with its own provenance statement, and that is a different
+#    piece of work. Hopkins is at three tables and the answer above is the
+#    reopened decision, not the original one.
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True, kw_only=True)
+class ResilientLayer:
+    """A resilient layer as its source prints it, in library units.
+
+    :ivar name: The material as the table names it, without the attribution
+        the printed cell carries.
+    :ivar dynamic_stiffness_n_m3: ``s'`` per unit area, in N/m3 (the book
+        prints MN/m3).
+    :ivar density_kg_m3: Specimen density, in kg/m3.
+    :ivar thickness_mm: Nominal uncompressed thickness, in millimetres.
+    :ivar source: Document, table, PDF page and printed folio.
+    :ivar attributed_to: The source the book itself credits, empty when the
+        number is the book's own.
+    """
+
+    name: str
+    dynamic_stiffness_n_m3: float
+    density_kg_m3: float
+    thickness_mm: float
+    source: str
+    attributed_to: str = ""
+
+    def natural_frequency(self, mass_per_area: float) -> float:
+        r"""``f0`` of a floor of this mass per unit area on this layer.
+
+        :math:`f_0 = (1/2\pi)\sqrt{s'/m'}` (Formula 2), through the module's
+        :func:`natural_frequency`.
+
+        :param mass_per_area: Mass per unit area of the supported floor ``m'``,
+            in kg/m2.
+        :return: The natural frequency ``f0``, in hertz.
+        """
+        return float(natural_frequency(self.dynamic_stiffness_n_m3, mass_per_area))
+
+
+#: Fifteen resilient layers, each carrying the dynamic stiffness per unit area
+#: ``s't`` measured on it, transcribed digit-for-digit from Hopkins (2007)
+#: **Table A3** (PDF page 637, printed p. 610), whose caption states they were
+#: measured according to ISO 9052-1, the standard this module implements as
+#: EN 29052-1. The book prints ``s't`` in MN/m3, the density in kg/m3 and the
+#: thickness in mm; the stiffness is stored here in N/m3 and the other two as
+#: printed, and the conversion is asserted against the printed digits in
+#: tests/materials/resilient/test_dynamic_stiffness.py.
+#:
+#: Eleven rows are the author's own measurements; the four rebond-foam rows
+#: the book credits to Hopkins and Hall (2006), which is what
+#: :attr:`ResilientLayer.attributed_to` carries. Four rock-wool rows and four
+#: glass-wool rows differ only by density and thickness, which is why the key
+#: is ``<material>_<density in kg/m3>_<thickness in mm>``: the printed table
+#: separates them by position in a merged cell, and a key has to say which
+#: specimen it is.
+#:
+#: These are **measured specimens, not declared product values**. A floating
+#: floor is designed with the manufacturer's ``s'`` declared to EN 29052-1;
+#: these rows are the order of magnitude for when there is none, in the sense
+#: :data:`~phonometry.noise_control.ROOM_ABSORPTION_ESTIMATES` is for when
+#: nobody measured an absorption coefficient.
+PUBLISHED_RESILIENT_LAYERS: dict[str, ResilientLayer] = {
+    "closed_cell_polyethylene_foam_45_5": ResilientLayer(
+        name="Closed-cell polyethylene foam",
+        dynamic_stiffness_n_m3=115e6,
+        density_kg_m3=45.0,
+        thickness_mm=5.0,
+        source=_TABLE_A3,
+    ),
+    "expanded_polystyrene_14_50": ResilientLayer(
+        name="Expanded polystyrene",
+        dynamic_stiffness_n_m3=78e6,
+        density_kg_m3=14.0,
+        thickness_mm=50.0,
+        source=_TABLE_A3,
+    ),
+    "expanded_polystyrene_precompressed_10_50": ResilientLayer(
+        name="Expanded polystyrene, pre-compressed",
+        dynamic_stiffness_n_m3=68e6,
+        density_kg_m3=10.0,
+        thickness_mm=50.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_rock_60_30": ResilientLayer(
+        name=_MINERAL_WOOL_ROCK,
+        dynamic_stiffness_n_m3=10e6,
+        density_kg_m3=60.0,
+        thickness_mm=30.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_rock_80_30": ResilientLayer(
+        name=_MINERAL_WOOL_ROCK,
+        dynamic_stiffness_n_m3=11e6,
+        density_kg_m3=80.0,
+        thickness_mm=30.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_rock_100_30": ResilientLayer(
+        name=_MINERAL_WOOL_ROCK,
+        dynamic_stiffness_n_m3=14e6,
+        density_kg_m3=100.0,
+        thickness_mm=30.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_rock_140_30": ResilientLayer(
+        name=_MINERAL_WOOL_ROCK,
+        dynamic_stiffness_n_m3=19e6,
+        density_kg_m3=140.0,
+        thickness_mm=30.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_glass_36_13": ResilientLayer(
+        name=_MINERAL_WOOL_GLASS,
+        dynamic_stiffness_n_m3=28e6,
+        density_kg_m3=36.0,
+        thickness_mm=13.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_glass_36_25": ResilientLayer(
+        name=_MINERAL_WOOL_GLASS,
+        dynamic_stiffness_n_m3=11e6,
+        density_kg_m3=36.0,
+        thickness_mm=25.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_glass_75_25": ResilientLayer(
+        name=_MINERAL_WOOL_GLASS,
+        dynamic_stiffness_n_m3=12e6,
+        density_kg_m3=75.0,
+        thickness_mm=25.0,
+        source=_TABLE_A3,
+    ),
+    "mineral_wool_glass_75_40": ResilientLayer(
+        name=_MINERAL_WOOL_GLASS,
+        dynamic_stiffness_n_m3=7e6,
+        density_kg_m3=75.0,
+        thickness_mm=40.0,
+        source=_TABLE_A3,
+    ),
+    "rebond_foam_64_15": ResilientLayer(
+        name=_REBOND_FOAM,
+        dynamic_stiffness_n_m3=12e6,
+        density_kg_m3=64.0,
+        thickness_mm=15.0,
+        source=_TABLE_A3,
+        attributed_to=_HOPKINS_AND_HALL,
+    ),
+    "rebond_foam_64_20": ResilientLayer(
+        name=_REBOND_FOAM,
+        dynamic_stiffness_n_m3=9e6,
+        density_kg_m3=64.0,
+        thickness_mm=20.0,
+        source=_TABLE_A3,
+        attributed_to=_HOPKINS_AND_HALL,
+    ),
+    "rebond_foam_64_25": ResilientLayer(
+        name=_REBOND_FOAM,
+        dynamic_stiffness_n_m3=7e6,
+        density_kg_m3=64.0,
+        thickness_mm=25.0,
+        source=_TABLE_A3,
+        attributed_to=_HOPKINS_AND_HALL,
+    ),
+    "rebond_foam_96_15": ResilientLayer(
+        name=_REBOND_FOAM,
+        dynamic_stiffness_n_m3=16e6,
+        density_kg_m3=96.0,
+        thickness_mm=15.0,
+        source=_TABLE_A3,
+        attributed_to=_HOPKINS_AND_HALL,
+    ),
+}
+
+
+def resilient_layer(layer: str | ResilientLayer) -> ResilientLayer:
+    """Look up a resilient layer in Hopkins Table A3.
+
+    :param layer: A key of :data:`PUBLISHED_RESILIENT_LAYERS`, spelled
+        ``<material>_<density in kg/m3>_<thickness in mm>``, or a
+        :class:`ResilientLayer` already in hand.
+    :return: The :class:`ResilientLayer`.
+    :raises ValueError: for an unknown layer name, listing the keys there are.
+    """
+    if isinstance(layer, ResilientLayer):
+        return layer
+    try:
+        return PUBLISHED_RESILIENT_LAYERS[layer]
+    except KeyError:
+        options = ", ".join(sorted(PUBLISHED_RESILIENT_LAYERS))
+        msg = f"Unknown resilient layer {layer!r}; choose one of {options}."
+        raise ValueError(msg) from None
 
 
 # ---------------------------------------------------------------------------

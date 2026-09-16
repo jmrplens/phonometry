@@ -373,6 +373,38 @@ jobs:
     - name: Check that no pressure, temperature or humidity hides its unit
       run: python scripts/check_parameter_units.py
 
+  # A value transcribed from a book is only checkable if the next reader can
+  # open the same page. The convention lived in review until a table came to
+  # cite a folio its page does not print and another attributed to a table two
+  # columns it does not carry. This holds every published record that carries a
+  # `source` to the grammar the errata registry uses, and every table
+  # transcribed from a book or a paper to a banner naming both its PDF page and
+  # its printed folio; a standard stays outside, because it numbers its own
+  # clauses and tables and is cited by that number. It walks the imported
+  # package, like the units guard, and re-runs its own census over the banners
+  # so a table from a new book fails until it is registered.
+  published-sources:
+    name: Every published value names its page
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    - name: Check that every published value cites its page and folio
+      run: python scripts/check_published_sources.py
+
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in
   # requirements-figures.txt so SVG *structure* (elements, text, colours) and

@@ -88,20 +88,15 @@ def _diffuse_field(language: str) -> Axes:
 
 
 def _biot_waves(language: str) -> Axes:
-    medium = materials.johnson_champoux_allard(
-        _FREQUENCIES,
-        25.0e3,
-        porosity=0.94,
-        tortuosity=1.06,
-        viscous_length=56e-6,
-        thermal_length=110e-6,
-    )
+    glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+    shear, poisson = glass_wool.frame_constants()
     result = materials.biot_waves(
-        medium,
-        porosity=0.94,
-        tortuosity=1.06,
-        frame_density=130.0,
-        shear_modulus=2.2e6 * (1.0 + 0.1j),
+        glass_wool.medium(_FREQUENCIES),
+        porosity=glass_wool.porosity,
+        tortuosity=glass_wool.tortuosity,
+        frame_density=glass_wool.frame_density_kg_m3,
+        shear_modulus=shear,
+        poisson_ratio=poisson,
     )
     return result.plot(language=language)
 

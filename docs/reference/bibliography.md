@@ -34,6 +34,26 @@ it; the list grows as guides gain their References sections.
   Cited by [Electroacoustics](../devices/electroacoustics/electroacoustics.md),
   [Loudspeaker characterisation](../devices/electroacoustics/loudspeakers.md) and
   [Sound Power](../devices/emission/sound-power.md).
+- Beranek, L. L., & Mellow, T. J. (2019). *Acoustics: Sound fields,
+  transducers and vibration* (2nd ed.). Academic Press.
+  ISBN 978-0-12-815227-0. The edition the conformance registry reads for the
+  baffled-piston radiation impedance and directivity (Eqs. 13.117, 13.118,
+  4.151, 13.102) and the one its Table 7.1 is read on for the
+  Delany-Bazley amplitudes discussed in
+  [ERRATA](../ERRATA.md).
+- Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and vibration
+  analysis for engineers* (2nd ed.). Cambridge University Press.
+  [doi:10.1017/CBO9781139163927](https://doi.org/10.1017/CBO9781139163927).
+  The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the
+  room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure
+  design equation of section 4.10 (Eqs. 4.102-4.115), the plateau method for
+  panel transmission loss of section 3.9 (Table 3.1), the higher-order
+  acoustic modes of a rigid circular duct of section 7.2 (Table 7.1) and the
+  worked problems 4.16, 4.18 and 4.21 with their printed octave-band answers.
+  Cited by [Room to Room: Partition, Receiving Room, Criterion](../devices/noise-control/room-to-room.md),
+  [Duct-Borne Noise: Fan to Room](../devices/noise-control/duct-path.md),
+  [Bending-wave transmission at plate junctions](../vibration/structural/junction-transmission.md) and
+  [Machine fault frequencies](../vibration/machinery/machine-diagnostics.md).
 
 ## Signal processing
 

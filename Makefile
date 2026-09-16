@@ -209,6 +209,15 @@ dead-constants:
 parameter-units:
 	$(PYTHON) scripts/check_parameter_units.py
 
+# A number transcribed from a book is only checkable if the next reader can
+# open the same page, and nothing used to require that a published value say
+# which one. This holds every record carrying a `source` to the grammar the
+# errata registry uses, and every table transcribed from a book or a paper to a
+# banner that names both its PDF page and its printed folio. Needs the package
+# importable, for the same reason parameter-units does.
+published-sources:
+	$(PYTHON) scripts/check_published_sources.py
+
 # A conformance row that computes the expected value itself is comparing a
 # formula with a second copy of it, and reports Pass whatever the library does.
 # This resolves what each row reaches, through its helpers and whatever name
@@ -469,4 +478,4 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point control-characters hazards dead-constants \
-	conformance-rows conformance-vocabulary parameter-units
+	conformance-rows conformance-vocabulary parameter-units published-sources

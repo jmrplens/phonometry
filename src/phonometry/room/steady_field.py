@@ -281,8 +281,9 @@ def schroeder_frequency(
     return as_float_or_array(2000.0 * np.sqrt(t / volume))
 
 
-#: Sound power models of Norton & Karczub 2e Table 4.5, as the exponent of the
-#: directivity factor ``Q`` that multiplies the radiated power: a constant-power
+#: Sound power models of Norton & Karczub (2003) Table 4.5, PDF page 301
+#: (printed p. 281), as the exponent of the directivity factor ``Q`` that
+#: multiplies the radiated power: a constant-power
 #: source radiates ``Pi_0`` wherever it stands, a constant-volume source
 #: ``Pi_0 Q`` (reflecting boundaries load it and it radiates *more*, the
 #: conservative upper bound), a constant-pressure source ``Pi_0 / Q`` (the

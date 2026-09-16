@@ -165,9 +165,10 @@ _MAX_DEFICIENCY_SUM = 32.0
 #: Maximum deficiency at any one frequency, ASTM E413-22 clause 5.4.2, in dB.
 _MAX_SINGLE_DEFICIENCY = 8.0
 
-#: Sidewall reflection cases of Vigran Eqs. (9.18) and (9.19): the constant
-#: ``eps``, which is both the prefactor of the compact form and the factor in
-#: the exponents of the attenuated one.
+#: Sidewall reflection cases of Vigran (2008) Eqs. (9.18) and (9.19), both on
+#: PDF page 361 (printed p. 339): the constant ``eps``, which is both the
+#: prefactor of the compact form and the factor in the exponents of the
+#: attenuated one.
 _SIDEWALLS: dict[str, float] = {"absorbing": 1.0, "reflecting": 2.0}
 
 

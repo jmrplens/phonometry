@@ -48,6 +48,7 @@ checked), and the shear wave beyond its role in the transfer matrix.
 
 from __future__ import annotations
 
+import dataclasses
 import itertools
 
 import numpy as np
@@ -64,43 +65,38 @@ from phonometry.materials.absorbers import biot as biot_module
 from phonometry.materials.absorbers.biot import _gamma, _porous_porous_matrix
 
 # ---------------------------------------------------------------------------
-# A&A Table 6.1 (printed p. 124): glass wool "Domisol Coffrage", with the
-# characteristic lengths the book derives in prose on printed p. 123 from
-# Eqs. (5.29)-(5.30) (fibre diameter 12 um, Lambda = 0,56e-4 m,
-# Lambda' = 2 Lambda). The shear modulus is printed in N/cm2.
+# The two specimens are read from the published objects, which carry the pages
+# they came off: the glass wool "Domisol Coffrage" of A&A Sect. 6.5.4, whose
+# six tabulated parameters are Table 6.1 on printed p. 124 and whose two
+# characteristic lengths are printed in prose on p. 123 from Eqs. (5.29)-(5.30)
+# (fibre diameter 12 um, Lambda = 0,56e-4 m, Lambda' = 2 Lambda = 1,1e-4 m);
+# and the soft fibrous material of Table 11.2 on printed p. 254, the input set
+# behind Figure 11.2 and the material of the limp-frame tests. Nothing here
+# retypes a printed number.
 # ---------------------------------------------------------------------------
-TABLE_6_1_TORTUOSITY = 1.06
-TABLE_6_1_FRAME_DENSITY = 130.0
-TABLE_6_1_RESISTIVITY = 40_000.0
-TABLE_6_1_POROSITY = 0.94
-TABLE_6_1_SHEAR_MODULUS = 220.0e4 * (1.0 + 0.1j)
-TABLE_6_1_POISSON_RATIO = 0.0
-TABLE_6_1_VISCOUS_LENGTH = 0.56e-4
-TABLE_6_1_THERMAL_LENGTH = 1.1e-4
+_GLASS_WOOL = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+_SOFT_FIBROUS = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
 
-#: A&A Table 11.2 (printed p. 254): soft fibrous material, 50 mm thick, the
-#: input set behind Figure 11.2 and the material of the limp-frame tests.
+TABLE_6_1_TORTUOSITY = _GLASS_WOOL.tortuosity
+TABLE_6_1_FRAME_DENSITY = _GLASS_WOOL.frame_density_kg_m3
+TABLE_6_1_RESISTIVITY = _GLASS_WOOL.flow_resistivity_pa_s_m2
+TABLE_6_1_POROSITY = _GLASS_WOOL.porosity
+TABLE_6_1_SHEAR_MODULUS, TABLE_6_1_POISSON_RATIO = _GLASS_WOOL.frame_constants()
+
 TABLE_11_2 = {
-    "porosity": 0.98,
-    "tortuosity": 1.02,
-    "viscous_length": 90e-6,
-    "thermal_length": 180e-6,
+    "porosity": _SOFT_FIBROUS.porosity,
+    "tortuosity": _SOFT_FIBROUS.tortuosity,
+    "viscous_length": _SOFT_FIBROUS.viscous_length_um / 1e6,
+    "thermal_length": _SOFT_FIBROUS.thermal_length_um / 1e6,
 }
-TABLE_11_2_RESISTIVITY = 25.0e3
-TABLE_11_2_FRAME_DENSITY = 30.0
-TABLE_11_2_THICKNESS = 0.050
+TABLE_11_2_RESISTIVITY = _SOFT_FIBROUS.flow_resistivity_pa_s_m2
+TABLE_11_2_FRAME_DENSITY = _SOFT_FIBROUS.frame_density_kg_m3
+TABLE_11_2_THICKNESS = _SOFT_FIBROUS.thickness_mm / 1e3
 
 
 def _glass_wool_medium(frequency: np.ndarray) -> materials.PorousMediumResult:
-    """Rigid-frame JCA equivalent fluid of the A&A Table 6.1 glass wool."""
-    return materials.johnson_champoux_allard(
-        frequency,
-        TABLE_6_1_RESISTIVITY,
-        porosity=TABLE_6_1_POROSITY,
-        tortuosity=TABLE_6_1_TORTUOSITY,
-        viscous_length=TABLE_6_1_VISCOUS_LENGTH,
-        thermal_length=TABLE_6_1_THERMAL_LENGTH,
-    )
+    """Rigid-frame JCA equivalent fluid of the A&A Sect. 6.5.4 glass wool."""
+    return _GLASS_WOOL.medium(frequency)
 
 
 def _glass_wool_waves(frequency: np.ndarray) -> materials.BiotWavesResult:
@@ -713,14 +709,10 @@ _DENSE_RESISTIVITY = 500.0e3
 
 
 def _dense_medium(frequency: np.ndarray) -> materials.PorousMediumResult:
-    return materials.johnson_champoux_allard(
-        frequency,
-        _DENSE_RESISTIVITY,
-        porosity=TABLE_6_1_POROSITY,
-        tortuosity=TABLE_6_1_TORTUOSITY,
-        viscous_length=TABLE_6_1_VISCOUS_LENGTH,
-        thermal_length=TABLE_6_1_THERMAL_LENGTH,
+    dense = dataclasses.replace(
+        _GLASS_WOOL, flow_resistivity_pa_s_m2=_DENSE_RESISTIVITY
     )
+    return dense.medium(frequency)
 
 
 def _dense_poroelastic(
@@ -1002,9 +994,7 @@ def test_rigid_frame_limit_holds_for_a_non_rigid_termination() -> None:
 # The limp limit: convergence on the shipped limp-frame equivalent fluid
 # ---------------------------------------------------------------------------
 def _soft_fibrous(frequency: np.ndarray) -> materials.PorousMediumResult:
-    return materials.johnson_champoux_allard(
-        frequency, TABLE_11_2_RESISTIVITY, **TABLE_11_2
-    )
+    return _SOFT_FIBROUS.medium(frequency)
 
 
 def test_limp_limit_converges_on_the_limp_frame_equivalent_fluid() -> None:

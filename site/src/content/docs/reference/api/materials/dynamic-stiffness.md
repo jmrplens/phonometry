@@ -358,3 +358,75 @@ plate.
 | Exception | When |
 | :--- | :--- |
 | ValueError | naming the first of the three that is not finite and positive. |
+
+## PUBLISHED_RESILIENT_LAYERS
+
+*Constant* (`dict`).
+
+## resilient_layer
+
+```python
+resilient_layer(layer: str | ResilientLayer) -> ResilientLayer
+```
+
+Look up a resilient layer in Hopkins Table A3.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `layer` | A key of [`PUBLISHED_RESILIENT_LAYERS`](/phonometry/reference/api/materials/dynamic-stiffness/#published_resilient_layers), spelled `<material>_<density in kg/m3>_<thickness in mm>`, or a [`ResilientLayer`](/phonometry/reference/api/materials/dynamic-stiffness/#resilientlayer) already in hand. |
+
+**Returns:** The [`ResilientLayer`](/phonometry/reference/api/materials/dynamic-stiffness/#resilientlayer).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for an unknown layer name, listing the keys there are. |
+
+## ResilientLayer
+
+```python
+ResilientLayer(
+    *,
+    name: str,
+    dynamic_stiffness_n_m3: float,
+    density_kg_m3: float,
+    thickness_mm: float,
+    source: str,
+    attributed_to: str = '',
+)
+```
+
+A resilient layer as its source prints it, in library units.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | The material as the table names it, without the attribution the printed cell carries. |
+| `dynamic_stiffness_n_m3` | `s'` per unit area, in N/m3 (the book prints MN/m3). |
+| `density_kg_m3` | Specimen density, in kg/m3. |
+| `thickness_mm` | Nominal uncompressed thickness, in millimetres. |
+| `source` | Document, table, PDF page and printed folio. |
+| `attributed_to` | The source the book itself credits, empty when the number is the book's own. |
+
+### ResilientLayer.natural_frequency()
+
+```python
+ResilientLayer.natural_frequency(mass_per_area: float) -> float
+```
+
+`f0` of a floor of this mass per unit area on this layer.
+
+$f_0 = (1/2\pi)\sqrt{s'/m'}$ (Formula 2), through the module's
+[`natural_frequency`](/phonometry/reference/api/materials/dynamic-stiffness/#natural_frequency).
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `mass_per_area` | Mass per unit area of the supported floor `m'`, in kg/m2. |
+
+**Returns:** The natural frequency `f0`, in hertz.

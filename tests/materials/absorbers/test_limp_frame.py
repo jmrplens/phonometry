@@ -47,32 +47,38 @@ import pytest
 
 from phonometry import materials
 
-#: A&A Table 11.2 (printed p. 254): soft fibrous material, 50 mm thick.
+#: Both specimens are read from the published objects, which carry the pages
+#: they came off: the soft fibrous material of A&A Table 11.2 (printed p. 254),
+#: 50 mm thick, and the "Domisol Coffrage" glass wool of Sect. 6.5.4.
+_SOFT_FIBROUS = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+_GLASS_WOOL = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+
 TABLE_11_2: dict[str, float] = {
-    "porosity": 0.98,
-    "tortuosity": 1.02,
-    "viscous_length": 90e-6,
-    "thermal_length": 180e-6,
+    "porosity": _SOFT_FIBROUS.porosity,
+    "tortuosity": _SOFT_FIBROUS.tortuosity,
+    "viscous_length": _SOFT_FIBROUS.viscous_length_um / 1e6,
+    "thermal_length": _SOFT_FIBROUS.thermal_length_um / 1e6,
 }
-TABLE_11_2_RESISTIVITY = 25.0e3
-TABLE_11_2_FRAME_DENSITY = 30.0
-TABLE_11_2_THICKNESS = 0.050
+TABLE_11_2_RESISTIVITY = _SOFT_FIBROUS.flow_resistivity_pa_s_m2
+TABLE_11_2_FRAME_DENSITY = _SOFT_FIBROUS.frame_density_kg_m3
+TABLE_11_2_THICKNESS = _SOFT_FIBROUS.thickness_mm / 1e3
 
 
 def _rigid(frequency: np.ndarray) -> materials.PorousMediumResult:
-    return materials.johnson_champoux_allard(
-        frequency, TABLE_11_2_RESISTIVITY, **TABLE_11_2
-    )
+    return _SOFT_FIBROUS.medium(frequency)
 
 
 def test_decoupling_frequency_allard_table_6_1() -> None:
     """A&A printed p. 251: ``Fd = sigma phi^2/(2 pi rho1)``.
 
-    On the fully specified glass wool of Table 6.1 (printed p. 124), pure
-    arithmetic gives ``40 000 x 0,94^2 / (2 pi x 130) = 43,27`` Hz.
+    On the glass wool of Table 6.1 (printed p. 124), pure arithmetic on three
+    columns that table prints gives ``40 000 x 0,94^2 / (2 pi x 130) = 43,27``
+    Hz.
     """
     assert materials.decoupling_frequency(
-        40.0e3, porosity=0.94, frame_density=130.0
+        _GLASS_WOOL.flow_resistivity_pa_s_m2,
+        porosity=_GLASS_WOOL.porosity,
+        frame_density=_GLASS_WOOL.frame_density_kg_m3,
     ) == pytest.approx(43.27, abs=0.005)
 
 

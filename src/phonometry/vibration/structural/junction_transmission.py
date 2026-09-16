@@ -189,8 +189,11 @@ _REFERENCE_FREQUENCY: float = 1000.0
 #: Speed of sound in air ``c0`` used for the plate critical frequencies, m/s.
 _SPEED_OF_SOUND: float = 343.0
 
-#: Junction constants ``(J1, J2, J3)`` for the perpendicular junctions
-#: (Hopkins Eq. 5.12/5.13). ``J3 is None`` where no straight section exists.
+#: Junction constants ``(J1, J2, J3)`` for the perpendicular junctions, from
+#: Hopkins (2007) Eqs. 5.12 and 5.13, PDF pages 569-570 (printed pp. 542-543):
+#: ``J1`` and ``J2`` are stated under Eq. 5.12 on the first folio and ``J3``
+#: under Eq. 5.13 on the second. ``J3 is None`` where no straight section
+#: exists.
 _JUNCTIONS: dict[str, tuple[float, float, float | None]] = {
     "X": (1.0, 1.0, 1.0),
     "T1": (2.0, 0.5, 0.5),

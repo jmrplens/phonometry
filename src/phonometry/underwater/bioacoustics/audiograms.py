@@ -75,7 +75,8 @@ class AudiogramParameters:
     in_air: bool
 
 
-#: Southall et al. (2019) Table 2, printed p. 144: estimated group audiograms
+#: Southall et al. (2019) Table 2, PDF page 20 (printed p. 144): estimated
+#: group audiograms
 #: fitted to the original (absolute) median behavioural thresholds.
 _AUDIOGRAM_ORIGINAL: dict[str, AudiogramParameters] = {
     "HF": AudiogramParameters("HF", 46.2, 25.9, 47.8, 35.5, 3.56, 0.977, in_air=False),
@@ -95,7 +96,8 @@ _AUDIOGRAM_ORIGINAL: dict[str, AudiogramParameters] = {
     "OCA": AudiogramParameters("OCA", 6.24, 1.54, 8.24, 55.6, 2.76, 0.978, in_air=True),
 }
 
-#: Southall et al. (2019) Table 3, printed p. 144: the same fits on thresholds
+#: Southall et al. (2019) Table 3, PDF page 20 (printed p. 144): the same fits
+#: on thresholds
 #: normalised so that the frequency of best sensitivity sits at 0 dB.
 _AUDIOGRAM_NORMALIZED: dict[str, AudiogramParameters] = {
     "HF": AudiogramParameters("HF", 3.61, 12.7, 64.4, 31.8, 4.5, 0.960, in_air=False),
@@ -120,7 +122,8 @@ _AUDIOGRAM_NORMALIZED: dict[str, AudiogramParameters] = {
 #: Hearing groups with a published group audiogram (Southall et al. 2019).
 AUDIOGRAM_GROUPS: tuple[str, ...] = tuple(_AUDIOGRAM_ORIGINAL)
 
-#: Southall et al. (2019) Table 4, printed p. 148: frequency of best hearing
+#: Southall et al. (2019) Table 4, PDF page 24 (printed p. 148): frequency of
+#: best hearing
 #: ``f0`` (kHz) from the original and from the normalised fits.
 BEST_HEARING_FREQUENCY_KHZ: dict[str, tuple[float, float]] = {
     "HF": (55.0, 58.0),

@@ -235,16 +235,14 @@ def _chk_porous_maa_peak_closed_form() -> Outcome:
 # tests/materials/absorbers/test_limp_frame.py. The two limits the book states in prose on
 # printed p. 253 and checked below corroborate that transcription without
 # pinning it: a sign-flipped variant of Eq. (11.55) satisfies both. The
-# decoupling frequency on the fully specified Table 6.1 glass wool is pure
-# arithmetic.
-_AA_TABLE_11_2 = {
-    "porosity": 0.98,
-    "tortuosity": 1.02,
-    "viscous_length": 90e-6,
-    "thermal_length": 180e-6,
-}
-_AA_TABLE_11_2_SIGMA = 25.0e3
-_AA_TABLE_11_2_RHO1 = 30.0
+# decoupling frequency of the Table 6.1 glass wool is pure arithmetic on three
+# columns that table prints.
+#
+# Both specimens are read from the published objects, which carry the page they
+# came off; nothing here retypes a printed number.
+_SOFT_FIBROUS = ph.materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+_GLASS_WOOL = ph.materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+_GLASS_WOOL_SHEAR, _GLASS_WOOL_POISSON = _GLASS_WOOL.frame_constants()
 
 
 @register(
@@ -253,7 +251,11 @@ _AA_TABLE_11_2_RHO1 = 30.0
     "Zwikker-Kosten decoupling frequency Fd, Hz",
 )
 def _chk_limp_decoupling_frequency() -> Outcome:
-    fd = ph.materials.decoupling_frequency(40.0e3, porosity=0.94, frame_density=130.0)
+    fd = ph.materials.decoupling_frequency(
+        _GLASS_WOOL.flow_resistivity_pa_s_m2,
+        porosity=_GLASS_WOOL.porosity,
+        frame_density=_GLASS_WOOL.frame_density_kg_m3,
+    )
     return numeric(43.27, fd, 0.005, unit="Hz", places=3)
 
 
@@ -263,19 +265,10 @@ def _chk_limp_decoupling_frequency() -> Outcome:
     "Limp effective density at DC = apparent total density rho_t, kg/m3",
 )
 def _chk_limp_low_frequency_limit() -> Outcome:
-    rigid = ph.materials.johnson_champoux_allard(
-        np.array([1.0e-4]),
-        _AA_TABLE_11_2_SIGMA,
-        fluid=ph.materials.PUBLISHED_AIR,
-        porosity=_AA_TABLE_11_2["porosity"],
-        tortuosity=_AA_TABLE_11_2["tortuosity"],
-        viscous_length=_AA_TABLE_11_2["viscous_length"],
-        thermal_length=_AA_TABLE_11_2["thermal_length"],
-    )
-    limp = ph.materials.limp_frame(
-        rigid, _AA_TABLE_11_2_RHO1, porosity=_AA_TABLE_11_2["porosity"]
-    )
-    expected = _AA_TABLE_11_2_RHO1 + _AA_TABLE_11_2["porosity"] * _PA_RHO0
+    rigid = _SOFT_FIBROUS.medium(np.array([1.0e-4]))
+    rho1 = _SOFT_FIBROUS.frame_density_kg_m3
+    limp = ph.materials.limp_frame(rigid, rho1, porosity=_SOFT_FIBROUS.porosity)
+    expected = rho1 + _SOFT_FIBROUS.porosity * _PA_RHO0
     return numeric(
         expected,
         float(np.real(limp.effective_density[0])),
@@ -293,16 +286,8 @@ def _chk_limp_low_frequency_limit() -> Outcome:
 )
 def _chk_limp_heavy_frame_limit() -> Outcome:
     f = np.array([50.0, 125.0, 500.0, 2000.0])
-    rigid = ph.materials.johnson_champoux_allard(
-        f,
-        _AA_TABLE_11_2_SIGMA,
-        fluid=ph.materials.PUBLISHED_AIR,
-        porosity=_AA_TABLE_11_2["porosity"],
-        tortuosity=_AA_TABLE_11_2["tortuosity"],
-        viscous_length=_AA_TABLE_11_2["viscous_length"],
-        thermal_length=_AA_TABLE_11_2["thermal_length"],
-    )
-    limp = ph.materials.limp_frame(rigid, 1.0e12, porosity=_AA_TABLE_11_2["porosity"])
+    rigid = _SOFT_FIBROUS.medium(f)
+    limp = ph.materials.limp_frame(rigid, 1.0e12, porosity=_SOFT_FIBROUS.porosity)
     deviation = float(
         np.max(
             np.abs(limp.characteristic_impedance / rigid.characteristic_impedance - 1.0)
@@ -330,39 +315,25 @@ def _chk_limp_frame_criterion_limit() -> Outcome:
 # Biot poroelastic layer (Allard & Atalla 2e, ch. 6 and 11). The book prints
 # no table of computed surface impedances, so these rows pin the closed forms
 # it does print, the three output digits its Sect. 6.5.4 states in prose for the
-# fully specified Table 6.1 glass wool, and the two exact limits (rigid frame
-# onto the digit-anchored JCA equivalent fluid, and the chapter 11 assembly onto
-# the chapter 6 closed form Eq. (6.107)).
-_AA_TABLE_6_1 = {
-    "porosity": 0.94,
-    "tortuosity": 1.06,
-    "viscous_length": 0.56e-4,
-    "thermal_length": 1.1e-4,
-}
-_AA_TABLE_6_1_SIGMA = 40_000.0
-_AA_TABLE_6_1_RHO1 = 130.0
-_AA_TABLE_6_1_SHEAR = 220.0e4 * (1.0 + 0.1j)
-
-
-def _aa_glass_wool_medium(frequency: np.ndarray) -> PorousMediumResult:
-    """The rigid-frame JCA equivalent fluid of the Table 6.1 glass wool."""
-    return ph.materials.johnson_champoux_allard(
-        frequency,
-        _AA_TABLE_6_1_SIGMA,
-        porosity=_AA_TABLE_6_1["porosity"],
-        tortuosity=_AA_TABLE_6_1["tortuosity"],
-        viscous_length=_AA_TABLE_6_1["viscous_length"],
-        thermal_length=_AA_TABLE_6_1["thermal_length"],
-    )
+# 'Domisol Coffrage' glass wool, and the two exact limits (rigid frame onto the
+# digit-anchored JCA equivalent fluid, and the chapter 11 assembly onto the
+# chapter 6 closed form Eq. (6.107)).
+#
+# That specimen is not fully specified by Table 6.1 alone: folio 124 prints the
+# tortuosity, the frame density, the flow resistivity, the porosity, the complex
+# shear modulus and the Poisson coefficient, and neither characteristic length.
+# The two lengths are printed in the prose of Sect. 6.5.4 on the facing folio
+# 123. Both pages are named in the published object's `source`, which is where
+# the rows below read the specimen from.
 
 
 def _aa_glass_wool_waves(frequency: np.ndarray) -> BiotWavesResult:
     return ph.materials.biot_waves(
-        _aa_glass_wool_medium(frequency),
-        porosity=_AA_TABLE_6_1["porosity"],
-        tortuosity=_AA_TABLE_6_1["tortuosity"],
-        frame_density=_AA_TABLE_6_1_RHO1,
-        shear_modulus=_AA_TABLE_6_1_SHEAR,
+        _GLASS_WOOL.medium(frequency),
+        porosity=_GLASS_WOOL.porosity,
+        tortuosity=_GLASS_WOOL.tortuosity,
+        frame_density=_GLASS_WOOL.frame_density_kg_m3,
+        shear_modulus=_GLASS_WOOL_SHEAR,
     )
 
 
@@ -373,10 +344,10 @@ def _aa_glass_wool_layer(
     return ph.materials.PoroelasticLayer(
         thickness,
         medium,
-        _AA_TABLE_6_1["porosity"],
-        _AA_TABLE_6_1["tortuosity"],
-        _AA_TABLE_6_1_RHO1 * scale,
-        _AA_TABLE_6_1_SHEAR * scale,
+        _GLASS_WOOL.porosity,
+        _GLASS_WOOL.tortuosity,
+        _GLASS_WOOL.frame_density_kg_m3 * scale,
+        _GLASS_WOOL_SHEAR * scale,
     )
 
 
@@ -388,9 +359,9 @@ def _aa_glass_wool_layer(
 def _chk_biot_frame_resonance() -> Outcome:
     value = ph.materials.frame_quarter_wave_resonance(
         0.10,
-        shear_modulus=_AA_TABLE_6_1_SHEAR,
-        poisson_ratio=0.0,
-        frame_density=_AA_TABLE_6_1_RHO1,
+        shear_modulus=_GLASS_WOOL_SHEAR,
+        poisson_ratio=_GLASS_WOOL_POISSON,
+        frame_density=_GLASS_WOOL.frame_density_kg_m3,
     )
     return numeric(459.9, value, 0.05, unit="Hz", places=2)
 
@@ -438,7 +409,7 @@ def _chk_biot_impedance_peak() -> Outcome:
 )
 def _chk_biot_rigid_frame_limit() -> Outcome:
     frequency = np.geomspace(50.0, 5000.0, 40)
-    medium = _aa_glass_wool_medium(frequency)
+    medium = _GLASS_WOOL.medium(frequency)
     reference = ph.materials.layered_absorber(
         frequency,
         [ph.materials.PorousLayer(0.05, medium)],
@@ -460,7 +431,7 @@ def _chk_biot_rigid_frame_limit() -> Outcome:
 )
 def _chk_biot_assembly_vs_closed_form() -> Outcome:
     frequency = np.geomspace(20.0, 5000.0, 80)
-    medium = _aa_glass_wool_medium(frequency)
+    medium = _GLASS_WOOL.medium(frequency)
     closed = ph.materials.biot_surface_impedance(_aa_glass_wool_waves(frequency), 0.10)
     assembled = ph.materials.layered_absorber(
         frequency, [_aa_glass_wool_layer(medium, 0.10)]

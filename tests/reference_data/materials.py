@@ -405,3 +405,114 @@ MAA_FIG5_DIAMETER = 0.2e-3
 MAA_FIG5_THICKNESS = 0.2e-3
 MAA_FIG5_SEPARATION = 2.5e-3
 MAA_FIG5_CAVITY = 0.06
+
+
+# ---------------------------------------------------------------------------
+# Allard & Atalla, Propagation of Sound in Porous Media 2e (2009): the two
+# specimens the library publishes as PUBLISHED_POROUS_MATERIALS, transcribed in
+# the units the book prints.
+#
+# Table 6.1 (PDF page 133, printed p. 124) gives the glass wool 'Domisol
+# Coffrage' as tortuosity, frame density, flow resistivity, porosity, a complex
+# shear modulus in N/cm2 and a Poisson coefficient. It prints NEITHER
+# characteristic length. Those two are printed in the prose of Sect. 6.5.4 on
+# the facing folio (PDF page 132, printed p. 123): a fibre diameter of 12e-6 m
+# gives, through Eqs. (5.29) and (5.30), Lambda = 0,56e-4 m and
+# Lambda' = 2 Lambda = 1,1e-4 m, the book rounding 1,12 to two figures in its
+# own print. Table 11.8 (PDF page 281, printed p. 275) prints the same
+# specimen a second time, in micrometres and with E instead of N: its 56 and
+# 110 um corroborate folio 123 (and settle 110 against 112), and its
+# E = 4,4e6 Pa at nu = 0 is the Table 6.1 shear modulus through
+# N = E/(2(1+nu)). Table 11.2 (PDF page 260, printed p. 254) gives the soft
+# fibrous material in full, seven columns in one row.
+#
+# There is one copy of each printed digit and it is here. The library stores
+# the same specimens in its own units (the shear modulus in pascals rather than
+# N/cm2), and tests/materials/absorbers/test_porous.py asserts the second is the
+# first converted, which is what makes two representations one copy and pins the
+# 1e4 and the 1e-6 that are the real risk.
+# ---------------------------------------------------------------------------
+ALLARD_TABLE_6_1_TORTUOSITY = 1.06
+ALLARD_TABLE_6_1_FRAME_DENSITY = 130.0  # rho_1 (kg m-3)
+ALLARD_TABLE_6_1_FLOW_RESISTIVITY = 40_000.0  # sigma (N m-4 s)
+ALLARD_TABLE_6_1_POROSITY = 0.94
+ALLARD_TABLE_6_1_SHEAR_MODULUS_N_PER_CM2 = 220.0 * (1.0 + 0.1j)  # N (N cm-2)
+ALLARD_TABLE_6_1_POISSON_RATIO = 0.0
+#: The columns Table 6.1 prints, in its own order, so a re-reading of folio 124
+#: can be diffed against the transcription as a whole rather than name by name.
+ALLARD_TABLE_6_1_ROW: tuple[complex, ...] = (
+    ALLARD_TABLE_6_1_TORTUOSITY,
+    ALLARD_TABLE_6_1_FRAME_DENSITY,
+    ALLARD_TABLE_6_1_FLOW_RESISTIVITY,
+    ALLARD_TABLE_6_1_POROSITY,
+    ALLARD_TABLE_6_1_SHEAR_MODULUS_N_PER_CM2,
+    ALLARD_TABLE_6_1_POISSON_RATIO,
+)
+
+# Sect. 6.5.4, printed p. 123, in prose and in the metres the book writes there.
+ALLARD_SECT_6_5_4_FIBRE_DIAMETER = 12.0e-6  # d (m), from Eq. (5.C.7)
+ALLARD_SECT_6_5_4_VISCOUS_LENGTH_M = 0.56e-4  # Lambda (m), from Eq. (5.29)
+ALLARD_SECT_6_5_4_THERMAL_LENGTH_M = 1.1e-4  # Lambda' = 2 Lambda (m), Eq. (5.30)
+
+# Table 11.2, the one row: h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um),
+# Lambda' (um), rho_1 (kg/m3).
+ALLARD_TABLE_11_2_THICKNESS_MM = 50.0
+ALLARD_TABLE_11_2_POROSITY = 0.98
+ALLARD_TABLE_11_2_FLOW_RESISTIVITY = 25.0e3
+ALLARD_TABLE_11_2_TORTUOSITY = 1.02
+ALLARD_TABLE_11_2_VISCOUS_LENGTH_UM = 90.0
+ALLARD_TABLE_11_2_THERMAL_LENGTH_UM = 180.0
+ALLARD_TABLE_11_2_FRAME_DENSITY = 30.0
+
+# Table 11.8, the glass-wool row, in the same column order plus E (Pa), nu and
+# eta_s. The two characteristic lengths are the ones Table 6.1 does not print.
+ALLARD_TABLE_11_8_THICKNESS_MM = 3.8
+ALLARD_TABLE_11_8_POROSITY = 0.94
+ALLARD_TABLE_11_8_FLOW_RESISTIVITY = 40.0e3
+ALLARD_TABLE_11_8_TORTUOSITY = 1.06
+ALLARD_TABLE_11_8_VISCOUS_LENGTH_UM = 56.0
+ALLARD_TABLE_11_8_THERMAL_LENGTH_UM = 110.0
+ALLARD_TABLE_11_8_FRAME_DENSITY = 130.0
+ALLARD_TABLE_11_8_YOUNGS_MODULUS = 4.4e6  # E (Pa)
+ALLARD_TABLE_11_8_POISSON_RATIO = 0.0
+ALLARD_TABLE_11_8_LOSS_FACTOR = 0.1  # eta_s
+
+# ---------------------------------------------------------------------------
+# Hopkins, Sound Insulation (2007), Table A3 (PDF page 637, printed p. 610):
+# "Dynamic stiffness per unit area of resilient materials measured according to
+# ISO 9052-1". All fifteen rows as
+# (material, density in kg/m3, nominal uncompressed thickness in mm,
+#  s't in MN/m3), in the printed order and the printed units.
+#
+# The density cell is merged over the rows that share it (one 36 and one 75 for
+# the glass wool, one 64 over the first three rebond rows), which is why the
+# library keys the rows by density and thickness: the printed table distinguishes
+# them by position and a lookup name cannot.
+#
+# There is one copy of each printed digit and it is here. The library stores the
+# same fifteen rows in N/m3 as PUBLISHED_RESILIENT_LAYERS, and
+# tests/materials/resilient/test_dynamic_stiffness.py asserts that it is this
+# table times 1e6, which is what makes two representations one copy and pins the
+# conversion that is the real risk.
+# ---------------------------------------------------------------------------
+HOPKINS_TABLE_A3_MN_PER_M3: tuple[tuple[str, float, float, float], ...] = (
+    ("Closed-cell polyethylene foam", 45.0, 5.0, 115.0),
+    ("Expanded polystyrene", 14.0, 50.0, 78.0),
+    ("Expanded polystyrene, pre-compressed", 10.0, 50.0, 68.0),
+    ("Mineral wool, rock", 60.0, 30.0, 10.0),
+    ("Mineral wool, rock", 80.0, 30.0, 11.0),
+    ("Mineral wool, rock", 100.0, 30.0, 14.0),
+    ("Mineral wool, rock", 140.0, 30.0, 19.0),
+    ("Mineral wool, glass", 36.0, 13.0, 28.0),
+    ("Mineral wool, glass", 36.0, 25.0, 11.0),
+    ("Mineral wool, glass", 75.0, 25.0, 12.0),
+    ("Mineral wool, glass", 75.0, 40.0, 7.0),
+    ("Rebond foam (reconstituted open cell foam)", 64.0, 15.0, 12.0),
+    ("Rebond foam (reconstituted open cell foam)", 64.0, 20.0, 9.0),
+    ("Rebond foam (reconstituted open cell foam)", 64.0, 25.0, 7.0),
+    ("Rebond foam (reconstituted open cell foam)", 96.0, 15.0, 16.0),
+)
+
+#: How many of the fifteen the book gives as its own measurements; the last four
+#: it credits to Hopkins and Hall (2006) in the material cell.
+HOPKINS_TABLE_A3_FIRST_HAND_ROWS = 11

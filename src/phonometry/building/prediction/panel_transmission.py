@@ -115,16 +115,18 @@ if TYPE_CHECKING:
 #: Default speed of sound in air ``c0``, m/s, of the single-property entry
 #: points: the published air's own, so the module spells 343 m/s once.
 _SPEED_OF_SOUND: float = PUBLISHED_AIR.speed_of_sound
-#: Field-incidence correction ``dB`` (Bies Eq. 7.42), keyed by band width.
+#: Field-incidence correction ``dB`` of Bies 5e Eq. 7.42, PDF page 409
+#: (printed p. 380), keyed by band width.
 _FIELD_CORRECTION: dict[str, float] = {"third": 5.5, "octave": 4.0}
 #: Error message for a non-positive frequency (shared by the module funcs).
 _FREQ_POSITIVE_MSG = "'frequency' must be positive."
 #: Error message for a malformed frequency axis (shared by the module funcs).
 _FREQ_1D_MSG = "'frequency' must be a non-empty 1-D array."
 
-#: Norton & Karczub (2003) Table 3.1: plateau-method data for common
-#: materials, as ``(surface density in kg/m2 per mm of thickness, coincidence
-#: plateau height in dB, frequency ratio B/A)``.
+#: Norton & Karczub (2003) Table 3.1, PDF page 261 (printed p. 241):
+#: plateau-method data for common materials, as ``(surface density in kg/m2
+#: per mm of thickness, coincidence plateau height in dB, frequency ratio
+#: B/A)``.
 PLATEAU_MATERIALS: dict[str, tuple[float, float, float]] = {
     "aluminium": (2.66, 29.0, 11.0),
     "brick": (2.10, 37.0, 4.5),

@@ -309,8 +309,8 @@ _NMFS_2024: dict[str, WeightingParameters] = {
     ),
 }
 
-#: Southall et al. (2019) Table 5 (printed p. 149). The article tabulates no
-#: generalised hearing range, so those fields stay ``None``.
+#: Southall et al. (2019) Table 5, PDF page 25 (printed p. 149). The article
+#: tabulates no generalised hearing range, so those fields stay ``None``.
 _SOUTHALL_2019: dict[str, WeightingParameters] = {
     "LF": _row("LF", "southall-2019", _LF_CETACEANS, 1.0, 2.0, 0.20, 19.0, 0.13, 179.0),
     "HF": _row("HF", "southall-2019", _HF_CETACEANS, 1.6, 2.0, 8.8, 110.0, 1.20, 177.0),
@@ -455,8 +455,9 @@ _CRITERIA_2024_IMPULSIVE: dict[str, _CriteriaRow] = {
     "PA": (125.0, 140.0, 156.0, 162.0),
     "OA": (148.0, 163.0, 171.0, 177.0),
 }
-#: Southall et al. (2019) Table 6 (non-impulsive) and Table 7 as corrected by
-#: the errata of Aquatic Mammals 45(5), printed p. 570.
+#: Southall et al. (2019) Table 6, PDF page 30 (printed p. 154), for the
+#: non-impulsive thresholds, and Table 7 as corrected by the errata of
+#: Aquatic Mammals 45(5), PDF page 110 (printed p. 570).
 _CRITERIA_SOUTHALL_CONTINUOUS: dict[str, _CriteriaRow] = {
     "LF": (179.0, 199.0, None, None),
     "HF": (178.0, 198.0, None, None),

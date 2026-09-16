@@ -96,7 +96,8 @@ class WestonSeabed:
     sound_speed_gradient_per_s: float
 
 
-#: The two characteristic seabeds tabulated in Ainslie Table 9.1: medium sand
+#: The two characteristic seabeds tabulated in Ainslie Table 9.1, PDF page 484
+#: (printed p. 454): medium sand
 #: (``Mz = 1.5``, a reflecting bottom with a critical angle) and mud
 #: (``Mz = 8``, refracting, no critical angle).
 WESTON_SEABEDS: dict[str, WestonSeabed] = {

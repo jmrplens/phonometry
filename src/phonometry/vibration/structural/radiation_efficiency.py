@@ -80,9 +80,11 @@ if TYPE_CHECKING:
 
 #: Default speed of sound in air ``c0``, m/s (20 degC).
 _SPEED_OF_SOUND: float = 343.0
-#: Boundary-condition constant ``C_BC`` (Hopkins Eq. 2.227).
+#: Boundary-condition constant ``C_BC`` of Hopkins (2007) Eq. 2.227, stated
+#: under the equation on PDF page 236 (printed p. 209).
 _C_BC: dict[str, float] = {"simply_supported": 1.0, "clamped": 2.0}
-#: Baffle-orientation constant ``C_OB`` (Hopkins Eq. 2.227).
+#: Baffle-orientation constant ``C_OB`` of Hopkins (2007) Eq. 2.227, stated
+#: under the equation on PDF page 236 (printed p. 209).
 _C_OB: dict[str, float] = {"infinite": 1.0, "perpendicular": 2.0}
 #: Half a one-third octave (ratio) around fc for the at-coincidence band.
 _COINCIDENCE_HALF_WIDTH: float = 2.0 ** (1.0 / 6.0)

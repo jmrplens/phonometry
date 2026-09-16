@@ -62,7 +62,7 @@ out.
 | Name | Description |
 | :--- | :--- |
 | `temperature_c` | Temperature `t`, in degrees Celsius (above absolute zero). |
-| `heat_capacity_ratio` | Ratio of specific heats `gamma` (> 0). It is 1,67 for a monatomic gas, about 1,4 for a diatomic one and lower for a polyatomic one. |
+| `heat_capacity_ratio` | Ratio of specific heats `gamma` (> 1). It is 1,67 for a monatomic gas, about 1,4 for a diatomic one and lower for a polyatomic one, and it is above 1 for every gas, because `gamma` is `c_p/c_v` and `c_p - c_v` is the gas constant. |
 | `molar_mass_kg_mol` | Molar mass `M`, in kg/mol (> 0). The tables print kg/mol, so 0,028 95 for dry air and not 28,95. |
 | `static_pressure_pa` | Static pressure `p`, in pascals (> 0). When omitted, one standard atmosphere is assumed and a [`FluidAssumptionWarning`](/phonometry/reference/api/fluids/fluids/#fluidassumptionwarning) says so, because the density is proportional to it. |
 

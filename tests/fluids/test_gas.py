@@ -135,6 +135,34 @@ def test_a_supplied_pressure_is_silent() -> None:
 # ---------------------------------------------------------------------------
 # Preconditions
 # ---------------------------------------------------------------------------
+@pytest.mark.parametrize("bad", [1.0, 0.99, 0.5])
+def test_a_ratio_of_specific_heats_at_or_below_one_is_refused(bad: float) -> None:
+    """No gas has one. ``gamma = c_p/c_v`` and ``c_p - c_v = R > 0``.
+
+    A positive ratio is not enough: 1,0 passes every positivity check and then
+    gives a speed of sound that is the isothermal one, which no gas has either.
+    """
+    with pytest.raises(ValueError, match="greater than 1"):
+        fluids.ideal_gas(
+            temperature_c=20.0,
+            heat_capacity_ratio=bad,
+            molar_mass_kg_mol=0.029,
+            static_pressure_pa=101325.0,
+        )
+
+
+def test_the_lightest_ratio_any_gas_has_is_accepted() -> None:
+    """Just above 1 is a real polyatomic gas and has to go through."""
+    gas = fluids.ideal_gas(
+        temperature_c=20.0,
+        heat_capacity_ratio=1.01,
+        molar_mass_kg_mol=0.146,
+        static_pressure_pa=101325.0,
+    )
+
+    assert gas.heat_capacity_ratio == pytest.approx(1.01)
+
+
 @pytest.mark.parametrize("bad", [0.0, -1.0, float("nan")])
 def test_the_two_gas_properties_have_to_be_positive(bad: float) -> None:
     """A ratio or a molar mass of zero is not a gas."""

@@ -91,9 +91,10 @@ def ideal_gas(
 
     :param temperature_c: Temperature ``t``, in degrees Celsius (above
         absolute zero).
-    :param heat_capacity_ratio: Ratio of specific heats ``gamma`` (> 0). It is
+    :param heat_capacity_ratio: Ratio of specific heats ``gamma`` (> 1). It is
         1,67 for a monatomic gas, about 1,4 for a diatomic one and lower for a
-        polyatomic one.
+        polyatomic one, and it is above 1 for every gas, because ``gamma`` is
+        ``c_p/c_v`` and ``c_p - c_v`` is the gas constant.
     :param molar_mass_kg_mol: Molar mass ``M``, in kg/mol (> 0). The tables
         print kg/mol, so 0,028 95 for dry air and not 28,95.
     :param static_pressure_pa: Static pressure ``p``, in pascals (> 0). When
@@ -109,6 +110,13 @@ def ideal_gas(
 
     temperature = require_above_absolute_zero(temperature_c, "temperature_c")
     gamma = require_positive(heat_capacity_ratio, "heat_capacity_ratio")
+    if gamma <= 1.0:
+        msg = (
+            f"'heat_capacity_ratio' must be greater than 1, not {gamma:g}: it is "
+            "c_p/c_v, and c_p - c_v is the specific gas constant, which is "
+            "positive"
+        )
+        raise ValueError(msg)
     molar_mass = require_positive(molar_mass_kg_mol, "molar_mass_kg_mol")
     if static_pressure_pa is None:
         pressure = DEFAULT_STATIC_PRESSURE_PA

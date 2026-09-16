@@ -582,7 +582,7 @@ def base_plate_scattering(
 def check_base_plate_scattering(
     scattering: Mapping[Any, float] | Sequence[float] | ArrayLike,
 ) -> tuple[int, ...]:
-    """Verify base-plate scattering against Table 1 (ISO 17497-1, Clause 6.2).
+    """Check base-plate scattering against Table 1 (ISO 17497-1, Clause 6.2).
 
     Every band whose measured base-plate scattering coefficient exceeds the
     :data:`BASE_PLATE_MAX_SCATTERING` limit is collected and a single

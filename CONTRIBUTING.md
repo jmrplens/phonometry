@@ -511,6 +511,36 @@ against numpy/scipy, pandas, matplotlib, scikit-learn, statsmodels and librosa).
 | Spelling | American English in identifiers | `normalized_frequencies`, `BAND_CENTERS` |
 | Tests | `test_<module>.py`, 1:1 with the module; cross-cutting suites get a descriptive name | `test_impulse_prominence.py` |
 
+### The three verbs of a judgement
+
+Of the public functions, the overwhelming majority are noun phrases, because
+they return a magnitude: `reverberation_time`, `sound_power_level`,
+`airflow_resistivity`. A verb marks the few that return a *judgement* instead,
+and there are three of them. They are not interchangeable, and the difference
+is what is being judged, not how strict the answer is.
+
+| Prefix | Judges | Answers | Returns |
+|---|---|---|---|
+| `verify_` | an instrument or a measuring system, against the requirements a standard sets for it | may this device be used for this grade of measurement | a result dataclass with one verdict per requirement and an overall pass |
+| `assess_` | a situation that was measured, against limits or categories | how bad is what we measured, and in which class does it fall | a result dataclass with the rating, the category and what drove it |
+| `check_` | the arrangement or the input a method requires before its numbers mean anything | am I allowed to apply this method here | a result dataclass with the conditions and whether each holds, or nothing at all when the answer is only an advisory warning |
+
+The boundary that used to be blurred is `check_` against `verify_`, and it is
+this: `verify_` judges the **instrument**, `check_` judges the **setup**.
+`verify_weighting` asks whether a vibration meter's weighting filter is inside
+the tolerances of ISO 8041-1; `check_source_positions` asks whether the source
+positions of a room measurement are far enough apart for the clause to apply.
+Both may fail, and only the first is about a piece of equipment.
+
+Two consequences worth stating. A summary line may open however it reads best,
+as a question ("Is the band flat enough for the clause?") or with any verb that
+is not one of these three, but it must not open with *another family's* verb: a
+`check_` function whose docstring begins "Verify", or a `verify_` one that
+begins "Check", tells a reader the family was arbitrary. And a judgement carries
+its reasons, so the return is a result dataclass rather than a bare `bool`: the
+caller who has to act on a failure needs to know which requirement failed and by
+how much.
+
 ### Module length
 
 There is no line limit, because no Python authority sets one. PEP 8 limits the

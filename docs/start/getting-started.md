@@ -181,7 +181,7 @@ rescaled to full scale, so keep calibrator and measurement in the same format;
 
 ## Where to go next
 
-The octave analysis above uses the `filters` core, one of twenty domain
+The octave analysis above uses the `filters` core, one of twenty-one domain
 namespaces; the documentation index walks through the rest, from
 psychoacoustics and room, building and vibration acoustics to environmental,
 aircraft and underwater noise, electroacoustics and FDTD wave simulation.

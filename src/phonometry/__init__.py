@@ -1,7 +1,7 @@
 #  Copyright (c) 2020. Jose Manuel Requena Plens
 """Acoustic measurement toolkit, organized as one package per domain.
 
-The library publishes twenty domain packages and the handful of types that
+The library publishes twenty-one domain packages and the handful of types that
 cross between them. A function lives in the package that owns it and is
 reached through it::
 
@@ -46,6 +46,7 @@ if TYPE_CHECKING:  # pragma: no cover - for the type checker, never at run time
     from . import room as room
     from . import signals as signals
     from . import simulation as simulation
+    from . import solids as solids
     from . import speech as speech
     from . import underwater as underwater
     from . import vibration as vibration
@@ -54,7 +55,7 @@ if TYPE_CHECKING:  # pragma: no cover - for the type checker, never at run time
     from ._version import __version__ as __version__
     from .io import Signal as Signal
 
-#: The twenty domain packages, imported on first use.
+#: The twenty-one domain packages, imported on first use.
 _PACKAGES = [
     "aircraft",
     "broadcast",
@@ -73,6 +74,7 @@ _PACKAGES = [
     "room",
     "signals",
     "simulation",
+    "solids",
     "speech",
     "underwater",
     "vibration",
@@ -110,6 +112,7 @@ __all__ = [
     "room",
     "signals",
     "simulation",
+    "solids",
     "speech",
     "underwater",
     "vibration",

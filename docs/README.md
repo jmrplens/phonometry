@@ -69,6 +69,15 @@ typed once.
 
 - [Humid air](fluids/humid-air.md): the density, speed of sound, ratio of specific heats, viscosity and thermal diffusivity of air from the measured temperature, pressure and humidity (IEC 61094-2:2009 Annex F, CIPM-2007), what each condition is worth, the domain the annex states for itself, and what the model refuses to guess
 
+### [Elastic solids](solids/index.md)
+
+The elastic constants of a solid and the three longitudinal wave speeds that
+follow from them, named after the shape the wave travels in. A plate table and
+a solver table print different numbers for the same steel; the conversion
+between them lives here.
+
+- [Wave speeds](solids/wave-speeds.md): the beam, plate and unbounded longitudinal speeds of a homogeneous isotropic solid, the inverse that turns each back into a Young's modulus, and the thickness-critical-frequency product that lets two books be checked against each other
+
 ### [Audio files](io/index.md)
 
 Measurement audio in and out: every linear WAV a meter writes read into a

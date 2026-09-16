@@ -55,6 +55,14 @@ export const apiSections = {
       'reference/api/fluids/water',
     ],
   },
+  'solids': {
+    label: 'Elastic solids',
+    translations: { es: 'Sólidos elásticos' },
+    collapsed: true,
+    items: [
+      'reference/api/solids/elastic',
+    ],
+  },
   'io': {
     label: 'Audio files',
     translations: { es: 'Archivos de audio' },

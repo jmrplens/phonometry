@@ -9,6 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **`phonometry.solids`**, the elastic constants of a solid and the three
+  longitudinal wave speeds that follow from them. A beam, a plate and an
+  unbounded solid carry a different longitudinal wave, and which one a printed
+  number belongs to depends on the shape and not on the material: for the steel
+  of Hopkins Table A2 they are 5 059, 5 270 and 5 720 m/s.
+  `beam_longitudinal_speed` is Hopkins Eq. (2.20), `plate_longitudinal_speed`
+  is his Eq. (2.21), and `bulk_longitudinal_speed` is Norton & Karczub Eq.
+  (1.225) after Fahy. Each has its inverse, because a table prints one of them
+  and the function next in the chain wants another: Hopkins gives a plate speed
+  and no Young's modulus, Cremer and Mechel give the modulus and no speed, and
+  until now the conversion between them was done in the caller's head, with
+  fifteen public parameters across `building`, `vibration` and `materials`
+  asking for a modulus or a Poisson ratio.
+
+  `thickness_critical_frequency_product` is the `h f_c` column that Hopkins,
+  Long and Mechel each print, which is a property of the material alone and so
+  the cheapest cross-check there is between books that share no other column.
+  It carries the exact `2 pi / sqrt(12)` of the thin-plate dispersion relation
+  rather than the 1,8 of ISO 12354-1: the exact constant reproduces all
+  twenty-five rows of Table A2, whose heading states the 343 m/s it assumes,
+  and the rounded one misses the steel row by 0,8 per cent.
+  `building.critical_frequency` keeps the rounded constant, because there it is
+  the standard's own arithmetic and not the material's.
+
+  Like `fluids`, this is a transverse package rather than a domain of
+  application, and the 2026-09-03 decision that put `fluids` at the top level
+  named the three conditions that would justify `solids` the day it was done.
+  They are met: there are sourced solid constants now, fifteen parameters ask
+  for them, and the bending stiffness was being derived separately in
+  `point_mobility` and `panel_transmission`.
+
 - **The two receiver terms of the sonar equation, drawn.** The detection
   threshold and the array gain arrived with their models and their prose and
   without a figure, which for two quantities that are each a curve over one

@@ -92,6 +92,11 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Overview](https://jmrplens.github.io/phonometry/fluids/)
 - [Humid air](https://jmrplens.github.io/phonometry/fluids/humid-air/)
 
+## Elastic solids
+
+- [Overview](https://jmrplens.github.io/phonometry/solids/)
+- [Wave speeds of a solid](https://jmrplens.github.io/phonometry/solids/wave-speeds/)
+
 ## Audio files
 
 - [Overview](https://jmrplens.github.io/phonometry/io/)
@@ -394,6 +399,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Signals and spectra](https://jmrplens.github.io/phonometry/llms/llms-signals-spectra.txt)
 - [Calibration and uncertainty](https://jmrplens.github.io/phonometry/llms/llms-signals-metrology.txt)
 - [The medium](https://jmrplens.github.io/phonometry/llms/llms-fluids.txt)
+- [Elastic solids](https://jmrplens.github.io/phonometry/llms/llms-solids.txt)
 - [Audio files](https://jmrplens.github.io/phonometry/llms/llms-io.txt)
 - [Hearing and perception](https://jmrplens.github.io/phonometry/llms/llms-perception.txt)
 - [Psychoacoustics](https://jmrplens.github.io/phonometry/llms/llms-perception-psychoacoustics.txt)
@@ -600,6 +606,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [simulation/elastic-fdtd](https://jmrplens.github.io/phonometry/reference/api/simulation/elastic-fdtd/)
 - [simulation/fdtd](https://jmrplens.github.io/phonometry/reference/api/simulation/fdtd/)
 - [simulation/ntff](https://jmrplens.github.io/phonometry/reference/api/simulation/ntff/)
+- [solids/elastic](https://jmrplens.github.io/phonometry/reference/api/solids/elastic/)
 - [speech/objective-intelligibility](https://jmrplens.github.io/phonometry/reference/api/speech/objective-intelligibility/)
 - [speech/sii](https://jmrplens.github.io/phonometry/reference/api/speech/sii/)
 - [speech/sti](https://jmrplens.github.io/phonometry/reference/api/speech/sti/)
@@ -30015,16 +30022,16 @@ conditions beside the result, and says which model produced it.
 
 ## Why it is not a domain
 
-Nineteen of the twenty packages are domains of application: you go to
+Sixteen of the twenty-one packages are domains of application: you go to
 `building` because you are measuring a building, to `underwater` because you
 are working in water. You never go to `fluids` because you are measuring a
 fluid. You go there because whatever else you are measuring happens in one.
 
 So it sits with `filters`, `signals` and `metrology` in the transverse
 toolbox: any package may import it without an architecture edge, because a
-medium is not a subject some domains have and others do not. It is the fourth
-member of that set, and the first added since the library split the original
-toolbox in three.
+medium is not a subject some domains have and others do not. It was the fourth
+member of that set, the first added since the library split the original
+toolbox in three, and `solids` is the fifth.
 
 ## Three kinds of number, deliberately kept apart
 
@@ -30055,7 +30062,8 @@ single measurement silently ceasing to reproduce the standard it cites.
 **No solids.** A `Fluid` carries no shear speed, and the elastic materials of
 the wave solvers keep their own type with its own precondition. The two are
 different quantities that happen to share the word "medium", and a solid's
-properties are tabulated where a fluid's are computed.
+properties are tabulated where a fluid's are computed: they live next door, in
+`phonometry.solids`.
 
 **No fields, only states.** A `Fluid` is one fluid at one point. The
 stratified profiles that ray tracers march through stay in the packages that
@@ -40727,9 +40735,9 @@ Source: https://jmrplens.github.io/phonometry/reference/api/
 
 # API Reference
 
-All core functionality lives in twenty domain subpackages, and every public
-name is reached through the one that owns it. The top-level `phonometry`
-package publishes those twenty and four names that belong to no domain:
+All core functionality lives in twenty-one subpackages, and every public name is
+reached through the one that owns it. The top-level `phonometry` package
+publishes those twenty-one and four names that belong to none of them:
 `Signal`, `ReportMetadata`, `PhonometryWarning` and `__version__`.
 
 > **Note.** This page is the curated quick table for the GitHub/PyPI audience:
@@ -40740,8 +40748,8 @@ package publishes those twenty and four names that belong to no domain:
 
 ## Namespaces
 
-The library is organized into twenty domain subpackages, and importing the
-domain namespace is the primary form used throughout the documentation:
+The library is organized into twenty-one subpackages, and importing the
+namespace is the primary form used throughout the documentation:
 
 ```python
 from phonometry import aircraft
@@ -40755,6 +40763,7 @@ contour = aircraft.noise_contour(..., x=..., y=...)   # the shape of every call
 | `phonometry.signals` | Levels (Leq, LAeq, percentiles), Welch and multitaper spectra, coherence, time-frequency, correlation, envelope, cepstrum, phase, synchronous averaging, test signals |
 | `phonometry.metrology` | Calibration, GUM uncertainty and Monte Carlo, data qualification (stationarity, trends, peak statistics) |
 | `phonometry.fluids` | The state of the propagating medium: humid air from IEC 61094-2:2009 Annex F (CIPM-2007), with the conditions it was computed for and the domain its model states for itself |
+| `phonometry.solids` | The elastic constants of a solid and the three longitudinal wave speeds that follow from them, named apart by the shape the wave travels in (beam, plate, unbounded), with the inverse of each and the `h f_c` a materials table prints |
 | `phonometry.io` | Measurement audio files: WAV/BWF/RF64 read and write with `bext` provenance (EBU Tech 3285), headers-only `info`, block streaming, lossless conversion, calibration sidecar; FLAC, AIFF, Ogg/Opus and MP3 via the `[audio]` extra |
 | `phonometry.psychoacoustics` | Two families: `loudness` (ISO 532-1 Zwicker, ISO 532-2 and ISO 532-3 Moore-Glasberg, ECMA-418-2, ISO 226 equal-loudness contours) and `quality` (sharpness, roughness, fluctuation strength, tonality, tone audibility, annoyance), plus the ERB scale both measure on |
 | `phonometry.speech` | Speech Transmission Index (IEC 60268-16), Speech Intelligibility Index (ANSI S3.5), STOI and ESTOI |
@@ -42048,6 +42057,10 @@ documents, one page per module.
 | `FluidWarning` | `warning class` | **State outside the domain its model states for itself.**<br>Annex F states 15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 % RH; outside it the result is an extrapolation, not a refusal | `warnings.simplefilter("error", fluids.FluidWarning)`<br>Emitted by `fluids.air` |
 | `FluidAssumptionWarning` | `warning class` | **A condition the caller did not supply was assumed.**<br>Names the assumed values and what they are worth; passing every condition silences it | `warnings.simplefilter("error", fluids.FluidAssumptionWarning)`<br>Emitted by `fluids.air` |
 | `FluidPropertyUnavailable` | `exception` | **A quantity the model does not determine.**<br>Raised instead of returning a number no source printed; names the model and what it does fix | `f.density  # on a model that fixes only a speed of sound` |
+| `plate_longitudinal_speed` / `youngs_modulus_from_plate_speed` | `function` / `function` | **Quasi-longitudinal wave speed along a plate, and back (Hopkins Eq. 2.21).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL [m/s]<br>• `density_kg_m3` ρ, `poisson_ratio` ν between -1 and 1<br>• cL = sqrt(E / (ρ (1 - ν²))): the value the building-acoustics tables print | `solids.plate_longitudinal_speed(2.0e11, density_kg_m3=7800.0, poisson_ratio=0.28)  # 5274.6` |
+| `beam_longitudinal_speed` / `youngs_modulus_from_beam_speed` | `function` / `function` | **Quasi-longitudinal wave speed along a beam, and back (Hopkins Eq. 2.20).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL [m/s]<br>• `density_kg_m3` ρ<br>• cL = sqrt(E / ρ): a beam is unconstrained on its sides, so ν does not appear | `solids.beam_longitudinal_speed(2.0e11, density_kg_m3=7800.0)  # 5063.7` |
+| `bulk_longitudinal_speed` / `youngs_modulus_from_bulk_speed` | `function` / `function` | **Pure longitudinal wave speed in an unbounded solid, and back (Norton & Karczub Eq. 1.225).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL' [m/s]<br>• `density_kg_m3` ρ, `poisson_ratio` ν between -1 and 0.5<br>• cL' = sqrt(E (1 - ν) / (ρ (1 + ν)(1 - 2ν))): the speed an elastic solver integrates, not the one a plate table prints | `solids.bulk_longitudinal_speed(2.0e11, density_kg_m3=7800.0, poisson_ratio=0.28)  # 5724.8` |
+| `thickness_critical_frequency_product` / `DEFAULT_SPEED_OF_SOUND_M_S` | `function` / `float` | **The `h f_c` column of a materials table, from the plate wave speed.**<br>• `plate_speed_m_s` cL,p [m/s]<br>• `speed_of_sound_m_s` c0 [m/s] (Default: 343)<br>• h f_c = c0² sqrt(12) / (2 π cL,p), the exact constant: the rounded 1.8 of ISO 12354-1 misses Hopkins Table A2 by 0.8 % | `solids.thickness_critical_frequency_product(5270.0)  # 12.31 m Hz, Table A2 prints 12.3` |
 | `DEFAULT_STATIC_PRESSURE_PA` | `float` | **One standard atmosphere [Pa].**<br>101325.0 | `DEFAULT_STATIC_PRESSURE_PA  # 101325.0` |
 | `DEFAULT_RELATIVE_HUMIDITY_PERCENT` | `float` | **Humidity assumed when none is supplied [%].**<br>50.0. There is no standard humidity: Annex F's own examples use 50 % and 65 % | `DEFAULT_RELATIVE_HUMIDITY_PERCENT  # 50.0` |
 | `DEFAULT_CO2_MOLE_FRACTION` | `float` | **CO₂ mole fraction assumed when none is supplied.**<br>0.0004, the value Clause F.2 recommends for laboratory conditions | `DEFAULT_CO2_MOLE_FRACTION  # 0.0004` |
@@ -56430,6 +56443,218 @@ each.
 ---
 
 
+<!-- source: docs/solids/index.md | canonical: https://jmrplens.github.io/phonometry/solids/ -->
+Source: https://jmrplens.github.io/phonometry/solids/
+
+# Elastic solids
+
+A plate transmits sound because it bends, and how it bends is decided by three
+numbers: a density, a Young's modulus and a Poisson ratio. Fifteen public
+functions in this library ask for one or two of them, and the tables that print
+them, in Hopkins, in Cremer, in Mechel, in Bies, rarely print the same pair.
+One book gives a wave speed and no modulus. The next gives a modulus and no
+speed. A third gives the product of thickness and critical frequency and
+neither.
+
+`phonometry.solids` is where the conversions between them live, so that they
+are written once instead of in each caller's head.
+
+## Why it is not a domain
+
+Sixteen of the twenty-one packages are domains of application: you go to
+`building` because you are measuring a building, to `underwater` because you
+are working in water. Nobody goes to `solids` because they are measuring a
+solid. They go there because whatever they are measuring happens in one, or
+through one.
+
+So it sits beside `fluids` in the transverse toolbox with `filters`, `signals`
+and `metrology`: any package may import it without an architecture edge,
+because a material is not a subject some domains have and others do not.
+
+## Three longitudinal waves, and only one of them is in your table
+
+A solid carries a longitudinal wave differently depending on the shape it
+travels in, and the three speeds are not interchangeable.
+
+A **beam** is free to contract sideways as it is compressed, so the lateral
+strains cost nothing and Poisson's ratio does not appear at all:
+$c_{\mathrm{L,b}} = \sqrt{E/\rho}$.
+
+A **plate** is held across its width. The material cannot get out of the way,
+which stiffens it by $1/(1-\nu^2)$:
+$c_{\mathrm{L,p}} = \sqrt{E/(\rho(1-\nu^2))}$. This is the one the
+building-acoustics tables print, and the one a critical frequency is computed
+from.
+
+An **unbounded solid** holds the material on every side at once:
+$c'_{\mathrm{L}} = \sqrt{E(1-\nu)/(\rho(1+\nu)(1-2\nu))}$. This is the fastest
+of the three and the one a time-domain elastic solver integrates.
+
+For the steel of Hopkins Table A2, with $\rho = 7800$ kg/m³, $\nu = 0{,}28$ and
+a plate speed of 5 270 m/s, the three are 5 059, 5 270 and 5 720 m/s. Reading
+one into another is a four to thirteen per cent error in whatever it feeds, and it
+is an easy mistake to make, because a table that prints one of them often calls
+it $c_\mathrm{L}$ with no qualifier at all.
+
+## The inverses are the point
+
+A catalogue of materials is built out of whatever its sources happened to
+print. Hopkins Table A2 gives a plate speed, a density and a Poisson ratio, and
+no Young's modulus anywhere. Cremer and Mechel give the modulus and no speed.
+Neither table can be checked against the other until one of them is converted,
+and that is what the six functions here are for: three speeds, three inverses,
+and a seventh for the column two of those books share.
+
+**No shear or bending waves.** The longitudinal family is what a materials
+table prints and what the conversions need. The bending wave that actually
+radiates from a wall is computed where it is used, in
+`phonometry.vibration.structural` and `phonometry.building.prediction`, from
+the bending stiffness of the plate rather than from a wave speed.
+
+**No anisotropy.** Every relation here is for a homogeneous isotropic solid
+with one modulus and one Poisson ratio. An orthotropic panel has two of each
+and two critical frequencies, and that is `orthotropic_critical_frequencies`
+in `phonometry.building`.
+
+**No temperature or ageing.** The constants are the ones a source printed for
+one specimen at one moment. Concrete stiffens for years and a polymer softens
+with the room; neither is modelled here, and a table that holds a range says
+so in its own entry.
+
+## What is here
+
+- [Wave speeds](https://jmrplens.github.io/phonometry/solids/wave-speeds/): the three longitudinal
+  speeds and their inverses, which one a printed table holds, and the
+  thickness-critical-frequency product that lets two books be checked against
+  each other for free.
+
+---
+
+
+<!-- source: docs/solids/wave-speeds.md | canonical: https://jmrplens.github.io/phonometry/solids/wave-speeds/ -->
+Source: https://jmrplens.github.io/phonometry/solids/wave-speeds/
+
+# Wave speeds of a solid
+
+## The problem this solves
+
+You have a table. It gives you a wave speed of 5 270 m/s for steel, a density
+and a Poisson ratio, and no Young's modulus. Your function wants the modulus.
+Another table gives you 200 GPa and no speed, and the function you are feeding
+next wants the speed. A third gives you 12,3 m Hz and neither.
+
+All three describe the same steel. Getting from one to another takes one line
+of algebra, which is one line of algebra too many to be doing from memory,
+because the answer depends on something the table often does not say: whether
+its speed is the speed in a beam, in a plate, or in an unbounded solid.
+
+## The three speeds
+
+```python
+from phonometry import solids
+
+modulus, density, poisson = 2.0e11, 7800.0, 0.28
+
+beam = solids.beam_longitudinal_speed(modulus, density_kg_m3=density)
+plate = solids.plate_longitudinal_speed(
+    modulus, density_kg_m3=density, poisson_ratio=poisson
+)
+bulk = solids.bulk_longitudinal_speed(
+    modulus, density_kg_m3=density, poisson_ratio=poisson
+)
+
+print(f"{beam:.0f} {plate:.0f} {bulk:.0f}")  # 5064 5275 5725
+```
+
+The order is always the same, and it is the order of how much the material is
+held: a beam can contract sideways freely, a plate is held across its width,
+and an unbounded solid is held on every side.
+
+$$
+c_{\mathrm{L,b}} = \sqrt{\frac{E}{\rho}}
+\qquad
+c_{\mathrm{L,p}} = \sqrt{\frac{E}{\rho\,(1-\nu^2)}}
+\qquad
+c'_{\mathrm{L}} = \sqrt{\frac{E\,(1-\nu)}{\rho\,(1+\nu)(1-2\nu)}}
+$$
+
+The first two are Hopkins Eqs. (2.20) and (2.21), the third is Norton and
+Karczub Eq. (1.225). At a Poisson ratio of zero the three collapse into one,
+which is the quickest way to remember that the only thing between them is how
+the lateral strain is paid for.
+
+## Which one is in your table
+
+Building acoustics prints the **plate** speed. EN 12354-1 Table B.3, Hopkins
+Table A2 and Mechel Table 3 all tabulate it, and Hopkins says so in a footnote:
+the values can be used as estimates for beams or plates, which is an admission
+that the two differ and a statement that for these materials the difference is
+inside the spread of the table.
+
+A time-domain elastic solver integrates the **bulk** speed, because the
+material it discretises is unbounded at the scale of a cell. Reading a plate
+table into a solver is a documented trap: for the steel above the gap is eight
+and a half per cent, and for aluminium fifteen.
+
+A **beam** speed turns up where a bar was actually measured, which is where a
+speed-of-sound table in a general acoustics text usually gets its solids.
+
+## Going back to the modulus
+
+Each speed has its inverse, and they are what let two books be compared:
+
+```python
+from phonometry import solids
+
+# Hopkins Table A2, steel: a plate speed, a density and a Poisson ratio.
+modulus = solids.youngs_modulus_from_plate_speed(
+    5270.0, density_kg_m3=7800.0, poisson_ratio=0.28
+)
+print(f"{modulus / 1e9:.0f} GPa")  # 200 GPa
+```
+
+Two hundred gigapascals, which is what a structural steel has, and the number
+Cremer and Mechel print in the column Hopkins leaves out.
+
+## The column that checks the table
+
+Hopkins, Long and Mechel each print the product of thickness and critical
+frequency. It is a property of the material alone, because the thickness
+cancels, and so it is the cheapest cross-check there is between books that
+share no other column:
+
+```python
+from phonometry import solids
+
+print(f"{solids.thickness_critical_frequency_product(5270.0):.2f}")  # 12.31
+```
+
+Hopkins Table A2 prints 12,3 m Hz for that steel and states in its heading that
+the column assumes a speed of sound of 343 m/s.
+
+$$
+h f_\mathrm{c} = \frac{c_0^2 \sqrt{12}}{2 \pi\, c_{\mathrm{L,p}}}
+$$
+
+The constant matters. ISO 12354-1 writes the critical frequency with a rounded
+1,8 in the denominator, which is 2π/√12 = 1,8138 to two figures. The rounded
+form is the standard's own arithmetic and `phonometry.building.critical_frequency`
+keeps it, because a measurement that claims to follow the standard has to. Here
+the exact constant is the right one: it reproduces all twenty-five rows of
+Table A2, and the rounded one misses the steel row by 0,8 per cent.
+
+## What the functions refuse
+
+A Poisson ratio of 0,5 describes an incompressible material, and an
+incompressible material has no pure longitudinal wave to have a speed, so
+`bulk_longitudinal_speed` raises rather than dividing by zero. The plate form
+is looser, since it only needs one minus the square of the ratio to stay
+positive, but it refuses a ratio of 1 for the same reason. Both messages name
+the ratio they were given and the term that would have vanished.
+
+---
+
+
 <!-- source: docs/start/about.md | canonical: https://jmrplens.github.io/phonometry/start/about/ -->
 Source: https://jmrplens.github.io/phonometry/start/about/
 
@@ -56803,7 +57028,7 @@ rescaled to full scale, so keep calibrator and measurement in the same format;
 
 ## Where to go next
 
-The octave analysis above uses the `filters` core, one of twenty domain
+The octave analysis above uses the `filters` core, one of twenty-one domain
 namespaces; the documentation index walks through the rest, from
 psychoacoustics and room, building and vibration acoustics to environmental,
 aircraft and underwater noise, electroacoustics and FDTD wave simulation.
@@ -57017,14 +57242,14 @@ one, and one of those three changes a number without raising anything.
 ## The one rule: imports move down one level
 
 In 3.3.0 the root re-exported the whole library, so `from phonometry import
-laeq` worked for almost every name. Today the root exports twenty-four things:
-the twenty subpackages, the three classes that belong to no single domain
+laeq` worked for almost every name. Today the root exports twenty-five things:
+the twenty-one subpackages, the three classes that belong to no single domain
 (`Signal`, `ReportMetadata`, `PhonometryWarning`) and `__version__`.
 
 ```python
 import phonometry
 
-print(len(phonometry.__all__))          # 24
+print(len(phonometry.__all__))          # 25
 print("laeq" in phonometry.__all__)     # False
 
 from phonometry.signals import laeq     # this is the new spelling

@@ -1,0 +1,94 @@
+---
+title: "Sólidos elásticos"
+description: "Las constantes elásticas de un sólido y las tres velocidades longitudinales que se siguen de ellas: cuál de las tres lleva una tabla impresa, cómo pasar de una a otra, y por qué la distinción merece un paquete propio."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+
+Una placa transmite sonido porque flexa, y cómo flexa lo deciden tres números:
+una densidad, un módulo de Young y un coeficiente de Poisson. Quince funciones
+públicas de esta biblioteca piden uno o dos de ellos, y las tablas que los
+imprimen, en Hopkins, en Cremer, en Mechel, en Bies, rara vez imprimen la misma
+pareja. Un libro da una velocidad de onda y ningún módulo. El siguiente da el
+módulo y ninguna velocidad. Un tercero da el producto del espesor por la
+frecuencia crítica y ninguno de los dos.
+
+`phonometry.solids` es donde viven las conversiones entre ellos, para que estén
+escritas una vez en lugar de en la cabeza de cada llamante.
+
+## Por qué no es un dominio
+
+Dieciséis de los veintiún paquetes son dominios de aplicación: uno va a
+`building` porque está midiendo un edificio, a `underwater` porque trabaja en
+el agua. Nadie va a `solids` porque esté midiendo un sólido. Se va porque lo
+que sea que esté midiendo ocurre dentro de uno, o a través de uno.
+
+Así que se coloca al lado de `fluids` en la caja de herramientas transversal,
+con `filters`, `signals` y `metrology`: cualquier paquete puede importarlo sin
+arista de arquitectura, porque un material no es un asunto que unos dominios
+tengan y otros no.
+
+## Tres ondas longitudinales, y en tu tabla sólo hay una
+
+Un sólido lleva la onda longitudinal de forma distinta según la forma por la
+que viaja, y las tres velocidades no son intercambiables.
+
+Una **viga** es libre de contraerse de lado mientras se comprime, así que las
+deformaciones laterales no cuestan nada y el coeficiente de Poisson no aparece:
+$c_{\mathrm{L,b}} = \sqrt{E/\rho}$.
+
+Una **placa** está sujeta a lo ancho. El material no puede apartarse, lo que la
+rigidiza en $1/(1-\nu^2)$: $c_{\mathrm{L,p}} = \sqrt{E/(\rho(1-\nu^2))}$. Ésta
+es la que imprimen las tablas de acústica de la edificación, y la que se usa
+para calcular una frecuencia crítica.
+
+Un **sólido extenso** sujeta el material por todos los lados a la vez:
+$c'_{\mathrm{L}} = \sqrt{E(1-\nu)/(\rho(1+\nu)(1-2\nu))}$. Es la más rápida de
+las tres y la que integra un solucionador elástico en el dominio del tiempo.
+
+Para el acero de la Tabla A2 de Hopkins, con $\rho = 7800$ kg/m³, $\nu = 0{,}28$
+y una velocidad de placa de 5 270 m/s, las tres son 5 059, 5 270 y 5 720 m/s.
+Leer una por otra es un error del cuatro al trece por ciento en lo que sea que
+alimente, y es fácil cometerlo, porque una tabla que imprime una de ellas suele
+llamarla $c_\mathrm{L}$ sin más.
+
+## Las inversas son el motivo
+
+Un catálogo de materiales se construye con lo que cada fuente imprimiera. La
+Tabla A2 de Hopkins da velocidad de placa, densidad y coeficiente de Poisson, y
+ningún módulo de Young. Cremer y Mechel dan el módulo y ninguna velocidad.
+Ninguna de las dos tablas puede compararse con la otra hasta que una se
+convierte, y para eso están las seis funciones de aquí: tres velocidades, tres
+inversas, y una séptima para la columna que dos de esos libros comparten.
+
+<Scope>
+<ScopeClaim status="not-covered">
+**Sin ondas de flexión ni de cizalla.** La familia longitudinal es la que
+imprime una tabla de materiales y la que necesitan las conversiones. La onda
+de flexión, que es la que de verdad radia desde un muro, se calcula donde se
+usa, en `phonometry.vibration.structural` y `phonometry.building.prediction`,
+a partir de la rigidez a flexión de la placa y no de una velocidad de onda.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Sin anisotropía.** Todas las relaciones de aquí son de un sólido homogéneo
+e isótropo, con un módulo y un Poisson. Un panel ortótropo tiene dos de cada y
+dos frecuencias críticas, y eso es `orthotropic_critical_frequencies` en
+`phonometry.building`.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered">
+**Sin temperatura ni envejecimiento.** Las constantes son las que una fuente
+imprimió para un espécimen en un momento. El hormigón se rigidiza durante años
+y un polímero se ablanda con la sala; ninguna de las dos cosas se modela aquí,
+y una tabla que lleva un rango lo dice en su propia entrada.
+</ScopeClaim>
+</Scope>
+
+## Qué hay aquí
+
+- [Velocidades de onda](/phonometry/es/solids/wave-speeds/): las tres
+  velocidades longitudinales y sus inversas, cuál de ellas lleva una tabla
+  impresa, y el producto de espesor por frecuencia crítica que permite
+  comprobar dos libros uno contra otro sin coste.

@@ -18,16 +18,16 @@ conditions beside the result, and says which model produced it.
 
 ## Why it is not a domain
 
-Nineteen of the twenty packages are domains of application: you go to
+Sixteen of the twenty-one packages are domains of application: you go to
 `building` because you are measuring a building, to `underwater` because you
 are working in water. You never go to `fluids` because you are measuring a
 fluid. You go there because whatever else you are measuring happens in one.
 
 So it sits with `filters`, `signals` and `metrology` in the transverse
 toolbox: any package may import it without an architecture edge, because a
-medium is not a subject some domains have and others do not. It is the fourth
-member of that set, and the first added since the library split the original
-toolbox in three.
+medium is not a subject some domains have and others do not. It was the fourth
+member of that set, the first added since the library split the original
+toolbox in three, and `solids` is the fifth.
 
 ## Three kinds of number, deliberately kept apart
 
@@ -60,7 +60,8 @@ single measurement silently ceasing to reproduce the standard it cites.
 **No solids.** A `Fluid` carries no shear speed, and the elastic materials of
 the wave solvers keep their own type with its own precondition. The two are
 different quantities that happen to share the word "medium", and a solid's
-properties are tabulated where a fluid's are computed.
+properties are tabulated where a fluid's are computed: they live next door, in
+`phonometry.solids`.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered">

@@ -68,6 +68,12 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`fluids.air`](/phonometry/reference/api/fluids/air/) | Humid air (IEC 61094-2:2009, Annex F). |
 | [`fluids.water`](/phonometry/reference/api/fluids/water/) | Sea water: its speed of sound, and its density. |
 
+## Elastic solids
+
+| Module | Summary |
+| :--- | :--- |
+| [`solids.elastic`](/phonometry/reference/api/solids/elastic/) | Three longitudinal wave speeds of a solid, and which one a table prints. |
+
 ## Audio files
 
 | Module | Summary |

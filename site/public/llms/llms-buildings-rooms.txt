@@ -1896,6 +1896,17 @@ directivity index inside ± 2 dB up to 630 Hz, rising to ± 8 dB at 1 kHz.
 print(room.omnidirectionality_tolerance_db(800.0))   # 5.0
 ```
 
+The margin over the background is a judgement the library will make for you,
+one octave band at a time, and it says which of the three cases each position
+falls in rather than correcting anything. A region holding exactly the two
+positions a regression needs, and a line read outside the distances it was
+fitted over, both emit `SpatialDecayWarning`.
+
+```python
+check = room.check_background_margin([80.0, 70.0, 66.0], 60.0)
+print(check.unusable)          # [False False  True]
+```
+
 ## Taking the source's own curve back out
 
 Close to the source, much of what the microphone hears is the source's own

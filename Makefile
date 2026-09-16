@@ -138,6 +138,14 @@ docstring-math:
 language-forwarding:
 	$(PYTHON) scripts/check_language_forwarding.py
 
+# Matplotlib aliases seven artist properties, and since 3.3 a call that receives
+# both spellings of one is a TypeError. A renderer that defaults its own colour
+# with kwargs.setdefault("color", ...) therefore refuses every caller who wrote
+# c= instead. style_default() defaults a property only when neither spelling is
+# there; this reads the tree and holds every renderer to it.
+plot-style-defaults:
+	$(PYTHON) scripts/check_plot_style_defaults.py
+
 # ISO 80000-2 sets a subscript by what it is, so a glyph pair can honestly take
 # both slopes: the z of the ISO 9613-2 barrier screening is a path-length
 # difference and the z of the ISO 2631-5 dose is a direction, and both

@@ -241,6 +241,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   as a question or with any other verb; only the two it would be confused with
   are refused.
 
+- **A style keyword written in matplotlib's short spelling reaches the artist.**
+  Seven artist properties have two names, `color` is also `c`, `linewidth` is
+  `lw`, `linestyle` is `ls`, `markersize` is `ms`, and the marker-edge and
+  marker-face pairs likewise, and since matplotlib 3.3 an artist that receives
+  both spellings of one refuses the call. Every renderer in the tree installed
+  its own default under one spelling and forwarded the rest, so
+  `result.plot(c="red")` came back as `TypeError: Got both 'color' and 'c',
+  which are aliases of one another` instead of a red curve.
+
+  It was there in three shapes and all three are gone: 195 `setdefault` calls
+  across 24 modules, 25 places that read the default back out to draw a second
+  artist in the same style, and 35 literals of the form
+  `{"color": _C_PRIMARY, **kwargs}`. The read-back was the quiet one. A
+  `kwargs.pop("color", _C_PRIMARY)` takes one name only, so a caller who wrote
+  `c=` got a figure whose first curve was red and whose shading under it was
+  the library's blue, with no error to say so.
+
+  `style_default`, `style_get`, `style_pop` and `styled` now do the work, each
+  honouring both spellings, and `scripts/check_plot_style_defaults.py` refuses
+  the four hand-written shapes on any mapping that is a function's own
+  `**kwargs`. The committed figures are unchanged: a default only moves when
+  the caller expressed an opinion, and until now such a caller got an exception.
+
 - The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.
 

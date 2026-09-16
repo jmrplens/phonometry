@@ -16,6 +16,7 @@ from .common import (
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     format_frequency_axis,
+    styled,
     theme_fill,
 )
 
@@ -164,7 +165,7 @@ def plot_epnl(
     ax.plot(
         t,
         np.asarray(result.pnlt),
-        **{"color": _C_PRIMARY, "lw": 1.4, "label": "PNLT", **kwargs},
+        **styled(kwargs, color=_C_PRIMARY, lw=1.4, label="PNLT"),
     )
     km = int(np.argmax(np.asarray(result.pnlt)))
     ax.plot(
@@ -210,14 +211,7 @@ def plot_aircraft_band_attenuation(
     ax.plot(
         f,
         np.asarray(result.band_attenuation),
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.6,
-            "marker": "o",
-            "ms": 3,
-            "label": label,
-            **kwargs,
-        },
+        **styled(kwargs, color=_C_PRIMARY, lw=1.6, marker="o", ms=3, label=label),
     )
     ax.plot(
         f,
@@ -261,7 +255,7 @@ def plot_npd_level(
     td = np.asarray(result.table_distances, dtype=np.float64)
     tl = np.asarray(result.table_levels, dtype=np.float64)
     label = f"NPD ($P$ = {decimal_comma(fmt_minus(result.power, 'g'), language)})"
-    ax.plot(d, lvl, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.plot(d, lvl, **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=label))
     ax.plot(td, tl, "o", color=_C_REFERENCE, ms=4, label=_t("Tabulated", language))
     ax.set_xscale("log")
     ax.set_xlabel(_t(_SLANT_DISTANCE_LABEL, language))
@@ -300,7 +294,7 @@ def plot_flyover(
     seg = np.where(np.isfinite(seg), seg, np.nan)
     idx = np.arange(seg.size)
     metric = "SEL" if result.metric == "exposure" else r"$L_\mathrm{Amax}$"
-    ax.bar(idx, seg, **{"color": _C_PRIMARY, "alpha": 0.85, **kwargs})
+    ax.bar(idx, seg, **styled(kwargs, color=_C_PRIMARY, alpha=0.85))
     if np.isfinite(result.level):
         ax.axhline(
             result.level,
@@ -354,12 +348,12 @@ def plot_rotorcraft_hemisphere(
     ax.plot(
         theta,
         grid[:, idx],
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.8,
-            "label": f"{format_number(freqs[idx], language, decimals=0)} Hz ($\\varphi$ = 0°)",
-            **kwargs,
-        },
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            lw=1.8,
+            label=f"{format_number(freqs[idx], language, decimals=0)} Hz ($\\varphi$ = 0°)",
+        ),
     )
     ax.set_xlabel(
         _t("Polar angle $\\theta$ [°]  (0° forward → 180° rearward)", language)
@@ -448,23 +442,23 @@ def plot_flight_path_kinematics(
     ax.plot(
         t,
         result.airspeed,
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.8,
-            "label": _t("Airspeed $V_\\mathrm{A}$", language),
-            **kwargs,
-        },
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            lw=1.8,
+            label=_t("Airspeed $V_\\mathrm{A}$", language),
+        ),
     )
     ax.plot(
         t,
         result.ground_speed,
-        **{
-            "color": _C_SECONDARY,
-            "lw": 1.4,
-            "ls": "--",
-            "label": _t("Ground speed $V_\\mathrm{g}$", language),
-            **kwargs,
-        },
+        **styled(
+            kwargs,
+            color=_C_SECONDARY,
+            lw=1.4,
+            ls="--",
+            label=_t("Ground speed $V_\\mathrm{g}$", language),
+        ),
     )
     ax.set_xlabel(_t(_TIME_LABEL, language))
     ax.set_ylabel(_t("Speed [m/s]", language))
@@ -527,7 +521,7 @@ def plot_rotorcraft_event(
     if np.isfinite(result.epnl):
         label += f", EPNL {format_number(result.epnl, language)} EPNdB"
     label += ")"
-    ax.plot(t, la, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.plot(t, la, **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=label))
     k = int(np.argmax(la))
     ax.plot(
         t[k],
@@ -624,12 +618,9 @@ def plot_mean_ground_plane(
     ax.plot(
         d,
         z,
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.8,
-            "label": _t(_TERRAIN_PROFILE_LABEL, language),
-            **kwargs,
-        },
+        **styled(
+            kwargs, color=_C_PRIMARY, lw=1.8, label=_t(_TERRAIN_PROFILE_LABEL, language)
+        ),
     )
     ax.fill_between(
         d, z, z.min() - 0.05 * np.ptp(z) - 0.5, color=_C_PRIMARY, alpha=0.08
@@ -676,12 +667,9 @@ def plot_terrain_screening(
     ax.plot(
         d,
         z,
-        **{
-            "color": _C_MUTED,
-            "lw": 1.8,
-            "label": _t(_TERRAIN_PROFILE_LABEL, language),
-            **kwargs,
-        },
+        **styled(
+            kwargs, color=_C_MUTED, lw=1.8, label=_t(_TERRAIN_PROFILE_LABEL, language)
+        ),
     )
     floor = min(z.min(), src[1], rcv[1]) - 0.05 * max(np.ptp(z), 1.0) - 0.5
     ax.fill_between(d, z, floor, color=theme_fill(_C_MUTED, ax), zorder=0)
@@ -748,7 +736,7 @@ def plot_anp_npd(
         ax.plot(
             curve.distance,
             curve.level,
-            **{"lw": 1.5, "label": f"$P$ = {reading}", **kwargs},
+            **styled(kwargs, lw=1.5, label=f"$P$ = {reading}"),
         )
         ax.plot(result.distances, result.levels[i], "o", ms=3, color=_C_MUTED)
     ax.set_xscale("log")
@@ -780,9 +768,7 @@ def plot_anp_profile(
     ax = ax if ax is not None else _new_axes()
     x_km = result.path[:, 0] / 1000.0
     z_m = result.path[:, 2]
-    ax.plot(
-        x_km, z_m, **{"marker": "o", "ms": 3, "lw": 1.5, "color": _C_PRIMARY, **kwargs}
-    )
+    ax.plot(x_km, z_m, **styled(kwargs, marker="o", ms=3, lw=1.5, color=_C_PRIMARY))
     # Highlight the runway points: both endpoints of every roll segment, so the
     # final point of a roll span is not dropped (the masks are per-segment).
     seg = result.ground_roll | result.landing_roll
@@ -839,14 +825,14 @@ def plot_flight_profile(
     ax.plot(
         distance_kft,
         result.altitude_ft,
-        **{
-            "marker": "o",
-            "ms": 3,
-            "linewidth": 1.5,
-            "color": _C_PRIMARY,
-            "label": _t("height (left axis)", language),
-            **kwargs,
-        },
+        **styled(
+            kwargs,
+            marker="o",
+            ms=3,
+            linewidth=1.5,
+            color=_C_PRIMARY,
+            label=_t("height (left axis)", language),
+        ),
     )
     ax.set_xlabel(_t("Along-track distance [kft]", language))
     ax.set_ylabel(_t("Height above aerodrome [ft]", language))

@@ -29,6 +29,7 @@ from ..common import (
     _C_SECONDARY,
     _C_SECONDARY_LIGHT,
     page_is_dark,
+    style_default,
     theme_fill_alpha,
 )
 
@@ -260,7 +261,7 @@ def _material_rect(
     face, hatch, alpha = _MATERIAL_STYLE[kind]
     kwargs.setdefault("facecolor", face)
     kwargs.setdefault("edgecolor", _C_EDGE)
-    kwargs.setdefault("linewidth", 0.9)
+    style_default(kwargs, "linewidth", 0.9)
     # The opacity reads as material density (a rigid backing is lighter than a
     # plate) and a caller may lighten it further to let an overlay through, but
     # in both cases it is a floor away from the page, not below it: the

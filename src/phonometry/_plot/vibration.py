@@ -22,6 +22,7 @@ from .common import (
     _new_axes_column,
     format_frequency_axis,
     style_default,
+    style_pop,
 )
 
 #: The three phasors of the ISO 20816-1 Figure D.1 diagram, named once so
@@ -378,7 +379,7 @@ def plot_vibration_weighting(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     mag_db = np.asarray(result.magnitude_db, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.semilogx(freqs, mag_db, **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t("Weighting factor [dB]", language))
@@ -425,7 +426,7 @@ def plot_weighted_spectrum(
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     width = 0.4
     # The weighted bars are the primary artist; forward user kwargs there.
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.bar(
         positions - width / 2,
         raw,
@@ -497,7 +498,7 @@ def plot_daily_exposure(
     # x-axis category labels. The combined A(8) bar takes the distinct A(8)
     # colour. A caller-supplied colour/width would collide with the per-bar
     # colouring, so those keys are consumed here.
-    kwargs.pop("color", None)
+    style_pop(kwargs, "color", None)
     width = kwargs.pop("width", 0.7)
     edgecolor = kwargs.pop("edgecolor", _C_EDGE)
     for i in range(n_ops):
@@ -599,7 +600,7 @@ def plot_mobility(
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     mag = np.asarray(result.magnitude, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     label = (
         _t("driving-point mobility", language)
         if result.driving_point
@@ -687,7 +688,7 @@ def plot_rigid_mass_calibration(
     def _deviation_panel(axd: Axes, **line_kwargs: Any) -> None:
         axd.axhspan(-tol_pct, tol_pct, color=_C_REFERENCE, alpha=0.15, label=band_label)
         axd.axhline(0.0, color=_C_MUTED, ls=":", lw=0.9)
-        line_kwargs.setdefault("color", _C_PRIMARY)
+        style_default(line_kwargs, "color", _C_PRIMARY)
         axd.semilogx(freq, 100.0 * deviation, "-", lw=1.4, zorder=2, **line_kwargs)
         axd.plot(
             freq[within],
@@ -719,7 +720,7 @@ def plot_rigid_mass_calibration(
 
     axes = _new_axes_column(2, sharex=True, figsize=(8.0, 6.6))
     axm, axd = axes[0], axes[1]
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     axm.fill_between(
         freq,
         expected * (1.0 - tol),
@@ -777,7 +778,7 @@ def plot_transfer_stiffness(
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     level = np.asarray(result.level, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$L_k = 20\,\log_{10}(|k_{2,1}|/k_0)$")
     ax.semilogx(freq, level, **kwargs)
     format_frequency_axis(ax, float(freq.min()), float(freq.max()), language=language)
@@ -811,9 +812,9 @@ def plot_radiation_efficiency(
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     sigma = np.asarray(result.radiation_efficiency, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("markersize", 3)
+    style_default(kwargs, "markersize", 3)
     kwargs.setdefault("label", r"$\sigma(f)$")
     ax.loglog(freq, sigma, **kwargs)
     ax.axhline(1.0, color=_C_MUTED, ls=":", lw=0.9, label=r"$\sigma = 1$")
@@ -865,7 +866,7 @@ def plot_seat_transmission(
         color=_C_PRIMARY,
         label=_t(r"platform $a_\mathrm{wP}$", language),
     )
-    kwargs.setdefault("color", _C_TERTIARY)
+    style_default(kwargs, "color", _C_TERTIARY)
     kwargs.setdefault("label", _t(r"seat $a_\mathrm{wS}$", language))
     seat_bars = ax.bar(runs + width / 2, result.seat_runs, width=width, **kwargs)
     means = [
@@ -1314,7 +1315,7 @@ def plot_multiple_shock(
         ax.axhline(level, color=_C_MUTED, ls=":", lw=0.8)
         ax.plot([r_val, r_val], [0.0, level], color=_C_MUTED, ls=":", lw=0.8)
 
-    kwargs.setdefault("color", _C_REFERENCE)
+    style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("zorder", 4)
     kwargs.setdefault("s", 90)
     kwargs.setdefault(
@@ -1368,8 +1369,8 @@ def _draw_measured_spectrum(
         ax.set_ylabel(_t("Predicted fault line", language))
         return 1.0
     keep = frequencies <= f_max
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.0)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.0)
     kwargs.setdefault("label", _t("envelope spectrum", language))
     ax.plot(frequencies[keep], amplitude[keep], **kwargs)
     ax.set_ylabel(_t("Envelope amplitude", language))
@@ -1687,9 +1688,9 @@ def plot_power_injection(
 
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("markersize", 4)
+    style_default(kwargs, "markersize", 4)
     kwargs.setdefault("label", r"$\eta_{12}$")
     ax.loglog(freq, result.coupling_loss_factor12, **kwargs)
     ax.loglog(
@@ -1756,7 +1757,7 @@ def plot_junction_transmission(
     angles = np.asarray(result.angles_deg, dtype=np.float64)
     corner = np.asarray(result.corner, dtype=np.float64)
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"corner $\tau_{12}(\theta)$", language))
     ax.plot(angles, corner, **kwargs)
     ax.axhline(
@@ -1893,9 +1894,9 @@ def plot_vector_change(
             markevery=[1],
             label=_t(key, language),
         )
-    kwargs.setdefault("color", _C_TERTIARY)
-    kwargs.setdefault("linewidth", 2.0)
-    kwargs.setdefault("linestyle", "--")
+    style_default(kwargs, "color", _C_TERTIARY)
+    style_default(kwargs, "linewidth", 2.0)
+    style_default(kwargs, "linestyle", "--")
     theta, radius = _polar_chord(first, second)
     kwargs.setdefault("label", _t(_LABEL_CHANGE, language))
     ax.plot(theta, radius, **kwargs)

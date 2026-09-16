@@ -1032,9 +1032,11 @@ def _plot_level_history(
 
     import matplotlib.pyplot as plt
 
+    from ..._plot.common import style_default
+
     if ax is None:
         _, ax = plt.subplots()
-    kwargs.setdefault("lw", 1.0)
+    style_default(kwargs, "lw", 1.0)
     ax.plot(result.times, result.levels, label=labels["level"], **kwargs)
     ax.set_xlabel(labels["xlabel"])
     ax.set_ylabel(labels["ylabel"])

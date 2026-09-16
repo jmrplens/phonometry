@@ -27,6 +27,7 @@ from ..common import (
     _C_SECONDARY_LIGHT,
     _C_TERTIARY,
     _new_axes,
+    style_default,
 )
 from ._draft import (
     _LEGEND_LOC,
@@ -356,9 +357,9 @@ def plot_sound_reinforcement_geometry(
         linewidth=1.6,
         zorder=4,
     )
-    kwargs.setdefault("color", _C_SECONDARY)
-    kwargs.setdefault("linewidth", 1.4)
-    kwargs.setdefault("linestyle", "--")
+    style_default(kwargs, "color", _C_SECONDARY)
+    style_default(kwargs, "linewidth", 1.4)
+    style_default(kwargs, "linestyle", "--")
     kwargs.setdefault("label", _t("Feedback path", language))
     ax.plot([h_xy[0], m_xy[0]], [h_xy[1], 0.62], zorder=4, **kwargs)
 

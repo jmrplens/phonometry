@@ -631,6 +631,10 @@ _STYLE_ALIASES_INVERSE: dict[str, str] = {
     short: long for long, short in _STYLE_ALIASES.items()
 }
 
+#: Sentinel for the style helpers, so that a caller who passed ``color=None``
+#: on purpose is told apart from one who passed no colour at all.
+_MISSING: Final = object()
+
 
 def style_default(kwargs: dict[str, Any], name: str, value: object) -> None:
     """Default a style keyword unless the caller gave it under either spelling.
@@ -649,6 +653,69 @@ def style_default(kwargs: dict[str, Any], name: str, value: object) -> None:
     if name in kwargs or (alias is not None and alias in kwargs):
         return
     kwargs[name] = value
+
+
+def style_get[StyleT](kwargs: dict[str, Any], name: str, default: StyleT) -> StyleT:
+    """Read a style keyword whichever of its two spellings the caller used.
+
+    A renderer that draws a second artist in the colour of the first reads the
+    value back out of ``kwargs``. ``kwargs["color"]`` finds nothing when the
+    caller wrote ``c=``, so the read raises ``KeyError`` on a call the primary
+    artist accepted.
+
+    :param kwargs: The keyword mapping, left unchanged.
+    :param name: The property to read, in either spelling.
+    :param default: What to return when neither spelling is present.
+    :return: The caller's value, or *default*.
+    """
+    alias = _STYLE_ALIASES.get(name) or _STYLE_ALIASES_INVERSE.get(name)
+    if name in kwargs:
+        return cast("StyleT", kwargs[name])
+    if alias is not None and alias in kwargs:
+        return cast("StyleT", kwargs[alias])
+    return default
+
+
+def style_pop[StyleT](kwargs: dict[str, Any], name: str, default: StyleT) -> StyleT:
+    """Take a style keyword out of *kwargs*, under either spelling.
+
+    A renderer that spends a property on a second artist has to remove it, or
+    the artist it forwards ``kwargs`` to receives it twice. ``kwargs.pop`` takes
+    one spelling: with the other one the renderer silently draws its own default
+    on the second artist and leaves the caller's value on the first, which is a
+    figure in two colours and no error to say why.
+
+    :param kwargs: The keyword mapping, with both spellings removed.
+    :param name: The property to take, in either spelling.
+    :param default: What to return when neither spelling is present.
+    :return: The caller's value, or *default*.
+    """
+    alias = _STYLE_ALIASES.get(name) or _STYLE_ALIASES_INVERSE.get(name)
+    taken: object = kwargs.pop(name, _MISSING)
+    if alias is not None:
+        from_alias: object = kwargs.pop(alias, _MISSING)
+        if taken is _MISSING:
+            taken = from_alias
+    return default if taken is _MISSING else cast("StyleT", taken)
+
+
+def styled(kwargs: dict[str, Any], **defaults: Any) -> dict[str, Any]:
+    """The caller's keywords over a renderer's defaults, alias for alias.
+
+    The literal ``{"color": _C_PRIMARY, "lw": 1.5, **kwargs}`` reads like a
+    default and is not one: a caller who wrote ``c=`` ends up with both
+    spellings in the same mapping, and the artist refuses the call. This is the
+    same merge done through :func:`style_default`, so each default is installed
+    only when the caller expressed no opinion under either name.
+
+    :param kwargs: What the caller passed, which always wins.
+    :param defaults: What the renderer would draw with otherwise.
+    :return: A new mapping to forward to the artist.
+    """
+    merged = dict(kwargs)
+    for name, value in defaults.items():
+        style_default(merged, name, value)
+    return merged
 
 
 def _freq_axis(ax: Axes, freqs: np.ndarray, *, language: str = "en") -> None:
@@ -946,7 +1013,7 @@ def _plot_rating(
     Extra keyword arguments style the measured curve (its primary artist).
     """
     ax = ax if ax is not None else _new_axes()
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(measured_label, language))
     ax.plot(band_centers, measured, "o-", **kwargs)
     ax.plot(
@@ -1106,7 +1173,7 @@ def _draw_decay_times(
         # Merge per-series defaults with the user kwargs (user wins) freshly
         # each iteration so an overriding label/color is not frozen by the
         # first band group.
-        bar_kwargs = {"color": colors, "label": label, **kwargs}
+        bar_kwargs = styled(kwargs, color=colors, label=label)
         bars = ax.bar(
             positions + offset,
             np.nan_to_num(vals),
@@ -1289,7 +1356,7 @@ def _plot_band_level_bars(
         labels = [str(i + 1) for i in range(n)]
         ax.set_xlabel(_t("Band", language))
     positions = np.arange(n)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.bar(positions, lw, width=0.7, edgecolor=_C_EDGE, linewidth=0.6, **kwargs)
     ax.set_xticks(positions)
     ax.set_xticklabels(labels)

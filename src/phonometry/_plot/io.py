@@ -12,7 +12,12 @@ if TYPE_CHECKING:
 
     from ..io._signal import Signal
 
-from .common import _C_PRIMARY, _LEGEND_UPPER_RIGHT, _new_axes
+from .common import (
+    _C_PRIMARY,
+    _LEGEND_UPPER_RIGHT,
+    _new_axes,
+    style_default,
+)
 
 #: Spanish translations of the fixed strings rendered here, keyed by their
 #: verbatim English text; ``_t`` returns the English key unchanged for any
@@ -70,7 +75,7 @@ def _draw_channels(
 ) -> None:
     """Draw one line per channel, labelled and with a legend when there are several."""
     if result.n_channels == 1:
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         axw.plot(t, y[0], **kwargs)
         return
     for index, channel in enumerate(y):
@@ -140,7 +145,7 @@ def plot_signal(
 
     new_figure = ax is None
     axw = _new_axes() if ax is None else ax
-    kwargs.setdefault("lw", 0.9)
+    style_default(kwargs, "lw", 0.9)
     _draw_channels(axw, t, y, result, language, kwargs)
     axw.set_xlabel(_t(_TIME_LABEL, language))
     axw.set_ylabel(_t(ylabel, language))

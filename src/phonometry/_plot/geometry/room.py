@@ -27,6 +27,7 @@ from ..common import (
     _C_SECONDARY,
     _C_TERTIARY,
     _new_axes,
+    style_default,
 )
 from ._draft import (
     _AXIS_X,
@@ -147,7 +148,7 @@ def plot_image_source_geometry(
         )
     kwargs.setdefault("facecolor", "none")
     kwargs.setdefault("edgecolor", _C_EDGE)
-    kwargs.setdefault("linewidth", 2.0)
+    style_default(kwargs, "linewidth", 2.0)
     ax.add_patch(Rectangle((0.0, 0.0), lx, ly, zorder=3, **kwargs))
     for order in range(order_cap, 0, -1):
         sel = ords == order
@@ -274,7 +275,7 @@ def plot_open_plan_geometry(
         zorder=6,
     )
     ax.text(0.0, -1.4 * desk, _t("Source", language), fontsize=8, ha="center", va="top")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("s", 18)
     ax.scatter(pos, np.zeros_like(pos), zorder=5, **kwargs)
     ax.plot(

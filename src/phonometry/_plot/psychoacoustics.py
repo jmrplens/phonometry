@@ -19,6 +19,8 @@ from .common import (
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    style_default,
+    style_get,
     theme_fill,
 )
 
@@ -166,9 +168,11 @@ def plot_zwicker_loudness(
     else:
         ax_specific = ax if ax is not None else _new_axes()
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax_specific.plot(bark, specific, **kwargs)
-    ax_specific.fill_between(bark, specific, color=kwargs["color"], alpha=0.25)
+    ax_specific.fill_between(
+        bark, specific, color=style_get(kwargs, "color", _C_PRIMARY), alpha=0.25
+    )
     ax_specific.set_xlabel(_t(_AXIS_BARK, language))
     ax_specific.set_ylabel(_t(r"Specific loudness $N^{\prime}$ [sone/Bark]", language))
     ax_specific.set_xlim(0.0, bark[-1])
@@ -225,7 +229,7 @@ def plot_zwicker_loudness_time(
     ax_time = ax if ax is not None else _new_axes()
     time = np.asarray(result.time, dtype=np.float64)
     lvt = np.asarray(result.loudness_vs_time, dtype=np.float64)
-    kwargs.setdefault("color", _C_TERTIARY)
+    style_default(kwargs, "color", _C_TERTIARY)
     kwargs.setdefault("label", "$N(t)$")
     ax_time.plot(time, lvt, **kwargs)
     if result.n5 is not None:
@@ -285,9 +289,11 @@ def plot_ecma_loudness(
     else:
         ax_specific = cast("Axes", ax)
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax_specific.plot(bark, specific, **kwargs)
-    ax_specific.fill_between(bark, specific, color=kwargs["color"], alpha=0.25)
+    ax_specific.fill_between(
+        bark, specific, color=style_get(kwargs, "color", _C_PRIMARY), alpha=0.25
+    )
     ax_specific.set_xlabel(_t(_AXIS_BARK_HMS, language))
     ax_specific.set_ylabel(
         _t(
@@ -347,9 +353,11 @@ def plot_moore_glasberg_loudness(
     erb_number = np.asarray(result.erb_number, dtype=np.float64)
     ax = ax if ax is not None else _new_axes()
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.plot(erb_number, specific, **kwargs)
-    ax.fill_between(erb_number, specific, color=kwargs["color"], alpha=0.25)
+    ax.fill_between(
+        erb_number, specific, color=style_get(kwargs, "color", _C_PRIMARY), alpha=0.25
+    )
     ax.set_xlabel(_t("ERB number [Cam]", language))
     ax.set_ylabel(_t(r"Specific loudness $N^{\prime}$ [sone/Cam]", language))
     ax.set_xlim(erb_number[0], erb_number[-1])
@@ -395,8 +403,8 @@ def plot_moore_glasberg_time_loudness(
         lw=1.0,
         label=_t("Short-term loudness", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.8)
     kwargs.setdefault("label", _t("Long-term loudness", language))
     ax.plot(time, ltl, **kwargs)
     ax.axhline(result.n_max, color=_C_REFERENCE, ls="--", lw=1.0, alpha=0.7)
@@ -454,9 +462,11 @@ def plot_ecma_tonality(
     # Tonality's per-metric identity color is red across the documentation
     # figures (roughness is brown); kept literal on purpose, see the module
     # color-constant note.
-    kwargs.setdefault("color", "#d62728")
+    style_default(kwargs, "color", "#d62728")
     ax_specific.plot(bark, specific, **kwargs)
-    ax_specific.fill_between(bark, specific, color=kwargs["color"], alpha=0.25)
+    ax_specific.fill_between(
+        bark, specific, color=style_get(kwargs, "color", "#d62728"), alpha=0.25
+    )
     ax_specific.set_xlabel(_t(_AXIS_BARK_HMS, language))
     ax_specific.set_ylabel(
         _t(r"Specific tonality $T^{\prime}$ [$\mathrm{tu}_{\mathrm{HMS}}$]", language)
@@ -521,7 +531,7 @@ def _plot_hms_time_and_heatmap(
         ax_time = cast("Axes", ax)
 
     if "c" not in kwargs:  # matplotlib alias; injecting "color" too would raise
-        kwargs.setdefault("color", color)
+        style_default(kwargs, "color", color)
     (line,) = ax_time.plot(time, vs_time, **kwargs)
     ax_time.fill_between(time, vs_time, color=line.get_color(), alpha=0.25)
     ax_time.set_xlabel(_t(_AXIS_TIME, language))
@@ -662,9 +672,9 @@ def plot_fluctuation_strength(
     ax = ax if ax is not None else _new_axes()
     z = np.asarray(result.bark_axis, dtype=np.float64)
     spec = np.asarray(result.specific, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.plot(z, spec, **kwargs)
-    ax.fill_between(z, spec, color=kwargs["color"], alpha=0.25)
+    ax.fill_between(z, spec, color=style_get(kwargs, "color", _C_PRIMARY), alpha=0.25)
     ax.set_xlabel(_t(_AXIS_BARK, language))
     ax.set_ylabel(
         _t(r"Specific fluctuation strength $f^{\prime}(z)$ [vacil/Bark]", language)
@@ -708,7 +718,7 @@ def plot_psychoacoustic_annoyance(
     colors = [_C_REFERENCE, _C_PRIMARY, _C_PRIMARY]
     positions = np.arange(len(labels))
     kwargs.setdefault("width", 0.6)
-    kwargs.setdefault("color", colors)
+    style_default(kwargs, "color", colors)
     kwargs.setdefault("edgecolor", _C_EDGE)
     ax.bar(positions, values, **kwargs)
     ax.set_xticks(positions)
@@ -796,9 +806,9 @@ def plot_tone_assessment(
     )
     ax.plot([ft, ft], [criterion, ratio], color=_C_MUTED, ls=":", lw=1.2)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("linestyle", "none")
-    kwargs.setdefault("markersize", 9)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "linestyle", "none")
+    style_default(kwargs, "markersize", 9)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("assessed tone", language))
     ax.plot([ft], [ratio], markeredgecolor=_C_EDGE, zorder=4, **kwargs)
     ax.annotate(
@@ -965,7 +975,7 @@ def plot_tone_audibility_levels(
             zorder=3,
         )
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("linestyle", "none")
+    style_default(kwargs, "linestyle", "none")
     kwargs.setdefault("label", _t(r"tone level $L_{p\mathrm{t}}$", language))
     ax.plot(
         freqs,
@@ -1028,8 +1038,8 @@ def plot_equal_loudness_contours(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     contours = np.asarray(result.contours, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("linewidth", 1.5)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.5)
 
     fmin, fmax = float(freqs.min()), float(freqs.max())
     # The per-contour labels sit at the 1 kHz crossing (SPL = phon by
@@ -1046,7 +1056,7 @@ def plot_equal_loudness_contours(
                 xy=(1000.0, phon),
                 xytext=(1180.0, phon + 1.0),
                 fontsize=9,
-                color=kwargs["color"],
+                color=style_get(kwargs, "color", _C_PRIMARY),
             )
     ax.plot(
         freqs,

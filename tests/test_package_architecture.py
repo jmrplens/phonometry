@@ -892,3 +892,47 @@ def test_the_grid_flag_is_named_the_way_matplotlib_names_it() -> None:
         f"matplotlib now calls the first grid parameter {first!r}; the plot "
         "corpus passes it as 'visible'"
     )
+
+
+def test_a_judgement_summary_does_not_open_with_another_family_verb() -> None:
+    """The three judgement verbs mean three different things, and say so.
+
+    `verify_` judges an instrument against the requirements a standard sets for
+    it, `assess_` judges a measured situation against limits or categories, and
+    `check_` judges the arrangement a method needs before its numbers mean
+    anything (CONTRIBUTING, "The three verbs of a judgement"). A summary may
+    open however it reads best, as a question or with any other verb, but one
+    that opens with a *different* family's verb tells a reader the prefix was
+    picked at random: `check_base_plate_scattering` used to begin "Verify", and
+    six of the ten `verify_` functions began "Check".
+    """
+    import importlib
+    import inspect
+    import pkgutil
+
+    import phonometry as ph
+
+    families = {"verify_": "verify", "assess_": "assess", "check_": "check"}
+    mismatched: list[str] = []
+    seen: set[str] = set()
+    for module in pkgutil.walk_packages(ph.__path__, "phonometry."):
+        if "._" in module.name:
+            continue
+        try:
+            imported = importlib.import_module(module.name)
+        except Exception:  # noqa: BLE001 - a module that will not import is
+            continue  # another test's finding, not this one's
+        for name in getattr(imported, "__all__", []):
+            obj = getattr(imported, name, None)
+            if not inspect.isfunction(obj) or name in seen:
+                continue
+            family = next((v for p, v in families.items() if name.startswith(p)), None)
+            if family is None:
+                continue
+            seen.add(name)
+            words = (inspect.getdoc(obj) or "").split()
+            opening = words[0].rstrip(".,:").lower() if words else ""
+            if opening in set(families.values()) - {family}:
+                mismatched.append(f"{name} ({family}) opens with {opening!r}")
+    assert not mismatched, mismatched
+    assert len(seen) >= 26, f"only {len(seen)} judgement functions found"

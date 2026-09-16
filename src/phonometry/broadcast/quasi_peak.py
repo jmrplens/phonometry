@@ -783,7 +783,7 @@ class QuasiPeakDynamicsResult:
 def verify_quasi_peak_dynamics(
     fs: float = 48000.0, *, ballistics: QuasiPeakBallistics = BS468_BALLISTICS
 ) -> QuasiPeakDynamicsResult:
-    """Check the detector against the eleven acceptance windows of clause 2.
+    """Verify the detector against the eleven acceptance windows of clause 2.
 
     Runs the clause 2.1 and 2.2 stimuli exactly as they are specified: a
     5 kHz sine starting at a zero crossing and lasting an integral number of

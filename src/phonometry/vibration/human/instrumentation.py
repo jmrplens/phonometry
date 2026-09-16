@@ -418,7 +418,7 @@ def verify_weighting(
     *,
     expanded_uncertainty_percent: float | None = None,
 ) -> WeightingVerification:
-    """Check a measured weighting response against ISO 8041-1 Tables 4 and 5.
+    """Verify a measured weighting response against ISO 8041-1 Tables 4 and 5.
 
     The acceptance test is the one Annex B is written in: the deviation
     ``(measured / design - 1) * 100`` at each frequency has to sit between the
@@ -862,7 +862,7 @@ class PhaseVerification:
 def verify_phase_response(
     name: str, frequencies_hz: ArrayLike, measured_phase_deg: ArrayLike
 ) -> PhaseVerification:
-    """Check a measured phase response against the ISO 8041-1 Table 5 band.
+    """Verify a measured phase response against the ISO 8041-1 Table 5 band.
 
     Table 5 (folio 15) prints a characteristic phase deviation limit beside
     every magnitude limit: ``±6°`` in the central region, ``±12°`` in the two
@@ -1092,7 +1092,7 @@ def running_rms_decay_time(integration_time_s: float, *, method: str) -> float:
 def verify_running_rms_decay(
     measured_time_s: float, *, integration_time_s: float, method: str
 ) -> bool:
-    """Check a measured decay time against Table 10 or Table 11.
+    """Verify a measured decay time against Table 10 or Table 11.
 
     The verdict is one printed row: the measured time to 10 % of the initial
     value has to sit inside the printed interval for that time constant and

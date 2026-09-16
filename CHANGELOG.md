@@ -225,6 +225,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **The three verbs of a judgement have a written criterion.** Of the public
+  functions only a handful carry a verb, and they are the ones that return a
+  judgement rather than a magnitude, in three families whose boundary was
+  nowhere written down: `verify_` judges an instrument against the requirements
+  a standard sets for it, `assess_` judges a measured situation against limits
+  or categories, and `check_` judges the arrangement a method needs before its
+  numbers mean anything. The criterion is now in CONTRIBUTING, with the
+  `check_` against `verify_` boundary stated plainly: the first judges the
+  setup, the second judges the instrument.
+
+  Eight summaries opened with another family's verb, which told a reader the
+  prefix had been picked at random. They now open with their own, and a test
+  keeps all 26 of them in line. A summary may still open however it reads best,
+  as a question or with any other verb; only the two it would be confused with
+  are refused.
+
 - The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.
 

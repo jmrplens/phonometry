@@ -1285,7 +1285,7 @@ def check_db_hr_requirement(value: float, requirement: DbHrRequirement) -> DbHrC
 def assess_db_hr(
     items: Sequence[tuple[float, DbHrRequirement]],
 ) -> DbHrAssessment:
-    """Check a set of achieved values against their DB-HR requirements.
+    """Judge a set of achieved values against their DB-HR requirements.
 
     :param items: ``(value, requirement)`` pairs.
     :return: A :class:`DbHrAssessment`.

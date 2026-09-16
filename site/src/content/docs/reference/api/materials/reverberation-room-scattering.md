@@ -176,7 +176,7 @@ check_base_plate_scattering(
 ) -> tuple[int, ...]
 ```
 
-Verify base-plate scattering against Table 1 (ISO 17497-1, Clause 6.2).
+Check base-plate scattering against Table 1 (ISO 17497-1, Clause 6.2).
 
 Every band whose measured base-plate scattering coefficient exceeds the
 [`BASE_PLATE_MAX_SCATTERING`](/phonometry/reference/api/materials/reverberation-room-scattering/#base_plate_max_scattering) limit is collected and a single

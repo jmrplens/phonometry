@@ -2303,7 +2303,7 @@ z
      <use xlink:href="#DejaVuSans-48" transform="translate(788.109375 0)"/>
      <use xlink:href="#DejaVuSans-47" transform="translate(849.640625 0)"/>
     </g>
-    <!-- $\pm$ 0,1 dB -->
+    <!-- $\pm$ 0.1 dB -->
     <g transform="translate(406.757327 82.278092) scale(0.09 -0.09)">
      <defs>
       <path id="DejaVuSans-73" d="M 2944 4013 
@@ -2327,20 +2327,11 @@ L 678 0
 L 678 531 
 z
 " transform="scale(0.015625)"/>
-      <path id="DejaVuSans-f" d="M 750 794 
-L 1409 794 
-L 1409 256 
-L 897 -744 
-L 494 -744 
-L 750 256 
-L 750 794 
-z
-" transform="scale(0.015625)"/>
      </defs>
      <use xlink:href="#DejaVuSans-73" transform="translate(0 0.015625)"/>
      <use xlink:href="#DejaVuSans-3" transform="translate(83.789062 0.015625)"/>
      <use xlink:href="#DejaVuSans-13" transform="translate(115.576172 0.015625)"/>
-     <use xlink:href="#DejaVuSans-f" transform="translate(179.199219 0.015625)"/>
+     <use xlink:href="#DejaVuSans-11" transform="translate(179.199219 0.015625)"/>
      <use xlink:href="#DejaVuSans-14" transform="translate(210.986328 0.015625)"/>
      <use xlink:href="#DejaVuSans-3" transform="translate(274.609375 0.015625)"/>
      <use xlink:href="#DejaVuSans-47" transform="translate(306.396484 0.015625)"/>
@@ -2437,6 +2428,17 @@ z
     </g>
     <!-- after processing, for one false alarm -->
     <g transform="translate(67.018914 151.113789) scale(0.09 -0.09)">
+     <defs>
+      <path id="DejaVuSans-f" d="M 750 794 
+L 1409 794 
+L 1409 256 
+L 897 -744 
+L 494 -744 
+L 750 256 
+L 750 794 
+z
+" transform="scale(0.015625)"/>
+     </defs>
      <use xlink:href="#DejaVuSans-44"/>
      <use xlink:href="#DejaVuSans-49" transform="translate(61.28125 0)"/>
      <use xlink:href="#DejaVuSans-57" transform="translate(94.734375 0)"/>
@@ -3641,7 +3643,7 @@ z
      <use xlink:href="#DejaVuSans-4f" transform="translate(1468.046875 0)"/>
      <use xlink:href="#DejaVuSans-4f" transform="translate(1495.828125 0)"/>
     </g>
-    <!-- returns 1,1 dB: the 0 dB is a -->
+    <!-- returns 1.1 dB: the 0 dB is a -->
     <g transform="translate(544.622162 107.903242) scale(0.09 -0.09)">
      <defs>
       <path id="DejaVuSans-1d" d="M 750 794 
@@ -3667,7 +3669,7 @@ z
      <use xlink:href="#DejaVuSans-56" transform="translate(305.75 0)"/>
      <use xlink:href="#DejaVuSans-3" transform="translate(357.84375 0)"/>
      <use xlink:href="#DejaVuSans-14" transform="translate(389.625 0)"/>
-     <use xlink:href="#DejaVuSans-f" transform="translate(453.25 0)"/>
+     <use xlink:href="#DejaVuSans-11" transform="translate(453.25 0)"/>
      <use xlink:href="#DejaVuSans-14" transform="translate(485.03125 0)"/>
      <use xlink:href="#DejaVuSans-3" transform="translate(548.65625 0)"/>
      <use xlink:href="#DejaVuSans-47" transform="translate(580.4375 0)"/>

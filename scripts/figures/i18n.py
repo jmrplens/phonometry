@@ -2653,7 +2653,7 @@ _ES_EXACT = {
     "DT at 50 % detection probability": "DT con 50 % de probabilidad de detección",
     "False-alarm probability $p_\\mathrm{fa}$": "Probabilidad de falsa alarma $p_\\mathrm{fa}$",
     "Detection threshold DT [dB]": "Umbral de detección DT [dB]",
-    "outside the stated\n$\\pm$ 0,1 dB": "fuera de los\n$\\pm$ 0,1 dB declarados",
+    "outside the stated\n$\\pm$ 0.1 dB": "fuera de los\n$\\pm$ 0,1 dB declarados",
     "10.1 dB of signal-to-noise\nafter processing, for one false alarm\n"
     "in ten thousand empty beams": "10,1 dB de relación señal-ruido\ntras el "
     "procesado, por una falsa alarma\nde cada diez mil haces vacíos",
@@ -2662,7 +2662,7 @@ _ES_EXACT = {
     "Steered 60°": "Orientado 60°",
     "Endfire": "Proa",
     "$10\\,\\lg(2L/\\lambda)$ and $10\\,\\lg(4L/\\lambda)$": "$10\\,\\lg(2L/\\lambda)$ y $10\\,\\lg(4L/\\lambda)$",
-    "half a wavelength of array still\nreturns 1,1 dB: the 0 dB is a\n"
+    "half a wavelength of array still\nreturns 1.1 dB: the 0 dB is a\n"
     "limit and not a cut-off\n\nat the half-wavelength spacing an\n"
     "array is usually built with,\n$L/\\lambda$ is $(N - 1)/2$ elements": "media longitud de onda de array\nsigue dando 1,1 dB: el 0 dB es un\n"
     "límite y no un corte\n\ncon el espaciado de media longitud\nde onda con "

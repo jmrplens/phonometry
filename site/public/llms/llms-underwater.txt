@@ -1063,7 +1063,9 @@ declared detections, and no threshold rescues that.
 
 *The two terms the receiver contributes, each over the one variable it depends
 on. Neither is measured at sea: the threshold is a property of the detector and
-the gain one of the array. The three steer directions share one limit and not
+the gain one of the array. The shaded decade is drawn past the $10^{-2}$ the
+book states its accuracy to, so what the curve gives there is an extrapolation
+and not a validated value. The three steer directions share one limit and not
 one asymptote, and the family flattens to 0 dB rather than cutting off.*
 
 ### 3.2 Detection range

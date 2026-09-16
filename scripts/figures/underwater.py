@@ -2248,7 +2248,7 @@ def generate_sonar_detection_terms(output_dir: str) -> None:
     ax_dt.text(
         3.0e-2,
         float(threshold.max()) - 0.3,
-        "outside the stated\n$\\pm$ 0,1 dB",
+        "outside the stated\n$\\pm$ 0.1 dB",
         ha="center",
         va="top",
         fontsize=9,
@@ -2322,7 +2322,7 @@ def generate_sonar_detection_terms(output_dir: str) -> None:
         ratio, 10.0 * np.log10(4.0 * ratio), color=COLOR_MUTED, linewidth=1.0, ls=":"
     )
     ax_di.annotate(
-        "half a wavelength of array still\nreturns 1,1 dB: the 0 dB is a\n"
+        "half a wavelength of array still\nreturns 1.1 dB: the 0 dB is a\n"
         "limit and not a cut-off\n\nat the half-wavelength spacing an\n"
         "array is usually built with,\n$L/\\lambda$ is $(N - 1)/2$ elements",
         xy=(0.5, underwater.array_directivity_index(0.5, 1.0)),

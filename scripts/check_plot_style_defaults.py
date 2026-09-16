@@ -142,6 +142,38 @@ def _findings(path: Path) -> list[tuple[int, str]]:
     return sorted(found)
 
 
+def _helper_aliases() -> set[str] | None:
+    """Every spelling in ``_STYLE_ALIASES``, read off the helper's source.
+
+    Read rather than imported. Importing the module would pull numpy in behind
+    it, and this gate runs in the step that installs nothing, next to the other
+    check that walks the tree as text. It is also the honest way round: what
+    this compares itself against is the table as written, not as some
+    environment happens to build it.
+    """
+    source = (_ROOT / "_plot" / "common.py").read_text(encoding="utf-8")
+    for node in ast.walk(ast.parse(source)):
+        if not isinstance(node, ast.AnnAssign | ast.Assign):
+            continue
+        targets = [node.target] if isinstance(node, ast.AnnAssign) else node.targets
+        names = {t.id for t in targets if isinstance(t, ast.Name)}
+        if "_STYLE_ALIASES" not in names or not isinstance(node.value, ast.Dict):
+            continue
+        pairs: list[tuple[str, str]] = []
+        for key, value in zip(node.value.keys, node.value.values, strict=True):
+            if (
+                isinstance(key, ast.Constant)
+                and isinstance(key.value, str)
+                and isinstance(value, ast.Constant)
+                and isinstance(value.value, str)
+            ):
+                pairs.append((key.value, value.value))
+        if len(pairs) != len(node.value.keys):
+            return None
+        return {long for long, _ in pairs} | {short for _, short in pairs}
+    return None
+
+
 def _aliases_agree() -> str | None:
     """Whether this gate's table still matches the one ``style_default`` reads.
 
@@ -150,10 +182,13 @@ def _aliases_agree() -> str | None:
     go on passing the very line the helper was extended to replace, so the two
     tables are compared rather than trusted.
     """
-    sys.path.insert(0, str(_REPO / "src"))
-    from phonometry._plot.common import _STYLE_ALIASES
-
-    helper = set(_STYLE_ALIASES) | set(_STYLE_ALIASES.values())
+    helper = _helper_aliases()
+    if helper is None:
+        return (
+            "_STYLE_ALIASES could not be read from src/phonometry/_plot/common.py "
+            "as a literal table of strings, so this gate cannot tell whether it "
+            "still refuses what the helper defaults."
+        )
     if helper == set(_ALIASED):
         return None
     missing = ", ".join(sorted(helper - set(_ALIASED))) or "none"

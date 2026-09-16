@@ -13,6 +13,10 @@ from __future__ import annotations
 
 import pathlib
 import sys
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    import pytest
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -112,6 +116,37 @@ def test_every_aliased_property_is_covered(tmp_path: pathlib.Path) -> None:
 def test_the_two_alias_tables_are_the_same() -> None:
     """The gate refuses exactly what the helper knows how to default."""
     assert gate._aliases_agree() is None
+
+
+def test_the_helper_table_is_read_and_not_imported(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """The gate runs in a step that installs nothing, so it may not import.
+
+    Importing ``phonometry._plot.common`` pulls numpy in behind it, which the
+    static step has no reason to hold. Blocking the package here is what tells
+    a reading of the source from an import of it.
+    """
+    monkeypatch.setitem(sys.modules, "phonometry", None)
+    assert gate._helper_aliases() == set(gate._ALIASED)
+    assert gate._aliases_agree() is None
+
+
+def test_a_table_that_is_not_a_literal_fails_closed(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """A gate that cannot read the helper's table says so instead of passing."""
+    root = tmp_path / "phonometry"
+    (root / "_plot").mkdir(parents=True)
+    (root / "_plot" / "common.py").write_text(
+        '_SHORT = "c"\n_STYLE_ALIASES: dict[str, str] = {"color": _SHORT}\n',
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(gate, "_ROOT", root)
+    assert gate._helper_aliases() is None
+    drift = gate._aliases_agree()
+    assert drift is not None
+    assert "could not be read" in drift
 
 
 def test_the_package_is_clean() -> None:

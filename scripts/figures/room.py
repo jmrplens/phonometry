@@ -1632,9 +1632,22 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
         ax_t.semilogx(
             freq, res.reverberation_time, color=colour, marker="o", label=name
         )
-    for ax, ylab, title in (
-        (ax_a, "Equivalent absorption area $A$ [m²]", "Absorption area (Formula 1)"),
-        (ax_t, "Reverberation time $T$ [s]", "Reverberation time (Formula 5)"),
+    # Absorption area climbs to the right and reverberation time falls, so the
+    # free corner is not the same one on the two panels: on the left the
+    # treated ceiling ends its rise under a box in the upper right.
+    for ax, ylab, title, corner in (
+        (
+            ax_a,
+            "Equivalent absorption area $A$ [m²]",
+            "Absorption area (Formula 1)",
+            "upper left",
+        ),
+        (
+            ax_t,
+            "Reverberation time $T$ [s]",
+            "Reverberation time (Formula 5)",
+            "upper right",
+        ),
     ):
         ax.set_xticks(freq)
         ax.set_xticklabels(labels)
@@ -1644,7 +1657,7 @@ def generate_enclosed_space_absorption(output_dir: str) -> None:
         ax.set_ylim(bottom=0.0)
         ax.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
         ax.set_axisbelow(True)
-        ax.legend(loc="upper right")
+        ax.legend(loc=corner)
 
     plt.tight_layout()
     save_figure(output_dir, "enclosed_space_absorption.png")

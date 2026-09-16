@@ -2686,30 +2686,30 @@ L 885.763437 26.318125
    </g>
    <g id="legend_2">
     <g id="patch_14">
-     <path d="M 493.725781 64.319687 
-L 615.807031 64.319687 
-Q 617.807031 64.319687 617.807031 62.319687 
-L 617.807031 33.318125 
-Q 617.807031 31.318125 615.807031 31.318125 
-L 493.725781 31.318125 
-Q 491.725781 31.318125 491.725781 33.318125 
-L 491.725781 62.319687 
-Q 491.725781 64.319687 493.725781 64.319687 
+     <path d="M 625.203984 64.319687 
+L 747.285234 64.319687 
+Q 749.285234 64.319687 749.285234 62.319687 
+L 749.285234 33.318125 
+Q 749.285234 31.318125 747.285234 31.318125 
+L 625.203984 31.318125 
+Q 623.203984 31.318125 623.203984 33.318125 
+L 623.203984 62.319687 
+Q 623.203984 64.319687 625.203984 64.319687 
 z
 " style="fill: #ffffff; opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="line2d_123">
-     <path d="M 495.725781 39.416562 
-L 505.725781 39.416562 
-L 515.725781 39.416562 
+     <path d="M 627.203984 39.416562 
+L 637.203984 39.416562 
+L 647.203984 39.416562 
 " style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m49466b02c9" x="505.725781" y="39.416562" style="fill: #1f77b4; stroke: #1f77b4"/>
+      <use xlink:href="#m49466b02c9" x="637.203984" y="39.416562" style="fill: #1f77b4; stroke: #1f77b4"/>
      </g>
     </g>
     <g id="text_48">
      <!-- Free-field (frontal) -->
-     <g transform="translate(523.725781 42.916562) scale(0.1 -0.1)">
+     <g transform="translate(655.203984 42.916562) scale(0.1 -0.1)">
       <defs>
        <path id="DejaVuSans-29" d="M 628 4666 
 L 3309 4666 
@@ -2776,17 +2776,17 @@ z
      </g>
     </g>
     <g id="line2d_124">
-     <path d="M 495.725781 54.417344 
-L 505.725781 54.417344 
-L 515.725781 54.417344 
+     <path d="M 627.203984 54.417344 
+L 637.203984 54.417344 
+L 647.203984 54.417344 
 " style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #d62728; stroke-width: 1.5"/>
      <g>
-      <use xlink:href="#mc3df89cc81" x="505.725781" y="54.417344" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
+      <use xlink:href="#mc3df89cc81" x="637.203984" y="54.417344" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
      </g>
     </g>
     <g id="text_49">
      <!-- Diffuse-field -->
-     <g transform="translate(523.725781 57.917344) scale(0.1 -0.1)">
+     <g transform="translate(655.203984 57.917344) scale(0.1 -0.1)">
       <defs>
        <path id="DejaVuSans-27" d="M 1259 4147 
 L 1259 519 

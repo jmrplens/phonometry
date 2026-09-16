@@ -1681,27 +1681,27 @@ z
    </g>
    <g id="legend_1">
     <g id="patch_7">
-     <path d="M 49.842188 89.522344 
-L 220.212187 89.522344 
-Q 222.012187 89.522344 222.012187 87.722344 
-L 222.012187 34.618125 
-Q 222.012187 32.818125 220.212187 32.818125 
-L 49.842188 32.818125 
-Q 48.042188 32.818125 48.042188 34.618125 
-L 48.042188 87.722344 
-Q 48.042188 89.522344 49.842188 89.522344 
+     <path d="M 528.352188 89.522344 
+L 698.722188 89.522344 
+Q 700.522188 89.522344 700.522188 87.722344 
+L 700.522188 34.618125 
+Q 700.522188 32.818125 698.722188 32.818125 
+L 528.352188 32.818125 
+Q 526.552188 32.818125 526.552188 34.618125 
+L 526.552188 87.722344 
+Q 526.552188 89.522344 528.352188 89.522344 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="line2d_41">
-     <path d="M 51.642188 40.106719 
-L 60.642188 40.106719 
-L 69.642188 40.106719 
+     <path d="M 530.152188 40.106719 
+L 539.152188 40.106719 
+L 548.152188 40.106719 
 " style="fill: none; stroke: #1f77b4; stroke-width: 1.8; stroke-linecap: square"/>
     </g>
     <g id="text_22">
      <!-- Terrain profile -->
-     <g style="fill: #ffffff" transform="translate(76.842188 43.256719) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(555.352188 43.256719) scale(0.09 -0.09)">
       <defs>
        <path id="DejaVuSans-37" d="M -19 4666 
 L 3928 4666 
@@ -1787,14 +1787,14 @@ z
      </g>
     </g>
     <g id="line2d_42">
-     <path d="M 51.642188 53.608828 
-L 60.642188 53.608828 
-L 69.642188 53.608828 
+     <path d="M 530.152188 53.608828 
+L 539.152188 53.608828 
+L 548.152188 53.608828 
 " style="fill: none; stroke-dasharray: 5.92,2.56; stroke-dashoffset: 0; stroke: #ff7f0e; stroke-width: 1.6"/>
     </g>
     <g id="text_23">
      <!-- Mean ground plane ($a$ = 0.034) -->
-     <g style="fill: #ffffff" transform="translate(76.842188 56.758828) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(555.352188 56.758828) scale(0.09 -0.09)">
       <defs>
        <path id="DejaVuSans-Oblique-44" d="M 3438 1997 
 L 3047 0 
@@ -1867,12 +1867,12 @@ z
     </g>
     <g id="line2d_43">
      <g>
-      <use xlink:href="#mdf1c090fbf" x="60.642188" y="67.109531" style="fill: #d62728; stroke: #d62728"/>
+      <use xlink:href="#mdf1c090fbf" x="539.152188" y="67.109531" style="fill: #d62728; stroke: #d62728"/>
      </g>
     </g>
     <g id="text_24">
      <!-- source -->
-     <g style="fill: #ffffff" transform="translate(76.842188 70.259531) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(555.352188 70.259531) scale(0.09 -0.09)">
       <use xlink:href="#DejaVuSans-56"/>
       <use xlink:href="#DejaVuSans-52" transform="translate(52.09375 0)"/>
       <use xlink:href="#DejaVuSans-58" transform="translate(113.28125 0)"/>
@@ -1883,12 +1883,12 @@ z
     </g>
     <g id="line2d_44">
      <g>
-      <use xlink:href="#ma0705a1263" x="60.642188" y="80.610234" style="fill: #1f77b4; stroke: #1f77b4"/>
+      <use xlink:href="#ma0705a1263" x="539.152188" y="80.610234" style="fill: #1f77b4; stroke: #1f77b4"/>
      </g>
     </g>
     <g id="text_25">
      <!-- receiver -->
-     <g style="fill: #ffffff" transform="translate(76.842188 83.760234) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(555.352188 83.760234) scale(0.09 -0.09)">
       <use xlink:href="#DejaVuSans-55"/>
       <use xlink:href="#DejaVuSans-48" transform="translate(38.90625 0)"/>
       <use xlink:href="#DejaVuSans-46" transform="translate(100.4375 0)"/>

@@ -186,6 +186,16 @@ decimal-comma:
 figure-decimal-point:
 	$(PYTHON) scripts/check_figure_decimal_point.py
 
+# A legend is an opaque plate placed by hand and sized by its longest label,
+# which is a defect waiting to happen in a bilingual corpus: the Spanish label
+# is routinely half again as long, so a box that clears the data in one
+# language reaches back over it in the other, and the drawing passes every
+# other gate while the reader loses a reading. This reads the committed SVGs
+# for a plotted point under a legend frame, so it costs seconds and needs no
+# `make graphs` first. Stdlib only.
+figure-legends:
+	$(PYTHON) scripts/check_figure_legends.py
+
 # The Python fences of a documentation page form one sequential example, and
 # one shipped page used names its own figure block defined further down --
 # while a same-named variable from a different room sat in scope, so reading
@@ -276,6 +286,7 @@ figures:
 	$(MAKE) figure-language
 	$(MAKE) figure-annotations
 	$(MAKE) figure-decimal-point
+	$(MAKE) figure-legends
 	$(PYTHON) scripts/check_figures.py
 
 # Regenerate the Tier-1 documentation animations (WebM for the site, GIF for
@@ -477,5 +488,5 @@ check: lint security test
 	animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
-	fence-names decimal-comma figure-decimal-point control-characters hazards dead-constants \
+	fence-names decimal-comma figure-decimal-point figure-legends control-characters hazards dead-constants \
 	conformance-rows conformance-vocabulary parameter-units published-sources

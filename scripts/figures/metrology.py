@@ -1113,7 +1113,7 @@ def generate_runs_test(output_dir: str) -> None:
     rng = np.random.default_rng(3)
     sequences = [rng.standard_normal(40), np.tile([1.0, -1.0], 10)]
 
-    _fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.4))
+    fig, axes = plt.subplots(1, 2, figsize=(12.5, 5.4))
     for ax, seq in zip(axes, sequences, strict=True):
         res = metrology.trend_test(seq, method="runs")
         idx = np.arange(1, seq.size + 1)
@@ -1154,10 +1154,23 @@ def generate_runs_test(output_dir: str) -> None:
         ax.set_ylabel("Sequence value")
         ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
         ax.set_axisbelow(True)
-        ax.legend(loc="lower left", fontsize=8.5)
-    plt.suptitle(
-        "Runs Test About the Median (Wald & Wolfowitz)",
+    # One legend for the two panels, over the figure rather than inside an
+    # axes. The right panel alternates between the two extremes at every
+    # sample, so it has no empty corner at all: a box anywhere inside it sits
+    # on a point, and the one that used to sit in the bottom left covered two.
+    handles, labels = axes[0].get_legend_handles_labels()
+    plt.suptitle("Runs Test About the Median (Wald & Wolfowitz)")
+    # Room for the legend under the two x labels, which is the one strip of
+    # the figure neither panel draws in.
+    plt.tight_layout(rect=(0.0, 0.07, 1.0, 1.0))
+    fig.legend(
+        handles,
+        labels,
+        loc="lower center",
+        bbox_to_anchor=(0.5, 0.005),
+        ncol=len(labels),
+        fontsize=8.5,
+        frameon=False,
     )
-    plt.tight_layout()
     save_figure(output_dir, "runs_test.svg")
     plt.close()

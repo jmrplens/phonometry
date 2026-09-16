@@ -2755,30 +2755,30 @@ L 886.163437 26.798125
    </g>
    <g id="legend_2">
     <g id="patch_14">
-     <path d="M 494.125781 64.799688 
-L 630.246094 64.799688 
-Q 632.246094 64.799688 632.246094 62.799688 
-L 632.246094 33.798125 
-Q 632.246094 31.798125 630.246094 31.798125 
-L 494.125781 31.798125 
-Q 492.125781 31.798125 492.125781 33.798125 
-L 492.125781 62.799688 
-Q 492.125781 64.799688 494.125781 64.799688 
+     <path d="M 618.584453 64.799688 
+L 754.704766 64.799688 
+Q 756.704766 64.799688 756.704766 62.799688 
+L 756.704766 33.798125 
+Q 756.704766 31.798125 754.704766 31.798125 
+L 618.584453 31.798125 
+Q 616.584453 31.798125 616.584453 33.798125 
+L 616.584453 62.799688 
+Q 616.584453 64.799688 618.584453 64.799688 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="line2d_123">
-     <path d="M 496.125781 39.896563 
-L 506.125781 39.896563 
-L 516.125781 39.896563 
+     <path d="M 620.584453 39.896563 
+L 630.584453 39.896563 
+L 640.584453 39.896563 
 " style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m49466b02c9" x="506.125781" y="39.896563" style="fill: #1f77b4; stroke: #1f77b4"/>
+      <use xlink:href="#m49466b02c9" x="630.584453" y="39.896563" style="fill: #1f77b4; stroke: #1f77b4"/>
      </g>
     </g>
     <g id="text_48">
      <!-- Campo libre (frontal) -->
-     <g style="fill: #ffffff" transform="translate(524.125781 43.396563) scale(0.1 -0.1)">
+     <g style="fill: #ffffff" transform="translate(648.584453 43.396563) scale(0.1 -0.1)">
       <defs>
        <path id="DejaVuSans-26" d="M 4122 4306 
 L 4122 3641 
@@ -2826,17 +2826,17 @@ z
      </g>
     </g>
     <g id="line2d_124">
-     <path d="M 496.125781 54.897344 
-L 506.125781 54.897344 
-L 516.125781 54.897344 
+     <path d="M 620.584453 54.897344 
+L 630.584453 54.897344 
+L 640.584453 54.897344 
 " style="fill: none; stroke-dasharray: 5.55,2.4; stroke-dashoffset: 0; stroke: #d62728; stroke-width: 1.5"/>
      <g>
-      <use xlink:href="#mc3df89cc81" x="506.125781" y="54.897344" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
+      <use xlink:href="#mc3df89cc81" x="630.584453" y="54.897344" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
      </g>
     </g>
     <g id="text_49">
      <!-- Campo difuso -->
-     <g style="fill: #ffffff" transform="translate(524.125781 58.397344) scale(0.1 -0.1)">
+     <g style="fill: #ffffff" transform="translate(648.584453 58.397344) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-26"/>
       <use xlink:href="#DejaVuSans-44" transform="translate(69.828125 0)"/>
       <use xlink:href="#DejaVuSans-50" transform="translate(131.109375 0)"/>

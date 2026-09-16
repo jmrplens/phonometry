@@ -1955,30 +1955,30 @@ z
    </g>
    <g id="legend_1">
     <g id="patch_8">
-     <path d="M 65.745313 381.933437 
-L 241.214375 381.933437 
-Q 243.014375 381.933437 243.014375 380.133437 
-L 243.014375 353.672031 
-Q 243.014375 351.872031 241.214375 351.872031 
-L 65.745313 351.872031 
-Q 63.945313 351.872031 63.945313 353.672031 
-L 63.945313 380.133437 
-Q 63.945313 381.933437 65.745313 381.933437 
+     <path d="M 523.31625 62.879531 
+L 698.785313 62.879531 
+Q 700.585313 62.879531 700.585313 61.079531 
+L 700.585313 34.618125 
+Q 700.585313 32.818125 698.785313 32.818125 
+L 523.31625 32.818125 
+Q 521.51625 32.818125 521.51625 34.618125 
+L 521.51625 61.079531 
+Q 521.51625 62.879531 523.31625 62.879531 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="line2d_66">
-     <path d="M 67.545313 359.520625 
-L 76.545313 359.520625 
-L 85.545313 359.520625 
+     <path d="M 525.11625 40.466719 
+L 534.11625 40.466719 
+L 543.11625 40.466719 
 " style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m6a7671b2ea" x="76.545313" y="359.520625" style="fill: #1f77b4; stroke: #1f77b4"/>
+      <use xlink:href="#m6a7671b2ea" x="534.11625" y="40.466719" style="fill: #1f77b4; stroke: #1f77b4"/>
      </g>
     </g>
     <g id="text_21">
      <!-- Duro (asfalto/hormigón, clase G) -->
-     <g style="fill: #ffffff" transform="translate(92.745313 362.670625) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(550.31625 43.616719) scale(0.09 -0.09)">
       <defs>
        <path id="DejaVuSans-b5" d="M 1959 3097 
 Q 1497 3097 1228 2736 
@@ -2068,17 +2068,17 @@ z
      </g>
     </g>
     <g id="line2d_67">
-     <path d="M 67.545313 373.021328 
-L 76.545313 373.021328 
-L 85.545313 373.021328 
+     <path d="M 525.11625 53.967422 
+L 534.11625 53.967422 
+L 543.11625 53.967422 
 " style="fill: none; stroke: #d62728; stroke-width: 2; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m74de26de3f" x="76.545313" y="373.021328" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
+      <use xlink:href="#m74de26de3f" x="534.11625" y="53.967422" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
      </g>
     </g>
     <g id="text_22">
      <!-- Blando (hierba/pasto, clase D) -->
-     <g style="fill: #ffffff" transform="translate(92.745313 376.171328) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(550.31625 57.117422) scale(0.09 -0.09)">
       <use xlink:href="#DejaVuSans-25"/>
       <use xlink:href="#DejaVuSans-4f" transform="translate(68.609375 0)"/>
       <use xlink:href="#DejaVuSans-44" transform="translate(96.390625 0)"/>

@@ -2073,30 +2073,30 @@ z
    </g>
    <g id="legend_1">
     <g id="patch_8">
-     <path d="M 65.745313 381.933437 
-L 239.27375 381.933437 
-Q 241.07375 381.933437 241.07375 380.133437 
-L 241.07375 354.032031 
-Q 241.07375 352.232031 239.27375 352.232031 
-L 65.745313 352.232031 
-Q 63.945313 352.232031 63.945313 354.032031 
-L 63.945313 380.133437 
-Q 63.945313 381.933437 65.745313 381.933437 
+     <path d="M 525.256875 62.519531 
+L 698.785313 62.519531 
+Q 700.585313 62.519531 700.585313 60.719531 
+L 700.585313 34.618125 
+Q 700.585313 32.818125 698.785313 32.818125 
+L 525.256875 32.818125 
+Q 523.456875 32.818125 523.456875 34.618125 
+L 523.456875 60.719531 
+Q 523.456875 62.519531 525.256875 62.519531 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="line2d_66">
-     <path d="M 67.545313 359.520625 
-L 76.545313 359.520625 
-L 85.545313 359.520625 
+     <path d="M 527.056875 40.106719 
+L 536.056875 40.106719 
+L 545.056875 40.106719 
 " style="fill: none; stroke: #1f77b4; stroke-width: 2; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m6a7671b2ea" x="76.545313" y="359.520625" style="fill: #1f77b4; stroke: #1f77b4"/>
+      <use xlink:href="#m6a7671b2ea" x="536.056875" y="40.106719" style="fill: #1f77b4; stroke: #1f77b4"/>
      </g>
     </g>
     <g id="text_21">
      <!-- Hard (asphalt/concrete, class G) -->
-     <g style="fill: #ffffff" transform="translate(92.745313 362.670625) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(552.256875 43.256719) scale(0.09 -0.09)">
       <defs>
        <path id="DejaVuSans-4f" d="M 603 4863 
 L 1178 4863 
@@ -2148,17 +2148,17 @@ z
      </g>
     </g>
     <g id="line2d_67">
-     <path d="M 67.545313 373.021328 
-L 76.545313 373.021328 
-L 85.545313 373.021328 
+     <path d="M 527.056875 53.607422 
+L 536.056875 53.607422 
+L 545.056875 53.607422 
 " style="fill: none; stroke: #d62728; stroke-width: 2; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m74de26de3f" x="76.545313" y="373.021328" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
+      <use xlink:href="#m74de26de3f" x="536.056875" y="53.607422" style="fill: #d62728; stroke: #d62728; stroke-linejoin: miter"/>
      </g>
     </g>
     <g id="text_22">
      <!-- Soft (grass/pasture, class D) -->
-     <g style="fill: #ffffff" transform="translate(92.745313 376.171328) scale(0.09 -0.09)">
+     <g style="fill: #ffffff" transform="translate(552.256875 56.757422) scale(0.09 -0.09)">
       <use xlink:href="#DejaVuSans-36"/>
       <use xlink:href="#DejaVuSans-52" transform="translate(63.484375 0)"/>
       <use xlink:href="#DejaVuSans-49" transform="translate(124.671875 0)"/>

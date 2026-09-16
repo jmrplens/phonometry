@@ -43,7 +43,7 @@ natural frequency falls as the square root of the layer's dynamic stiffness
 and rises as the square root of one over the slab's surface mass. Quartering
 $s'$ halves $f_0$, and so does quadrupling the slab mass. A floating floor
 only improves insulation well above $f_0$, which is why the design goal is a
-soft layer under a heavy slab — and why the flat right-hand end of the curve
+soft layer under a heavy slab, and why the flat right-hand end of the curve
 means that a stiffer layer costs less than it looks.*
 
 <details>
@@ -425,14 +425,14 @@ target is to keep $f_0$ below the lowest band of interest.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/floating_floor_transmissibility.svg" alt="Two panels: on the left the load-plate response of the rig against frequency, peaking at 25 hertz for a small excitation and at 22 hertz with a lower peak when over-driven; on the right the improvement of impact insulation against frequency for two resilient layers, rising as thirty times the logarithm of frequency over the natural frequency from 47 hertz and from 32 hertz, with the ideal mass-spring isolation curve showing the amplification below the square root of two times the natural frequency shaded in red" width="92%" />
 
 *Left: the peak the operator reads off the rig, and what over-driving does to
-it — the resonance walks down in frequency and flattens, which is the whole
+it: the resonance walks down in frequency and flattens, which is the whole
 reason for the extrapolation of section 1.1. Right: what the installed floor
 does with the result. Nothing is gained below $\sqrt{2}\,f_0$; the shaded
 region is where an undamped mass-spring floor would be worse than no floating
 floor at all, and the ISO 12354-2 law truncates that to zero rather than
 predicting the ideal peak, because a real screed on a real layer is damped.
 Halving $s'$ moves $f_0$ down by $\sqrt{2}$ and lifts the whole curve by about
-5 dB — 30.8 dB against 35.6 dB at 500 Hz for the two layers drawn.*
+5 dB: 30.8 dB against 35.6 dB at 500 Hz for the two layers drawn.*
 
 <details>
 <summary>Show the code for this figure</summary>

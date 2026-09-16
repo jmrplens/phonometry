@@ -63,6 +63,9 @@ DEFAULT_ROOTS = (
 
 #: Bold markers, which are not italics and are taken out before counting.
 _BOLD = re.compile(r"\*\*")
+#: A list bullet written with an asterisk, which is not an italic marker
+#: either: left in, it opens a span that swallows the rest of the item.
+_BULLET = re.compile(r"^\s*\*(?=\s)")
 #: A part number after the dash, which only a standard's title prints.
 _PART_AFTER_DASH = re.compile(EM_DASH + r"\s*(?:Part|Teil|Partie|Parte)\s+\d")
 #: A dash inside quotation marks or guillemets: the text reproduces a source.
@@ -100,8 +103,11 @@ def _outside_italics(line: str, *, italic_open: bool) -> tuple[str, bool]:
     A title in italics is a citation reproduced as printed, and the
     bibliography wraps a title over several lines, so the italic state is
     carried from one line to the next within a paragraph.
+
+    Only a citation, though: see :func:`_is_caption`, which is what tells the
+    two italics of this corpus apart.
     """
-    text = _BOLD.sub("", line)
+    text = _BULLET.sub(lambda m: " " * len(m.group()), _BOLD.sub("", line))
     kept: list[str] = []
     for char in text:
         if char == "*":
@@ -154,8 +160,31 @@ def _outside_quotations(line: str, *, closer: str | None) -> tuple[str, str | No
     return "".join(kept), closer
 
 
+def _is_caption(line: str) -> bool:
+    """Whether the paragraph this line opens is one italic span, end to end.
+
+    The two italics of this corpus are not the same thing. A citation sets a
+    title in italics *inside* a sentence, and the title carries whatever dash
+    the document prints. A figure caption sets the whole paragraph in italics,
+    and it is the maintainer's own prose, which the house style writes without
+    the em dash like every other sentence. Exempting the second along with the
+    first is what let 262 dashes stand in the published pages, one to a caption,
+    where no other gate could see them.
+
+    The paragraph's first line is what says which: a caption opens with the
+    ``*`` that opens the span, a citation opens with the text that introduces
+    the title. Bold (``**``) and a list bullet (``* ``) are not italics at all.
+    """
+    stripped = line.lstrip()
+    return (
+        stripped.startswith("*")
+        and not stripped.startswith("**")
+        and not stripped.startswith("* ")
+    )
+
+
 def _strip_exempt_markdown(
-    line: str, *, italic_open: bool, quote_closer: str | None
+    line: str, *, italic_open: bool, quote_closer: str | None, caption: bool = False
 ) -> tuple[str, bool, str | None]:
     """The line with every exempt use of the dash removed, and the carried state."""
     if _TITLE_LINE.match(line):
@@ -164,7 +193,13 @@ def _strip_exempt_markdown(
     if _TABLE_ROW.match(line):
         line = "|".join(_PLACEHOLDER_ITEM.sub("", cell) for cell in line.split("|"))
     line, quote_closer = _outside_quotations(line, closer=quote_closer)
-    line, italic_open = _outside_italics(line, italic_open=italic_open)
+    if caption:
+        # The whole paragraph is the span, so there is no "outside" to keep:
+        # the state still has to be carried, because the closing ``*`` may be
+        # several lines below.
+        _, italic_open = _outside_italics(line, italic_open=italic_open)
+    else:
+        line, italic_open = _outside_italics(line, italic_open=italic_open)
     if _PART_AFTER_DASH.search(line):
         return "", italic_open, quote_closer
     return line, italic_open, quote_closer
@@ -178,6 +213,8 @@ def markdown_hits(text: str) -> list[int]:
     italic_open = False
     quote_closer: str | None = None
     in_reference = False
+    caption = False
+    opening = True
     for number, line in enumerate(text.splitlines(), start=1):
         stripped = line.lstrip()
         if stripped.startswith(("```", "~~~")):
@@ -193,13 +230,17 @@ def markdown_hits(text: str) -> list[int]:
             italic_open = False
             quote_closer = None
             in_reference = False
+            caption = False
+            opening = True
             continue
         if _REFERENCE_ENTRY.match(line):
             in_reference = True
         elif not line.startswith((" ", "\t")):
             in_reference = False
+        if opening:
+            caption, opening = _is_caption(line), False
         prose, italic_open, quote_closer = _strip_exempt_markdown(
-            line, italic_open=italic_open, quote_closer=quote_closer
+            line, italic_open=italic_open, quote_closer=quote_closer, caption=caption
         )
         if EM_DASH in prose and not in_reference:
             hits.append(number)

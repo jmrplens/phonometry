@@ -257,6 +257,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB` were published in the same release and
   read by nothing; they are what the first of the three compares against.
 
+- The em dash guard exempted italics, and a figure caption is a whole paragraph
+  in italics. The exemption is there for a citation, which sets a title in
+  italics inside a sentence and reproduces whatever dash the document prints;
+  it was swallowing the captions with it, and 262 dashes stood in the published
+  prose of 102 pages where no other gate could see them. The guard tells the two
+  apart by the paragraph: a caption opens with the asterisk that opens its span,
+  a citation opens with the text that introduces the title. A list bullet
+  written with an asterisk is not an italic marker either, which had been
+  exempting the rest of the item.
+
+  The 262 are rewritten the way the house style asks: a parenthesis where the
+  clause explains, a colon where it announces, a comma where it qualifies, and a
+  sentence of its own where the dash was joining two of them.
 - **The three verbs of a judgement have a written criterion.** Of the public
   functions only a handful carry a verb, and they are the ones that return a
   judgement rather than a magnitude, in three families whose boundary was

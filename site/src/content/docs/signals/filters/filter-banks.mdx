@@ -363,7 +363,7 @@ For block processing pass `stateful=True` (the same convention as
 
 *The three sections of the snippet (grey) and the cascade they sum to; the
 lower panel is the phase the magnitude costs. Any result in the library redraws
-itself this way — `res.plot()` above produced exactly this figure.*
+itself this way, `res.plot()` above produced exactly this figure.*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/parametric_eq_family.svg" alt="Magnitude responses of the RBJ Audio EQ Cookbook biquad family: peaking, shelves, low/high-pass, band-pass and notch" width="80%" />
 
@@ -440,7 +440,7 @@ spl_c2, _, xb_cheby2 = filters.octave_filter(
 *The top panel is the input, the middle panels are its band signals under
 **Butterworth** (solid) and **Chebyshev II** (dashed), and the bottom panel is
 the impulse response of the 1 kHz band of each. Both impulse responses decay to
-zero — that is the stability check — but the Chebyshev II ring lasts visibly
+zero (that is the stability check) but the Chebyshev II ring lasts visibly
 longer, which is the transient price of its steeper skirt.*
 
 <details>

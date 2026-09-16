@@ -231,8 +231,8 @@ res.plot()
 *The same twenty-segment sequence tells a stationarity story with the same
 arithmetic. The steady record's segment mean squares stay between 0.982 and
 1.034 and give $A = 91$, inside $(64, 125]$. The 20 % gain ramp lifts them from
-1.016 to 1.476 — a change of a factor 1.45, which no eye would call dramatic on
-a time trace — and $A$ collapses to 7. Twenty numbers and a pair counted
+1.016 to 1.476 (a change of a factor 1.45, which no eye would call dramatic on
+a time trace) and $A$ collapses to 7. Twenty numbers and a pair counted
 against a table are enough; nothing about the record's bandwidth or units
 enters.*
 
@@ -328,7 +328,7 @@ the test *accept* a record it should reject. It is worth seeing:
 gets, and the full-band mean square cannot see it: the twenty segment values span
 0.4998 to 0.5002 and the count $A = 96$ sits comfortably inside $(64, 125]$.
 Band-limit the same record to 200-400 Hz first and the segment values collapse
-once the glide leaves the band, giving $A = 173$ — above the upper bound, and
+once the glide leaves the band, giving $A = 173$, above the upper bound, and
 rejected. The remedy in the caveat above is not a formality: what the test sees
 depends entirely on the statistic and the band you hand it.*
 
@@ -527,7 +527,7 @@ samples of the same sign goes uncounted.
 and the same 800-1200 Hz band, each drawn with its own Rice curve so the
 deviation is a model mismatch and not a scaling artefact. The Gaussian reference
 sits on the curve at every level. Hard clipping at 2.5σ leaves the rates
-untouched below the clip level and removes them entirely above it — the signature
+untouched below the clip level and removes them entirely above it: the signature
 is a cliff, not a slope. Sparse 6σ spikes lift both tails above the curve beyond
 about 2.5σ while barely moving the centre. Right: the companion warning of
 section 5, measured. A record that is ideal low-pass noise to 2 kHz plus a flat
@@ -588,9 +588,8 @@ res.plot()   # empirical exceedance against the Rice mixture (figure below)
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/rice_peak_distribution.svg" alt="Peak-height exceedance probability of low-pass Gaussian noise on a logarithmic axis against the standardized peak height from minus two point five to four point five: the empirical staircase from half a million samples follows the Rice mixture curve for irregularity factor zero point seven four six, clearly below the dashed Rayleigh limit and above the dotted Gaussian limit, with a visible fraction of negative maxima" width="82%" loading="eager" />
 
 *One number decides which curve the peaks follow. Ideal low-pass noise has the
-closed-form $r = \sqrt5/3 = 0.745$, and the record measures 0.746 — which is
-also why 12.6 % of its 39 534 maxima are **negative**, an impossibility under
-Rayleigh. The empirical staircase sits on the Rice mixture for that $r$ and
+closed-form $r = \sqrt5/3 = 0.745$, and the record measures 0.746, which is
+also why 12.6 % of its 39 534 maxima are **negative**, an impossibility underRayleigh. The empirical staircase sits on the Rice mixture for that $r$ and
 between the two limits everywhere: the chance of a peak beyond $4\sigma$ is
 $2.5\times10^{-4}$, a quarter below the Rayleigh $e^{-8} = 3.4\times10^{-4}$.
 Assuming the Rayleigh limit on a record that is not narrowband over-predicts the

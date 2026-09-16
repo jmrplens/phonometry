@@ -222,7 +222,7 @@ solver exactly like a modelled one.
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/porous_model_comparison.svg" alt="Left panel: the normalised characteristic impedance of a 20 kPa s per square metre material under Delany-Bazley, Miki and Johnson-Champoux-Allard from 20 hertz to 20 kilohertz on log-log axes, with the 0.01 to 1 fit window in the absorber variable shaded; the three curves overlie inside the window and separate below it. Right panel: the real part of the input impedance of a 50 mm hard-backed layer under the same three models, where the Delany-Bazley curve goes negative below 74.6 hertz while Miki and JCA stay positive" width="90%" />
 
 *The three models, and what "outside the fit range" costs. Inside the
-$0.01 < X < 1$ window the curves are practically the same material — which is
+$0.01 < X < 1$ window the curves are practically the same material, which is
 why the one-parameter fits are still used. Below it they part company, and the
 right panel shows the consequence in the quantity a designer actually uses: for
 this 50 mm hard-backed layer Delany–Bazley returns a **negative** resistance
@@ -499,7 +499,7 @@ has no equivalent-fluid counterpart at all.
 *The three waves the Biot theory predicts where an equivalent fluid predicts
 one, for the Allard & Atalla Table 6.1 glass wool. The lower panel is what
 names them: $|\mu_\mathrm{a}|$ never falls below 42, so in the airborne wave the pore
-fluid moves and the frame barely does — that is the wave the equivalent-fluid
+fluid moves and the frame barely does: that is the wave the equivalent-fluid
 models already describe. $|\mu_\mathrm{b}|$ sits on 1, so in the frame-borne wave fluid
 and frame move together, and no equivalent fluid has such a branch at all. The
 dotted line at 495 Hz is where the solver's two compressional roots exchange
@@ -1007,7 +1007,7 @@ print(round(materials.perforation_end_correction(0.05), 3))   # 0.575 vs 0.85
 $x(f)$ and the cavity reactance $-\cot(\omega D/c_0)$ cross at 677 Hz: that
 crossing is the resonance, and it is placed by the geometry. What happens
 *at* the crossing is set by the resistance there, $r = 1.53$, which gives
-$4r/(1+r)^2 = 0.96$ — the peak the stack computes, recovered from two numbers.
+$4r/(1+r)^2 = 0.96$: the peak the stack computes, recovered from two numbers.
 A panel with millimetre holes has $r$ sixteen times smaller, so its crossing
 would be just as sharp and far less absorbent, which is the whole argument for
 either sub-millimetre holes or porous backing.*
@@ -1160,8 +1160,8 @@ solid bulk-reacting curve (`layered_absorber(..., angle_rad=theta)`, in which th
 fluid layers refract) shadowed by the locally reacting curve obtained from the
 same normal-incidence surface impedance. The two agree at normal incidence by
 construction, separate through the 40°–75° range where the Paris integrand
-carries most of its weight — the bulk model absorbing more, because the wave
-refracts and travels further inside the layer — and converge again as both
+carries most of its weight (the bulk model absorbing more, because the wave
+refracts and travels further inside the layer) and converge again as both
 collapse towards zero at grazing. The choice of reaction model is therefore a
 choice about the part of the integral that matters most. Right: the two integrated results over frequency, with the
 0.951 maximum of the locally reacting closed form drawn as a ceiling no

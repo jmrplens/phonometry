@@ -326,8 +326,8 @@ travelled with the samples.
 
 *What `read()` returns besides samples. The waveform is in pascals because
 the sidecar's calibration was applied on read; the card is the `bext`
-provenance of EBU Tech 3285 — who recorded it, when, and at which sample
-since midnight — plus the container facts and the calibration source. None
+provenance of EBU Tech 3285, who recorded it, when, and at which sample
+since midnight, plus the container facts and the calibration source. None
 of it had to be typed back in.*
 
 <details>

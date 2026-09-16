@@ -261,7 +261,7 @@ Where the STI characterizes a transmission channel, the SII (ANSI S3.5-1997) pre
 
 *The importance function is where the speech cues are, and all four band
 procedures below agree about it: the same rise to a maximum near 2 kHz, the same
-total of 1.0 redistributed over wider or narrower bands — which is why the
+total of 1.0 redistributed over wider or narrower bands, which is why the
 octave steps stand at 0.265 where the one-third-octave steps stand at 0.090. A
 band lost at 2 kHz costs several times what the same band costs at 160 Hz.*
 
@@ -275,7 +275,7 @@ The same chain runs over the standard's other three band tables, selected with `
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum.svg" alt="The four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) as one labelled family: the standard speech spectrum level in dB SPL over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum" width="90%"></picture>
 
-*The four vocal efforts, in spectrum level rather than band level — which is why
+*The four vocal efforts, in spectrum level rather than band level, which is why
 the normal-effort curve passes through 25.01 dB at 1 kHz rather than through the
 60-odd dB a talker measures as a band level at a metre. Raising the effort does
 not lift the family uniformly: shouting adds 27.6 dB at 2.5 kHz, 26.3 dB at
@@ -322,7 +322,7 @@ The Annex D worked examples (Tables D.1–D.4; e.g. 100 dB / 40 yr at 3 kHz: 29/
 at 4 kHz is what makes noise-induced loss recognisable in a clinic, and it is
 here only because $L_0$ is lowest (75 dB) in that band. Mind the fractile
 direction the paragraph above states: the edge of the shaded band showing the
-**deeper** shift is the library's `fractile=0.90`, the most susceptible tenth —
+**deeper** shift is the library's `fractile=0.90`, the most susceptible tenth,
 which ISO 1999 and its Annex D column headings label $Q = 10\ \%$. At 4 kHz
 this case runs 19.5 / 26.0 / 36.0 dB at `fractile` 0.10 / 0.50 / 0.90.*
 

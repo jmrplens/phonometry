@@ -457,7 +457,7 @@ result.plot(quantity="directivity")  # polar response on the 25 dB circle
 per 25 dB, which is what makes two datasheets comparable by eye. The shaded band
 is the $\pm$ tolerance the caller declares (`tolerance_db`, 3 dB here) and the
 markers are the clause 21.2 effective-range edges, read against the $-10$ dB
-line referred to the octave of maximum sensitivity — not to the mean of the
+line referred to the octave of maximum sensitivity, not to the mean of the
 whole curve.*
 
 <details>
@@ -485,7 +485,7 @@ plt.show()
 
 *The peak at 52 Hz in this example is the driver's fundamental resonance, where
 the moving mass and the suspension compliance exchange energy and the motor's
-back-EMF is largest — the rating is not allowed to be read there. The 80 % line
+back-EMF is largest: the rating is not allowed to be read there. The 80 % line
 is the clause 16.1 acceptance limit, and the minimum modulus, not the rated one,
 is the load the amplifier actually sees.*
 
@@ -544,8 +544,8 @@ plt.show()
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/loudspeaker_directivity.svg" alt="Loudspeaker polar directional response at 2000 Hz on the IEC 60263 25 dB reference circle" width="72%" />
 
 *Drawn on the IEC 60263 clause 3 reference circle: the full radius is 25 dB and
-each ring is 5 dB, so the $-6$ dB half-angle — the coverage number a system
-designer works with — can be read straight off. The polar zero is the
+each ring is 5 dB, so the $-6$ dB half-angle (the coverage number a system
+designer works with) can be read straight off. The polar zero is the
 reference-axis level, which is why the drive has to be retrimmed per band while
 the cut is taken.*
 

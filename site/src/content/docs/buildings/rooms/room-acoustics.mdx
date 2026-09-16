@@ -300,12 +300,12 @@ you have to diagnose one.
 
 *Three decays, one axis, all read by `room_parameters`. Left, a single
 exponential at $T$ = 1.0 s: EDT, T20 and T30 all return 1.00 s and the curvature
-is −0.1 %. Middle, a coupled volume — 98 % of the energy decaying at 0.6 s over
-a 2.5 s tail — which puts a visible knee in the Schroeder curve and returns
+is −0.1 %. Middle, a coupled volume: 98 % of the energy decaying at 0.6 s over
+a 2.5 s tail, which puts a visible knee in the Schroeder curve and returns
 EDT 0.72 s, T20 1.78 s, T30 2.18 s and a curvature of **23 %**: no single number
 describes it. Right, the same 1.0 s tail preceded by a cluster of strong early
 reflections in the first 25 ms: T20 and T30 are untouched at 0.99 s and 1.00 s,
-the curvature stays at 0.5 %, and **EDT collapses to 0.58 s** — the seat sounds
+the curvature stays at 0.5 %, and **EDT collapses to 0.58 s**: the seat sounds
 drier than its reverberation time says, and only EDT knows.*
 
 <details>
@@ -393,15 +393,15 @@ The whole budget fits in one drawing, and so does the bias it controls.
 evaluation window plus the 15 dB margin of ISO 3382-1 clause 5.3.3 has to fit
 inside it, which is where 35 dB (T20) and 45 dB (T30) come from. The
 integration stops where the fitted line crosses the background estimate, and the
-tail beyond is replaced by the exponential continuation of the fit — a
+tail beyond is replaced by the exponential continuation of the fit, a
 compensation whose residual bias is positive, which is why phonometry adds a
 further 11 dB and 9 dB of headroom before it calls a band valid.*
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/decay_range_bias.svg" alt="Percentage error of the fitted T20 and T30 against the returned dynamic range from 25 to 80 decibels for a synthetic one second decay: both errors are positive and grow as the dynamic range shrinks, T30 leaving the shaded plus or minus five per cent band below about 54 decibels and T20 below about 46 decibels, with vertical markers at the ISO minima of 35 and 45 decibels and the flagged-invalid region hatched" width="88%" />
 
 *A synthetic $T$ = 1.0 s decay with its noise floor swept, measured with
-`room_parameters`. The bias is always **positive** — the flat noise tail can
-only make the fitted decay look longer — and it grows as the range shrinks:
+`room_parameters`. The bias is always **positive**: the flat noise tail can
+only make the fitted decay look longer, and it grows as the range shrinks:
 +0.4 % at 70 dB, +1.3 % (T30) at 61 dB, +3.1 % at 55 dB, +6.6 % at 46 dB and
 +8.8 % for T20 at 37 dB, just above the ISO minimum. That is the whole argument
 for the tightened flags: at ISO's own 35 dB and 45 dB minima the surviving bias

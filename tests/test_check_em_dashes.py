@@ -120,3 +120,37 @@ def test_dash_in_a_docstring_is_refused() -> None:
 
 def test_dash_in_a_reproduced_title_in_a_docstring_is_exempt() -> None:
     assert ced.python_hits('"""Cites "Acoustics — Part 2: rooms"."""\n') == []
+
+
+def test_a_title_in_italics_inside_a_sentence_is_exempt() -> None:
+    """The citation form: the title is reproduced as the document prints it."""
+    text = "EN 12354-5:2009, *Building acoustics — Estimation of levels*, gives\n"
+    assert ced.markdown_hits(text) == []
+
+
+def test_a_caption_set_entirely_in_italics_is_not() -> None:
+    """The other italics of this corpus: a figure caption, and the house prose."""
+    text = "*The gate as a picture rather than an inequality — drawn in the\nISO 9614-1 naming.*\n"
+    assert ced.markdown_hits(text) == [1]
+
+
+def test_a_caption_carries_its_state_to_the_end_of_the_paragraph() -> None:
+    """The closing asterisk may be several lines below the dash."""
+    text = "*The two routes on one problem,\nand the price of each — which is the\npoint.*\n"
+    assert ced.markdown_hits(text) == [2]
+
+
+def test_bold_and_a_list_bullet_are_not_a_caption() -> None:
+    """``**`` opens bold and ``* `` a list item; neither opens an italic span."""
+    assert ced.markdown_hits("**Bold** text — and a dash.\n") == [1]
+    assert ced.markdown_hits("* A list item — with a dash.\n") == [1]
+
+
+def test_a_citation_inside_a_caption_still_carries_its_own_dash() -> None:
+    """A caption may quote a title, and the title keeps the dash it prints.
+
+    The quotation marks are what say so, which is the rule the guard already
+    had; the italics no longer say anything on their own.
+    """
+    text = '*Read against "Acoustics — Part 2: rooms", the curve is flat.*\n'
+    assert ced.markdown_hits(text) == []

@@ -272,7 +272,7 @@ repository. Click the preview to open the PDF:
 *Acoustic inspection fiche (`ActivityAssessment.report`), the three per-period
 criteria of RD 1367/2007 and the boxed verdict. The day period clears the
 phase criterion (59 against 60) and the daily one (57 against 58) and fails
-only the annual $L_{\mathrm{K},x}$ (56 against 55) — which is why the fiche prints all
+only the annual $L_{\mathrm{K},x}$ (56 against 55), which is why the fiche prints all
 three: any one of them is enough to fail.*
 
 ## What this guide covers

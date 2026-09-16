@@ -148,7 +148,7 @@ is a pity, because the balance is easier to see than to read:
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/critical_coupling_impedance.svg" alt="Left panel: the real and imaginary parts of the normalised surface impedance at 300 hertz against slit height over half to two and a half times the solved value, with horizontal guides at one and zero and the solved height marked where both are met, and a companion axis showing the absorption at 300 hertz peaking exactly there. Right panel: the impedance locus in the complex plane from 150 to 500 hertz for the under-damped, critically coupled and over-damped slits, with the matched point one plus zero j marked; the critically coupled loop passes through it and the other two miss it on either side" width="90%" />
 
 *What `critical_coupling_design` is solving. Left: sweep the slit height at
-the design frequency and the two matching conditions cross the same point —
+the design frequency and the two matching conditions cross the same point,
 $\mathrm{Re}(z) = 1$ and $\mathrm{Im}(z) = 0$ at 0.978 mm, where the
 absorption reaches 1. Right: the same three slits as loci in the complex
 plane. Over-damped and under-damped fail for opposite reasons, and the locus
@@ -445,7 +445,7 @@ on 1 by definition; the loaded one falls to a minimum of 0.08 $c_0$ near
 379 Hz and then climbs steeply as the resonators pass their own resonance at
 485 Hz, above which the propagating branch closes. At the 300 Hz design point
 the phase speed is 0.11 $c_0$ = 37 m/s, which makes the fixed 30 mm depth a
-quarter wavelength at 308 Hz — where the panel resonates. The same 30 mm of
+quarter wavelength at 308 Hz, where the panel resonates. The same 30 mm of
 plain air would be a quarter wave at 2858 Hz, and that ratio is the whole
 argument for the panel being thin. The same curve explains the 2 cm
 metadiffuser panel of the
@@ -540,8 +540,8 @@ resonators along one slit is what the library's own list argument is for:
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/graded_slit_absorber.svg" alt="Absorption against frequency from 120 to 700 hertz for three panels: a single critically coupled cell with one narrow peak reaching 1.0 near 320 hertz, a chain of four graded resonators along one slit with two lobes reaching 1.0 near 150 hertz and 0.95 near 295 hertz, and a chain of four identical resonators with two lower lobes. Shaded bars beneath each curve mark where each exceeds 0.8, totalling 38, 51 and 22 hertz respectively" width="86%" />
 
 *What a chain buys, and what it costs. Measured as the total frequency
-interval above $\alpha = 0.8$ — not as the span between the outermost points,
-which for a chain hides a dip — one cell gives 38 Hz, the four graded
+interval above $\alpha = 0.8$, not as the span between the outermost points,
+which for a chain hides a dip: one cell gives 38 Hz, the four graded
 resonators give 51 Hz in two lobes, and four *identical* resonators of the
 same total depth give only 22 Hz. So the extra stages alone do not buy
 bandwidth: detuning them is what makes the depth pay, which is the whole idea

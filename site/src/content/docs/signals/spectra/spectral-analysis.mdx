@@ -186,7 +186,7 @@ print(round(b_e, 2), int(nperseg), round(record_s))     # 0.49 146969 153
 width, and the peak reads about 8 dB low and far too broad; by 4096 the
 bandwidth is 17.6 Hz and the peak is essentially resolved. The right panel puts
 the two errors on one axis: the bias falls as $B_\mathrm{e}^2$ and the random error rises
-as $n_\mathrm{d}^{-1/2}$, and they are equal near `nperseg = 7400` for this resonance —
+as $n_\mathrm{d}^{-1/2}$, and they are equal near `nperseg = 7400` for this resonance,
 which is the segment length to choose if there is no reason to favour one error
 over the other.*
 
@@ -223,7 +223,7 @@ that section spells out. The factor itself comes from
 
 *What 20 s of record buys, read off the figure. 467 segments of 4096 samples
 give 442 equivalent averages, a normalized random error of 0.047 and a 95 %
-chi-square band 0.81 dB wide — so the ragged estimate is never more than about
+chi-square band 0.81 dB wide, so the ragged estimate is never more than about
 0.8 dB from the smoothed curve anywhere in the decade, and the shaded band, not
 the ripple, is the honest statement of what is known. Both curves fit
 −3.007 dB/octave against the exact −3.01 dB/octave of pink noise. Smoothing
@@ -635,7 +635,7 @@ the Dirichlet kernel evaluated half a bin off center.
 a bin. Going from rectangular to Blackman drops the highest sidelobe from
 −13.3 dB to −58.1 dB while the ENBW widens from 1.000 to 1.727 bins and the
 −3 dB main lobe from 0.886 to 1.644 bins. Hann sits where the module's default
-sits: −31.5 dB for 1.500 bins. Read the two axes together — a narrow main lobe
+sits: −31.5 dB for 1.500 bins. Read the two axes together, a narrow main lobe
 separates two tones of similar level, a low sidelobe floor finds a weak tone
 beside a strong one, and no window does both.*
 
@@ -755,7 +755,7 @@ confidence band is visibly the wider of the two and its curve the rougher, while
 the 7-taper adaptive estimate carries 13.7 equivalent degrees of freedom from
 the same record. Right, the other reason to reach for it: a 60 dB tone over a
 pink floor. The Hann taper leaves a broader skirt around the tone than the
-adaptive weights do, and the price is printed on the right-hand axis — the
+adaptive weights do, and the price is printed on the right-hand axis, the
 equivalent degrees of freedom fall wherever the weights bought that protection,
 which is exactly what widens the confidence interval there.*
 

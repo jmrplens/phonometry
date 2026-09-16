@@ -104,7 +104,7 @@ $m = \alpha/(10 \log_{10} e)$, exposed as `air_attenuation_m`.
 *The humidity claim of the paragraph above, drawn: four atmospheres, and a
 spread far wider than the $\pm 10$ % claimed for any one of them. At 2 kHz the
 coefficient is 9.9 dB/km at the 20 °C / 50 % reference and **45.5 dB/km** at the
-same temperature and 10 % humidity — a factor 4.6 from humidity alone, worth
+same temperature and 10 % humidity, a factor 4.6 from humidity alone, worth
 36 dB over a kilometre. Note which way it goes: drying the air *increases* the
 mid-band attenuation, because the oxygen relaxation frequency falls with
 humidity and drags its peak down into the band. Temperature moves the curves far
@@ -208,7 +208,7 @@ effective-day level (see the [Occupational Noise Exposure guide](../../perceptio
 
 *What the budget buys: the Annex D worked day, its three task contributions, the
 energy-summed $L_\mathrm{EX,8h}$ and the band up to $L_\mathrm{EX,8h} + U$ that the one-sided
-95 % interval adds on top. The reported result is the pair, not the line — and
+95 % interval adds on top. The reported result is the pair, not the line, and
 with $U = 2.7$ dB the upper limit sits 2.7 dB above the number, which is enough
 to cross an action value on its own.*
 
@@ -341,7 +341,7 @@ and the two repeated sweeps agree within the Table 2 limit.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/field_indicators_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/field_indicators.svg" alt="ISO 9614-1 field indicators of a ten-position scan over six octave bands: F2 and F3 climb towards low frequency as the field turns reactive, crossing the dashed dynamic-capability line Ld at 125 Hz where F3 also rises above F2, with the field non-uniformity F4 drawn as bars on a twin axis" width="88%"></picture>
 
-*The gate as a picture rather than an inequality — drawn here in the ISO 9614-1
+*The gate as a picture rather than an inequality, drawn here in the ISO 9614-1
 naming, $F_2$ for what Part 2 calls $F_{pI}$. The reactivity indicator climbs
 towards low frequency and crosses the dynamic-capability line at 125 Hz: that
 band fails, and no amount of averaging will rescue it, because the cause is the

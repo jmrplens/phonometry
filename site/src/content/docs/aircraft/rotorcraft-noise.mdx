@@ -174,8 +174,8 @@ h.plot()                                          # fore-aft directivity
 *Why the method needs a hemisphere at all: in the most directive band, 9.4 dB
 separate the loudest measured direction from the quietest, and the lobe sits at
 $\theta \approx 140°$, well aft of the vertical. The three sections on the left show that the directivity is
-frequency-dependent — the low band is nearly flat, the mid band carries the
-lobe, the high band is quiet everywhere — so a single source level cannot stand
+frequency-dependent: the low band is nearly flat, the mid band carries the
+lobe, the high band is quiet everywhere, so a single source level cannot stand
 in for it. Note also what the curves do outside the shaded band: they go flat.
 That is the gap-filling, not measurement.*
 
@@ -371,7 +371,7 @@ blended. The diagonal of the quadrilateral around it flips between the raw and
 the normalised plane, so the raw triangulation blends conditions 5, 6 and 9 and
 the normalised one blends 5, 9 and 10. Both are defensible; only one reproduces
 NORAH. Outside the hull neither blends at all, and the nearest condition is
-adopted whole — which changes the answer without raising anything, and is the
+adopted whole, which changes the answer without raising anything, and is the
 trap worth knowing about.*
 
 <details>
@@ -457,7 +457,7 @@ full_rpm_idle = aircraft.hover_derived_hemisphere(hige, "full_rpm_idle")  # -2.5
 
 *The ring on the left is the only measurement; everything on the right is
 derived from it. The HIGE section starts at the ring's nose value and ends at
-its tail value — that is the constant-φ extension at work — and the other
+its tail value (that is the constant-φ extension at work) and the other
 three sources are the same directivity shifted whole: +12 dB up to HOGE,
 −2.5 dB to full-rpm idle, −12 dB to reduced-rpm idle.*
 
@@ -565,7 +565,7 @@ kin.plot()                            # speed and angle profiles
 
 *The same track, differentiated twice. The bank angle is derived from the
 curvature, which is a second derivative of position, so a few metres of radar
-noise at a 1 s cadence turn a 9.2° turn into 41° of nonsense — and the emission
+noise at a 1 s cadence turn a 9.2° turn into 41° of nonsense, and the emission
 frame is tilted by that angle, so the error goes straight into the source level.
 After spline resampling to 0.5 s the trace shows one clean trough through the
 turn, peaking at 10° against the 9.2° the geometry asks for. Smooth before you
@@ -654,7 +654,7 @@ hemisphere rather than a source level.
 $L_\mathrm{AS,max}$ = 78.5 dB(A) arrives at 64.56 s, a full second **before** the sound
 emitted at the closest point of approach (65.56 s), because the hemisphere's
 loudest direction is reached slightly before abeam. And the 10 dB-down window
-runs 9.4 s up and 11.5 s down about the peak — the retarded time compresses the
+runs 9.4 s up and 11.5 s down about the peak: the retarded time compresses the
 approach and stretches the departure. Integrating all 20.9 s of it and
 normalising to one second gives SEL = 88.8 dB(A), 10.3 dB above the peak the
 meter would show.*
@@ -723,7 +723,7 @@ model then uses its local values.
 *The deliverable of the whole method, and what the ground does to it. Over
 uniform pasture the footprint is a band along the track, its width set by the
 hemisphere and the slant distance. Give the same run a 600 m hard strip across
-the track — an apron, a runway, a lake — and every contour steps outward inside
+the track (an apron, a runway, a lake) and every contour steps outward inside
 it, because the reflection stops being absorbed. That step is the per-receiver
 `flow_resistivity` map doing its work; a study that leaves the default `"G"` in
 place is drawing the right-hand picture everywhere.*
@@ -769,7 +769,7 @@ resistivity by the logarithm, weighted by segment length (Eq. 41).
 
 *Why the construction exists. The receiver stands 1.2 m above the terrain, but
 the terrain under it is 4 m above the plane the section fits, so its equivalent
-height is 5.1 m — and the ground effect is a function of the equivalent heights,
+height is 5.1 m, and the ground effect is a function of the equivalent heights,
 not the true ones. Four metres of local relief move the first interference
 minimum by an octave. The 0.1 m floor exists for the opposite case, a receiver
 in a hollow that the fitted plane passes above.*
@@ -896,7 +896,7 @@ res.plot()                             # the section geometry
 *The hill is worth 0.766 m of path difference, and that single number is the
 whole spectrum. It is a ninth of a wavelength at 50 Hz and nearly nine
 wavelengths at 4 kHz, so the screened curve reads −7.3 dB in the lowest band
-and saturates near the 25 dB cap from about 2.5 kHz up — 23.9 dB at 4 kHz. Read
+and saturates near the 25 dB cap from about 2.5 kHz up, 23.9 dB at 4 kHz. Read
 against the flat-ground comb, the hill buys 12.3 dB at 50 Hz and about 25 dB
 across the top of the range. Terrain screening is a high-frequency instrument,
 and it does not fix a low-frequency complaint.*

@@ -88,8 +88,8 @@ their fixed advances.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_swept_sine.svg" alt="Swept-sine distortion measurement chain: an exponential sweep from 20 Hz to 6 kHz in T equal to 4 s drives the weakly nonlinear device under test, the recording is deconvolved with the time-reversed inverse filter with its plus 6 dB per octave tilt, and on the resulting time axis the linear impulse response h1 sits at t equal to zero while the second, third and fourth harmonic responses appear as smaller pre-arrivals in their own dashed windows, advanced by L times ln n, 0.49 s for h2 and 0.77 s for h3 with L equal to 0.70 s" width="92%" />
 
-*The advances are fixed by the sweep alone — $L = T/\ln(f_2/f_1) = 0.70$ s
-here — and not by the device, which is why the same windows work for any
+*The advances are fixed by the sweep alone, $L = T/\ln(f_2/f_1) = 0.70$ s
+here, and not by the device, which is why the same windows work for any
 weakly non-linear system and why lengthening the sweep is what buys
 separation.*
 
@@ -174,7 +174,7 @@ report the measured noise floor beside the curve.
 
 *The flat low-frequency plateaus are the Chebyshev levels $(a_2/2)/H_1$ and
 $(a_3/4)/H_1$ of the memoryless polynomial, and each order bends down where its
-own product $nf$ crosses the 3 kHz post-filter — so the knees are at 1.5 kHz
+own product $nf$ crosses the 3 kHz post-filter, so the knees are at 1.5 kHz
 for $d_2$ and 1 kHz for $d_3$, on the excitation axis. That is the same oracle
 the conformance tests pin.*
 
@@ -342,7 +342,7 @@ one recording:
 deconvolution measures $H_2$ up to $2f_2$; the Farina inverse filter stops it
 at $f_2$. And on a device whose true $H_2$ phase is exactly $-\pi/2$ at every
 frequency (the memoryless cubic of the oracle), only the synchronized phase
-reproduces it — which is why `method="farina"` returns phases that must be
+reproduces it, which is why `method="farina"` returns phases that must be
 discarded rather than read.*
 
 <details>

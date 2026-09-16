@@ -1906,7 +1906,7 @@ beams.plot()   # the PL field, on the same frame as parabolic_equation
 *The snippet's own water, on a finer grid: 600 Hz over the $n^2$-linear
 profile, the source 7.5 m off the bottom, 439 beams over ±45°. The up-going fan
 turns inside the column, and where it folds on itself the beam sum answers
-**59 dB, not infinity** — that fold is the bright arc across the top of the
+**59 dB, not infinity**: that fold is the bright arc across the top of the
 dome, and it is the caustic. Above the arc no ray arrives at all, and the field
 does not stop at that edge: it climbs 88 dB over the 100 m above it, which is
 the graded penumbra the exact solution has and geometric ray theory does not

@@ -101,6 +101,7 @@ _SECTION_LIST: tuple[Section, ...] = (
         modules=(
             "phonometry.fluids",
             "phonometry.fluids.air",
+            "phonometry.fluids.gas",
             "phonometry.fluids.water",
         ),
     ),
@@ -462,6 +463,11 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # owned by the module that uses it and re-exported by the package, the
     # same shape as the three above.
     "DEFAULT_SPEED_OF_SOUND_M_S": "phonometry.solids.elastic",
+    # The ideal-gas closure and its two published constants are owned by the
+    # module that computes with them and re-exported by the package.
+    "IDEAL_GAS_VALIDITY": "phonometry.fluids.gas",
+    "MOLAR_GAS_CONSTANT": "phonometry.fluids.gas",
+    "ideal_gas": "phonometry.fluids.gas",
     # The band ranges, the leak ratio and the seal ratio are printed in the
     # same words by ISO 11546 and ISO 11957, so they are defined once and
     # re-exported by both modules, and a plain scan sees them twice. The

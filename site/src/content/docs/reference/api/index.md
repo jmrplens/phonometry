@@ -66,6 +66,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | :--- | :--- |
 | [`fluids`](/phonometry/reference/api/fluids/fluids/) | fluids domain of phonometry (see module docstrings). |
 | [`fluids.air`](/phonometry/reference/api/fluids/air/) | Humid air (IEC 61094-2:2009, Annex F). |
+| [`fluids.gas`](/phonometry/reference/api/fluids/gas/) | An ideal gas from the two numbers a gas table prints. |
 | [`fluids.water`](/phonometry/reference/api/fluids/water/) | Sea water: its speed of sound, and its density. |
 
 ## Elastic solids

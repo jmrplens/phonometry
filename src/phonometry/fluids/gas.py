@@ -16,8 +16,8 @@ so a caller who has a gas that is not air or water can still have a
 How far the closure goes
 ------------------------
 Hopkins (2007) Table A1, PDF page 634 (printed p. 607), prints both columns
-for six gases at 20 degC and 1,013e5 Pa, as its own footnote states. Against
-it, the speeds land within 0,5 m/s for all six and the densities within
+for six gases at 20 degC and 1,013 x 10^5 Pa, as its own footnote states.
+Against it, the speeds land within 0,5 m/s for all six and the densities within
 0,002 kg/m3 for the four light ones. Carbon dioxide comes out 0,7 % light and
 sulphur hexafluoride 2 % light.
 

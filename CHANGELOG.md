@@ -48,8 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   How far the closure goes is measured rather than asserted. Hopkins (2007)
   Table A1, PDF page 634 (printed p. 607), prints both the inputs and the
-  outputs for six gases at the 20 degC and 1,013e5 Pa its own footnote states:
-  the speeds land within 0,5 m/s for all six, and the densities within two
+  outputs for six gases at the 20 degC and 1,013 x 10^5 Pa its own footnote
+  states: the speeds land within 0,5 m/s for all six, and the densities within two
   parts in a thousand for air, argon, nitrogen and oxygen. Carbon dioxide is
   0,7 per cent light and sulphur hexafluoride 2,1 per cent, which is the
   compressibility factor and not an error in the arithmetic, and the model says

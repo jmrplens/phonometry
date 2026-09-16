@@ -52,7 +52,7 @@ $c'_{\mathrm{L}} = \sqrt{E(1-\nu)/(\rho(1+\nu)(1-2\nu))}$. This is the fastest
 of the three and the one a time-domain elastic solver integrates.
 
 For the steel of Hopkins Table A2, with $\rho = 7800$ kg/m³, $\nu = 0{,}28$ and
-a plate speed of 5 270 m/s, the three are 5 059, 5 270 and 5 720 m/s. Reading
+a plate speed of 5 270 m/s, the three are 5 059, 5 270 and 5 720 m/s. Reading
 one into another is a four to nine per cent error in whatever it feeds, and it
 is an easy mistake to make, because a table that prints one of them often calls
 it $c_\mathrm{L}$ with no qualifier at all.
@@ -99,7 +99,7 @@ Source: https://jmrplens.github.io/phonometry/solids/wave-speeds/
 
 ## The problem this solves
 
-You have a table. It gives you a wave speed of 5 270 m/s for steel, a density
+You have a table. It gives you a wave speed of 5 270 m/s for steel, a density
 and a Poisson ratio, and no Young's modulus. Your function wants the modulus.
 Another table gives you 200 GPa and no speed, and the function you are feeding
 next wants the speed. A third gives you 12,3 m Hz and neither.

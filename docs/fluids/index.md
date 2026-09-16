@@ -12,6 +12,13 @@ That is what this area exists to stop. `phonometry.fluids` computes the state
 of the fluid from the conditions that were actually measured, keeps the
 conditions beside the result, and says which model produced it.
 
+Three media are built here. Humid air has the most carefully stated model in
+the acoustic literature and gets a guide of its own below. Sea water has four
+rival sound-speed fits and carries the one it was asked for. Any other gas is
+`fluids.ideal_gas`, which takes the ratio of specific heats and the molar mass
+that a gas table prints and returns the speed and density that follow, with
+how far that closure goes written into the result.
+
 ## Why it is not a domain
 
 Sixteen of the twenty-one packages are domains of application: you go to

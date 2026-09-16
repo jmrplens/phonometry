@@ -511,6 +511,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [filters/weighting-compliance](https://jmrplens.github.io/phonometry/reference/api/filters/weighting-compliance/)
 - [fluids/air](https://jmrplens.github.io/phonometry/reference/api/fluids/air/)
 - [fluids/fluids](https://jmrplens.github.io/phonometry/reference/api/fluids/fluids/)
+- [fluids/gas](https://jmrplens.github.io/phonometry/reference/api/fluids/gas/)
 - [fluids/water](https://jmrplens.github.io/phonometry/reference/api/fluids/water/)
 - [hearing/hearing-protectors](https://jmrplens.github.io/phonometry/reference/api/hearing/hearing-protectors/)
 - [hearing/noise-induced-hearing-loss](https://jmrplens.github.io/phonometry/reference/api/hearing/noise-induced-hearing-loss/)

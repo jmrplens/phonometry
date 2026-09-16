@@ -126,7 +126,8 @@ _PA_PER_IN_WG = 249.0  # Long Eq. 13.1 reference pressure P_REF
 _REYNOLDS_PS_SPLIT_PER_FT = 3.0
 
 # ---------------------------------------------------------------------------
-# Bies Table 8.14 -- duct end reflection loss (dB), ASHRAE.
+# Bies 5e Table 8.14, PDF page 530 (printed p. 501) -- duct end reflection
+# loss (dB), ASHRAE.
 # Rows: internal diameter (mm). Columns: octave band centre (Hz).
 # Two termination conditions: "flush" (duct flush with a wall/ceiling) and
 # "free" (free space / suspended in the room).
@@ -173,7 +174,8 @@ _END_REFLECTION_FREE: NDArray[np.float64] = np.array(
 )
 
 # ---------------------------------------------------------------------------
-# Bies Table 8.11 -- elbow/bend insertion loss (dB per bend) vs W / lambda.
+# Bies 5e Table 8.11, PDF page 529 (printed p. 500) -- elbow/bend insertion
+# loss (dB per bend) vs W / lambda.
 # The five columns are the supported (bend_type, vanes, lined, round) cases;
 # each row is the value for the W/lambda band whose upper edge is the key. The
 # printed rows read "W/lambda < 0.14", "0.14 <= W/lambda < 0.28" and so on, so
@@ -204,9 +206,10 @@ _ELBOW_TABLE: dict[str, NDArray[np.float64]] = {
 }
 
 # ---------------------------------------------------------------------------
-# Long Table 13.5 -- level correction K_\mathrm{F} of the ASHRAE fan sound-power model
-# (Eq. 13.1), dB, over the octave bands 63 Hz to 8 kHz, with the blade
-# frequency increment of Table 13.7 (its octave band, Hz, and increment, dB).
+# Long 2e Table 13.5, PDF page 505 (printed p. 504) -- level correction
+# K_\mathrm{F} of the ASHRAE fan sound-power model (Eq. 13.1), dB, over the
+# octave bands 63 Hz to 8 kHz, with the blade frequency increment of Table
+# 13.7, PDF page 507 (printed p. 506): its octave band, Hz, and increment, dB.
 # ---------------------------------------------------------------------------
 _FAN_LEVEL_CORRECTION: dict[str, NDArray[np.float64]] = {
     "airfoil_large": np.array([40, 40, 39, 34, 30, 23, 19, 17], dtype=float),
@@ -236,8 +239,9 @@ _FAN_BLADE_INCREMENT: dict[str, tuple[float, float]] = {
     "tubeaxial_small": (63.0, 7.0),
     "propeller": (63.0, 5.0),
 }
-#: Long Table 13.6 -- off-peak efficiency correction ``C_EFF``: the lower edge
-#: of each static-efficiency band (per cent of peak) and its correction, dB.
+#: Long 2e Table 13.6, PDF page 506 (printed p. 505) -- off-peak efficiency
+#: correction ``C_EFF``: the lower edge of each static-efficiency band (per
+#: cent of peak) and its correction, dB.
 _EFFICIENCY_CORRECTION: tuple[tuple[float, float], ...] = (
     (90.0, 0.0),
     (85.0, 3.0),
@@ -363,24 +367,27 @@ VDI2081_SPECTRAL_CORRECTION: NDArray[np.float64] = np.array(
 #: when the duct is anechoically terminated at both ends.
 _VDI2081_SECTION_CHANGE_CAP = 5.0
 
-#: Long Table 13.8 -- approximate fan-housing (casing) attenuation, dB, over the
-#: octave bands 63 Hz to 8 kHz (Miller, 1980).
+#: Long 2e Table 13.8, PDF page 507 (printed p. 506) -- approximate fan-housing
+#: (casing) attenuation, dB, over the octave bands 63 Hz to 8 kHz; the printed
+#: table opens at 32 Hz and this drops that column. Credited there to Miller
+#: (1980).
 _FAN_CASING_ATTENUATION: NDArray[np.float64] = np.array(
     [0, 0, 5, 10, 15, 20, 22, 25], dtype=float
 )
 
 # ---------------------------------------------------------------------------
-# Long Table 14.1 -- losses in unlined circular ducts, dB/ft, at the octave
-# bands 63 Hz to 4 kHz (the table stops at 4 kHz; the 4 kHz value is held above
-# it, see :func:`unlined_circular_duct_attenuation`).
+# Long 2e Table 14.1, PDF page 536 (printed p. 535) -- losses in unlined
+# circular ducts, dB/ft, at the octave bands 63 Hz to 4 kHz (the table stops at
+# 4 kHz; the 4 kHz value is held above it, see
+# :func:`unlined_circular_duct_attenuation`).
 # ---------------------------------------------------------------------------
 _UNLINED_CIRCULAR_DB_PER_FT: NDArray[np.float64] = np.array(
     [0.03, 0.03, 0.03, 0.05, 0.07, 0.07, 0.07, 0.07]
 )
 
 # ---------------------------------------------------------------------------
-# Long Table 14.2 -- constants B, C, D of the Reynolds (1990) lined
-# rectangular-duct regression, Eq. 14.12.
+# Long 2e Table 14.2, PDF page 537 (printed p. 536) -- constants B, C, D of the
+# Reynolds (1990) lined rectangular-duct regression, Eq. 14.12.
 # ---------------------------------------------------------------------------
 _LINED_RECT_B: NDArray[np.float64] = np.array(
     [0.0133, 0.0574, 0.2710, 1.0147, 1.7700, 1.3920, 1.5180, 1.5810]
@@ -393,9 +400,9 @@ _LINED_RECT_D: NDArray[np.float64] = np.array(
 )
 
 # ---------------------------------------------------------------------------
-# Long Table 14.3 -- constants A..F of the Reynolds (1990) lined circular-duct
-# third-order regression, Eq. 14.13 (columns A, B, C, D, E, F; rows 63 Hz to
-# 8 kHz).
+# Long 2e Table 14.3, PDF page 537 (printed p. 536) -- constants A..F of the
+# Reynolds (1990) lined circular-duct third-order regression, Eq. 14.13
+# (columns A, B, C, D, E, F; rows 63 Hz to 8 kHz).
 # ---------------------------------------------------------------------------
 _LINED_ROUND_COEFFS: NDArray[np.float64] = np.array(
     [
@@ -414,7 +421,8 @@ _LINED_ROUND_COEFFS: NDArray[np.float64] = np.array(
 _LINED_DUCT_LIMIT = 40.0
 
 # ---------------------------------------------------------------------------
-# Long Table 14.4 -- lined flexible duct insertion loss, dB (ASHRAE, 1995).
+# Long 2e Table 14.4, PDF pages 539-540 (printed pp. 538-539) -- lined flexible
+# duct insertion loss, dB (ASHRAE, 1995).
 # Axis 0: internal diameter, in; axis 1: length, ft (ascending); axis 2: the
 # octave bands 63 Hz to 4 kHz.
 # ---------------------------------------------------------------------------
@@ -491,8 +499,9 @@ _FLEX_INSERTION_LOSS: NDArray[np.float64] = np.array(
     dtype=float,
 )
 
-#: Long Table 14.8 -- silencer self-noise octave-band corrections, dB, to be
-#: subtracted from the overall level of Eq. 14.31 (63 Hz to 8 kHz).
+#: Long 2e Table 14.8, PDF page 548 (printed p. 547) -- silencer self-noise
+#: octave-band corrections, dB, to be subtracted from the overall level of
+#: Eq. 14.31 (63 Hz to 8 kHz).
 _SILENCER_SELF_NOISE_CORRECTION: NDArray[np.float64] = np.array(
     [4, 4, 6, 8, 13, 18, 23, 28], dtype=float
 )

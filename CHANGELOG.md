@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - **Seventeen published inputs that carry the page they were read on.**
   `materials.PUBLISHED_POROUS_MATERIALS` holds the two porous specimens this
-  library already computed with, and `materials.RESILIENT_LAYER_STIFFNESS` the
+  library already computed with, and `materials.PUBLISHED_RESILIENT_LAYERS` the
   fifteen resilient layers of Hopkins Table A3, each row naming the document,
   the table, the PDF page and the printed folio in its `source`, and naming in
   `attributed_to` whoever the book itself credits.
@@ -48,6 +48,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the banners, so a table transcribed from a new book fails until it is
   registered. Standards stay outside it: they number their own clauses and
   tables, and this project cites them that way.
+
+
+
+  The census reads a banner however it is written, which is what makes that
+  claim true: the surnames it knows are read off `docs/reference/bibliography.md`
+  rather than a list in the gate, so a single-author book counts; a plain `#`
+  comment block is a banner as much as a `#:` one; and `Eq.`, `Fig.` and
+  `Sect.` are locators as everyone spells them. Thirty-six tables are
+  registered, twenty-three of them found by those three widenings and read off
+  their pages for this release: ten HVAC tables from Long 2e and Bies 5e, the
+  point-impedance constants of Cremer 3e Table 5.1, the junction, radiation,
+  aperture and band-width constants of Hopkins (2007), the plenum sidewall
+  cases of Vigran (2008), and the stated fit ranges of the Delany-Bazley and
+  Miki regressions. The twenty-fourth the wider net caught transcribes nothing:
+  it names Norton for the formula that consumes it while its two values are the
+  band edges themselves, and it says so in the registry rather than citing a
+  page that prints neither.
 - **ISO 11546-1:1995 and ISO 11546-2:1995**, the insulation an enclosure gives
   once it is built, in `phonometry.noise_control.enclosure_insulation`. The
   quantity is a difference of two runs: determine the machine's sound power
@@ -259,12 +276,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- Eight transcribed tables gained the PDF page their banner never gave
-  (`PLATEAU_MATERIALS`, `DELANY_BAZLEY_COEFFICIENTS`, `CIRCULAR_EIGENVALUES`,
-  `SOURCE_POWER_MODELS`, `WESTON_SEABEDS`, `WALL_TIE_STIFFNESS` and the four
-  Southall tables of the underwater bioacoustics module). Norton & Karczub
-  (2003), which three of them transcribe from, gained the bibliography entry
-  the `docs/` edition never carried.
+- Thirty-one transcribed tables gained the PDF page their banner never gave:
+  the eight the first sweep found (`PLATEAU_MATERIALS`,
+  `DELANY_BAZLEY_COEFFICIENTS`, `CIRCULAR_EIGENVALUES`, `SOURCE_POWER_MODELS`,
+  `WESTON_SEABEDS`, `WALL_TIE_STIFFNESS` and the four Southall tables of the
+  underwater bioacoustics module), and twenty-three more across the HVAC,
+  building, structural-vibration and porous-absorber modules once the census
+  could see them. Norton & Karczub (2003), which three of them transcribe from,
+  gained the bibliography entry the `docs/` edition never carried, and Beranek
+  & Mellow's second edition of 2019, which the conformance registry reads for
+  the baffled piston, gained one of its own beside the first edition already
+  listed. The `docs/` and site editions of the bibliography say the same thing
+  about both books.
 
 - The documentation, the figures and the docstrings are written without the em
   dash. Every clause that hung off one is now a parenthesis where it explains,

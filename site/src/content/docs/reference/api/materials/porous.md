@@ -658,11 +658,11 @@ of them.
 | `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
 | `porosity` | Open porosity `phi`. |
 | `tortuosity` | Tortuosity $\alpha_\infty$. |
-| `viscous_length_um` | Viscous characteristic length `Lambda`, in micrometres. |
-| `thermal_length_um` | Thermal characteristic length `Lambda'`, in micrometres. |
-| `source` | Document, locator, PDF page and printed folio. A specimen whose columns come off two pages of one book names both, separated by `"; "`. |
+| `viscous_length_um` | Viscous characteristic length `Lambda`, in micrometres, the unit the tables print it in. The `viscous_length` parameter of [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) is in **metres**, so this field is not passed to it directly: `medium` makes the conversion, once, and a caller who assembles the argument list by hand divides by a million first. |
+| `thermal_length_um` | Thermal characteristic length `Lambda'`, in micrometres. Metres at the model's `thermal_length`, as above. |
+| `source` | Document, locator, PDF page and printed folio. A specimen whose columns come off several pages of one book names every one of them, separated by `"; "`. |
 | `frame_density_kg_m3` | Frame density `rho1`, in kg/m3. |
-| `thickness_mm` | Layer thickness `h` of the specimen the table describes, in millimetres. |
+| `thickness_mm` | Layer thickness `h` of the specimen as tabulated, in millimetres. It is the thickness of the layer the table describes and not a property of the material: a specimen whose columns come off several pages takes it from the one page that prints an `h`, and the worked examples of the same book use the same material at other thicknesses. |
 | `shear_modulus_pa` | Complex in-vacuo shear modulus `N`, in pascals, or `None` when the table prints no elastic constants. `None` together with `poisson_ratio`, because a table that prints one prints the other. |
 | `poisson_ratio` | Frame Poisson ratio `nu`, or `None`. |
 | `attributed_to` | The source the book itself credits, empty when the number is the book's own. |
@@ -790,5 +790,5 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 *Constant* (`dict`).
 
 ```python
-PUBLISHED_POROUS_MATERIALS = {'glass_wool': PorousMaterial(name='Domisol Coffrage glass wool', flow_resistivity_pa_s_m2=40000.0, porosity=0.94, tortuosity=1.06, viscous_length_um=56.0, thermal_length_um=110.0, frame_density_kg_m3=130.0, thickness_mm=3.8, source='Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)', shear_modulus_pa=(2200000+220000j), poisson_ratio=0.0, attributed_to=''), 'soft_fibrous': PorousMaterial(name='Soft fibrous', flow_resistivity_pa_s_m2=25000.0, porosity=0.98, tortuosity=1.02, viscous_length_um=90.0, thermal_length_um=180.0, frame_density_kg_m3=30.0, thickness_mm=50.0, source='Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)', shear_modulus_pa=None, poisson_ratio=None, attributed_to='')}
+PUBLISHED_POROUS_MATERIALS = {'glass_wool': PorousMaterial(name='Domisol Coffrage glass wool', flow_resistivity_pa_s_m2=40000.0, porosity=0.94, tortuosity=1.06, viscous_length_um=56.0, thermal_length_um=110.0, frame_density_kg_m3=130.0, thickness_mm=3.8, source='Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)', shear_modulus_pa=(2200000+220000j), poisson_ratio=0.0, attributed_to=''), 'soft_fibrous': PorousMaterial(name='Soft fibrous', flow_resistivity_pa_s_m2=25000.0, porosity=0.98, tortuosity=1.02, viscous_length_um=90.0, thermal_length_um=180.0, frame_density_kg_m3=30.0, thickness_mm=50.0, source='Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)', shear_modulus_pa=None, poisson_ratio=None, attributed_to='')}
 ```

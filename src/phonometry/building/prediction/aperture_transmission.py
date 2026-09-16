@@ -75,9 +75,11 @@ if TYPE_CHECKING:
 _SPEED_OF_SOUND: float = 343.0
 #: Euler-Mascheroni constant in the slit end correction (Hopkins Eq. 4.100).
 _EULER_GAMMA: float = 0.57722
-#: Incident-field constant ``m`` (Hopkins Eq. 4.99).
+#: Incident-field constant ``m`` of Hopkins (2007) Eq. 4.99, printed with the
+#: equation's symbols on PDF page 522 (printed p. 495).
 _FIELD_M: dict[str, float] = {"diffuse": 8.0, "normal": 4.0}
-#: Slit-position constant ``n`` (Hopkins Eq. 4.99).
+#: Slit-position constant ``n`` of Hopkins (2007) Eq. 4.99, printed with the
+#: equation's symbols on PDF page 522 (printed p. 495).
 _POSITION_N: dict[str, float] = {"mid": 1.0, "edge": 0.5}
 
 __all__ = [

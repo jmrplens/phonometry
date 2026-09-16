@@ -4,7 +4,7 @@
 from __future__ import annotations
 
 from .dynamic_stiffness import (
-    RESILIENT_LAYER_STIFFNESS,
+    PUBLISHED_RESILIENT_LAYERS,
     DynamicStiffnessResult,
     DynamicStiffnessWarning,
     ResilientLayer,
@@ -13,11 +13,11 @@ from .dynamic_stiffness import (
     floating_floor_resonance,
     installed_dynamic_stiffness,
     natural_frequency,
-    resilient_layer_stiffness,
+    resilient_layer,
 )
 
 __all__ = [
-    "RESILIENT_LAYER_STIFFNESS",
+    "PUBLISHED_RESILIENT_LAYERS",
     "DynamicStiffnessResult",
     "DynamicStiffnessWarning",
     "ResilientLayer",
@@ -26,5 +26,5 @@ __all__ = [
     "floating_floor_resonance",
     "installed_dynamic_stiffness",
     "natural_frequency",
-    "resilient_layer_stiffness",
+    "resilient_layer",
 ]

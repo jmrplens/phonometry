@@ -381,7 +381,7 @@ res.report(
 
 Designing a floating floor starts from the manufacturer's $s'$, declared to
 EN 29052-1 for that product. When there is none, fifteen measured layers are
-published as `RESILIENT_LAYER_STIFFNESS`, transcribed from Hopkins Table A3
+published as `PUBLISHED_RESILIENT_LAYERS`, transcribed from Hopkins Table A3
 (printed p. 610), whose caption states they were measured according to
 ISO 9052-1. Each row carries the page it was read on, and the four rebond
 foams carry the second-level attribution the printed cell gives them.
@@ -393,14 +393,14 @@ numbers and the printed table separates them by position in a merged cell.
 ```python
 from phonometry import materials
 
-layer = materials.resilient_layer_stiffness("mineral_wool_rock_60_30")
+layer = materials.resilient_layer("mineral_wool_rock_60_30")
 print(layer.name, layer.density_kg_m3, layer.thickness_mm)   # Mineral wool, rock 60.0 30.0
 print(layer.source)
 # Hopkins (2007) Table A3, PDF page 637 (printed p. 610)
 print(round(layer.dynamic_stiffness_n_m3 / 1e6, 1))          # 10.0 MN/m3, as printed
 print(round(layer.natural_frequency(120.0), 1))              # 45.9 Hz under a 120 kg/m2 screed
 
-rebond = materials.RESILIENT_LAYER_STIFFNESS["rebond_foam_64_20"]
+rebond = materials.PUBLISHED_RESILIENT_LAYERS["rebond_foam_64_20"]
 print(rebond.attributed_to)                                  # Hopkins and Hall (2006)
 print(round(rebond.natural_frequency(120.0), 1))             # 43.6
 ```

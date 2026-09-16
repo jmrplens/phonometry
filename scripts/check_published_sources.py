@@ -31,11 +31,26 @@ vacuous.
 
 3. **The registry, so the guard has something to be true of.**
    :data:`SOURCED` names every table in ``src`` transcribed from a book or a
-   paper, and requires its ``#:`` banner to cite **both** a PDF page and a
-   printed folio. The census that fills it is re-run here, over the banners
-   themselves, so a table transcribed from a new book fails until it is
-   registered: that is what closes the class rather than pinning today's
-   instances of it.
+   paper, and requires its banner to cite **both** a PDF page and a printed
+   folio. The census that fills it is re-run here, over the banners themselves,
+   so a table transcribed from a new book fails until it is registered: that is
+   what closes the class rather than pinning today's instances of it.
+
+   Closing it means the census has to catch a banner however it is written.
+   Its first shape did not, and the review that found this counted the escapes:
+   a surname whitelist that no single-author book could match, which left eight
+   Long tables and the two constants of Cremer Table 5.1 uncited while the gate
+   reported green; a banner reader that only looked at ``#:``, so two Bies
+   tables left the census by dropping one character; and a locator pattern
+   whose ``Fig.``, ``Eq.`` and ``Sect.`` alternatives closed with a word
+   boundary after a literal ``.``, which needs a word character next and so
+   matches nothing anybody writes.
+   The surnames now come from the bibliography (:func:`bibliography_leads`),
+   any comment block counts as a banner, and the abbreviated locators are
+   matched without the trailing boundary.
+   :data:`NOT_TRANSCRIBED` is the other side of a wider net: a banner that
+   names a document for its *formula* while the values are arithmetic says so
+   there rather than citing a page that prints nothing.
 
 A standard is deliberately outside the registry. ISO, IEC, EN and DIN number
 their own clauses and tables, and CONTRIBUTING.md asks for a citation by that
@@ -46,6 +61,7 @@ page, which is exactly why the errata rule demands one.
 :data:`PAGE_UNKNOWN` is the escape hatch, and it is a ratchet in both
 directions: an entry whose banner now cites its page fails until the line is
 deleted, and a line naming a table that no longer exists fails too.
+:data:`NOT_TRANSCRIBED` ratchets the same way.
 
 Usage::
 
@@ -113,6 +129,18 @@ FOLIO_FORMS = (
 #: cannot resolve.
 SOURCED: dict[tuple[str, str], str] = {
     (
+        "building/prediction/aperture_transmission.py",
+        "_FIELD_M",
+    ): "Hopkins (2007) Eq. 4.99, the incident-field constant m",
+    (
+        "building/prediction/aperture_transmission.py",
+        "_POSITION_N",
+    ): "Hopkins (2007) Eq. 4.99, the slit-position constant n",
+    (
+        "building/prediction/ceiling_plenum.py",
+        "_SIDEWALLS",
+    ): "Vigran (2008) Eqs. (9.18) and (9.19), the two sidewall cases",
+    (
         "building/prediction/masonry_cavity_wall.py",
         "WALL_TIE_STIFFNESS",
     ): "Hopkins (2007) Table A4, four wall ties",
@@ -121,49 +149,129 @@ SOURCED: dict[tuple[str, str], str] = {
         "PLATEAU_MATERIALS",
     ): "Norton & Karczub (2003) Table 3.1, eight plateau-method materials",
     (
+        "building/prediction/panel_transmission.py",
+        "_FIELD_CORRECTION",
+    ): "Bies 5e Eq. 7.42, the field-incidence correction per band width",
+    (
+        "building/prediction/resilient_layers.py",
+        "_BANDWIDTH_FACTOR",
+    ): "Hopkins (2007) Eq. (3.91), the two band-width factors B",
+    (
         "materials/absorbers/porous.py",
         "DELANY_BAZLEY_COEFFICIENTS",
     ): "Bies 5e Table D.1, four coefficient sets C1..C8",
+    (
+        "materials/absorbers/porous.py",
+        "DELANY_BAZLEY_VALIDITY",
+    ): "Hopkins (2007) Eq. (1.174), the stated range of X",
+    (
+        "materials/absorbers/porous.py",
+        "LIMP_FRAME_CRITERIA",
+    ): "Allard & Atalla 2e Sect. 11.3.4, two limp-frame criteria",
+    (
+        "materials/absorbers/porous.py",
+        "MIKI_VALIDITY",
+    ): "Miki (1990) Sect. 4.1, the lower limit of the fit range",
     (
         "materials/absorbers/porous.py",
         "PUBLISHED_POROUS_MATERIALS",
     ): "Allard & Atalla 2e, two porous specimens",
     (
         "materials/resilient/dynamic_stiffness.py",
-        "RESILIENT_LAYER_STIFFNESS",
+        "PUBLISHED_RESILIENT_LAYERS",
     ): "Hopkins (2007) Table A3, fifteen resilient layers",
     (
         "noise_control/duct_modes.py",
         "CIRCULAR_EIGENVALUES",
     ): "Norton & Karczub (2003) Table 7.1, twelve circular-duct eigenvalues",
     (
+        "noise_control/hvac.py",
+        "_EFFICIENCY_CORRECTION",
+    ): "Long 2e Table 13.6, seven off-peak efficiency corrections",
+    (
+        "noise_control/hvac.py",
+        "_ELBOW_WL_UPPER",
+    ): "Bies 5e Table 8.11, elbow insertion loss over six W/lambda bands",
+    (
+        "noise_control/hvac.py",
+        "_END_REFLECTION_BANDS",
+    ): "Bies 5e Table 8.14, duct end reflection loss over twelve diameters",
+    (
+        "noise_control/hvac.py",
+        "_FAN_CASING_ATTENUATION",
+    ): "Long 2e Table 13.8, eight octave-band casing attenuations",
+    (
+        "noise_control/hvac.py",
+        "_FAN_LEVEL_CORRECTION",
+    ): "Long 2e Tables 13.5 and 13.7, the fan spectral constants",
+    (
+        "noise_control/hvac.py",
+        "_FLEX_DIAMETERS_IN",
+    ): "Long 2e Table 14.4, lined flexible duct insertion loss",
+    (
+        "noise_control/hvac.py",
+        "_LINED_RECT_B",
+    ): "Long 2e Table 14.2, the constants B, C and D",
+    (
+        "noise_control/hvac.py",
+        "_LINED_ROUND_COEFFS",
+    ): "Long 2e Table 14.3, the constants A to F",
+    (
+        "noise_control/hvac.py",
+        "_SILENCER_SELF_NOISE_CORRECTION",
+    ): "Long 2e Table 14.8, eight self-noise corrections",
+    (
+        "noise_control/hvac.py",
+        "_UNLINED_CIRCULAR_DB_PER_FT",
+    ): "Long 2e Table 14.1, losses in unlined circular ducts",
+    (
         "room/steady_field.py",
         "SOURCE_POWER_MODELS",
     ): "Norton & Karczub (2003) Table 4.5, three sound power models",
     (
         "underwater/bioacoustics/audiograms.py",
-        "_AUDIOGRAM_ORIGINAL",
-    ): "Southall et al. (2019) Table 2, seven group audiogram fits",
+        "BEST_HEARING_FREQUENCY_KHZ",
+    ): "Southall et al. (2019) Table 4, frequency of best hearing",
     (
         "underwater/bioacoustics/audiograms.py",
         "_AUDIOGRAM_NORMALIZED",
     ): "Southall et al. (2019) Table 3, the same fits normalised",
     (
         "underwater/bioacoustics/audiograms.py",
-        "BEST_HEARING_FREQUENCY_KHZ",
-    ): "Southall et al. (2019) Table 4, frequency of best hearing",
-    (
-        "underwater/bioacoustics/weighting.py",
-        "_SOUTHALL_2019",
-    ): "Southall et al. (2019) Table 5, the weighting-function parameters",
+        "_AUDIOGRAM_ORIGINAL",
+    ): "Southall et al. (2019) Table 2, seven group audiogram fits",
     (
         "underwater/bioacoustics/weighting.py",
         "_CRITERIA_SOUTHALL_CONTINUOUS",
     ): "Southall et al. (2019) Tables 6 and 7, TTS and PTS onset thresholds",
     (
+        "underwater/bioacoustics/weighting.py",
+        "_SOUTHALL_2019",
+    ): "Southall et al. (2019) Table 5, the weighting-function parameters",
+    (
         "underwater/propagation/weston_regimes.py",
         "WESTON_SEABEDS",
     ): "Ainslie (2010) Table 9.1, two characteristic seabeds",
+    (
+        "vibration/structural/junction_transmission.py",
+        "_JUNCTIONS",
+    ): "Hopkins (2007) Eqs. 5.12 and 5.13, four sets of junction constants",
+    (
+        "vibration/structural/point_mobility.py",
+        "_BEAM_CONSTANT",
+    ): "Cremer 3e Table 5.1, the two slender-beam constants",
+    (
+        "vibration/structural/point_mobility.py",
+        "_PLATE_CONSTANT",
+    ): "Cremer 3e Table 5.1, the two thin-plate constants",
+    (
+        "vibration/structural/radiation_efficiency.py",
+        "_C_BC",
+    ): "Hopkins (2007) Eq. 2.227, the boundary-condition constant",
+    (
+        "vibration/structural/radiation_efficiency.py",
+        "_C_OB",
+    ): "Hopkins (2007) Eq. 2.227, the baffle-orientation constant",
 }
 
 #: Tables whose page cannot be established, each with the reason. Empty, and
@@ -171,20 +279,67 @@ SOURCED: dict[tuple[str, str], str] = {
 #: document it can open. A line added here is a promise to come back.
 PAGE_UNKNOWN: dict[tuple[str, str], str] = {}
 
-#: How this tree spells a book or a paper in a banner. A table whose banner
-#: matches one of these and names a table, annex or section is a transcription
-#: from a document with pages, and belongs in :data:`SOURCED`.
-BOOK_OR_PAPER = re.compile(
-    r"(Bies\b|Cox (?:&|and) D'Antonio|Hopkins\b|Allard (?:&|and) Atalla|Mechel\b"
-    r"|Beranek\b|Ver (?:&|and) Beranek|Norton (?:&|and) Karczub|Ainslie\b|Vigran\b"
-    r"|Kuttruff\b|Everest\b|Maa \d{4}|Miki \d{4}|Jimenez|Rindel\b|Fahy\b|Heckl\b"
-    r"|[A-Z][a-z]+ et al\.?,? \(?\d{4}"
-    r"|[A-Z][a-z]+ (?:&|and) [A-Z][a-z]+,? \(?\d{4})"
-)
+#: Tables the census catches and that transcribe nothing: the banner names a
+#: document because the **formula** is that document's, while the values are
+#: arithmetic anybody can redo. A page would be a false citation, since no page
+#: of the book prints them, so these say so here instead. Like
+#: :data:`PAGE_UNKNOWN` this is a two-way ratchet: a line naming a table the
+#: census no longer reaches fails as loudly as a transcription that is missing
+#: one, and a table cannot be in this and in :data:`SOURCED` at once.
+NOT_TRANSCRIBED: dict[tuple[str, str], str] = {
+    (
+        "vibration/structural/experimental_sea.py",
+        "_BANDWIDTH_FACTOR",
+    ): "sqrt(2) and sqrt(2 ** (1/3)), the band edges themselves; Norton is "
+    "named for Eq. 6.29, which consumes them",
+}
+
+#: One bibliography entry: the lead surname it opens with.
+_BIBLIOGRAPHY_ENTRY = re.compile(r"^- (?P<lead>[^\s,.]+)[,.]", re.MULTILINE)
+
+
+def bibliography_leads() -> tuple[str, ...]:
+    """Every lead surname ``docs/reference/bibliography.md`` lists.
+
+    A hardcoded list of surnames was the first shape of this, and it ratcheted
+    only over books someone had already thought to name: a single-author book,
+    the commonest shape in this field, matched nothing, which is how eight Long
+    tables and the two constants of Cremer Table 5.1 sat in ``src`` with no
+    page while the gate reported green. Reading the bibliography closes that, because rule 2
+    already requires a cited book to be listed there, so a book this tree
+    transcribes a table from is either in this list or already failing.
+
+    :return: The surnames, sorted, in the spelling the bibliography uses.
+    """
+    text = BIBLIOGRAPHY.read_text(encoding="utf-8")
+    return tuple(
+        sorted({match["lead"] for match in _BIBLIOGRAPHY_ENTRY.finditer(text)})
+    )
+
+
+def _book_or_paper() -> re.Pattern[str]:
+    """How this tree spells a book or a paper in a banner.
+
+    A banner that names one of these **and** a locator is a transcription from
+    a document with pages, and belongs in :data:`SOURCED`.
+
+    :return: The compiled pattern.
+    """
+    leads = "|".join(re.escape(lead) for lead in bibliography_leads())
+    return re.compile(rf"\b(?:{leads})\b|[A-Z][a-z]+ et al\.?,? \(?\d{{4}}")
+
+
+BOOK_OR_PAPER = _book_or_paper()
 
 #: A locator inside a document: what makes a banner a transcription rather than
-#: a sentence that happens to name a book.
-LOCATOR = re.compile(r"\b(Table|Tables|Annex|Appendix|Fig\.|Figure|Eq\.|Sect\.)\b")
+#: a sentence that happens to name a book. The abbreviated forms are matched
+#: without a closing ``\b``, because a word boundary after a literal ``.``
+#: needs a word character next and nobody writes "Eq.7": the first shape of
+#: this pattern carried three alternatives that could never match.
+LOCATOR = re.compile(
+    r"\b(?:Table|Tables|Annex|Appendix|Figure|Figures)\b"
+    r"|\b(?:Fig|Figs|Eq|Eqs|Sect|Sects)\."
+)
 
 #: What a registered banner has to carry.
 BANNER_PDF_PAGE = re.compile(r"PDF pages? \d+")
@@ -221,9 +376,17 @@ def _sourced_records(obj: object) -> Iterator[object]:
 
     A published table is a mapping or a sequence of records as often as it is
     one record, and the provenance rule is the same in all three shapes.
+
+    ``source`` is a field name this tree also uses for things that are not a
+    provenance claim: an ``(x, y, z)`` image-source coordinate, a ground factor
+    in ``[0, 1]``, a :class:`~phonometry.io.SignalOrigin`. Only a string can be
+    a citation, so only a string is held to the grammar; none of the others
+    would reach here today, and this is what keeps it that way when one does.
     """
     if dataclasses.is_dataclass(obj) and not isinstance(obj, type):
-        if any(field.name == SOURCE_FIELD for field in dataclasses.fields(obj)):
+        if any(
+            field.name == SOURCE_FIELD for field in dataclasses.fields(obj)
+        ) and isinstance(getattr(obj, SOURCE_FIELD, None), str):
             yield obj
         return
     if isinstance(obj, Mapping):
@@ -235,11 +398,24 @@ def _sourced_records(obj: object) -> Iterator[object]:
             yield from _sourced_records(value)
 
 
+def _published_names(module: ModuleType) -> tuple[str, ...]:
+    """What a caller can reach in *module* by a public name.
+
+    ``__all__`` when the module declares one, and every public attribute when
+    it does not: 115 of this package's public modules declare none, and a
+    record added to any of them would otherwise never be read.
+    """
+    exported = getattr(module, "__all__", None)
+    if exported is not None:
+        return tuple(exported)
+    return tuple(name for name in vars(module) if _is_public(name))
+
+
 def published_records() -> Iterator[tuple[str, str, object]]:
     """``(module, exported name, record)`` for every published sourced record."""
     seen: set[int] = set()
     for module_name, module in public_modules():
-        for exported in getattr(module, "__all__", ()):
+        for exported in _published_names(module):
             obj = getattr(module, exported, None)
             for record in _sourced_records(obj):
                 if id(record) in seen:
@@ -306,11 +482,23 @@ def _bibliography_problems(cite: str, parsed: references.Reference) -> list[str]
 
 
 def banner_above(lines: Sequence[str], index: int) -> str:
-    """The ``#:`` doc-comment block immediately above line *index* (0-based)."""
+    """The comment block immediately above line *index* (0-based).
+
+    Both spellings count. Reading only ``#:`` let a table leave the census by
+    losing one character: ``noise_control/hvac.py`` documents Bies Table 8.14
+    and Bies Table 8.11 under plain ``#`` rules, naming the book and the table
+    and no page at all, and the census never saw either. The horizontal rules
+    that open and close such a block carry nothing and are dropped.
+    """
     out: list[str] = []
     cursor = index - 1
-    while cursor >= 0 and lines[cursor].lstrip().startswith("#:"):
-        out.append(lines[cursor].lstrip()[2:].strip())
+    while cursor >= 0:
+        stripped = lines[cursor].lstrip()
+        if not stripped.startswith("#"):
+            break
+        body = (stripped[2:] if stripped.startswith("#:") else stripped[1:]).strip()
+        if body and set(body) != {"-"}:
+            out.append(body)
         cursor -= 1
     return " ".join(reversed(out))
 
@@ -410,12 +598,27 @@ def registry_problems() -> list[Problem]:
                 )
             )
 
+    for key, reason in NOT_TRANSCRIBED.items():
+        where = f"{key[0]}::{key[1]}"
+        if key in SOURCED:
+            problems.append(
+                Problem(where, f"is in SOURCED and is also declared {reason!r}")
+            )
+        elif key not in census:
+            problems.append(
+                Problem(
+                    where,
+                    f"is declared to transcribe nothing ({reason}) and the census "
+                    "no longer reaches it, so the line must go",
+                )
+            )
+
     problems.extend(
         Problem(
             f"{module}::{name}",
             "is transcribed from a book or a paper and is not in SOURCED",
         )
-        for module, name in sorted(census - set(SOURCED))
+        for module, name in sorted(census - set(SOURCED) - set(NOT_TRANSCRIBED))
     )
     return problems
 

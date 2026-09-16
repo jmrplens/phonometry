@@ -17,6 +17,7 @@ from __future__ import annotations
 import dataclasses
 import pathlib
 import sys
+import types
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -36,6 +37,13 @@ class _Record:
 @dataclasses.dataclass(frozen=True)
 class _Unsourced:
     name: str = "specimen"
+
+
+@dataclasses.dataclass(frozen=True)
+class _Coordinate:
+    """A record whose ``source`` is a place in the room, not a page."""
+
+    source: tuple[float, float, float] = (0.0, 0.0, 0.0)
 
 
 class TestCitationGrammar:
@@ -143,6 +151,61 @@ class TestTheCensus:
         assert gate.banner_above(lines, 2) == "first line second line"
         assert gate.banner_above(lines, 3) == ""
 
+    def test_a_plain_comment_block_is_a_banner_too(self) -> None:
+        """A table cannot leave the census by dropping the colon.
+
+        ``noise_control/hvac.py`` documents its Bies and Long tables under a
+        plain rule, and reading only ``#:`` is how ten of them sat in ``src``
+        with no page while this gate reported green.
+        """
+        lines = [
+            "# " + "-" * 40,
+            "# Bies 5e Table 8.14 -- duct end reflection loss (dB).",
+            "# Rows: internal diameter (mm).",
+            "# " + "-" * 40,
+            "TABLE = {1: 2, 3: 4}",
+        ]
+        banner = gate.banner_above(lines, 4)
+        assert banner == (
+            "Bies 5e Table 8.14 -- duct end reflection loss (dB). "
+            "Rows: internal diameter (mm)."
+        )
+        assert gate.BOOK_OR_PAPER.search(banner)
+        assert gate.LOCATOR.search(banner)
+
+    def test_the_abbreviated_locators_match_as_they_are_written(self) -> None:
+        """``Eq. 7``, not ``Eq.7``: the pattern used to require the latter."""
+        for banner in (
+            "Field-incidence correction of Bies 5e Eq. 7.42, keyed by band.",
+            "Validity range of Hopkins (2007) Eq. (1.174).",
+            "Fit range of Miki (1990) Sect. 4.1.",
+            "Scattering coefficients of Cox & D'Antonio 3e Fig. 6.19.",
+        ):
+            assert gate.LOCATOR.search(banner), banner
+
+    def test_a_single_author_book_is_a_book(self) -> None:
+        """The surnames come from the bibliography, not from a whitelist.
+
+        Long and Cremer are single-author spellings that the first shape of
+        this pattern could not match, and ten of their tables were transcribed
+        in ``src`` with no page while the census stayed quiet.
+        """
+        for banner in (
+            "Long 2e Table 13.6 -- off-peak efficiency correction.",
+            "Cremer 3e Table 5.1 point-impedance constants for a thin plate.",
+            "Vigran (2008) Eqs. (9.18) and (9.19), the two sidewall cases.",
+        ):
+            assert gate.BOOK_OR_PAPER.search(banner), banner
+
+    def test_the_book_pattern_is_the_bibliography(self) -> None:
+        leads = gate.bibliography_leads()
+        assert "Long" in leads
+        assert "Cremer" in leads
+        assert "Hopkins" in leads
+        # A surname the bibliography does not list is not yet a book here, and
+        # rule 2 is what makes that the same question as "is it citable".
+        assert gate.BOOK_OR_PAPER.search("Nonesuch 1e Table 1") is None
+
     def test_only_a_collection_is_a_table(self, tmp_path: pathlib.Path) -> None:
         """A scalar is a cited number; the errata registry covers those."""
         module = tmp_path / "sample.py"
@@ -170,6 +233,30 @@ class TestTheRatchet:
     def test_the_allowlist_is_empty_and_says_so(self) -> None:
         """Every source this repository transcribes from is one it can open."""
         assert gate.PAGE_UNKNOWN == {}
+
+    def test_nothing_is_both_transcribed_and_not(self) -> None:
+        assert set(gate.NOT_TRANSCRIBED) & set(gate.SOURCED) == set()
+
+    def test_a_declared_non_transcription_still_names_its_reason(self) -> None:
+        for (module, name), reason in gate.NOT_TRANSCRIBED.items():
+            assert module.endswith(".py"), name
+            assert reason.strip(), name
+
+    def test_a_field_named_source_that_is_not_a_citation_is_skipped(self) -> None:
+        """``source`` also spells a coordinate and a ground factor in this tree."""
+        coordinate = _Coordinate()
+        assert list(gate._sourced_records(coordinate)) == []
+        record = _Record()
+        assert list(gate._sourced_records(record)) == [record]
+
+    def test_a_module_without_all_is_still_read(self) -> None:
+        """115 public modules declare no ``__all__``; a record in one counts."""
+        module = types.ModuleType("sample")
+        module.PUBLISHED = _Record()
+        module._private = _Record()
+        assert gate._published_names(module) == ("PUBLISHED",)
+        module.__all__ = []
+        assert gate._published_names(module) == ()
 
     def test_every_registered_table_names_a_document_and_what_it_holds(self) -> None:
         for (module, name), reason in gate.SOURCED.items():

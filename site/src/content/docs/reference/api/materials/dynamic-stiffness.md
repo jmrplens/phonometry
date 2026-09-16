@@ -359,14 +359,14 @@ plate.
 | :--- | :--- |
 | ValueError | naming the first of the three that is not finite and positive. |
 
-## RESILIENT_LAYER_STIFFNESS
+## PUBLISHED_RESILIENT_LAYERS
 
 *Constant* (`dict`).
 
-## resilient_layer_stiffness
+## resilient_layer
 
 ```python
-resilient_layer_stiffness(layer: str | ResilientLayer) -> ResilientLayer
+resilient_layer(layer: str | ResilientLayer) -> ResilientLayer
 ```
 
 Look up a resilient layer in Hopkins Table A3.
@@ -375,7 +375,7 @@ Look up a resilient layer in Hopkins Table A3.
 
 | Name | Description |
 | :--- | :--- |
-| `layer` | A key of [`RESILIENT_LAYER_STIFFNESS`](/phonometry/reference/api/materials/dynamic-stiffness/#resilient_layer_stiffness), spelled `<material>_<density in kg/m3>_<thickness in mm>`, or a [`ResilientLayer`](/phonometry/reference/api/materials/dynamic-stiffness/#resilientlayer) already in hand. |
+| `layer` | A key of [`PUBLISHED_RESILIENT_LAYERS`](/phonometry/reference/api/materials/dynamic-stiffness/#published_resilient_layers), spelled `<material>_<density in kg/m3>_<thickness in mm>`, or a [`ResilientLayer`](/phonometry/reference/api/materials/dynamic-stiffness/#resilientlayer) already in hand. |
 
 **Returns:** The [`ResilientLayer`](/phonometry/reference/api/materials/dynamic-stiffness/#resilientlayer).
 

@@ -6883,7 +6883,7 @@ concordancia con las fuentes publicadas:
   $C = a\,\rho_0^{\,b}$ fila a fila da $\rho_0$ = 1.16, 1.19, 1.21,
   1.14 kg/m³, que es la densidad del aire en todas ellas; hacer la conversión
   en sentido contrario con $\rho_0$ = 1.18 kg/m³ reproduce las cuatro
-  amplitudes impresas con un 0,4 %, un 1,4 %, un 1,5 % y un 2,1 % de
+  amplitudes impresas con un 1,4 %, un 0,4 %, un 1,5 % y un 2,1 % de
   diferencia. Los exponentes lo corroboran por su cuenta: Beranek imprime
   $b_1$ a $b_4$ = 0.75, 0.73, 0.70, 0.59 frente a $C_2$, $C_4$, $C_6$, $C_8$ =
   0.754, 0.732, 0.700, 0.595, los mismos números con dos decimales. El control

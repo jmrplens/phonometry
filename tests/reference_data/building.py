@@ -861,9 +861,12 @@ ISO10140_5_C1_FLOOR_C3_RATING = (75, -3)
 # own, which is why this cites the folios either side instead of inventing 608
 # and 609; the offset the rest of the appendix follows is printed page + 27 =
 # PDF page, and it puts Table A3 and Table A4's folio 610 at PDF page 637.
-# Each row pairs the
-# quasi-longitudinal thin-plate phase speed cL (m/s) with the printed product
-# h.fc (m.Hz), stated for c0 = 343 m/s. The product follows from
+# Each row pairs the quasi-longitudinal thin-plate phase speed cL (m/s) with
+# the printed product h.fc (m.Hz), stated for c0 = 343 m/s. The printed table
+# credits several of its rows to the measurement they come from (Heckl 1981,
+# Rindel 1994, Schmitz et al. 1999, Hopkins 1999 and others); those credits sit
+# with the material names, which this oracle does not carry, because a row here
+# is two numbers rather than a named specimen. The product follows from
 # h fc = c0^2 sqrt(12) / (2 pi cL) and is independent of density and Poisson
 # ratio, so every row is an independent check on the coincidence frequency.
 # ---------------------------------------------------------------------------

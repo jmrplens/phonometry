@@ -155,8 +155,9 @@ TAPPING_HAMMER_RADIUS: float = 0.015
 #: impact velocity ``vo = 0,886 m/s`` of Hopkins 3.6.3.1.
 _GRAVITY: float = 9.81
 
-#: Band-width factors ``B`` of Hopkins Eq. (3.91): ``B = 0,23 f`` for
-#: one-third-octave bands and ``B = 0,707 f`` for octave bands.
+#: Band-width factors ``B`` of Hopkins (2007) Eq. (3.91), PDF page 305
+#: (printed p. 278): ``B = 0,23 f`` for one-third-octave bands and
+#: ``B = 0,707 f`` for octave bands.
 _BANDWIDTH_FACTOR: dict[str, float] = {"third": 0.23, "octave": 0.707}
 
 #: Half-band ratios ``fupper/fcentre`` of the base-ten band system, used to

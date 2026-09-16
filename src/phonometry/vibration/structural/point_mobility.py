@@ -84,10 +84,12 @@ __all__ = [
     "plate_bending_wave_speed",
 ]
 
-#: Cremer Table 5.1 point-impedance constants for a thin plate in bending.
+#: Cremer 3e Table 5.1, PDF page 298 (printed p. 288): point-impedance
+#: constants for a thin plate in bending.
 _PLATE_CONSTANT: dict[str, float] = {"centre": 8.0, "edge": 3.5}
-#: Cremer Table 5.1 point-impedance constants for a slender beam in bending
-#: (the ``(1 + j)`` prefactor is applied separately).
+#: Cremer 3e Table 5.1, PDF page 298 (printed p. 288): point-impedance
+#: constants for a slender beam in bending (the ``(1 + j)`` prefactor is
+#: applied separately).
 _BEAM_CONSTANT: dict[str, float] = {"centre": 2.0, "end": 0.5}
 
 

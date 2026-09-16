@@ -201,7 +201,7 @@ from .diffusers import (
     speed_of_sound_iso17497,
 )
 from .resilient import (
-    RESILIENT_LAYER_STIFFNESS,
+    PUBLISHED_RESILIENT_LAYERS,
     DynamicStiffnessResult,
     DynamicStiffnessWarning,
     ResilientLayer,
@@ -210,7 +210,7 @@ from .resilient import (
     floating_floor_resonance,
     installed_dynamic_stiffness,
     natural_frequency,
-    resilient_layer_stiffness,
+    resilient_layer,
 )
 from .surfaces import (
     DEFAULT_MIC_HEIGHT,
@@ -265,7 +265,6 @@ __all__ = [
     "DiffuserPolarResponse",
     "DiffusionResult",
     "DiffusionSpectrum",
-    "RESILIENT_LAYER_STIFFNESS",
     "DynamicStiffnessResult",
     "ResilientLayer",
     "DynamicStiffnessWarning",
@@ -290,6 +289,7 @@ __all__ = [
     "PART1_FREQUENCY_RANGE",
     "PUBLISHED_AIR",
     "PUBLISHED_POROUS_MATERIALS",
+    "PUBLISHED_RESILIENT_LAYERS",
     "PerforatedPlateLayer",
     "PoroelasticLayer",
     "PorousAbsorberWarning",
@@ -387,7 +387,6 @@ __all__ = [
     "mounting_type",
     "msa_major_axis",
     "natural_frequency",
-    "resilient_layer_stiffness",
     "normalized_diffusion_coefficient",
     "normalized_surface_admittance",
     "normalized_surface_impedance",
@@ -421,6 +420,7 @@ __all__ = [
     "reflected_path_delay",
     "reflection_factor",
     "reproducibility_uncertainty",
+    "resilient_layer",
     "reverberation_time_uncertainty",
     "scattering_coefficient",
     "scattering_coefficient_spectrum",

@@ -6463,7 +6463,7 @@ published sources:
   $\rho_0^{\,b}$, and solving $C = a\,\rho_0^{\,b}$ row by row gives
   $\rho_0$ = 1.16, 1.19, 1.21, 1.14 kg/m³, which is the density of air in
   every row; carrying the conversion the other way with $\rho_0$ = 1.18 kg/m³
-  reproduces the four printed amplitudes to 0.4 %, 1.4 %, 1.5 % and 2.1 %. The
+  reproduces the four printed amplitudes to 1.4 %, 0.4 %, 1.5 % and 2.1 %. The
   exponents agree independently: Beranek prints $b_1$ to $b_4$ = 0.75, 0.73,
   0.70, 0.59 against $C_2$, $C_4$, $C_6$, $C_8$ = 0.754, 0.732, 0.700, 0.595,
   the same numbers to two decimals. The control is the table's other column:

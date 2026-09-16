@@ -99,7 +99,7 @@ _LOW_RESISTIVITY = 10.0
 _TWO_PI = 2.0 * np.pi
 _FOUR_PI_SQ = 4.0 * np.pi**2
 
-#: Where every row of :data:`RESILIENT_LAYER_STIFFNESS` was read, written once
+#: Where every row of :data:`PUBLISHED_RESILIENT_LAYERS` was read, written once
 #: because fifteen rows come off one page and a citation repeated fifteen times
 #: is fifteen chances to mistype it.
 _TABLE_A3 = "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)"
@@ -273,16 +273,25 @@ def natural_frequency(
 # Contents. One table, Table A3, of the four the book's appendix prints. Its
 # three data columns are transcribed row by row and the stiffness is converted
 # from the printed MN/m3 into the N/m3 the functions above take, so what is
-# stored is the argument list rather than the printed table. The companion
-# Table A4 on the same printed folio has shipped whole, transcribed
-# digit-for-digit, in building/prediction/masonry_cavity_wall.py since before
-# this table existed; this is the adjacent table in the same form.
+# stored is the argument list rather than the printed table.
+#
+# Holdings from this one source, counted so the statement below is about what
+# is actually here: Table A3 entire (fifteen rows, three columns) here;
+# Table A4 entire (four rows, two columns) in
+# building/prediction/masonry_cavity_wall.py, where it has shipped since before
+# this table existed; and Table A2 as an oracle of the coincidence frequency,
+# in tests/reference_data/building.py, which is test data and ships in no
+# wheel. Three of the four tables of one appendix, two of them whole.
 #
 # Basis. Each row is a measured property of a named specimen, cited to the
 # document, table, PDF page and printed folio it was read on, and credited in
-# `attributed_to` wherever the book credits it to someone else. No compilation
-# is reproduced, whole or in substantial part. This repository's MIT licence
-# covers the code, not the values, which remain the author's to describe.
+# `attributed_to` wherever the book credits it to someone else. Two of the
+# three tables above are short enough that taking the columns a function needs
+# takes the table, and that is stated rather than stepped around: what is taken
+# is a list of measured facts, in this library's units and keyed by this
+# library's spelling, and no prose, figure, derivation or arrangement of the
+# appendix comes with it. This repository's MIT licence covers the code, not
+# the values, which remain the author's to describe.
 #
 # Removal policy. Withdrawing this table costs no capability: every function
 # here takes `s'` as an explicit argument and none of them defaults to a
@@ -306,9 +315,13 @@ def natural_frequency(
 # 5. One key, one dimension, one spelling. A quantity that appears in two
 #    dimensions gets two field names: the stiffness per unit area here is N/m3
 #    and the per-tie stiffness of Table A4 is N/m, and they are two names.
-# 6. When a single source starts contributing more than one table, the
-#    copyright decision is reopened: the next form is a data directory with its
-#    own provenance statement, and that is a different piece of work.
+# 6. The copyright decision is reopened by how much of one source is here,
+#    not by how many of its tables are touched: when the rows from a single
+#    source stop being the arguments a published function takes and start
+#    being a collection worth consulting for its own sake, the next form is a
+#    data directory with its own provenance statement, and that is a different
+#    piece of work. Hopkins is at three tables and the answer above is the
+#    reopened decision, not the original one.
 # ---------------------------------------------------------------------------
 @dataclass(frozen=True, kw_only=True)
 class ResilientLayer:
@@ -345,13 +358,13 @@ class ResilientLayer:
         return float(natural_frequency(self.dynamic_stiffness_n_m3, mass_per_area))
 
 
-#: Dynamic stiffness per unit area ``s't`` of fifteen resilient layers,
-#: transcribed digit-for-digit from Hopkins (2007) **Table A3** (PDF page 637,
-#: printed p. 610), whose caption states they were measured according to
-#: ISO 9052-1, the standard this module implements as EN 29052-1. The book
-#: prints ``s't`` in MN/m3, the density in kg/m3 and the thickness in mm; the
-#: stiffness is stored here in N/m3 and the other two as printed, and the
-#: conversion is asserted against the printed digits in
+#: Fifteen resilient layers, each carrying the dynamic stiffness per unit area
+#: ``s't`` measured on it, transcribed digit-for-digit from Hopkins (2007)
+#: **Table A3** (PDF page 637, printed p. 610), whose caption states they were
+#: measured according to ISO 9052-1, the standard this module implements as
+#: EN 29052-1. The book prints ``s't`` in MN/m3, the density in kg/m3 and the
+#: thickness in mm; the stiffness is stored here in N/m3 and the other two as
+#: printed, and the conversion is asserted against the printed digits in
 #: tests/materials/resilient/test_dynamic_stiffness.py.
 #:
 #: Eleven rows are the author's own measurements; the four rebond-foam rows
@@ -365,9 +378,9 @@ class ResilientLayer:
 #: These are **measured specimens, not declared product values**. A floating
 #: floor is designed with the manufacturer's ``s'`` declared to EN 29052-1;
 #: these rows are the order of magnitude for when there is none, in the sense
-#: :data:`~phonometry.room.ROOM_ABSORPTION_ESTIMATES` is for when nobody
-#: measured an absorption coefficient.
-RESILIENT_LAYER_STIFFNESS: dict[str, ResilientLayer] = {
+#: :data:`~phonometry.noise_control.ROOM_ABSORPTION_ESTIMATES` is for when
+#: nobody measured an absorption coefficient.
+PUBLISHED_RESILIENT_LAYERS: dict[str, ResilientLayer] = {
     "closed_cell_polyethylene_foam_45_5": ResilientLayer(
         name="Closed-cell polyethylene foam",
         dynamic_stiffness_n_m3=115e6,
@@ -480,10 +493,10 @@ RESILIENT_LAYER_STIFFNESS: dict[str, ResilientLayer] = {
 }
 
 
-def resilient_layer_stiffness(layer: str | ResilientLayer) -> ResilientLayer:
+def resilient_layer(layer: str | ResilientLayer) -> ResilientLayer:
     """Look up a resilient layer in Hopkins Table A3.
 
-    :param layer: A key of :data:`RESILIENT_LAYER_STIFFNESS`, spelled
+    :param layer: A key of :data:`PUBLISHED_RESILIENT_LAYERS`, spelled
         ``<material>_<density in kg/m3>_<thickness in mm>``, or a
         :class:`ResilientLayer` already in hand.
     :return: The :class:`ResilientLayer`.
@@ -492,9 +505,9 @@ def resilient_layer_stiffness(layer: str | ResilientLayer) -> ResilientLayer:
     if isinstance(layer, ResilientLayer):
         return layer
     try:
-        return RESILIENT_LAYER_STIFFNESS[layer]
+        return PUBLISHED_RESILIENT_LAYERS[layer]
     except KeyError:
-        options = ", ".join(sorted(RESILIENT_LAYER_STIFFNESS))
+        options = ", ".join(sorted(PUBLISHED_RESILIENT_LAYERS))
         msg = f"Unknown resilient layer {layer!r}; choose one of {options}."
         raise ValueError(msg) from None
 

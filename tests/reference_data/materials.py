@@ -490,7 +490,7 @@ ALLARD_TABLE_11_8_LOSS_FACTOR = 0.1  # eta_s
 # them by position and a lookup name cannot.
 #
 # There is one copy of each printed digit and it is here. The library stores the
-# same fifteen rows in N/m3 as RESILIENT_LAYER_STIFFNESS, and
+# same fifteen rows in N/m3 as PUBLISHED_RESILIENT_LAYERS, and
 # tests/materials/resilient/test_dynamic_stiffness.py asserts that it is this
 # table times 1e6, which is what makes two representations one copy and pins the
 # conversion that is the real risk.

@@ -32913,8 +32913,10 @@ print(round(materials.decoupling_frequency(
 ), 1))
 # 127.4
 print(round(float(limp.effective_density[0].real), 1))     # 31.2 = rho_t
+# Both arguments are a frame bulk modulus in pascals, not a flow resistivity:
+# the criterion is the book's 20 kPa.
 print(materials.limp_frame_applicable(20e3),
-      materials.limp_frame_applicable(soft.flow_resistivity_pa_s_m2))  # True False
+      materials.limp_frame_applicable(25e3))  # True False
 
 limp.plot()   # normalised Zc and k of the corrected medium
 plt.show()
@@ -33049,7 +33051,7 @@ from phonometry import materials
 # The published glass wool "Domisol Coffrage", 100 mm, glued.
 glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
 print(glass_wool.source)
-# Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)
+# Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)
 
 f = np.linspace(200.0, 1500.0, 1301)
 shear, poisson = glass_wool.frame_constants()   # 220 N/cm2 in pascals, eta 0.1
@@ -33069,7 +33071,10 @@ waves = materials.biot_waves(
 print(round(float(abs(waves.airborne_velocity_ratio[800])), 1))     # 42.4
 print(np.round(waves.frame_borne_velocity_ratio[-1], 3))  # (0.811+0.473j)
 
-biot = materials.layered_absorber(f, [materials.PoroelasticLayer(0.10, med, 0.94, 1.06, 130.0, shear)])
+biot = materials.layered_absorber(f, [materials.PoroelasticLayer(
+    0.10, med, glass_wool.porosity, glass_wool.tortuosity,
+    glass_wool.frame_density_kg_m3, shear,
+)])
 rigid = materials.layered_absorber(f, [materials.PorousLayer(0.10, med)])
 
 fig, ax = plt.subplots()
@@ -35125,7 +35130,7 @@ res.report(
 
 Designing a floating floor starts from the manufacturer's $s'$, declared to
 EN 29052-1 for that product. When there is none, fifteen measured layers are
-published as `RESILIENT_LAYER_STIFFNESS`, transcribed from Hopkins Table A3
+published as `PUBLISHED_RESILIENT_LAYERS`, transcribed from Hopkins Table A3
 (printed p. 610), whose caption states they were measured according to
 ISO 9052-1. Each row carries the page it was read on, and the four rebond
 foams carry the second-level attribution the printed cell gives them.
@@ -35137,14 +35142,14 @@ numbers and the printed table separates them by position in a merged cell.
 ```python
 from phonometry import materials
 
-layer = materials.resilient_layer_stiffness("mineral_wool_rock_60_30")
+layer = materials.resilient_layer("mineral_wool_rock_60_30")
 print(layer.name, layer.density_kg_m3, layer.thickness_mm)   # Mineral wool, rock 60.0 30.0
 print(layer.source)
 # Hopkins (2007) Table A3, PDF page 637 (printed p. 610)
 print(round(layer.dynamic_stiffness_n_m3 / 1e6, 1))          # 10.0 MN/m3, as printed
 print(round(layer.natural_frequency(120.0), 1))              # 45.9 Hz under a 120 kg/m2 screed
 
-rebond = materials.RESILIENT_LAYER_STIFFNESS["rebond_foam_64_20"]
+rebond = materials.PUBLISHED_RESILIENT_LAYERS["rebond_foam_64_20"]
 print(rebond.attributed_to)                                  # Hopkins and Hall (2006)
 print(round(rebond.natural_frequency(120.0), 1))             # 43.6
 ```
@@ -41923,7 +41928,7 @@ documents, one page per module.
 | `installed_dynamic_stiffness` | `function` | **Installed s' by airflow resistivity (EN 29052-1 clause 8.2).**<br>• `apparent_stiffness` s't [N/m³]<br>• `airflow_resistivity` r [kPa·s/m²]<br>• `gas_stiffness` s'a [N/m³]<br>r≥100 → s't · 10≤r<100 → s't+s'a · r<10 → s't if s'a negligible else nan (warns) | `installed_dynamic_stiffness(20e6, 50.0, gas_stiffness=3e6)  # 23e6` |
 | `natural_frequency` | `function` | **Floating-floor natural frequency f0 (EN 29052-1 Formula 2).**<br>• `dynamic_stiffness` s' [N/m³] (scalar/array)<br>• `mass_per_area` m' [kg/m²]<br>f0 = (1/2π)√(s'/m') | `natural_frequency(10e6, 120.0)  # 45.9 Hz` |
 | `floating_floor_resonance` | `function` | **Full EN 29052-1 chain → result.**<br>• `resonant_frequency`, `total_mass_per_area`, `floor_mass_per_area`<br>• `airflow_resistivity` (Default: inf), `thickness`, `porosity`, `atmospheric_pressure_pa` | `res = materials.floating_floor_resonance(25.0, 200.0, 120.0)`<br><br>• `DynamicStiffnessResult` |
-| `ResilientLayer` / `RESILIENT_LAYER_STIFFNESS` / `resilient_layer_stiffness` | `dataclass` / `mapping` / `function` | **Fifteen resilient layers as Hopkins Table A3 prints them (printed p. 610).**<br>• `layer`: `'<material>_<density>_<thickness>'`, e.g. `'mineral_wool_rock_60_30'`, `'rebond_foam_64_20'`<br>• `dynamic_stiffness_n_m3` s′ [N/m³] (the book prints MN/m³), `density_kg_m3`, `thickness_mm`, `source`, `attributed_to`<br>• `.natural_frequency(m')` → f₀ [Hz] (Formula 2)<br>• Measured specimens, not declared product values: design with the manufacturer's s′ to EN 29052-1 | `layer = materials.resilient_layer_stiffness('mineral_wool_rock_60_30')`<br>`layer.natural_frequency(100.0)  # 50.3 Hz` |
+| `ResilientLayer` / `PUBLISHED_RESILIENT_LAYERS` / `resilient_layer` | `dataclass` / `mapping` / `function` | **Fifteen resilient layers as Hopkins Table A3 prints them (printed p. 610).**<br>• `layer`: `'<material>_<density>_<thickness>'`, e.g. `'mineral_wool_rock_60_30'`, `'rebond_foam_64_20'`<br>• `dynamic_stiffness_n_m3` s′ [N/m³] (the book prints MN/m³), `density_kg_m3`, `thickness_mm`, `source`, `attributed_to`<br>• `.natural_frequency(m')` → f₀ [Hz] (Formula 2)<br>• Measured specimens, not declared product values: design with the manufacturer's s′ to EN 29052-1 | `layer = materials.resilient_layer('mineral_wool_rock_60_30')`<br>`layer.natural_frequency(100.0)  # 50.3 Hz` |
 | `DynamicStiffnessResult` | `dataclass` | **Dynamic-stiffness measurement result.**<br>• `apparent_stiffness`/`gas_stiffness`/`dynamic_stiffness` [N/m³]<br>• `resonant_frequency` [Hz], `floor_mass_per_area` [kg/m²]<br>• `natural_frequency` [Hz]<br>• `.plot()` | `res.dynamic_stiffness, res.natural_frequency` |
 | `DynamicStiffnessWarning` | `warning class` | **EN 29052-1 advisory.**<br>Emitted when the enclosed-gas term makes s′ unresolvable (clause 8.2) | `warnings.simplefilter('error', DynamicStiffnessWarning)` |
 | `convert_frf` | `function` | **Convert between any two FRFs (ISO 7626-1 Table 1).**<br>• `value`: complex FRF value(s) of kind *source*<br>• `frequency` f [Hz] (scalar/array, broadcast)<br>• `source`/`target`: `receptance`/`mobility`/`accelerance`/`dynamic_stiffness`/`impedance`/`apparent_mass`<br>Pivots through the receptance H | `convert_frf(2e-3, 80.0, "mobility", "impedance")  # 500 N.s/m` |
@@ -42187,7 +42192,7 @@ documents, one page per module.
 | `frame_elastic_coefficient` | `function` | **Longitudinal coefficient Kc of the frame in vacuum (Allard & Atalla 2e Eq. 6.111).**<br>• `shear_modulus` N [Pa], `poisson_ratio` ν<br>• Kc = 2(1−ν)N/(1−2ν) = Kb + 4N/3 | `frame_elastic_coefficient(2.2e6, 0.0)  # 4.4e6`<br><br>• complex [Pa] |
 | `frame_quarter_wave_resonance` | `function` | **λ/4 frame resonance of a glued layer (Allard & Atalla 2e Eq. 6.110).**<br>• `thickness` l [m]<br>• `shear_modulus` N, `poisson_ratio` ν, `frame_density` ρ₁<br>• fr = (1/4l)√(Re(Kc)/ρ₁): the peak no equivalent fluid produces | `frame_quarter_wave_resonance(0.10, shear_modulus=2.2e6*(1+0.1j), poisson_ratio=0.0, frame_density=130.0)  # 459.9`<br><br>• [Hz] |
 | `PorousMediumResult` | `dataclass` | **Equivalent-fluid characterisation.**<br>• `characteristic_impedance` Zc [Pa·s/m], `wavenumber` k [rad/m] (Im < 0)<br>• `effective_density`, `bulk_modulus` (surface-normalised)<br>• `.normalized_impedance`, `.normalized_wavenumber`<br>• `.plot()`: normalised Zc/k components | `med.characteristic_impedance, med.plot()` |
-| `PorousMaterial` / `PUBLISHED_POROUS_MATERIALS` | `dataclass` / `mapping` | **Two porous specimens as their pages print them (Allard & Atalla 2e).**<br>• `'glass_wool'`: 'Domisol Coffrage', Table 6.1 (printed p. 124) and the Λ = 56 µm / Λ′ = 110 µm of Sect. 6.5.4 (printed p. 123)<br>• `'soft_fibrous'`: Table 11.2 (printed p. 254)<br>• `flow_resistivity_pa_s_m2`, `porosity`, `tortuosity`, `viscous_length_um`, `thermal_length_um`, `frame_density_kg_m3`, `thickness_mm`, `source`, `attributed_to`<br>• `.medium(f)` → `PorousMediumResult`; `.frame_constants()` → (N, ν)<br>• Not a material catalogue: a real specimen is characterised to ISO 9053 and ISO 10534-2 | `gw = materials.PUBLISHED_POROUS_MATERIALS['glass_wool']`<br>`med = gw.medium(f)`<br><br>• `gw.source` prints the page |
+| `PorousMaterial` / `PUBLISHED_POROUS_MATERIALS` | `dataclass` / `mapping` | **Two porous specimens as their pages print them (Allard & Atalla 2e).**<br>• `'glass_wool'`: 'Domisol Coffrage', Table 6.1 (printed p. 124), the Λ = 56 µm / Λ′ = 110 µm of Sect. 6.5.4 (printed p. 123) and the h = 3.8 mm of Table 11.8 (printed p. 275)<br>• `'soft_fibrous'`: Table 11.2 (printed p. 254)<br>• `flow_resistivity_pa_s_m2`, `porosity`, `tortuosity`, `viscous_length_um`, `thermal_length_um`, `frame_density_kg_m3`, `thickness_mm`, `source`, `attributed_to`<br>• `.medium(f)` → `PorousMediumResult`; `.frame_constants()` → (N, ν)<br>• Not a material catalogue: a real specimen is characterised to ISO 9053 and ISO 10534-2 | `gw = materials.PUBLISHED_POROUS_MATERIALS['glass_wool']`<br>`med = gw.medium(f)`<br><br>• `gw.source` prints the page |
 | `DELANY_BAZLEY_COEFFICIENTS` | `mapping` | **Bies 5e Table D.1 coefficient presets (C1…C8).**<br>'delany_bazley' (rockwool/fibreglass), 'garai_pompoli' (polyester), 'dunn_davern' / 'wu' (foams) | `DELANY_BAZLEY_COEFFICIENTS['garai_pompoli']` |
 | `DELANY_BAZLEY_VALIDITY` | `tuple` | **Stated fit range in X = ρf/σ.**<br>(0.01, 1.0) | `DELANY_BAZLEY_VALIDITY  # (0.01, 1.0)` |
 | `MIKI_VALIDITY` | `tuple` | **Miki fit range in f/σ.**<br>(0.01, 1.0) | `MIKI_VALIDITY  # (0.01, 1.0)` |
@@ -42500,14 +42505,22 @@ it; the list grows as guides gain their References sections.
   Cited by [Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/),
   [Loudspeaker characterisation](https://jmrplens.github.io/phonometry/devices/electroacoustics/loudspeakers/) and
   [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+- Beranek, L. L., & Mellow, T. J. (2019). *Acoustics: Sound fields,
+  transducers and vibration* (2nd ed.). Academic Press.
+  ISBN 978-0-12-815227-0. The edition the conformance registry reads for the
+  baffled-piston radiation impedance and directivity (Eqs. 13.117, 13.118,
+  4.151, 13.102) and the one its Table 7.1 is read on for the
+  Delany-Bazley amplitudes discussed in
+  [ERRATA](https://jmrplens.github.io/phonometry/reference/errata/).
 - Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and vibration
   analysis for engineers* (2nd ed.). Cambridge University Press.
   [doi:10.1017/CBO9781139163927](https://doi.org/10.1017/CBO9781139163927).
   The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the
   room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure
   design equation of section 4.10 (Eqs. 4.102-4.115), the plateau method for
-  panel transmission loss of section 3.9 (Table 3.1) and the higher-order
-  acoustic modes of a rigid circular duct of section 7.2 (Table 7.1).
+  panel transmission loss of section 3.9 (Table 3.1), the higher-order
+  acoustic modes of a rigid circular duct of section 7.2 (Table 7.1) and the
+  worked problems 4.16, 4.18 and 4.21 with their printed octave-band answers.
   Cited by [Room to Room: Partition, Receiving Room, Criterion](https://jmrplens.github.io/phonometry/devices/noise-control/room-to-room/),
   [Duct-Borne Noise: Fan to Room](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/),
   [Bending-wave transmission at plate junctions](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/) and

@@ -138,15 +138,20 @@ DELANY_BAZLEY_COEFFICIENTS: Mapping[str, tuple[float, ...]] = {
 #: (Mechel 2e Sect. G.11 Eqs. (1)-(2)), the length of the preset tuples above.
 _DELANY_BAZLEY_COEFFICIENT_COUNT = 8
 
-#: Stated validity range of the Delany-Bazley regression in ``X = rho f/sigma``
-#: (Hopkins Eq. (1.174); Cox & D'Antonio Sect. 6.5.1).
+#: Stated validity range of the Delany-Bazley regression in ``X = rho f/sigma``,
+#: printed as ``0,01 < X < 1,0`` by Hopkins (2007) Eq. (1.174), PDF page 112
+#: (printed p. 85), and again by Cox & D'Antonio 3e Sect. 6.5.1, PDF page 254
+#: (printed p. 197).
 DELANY_BAZLEY_VALIDITY = (0.01, 1.0)
-#: Fit range of the Miki regression in ``f/sigma`` (Miki 1990, Sect. 4.1: the
-#: Delany-Bazley data below ``f/sigma = 0.01`` are extrapolation).
+#: Fit range of the Miki regression in ``f/sigma``. The lower limit is Miki
+#: (1990) Sect. 4.1, PDF page 4 (printed p. 22), which reads the Delany-Bazley
+#: data below ``f/sigma = 0,01`` as extrapolation; the upper limit is the
+#: Delany-Bazley one above, since Miki refits their data.
 MIKI_VALIDITY = (0.01, 1.0)
 #: Published upper limits on ``|K_c / K_f|`` (frame-in-vacuum bulk modulus over
 #: pore-fluid bulk modulus) below which the limp-frame equivalent fluid of
-#: :func:`limp_frame` may be used, from Allard & Atalla 2e printed pp. 253-254:
+#: :func:`limp_frame` may be used, from Allard & Atalla 2e Sect. 11.3.4, PDF
+#: pages 259-260 (printed pp. 253-254):
 #: ``"beranek"`` is Beranek's (1947) original 0,05 and ``"doutres"`` the 0,2
 #: to which Doutres et al. (2007) relaxed it with their frame structural
 #: interaction criterion (which, with ``K_f`` approximated by the isothermal
@@ -689,12 +694,12 @@ def limp_frame(
 # here.
 #
 # Contents. Two specimens: one row of Table 11.2, and the worked example of
-# Sect. 6.5.4, whose parameters are split between Table 6.1 and the prose of
-# the facing page. The book prints twenty-two property tables and this takes
-# columns from two of them. Each specimen is transcribed column by column and
-# converted into the units this library computes in, so what is stored is
-# neither the printed table nor a facsimile of it: it is the argument list the
-# functions below already take. The columns kept are the ones a published
+# Sect. 6.5.4, whose parameters are split between Table 6.1, the prose of the
+# facing page and the row Table 11.8 prints for the same specimen. The book
+# prints twenty-two property tables and this takes columns from three of them.
+# Each specimen is transcribed column by column and converted into the units
+# this library computes in, so what is stored is neither the printed table nor
+# a facsimile of it: it is the argument list the functions below already take. The columns kept are the ones a published
 # function consumes; everything else those pages print stays in the book.
 #
 # Basis. The parameters are physical constants of a measured specimen, cited
@@ -724,8 +729,12 @@ def limp_frame(
 #    consistency assertion.
 # 5. One key, one dimension, one spelling. A quantity that appears in two
 #    dimensions gets two field names.
-# 6. When a single source starts contributing more than one table, the
-#    copyright decision is reopened: the next form is a data directory with its
+# 6. The copyright decision is reopened by how much of one source is here,
+#    not by how many of its tables are touched: three of Allard & Atalla's
+#    twenty-two property tables are read for two specimens and no table of
+#    theirs is reproduced. When the rows from a single source stop being the
+#    arguments a published function takes and start being a collection worth
+#    consulting for its own sake, the next form is a data directory with its
 #    own provenance statement, and that is a different piece of work.
 #
 # The twenty-five Allard rows that print a Young's modulus and a structural
@@ -751,15 +760,23 @@ class PorousMaterial:
     :ivar porosity: Open porosity ``phi``.
     :ivar tortuosity: Tortuosity :math:`\alpha_\infty`.
     :ivar viscous_length_um: Viscous characteristic length ``Lambda``, in
-        micrometres.
+        micrometres, the unit the tables print it in. The
+        ``viscous_length`` parameter of :func:`johnson_champoux_allard` is in
+        **metres**, so this field is not passed to it directly: :meth:`medium`
+        makes the conversion, once, and a caller who assembles the argument
+        list by hand divides by a million first.
     :ivar thermal_length_um: Thermal characteristic length ``Lambda'``, in
-        micrometres.
+        micrometres. Metres at the model's ``thermal_length``, as above.
     :ivar source: Document, locator, PDF page and printed folio. A specimen
-        whose columns come off two pages of one book names both, separated by
-        ``"; "``.
+        whose columns come off several pages of one book names every one of
+        them, separated by ``"; "``.
     :ivar frame_density_kg_m3: Frame density ``rho1``, in kg/m3.
-    :ivar thickness_mm: Layer thickness ``h`` of the specimen the table
-        describes, in millimetres.
+    :ivar thickness_mm: Layer thickness ``h`` of the specimen as tabulated, in
+        millimetres. It is the thickness of the layer the table describes and
+        not a property of the material: a specimen whose columns come off
+        several pages takes it from the one page that prints an ``h``, and the
+        worked examples of the same book use the same material at other
+        thicknesses.
     :ivar shear_modulus_pa: Complex in-vacuo shear modulus ``N``, in pascals,
         or ``None`` when the table prints no elastic constants. ``None``
         together with :attr:`poisson_ratio`, because a table that prints one
@@ -863,9 +880,12 @@ class PorousMaterial:
 #: ``Lambda' = 2 Lambda = 1,1 x 10^-4 m``. That last step is the book's own
 #: rounding of 1,12 to two figures, and **Table 11.8** (PDF page 281, printed
 #: p. 275) prints the same specimen's lengths independently as 56 and 110 um,
-#: which is why 110 and not 112 is what a re-reading finds. Both pages of the
-#: example are named in ``source``, because neither of them alone supplies the
-#: five parameters the model takes.
+#: which is why 110 and not 112 is what a re-reading finds. Table 11.8 is also
+#: the only one of the three that prints a thickness for it, the 3,8 mm of the
+#: layer bonded to the plate of its Figure 11.18; Sect. 6.5.4 works the same
+#: material at 10 cm and at 5,6 cm and prints no ``h`` of its own. All three
+#: pages are named in ``source``, because no one of them supplies what the
+#: object stores.
 #:
 #: ``soft_fibrous`` is the one row of **Table 11.2** (PDF page 260, printed
 #: p. 254), which prints all seven of its columns.
@@ -889,7 +909,8 @@ PUBLISHED_POROUS_MATERIALS: dict[str, PorousMaterial] = {
         poisson_ratio=0.0,
         source=(
             "Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); "
-            "Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)"
+            "Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); "
+            "Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)"
         ),
     ),
     "soft_fibrous": PorousMaterial(

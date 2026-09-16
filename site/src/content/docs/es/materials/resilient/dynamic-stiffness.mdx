@@ -397,7 +397,7 @@ res.report(
 
 El diseño de un suelo flotante parte del $s'$ del fabricante, declarado según
 la EN 29052-1 para ese producto. Cuando no lo hay, se publican quince capas
-medidas en `RESILIENT_LAYER_STIFFNESS`, transcritas de la tabla A3 de Hopkins
+medidas en `PUBLISHED_RESILIENT_LAYERS`, transcritas de la tabla A3 de Hopkins
 (p. impresa 610), cuyo pie dice que se midieron según la ISO 9052-1. Cada fila
 lleva la página de la que se leyó, y las cuatro espumas rebond llevan la
 atribución de segundo nivel que les da la celda impresa.
@@ -410,14 +410,14 @@ las separa por su posición dentro de una celda combinada.
 ```python
 from phonometry import materials
 
-layer = materials.resilient_layer_stiffness("mineral_wool_rock_60_30")
+layer = materials.resilient_layer("mineral_wool_rock_60_30")
 print(layer.name, layer.density_kg_m3, layer.thickness_mm)   # Mineral wool, rock 60.0 30.0
 print(layer.source)
 # Hopkins (2007) Table A3, PDF page 637 (printed p. 610)
 print(round(layer.dynamic_stiffness_n_m3 / 1e6, 1))          # 10.0 MN/m3, como se imprime
 print(round(layer.natural_frequency(120.0), 1))              # 45.9 Hz bajo una losa de 120 kg/m2
 
-rebond = materials.RESILIENT_LAYER_STIFFNESS["rebond_foam_64_20"]
+rebond = materials.PUBLISHED_RESILIENT_LAYERS["rebond_foam_64_20"]
 print(rebond.attributed_to)                                  # Hopkins and Hall (2006)
 print(round(rebond.natural_frequency(120.0), 1))             # 43.6
 ```

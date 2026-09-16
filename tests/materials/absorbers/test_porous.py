@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import inspect
 import pathlib
+import re
 
 import numpy as np
 import pytest
@@ -82,6 +83,11 @@ from phonometry.materials.absorbers.porous import (
 RHO0 = 1.205
 C0 = 343.0
 RC = RHO0 * C0
+
+# How ``scripts/check_published_sources.JOINER`` splits a ``source`` field:
+# only after a closing parenthesis, because the spelling for a page that prints
+# no folio carries a semicolon of its own.
+_CITATION_JOINER = re.compile(r"(?<=\)); ")
 
 
 def _grid(lo: float = 50.0, hi: float = 4000.0, n: int = 300) -> np.ndarray:
@@ -977,6 +983,17 @@ class TestPublishedPorousMaterials:
         shear, _ = PUBLISHED_POROUS_MATERIALS["glass_wool"].frame_constants()
         assert shear == pytest.approx(shear_from_young, rel=1e-12)
 
+    def test_glass_wool_thickness_is_the_one_table_11_8_prints(self) -> None:
+        """Only folio 275 prints an ``h`` for this specimen, and it is stored.
+
+        Table 6.1 prints no thickness and Sect. 6.5.4 prints none either, so
+        the field would have no page to stand on if Table 11.8 were not in
+        ``source``; this is the assertion that keeps the two together.
+        """
+        specimen = PUBLISHED_POROUS_MATERIALS["glass_wool"]
+        assert specimen.thickness_mm == ref.ALLARD_TABLE_11_8_THICKNESS_MM
+        assert "Table 11.8, PDF page 281 (printed p. 275)" in specimen.source
+
     def test_soft_fibrous_is_the_printed_table_11_2_row(self) -> None:
         """Folio 254 prints all seven columns of the one row it has."""
         specimen = PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
@@ -991,8 +1008,16 @@ class TestPublishedPorousMaterials:
         assert specimen.frame_density_kg_m3 == ref.ALLARD_TABLE_11_2_FRAME_DENSITY
 
     def test_every_specimen_cites_a_document_a_page_and_a_folio(self) -> None:
+        """Split the way the gate splits: a folio form carries its own ``;``.
+
+        ``check_published_sources.JOINER`` only breaks after a closing
+        parenthesis, because the spelling for a page that prints no folio reads
+        "(no printed folio; between folios A and B)". Splitting on a bare
+        "; " here would turn that correct value red, so this test reads the
+        citations the same way the gate does.
+        """
         for key, specimen in PUBLISHED_POROUS_MATERIALS.items():
-            for citation in specimen.source.split("; "):
+            for citation in _CITATION_JOINER.split(specimen.source):
                 assert citation.startswith("Allard & Atalla 2e "), key
                 assert "PDF page " in citation, key
                 assert "(printed p. " in citation, key
@@ -1061,7 +1086,7 @@ class TestPublishedPorousMaterials:
             path.relative_to(root).as_posix()
             for path in root.rglob("*.py")
             if "PUBLISHED_POROUS_MATERIALS" in path.read_text(encoding="utf-8")
-            or "RESILIENT_LAYER_STIFFNESS" in path.read_text(encoding="utf-8")
+            or "PUBLISHED_RESILIENT_LAYERS" in path.read_text(encoding="utf-8")
         ]
         # Only where they are defined and rolled up for export.
         assert sorted(readers) == [

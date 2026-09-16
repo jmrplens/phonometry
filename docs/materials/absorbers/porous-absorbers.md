@@ -346,7 +346,7 @@ from phonometry import materials
 # The published glass wool "Domisol Coffrage", 100 mm, glued.
 glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
 print(glass_wool.source)
-# Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)
+# Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)
 
 f = np.linspace(200.0, 1500.0, 1301)
 shear, poisson = glass_wool.frame_constants()   # 220 N/cm2 in pascals, eta 0.1
@@ -366,7 +366,10 @@ waves = materials.biot_waves(
 print(round(float(abs(waves.airborne_velocity_ratio[800])), 1))     # 42.4
 print(np.round(waves.frame_borne_velocity_ratio[-1], 3))  # (0.811+0.473j)
 
-biot = materials.layered_absorber(f, [materials.PoroelasticLayer(0.10, med, 0.94, 1.06, 130.0, shear)])
+biot = materials.layered_absorber(f, [materials.PoroelasticLayer(
+    0.10, med, glass_wool.porosity, glass_wool.tortuosity,
+    glass_wool.frame_density_kg_m3, shear,
+)])
 rigid = materials.layered_absorber(f, [materials.PorousLayer(0.10, med)])
 
 fig, ax = plt.subplots()

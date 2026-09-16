@@ -2406,6 +2406,17 @@ def generate_silencer_extended_tube(output_dir: str) -> None:
         xytext=(150.0, 11.5),
         fontsize="small",
         color=COLOR_PRIMARY,
+        # Chipped rather than moved: the outlet curve climbs through this
+        # corner from 20 Hz to the first tuned trough, so a horizontal label
+        # anywhere along it meets it somewhere, and here it crossed the last
+        # word of the note in both languages. Nothing is lost under the chip,
+        # which covers a stretch of that rise and no plotted point.
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.4",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
         arrowprops={"arrowstyle": "->", "color": COLOR_PRIMARY, "lw": 1.0},
     )
     ax.set_xlim(20.0, 880.0)
@@ -3739,7 +3750,13 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
             ax.set_ylim(bottom=0.0)
             format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
             ax.grid(visible=True, which="both", alpha=0.4)
-            ax.legend(loc="upper left", fontsize="x-small")
+            # Three of the four panels rise to the right and leave the top
+            # left empty. Panel (c) is the one that falls from its first
+            # band, and the legend there sat on the 63 Hz point of both
+            # curves: the blue marker showed half of itself under the frame
+            # and the red one not at all.
+            corner = "upper right" if ax is axes[1][0] else "upper left"
+            ax.legend(loc=corner, fontsize="x-small")
     plt.tight_layout()
     save_figure(output_dir, "duct_attenuation_elements.svg")
     plt.close()
@@ -3867,14 +3884,23 @@ def generate_duct_regenerated_noise(output_dir: str) -> None:
     ax.annotate(
         "$55\\,\\mathrm{lg}(V/V_0)$: 16.6 dB per\ndoubling, every band",
         xy=(250.0, 55.0),
-        xytext=(400.0, 26.0),
+        # The four curves are the same curve 16.6 dB apart, so the corridor
+        # between two of them is the only room on the panel and it slopes
+        # down to the right while the note stays level. Two dB lower than it
+        # used to sit: at 26 dB the last word reached the 10 m/s curve, which
+        # has fallen to 30 dB by the time the Spanish line ends.
+        xytext=(400.0, 24.0),
         fontsize="small",
         color=COLOR_FG,
         arrowprops={"arrowstyle": "->", "color": COLOR_FG, "lw": 1.0},
     )
     ax.set_title("Silencer self-noise (Long Eq. 14.31)", pad=10)
     ax.set_ylabel("Regenerated $L_W$ [dB re 1 pW]")
-    ax.legend(loc="upper right", fontsize="small", title="Airway velocity")
+    # Bottom left, where the four curves leave the whole corner empty, and not
+    # the top right the English legend fitted into: the Spanish title is half
+    # again as wide, and the box it sizes reached back to 500 Hz and closed
+    # over the 40 m/s point at 1 kHz.
+    ax.legend(loc="lower left", fontsize="small", title="Airway velocity")
 
     ax = axes[1]
     for flow, color in (

@@ -219,6 +219,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   recomputing the annex returns both printed levels, each against the other
   label.
 
+- An erratum entry for VDI 2081 Blatt 2:2005-05, read from the page as printed.
+  Element 14 of Table 1 is a round bend, and its two running totals disagree in
+  one band of eight: the level arriving prints 34,0 dB at 8 kHz and the same
+  level with the bend's own flow noise in it prints 33,6 dB, which is lower than
+  what it adds to. Element 13 hands 8 kHz over at 37,0 dB, the bend takes 3 dB
+  off it, and the flow noise the element prints two rows higher is 14,4 dB under
+  the band, so it moves the level by less than 0,0001 dB. Read the other way the
+  cell is just as unreachable: 33,6 dB would need 36,6 dB to arrive. The
+  A-weighted total of the element is printed the same in both rows, which is what
+  hides it.
+
 ### Changed
 
 - The documentation, the figures and the docstrings are written without the em
@@ -310,6 +321,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   belongs to the unit. It also leaves figure labels alone, where text cannot
   reflow, and every Python string that is not a docstring or a comment, because
   a string may be a key a caller passes in.
+
+- Three figures of the duct chain covered something the reader needs. The legend
+  of the self-noise panel of `duct_regenerated_noise` is titled with a line half
+  again as long in Spanish, and the box that title sizes reached back to 500 Hz
+  and closed over the 40 m/s point at 1 kHz; it sits in the empty bottom corner
+  now, which neither language reaches. The note on the velocity law of the same
+  panel sits two decibels lower, clear of the 10 m/s curve its second line ended
+  on. The four panels of `duct_attenuation_elements` all put their legend in the
+  top left, which is empty in the three that rise to the right and is where the
+  two curves of the open-end panel start: its 63 Hz points were under the frame,
+  the first showing half a marker and the second nothing at all, and that panel
+  carries its legend on the right now. In `silencer_extended_tube` the outlet
+  curve climbs through the note on the surviving trough and crossed its last word
+  in both languages, so that note carries the chip the convention gives a label
+  with nowhere to go.
+
 - The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.
 

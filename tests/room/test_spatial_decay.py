@@ -26,6 +26,8 @@ folio and the page it was read on, and the conformance rows read it there too.
 
 from __future__ import annotations
 
+import warnings
+
 import numpy as np
 import pytest
 from reference_data import spatial_decay as oracle
@@ -688,3 +690,90 @@ def test_the_probst_fitting_surfaces_are_the_envelope_without_the_base(
         for count, long_m, wide_m, tall_m in fittings
     )
     assert envelope == pytest.approx(surface_m2)
+
+
+# ---------------------------------------------------------------------------
+# The three conditions of SpatialDecayWarning (5.1.4, 5.3.2, 6.4.3).
+# ---------------------------------------------------------------------------
+
+
+def test_a_clear_background_says_nothing() -> None:
+    """The one case 5.1.4 asks nothing of: 10 dB over the background."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        check = room.check_background_margin([80.0, 75.0], [70.0, 60.0])
+    assert check.satisfied
+    assert not check.needs_correction.any()
+    assert not check.unusable.any()
+    assert check.margins_db == pytest.approx([10.0, 15.0])
+
+
+def test_a_margin_in_the_correction_window_asks_for_iso_3744() -> None:
+    """Between 6 dB and 10 dB the clause corrects rather than refuses."""
+    with pytest.warns(room.SpatialDecayWarning, match="5.1.4"):
+        check = room.check_background_margin([80.0], [72.0])
+    assert not check.satisfied
+    assert check.needs_correction.tolist() == [True]
+    assert check.unusable.tolist() == [False]
+
+
+def test_a_margin_of_six_decibels_is_not_corrected_at_all() -> None:
+    """At 6 dB the clause stops offering the correction, so the point is lost."""
+    with pytest.warns(room.SpatialDecayWarning, match="offers no correction"):
+        check = room.check_background_margin([80.0, 80.0], [74.0, 60.0])
+    assert check.unusable.tolist() == [True, False]
+    assert check.needs_correction.tolist() == [False, False]
+
+
+def test_one_background_stands_for_every_position() -> None:
+    """A single background level is the shape a quiet room is reported in."""
+    with pytest.warns(room.SpatialDecayWarning):
+        check = room.check_background_margin([80.0, 70.0, 66.0], 60.0)
+    assert check.margins_db == pytest.approx([20.0, 10.0, 6.0])
+    assert check.unusable.tolist() == [False, False, True]
+
+
+def test_a_background_that_does_not_match_the_positions_is_refused() -> None:
+    with pytest.raises(ValueError, match="position for position"):
+        room.check_background_margin([80.0, 75.0], [70.0, 60.0, 50.0])
+
+
+def test_two_positions_are_a_line_and_not_a_regression() -> None:
+    """The count 5.3.2 calls a minimum, met exactly, leaves nothing to spare."""
+    with pytest.warns(room.SpatialDecayWarning, match="line through them"):
+        rate = room.spatial_decay_rate([-20.0, -26.0], [5.0, 10.0])
+    assert rate == pytest.approx(
+        -DECADE_TO_DOUBLING * (-6.0 / np.log10(2.0)), rel=1e-12
+    )
+
+
+def test_three_positions_are_a_regression_and_say_nothing() -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        room.spatial_decay_rate([-20.0, -23.0, -26.0], [5.0, 7.0, 10.0])
+
+
+def test_reading_the_line_past_the_last_position_says_so() -> None:
+    """6.4.3 reads the far region at 30 m, which a path may never reach."""
+    values = [-20.0, -23.0, -26.0]
+    distances = [5.0, 10.0, 24.0]
+    with pytest.warns(room.SpatialDecayWarning, match="extrapolation"):
+        room.level_excess_at(values, distances, EVALUATION_DISTANCES_M["far"])
+
+
+def test_reading_the_line_inside_the_measured_range_says_nothing() -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        room.level_excess_at(
+            [-20.0, -23.0, -26.0], [5.0, 10.0, 24.0], EVALUATION_DISTANCES_M["middle"]
+        )
+
+
+def test_the_annex_c_middle_region_raises_none_of_the_three() -> None:
+    """The worked example is what a measurement that meets the clauses looks like."""
+    keep = _select(*oracle.ANNEX_C_RANGES_M["middle"])
+    values, distances = _raw(1000)[keep], DISTANCES_M[keep]
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        room.spatial_decay_rate(values, distances)
+        room.level_excess_at(values, distances, EVALUATION_DISTANCES_M["middle"])

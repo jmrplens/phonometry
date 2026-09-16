@@ -157,6 +157,28 @@ describe una dirección, y dos describen una sala. Anota la altura del trayecto,
 la posición de la fuente y cualquier obstáculo que no hayas podido evitar, porque
 el informe es lo que hace reproducible la curva.
 
+El margen es un juicio que la biblioteca hace por ti, banda de octava a banda de
+octava, y dice en cuál de los tres casos cae cada posición en lugar de corregir
+nada: la corrección que pide el 5.1.4 entre 6 dB y 10 dB es la que imprime la
+ISO 3744, y aplicarla aquí movería un nivel medido a tus espaldas.
+
+```python
+check = room.check_background_margin([80.0, 70.0, 66.0], 60.0)
+print(check.margins_db)        # [20. 10.  6.]
+print(check.unusable)          # [False False  True]
+print(check.satisfied)         # False
+```
+
+Otras dos condiciones se leen donde se ven, sin que haya que preguntar por
+ellas. Un tramo que contiene exactamente las dos posiciones que necesita una
+regresión da una tasa que es la recta que pasa por ellas, sin nada que sobre
+para contrastar ninguna de las dos, y el 5.3.2 llama mínimo al número de
+posiciones de sus distribuciones recomendadas. Y `level_excess_at` leyendo la
+recta ajustada fuera de las distancias sobre las que se ajustó es una
+extrapolación, que es lo que pide el 30 m del 6.4.3 a un trayecto que se quedó
+en 24 m. Las dos emiten `SpatialDecayWarning`, así que un resultado que salga de
+ahí lo dice.
+
 La propia fuente tiene que cualificarse antes. El anexo A pide más que la
 ISO 6926: su índice de directividad debe quedarse dentro de ± 2 dB hasta 630 Hz,
 subiendo a ± 8 dB en 1 kHz y manteniéndose ahí hasta 5 kHz, su espectro no puede

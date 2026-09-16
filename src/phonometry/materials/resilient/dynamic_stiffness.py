@@ -107,6 +107,14 @@ _TABLE_A3 = "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)"
 #: What the four rebond-foam cells of that table print under the material name.
 _HOPKINS_AND_HALL = "Hopkins and Hall (2006)"
 
+#: The three material names Table A3 prints once and spans over four rows each.
+#: Written here rather than in the rows for the same reason as the citation
+#: above: the table groups them, and four copies of a name are four chances to
+#: part one row from its group.
+_MINERAL_WOOL_ROCK = "Mineral wool, rock"
+_MINERAL_WOOL_GLASS = "Mineral wool, glass"
+_REBOND_FOAM = "Rebond foam (reconstituted open cell foam)"
+
 
 class DynamicStiffnessWarning(PhonometryWarning):
     """Advisory when the enclosed-gas term makes ``s'`` unresolvable (clause 8.2)."""
@@ -403,63 +411,63 @@ PUBLISHED_RESILIENT_LAYERS: dict[str, ResilientLayer] = {
         source=_TABLE_A3,
     ),
     "mineral_wool_rock_60_30": ResilientLayer(
-        name="Mineral wool, rock",
+        name=_MINERAL_WOOL_ROCK,
         dynamic_stiffness_n_m3=10e6,
         density_kg_m3=60.0,
         thickness_mm=30.0,
         source=_TABLE_A3,
     ),
     "mineral_wool_rock_80_30": ResilientLayer(
-        name="Mineral wool, rock",
+        name=_MINERAL_WOOL_ROCK,
         dynamic_stiffness_n_m3=11e6,
         density_kg_m3=80.0,
         thickness_mm=30.0,
         source=_TABLE_A3,
     ),
     "mineral_wool_rock_100_30": ResilientLayer(
-        name="Mineral wool, rock",
+        name=_MINERAL_WOOL_ROCK,
         dynamic_stiffness_n_m3=14e6,
         density_kg_m3=100.0,
         thickness_mm=30.0,
         source=_TABLE_A3,
     ),
     "mineral_wool_rock_140_30": ResilientLayer(
-        name="Mineral wool, rock",
+        name=_MINERAL_WOOL_ROCK,
         dynamic_stiffness_n_m3=19e6,
         density_kg_m3=140.0,
         thickness_mm=30.0,
         source=_TABLE_A3,
     ),
     "mineral_wool_glass_36_13": ResilientLayer(
-        name="Mineral wool, glass",
+        name=_MINERAL_WOOL_GLASS,
         dynamic_stiffness_n_m3=28e6,
         density_kg_m3=36.0,
         thickness_mm=13.0,
         source=_TABLE_A3,
     ),
     "mineral_wool_glass_36_25": ResilientLayer(
-        name="Mineral wool, glass",
+        name=_MINERAL_WOOL_GLASS,
         dynamic_stiffness_n_m3=11e6,
         density_kg_m3=36.0,
         thickness_mm=25.0,
         source=_TABLE_A3,
     ),
     "mineral_wool_glass_75_25": ResilientLayer(
-        name="Mineral wool, glass",
+        name=_MINERAL_WOOL_GLASS,
         dynamic_stiffness_n_m3=12e6,
         density_kg_m3=75.0,
         thickness_mm=25.0,
         source=_TABLE_A3,
     ),
     "mineral_wool_glass_75_40": ResilientLayer(
-        name="Mineral wool, glass",
+        name=_MINERAL_WOOL_GLASS,
         dynamic_stiffness_n_m3=7e6,
         density_kg_m3=75.0,
         thickness_mm=40.0,
         source=_TABLE_A3,
     ),
     "rebond_foam_64_15": ResilientLayer(
-        name="Rebond foam (reconstituted open cell foam)",
+        name=_REBOND_FOAM,
         dynamic_stiffness_n_m3=12e6,
         density_kg_m3=64.0,
         thickness_mm=15.0,
@@ -467,7 +475,7 @@ PUBLISHED_RESILIENT_LAYERS: dict[str, ResilientLayer] = {
         attributed_to=_HOPKINS_AND_HALL,
     ),
     "rebond_foam_64_20": ResilientLayer(
-        name="Rebond foam (reconstituted open cell foam)",
+        name=_REBOND_FOAM,
         dynamic_stiffness_n_m3=9e6,
         density_kg_m3=64.0,
         thickness_mm=20.0,
@@ -475,7 +483,7 @@ PUBLISHED_RESILIENT_LAYERS: dict[str, ResilientLayer] = {
         attributed_to=_HOPKINS_AND_HALL,
     ),
     "rebond_foam_64_25": ResilientLayer(
-        name="Rebond foam (reconstituted open cell foam)",
+        name=_REBOND_FOAM,
         dynamic_stiffness_n_m3=7e6,
         density_kg_m3=64.0,
         thickness_mm=25.0,
@@ -483,7 +491,7 @@ PUBLISHED_RESILIENT_LAYERS: dict[str, ResilientLayer] = {
         attributed_to=_HOPKINS_AND_HALL,
     ),
     "rebond_foam_96_15": ResilientLayer(
-        name="Rebond foam (reconstituted open cell foam)",
+        name=_REBOND_FOAM,
         dynamic_stiffness_n_m3=16e6,
         density_kg_m3=96.0,
         thickness_mm=15.0,

@@ -58,7 +58,7 @@ Every certification level on this page is asked for at one of the three
 reference points Annex 16 fixes around the runway, so it helps to see them
 before the mathematics.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification.svg" alt="The three aircraft noise certification points of ICAO Annex 16 Chapter 3, in plan and side view sharing the same distance scale: a lateral reference line parallel to the runway at 450 m where take-off noise is greatest, with a symmetric point on the other side; the flyover reference point on the extended centre line 6 500 m from the start of roll, under the climb-out; and the approach reference point 2 000 m from the threshold, 120 m below the 3 degree glide path that meets the ground 300 m beyond the threshold; microphones sit 1.2 m above the ground and the metric at all three points is EPNL in EPNdB" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification.svg" alt="The three aircraft noise certification points of ICAO Annex 16 Chapter 3, in plan and side view sharing the same distance scale: a lateral reference line parallel to the runway at 450 m where take-off noise is greatest, with a symmetric point on the other side; the flyover reference point on the extended centre line 6 500 m from the start of roll, under the climb-out; and the approach reference point 2 000 m from the threshold, 120 m below the 3 degree glide path that meets the ground 300 m beyond the threshold; microphones sit 1.2 m above the ground and the metric at all three points is EPNL in EPNdB" width="92%" />
 
 Three points, because a transport aeroplane is loud in three different ways.
 The **lateral** point, on a line 450 m to the side of the runway and placed
@@ -66,11 +66,11 @@ where the take-off noise is greatest (§3.3.1 a), catches full take-off thrust a
 a shallow elevation angle, where ground effect and engine installation matter
 most. The **flyover** point, 6.5 km from the start of roll on the extended
 centre line, catches the aeroplane after thrust cutback, which is the community
-case. The **approach** point, 2 000 m before the threshold and 120 m below the
+case. The **approach** point, 2 000 m before the threshold and 120 m below the
 3° path, catches an airframe- and fan-dominated condition at low power. All
 three are scored with the EPNL of this page, but the limits differ and are not
 single numbers: Chapter 3 §3.4 sets them as lines rising with maximum
-certificated take-off mass: 101 EPNdB at flyover for a twin at 385 000 kg and
+certificated take-off mass: 101 EPNdB at flyover for a twin at 385 000 kg and
 above, 104 for a trijet and 106 for four engines or more, against 103 lateral
 and 105 on approach at the top of their own mass ranges. The same EPNL can
 pass at one point and fail at another. The microphone is 1.2 m above the ground
@@ -181,7 +181,7 @@ The station that produces those spectra is fixed clause by clause.
   average crosswind no more than 3.6 m/s with a maximum of 5.1 m/s (§2.2.2.4.1).
   For helicopters the wind limits tighten to 5.1 m/s and 2.6 m/s and the
   temperature and humidity limits apply at 10 m only. Temperature, humidity,
-  wind speed and direction are measured at 10 m above the ground within 2 000 m
+  wind speed and direction are measured at 10 m above the ground within 2 000 m
   of the noise measurement point (§2.2.2.2).
 - **The tracking.** Aircraft position is determined by a method independent of
   the cockpit flight instrumentation and time-synchronised with the acoustic
@@ -502,7 +502,7 @@ att.plot()   # band vs pure-tone mid-band (needs matplotlib)
 
 The regression was fitted for roughly 6-32 °C and 20-95 % relative humidity
 (the 14 CFR Part 36 test window) and for path lengths up to 7620 m
-(25 000 ft). The function's defaults (25 °C and 70 % RH) are the ARP 5534
+(25 000 ft). The function's defaults (25 °C and 70 % RH) are the ARP 5534
 reference point and the Annex 16 reference day. The mapping is reciprocal, so
 the same call serves both directions of the reference-condition adjustment:
 removing the test-day absorption from a measured record, and re-applying the

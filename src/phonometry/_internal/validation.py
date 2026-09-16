@@ -49,7 +49,7 @@ def require_above_absolute_zero(value: float, name: str) -> float:
     its validated range is still arithmetic; a temperature at or below absolute
     zero is not a state at all, and the arithmetic below one is not wrong so much as
     meaningless. Left unguarded it does not raise, it returns: a sea-water sound
-    speed comes back at -31 457 m/s, and an absorption at -300 degC comes back
+    speed comes back at -31 457 m/s, and an absorption at -300 degC comes back
     at a plausible-looking 0,495 dB/km.
 
     :param value: The temperature to validate, in degrees Celsius.

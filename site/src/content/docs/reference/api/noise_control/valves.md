@@ -161,7 +161,7 @@ $$
 | `internal_diameter_m` | $D_i$ of the downstream pipe, in m. |
 | `wall_thickness` | $t_S$ of the pipe wall, in m. |
 | `downstream_sound_speed` | $c_2$ in the fluid downstream of the valve, in m/s. |
-| `pipe_sound_speed` | $c_s$, 5 000 m/s for steel by NOTE 4. |
+| `pipe_sound_speed` | $c_s$, 5 000 m/s for steel by NOTE 4. |
 | `air_sound_speed` | $c_a$, 343 m/s by NOTE 3. |
 
 **Returns:** The three frequencies, in Hz.

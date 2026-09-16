@@ -260,7 +260,7 @@ $P = \sum P_i$ (Eq. 8) and `sound_power_level` its level
 $L_W = 10 \log_{10}(P/P_0)$ (Eq. 9), `NaN`
 where $P \le 0$ (`not_applicable_band` True, clause 9.2).
 `sound_power_level_normalized` is `LW0` normalized to 23 deg C /
-101 325 Pa (Eq. 10). `sound_power_level_a` is the A-weighted total over
+101 325 Pa (Eq. 10). `sound_power_level_a` is the A-weighted total over
 applicable bands (`NaN` without `frequencies` and more than one band).
 
 ### PrecisionIntensityResult.plot()

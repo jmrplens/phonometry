@@ -63,7 +63,7 @@ from .._internal.warnings import PhonometryWarning
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 #: Reference static pressure of the ISO 3740 family, in kilopascals
-#: (ISO 3741:2010 clause 4; ISO 3747:2010 Annex C prints 1,013 25 x 10^5 Pa).
+#: (ISO 3741:2010 clause 4; ISO 3747:2010 Annex C prints 1,013 25 x 10^5 Pa).
 _PS0 = 101.325
 #: Reference temperature of the C2 radiation-impedance correction, in kelvin
 #: (ISO 3741:2010 clause 9.1.4, ISO 3747:2010 Annex C).

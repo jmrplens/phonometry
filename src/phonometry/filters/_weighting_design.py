@@ -234,7 +234,7 @@ _LAWSON_RESIDUAL_FLOOR = 1e-14
 #: the 70 designs trip it, with first fits from 0.27 dB to 107 dB, and a later
 #: placement improves every one of them and lands all of them inside the
 #: 0.44 dB the suite allows at these rates. The improvement runs from a factor
-#: of 300 000 (AU at 1 kHz, 89 dB to 0.0003) down to 1.001 at the two G rows,
+#: of 300 000 (AU at 1 kHz, 89 dB to 0.0003) down to 1.001 at the two G rows,
 #: where what is left is the zero slope a real-coefficient filter has at the
 #: Nyquist frequency and not where the search stopped. Below the threshold,
 #: the loosest first fit at any of the
@@ -244,7 +244,7 @@ _LAWSON_RESIDUAL_FLOOR = 1e-14
 #: would have to move by 221 % to change an answer there.
 #:
 #: That separation is a property of the standard rates, not of the whole axis.
-#: Swept at 500 Hz steps, BS.468-4's first fit is 0.28 dB at 46 500 Hz, so 3 %
+#: Swept at 500 Hz steps, BS.468-4's first fit is 0.28 dB at 46 500 Hz, so 3 %
 #: away from a rate the library is graded at the threshold is straddled and a
 #: perturbation of that size could flip which design comes back. What it flips
 #: between is bounded: 0.28 dB against 0.033 dB, both far inside every mask in
@@ -555,7 +555,7 @@ def _scalar_log(values: np.ndarray) -> np.ndarray:
     :func:`~phonometry.filters._pinned_log.pinned_log` spells the C library's
     own routine in numpy operations IEEE 754 pins exactly, and returns
     :func:`math.log`'s own bits on every input the fit produces: verified
-    over the 91 658 333 distinct values the whole corpus evaluates, zero
+    over the 91 658 333 distinct values the whole corpus evaluates, zero
     mismatches, so the shipped coefficients, the figure corpus and the
     conformance report are untouched by the switch. The transcendentals
     outside the iteration stay on the :mod:`math` loop, where a design pays

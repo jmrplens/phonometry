@@ -16,7 +16,7 @@ below use the values that make it self-consistent:
 
 * The piping geometry factor is printed ``F_p = 0,98``. Every one of the six
   printed vena contracta pressures needs ``0,984``: solving Equation (2) for
-  ``(F_LP/F_P)^2`` from each printed pair gives 0,647 83 to five digits in all
+  ``(F_LP/F_P)^2`` from each printed pair gives 0,647 83 to five digits in all
   six columns, and that is ``F_p = 0,984``.
 * The equivalent orifice diameter is printed ``d_o = 0,010`` m where
   Equation (8c) with the annex's own ``N_O = 6`` and ``A = 0,00137`` m² gives
@@ -139,7 +139,7 @@ _PRINTED_PIPE_FREQUENCIES = {"f_r": 7958.0, "f_o": 2365.0, "f_g": 1622.0}
 
 #: Equation (20a) of example 7, all 33 bands, in dB: the annex prints the
 #: first 24 on one folio and the remaining nine on the next. The column turns
-#: at band 24, where the loss is least, which is the 7 958 Hz ring frequency
+#: at band 24, where the loss is least, which is the 7 958 Hz ring frequency
 #: of this pipe showing through.
 _PRINTED_TRANSMISSION_LOSS = (
     -94.1, -92.0, -90.0, -88.1, -86.1, -84.1, -82.2, -80.2,

@@ -109,7 +109,7 @@ marginal. Las dos están en
 ## 2. Cuántas posiciones, y dónde
 
 La Tabla A.2 imprime tres filas: 500 butacas piden 6 posiciones de micrófono,
-1 000 piden 8 y 2 000 piden 10. Están exactamente sobre una recta en el
+1 000 piden 8 y 2 000 piden 10. Están exactamente sobre una recta en el
 logaritmo del número de butacas, dos posiciones por duplicación, que es lo que
 permite responder por una sala que caiga entre dos filas.
 
@@ -123,7 +123,7 @@ print(round(float(room.minimum_receiver_positions(5000)), 2))   # 10.0
 ```
 
 La recta se acaba donde se acaba la tabla. A.4 pide «a minimum of between 6
-and 10 representative microphone positions», así que un pabellón de 5 000
+and 10 representative microphone positions», así que un pabellón de 5 000
 butacas no se lleva trece posiciones por la fe de tres filas, ni un estudio de
 200 se lleva cuatro. A.4 añade la geometría que la tabla no da: al menos tres
 posiciones de fuente en el escenario en el caso normal, 1,5 m de altura de
@@ -131,7 +131,7 @@ fuente, 1,2 m de altura de micrófono en las butacas, posiciones repartidas por
 igual sobre todo el público, y más allá donde una sala se rompe en anfiteatros
 y zonas bajo ellos.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Dos mitades. A la izquierda, vista desde arriba: una fuente en campo libre sobre un plato giratorio, y a su alrededor las setenta y dos orientaciones de la medida que se hace cada 5 grados cuando no se puede usar plato, con un micrófono sobre ese anillo a un metro y medio como mínimo del centro acústico. Seis lecturas contiguas se destacan como un arco deslizante de 30 grados, una flecha indica que el arco siguiente empieza una lectura más allá, y cada arco se compara con el promedio energético de 360 grados en el plano de medida. Debajo, la Tabla 1 para bandas de octava de ruido rosa: más menos 1 dB a 125, 250 y 500 Hz, 3 dB a 1 kHz, 5 dB a 2 kHz y 6 dB a 4 kHz. A la derecha, la planta de una sala de 1 000 butacas con tres posiciones de fuente en el escenario, una en el eje central y una a cada lado, ocho posiciones de micrófono, las menos que pide la Tabla A.2 a ese tamaño, repartidas por el público a un lado del eje, y dos más bajo el anfiteatro, y bajo la planta una sección con la fuente a un metro y medio sobre el suelo del escenario y un micrófono a un metro veinte del suelo junto a un oyente sentado. Dos recuadros al pie llevan la desviación de un arco respecto de la referencia, y el número mínimo de posiciones de micrófono como la recta que pasa por la Tabla A.2, 6 para 500 butacas, 8 para 1 000 y 10 para 2 000, acotada entre 6 y 10" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Dos mitades. A la izquierda, vista desde arriba: una fuente en campo libre sobre un plato giratorio, y a su alrededor las setenta y dos orientaciones de la medida que se hace cada 5 grados cuando no se puede usar plato, con un micrófono sobre ese anillo a un metro y medio como mínimo del centro acústico. Seis lecturas contiguas se destacan como un arco deslizante de 30 grados, una flecha indica que el arco siguiente empieza una lectura más allá, y cada arco se compara con el promedio energético de 360 grados en el plano de medida. Debajo, la Tabla 1 para bandas de octava de ruido rosa: más menos 1 dB a 125, 250 y 500 Hz, 3 dB a 1 kHz, 5 dB a 2 kHz y 6 dB a 4 kHz. A la derecha, la planta de una sala de 1 000 butacas con tres posiciones de fuente en el escenario, una en el eje central y una a cada lado, ocho posiciones de micrófono, las menos que pide la Tabla A.2 a ese tamaño, repartidas por el público a un lado del eje, y dos más bajo el anfiteatro, y bajo la planta una sección con la fuente a un metro y medio sobre el suelo del escenario y un micrófono a un metro veinte del suelo junto a un oyente sentado. Dos recuadros al pie llevan la desviación de un arco respecto de la referencia, y el número mínimo de posiciones de micrófono como la recta que pasa por la Tabla A.2, 6 para 500 butacas, 8 para 1 000 y 10 para 2 000, acotada entre 6 y 10" width="100%" />
 
 ### Cómo se hace la medida
 
@@ -149,7 +149,7 @@ Pon normalmente al menos tres posiciones de fuente en el escenario, más si el
 escenario es grande o hay foso de orquesta, por ejemplo una en el eje y dos a
 igual distancia a cada lado, con el centro acústico a 1,5 m del suelo. La
 Tabla A.2 da el número mínimo de posiciones de micrófono, de 6 para 500
-butacas a 10 para 2 000: a 1,2 m del suelo en las butacas, a unos 2 m entre sí
+butacas a 10 para 2 000: a 1,2 m del suelo en las butacas, a unos 2 m entre sí
 como mínimo, repartidas por igual, y más donde los anfiteatros dividen el
 público. Sin promediado síncrono, haz que la fuente supere el ruido de fondo
 en al menos 45 dB en cada banda, o en al menos 35 dB si solo se quiere
@@ -244,7 +244,7 @@ poco de ellas.
 El apartado 9.1 imprime dos maneras de citar un solo número de tiempo de
 reverberación, y ninguna tercera: la media de $T_{30}$ sobre las bandas de
 **octava** de 500 Hz y 1 kHz, o «averages over the six one-third-octave bands
-from 400 Hz to 1 250 Hz».
+from 400 Hz to 1 250 Hz».
 
 ```python
 from phonometry import room

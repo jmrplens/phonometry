@@ -35,14 +35,14 @@ the Doc 29 functions: how to open it, what one aircraft record holds, and how
 to go from an aircraft identifier to an event level or a contour without
 writing a table yourself.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records.svg" alt="Three bands. Top: one aircraft in the ANP tables. A dashed box for the substitutions table the ANP website keeps says the A320neo, which the database lacks, is modelled by the A320-211 with either 6.7 dB taken off the A320-211 departure NPD levels or each A320neo departure counted as 0.21 of one, and points to the Aircraft.csv record of the A320-211: a two-engine jet in the large weight class, NPD_ID CFM565, power parameter corrected net thrust in pounds, wing-mounted engines. From NPD_ID an arrow leads to the NPD table, drawn as a grid of four power settings from 12 000 to 22 500 lb by ten slant distances, with the four cells at 19 000 and 22 500 lb and 2 000 and 4 000 ft outlined and filled with their levels. From the aircraft identifier a second arrow leads to the trajectory tables: a dashed fixed-point profile table with no rows for this aircraft, or the departure procedural steps of profile DEFAULT at stage length 1, with the default weight and the engine and aerodynamic coefficients. Middle, left: the third of the ten profile segments in its plane with a receiver O. The segment is 1 236 m long, the foot of the perpendicular lies 676 m along it and O is 612 m from it. Middle, right: the first 5 km of the departure flown at sea level, with the ground roll, the segment climbing from 305 m to 392 m, the change from take-off to climb thrust, and the receiver 3 000 m along the track and 500 m to the side. Bottom: three boxes chain the NPD lookup of 89.3 dB, the segment corrections that bring it to 88.0 dB and the energy sum of the ten profile segments, 89.0 dB at O, above the segment level and event level equations" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records.svg" alt="Three bands. Top: one aircraft in the ANP tables. A dashed box for the substitutions table the ANP website keeps says the A320neo, which the database lacks, is modelled by the A320-211 with either 6.7 dB taken off the A320-211 departure NPD levels or each A320neo departure counted as 0.21 of one, and points to the Aircraft.csv record of the A320-211: a two-engine jet in the large weight class, NPD_ID CFM565, power parameter corrected net thrust in pounds, wing-mounted engines. From NPD_ID an arrow leads to the NPD table, drawn as a grid of four power settings from 12 000 to 22 500 lb by ten slant distances, with the four cells at 19 000 and 22 500 lb and 2 000 and 4 000 ft outlined and filled with their levels. From the aircraft identifier a second arrow leads to the trajectory tables: a dashed fixed-point profile table with no rows for this aircraft, or the departure procedural steps of profile DEFAULT at stage length 1, with the default weight and the engine and aerodynamic coefficients. Middle, left: the third of the ten profile segments in its plane with a receiver O. The segment is 1 236 m long, the foot of the perpendicular lies 676 m along it and O is 612 m from it. Middle, right: the first 5 km of the departure flown at sea level, with the ground roll, the segment climbing from 305 m to 392 m, the change from take-off to climb thrust, and the receiver 3 000 m along the track and 500 m to the side. Bottom: three boxes chain the NPD lookup of 89.3 dB, the segment corrections that bring it to 88.0 dB and the energy sum of the ten profile segments, 89.0 dB at O, above the segment level and event level equations" width="100%" />
 
 *One aircraft, from its record to one number. A type the database lacks enters
 at the top, through a proxy the ANP website recommends and an adjustment you
 apply yourself. The A320-211 ships no fixed-point departure, so its published
 steps are flown at a sea-level aerodrome; the third of the ten profile segments
 that result passes 612 m from a receiver 3 km down the track and 500 m to the
-side, reads the four cells of the NPD table that surround 20 159 lb and 612 m,
+side, reads the four cells of the NPD table that surround 20 159 lb and 612 m,
 and at 88.0 dB carries about four fifths of the sound energy of the 89.0 dB
 event.*
 
@@ -230,12 +230,12 @@ aircraft.load_anp_database().aircraft("747100").profile("D", stage_length=1).plo
 The **stage length** selects the trip-distance bin: a longer stage means more
 fuel, more weight and a shallower climb, so the same aircraft has one profile
 per bin. Doc 29 Vol. 2 Appendix G3.5 defines the bins by trip length in nautical
-miles: 1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, 5 is
-2 500-3 500, 6 is 3 500-4 500, 7 is 4 500-5 500, and so on in 1 000 nmi steps to
-10 (7 500-8 500), with 11 for anything longer and "M" for maximum range at
+miles: 1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, 5 is
+2 500-3 500, 6 is 3 500-4 500, 7 is 4 500-5 500, and so on in 1 000 nmi steps to
+10 (7 500-8 500), with 11 for anything longer and "M" for maximum range at
 maximum take-off mass. The take-off weight of each profile is computed at the
 bin's representative range, defined as the minimum plus 70 % of the span, so
-bin 1 is weighed at 350 nmi and bin 4 at 2 200 nmi. Not every aircraft flies
+bin 1 is weighed at 350 nmi and bin 4 at 2 200 nmi. Not every aircraft flies
 every bin, and the shipped fixed-point profiles cover stage lengths 1 to 7 for
 departures and 1 only for arrivals.
 
@@ -273,7 +273,7 @@ A procedure is not a trajectory, and that is the whole of the difficulty. Its
 steps say what the aeroplane does, not where it goes: climb at this rate to that
 altitude, accelerate to that speed, change to climb thrust. Where those
 instructions put it over the ground depends on the field, because the same steps
-flown from a hot runway high above sea level reach 10 000 ft much further out
+flown from a hot runway high above sea level reach 10 000 ft much further out
 than from a cold one at the coast. There is nothing to tabulate, which is why
 the database ships the steps and not the points.
 
@@ -296,11 +296,11 @@ print(len(flown.points), round(flown.distance_ft[-1]), flown.altitude_ft[-1])
 flown.plot()
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Departure profile of an Airbus A320-211 synthesised from its published procedural steps: height climbing to 10 000 ft against along-track distance, with corrected net thrust on a second axis falling through the ground roll and stepping down at the change to climb thrust" width="82%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Departure profile of an Airbus A320-211 synthesised from its published procedural steps: height climbing to 10 000 ft against along-track distance, with corrected net thrust on a second axis falling through the ground roll and stepping down at the change to climb thrust" width="82%" />
 
 *The A320-211 ships no fixed-point departure profile at all, so this is the only
 way to fly it. The shaded band is the take-off ground roll; the dotted line is
-where the procedure changes from take-off to climb thrust, a fall of 3 047 lb
+where the procedure changes from take-off to climb thrust, a fall of 3 047 lb
 per engine that the height curve barely registers. That is what computing the
 thrust buys over reading a trajectory: nothing in the shape of the climb says
 the engines were throttled back, and the noise says it plainly.*
@@ -393,7 +393,7 @@ print(round(float(flyover.level), 1))     # 100.4 dB
 
 That is the single-event sound exposure level of one 747-100 departure at a
 receiver 3 km down the track and 500 m to the side of it. Move the receiver out
-to 1 500 m lateral and it costs more than the extra distance alone, because the
+to 1 500 m lateral and it costs more than the extra distance alone, because the
 lateral attenuation switches on as the elevation angle falls below 50°.
 
 ```python
@@ -423,7 +423,7 @@ and far more elongated than the teaching contour of the airport-noise guide,
 because a real climb profile puts the aeroplane high quickly and the loud part
 of the event stays close to the runway. The marked receiver is the
 `event_level` call above, so the two halves of this section are the same
-calculation at one point and at 1 200 of them.*
+calculation at one point and at 1 200 of them.*
 
 <details>
 <summary>Show the code for this figure</summary>

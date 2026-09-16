@@ -642,7 +642,7 @@ def coincidence_frequencies(
     :param wall_thickness: :math:`t_S` of the pipe wall, in m.
     :param downstream_sound_speed: :math:`c_2` in the fluid downstream of the
         valve, in m/s.
-    :param pipe_sound_speed: :math:`c_s`, 5 000 m/s for steel by NOTE 4.
+    :param pipe_sound_speed: :math:`c_s`, 5 000 m/s for steel by NOTE 4.
     :param air_sound_speed: :math:`c_a`, 343 m/s by NOTE 3.
     :return: The three frequencies, in Hz.
     :raises ValueError: If any argument is not positive and finite.

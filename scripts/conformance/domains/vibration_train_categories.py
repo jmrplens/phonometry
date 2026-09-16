@@ -96,8 +96,8 @@ def _chk_table_b1(name: str, quantity: str) -> Outcome:
     _TRAINS,
     f"{_EDITION} Annex B, Example 8",
     "KB_FTr of the day by Formula (6), 144 metros at 1,0 and 80 trams at 0,7 a track "
-    "(the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal "
-    "inputs give 0,099 7)",
+    "(the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal "
+    "inputs give 0,099 7)",
 )
 def _chk_example_8_kb_ftr() -> Outcome:
     kb_ftm = [ph.vibration.train_category_rms(c[0]) for c in _CATEGORIES.values()]

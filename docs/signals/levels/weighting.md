@@ -273,7 +273,7 @@ plt.show()
 - `high_accuracy=False` gives the plain bilinear design: the closed form a
   reader can check against the standard term by term, at the cost above. It
   verifies to class 1 for $f_\mathrm{s} \ge 44\,100$ Hz, degrades to class 2 at
-  32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
+  32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
 - The `'468'` curve refuses `high_accuracy=False`: its skirt puts the plain
   design 23 dB out at 16 kHz, and ITU-R BS.468-4 prints one tolerance mask and
   no lower grade to fall back to.

@@ -24,7 +24,7 @@ at the top, through a proxy the ANP website recommends and an adjustment you
 apply yourself. The A320-211 ships no fixed-point departure, so its published
 steps are flown at a sea-level aerodrome; the third of the ten profile segments
 that result passes 612 m from a receiver 3 km down the track and 500 m to the
-side, reads the four NPD cells that surround 20 159 lb and 612 m, and at 88.0 dB
+side, reads the four NPD cells that surround 20 159 lb and 612 m, and at 88.0 dB
 carries about four fifths of the sound energy of the 89.0 dB event.
 
 ## Opening the database
@@ -125,7 +125,7 @@ profile and 20 a fixed-point *arrival* profile; "Flying a published procedure"
 below flies the rest.
 
 Doc 29 Vol. 2 Appendix G3.5 defines the bins by trip length in nautical miles
-(1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, then 1 000 nmi
+(1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, then 1 000 nmi
 steps), and the shipped profiles cover stage lengths 1 to 7 for departures and 1
 only for arrivals. Asking for one that does not exist raises a `KeyError` naming
 the stage lengths that do, which is how to discover them:
@@ -190,7 +190,7 @@ plt.show()
 A procedure is not a trajectory, and that is the whole of the difficulty. Its
 steps say what the aeroplane does, not where it goes, and where those
 instructions put it over the ground depends on the field: the same steps flown
-from a hot runway high above sea level reach 10 000 ft much further out than
+from a hot runway high above sea level reach 10 000 ft much further out than
 from a cold one at the coast. There is nothing to tabulate, which is why the
 database ships the steps and not the points. `flight_profile` flies them,
 through the ECAC Doc 29 Vol. 2 Appendix B flight performance model, in the
@@ -210,12 +210,12 @@ flown.plot()
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Departure profile of an Airbus A320-211 synthesised from its published procedural steps: height climbing to 10 000 ft against along-track distance, with corrected net thrust on a second axis falling through the ground roll and stepping down at the change to climb thrust" width="82%">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Departure profile of an Airbus A320-211 synthesised from its published procedural steps: height climbing to 10 000 ft against along-track distance, with corrected net thrust on a second axis falling through the ground roll and stepping down at the change to climb thrust" width="82%">
 </picture>
 
 The A320-211 ships no fixed-point departure profile at all, so this is the only
 way to fly it. The shaded band is the take-off ground roll and the dotted line is
-the change from take-off to climb thrust, a fall of 3 047 lb per engine that the
+the change from take-off to climb thrust, a fall of 3 047 lb per engine that the
 height curve barely registers: nothing in the shape of the climb says the engines
 were throttled back, and the noise says it plainly.
 

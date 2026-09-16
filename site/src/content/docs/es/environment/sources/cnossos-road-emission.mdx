@@ -144,10 +144,10 @@ plt.show()
 
 </details>
 
-**Cuánto vale una fuente viaria.** Esta arteria urbana, 1 200 vehículos ligeros,
+**Cuánto vale una fuente viaria.** Esta arteria urbana, 1 200 vehículos ligeros,
 90 pesados medios, 45 pesados y 60 motocicletas por hora a 50 km/h, sale a
 **84,2 dB(A) por metro de línea**; el enlace de autopista en circulación libre de
-la sección 6 (1 000 ligeros y 120 pesados por hora a 90 y 80 km/h) llega a
+la sección 6 (1 000 ligeros y 120 pesados por hora a 90 y 80 km/h) llega a
 **88,6 dB(A) por metro**. Esas son las dos magnitudes contra las que contrastar
 un resultado propio. La aritmética que hay detrás merece retenerse: duplicar el
 flujo suma exactamente 3 dB, mientras que reducir a la mitad la velocidad suma
@@ -405,7 +405,7 @@ velocidades inferiores a 20 km/h la potencia acústica toma su valor de 20 km/h:
 las regresiones tabuladas se ajustaron sobre tráfico en circulación libre y no se
 extrapolan a una cola. El término de flujo conserva la velocidad *real*, así que
 las dos mitades de la (2.2.1) tiran en sentidos opuestos y la potencia de línea
-tiene un mínimo. Para 1 000 vehículos ligeros por hora sobre el pavimento de
+tiene un mínimo. Para 1 000 vehículos ligeros por hora sobre el pavimento de
 referencia, `road_source_power` devuelve 81,5 dB(A) por metro a 50 km/h, **76,2 a
 20 km/h**, 79,2 a 10 km/h y 82,2 a 5 km/h: la misma vía se vuelve *más ruidosa*
 por metro a medida que la corriente se frena por debajo de ese mínimo,
@@ -597,7 +597,7 @@ se use: pedir una categoría que no lleva lanza `ValueError` en lugar de fallar
 más adelante.
 
 Ese mecanismo es además lo que ancla la implementación: la Comisión Europea
-publicó un juego de prueba de 4 875 casos de emisión viaria calculados con los
+publicó un juego de prueba de 4 875 casos de emisión viaria calculados con los
 coeficientes de 2015, y alimentar las ecuaciones implementadas con esa base
 superada (no con las tablas de 2021 que la biblioteca trae por defecto)
 reproduce todos los niveles publicados por banda con 0,005 dB, dentro de los dos

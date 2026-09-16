@@ -326,7 +326,7 @@ diferencias de nivel).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | array 1D | cualquiera (vale sin calibrar) | ≥ `fs/resolution_hz` muestras | Las relaciones son diferencias de nivel: la calibración se cancela |
 | `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, opcional | Hz | 89,1–11 200; por defecto `None` | `None` evalúa el pico más alto del rango de interés |
+| `tone_freq` | float, opcional | Hz | 89,1–11 200; por defecto `None` | `None` evalúa el pico más alto del rango de interés |
 | `resolution_hz` | float | Hz | > 0; por defecto `1.0` | La banda del tono debe quedar dentro del 15 % de la banda crítica (apartado 11.2) |
 
 Ambos devuelven un `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.

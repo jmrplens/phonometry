@@ -88,7 +88,7 @@ from ..._internal.warnings import PhonometryWarning
 
 #: Atmospheric pressure ``p0`` used by EN 29052-1 for the enclosed-gas term
 #: (clause 8.2 NOTE: ``p0 = 0,1 MPa``), in pascals. The standard rounds one
-#: atmosphere to 0,1 MPa; pass the true 101 325 Pa explicitly if preferred.
+#: atmosphere to 0,1 MPa; pass the true 101 325 Pa explicitly if preferred.
 STANDARD_ATMOSPHERIC_PRESSURE = 1.0e5
 
 #: Airflow-resistivity thresholds of clause 8.2, in kPa.s/m2.

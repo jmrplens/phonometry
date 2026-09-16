@@ -661,7 +661,7 @@ Every certification level on this page is asked for at one of the three
 reference points Annex 16 fixes around the runway, so it helps to see them
 before the mathematics.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification.svg" alt="The three aircraft noise certification points of ICAO Annex 16 Chapter 3, in plan and side view sharing the same distance scale: a lateral reference line parallel to the runway at 450 m where take-off noise is greatest, with a symmetric point on the other side; the flyover reference point on the extended centre line 6 500 m from the start of roll, under the climb-out; and the approach reference point 2 000 m from the threshold, 120 m below the 3 degree glide path that meets the ground 300 m beyond the threshold; microphones sit 1.2 m above the ground and the metric at all three points is EPNL in EPNdB" width="92%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification.svg" alt="The three aircraft noise certification points of ICAO Annex 16 Chapter 3, in plan and side view sharing the same distance scale: a lateral reference line parallel to the runway at 450 m where take-off noise is greatest, with a symmetric point on the other side; the flyover reference point on the extended centre line 6 500 m from the start of roll, under the climb-out; and the approach reference point 2 000 m from the threshold, 120 m below the 3 degree glide path that meets the ground 300 m beyond the threshold; microphones sit 1.2 m above the ground and the metric at all three points is EPNL in EPNdB" width="92%"></picture>
 
 ## 1. Perceived noisiness and PNL
 
@@ -1275,7 +1275,7 @@ at the top, through a proxy the ANP website recommends and an adjustment you
 apply yourself. The A320-211 ships no fixed-point departure, so its published
 steps are flown at a sea-level aerodrome; the third of the ten profile segments
 that result passes 612 m from a receiver 3 km down the track and 500 m to the
-side, reads the four NPD cells that surround 20 159 lb and 612 m, and at 88.0 dB
+side, reads the four NPD cells that surround 20 159 lb and 612 m, and at 88.0 dB
 carries about four fifths of the sound energy of the 89.0 dB event.
 
 ## Opening the database
@@ -1376,7 +1376,7 @@ profile and 20 a fixed-point *arrival* profile; "Flying a published procedure"
 below flies the rest.
 
 Doc 29 Vol. 2 Appendix G3.5 defines the bins by trip length in nautical miles
-(1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, then 1 000 nmi
+(1 is 0-500, 2 is 500-1 000, 3 is 1 000-1 500, 4 is 1 500-2 500, then 1 000 nmi
 steps), and the shipped profiles cover stage lengths 1 to 7 for departures and 1
 only for arrivals. Asking for one that does not exist raises a `KeyError` naming
 the stage lengths that do, which is how to discover them:
@@ -1441,7 +1441,7 @@ plt.show()
 A procedure is not a trajectory, and that is the whole of the difficulty. Its
 steps say what the aeroplane does, not where it goes, and where those
 instructions put it over the ground depends on the field: the same steps flown
-from a hot runway high above sea level reach 10 000 ft much further out than
+from a hot runway high above sea level reach 10 000 ft much further out than
 from a cold one at the coast. There is nothing to tabulate, which is why the
 database ships the steps and not the points. `flight_profile` flies them,
 through the ECAC Doc 29 Vol. 2 Appendix B flight performance model, in the
@@ -1461,12 +1461,12 @@ flown.plot()
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile_dark.svg">
-  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Departure profile of an Airbus A320-211 synthesised from its published procedural steps: height climbing to 10 000 ft against along-track distance, with corrected net thrust on a second axis falling through the ground roll and stepping down at the change to climb thrust" width="82%">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Departure profile of an Airbus A320-211 synthesised from its published procedural steps: height climbing to 10 000 ft against along-track distance, with corrected net thrust on a second axis falling through the ground roll and stepping down at the change to climb thrust" width="82%">
 </picture>
 
 The A320-211 ships no fixed-point departure profile at all, so this is the only
 way to fly it. The shaded band is the take-off ground roll and the dotted line is
-the change from take-off to climb thrust, a fall of 3 047 lb per engine that the
+the change from take-off to climb thrust, a fall of 3 047 lb per engine that the
 height curve barely registers: nothing in the shape of the climb says the engines
 were throttled back, and the noise says it plainly.
 
@@ -11064,8 +11064,8 @@ about. Both are in
 
 ## 2. How many positions, and where
 
-Table A.2 prints three rows: 500 seats want 6 microphone positions, 1 000
-want 8 and 2 000 want 10. They lie exactly on a straight line in the
+Table A.2 prints three rows: 500 seats want 6 microphone positions, 1 000
+want 8 and 2 000 want 10. They lie exactly on a straight line in the
 logarithm of the seat count, two positions per doubling, which is what lets
 a hall between the rows be answered at all.
 
@@ -11079,7 +11079,7 @@ print(round(float(room.minimum_receiver_positions(5000)), 2))   # 10.0
 ```
 
 The line stops where the table does. A.4 asks for "a minimum of between 6
-and 10 representative microphone positions", so a 5 000-seat arena does not
+and 10 representative microphone positions", so a 5 000-seat arena does not
 get thirteen positions on the strength of three rows, and a 200-seat studio
 does not get four. A.4 adds the geometry the table does not: at least three
 on-stage source positions in the normal case, a source height of 1,5 m, a
@@ -11087,7 +11087,7 @@ microphone height of 1,2 m at audience seat locations, positions evenly
 distributed over all the seating, and more of them wherever a hall breaks
 into balconies and under-balcony areas.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves: the source surveyed in a free field, on a turntable or, where no turntable can be used, from seventy-two readings taken every 5 degrees, with one gliding 30 degree arc of six readings and the Table 1 limits, and a 1 000-seat hall in plan and in section with three source positions on the stage at 1,5 m, the microphone positions of Table A.2 at 1,2 m, and more under the balcony" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves: the source surveyed in a free field, on a turntable or, where no turntable can be used, from seventy-two readings taken every 5 degrees, with one gliding 30 degree arc of six readings and the Table 1 limits, and a 1 000-seat hall in plan and in section with three source positions on the stage at 1,5 m, the microphone positions of Table A.2 at 1,2 m, and more under the balcony" width="100%"></picture>
 
 **How the measurement goes.** Qualify the source first: octave bands of pink
 noise in a free field, the microphone at least 1,5 m away, and the output
@@ -11186,7 +11186,7 @@ them.
 Clause 9.1 prints two ways to quote one number for the reverberation time
 and no third: the average of $T_{30}$ over the 500 Hz and 1 kHz **octave**
 bands, or "averages over the six one-third-octave bands from 400 Hz to
-1 250 Hz".
+1 250 Hz".
 
 ```python
 from phonometry import room
@@ -13376,7 +13376,7 @@ the recording says so.
 An anechoic room 10 m across is rare, so A.2.1 prints three ways to obtain
 $L_{pE,10}$ without one.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes.svg" alt="Left: three printed routes to the free-field reference level at 10 m, plotted on a decibel axis 0.030 dB wide, landing 0.0206 dB apart around the exact value. Right: sound strength against source-receiver distance in a 15 000 cubic metre hall, with the direct-sound contribution alone and the Table A.1 typical range shaded" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes.svg" alt="Left: three printed routes to the free-field reference level at 10 m, plotted on a decibel axis 0.030 dB wide, landing 0.0206 dB apart around the exact value. Right: sound strength against source-receiver distance in a 15 000 cubic metre hall, with the direct-sound contribution alone and the Table A.1 typical range shaded" width="100%"></picture>
 
 *The same source, measured three ways. The spread on the left is 0.0206 dB
 and it is not a rounding error in the library: see section 3. The shaded
@@ -13499,7 +13499,7 @@ useful". Near the source the direct field dominates and $G$ falls 6 dB per
 doubling; past the critical distance the reverberant field takes over and
 the curve flattens, at a level set by the room's absorption alone. Table A.1
 gives −2 dB to +10 dB as the typical range in unoccupied halls up to
-25 000 m³ (for the **single number**, the arithmetic mean of the 500 Hz and
+25 000 m³ (for the **single number**, the arithmetic mean of the 500 Hz and
 1 kHz octave bands), which is what the "m" of $G_m$ marks and what
 `res.plot()` draws across the shaded band.
 
@@ -13925,7 +13925,7 @@ late support to how much of the hall comes back. Both divide by the same
 direct sound, so their difference is a property of the hall and does not
 move with how loudly the instrument was played.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stage_support_windows_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stage_support_windows.svg" alt="Three panels. Left: the energy envelope of a platform impulse response on a logarithmic time axis, with the direct window from 0 to 10 ms, the early window from 20 to 100 ms and the late window from 100 to 1 000 ms shaded, leaving visible gaps between 10 and 20 ms and after one second. Middle: both stage supports band by band for a platform with 1.9 seconds of decay, over the shaded typical ranges of Table C.1. Right: the standard deviation of a two-second reverberation time as a percentage of it, falling with the number of independent positions, for the 125 Hz and 1 kHz octave bands, against the 5 per cent just-noticeable difference" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stage_support_windows_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/stage_support_windows.svg" alt="Three panels. Left: the energy envelope of a platform impulse response on a logarithmic time axis, with the direct window from 0 to 10 ms, the early window from 20 to 100 ms and the late window from 100 to 1 000 ms shaded, leaving visible gaps between 10 and 20 ms and after one second. Middle: both stage supports band by band for a platform with 1.9 seconds of decay, over the shaded typical ranges of Table C.1. Right: the standard deviation of a two-second reverberation time as a percentage of it, falling with the number of independent positions, for the 125 Hz and 1 kHz octave bands, against the 5 per cent just-noticeable difference" width="100%"></picture>
 
 *The three windows, the two supports, and what the excitation costs.*
 
@@ -18567,7 +18567,7 @@ and $b$ = 5,2553. The result exposes `c2` and the properties
 `sound_power_level_ref` and `sound_energy_level_ref` (Eq. C.1, C.3).
 $\theta_\mathrm{ref}$ is printed as 296 K beside a reference temperature of
 23,0 °C (296,15 K), so at exactly the reference conditions $C_2$ is
-+0,003 3 dB and not zero; ISO 3741 and ISO 3744 print the same 296 K, so the
++0,003 3 dB and not zero; ISO 3741 and ISO 3744 print the same 296 K, so the
 library keeps the family's rounding.
 
 ```python
@@ -25036,7 +25036,7 @@ Source: https://jmrplens.github.io/phonometry/devices/noise-control/valve-cavita
 
 # Hydrodynamic valve noise (IEC 60534-8-4)
 
-Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
+Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
 choke the way a gas does, so a control valve on a water line cannot build
 the shock cells that [the aerodynamic part](https://jmrplens.github.io/phonometry/devices/noise-control/control-valve-noise/) spends
 five regimes on. It makes noise two ways instead, and the whole of
@@ -25128,7 +25128,7 @@ print(round(speed, 3), round(power, 1))                 # 28.801 14042.1
 Then two efficiencies say what fraction of those fourteen kilowatts leaves as
 sound. Equation (8) makes the turbulent one linear in the jet Mach number,
 reaching $10^{-4}$ only when the jet reaches the speed of sound in the liquid,
-which for water is 1 400 m/s and never happens in a control valve:
+which for water is 1 400 m/s and never happens in a control valve:
 
 $$
 \eta_{turb} = 10^{-4}\left(\frac{U_{vc}}{c_L}\right)
@@ -25390,7 +25390,7 @@ the disagreement is worth knowing about. The library keeps them apart with
 Part 2 is a table of twenty numbered elements. It is easier to read as a
 place.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vdi2081_sheet_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vdi2081_sheet.svg" alt="Section through a plant room and an office. In the plant room a supply fan, element 1, delivering 16 000 cubic metres per hour against 600 pascals. A duct leaves it and runs left to right through four boxes: element 2, a splitter silencer of five baffles; element 3, a branch taking 0.30 of 1.08 square metres; element 5, four metres of 0.5 by 0.4 metre straight duct; and element 14, a 160 millimetre round bend. It ends at element 19, two diffusers, and drops through the ceiling of room 102, where a standing listener is 1.5 metres from the outlet. A strip along the bottom names the equation or table each element's number is obtained from." width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vdi2081_sheet_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_vdi2081_sheet.svg" alt="Section through a plant room and an office. In the plant room a supply fan, element 1, delivering 16 000 cubic metres per hour against 600 pascals. A duct leaves it and runs left to right through four boxes: element 2, a splitter silencer of five baffles; element 3, a branch taking 0.30 of 1.08 square metres; element 5, four metres of 0.5 by 0.4 metre straight duct; and element 14, a 160 millimetre round bend. It ends at element 19, two diffusers, and drops through the ceiling of room 102, where a standing listener is 1.5 metres from the outlet. A strip along the bottom names the equation or table each element's number is obtained from." width="100%"></picture>
 
 *Every box is one row of Table 1. The strip under the drawing is the part a
 table of results cannot show: which equation, table or measurement each number
@@ -27863,7 +27863,7 @@ exact one-third-octave midband $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6), N
 used to compute Table 1, so the library reproduces every tabulated point to under
 0.4 %, the standard's own three-significant-figure precision, far inside its
 stated $\pm 10$ % accuracy (Clause 7.1). Inputs outside the tabulated ranges
-(−20…+50 °C, 10…100 % RH, 50…10 000 Hz, or above the 200 kPa validity envelope)
+(−20…+50 °C, 10…100 % RH, 50…10 000 Hz, or above the 200 kPa validity envelope)
 still compute but raise an `AtmosphericAbsorptionWarning`; non-physical inputs
 (non-positive frequency, humidity outside 0…100 %, sub-absolute-zero
 temperature) raise `ValueError`. `air_attenuation_m` composes $\alpha$ with the
@@ -27875,7 +27875,7 @@ atmospheric conditions straight into `absorption_area` /
 
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `frequencies` | scalar or 1D array | Hz | > 0 | Vectorized; 50–10 000 Hz tabulated |
+| `frequencies` | scalar or 1D array | Hz | > 0 | Vectorized; 50–10 000 Hz tabulated |
 | `temperature_c` | float | °C | default `20.0` | −20…+50 tabulated; outside warns |
 | `relative_humidity_percent` | float | % | default `50.0` | 10…100 tabulated; `[0, 100]` allowed |
 | `atmospheric_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |
@@ -28924,8 +28924,8 @@ Official Journal text of the instrument that enacted it. And the whole chain of
 equations end to end, against the emission test workbook the European Commission
 published with its reference source module: feeding the shipped equations the
 **2015** coefficient database that workbook was computed with reproduces **all
-34 560 published rows of the twenty vehicles whose catalogue entries are well
-formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
+34 560 published rows of the twenty vehicles whose catalogue entries are well
+formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
 two decimals it prints. A hundred and twenty-three of those cases are committed
 to the repository and run in CI. The three vehicles left out are described in
 `tests/data/cnossos/README.md`: their rows record defects of the reference
@@ -29305,7 +29305,7 @@ with: reaching for a category it does not carry raises `ValueError` rather than
 failing later.
 
 That mechanism is also what pins the implementation: the European Commission
-published a test set of 4 875 road emission cases computed with the 2015
+published a test set of 4 875 road emission cases computed with the 2015
 coefficients, and feeding the shipped equations that superseded database (not
 the 2021 tables the library ships by default) reproduces every published band
 level to 0,005 dB, inside the two decimals the test set prints.
@@ -29832,7 +29832,7 @@ The temperature has no default at all. It is the one condition a caller has
 actually measured, and there is no value that would be defensible to invent
 for it.
 
-The carbon dioxide fraction defaults quietly, to 0,000 4. That is not a guess
+The carbon dioxide fraction defaults quietly, to 0,000 4. That is not a guess
 about the caller's air: Clause F.2 names it as the value to use for laboratory
 conditions in the absence of a measurement, so the library is quoting the
 annex rather than filling a hole.
@@ -29931,7 +29931,7 @@ all. The tolerance is not chosen. A value is stated to within half a unit of
 the last place it was printed to, so that is what reproducing it means, and the
 test derives that bound from the printed string rather than carrying a constant
 somebody picked. It is the last *place* that sets the bound, not a count of
-significant figures: `1,186 084 8` carries eight of them and `2,115 317 x 10^-5`
+significant figures: `1,186 084 8` carries eight of them and `2,115 317 x 10^-5`
 seven, and the same rule reads both:
 
 <details>
@@ -39047,7 +39047,7 @@ calibration (the ratios are level differences).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D array | any (uncalibrated OK) | ≥ `fs/resolution_hz` samples | Ratios are level differences: calibration cancels out |
 | `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
+| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
 | `resolution_hz` | float | Hz | > 0; default `1.0` | Tone band must stay within 15 % of the critical band (clause 11.2) |
 
 Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.
@@ -40984,7 +40984,7 @@ documents, one page per module.
 | `speech_direct_level` / `crowd_noise_level` / `speech_to_noise_ratio` / `absorption_per_table` | `function` | **Crowd-noise building blocks (Long Eqs. 17.50–17.54).**<br>• `speech_direct_level(r)` = `Lw + 10 lg(Q/4πr²)` [dB]<br>• `crowd_noise_level(N, A)` = `Lw + 10 lg N + 10 lg(4/A)` [dB]<br>• `speech_to_noise_ratio(r, A_tab)` [dB]<br>• `absorption_per_table(r, L_SN)` [m²]: the inverse | `crowd_noise_level(20, 20.0)  # 76`<br>`absorption_per_table(1.0, -6.0)  # 6.31` |
 | `NORMAL_VOICE_POWER_LEVEL` / `TALKER_DIRECTIVITY` / `COMMUNICATION_SNR` / `PRIVACY_SNR` | `constant` | **Crowd-noise defaults (Long Ch. 17).**<br>• 70 dB re 1 pW per talker, Q = 2<br>• −6 dB communication limit (Eq. 17.53), −9 dB privacy limit (Eq. 17.54) | `absorption_per_table(1.0, COMMUNICATION_SNR)` |
 | `sound_distribution_value` / `reference_distribution_value` / `ISO14257_REFERENCE_DISTANCE_M` / `FREE_FIELD_OFFSET_DB` | `function` / `constant` | **The curve a workroom is judged by, ISO 14257 Eqs. (1) and (2).**<br>• `sound_distribution_value(levels, power_levels)`: D = L_p − L_W, the level at a position referred to the power of the source that made it<br>• `reference_distribution_value(distances)`: D_ref = 20 lg(r_0/r) − 11 dB, the free field the same source would give, with r_0 = 1 m<br>• the 11 dB is 10 lg(4 π r_0²) rounded, which is why a free field slopes 6 dB per doubling and starts where it does | `d = room.sound_distribution_value(levels, 110.8)`<br>`room.reference_distribution_value([2.0, 4.0])  # -17.02, -23.04` |
-| `spectrum_distribution_value` / `normalized_distribution_value` / `PINK_NOISE_WEIGHTS_DB` / `NORMALIZED_OFFSET_DB` | `function` / `mapping` / `constant` | **The six bands collapsed into one number, Eqs. (3) and (4).**<br>• `spectrum_distribution_value(values, machine_power_levels)`: the curve weighted by the spectrum of the machine that will stand there<br>• `normalized_distribution_value(values)`: the same sum with A-weighted pink noise fixed as the spectrum, Table 1, minus the printed 6,2 dB; the six printed weights sum to 6,251 5 dB, so a flat curve comes back 0,05 dB high, and `spectrum_distribution_value(values, list(PINK_NOISE_WEIGHTS_DB.values()))` is the exact normalisation Annex C used<br>• 4.2.3 says why that spectrum is a normalisation and not an average machine: real spectra are too varied for an average to mean anything | `room.normalized_distribution_value(d_by_band)` |
+| `spectrum_distribution_value` / `normalized_distribution_value` / `PINK_NOISE_WEIGHTS_DB` / `NORMALIZED_OFFSET_DB` | `function` / `mapping` / `constant` | **The six bands collapsed into one number, Eqs. (3) and (4).**<br>• `spectrum_distribution_value(values, machine_power_levels)`: the curve weighted by the spectrum of the machine that will stand there<br>• `normalized_distribution_value(values)`: the same sum with A-weighted pink noise fixed as the spectrum, Table 1, minus the printed 6,2 dB; the six printed weights sum to 6,251 5 dB, so a flat curve comes back 0,05 dB high, and `spectrum_distribution_value(values, list(PINK_NOISE_WEIGHTS_DB.values()))` is the exact normalisation Annex C used<br>• 4.2.3 says why that spectrum is a normalisation and not an average machine: real spectra are too varied for an average to mean anything | `room.normalized_distribution_value(d_by_band)` |
 | `spatial_decay_rate` / `DECADE_TO_DOUBLING` | `function` / `constant` | **DL2, the rate of spatial decay per distance doubling, Eq. (5).**<br>• the least-squares slope of D against lg r, times 0,3, sign flipped so a decay is positive<br>• 6 dB is the free field; a workroom gives less, and how much less is what the room is worth<br>• `DECADE_TO_DOUBLING` is the printed 0,3, which is lg 2 rounded | `room.spatial_decay_rate(d, distances)  # 4.39` |
 | `level_excess` / `mean_level_excess` / `level_excess_at` / `EVALUATION_DISTANCES_M` | `function` / `mapping` | **DLf, how far the room sits above a free field, Eqs. (6) to (8).**<br>• `level_excess`: D − D_ref at every position<br>• `mean_level_excess`: the average of Eq. (7), a trapezoid over lg r, so the wide gaps of a logarithmic distribution weigh what they should<br>• `level_excess_at`: the height of the fitted line over the free-field line at one distance, which a single outlying position moves much less<br>• `EVALUATION_DISTANCES_M`: 4 m, 10 m and 30 m, the conventional distances 6.4.3 reads the line at | `room.mean_level_excess(d, distances)  # 6.73` |
 | `spatial_decay_curve` / `SpatialDecayResult` | `function` / `dataclass` | **One region of the path, with both descriptors, clause 6.**<br>• `region`: 'near', 'middle', 'far' or 'whole'; `near_limit_m` d₁ and `far_limit_m` d₂ place the boundaries<br>• result: `distances_m`, `distribution_values_db`, `reference_values_db`, `level_excess_db`, `decay_rate_db`, `mean_excess_db`, `region`, `band_hz`<br>• `.plot()`: the curve, the free field it is judged by, and the fitted slope | `res = room.spatial_decay_curve(d, distances, region="middle")`<br><br>• `res.decay_rate_db`, `res.mean_excess_db` |
@@ -41060,7 +41060,7 @@ documents, one page per module.
 | `IntensityReductionResult` / `IntensityElementNormalizedResult` | `dataclass` | **ISO 15186-1 intensity insulation results.**<br>• `r_i` / `r_i_modified` per band with `rating` / `rating_modified`<br>• `d_i_n_e` per band with `rating` | `res = building.intensity_sound_reduction(...)` |
 | `low_frequency_intensity_reduction` | `function` | **Low-frequency intensity sound reduction index RI (ISO 15186-3 Formula (7)).**<br>• `lp_surface`: Level over the surface of the specimen [dB], 1D or (positions, bands)<br>• `l_in`: Normal intensity level over the measurement surface [dB]<br>• `measurement_area`: Surface Sm [m²], `area`: Specimen S [m²]<br>• `l_p`: Receiving-side pressure on the measurement surface [dB] for FpI (Default: None)<br>• `frequencies`: 50 Hz to 160 Hz only (Clause 6.6) (Default: None)<br>• `absorbing_specimen_surface`: Tightens the Clause 6.4.2 limit to 6 dB (Default: False) | `res = building.low_frequency_intensity_reduction(lps, l_in, measurement_area=12.6, area=10)`<br><br>• `LowFrequencyIntensityResult` (`r_i`, `surface_pressure_intensity_indicator`, `qualified`, `indicator_limit`) |
 | `low_frequency_element_normalized_difference` | `function` | **Low-frequency element normalized level difference DI,n,e (ISO 15186-3 Formula (8)).**<br>• `lp_surface`/`l_in`: Surface level / measurement-surface intensity level [dB]<br>• `measurement_area`: Surface Sm [m²]<br>• `elements`: Element units N, added as +10 lg N (Default: 1)<br>• `l_p`: Receiving-side pressure on the measurement surface [dB] for FpI (Default: None)<br>• `frequencies`: 50 Hz to 160 Hz only (Clause 1.1) (Default: None)<br>• `absorbing_specimen_surface`: Tightens the Clause 6.4.2 limit to 6 dB (Default: False) | `d = building.low_frequency_element_normalized_difference(lps, l_in, measurement_area=2.0)`<br><br>• `LowFrequencyElementResult` (`d_i_n_e`, `surface_pressure_intensity_indicator`, `qualified`, `indicator_limit`) |
-| `limp_panel_reduction_index` | `function` | **Calculated limp-panel sound reduction index (ISO 15186-3 Annex A, Formulas (A.1)-(A.5)).**<br>• `frequencies`: Mid-band frequencies [Hz]<br>• `surface_mass`: Panel mass m [kg/m²], `area`: Panel S [m²] (≥ 1 m²)<br>• `temperature_c`/`static_pressure_pa`: Climate of (A.4) and (A.5) (Default: 23 °C, 101 300 Pa) | `r = building.limp_panel_reduction_index(freqs, surface_mass=10.0, area=10.0)`<br><br>• `R` array [dB]; a measurement must agree within 4,0 dB from 50 Hz to 160 Hz |
+| `limp_panel_reduction_index` | `function` | **Calculated limp-panel sound reduction index (ISO 15186-3 Annex A, Formulas (A.1)-(A.5)).**<br>• `frequencies`: Mid-band frequencies [Hz]<br>• `surface_mass`: Panel mass m [kg/m²], `area`: Panel S [m²] (≥ 1 m²)<br>• `temperature_c`/`static_pressure_pa`: Climate of (A.4) and (A.5) (Default: 23 °C, 101 300 Pa) | `r = building.limp_panel_reduction_index(freqs, surface_mass=10.0, area=10.0)`<br><br>• `R` array [dB]; a measurement must agree within 4,0 dB from 50 Hz to 160 Hz |
 | `LowFrequencyIntensityResult` / `LowFrequencyElementResult` | `dataclass` | **ISO 15186-3 low-frequency intensity results.**<br>• `r_i` / `d_i_n_e` per band, no rating (six bands cannot feed ISO 717-1)<br>• `surface_pressure_intensity_indicator` and `qualified`, or `None` when `l_p` was not given<br>• `indicator_limit`: The Clause 6.4.2 limit the bands were judged by, 10 dB or 6 dB | `res = building.low_frequency_intensity_reduction(...)` |
 | `reverberation_index` / `estimate_reverberation_index` | `function` | **Survey reverberation index k (ISO 10052:2021 Clause 3.3 / Table 4).**<br>• `reverberation_index(t)`: k = 10 lg(T/0.5) per band<br>• `estimate_reverberation_index(volume, room)`: k from Table 4 (`room`: `kitchen`/`bathroom`/`furnished`/`a`-`h`/`a+e`...); `weighted=True` for the A/C column | `k = building.reverberation_index(t)`<br><br>• k per band [dB] |
 | `survey_airborne_insulation` | `function` | **Survey airborne insulation (ISO 10052:2021 Clauses 3.2-3.6).**<br>• `l1`/`l2`: source/receiving levels [dB]<br>• `reverberation_index`: k per band [dB]<br>• `volume` (for Dn/R'), `area` (R', V/7.5 rule) | `res = building.survey_airborne_insulation(l1, l2, k, volume=50, area=12)`<br><br>• `SurveyAirborneResult` (`d`, `d_nt`, `d_n`, `r_prime`, `rating`, `r_prime_rating`) |
@@ -41336,7 +41336,7 @@ documents, one page per module.
 | `WheelMeasure` | `enum` | **Digit 4 of the vehicle descriptor.**<br>`NONE` (n), `DAMPERS` (d), `SCREENS` (s), `OTHER` (o) | `WheelMeasure.DAMPERS` |
 | `TrackBase` | `enum` | **Digit 1 of the track descriptor.**<br>`BALLAST` (B), `SLAB` (S), `BALLASTED_BRIDGE` (L), `NON_BALLASTED_BRIDGE` (N), `EMBEDDED` (T), `OTHER` (O) | `TrackBase.BALLAST` |
 | `RailRoughnessClass` | `enum` | **Digit 2 of the track descriptor.**<br>`WELL_MAINTAINED` (E), `NORMAL` (M), `NOT_WELL_MAINTAINED` (N), `BAD` (B) | `RailRoughnessClass.NORMAL` |
-| `RailPad` | `enum` | **Digit 3 of the track descriptor, the rail-pad dynamic stiffness.**<br>`SOFT` (S, 150-250 MN/m), `MEDIUM` (M, 250-800 MN/m), `HARD` (H, 800-1 000 MN/m) | `RailPad.MEDIUM` |
+| `RailPad` | `enum` | **Digit 3 of the track descriptor, the rail-pad dynamic stiffness.**<br>`SOFT` (S, 150-250 MN/m), `MEDIUM` (M, 250-800 MN/m), `HARD` (H, 800-1 000 MN/m) | `RailPad.MEDIUM` |
 | `TrackMeasure` | `enum` | **Digit 4 of the track descriptor.**<br>`NONE` (N), `RAIL_DAMPER` (D), `LOW_BARRIER` (B), `ABSORBER_PLATE` (A), `EMBEDDED_RAIL` (E), `OTHER` (O) | `TrackMeasure.RAIL_DAMPER` |
 | `RailJoints` | `enum` | **Digit 5 of the track descriptor.**<br>`NONE` (N), `SINGLE` (S), `TWO` (D), `MORE` (M) | `RailJoints.SINGLE` |
 | `TrackCurvature` | `enum` | **Digit 6 of the track descriptor.**<br>`STRAIGHT` (N), `LOW` (L), `MEDIUM` (M), `HIGH` (H) | `TrackCurvature.HIGH` |
@@ -41959,13 +41959,13 @@ documents, one page per module.
 | `tapping_machine_characteristic_power_level` / `tapping_machine_coupling_term` | `function` | **Tapping machine as a force source (EN 12354-5 Formulae D.9a/D.9b).**<br>• power: L_Ws,c = L_F − 5 − 10 lg f (≈115 dB re 1 pW per 1/3 octave)<br>• coupling: −10 lg(ωMYi) + 10 lg[1 + (ωMYi)²], `hammer_mass` M (Default: 0,5 kg) | `tapping_machine_coupling_term(500.0, 1.07e-6)` |
 | `structure_to_airborne_adjustment` | `function` | **Adjustment term D_sa (EN 12354-5 Formula F.3).**<br>• `frequency` f [Hz], `critical_frequency` fc [Hz], `mass_per_area` m [kg/m²]<br>• `radiation_factor` σ (Default: 1.0)<br>D_sa = 10 lg(400 fc σ/(m f²)); normally negative, and Formula 18a subtracts it | `structure_to_airborne_adjustment(500.0, 200.0, 92.0)  # -24.6 dB` |
 | `multi_junction_adjustment` / `MINIMUM_MULTI_JUNCTION_KIJ` | `function` / `float` | **Multi-junction ΔK (EN 12354-5 clause F.1).**<br>• `junctions` ≥ 1 → 0 dB (single), 4 dB (two), 6 dB (three or more)<br>• the resulting Kij is floored at `MINIMUM_MULTI_JUNCTION_KIJ` = −5.0 dB | `multi_junction_adjustment(2)  # 4.0` |
-| `air` | `function` | **Humid air (IEC 61094-2:2009 Annex F, CIPM-2007).**<br>• `temperature_c` t [°C], required<br>• `static_pressure_pa` p_s [Pa] (Default: None → 101 325, warns)<br>• `relative_humidity_percent` H [%] (Default: None → 50, warns)<br>• `co2_mole_fraction` x_c (Default: None → 0,000 4, silent) | `f = fluids.air(temperature_c=23.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0)`<br><br>• `Fluid`; rho = 1.1860848 kg/m³, c0 = 345.86652 m/s |
+| `air` | `function` | **Humid air (IEC 61094-2:2009 Annex F, CIPM-2007).**<br>• `temperature_c` t [°C], required<br>• `static_pressure_pa` p_s [Pa] (Default: None → 101 325, warns)<br>• `relative_humidity_percent` H [%] (Default: None → 50, warns)<br>• `co2_mole_fraction` x_c (Default: None → 0,000 4, silent) | `f = fluids.air(temperature_c=23.0, static_pressure_pa=101325.0, relative_humidity_percent=50.0)`<br><br>• `Fluid`; rho = 1.1860848 kg/m³, c0 = 345.86652 m/s |
 | `Fluid` | `dataclass` | **One fluid at one state, and what its model fixed there.**<br>• `temperature_c`, `static_pressure_pa`, `composition`, `model`, `validity`, `properties`<br>• accessors `density`, `speed_of_sound`, `heat_capacity_ratio`, `viscosity`, `thermal_diffusivity`, `thermal_conductivity`, `specific_heat_capacity`<br>• closed by identity: `characteristic_impedance`, `kinematic_viscosity`, and `prandtl_number` unless the model printed one of its own, which wins | `f.characteristic_impedance  # rho c` |
 | `characteristic_impedance` | `function` | **Characteristic impedance rho c [Pa·s/m].**<br>• `density` ρ [kg/m³]<br>• `speed_of_sound` c [m/s]<br>The medium's own quantity, so it moved here from the impedance tube that used to publish it; `Fluid` exposes the same thing as a property | `fluids.characteristic_impedance(1.186, 343.2)  # 407.04` |
 | `sea_water` | `function` | **Sea water at one point of the ocean.**<br>• `temperature_c` T [°C], required<br>• `salinity_psu` S (Default: 35)<br>• `depth_m` (Default: 0)<br>• `latitude_deg` (Default: 45)<br>• `sound_speed_model`: `unesco` (default), `del_grosso`, `mackenzie`, `medwin` | `fluids.sea_water(temperature_c=10.0)`<br><br>• `Fluid`; rho = 1027.04 kg/m³, c = 1489.83 m/s. No heat-capacity ratio: no source here prints one |
 | `sea_water_density` | `function` | **Density of sea water (Ainslie 2010 Eq. 4.6, after Pierce 1989).**<br>• `temperature_c` T [°C]<br>• `salinity_psu` S<br>• `absolute_pressure_pa` P_w [Pa], **absolute** | `fluids.sea_water_density(temperature_c=10.0, salinity_psu=35.0, absolute_pressure_pa=101989.16)  # 1027.04`<br><br>• ρ [kg/m³] |
 | `sea_water_sound_speed` | `function` | **Speed of sound in sea water, m/s.**<br>• `temperature_c` [°C] / `salinity` [ppt] / `depth` [m]<br>• `model`: `"unesco"` (default) / `"del_grosso"` / `"mackenzie"` / `"medwin"`<br>• `latitude` (Default: 45) | `fluids.sea_water_sound_speed(25, 35, 1000)` |
-| `depth_to_absolute_pressure_pa` | `function` | **Absolute static pressure at a depth (Ainslie 2010 Eq. 4.11).**<br>• `depth_m` z [m]<br>• `latitude_deg` (Default: 45)<br>Not zero at the surface: Eq. (4.11) puts 98 066,5 x 1,04 = 101 989,16 Pa there, which is Ainslie's own reference and 664 Pa above the 101 325 Pa standard atmosphere | `fluids.depth_to_absolute_pressure_pa(depth_m=0.0)  # 101989.16` |
+| `depth_to_absolute_pressure_pa` | `function` | **Absolute static pressure at a depth (Ainslie 2010 Eq. 4.11).**<br>• `depth_m` z [m]<br>• `latitude_deg` (Default: 45)<br>Not zero at the surface: Eq. (4.11) puts 98 066,5 x 1,04 = 101 989,16 Pa there, which is Ainslie's own reference and 664 Pa above the 101 325 Pa standard atmosphere | `fluids.depth_to_absolute_pressure_pa(depth_m=0.0)  # 101989.16` |
 | `depth_to_gauge_pressure_mpa` | `function` | **Gauge pressure at a depth (Leroy & Parthiot 1998).**<br>• `depth_m` Z [m]<br>• `latitude_deg` (Default: 45)<br>Zero at the surface; what the UNESCO and Del Grosso sound speeds want | `fluids.depth_to_gauge_pressure_mpa(depth_m=1000.0)  # 10.106` |
 | `FluidWarning` | `warning class` | **State outside the domain its model states for itself.**<br>Annex F states 15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 % RH; outside it the result is an extrapolation, not a refusal | `warnings.simplefilter("error", fluids.FluidWarning)` |
 | `FluidAssumptionWarning` | `warning class` | **A condition the caller did not supply was assumed.**<br>Names the assumed values and what they are worth; passing every condition silences it | `warnings.simplefilter("error", fluids.FluidAssumptionWarning)` |
@@ -42097,7 +42097,7 @@ documents, one page per module.
 | `StaticAirflowResult` | `dataclass` | **Static-method result at the evaluation velocity.**<br>• `resistance` R [Pa·s/m³], `specific_resistance` Rs [Pa·s/m]<br>• `resistivity` σ [Pa·s/m²] or None<br>• `evaluation_velocity` [m/s], `pressure_drop_pa` [Pa]<br>• `linear_coefficient` a (zero-velocity Rs), `quadratic_coefficient` b | `res.specific_resistance, res.resistivity` |
 | `piston_volume_flow_rate` | `function` | **RMS piston volume flow qv = 2πf·h·AP (ISO 9053-2 §6.2).**<br>• `frequency` f [Hz]<br>• `stroke_amplitude` h [m]<br>• `piston_area` AP [m²] | `piston_volume_flow_rate(2.0, 0.005, 0.01)  # 0.000628`<br><br>• [m³/s] |
 | `alternating_airflow_resistance` | `function` | **Alternating-method resistance (ISO 9053-2:2020 Formula 2).**<br>• `level_specimen` Lps / `level_termination` Lpt [dB]<br>• `piston_stroke_specimen` hs / `piston_stroke_termination` ht [m]<br>• `frequency` f [Hz] (1–4 Hz), `cavity_volume` V [m³]<br>• `static_pressure_pa` [Pa] (Default: 101325)<br>• `kappa_prime` κ′ (Default: 1.4; use `effective_kappa` for Annex A conformity)<br>• `background_level` Lpb [dB] (Default: None) | `r = materials.alternating_airflow_resistance(78.0, 60.0, piston_stroke_specimen=5e-3, piston_stroke_termination=5e-4, frequency=2.0, cavity_volume=7.854e-4)`<br><br>• R [Pa·s/m³]; `AirflowResistanceWarning` when criteria fail |
-| `ANNEX_A_AIR` | `Fluid` | **The air of the ISO 9053-2:2020 Annex A.3 reference state (23 °C, 101 325 Pa, 50 % RH).**<br>345,866 52 m/s, 1,186 084 8 kg/m³, κ = 1,400 757 3, plus the conductivity and specific heat Clause F.6 gives<br>• the default of `thermal_boundary_layer_thickness` and `effective_kappa`; pass a computed `fluids.air()` to work in the air of the laboratory instead | `materials.ANNEX_A_AIR.speed_of_sound  # 345.86652` |
+| `ANNEX_A_AIR` | `Fluid` | **The air of the ISO 9053-2:2020 Annex A.3 reference state (23 °C, 101 325 Pa, 50 % RH).**<br>345,866 52 m/s, 1,186 084 8 kg/m³, κ = 1,400 757 3, plus the conductivity and specific heat Clause F.6 gives<br>• the default of `thermal_boundary_layer_thickness` and `effective_kappa`; pass a computed `fluids.air()` to work in the air of the laboratory instead | `materials.ANNEX_A_AIR.speed_of_sound  # 345.86652` |
 | `thermal_boundary_layer_thickness` | `function` | **Thermal boundary-layer thickness b (ISO 9053-2 Formulas A.4/A.5).**<br>• `frequency` f [Hz]<br>• Air properties (Default: Annex A.3 values) | `thermal_boundary_layer_thickness(2.0)  # 0.00183`<br><br>• [m] |
 | `effective_kappa` | `function` | **Effective ratio of specific heats κ′ (Formula A.7).**<br>• `cavity_surface` S [m²], `cavity_volume` V [m³]<br>• `frequency` f [Hz]<br>• Air properties (Default: Annex A.3 values) | `effective_kappa(0.0471, 7.854e-4, 2.0)  # 1.37`<br><br>• The Annex A.3 worked example |
 | `delany_bazley` | `function` | **Delany–Bazley one-parameter porous model (Mechel 2e G.11; Bies 5e Table D.1).**<br>• `frequency` f [Hz]<br>• `flow_resistivity` σ [Pa·s/m²]<br>• `coefficients`: preset name or (C1…C8) (Default: 'delany_bazley' rockwool/fibreglass)<br>• `fluid`: `Fluid` (Default: `PUBLISHED_AIR`, 343.0 m/s and 1.205 kg/m³)<br>• Warns outside 0.01 < X < 1 (X = ρf/σ) | `med = materials.delany_bazley(f, 20000.0)`<br><br>• `PorousMediumResult` |
@@ -42255,7 +42255,7 @@ documents, one page per module.
 | `verify_weighting` / `WeightingVerification` | `function` / `dataclass` | **Does a vibration meter's frequency weighting meet ISO 8041-1 (Tables 4 and 5)?**<br>• `name`, `frequencies` [Hz], `measured_factors` (linear, not dB)<br>• `expanded_uncertainty_percent`: the testing laboratory's own U, which extends the measured deviation (13.1 and 14.1); Default `None`, the bare deviation<br>• `.passes`, `.deviation_percent`, `.failing_frequencies_hz`, `.worst_deviation_percent`, `.expanded_uncertainty_percent`, `.plot()`<br>• the weighting only: indication, linearity, overload and the environmental tests are hardware measurements this does not stand in for | `vibration.verify_weighting('Wk', [16.0], [0.86]).passes  # True (+11.9 %, inside +12 %)` |
 | `verify_phase_response` / `PhaseVerification` | `function` / `dataclass` | **Does its phase response meet the phase column of ISO 8041-1 Table 5?**<br>• `name`, `frequencies_hz` (ascending), `measured_phase_deg` on the continuous branch Annex B prints<br>• `.characteristic_deviation_deg` (Formula (6), one per adjacent pair, attributed to the lower frequency), `.deviation_deg`, `.tolerance_deg`, `.passes`, `.peak_deviation_percent`, `.plot()`<br>• only for a meter reporting a parameter not based on r.m.s. values (Table 5 footnote a) | `vibration.verify_phase_response('Wk', [8.0, 10.0, 12.5], phases).passes` |
 | `characteristic_phase_deviation` / `peak_deviation_percent` | `function` | **The two formulae the phase criterion is made of.**<br>• Formula (6): `abs((f_n Δφ_{n+1} − f_{n+1} Δφ_n) / (f_{n+1} − f_n))` [degrees], N − 1 values<br>• Formula (H.4): the peak-value deviation that costs, `0,48 sin Δφ0 × 100 %`, an approximation Annex H limits to Δφ0 below 30° | `vibration.peak_deviation_percent(12.0)  # 9.98 %` |
-| `NOMINAL_FREQUENCY_RANGE_HZ` | `constant` | **The nominal frequency range of each weighting (ISO 8041-1 Table 1).**<br>• `Wh` 8 to 1 000, whole-body 0,5 to 80, `Wm` 1 to 80, `Wf` 0,1 to 0,5<br>• the printed round numbers, not the band centres `10**(k/10)` Annex B tabulates at | `vibration.NOMINAL_FREQUENCY_RANGE_HZ['Wm']  # (1.0, 80.0)` |
+| `NOMINAL_FREQUENCY_RANGE_HZ` | `constant` | **The nominal frequency range of each weighting (ISO 8041-1 Table 1).**<br>• `Wh` 8 to 1 000, whole-body 0,5 to 80, `Wm` 1 to 80, `Wf` 0,1 to 0,5<br>• the printed round numbers, not the band centres `10**(k/10)` Annex B tabulates at | `vibration.NOMINAL_FREQUENCY_RANGE_HZ['Wm']  # (1.0, 80.0)` |
 | `ISO8041_COVERAGE_FACTOR` / `MAX_EXPANDED_UNCERTAINTY_PERCENT` | `constant` | **What a testing laboratory's uncertainty is expanded with, and how far it may reach.**<br>• `k = 2` (13.1 and 14.1; 12.1 prints "no less than 2"), named for its standard because `hearing.COVERAGE_FACTOR` is a different one (1,65, ISO 9612)<br>• the maximum permitted expanded uncertainty per test clause, e.g. 4,5 % for 12.11.2 and 0,01 % for the timing clauses | `vibration.MAX_EXPANDED_UNCERTAINTY_PERCENT['12.13']  # 3.0 %` |
 | `weighting_tolerance_percent` / `phase_tolerance_degrees` | `function` | **The band ISO 8041-1 Table 5 allows, region by region.**<br>• `+12 %` / `−11 %` in the central region, `+26 %` / `−21 %` in the skirts, no lower limit in the tails<br>• the phase band applies only to a meter reporting a parameter not based on r.m.s. values (Table 5 footnote a), which is why it is a separate call | `vibration.weighting_tolerance_percent('Wk', [16.0])  # (12.0, -11.0)` |
 | `TRANSITION_FREQUENCIES_HZ` / `CENTRAL_TOLERANCE_PERCENT` / `SKIRT_TOLERANCE_PERCENT` / `TAIL_TOLERANCE_PERCENT` / `UNCONSTRAINED_BELOW` | `constant` | **Tables 4 and 5 of ISO 8041-1, as data.**<br>• the four transition frequencies per weighting, built from the printed `10**(k/10)` exponents<br>• the three bands, each `(upper %, lower %, phase °)`<br>• `−100 %`, which is the absence of a lower limit rather than a wide one | `vibration.TRANSITION_FREQUENCIES_HZ['Wk']`<br><br>• (0.251, 0.631, 63.1, 158.5) Hz |
@@ -46003,7 +46003,7 @@ for f, pxx in zip(freq_bins[in_band], psd[in_band]):
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a six-tone signal with the raw PSD in the background" width="80%"></picture>
 
 *The two objects on one axis, for a six-tone signal at 20, 100, 500, 2000,
-4000 and 15 000 Hz. The grey trace is a Welch PSD ($f_\mathrm{s}$ = 48 kHz,
+4000 and 15 000 Hz. The grey trace is a Welch PSD ($f_\mathrm{s}$ = 48 kHz,
 `nperseg = 8192`, so a fixed 5.86 Hz bin everywhere); the markers are the
 standardized third-octave levels of the same signal. The bin width never
 changes and the band width does: 4.60 Hz at the 20 Hz band, narrower than one
@@ -50014,7 +50014,7 @@ plt.show()
 - `high_accuracy=False` gives the plain bilinear design: the closed form a
   reader can check against the standard term by term, at the cost above. It
   verifies to class 1 for $f_\mathrm{s} \ge 44\,100$ Hz, degrades to class 2 at
-  32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
+  32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
 - The `'468'` curve refuses `high_accuracy=False`: its skirt puts the plain
   design 23 dB out at 16 kHz, and ITU-R BS.468-4 prints one tolerance mask and
   no lower grade to fall back to.
@@ -55387,7 +55387,7 @@ FDTD run reproduces the whole curve: 5.8 dB at 10 kHz (where
 the exact form to 0.02 dB), 18.1 dB at 50 kHz, and a transmission-loss
 dip within 0.1 % of the 295 kHz resonance. The same suite stress-tests the
 extreme contrast of an air-steel contact (impedance ratio ~$10^5$:1): stable
-over 10 000 steps with the reflected amplitude conserved to 0.5 %.
+over 10 000 steps with the reflected amplitude conserved to 0.5 %.
 
 At oblique incidence the plate physics gets richer, and the clip below is
 this solver driving the same 10 mm steel plate, now lying in air, with a
@@ -56889,7 +56889,7 @@ could find, re-checked on the date shown. Four routes help:
 | [VDI 2081 Part 1:2022-04](https://www.vdi.de/richtlinien/details/vdi-2081-blatt-1-raumlufttechnik-geraeuscherzeugung-und-laermminderung) | The edition in force of the German HVAC noise method. The library holds the 2001-07 print, two editions behind: the 2019 revision renumbered every clause and added whole chapters on air-handling units and on outdoor propagation, so the delta cannot be reviewed from what is here | 2026-09-04 |
 | [VDI 2081 Part 2:2022-10](https://www.vdi.de/richtlinien/details/vdi-2081-blatt-2-raumlufttechnik-geraeuscherzeugung-und-laermminderung-beispiele) | The worked examples that anchor Part 1, and the spreadsheet the current edition ships with them. The 2005-05 print in hand is the conformance oracle for the fan, splitter-silencer and cross-talk chain; the current one would say whether those printed values still hold | 2026-09-04 |
 | [ASTM E413-22](https://doi.org/10.1520/E0413-22) | The two appendix figures. The body text is transcribed in full, Table 1 and Appendix X1 included, but Figures X1.1 and X1.2 are graphs and carry the worked STC 24 and STC 30 examples, which is exactly the part that would anchor `sound_transmission_class` against the classification's own arithmetic | 2026-09-04 |
-| ISO 20816-3:2022 | The zone boundaries in force for industrial machines above 15 kW, the part of the series a plant reaches for most often. Every legitimate route came back empty, so `industrial_machine_zone` is written from the direct predecessor it replaced, ISO 10816-3:2009; the current edition widened the speed range to 30 000 r/min and would say whether the printed boundaries moved with it | 2026-09-05 |
+| ISO 20816-3:2022 | The zone boundaries in force for industrial machines above 15 kW, the part of the series a plant reaches for most often. Every legitimate route came back empty, so `industrial_machine_zone` is written from the direct predecessor it replaced, ISO 10816-3:2009; the current edition widened the speed range to 30 000 r/min and would say whether the printed boundaries moved with it | 2026-09-05 |
 | Widmann (1992), *Ein Modell der psychoakustischen Lästigkeit von Schallen und seine Anwendung in der Praxis der Lärmbeurteilung*, doctoral thesis, Technische Universität München | The primary source of the psychoacoustic-annoyance model, implemented from Fastl & Zwicker (2006). The chair that supervised it lists the thesis but deposits no file, unlike others on the same page, so it appears to exist only in print | 2026-09-04 |
 | Bowdler & Leventhall (eds.), *Wind Turbine Noise* (Multi-Science, 2011) | The standard reference behind the wind-turbine noise guide; only its book reviews circulate | 2026-09-01 |
 | Hopkins, *Sound insulation measurements with intensity techniques: flanking transmission* (Proceedings of the Institute of Acoustics, 1997, [doi:10.25144/19134](https://doi.org/10.25144/19134)) | Intensity-measured flanking data beside the ISO 15186 implementation. The DOI resolves to the Institute's own site and returns 404, and no repository preserves it; the author lists his work at [his ResearchGate profile](https://www.researchgate.net/profile/Carl-Hopkins/research) | 2026-09-04 |
@@ -57503,7 +57503,7 @@ airborne acoustics, and it is worth settling before anything else. The same
 pressure expressed re 1 µPa is **26 dB larger** than expressed re 20 µPa, which
 is arithmetic. On top of that, the same pressure in water carries far less
 intensity than in air, because sea water's characteristic impedance is some
-3 700 times that of air. An underwater 120 dB and an airborne 120 dB therefore
+3 700 times that of air. An underwater 120 dB and an airborne 120 dB therefore
 describe entirely different physical situations, and the two must never be
 compared. The rule this section follows is simple: every level carries its
 reference explicitly, a conversion between the two conventions is pure
@@ -60504,7 +60504,7 @@ print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[1])
 application, and the Table 4 corners straddle it rather than coincide with it.
 Whole-body vibration is specified from 0.5 Hz to 80 Hz while the tight region
 runs from 0.631 Hz to 63.1 Hz; hand-transmitted vibration from 8 Hz to
-1 000 Hz against 10 Hz to 794.3 Hz; low-frequency whole-body vibration from
+1 000 Hz against 10 Hz to 794.3 Hz; low-frequency whole-body vibration from
 0.1 Hz to 0.5 Hz against 0.1259 Hz to 0.3981 Hz. In all three cases both ends
 of the working range fall in a skirt, and the tails begin beyond it.
 
@@ -65722,7 +65722,7 @@ predecessor supplies the industrial boundaries.
 - International Organization for Standardization. (2009). *Mechanical
   vibration — Evaluation of machine vibration by measurements on non-rotating
   parts — Part 3: Industrial machines with nominal power above 15 kW and
-  nominal speeds between 120 r/min and 15 000 r/min when measured in situ*
+  nominal speeds between 120 r/min and 15 000 r/min when measured in situ*
   (ISO 10816-3:2009).
   The machine groups (4.2), the support classification (4.3), the zone
   boundaries of Tables A.1 and A.2, the most-restrictive rule (5.2.3), the
@@ -65747,7 +65747,7 @@ change of Annex D.
 
 ISO 10816-3:2009, *Mechanical vibration — Evaluation of machine vibration by
 measurements on non-rotating parts — Part 3: Industrial machines with nominal
-power above 15 kW and nominal speeds between 120 r/min and 15 000 r/min when
+power above 15 kW and nominal speeds between 120 r/min and 15 000 r/min when
 measured in situ*: the machine groups of 4.2, the support classification of
 4.3, the zone boundaries of Tables A.1 and A.2 in both quantities with the
 measurement band Annex A states, the most-restrictive rule of 5.2.3, the significant

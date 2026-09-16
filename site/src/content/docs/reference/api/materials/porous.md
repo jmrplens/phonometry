@@ -352,7 +352,7 @@ vibrating structure by an air gap behaves limply well above the limit.
 | :--- | :--- |
 | `frame_bulk_modulus` | Bulk modulus of the frame in vacuum `K_c`, in Pa (>= 0; pass `abs(K_c)` for a complex modulus). |
 | `criterion` | Key into [`LIMP_FRAME_CRITERIA`](/phonometry/reference/api/materials/porous/#limp_frame_criteria), `"doutres"` (Default, 0,2) or `"beranek"` (0,05). |
-| `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa (Default: 101 325, the isothermal value for fluid). |
+| `fluid_bulk_modulus` | Bulk modulus of the pore fluid `K_f`, in Pa (Default: 101 325, the isothermal value for fluid). |
 
 **Returns:** `True` when $\lvert K_c/K_\mathrm{f} \rvert$ does not exceed the threshold.
 

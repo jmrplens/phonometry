@@ -41,7 +41,7 @@ def _cnossos_road_2015_inputs() -> tuple[Any, dict[str, Any]]:
 @register(
     _CNOSSOS_ROAD,
     "CIRCABC CNOSSOS-EU road emission test set",
-    "Line power of the 60 committed cases of the 4 875-case published test set, 8 octave bands each, dB re 1 pW/m",
+    "Line power of the 60 committed cases of the 4 875-case published test set, 8 octave bands each, dB re 1 pW/m",
 )
 def _chk_cnossos_road_workbook() -> Outcome:
     """Worst per-band deviation from the published test workbook.

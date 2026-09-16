@@ -86,7 +86,7 @@ Equation (A.17) while every other row is averaged arithmetically.
 
 `typical_range` is the pair the table prints, and footnote b conditions
 it: frequency-averaged values at single positions in unoccupied concert
-and multi-purpose halls up to 25 000 m³. It is not a range for one band,
+and multi-purpose halls up to 25 000 m³. It is not a range for one band,
 for an occupied hall, or for a spatial average.
 
 ## AuditoriumWarning
@@ -719,7 +719,7 @@ minimum_receiver_positions(seats: ArrayLike) -> NDArray[np.float64] | float
 Fewest microphone positions a hall of a given size wants (Table A.2).
 
 ISO 3382-1:2009, Table A.2 prints three pairs, 500 seats to 6 positions,
-1 000 to 8 and 2 000 to 10. They lie exactly on a straight line in the
+1 000 to 8 and 2 000 to 10. They lie exactly on a straight line in the
 logarithm of the seat count, two positions per doubling:
 
 $$
@@ -730,7 +730,7 @@ which reproduces all three printed integers to the last bit. A.4 caps
 what that line may be used for: it asks for "a minimum of between 6 and
 10 representative microphone positions", so the result is clamped to the
 range the table covers, and this function will not extrapolate a
-5 000-seat arena to thirteen positions on the strength of three rows.
+5 000-seat arena to thirteen positions on the strength of three rows.
 
 A.4 also says the positions are to be evenly distributed over all
 audience seating areas, and that a hall broken into separate areas such

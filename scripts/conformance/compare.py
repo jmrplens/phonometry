@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
 #: Relative floor applied on top of the per-check quantum, so the judgement
-#: stays meaningful for a value of 10 000 as well as for one of 0.001.
+#: stays meaningful for a value of 10 000 as well as for one of 0.001.
 _RELATIVE = 1e-9
 
 #: Decimals the showcase panels are rounded to. They carry no per-row

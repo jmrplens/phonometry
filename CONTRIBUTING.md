@@ -494,6 +494,35 @@ with one name: `label`, `marker` and `zorder` cost nothing. It also compares its
 own alias table against the one the helpers read, so teaching the helpers an
 eighth pair without teaching the gate fails rather than passing quietly.
 
+### 7d. Writing a long number
+
+ISO 80000-1 and the SI Brochure group long strings of digits in threes on both
+sides of the decimal marker, and the standards this library reads print their
+numbers that way, so the corpus does too: `6,251 5`, `0,647 829`, `101 325`.
+
+The separator is **U+202F, the narrow no-break space**, not an ordinary space.
+With an ordinary one a line break may fall inside the number and leave `6,251`
+at the end of one line and `5` at the start of the next, which reads as two
+numbers. The character is in the font the figures are drawn with and in the web
+fonts the site loads, and it survives the plain-Markdown twins and `llms.txt`.
+
+```bash
+python scripts/check_digit_grouping.py   # or: make digit-grouping
+```
+
+Two things the gate deliberately leaves alone, and the reasons are worth
+knowing before writing a sweep of your own.
+
+A figure or diagram label is exempt, because the defect cannot occur there: the
+label is drawn as one line of text in an SVG and SVG text does not reflow.
+Inside `$...$` mathtext the separator is `\,`, which is a different rule for a
+different renderer.
+
+In a Python file only the docstrings and the comments count as prose. Every
+other string may be data, and one of them is: the CNOSSOS traction table is
+keyed by names such as `"diesel locomotive, c. 2 200 kW"` that a caller passes
+in, and an invisible character inside a key breaks the lookup on the spot. A
+first pass over the corpus did exactly that and the conformance run caught it.
 ### 8. Writing the code fences of a documentation page
 
 The Python fences of one page form **one sequential example**: a later fence

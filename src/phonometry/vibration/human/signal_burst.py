@@ -26,8 +26,8 @@ which reading reproduces the page:
 
 1. *The continuous row starts at t = 0* and fills the printed duration; it
    does not start at the Table 6 start time. Read from zero, the band-limiting
-   continuous cell of Table 7 comes out 0,564 9 against the 0,565 printed;
-   started at 0,2 s it comes out 0,560 1.
+   continuous cell of Table 7 comes out 0,564 9 against the 0,565 printed;
+   started at 0,2 s it comes out 0,560 1.
 2. *The filtering is zero state.* :func:`~phonometry.vibration.apply_weighting`
    multiplies in the frequency domain without padding, which is a circular
    convolution, and its own docstring says so. In the continuous row that
@@ -165,7 +165,7 @@ class SawtoothBurstTest:
         """The saw-tooth frequency, in hertz.
 
         Table 6 prints it beside the angular frequency (79,58 Hz, 15,915 Hz
-        and 0,397 9 Hz); this is the division, not the rounded decimal.
+        and 0,397 9 Hz); this is the division, not the rounded decimal.
         """
         return self.angular_frequency_rad_s / (2.0 * math.pi)
 
@@ -471,8 +471,8 @@ def sawtooth_burst(
     unbroken saw-tooth from ``t = 0`` to the end of the printed duration. The
     start time does not apply to it, and the reason is measured rather than
     printed: read from zero, the band-limiting continuous cell of Table 7
-    comes out 0,564 9 against the 0,565 printed, and read from the start time
-    it comes out 0,560 1.
+    comes out 0,564 9 against the 0,565 printed, and read from the start time
+    it comes out 0,560 1.
 
     The fall is vertical, as Figure 3 draws it. 12.13 (folio 36) allows a real
     generator a fall time of up to ``1/(5 f2)``, which is

@@ -196,7 +196,7 @@ def _chk_b_weighting() -> Outcome:
 )
 def _chk_au_weighting() -> Outcome:
     # 96 kHz so the 25/31.5/40 kHz rows (exact base-10 frequencies up to
-    # 39 811 Hz) fall below Nyquist and the full Table 1 range is checked.
+    # 39 811 Hz) fall below Nyquist and the full Table 1 range is checked.
     return _weighting_check("AU", 96000)
 
 

@@ -65,14 +65,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
   suma correcta de 100 Hz a 2500 Hz es 83,2613 dB, redondeada 83, lo que da
   $C_I = -11$. (b) Incluso leída como la suma de dieciséis bandas, los dígitos
   impresos están mal en la última cifra: la columna $L_n$ del suelo desnudo
-  suma 83,523 4 dB, no los 83,523 **8** dB impresos. El defecto queda
+  suma 83,523 4 dB, no los 83,523 **8** dB impresos. El defecto queda
   confinado a esa celda, porque la columna con revestimiento de la misma tabla
   imprime $L_{n,\text{sum}} = 76{,}059\,3\ldots$ y se recalcula a
-  76,059 29 dB, reproduciendo todos los dígitos impresos. Ni (a) ni (b)
+  76,059 29 dB, reproduciendo todos los dígitos impresos. Ni (a) ni (b)
   cambian los 84 dB redondeados, así que solo (a) mueve $C_I$.
 - **Evidencia:** recálculo independiente de ambas sumas a partir de los
-  niveles por banda impresos (16 bandas 83,523 38 dB, 15 bandas 83,261 27 dB,
-  con revestimiento 16 bandas 76,059 29 dB); la edición de 2013 del mismo
+  niveles por banda impresos (16 bandas 83,523 38 dB, 15 bandas 83,261 27 dB,
+  con revestimiento 16 bandas 76,059 29 dB); la edición de 2013 del mismo
   ejemplo imprime $C_I = -11$. Verificado en la página 23 del PDF (p. 17
   impresa) y la página 17 del PDF (p. 11 impresa) de ISO 717-2:2020, y en la
   página 22 del PDF (p. 14 impresa) de ISO 717-2:2013.
@@ -191,11 +191,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **El problema:** dos defectos de distinta naturaleza.
 
   (a) El 1024,2 del folio 177 no se sigue de la Ec. (4.6) leída con la
-  Ec. (4.4). A 23 °C, salinidad 35 y una atmósfera, la ecuación da 1024,287 9,
+  Ec. (4.4). A 23 °C, salinidad 35 y una atmósfera, la ecuación da 1024,287 9,
   que imprime 1024,3. El 1024,2 impreso es lo que da la ecuación con su término
   de presión a cero, es decir, leyendo $P_\mathrm{w}$ como presión manométrica
   contra la definición que enuncia el mismo capítulo. La diferencia son
-  0,043 9 kg/m³, o 4,3 partes por cien mil.
+  0,043 9 kg/m³, o 4,3 partes por cien mil.
 
   (b) La Ec. (4.13), que despeja la (4.6) para estimar la salinidad a partir de
   una densidad medida, imprime el coeficiente de presión como
@@ -251,7 +251,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $(7/2)R = 29{,}10$ J/(mol·K), así que no es aire a ninguna temperatura, en
   ninguna unidad, ni por masa ni por mol, y la expresión del Anexo F para
   $C_\mathrm{P}$ no baja de unos 1013 J/(kg·K) en todo el intervalo de 200 K a
-  400 K. La conductividad 0,023 55 J/(s·m·K), en cambio, sí es una conductividad
+  400 K. La conductividad 0,023 55 J/(s·m·K), en cambio, sí es una conductividad
   real del aire: es la que da la expresión del Anexo F cerca de −1,4 °C, fuera
   del dominio de 15 °C a 27 °C que el propio Anexo F imprime.
 - **Consecuencia para el ejemplo del anexo:** ninguna. La Fórmula (A.5) usa
@@ -263,7 +263,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   documento al que se atribuye haberla publicado.
 - **Evidencia:** las dos páginas impresas contra la Tabla F.1 (folio impreso 40)
   y la cláusula F.6 (folio impreso 39) de IEC 61094-2:2009; las expresiones de la
-  cláusula F.6 evaluadas a 23 °C, 101 325 Pa y 50 % de humedad relativa, que
+  cláusula F.6 evaluadas a 23 °C, 101 325 Pa y 50 % de humedad relativa, que
   reproducen el $\alpha_t$ impreso a $1{,}0 \times 10^{-7}$ relativo; el calor
   molar que implican los 938,7 J/(kg·K) contra el suelo diatómico.
   IEC 61094-2:2009 no es referencia normativa de ISO 9053-2:2020: aparece sólo
@@ -569,8 +569,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   2,375 m con $S = 11\ \text{m}^2$ da la pared exterior 1 exacta, y 1,840 m
   con $S = 13{,}75\ \text{m}^2$ da la pared interior **2** exacta. Los
   2,364 m impresos del suelo separador no reproducen su propia columna en
-  ninguna banda (0,074 9 contra los 0,083 1 impresos a 50 Hz, 0,026 4 contra
-  0,029 0 a 500 Hz); 2,659 m sí, en todas las bandas. Los dos elementos sin
+  ninguna banda (0,074 9 contra los 0,083 1 impresos a 50 Hz, 0,026 4 contra
+  0,029 0 a 500 Hz); 2,659 m sí, en todas las bandas. Los dos elementos sin
   valor impreso necesitan 2,548 m (pared exterior 2,
   $S = 13{,}75\ \text{m}^2$) y 1,636 m (pared interior 1,
   $S = 11\ \text{m}^2$).
@@ -584,8 +584,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $\eta_\text{tot,situ}$ de la Tabla L.3 / G.3 se reproducen a
   $5 \cdot 10^{-5}$. Los valores impresos aplicados al elemento equivocado
   del mismo tipo fallan por mucho más que ese redondeo: 2,375 m en la pared
-  exterior 2 da 0,108 5 contra los 0,114 9 impresos a 50 Hz, y 1,840 m en la
-  pared interior 1 da 0,085 0 contra 0,077 0.
+  exterior 2 da 0,108 5 contra los 0,114 9 impresos a 50 Hz, y 1,840 m en la
+  pared interior 1 da 0,085 0 contra 0,077 0.
 - **Comportamiento de la biblioteca:** `in_situ_total_loss_factor` toma
   $\sum l_k \alpha_k$ como entrada y `perimeter_absorption_coefficient`
   implementa la Fórmula (C.4); la fixture del Anexo L deduce las cinco sumas
@@ -601,14 +601,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
   hormigón celular curado en autoclave de 365 mm.
 - **El problema:** la propia especificación de elementos del ejemplo, y la
   Tabla B.3 del Anexo B para el hormigón celular curado en autoclave, dan
-  0,012 5. Solo 0,012 5 reproduce el $\eta_\text{tot,situ}$ tabulado: a
+  0,012 5. Solo 0,012 5 reproduce el $\eta_\text{tot,situ}$ tabulado: a
   500 Hz la Fórmula (C.1) da
   $0{,}012\,5 + 0{,}001\,41 + 0{,}034\,57 = 0{,}048\,5$, el valor impreso,
-  donde 0,013 daría 0,049 0.
+  donde 0,013 daría 0,049 0.
 - **Evidencia:** recálculo término a término de la Fórmula (C.1) para ambas
   paredes exteriores en todas las bandas con cada $\eta_\text{int}$
   candidato.
-- **Comportamiento de la biblioteca:** la fixture del Anexo L usa 0,012 5.
+- **Comportamiento de la biblioteca:** la fixture del Anexo L usa 0,012 5.
 - **Estado:** sin notificar.
 
 ## ISO 12354-1:2017, Tabla L.4 (segundo bloque de trayectoria etiquetado 2d)
@@ -770,37 +770,37 @@ dos ediciones con las mismas entradas y en el mismo orden.
   se ven afectados.
 - **Estado:** sin notificar.
 
-## ISO 12354-1:2017, Tabla D.1 (1 600 Hz cubierto por dos filas)
+## ISO 12354-1:2017, Tabla D.1 (1 600 Hz cubierto por dos filas)
 
 - **Ubicación:** Anexo D, Tabla D.1 (p. 39 impresa), en la que se lee la
   mejora del índice global de reducción sonora de un revestimiento interior a
   partir de su frecuencia de resonancia.
-- **El impreso:** las dos últimas filas son «630 to 1 600 -> -10» y «1 600 <=
-  f0 <= 5 000 -> -5».
-- **El problema:** 1 600 Hz pertenece a ambas filas, con valores distintos, y
+- **El impreso:** las dos últimas filas son «630 to 1 600 -> -10» y «1 600 <=
+  f0 <= 5 000 -> -5».
+- **El problema:** 1 600 Hz pertenece a ambas filas, con valores distintos, y
   el apartado D.2.2 exige que $f_0$ sea «rounded to the centre frequency of
-  the one-third-octave band in which fo falls», así que 1 600 Hz es un valor
+  the one-third-octave band in which fo falls», así que 1 600 Hz es un valor
   en el que la tabla se lee de verdad y no un borde inalcanzable. Como el
   redondeo es obligatorio, la ambigüedad no es un punto único: toda
-  frecuencia de resonancia bruta de la banda de 1 600 Hz, es decir de
+  frecuencia de resonancia bruta de la banda de 1 600 Hz, es decir de
   1 412,5 Hz a 1 778,3 Hz (bordes de banda de ISO 266), cae en él. Todos los
   demás límites de la tabla son centros de banda distintos (200, 250, 315,
   400, 500 Hz), y ningún otro par de filas se solapa.
 - **Evidencia:** la propia tabla impresa, en la página 45 del PDF (p. 39
   impresa) de ISO 12354-1:2017: las dos filas van regladas por separado y
-  comparten el extremo al pie de la letra, «630 to 1 600» y «1 600 <= f0 <=
-  5 000». Ninguna de las dos filas puede descartarse, porque de 630 Hz a
-  1 250 Hz no hay otra entrada y de 2 000 Hz a 5 000 Hz tampoco. La edición
+  comparten el extremo al pie de la letra, «630 to 1 600» y «1 600 <= f0 <=
+  5 000». Ninguna de las dos filas puede descartarse, porque de 630 Hz a
+  1 250 Hz no hay otra entrada y de 2 000 Hz a 5 000 Hz tampoco. La edición
   predecesora da la lectura anterior, sin ambigüedad: la Tabla D.3 de
   EN 12354-1:2000, verificada en la página 43 del PDF (p. 41 impresa) de esa
-  edición, imprime el mismo par de filas como «630 - 1 600 -> -10» y
-  «> 1 600 -> -5», estrictamente mayor, así que en 2000 exactamente 1 600 Hz
+  edición, imprime el mismo par de filas como «630 - 1 600 -> -10» y
+  «> 1 600 -> -5», estrictamente mayor, así que en 2000 exactamente 1 600 Hz
   tomaba -10 dB sin nada que decidir. La reescritura de 2017 sustituyó
-  «> 1 600» por «1 600 <= f0 <= 5 000» dejando «630 to 1 600» intacto, que es
+  «> 1 600» por «1 600 <= f0 <= 5 000» dejando «630 to 1 600» intacto, que es
   lo que crea el solape; qué pretendía la reescritura en el extremo
   compartido, el texto no lo dice.
 - **Comportamiento de la biblioteca:** `weighted_lining_improvement` devuelve
-  los -10 dB más conservadores exactamente a 1 600 Hz y -5 dB por encima, la
+  los -10 dB más conservadores exactamente a 1 600 Hz y -5 dB por encima, la
   lectura de 2000, con la ambigüedad nombrada en el docstring y fijada en
   [`tests/building/prediction/test_resilient_layers.py`](../tests/building/prediction/test_resilient_layers.py).
 - **Estado:** sin notificar.
@@ -862,7 +862,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 ## ISO 15186-3:2002, anexo A, Tabla A.1 (la columna del sándwich de acero no se reproduce con sus propios datos)
 
 - **Ubicación:** anexo A (normativo), A.2 y Tabla A.1, «Calculated sound
-  reduction index (at 1 013 hPa and 23 °C)», el ejemplo de calificación con
+  reduction index (at 1 013 hPa and 23 °C)», el ejemplo de calificación con
   el que un laboratorio comprueba su instalación. El ejemplar leído es **BS EN
   ISO 15186-3:2010**, la adopción británica de texto idéntico de la ISO
   15186-3:2002, página 18 del PDF (p. 12 impresa).
@@ -888,7 +888,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   18,13 kg/m² y deja 0,051 dB; la mejor presión estática sola son 950 hPa y
   deja 0,051 dB; la mejor temperatura sola, sobre el hueco de ensayo, son 63 °C
   y deja 0,052 dB. Las dos últimas contradicen el encabezado, que fija el clima
-  en 1 013 hPa y 23 °C, y la columna del cartón-yeso sí se reproduce justo con
+  en 1 013 hPa y 23 °C, y la columna del cartón-yeso sí se reproduce justo con
   ese clima, así que las dos columnas no pueden leerse con climas distintos.
 
   La única lectura que sí reproduce los seis valores mueve dos datos a la vez:
@@ -899,7 +899,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   su masa superficial queda por fuerza por debajo. La columna del cartón-yeso
   de esa misma tabla, con las mismas fórmulas y el mismo clima, reproduce sus
   seis valores dentro de 0,050 dB.
-- **Evidencia:** Fórmulas (A.1) a (A.5) evaluadas a los 1 013 hPa y 23 °C
+- **Evidencia:** Fórmulas (A.1) a (A.5) evaluadas a los 1 013 hPa y 23 °C
   declarados, leídas en las páginas 17 y 18 del PDF (pp. 11 y 12 impresas) de
   BS EN ISO 15186-3:2010. La ISO 140-3:1995, C.2.4, que A.2 cita como origen de
   la probeta, describe la hoja de acero/resina/acero de 2,2 mm pero no declara
@@ -1021,7 +1021,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   reproducibility conditions» (p. 7 impresa).
 - **El impreso:** la columna de frecuencias de la Tabla 5 se encabeza
   **«One-third octave midband frequency / Hz»** y sus filas son 250, 500,
-  1 000, 2 000 y 4 000 Hz.
+  1 000, 2 000 y 4 000 Hz.
 - **El problema:** esas cinco frecuencias son la serie de bandas de
   **octava** de ISO 11654, que es sobre la que se define el coeficiente de
   absorción sonora práctico $\alpha_p$; no son una serie de tercios de
@@ -1031,7 +1031,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   cinco frecuencias, se encabeza «Octave midband frequency». El mismo texto
   de encabezado figura sobre la Tabla 4 de la misma página, donde es
   correcto: esa tabla lleva una serie genuina de tercios de octava, de 63 Hz
-  a 5 000 Hz en 20 filas.
+  a 5 000 Hz en 20 filas.
 - **Evidencia:** las cinco frecuencias tabuladas mismas, y el encabezado
   «Octave midband frequency» de la Tabla 2 para las mismas constantes de
   $\alpha_p$. Verificado en la página 13 del PDF (p. 7 impresa) y la página
@@ -1137,9 +1137,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 - **Ubicación:** apartado 10.3 «Default procedure» del tiempo de
   reverberación (p. 18 impresa).
-- **El impreso:** «for all one-third octave bands between 50 Hz and 5 000 Hz
+- **El impreso:** «for all one-third octave bands between 50 Hz and 5 000 Hz
   when the receiving room has a volume **larger than** 25 m³ (calculated to
-  the nearest cubic metre) and between 100 Hz and 5 000 Hz when the receiving
+  the nearest cubic metre) and between 100 Hz and 5 000 Hz when the receiving
   room has a volume smaller than 25 m³ (calculated to the nearest cubic
   metre)».
 - **El problema:** una sala receptora que redondea a exactamente 25 m³ no cae
@@ -1148,7 +1148,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   equal to** 25 m³» en la frase por lo demás idéntica, que cierra el límite.
   La lectura pretendida no está en duda: el disparador de los apartados 8.1 y
   10.4 es «smaller than 25 m³» en las tres partes, así que 25 m³ pertenece a
-  la rama mayor y toma el rango por defecto completo de 50 Hz a 5 000 Hz.
+  la rama mayor y toma el rango por defecto completo de 50 Hz a 5 000 Hz.
 - **Evidencia:** página 24 del PDF (p. 18 impresa) de ISO 16283-2:2020,
   contra la página 24 del PDF (p. 18 impresa) de ISO 16283-1:2014 y la página
   24 del PDF (p. 18 impresa) de ISO 16283-3:2016, que llevan ambas el «or
@@ -1170,15 +1170,15 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Ubicación:** apartado 5 (incertidumbres expandidas representativas), p. 4
   impresa.
 - **El impreso:** «5 dB for the low frequency (10 Hz to 100 Hz) bands, 3 dB
-  for the mid frequency (125 Hz to 16 000 Hz) bands, and 4 dB for the high
-  frequency (**>20 000 Hz**) bands».
+  for the mid frequency (125 Hz to 16 000 Hz) bands, and 4 dB for the high
+  frequency (**>20 000 Hz**) bands».
 - **El problema:** la propia banda de tercio de octava de 20 kHz queda sin
   asignar: el rango medio termina en 16 kHz *inclusive* y el rango alto
   empieza estrictamente por encima de 20 kHz. ISO 17208-1:2016, de la que el
   apartado 5 dice tomar los valores, imprime los mismos tres rangos con
-  «**≥20 000 Hz**», que cierra el hueco; la Parte 2 degradó el $\ge$ a un
+  «**≥20 000 Hz**», que cierra el hueco; la Parte 2 degradó el $\ge$ a un
   $>$. La banda de 20 kHz no es un caso límite para este documento: la Tabla
-  1 de ISO 17208-1 exige que la medición cubra «20 000 Hz (minimum)» como su
+  1 de ISO 17208-1 exige que la medición cubra «20 000 Hz (minimum)» como su
   banda de tercio de octava superior. Una revisión anterior de esta entrada
   decía «nada cubre de 16 kHz a 20 kHz inclusive», que está mal por el
   extremo inferior: 16 kHz sí está cubierto.
@@ -1198,18 +1198,18 @@ dos ediciones con las mismas entradas y en el mismo orden.
   frecuencias.
 - **El impreso:** «From viewpoint of test implementation by using FFT
   analyser, the frequency range of discrete tones are between 89,1 Hz and
-  11 220 Hz inclusive, referred to *the discrete tone frequency range of
+  11 220 Hz inclusive, referred to *the discrete tone frequency range of
   interest*.»
 - **El problema:** todas las fórmulas y tablas de la norma trabajan hasta
-  11 200 Hz: los ajustes de bordes de banda de las Tablas 2 y 3 se declaran
+  11 200 Hz: los ajustes de bordes de banda de las Tablas 2 y 3 se declaran
   para $11\,200 \ge f_t > 1\,600$, y los apartados 10, 12.3 y 12.4 permiten
   datos FFT con $f_1 < 89{,}1\ \text{Hz}$ y $f_2 > 11\,200\ \text{Hz}$. Los
   dos números son la misma cantidad a distinta precisión y no un error
   tipográfico: $10\,000 \cdot 2^{1/6} = 11\,224{,}6\ \text{Hz}$ es el borde
   superior de la banda de tercio de octava de 10 kHz que cierra el rango de
-  interés, que redondea a 11 220 Hz con cuatro cifras significativas y a
-  11 200 Hz con tres. Una revisión anterior de esta entrada lo llamaba errata
-  y añadía que «ningún otro apartado menciona 11 220 Hz»; la última marca del
+  interés, que redondea a 11 220 Hz con cuatro cifras significativas y a
+  11 200 Hz con tres. Una revisión anterior de esta entrada lo llamaba errata
+  y añadía que «ningún otro apartado menciona 11 220 Hz»; la última marca del
   eje x de la Figura 6 (p. 20 impresa) está etiquetada 11220. Lo que sí lleva
   el apartado 4.1 es un defecto estructural: 4.1.2 «ITT equipment» repite al
   pie de la letra la NOTA 1 de 4.1.1 («This range was selected to be
@@ -1222,7 +1222,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   PDF (p. 17 impresa) y la página 28 del PDF (p. 20 impresa) de
   ECMA-418-1:2024 (3.ª edición).
 - **Comportamiento de la biblioteca:** usa el rango internamente consistente
-  de $89{,}1\ \text{Hz}$ a 11 200 Hz (extremo superior exclusivo según las
+  de $89{,}1\ \text{Hz}$ a 11 200 Hz (extremo superior exclusivo según las
   fórmulas), con una nota en el código en
   [`tonality.py`](../src/phonometry/psychoacoustics/quality/tonality.py).
 - **Estado:** sin notificar.
@@ -1517,9 +1517,9 @@ dos ediciones con las mismas entradas y en el mismo orden.
   mismo: evaluada contra la Table AI, impresa dos páginas antes en el mismo
   anexo, la escalera con 31.47 nF reproduce las 21 filas con un máximo de
   **0.050 dB** y no viola tolerancia alguna, mientras que la escalera con
-  41.47 nF se va hasta **2.252 dB** (a 31 500 Hz) con un error cuadrático
+  41.47 nF se va hasta **2.252 dB** (a 31 500 Hz) con un error cuadrático
   medio de 1.055 dB y **rompe la propia columna de tolerancias de la Table AI
-  en siete frecuencias**, todas de 8 000 Hz a 20 000 Hz: −0.40 dB contra
+  en siete frecuencias**, todas de 8 000 Hz a 20 000 Hz: −0.40 dB contra
   ±0.40 a 8 kHz, −0.74 contra ±0.60 a 9 kHz, −1.16 contra ±0.80 a 10 kHz,
   −1.85 contra ±1.20 a 12.5 kHz, −1.98 contra ±1.40 a 14 kHz, −2.05 contra
   ±1.60 a 16 kHz y −2.12 contra ±2.00 a 20 kHz. Barrer el condensador para
@@ -1620,29 +1620,29 @@ dos ediciones con las mismas entradas y en el mismo orden.
   BS.468-4 Table 2» y «ITU-R BS.468-4 Table 3».
 - **Estado:** sin notificar.
 
-## IEC 60268-1:1985, Appendix A, Table AI (tolerancia de 16 000 Hz impresa como ±1.65)
+## IEC 60268-1:1985, Appendix A, Table AI (tolerancia de 16 000 Hz impresa como ±1.65)
 
 - **Ubicación:** Appendix A, Table AI, la columna de tolerancias, fila de
-  16 000 Hz (p. 27 impresa; el Tableau AI francés en la p. 26 impresa imprime
+  16 000 Hz (p. 27 impresa; el Tableau AI francés en la p. 26 impresa imprime
   el mismo valor).
 - **El impreso:** `±1.65 1)`.
 - **El problema:** la Table 1 de ITU-R BS.468-4 y la Table 1 de AES17-2015
   imprimen ambas **±1.6** para la misma fila, y la propia nota 1) de la tabla
   es lo que lo zanja: las tolerancias marcadas «are obtained by a linear
   interpolation on a logarithmic graph on the basis of values specified for
-  the frequencies used to define the mask, i.e. 31.5 Hz, 100 Hz, 1 000 Hz,
-  5 000 Hz, 6 300 Hz, and 20 000 Hz». Interpolado con esa regla entre
-  (6 300 Hz, 0 dB) y (20 000 Hz, ±2.0 dB), 16 000 Hz da 1.6137 dB, que
+  the frequencies used to define the mask, i.e. 31.5 Hz, 100 Hz, 1 000 Hz,
+  5 000 Hz, 6 300 Hz, and 20 000 Hz». Interpolado con esa regla entre
+  (6 300 Hz, 0 dB) y (20 000 Hz, ±2.0 dB), 16 000 Hz da 1.6137 dB, que
   redondea a 1.6 con un decimal y a 1.61 con dos. Ningún redondeo de la regla
   produce 1.65, y ningún par de anclas alternativo tampoco: tomar la recta de
-  6 300 Hz a 31 500 Hz da en cambio 1.6216 dB. El valor es además anómalo
+  6 300 Hz a 31 500 Hz da en cambio 1.6216 dB. El valor es además anómalo
   dentro de su propia columna, que está citada a un decimal en todos los
   demás sitios.
 - **Evidencia:** la regla de la nota aplicada a las 14 filas marcadas de la
   misma columna, que reproduce todas y cada una (63 Hz 1.400, 200 Hz 0.8495,
-  400 Hz 0.6990, 800 Hz 0.5485, 3 150 y 4 000 Hz 0.5000, 7 100 Hz 0.2070,
-  8 000 Hz 0.4136, 9 000 Hz 0.6175, 10 000 Hz 0.7999, 12 500 Hz 1.1863,
-  14 000 Hz 1.3825, 31 500 Hz 2.7865) y solo 16 000 Hz discrepa de lo
+  400 Hz 0.6990, 800 Hz 0.5485, 3 150 y 4 000 Hz 0.5000, 7 100 Hz 0.2070,
+  8 000 Hz 0.4136, 9 000 Hz 0.6175, 10 000 Hz 0.7999, 12 500 Hz 1.1863,
+  14 000 Hz 1.3825, 31 500 Hz 2.7865) y solo 16 000 Hz discrepa de lo
   impreso. No lo corrigen la Amendment 1:1988 ni la Amendment 2:1988.
   Verificado en la página 29 del PDF (p. 27 impresa) de IEC 60268-1:1985 y en
   la página 2 del PDF (p. 2 impresa) de la Recomendación ITU-R BS.468-4.
@@ -1732,7 +1732,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $I_k$, MPa$^2$» del paso 2 (p. 64 impresa) y del paso 3 (p. 65 impresa),
   leída con las filas $I_{am,k}$ e $I_{rt,k}$ de debajo.
 - **El impreso:** para la señal de 77,9 dB de la banda de 125 Hz, el paso 2
-  imprime $I_k$ = 61,7, y cuatro filas más abajo imprime $I_{rt,k}$ = 40 000
+  imprime $I_k$ = 61,7, y cuatro filas más abajo imprime $I_{rt,k}$ = 40 000
   para el umbral de recepción de 46 dB de la misma banda.
 - **El problema:** dos defectos en una fila. La unidad es imposible: a
   77,9 dB re 20 µPa la presión sonora al cuadrado es
@@ -1741,14 +1741,14 @@ dos ediciones con las mismas entradas y en el mismo orden.
   de intensidades adimensional $10^{L/10} = 61\,722\,596$ dividida por
   $10^{6}$. Y ese divisor no se aplica a las dos cantidades que la norma suma
   a $I_k$ en las filas inmediatamente siguientes: $I_{am,k}$ e $I_{rt,k}$ se
-  tabulan como la razón simple, siendo 40 000 el
+  tabulan como la razón simple, siendo 40 000 el
   $10^{4,6} = 39\,811$ redondeado, sin dividir. Un lector que forme
   $I_k + I_{am,k} + I_{rt,k}$ desde las celdas tal como están impresas
   infravalora su primer término en $10^{6}$. La fila impresa «adjustment to
   remove masking and threshold» es la comprobación: 1,019 a 500 Hz es
   $(I_k + I_{am,k} + I_{rt,k})/I_k$ solo una vez que $I_k$ se restituye a
-  26 305 192; formada desde las celdas tal como están impresas, la misma
-  expresión lee 19 279.
+  26 305 192; formada desde las celdas tal como están impresas, la misma
+  expresión lee 19 279.
 - **Evidencia:** todas las celdas de ambas filas de $I_k$ recalculadas como
   $10^{L/10}$ desde los niveles combinados impresos encima, y todas las
   celdas de las filas $I_{am,k}$ e $I_{rt,k}$ recalculadas como
@@ -1768,20 +1768,20 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 - **Ubicación:** Annex M, Table M.1, paso 3, la fila $I_{am,k}$, columna de
   250 Hz (p. 65 impresa).
-- **El impreso:** 2 850 000, el mismo valor que la celda de 500 Hz de al
+- **El impreso:** 2 850 000, el mismo valor que la celda de 500 Hz de al
   lado.
 - **El problema:** la celda no redondea desde la cantidad que nombra. Con los
   niveles operacionales impresos dos filas más arriba, $I_{am,k}$ a 250 Hz es
   el factor de enmascaramiento auditivo de la banda de 125 Hz por la
   intensidad combinada de esa banda,
   $0{,}01463507 \times 195\,339\,273 = 2\,858\,804$, que a las tres cifras
-  significativas a las que se imprime la fila lee 2 860 000. La celda de
-  500 Hz es correcta: su 2 852 252 sí se imprime como 2 850 000. Las dos
+  significativas a las que se imprime la fila lee 2 860 000. La celda de
+  500 Hz es correcta: su 2 852 252 sí se imprime como 2 850 000. Las dos
   celdas solo se reproducen juntas arrastrando el
   $amf \times 1000 = 14{,}6$ *redondeado* de la fila de arriba en lugar del
   propio factor, y el paso 2 demuestra que eso no es lo que hace la tabla, ya
-  que sus dos celdas correspondientes se imprimen separadas, como 508 000 y
-  507 000, cosa que solo da el factor sin redondear.
+  que sus dos celdas correspondientes se imprimen separadas, como 508 000 y
+  507 000, cosa que solo da el factor sin redondear.
 - **Evidencia:** ambas celdas recalculadas desde los niveles operacionales de
   habla y ruido impresos, y el par del paso 2 recalculado de la misma manera
   como control. El defecto no cambia nada aguas abajo: la corrección de
@@ -1794,7 +1794,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   [`tests/reference_data/`](../tests/reference_data/) conserva la celda
   impresa y el test
   `test_annex_m_step3_masking_intensity_at_250_hz_is_the_printed_erratum`
-  afirma el valor calculado contra 2 858 804 y contra el impreso, para que la
+  afirma el valor calculado contra 2 858 804 y contra el impreso, para que la
   única celda de la tabla que no es un oráculo no pueda convertirse en uno
   sin hacer ruido.
 - **Estado:** sin notificar.
@@ -2056,11 +2056,11 @@ dos ediciones con las mismas entradas y en el mismo orden.
   B.2 para una determinación ponderada A.
 - **El impreso:** «Si la contribución total al **nivel de** potencia acústica
   ponderado A de las bandas de tercio de octava en el margen de frecuencias
-  de 800 Hz a 5 000 Hz es menos de la mitad del **nivel total**, entonces
+  de 800 Hz a 5 000 Hz es menos de la mitad del **nivel total**, entonces
   **deben** usarse los valores de $C$ para las bandas de tercio de octava de
   200 Hz a 630 Hz.» El original ISO lee «If the total contribution to the
   A-weighted sound **power** from the one-third-octave bands in the frequency
-  range 800 Hz to 5 000 Hz is less than half the total **power**, then the
+  range 800 Hz to 5 000 Hz is less than half the total **power**, then the
   values of $C$ for the one-third-octave band 200 Hz to 630 Hz **should** be
   used.»
 - **El problema:** dos desviaciones en una frase. La mitad de un *nivel* no
@@ -2450,7 +2450,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   represent the vibrational relaxation frequencies of oxygen and nitrogen
   respectively».
 - **El problema:** los dos subíndices están intercambiados en la frase de
-  definición. Los *valores* casan con los *nombres* que les da (75 692 Hz es
+  definición. Los *valores* casan con los *nombres* que les da (75 692 Hz es
   la frecuencia de relajación del oxígeno y 630.7 Hz la del nitrógeno en las
   condiciones de referencia), pero están asignados a los símbolos opuestos,
   así que la ecuación tal como está impresa multiplica el coeficiente del
@@ -2997,7 +2997,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   capítulo usa para un orador, esa constante es 6.3130, no 6.33. La brecha es
   del $0.27\,\%$, es decir, el último dígito impreso: 6.33 es lo que devuelve
   $16\pi \cdot 10^{-0.6}/2$ si $10^{-0.6}$ se arrastra grueso como 0.252 en
-  lugar de 0.251 19. Se clasifica como discrepancia de redondeo y no como
+  lugar de 0.251 19. Se clasifica como discrepancia de redondeo y no como
   error estructural de la fórmula, ya que la fórmula misma queda confirmada
   por su compañera (abajo) y ninguna suposición alternativa consistente
   reproduce 6.33 (exigiría $Q = 1.995$).
@@ -3090,7 +3090,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   aproximación es $1.3\ \text{ft/s}$ y el pico cae a 63.4 Hz, es decir, en la
   octava de 63 Hz, así que la forma de la Ec. 13.31 pone 33.4 dB en esa banda
   contra los 33 impresos; leída en ft/min es $78\ \text{ft/min}$, el pico se
-  mueve a 3 806 Hz, y la misma forma pone -8.2 dB en la banda de 63 Hz.
+  mueve a 3 806 Hz, y la misma forma pone -8.2 dB en la banda de 63 Hz.
   Verificado en la página 522 del PDF (p. 521 impresa) de Long, Architectural
   Acoustics 2e (2014).
 - **Comportamiento de la biblioteca:** `diffuser_sound_power` en
@@ -3636,20 +3636,20 @@ dos ediciones con las mismas entradas y en el mismo orden.
   bajo la cual las clases de la Tabla [2.3.b] pueden alcanzarse siquiera.
 - **Estado:** sin notificar (corregido por el organismo emisor en 2018).
 
-## Directiva (UE) 2015/996, Appendix G, Tabla G-5, fila de 6 350 Hz (muesca de 50 dB)
+## Directiva (UE) 2015/996, Appendix G, Tabla G-5, fila de 6 350 Hz (muesca de 50 dB)
 
 - **Ubicación:** Tabla G-5, «Coefficients LW,0,idling for traction noise», la
-  fila de 6 350 Hz del par «Diesel locomotive (c. 2 200 kW)» (DO L 168,
+  fila de 6 350 Hz del par «Diesel locomotive (c. 2 200 kW)» (DO L 168,
   1.7.2015, p. 138).
 - **El impreso:** Source A **31,4** dB y Source B **30,7** dB.
 - **El problema:** ambos están unos 50 dB por debajo de sus propios vecinos
-  en la misma columna: 90,5 / 89,5 dB a 5 000 Hz y 81,2 / 80,6 dB a
-  8 000 Hz. Ninguna fuente de tracción física tiene una muesca de 50 dB de un
+  en la misma columna: 90,5 / 89,5 dB a 5 000 Hz y 81,2 / 80,6 dB a
+  8 000 Hz. Ninguna fuente de tracción física tiene una muesca de 50 dB de un
   tercio de octava de ancho, y ninguna otra columna de la tabla tiene nada
   comparable. Se perdió el dígito inicial 8.
 - **Evidencia:** verificado en la página 138 del PDF (p. L 168/138 impresa)
-  de la Directiva (UE) 2015/996:2015, que lleva las filas de 5 000, 6 350 y
-  8 000 Hz y el encabezado de columna «Diesel locomotive (c. 2 200 kW)». La
+  de la Directiva (UE) 2015/996:2015, que lleva las filas de 5 000, 6 350 y
+  8 000 Hz y el encabezado de columna «Diesel locomotive (c. 2 200 kW)». La
   Directiva Delegada (UE) 2021/1226 de la Comisión, punto (20)(f) del Anexo,
   verificado en la página 39 del PDF (p. L 269/103 impresa) de esa Directiva,
   sustituye la 4.ª columna, 25.ª fila por «81,4» y la 5.ª columna, 25.ª fila
@@ -3669,10 +3669,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   columna de longitudes de onda de la Tabla G-1 (DO L 168, 1.7.2015,
   pp. 129-140).
 - **El impreso:** los centros de tercio de octava están etiquetados
-  **316 Hz**, **3 160 Hz** y **6 350 Hz**, y las longitudes de onda
+  **316 Hz**, **3 160 Hz** y **6 350 Hz**, y las longitudes de onda
   **120 mm**, **12 mm**, **3,2 mm** y **1,2 mm**.
 - **El problema:** ninguna de las dos series es la preferente. Los centros
-  nominales de tercio de octava de IEC 61260-1 son 315, 3 150 y 6 300 Hz, y
+  nominales de tercio de octava de IEC 61260-1 son 315, 3 150 y 6 300 Hz, y
   los números preferentes R10 en torno a esas longitudes de onda son 125,
   12,5, 3,15 y 1,25 mm. Los propios ficheros de catálogo de la Comisión,
   distribuidos con el módulo fuente de referencia, usan la serie de
@@ -4174,8 +4174,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   requiera corrección meteorológica». El ejemplo informativo es inconsistente
   con el anexo normativo que cita.
 - **Evidencia:** recálculo de la Ec. (C.2) y de $C_2$ a partir de las
-  constantes impresas ($a$ = 2,2560 × 10⁻⁵ m⁻¹, $b$ = 5,255 3,
-  $p_{\mathrm{s},0}$ = 1,013 25 × 10⁵ Pa, $\theta_\mathrm{ref}$ = 296 K).
+  constantes impresas ($a$ = 2,2560 × 10⁻⁵ m⁻¹, $b$ = 5,255 3,
+  $p_{\mathrm{s},0}$ = 1,013 25 × 10⁵ Pa, $\theta_\mathrm{ref}$ = 296 K).
   Verificado en la página 46 del PDF (p. 37 impresa) y en la página 36 del
   PDF (p. 27 impresa) de BS EN ISO 3747:2010.
 - **Comportamiento de la biblioteca:** implementa el Anexo C tal como está
@@ -4279,18 +4279,18 @@ dos ediciones con las mismas entradas y en el mismo orden.
   la ecuación equivocada.
 - **Estado:** sin notificar.
 
-## ISO 5136:2003, Tabla A.5, fila de 5 000 Hz (falta el primer dígito de $a_3$)
+## ISO 5136:2003, Tabla A.5, fila de 5 000 Hz (falta el primer dígito de $a_3$)
 
 - **Ubicación:** Anexo A, Tabla A.5, «Values of coefficients $a_i$ for the
   determination of the combined mean flow velocity and modal correction
   $C_{3,4}$ of the sampling tube for duct diameters 0,8 m $\le d <$ 1,25 m»,
-  fila de 5 000 Hz, columna $a_3$.
+  fila de 5 000 Hz, columna $a_3$.
 - **El impreso:** $- ,24 \times 10^{-05}$: un signo menos, un espacio, una
   coma decimal y dos dígitos, sin ningún dígito antes de la coma. Todas las
   demás celdas de las doce tablas de coeficientes de los Anexos A, H e I
   imprimen un dígito antes de la coma.
 - **El problema:** el coeficiente no puede leerse del documento, y la fila
-  está dentro del rango normativo de la norma (5 000 Hz, $|U| \le 40$ m/s).
+  está dentro del rango normativo de la norma (5 000 Hz, $|U| \le 40$ m/s).
   El $a_3$ de la misma banda en las dos tablas vecinas es
   $-1{,}17 \times 10^{-5}$ (Tabla A.4, de 0,5 m a 0,8 m) y
   $-1{,}27 \times 10^{-5}$ (Tabla A.6, de 1,25 m a 2 m), que encierran
@@ -4410,7 +4410,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   misma columna se titula $a_9$ en las Tablas A.1 y A.3 a A.6, la NOTA de
   cada una de ellas suma $a_i U^i$ de $i = 0$ a $i = 10$ sobre las once
   columnas que tiene la fila, y la única celda que esta contiene, el
-  $4{,}09 \times 10^{-14}$ de la fila de 20 000 Hz, es el coeficiente de
+  $4{,}09 \times 10^{-14}$ de la fila de 20 000 Hz, es el coeficiente de
   $U^9$: un $a_{90}$ no tendría lugar alguno en esa suma.
 - **Evidencia:** página 36 del PDF (p. 26 impresa) de ISO 5136:2003, frente a
   la fila de cabecera de la Tabla A.1 en la página 35 del PDF (p. 25
@@ -4418,16 +4418,16 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Comportamiento de la biblioteca:** la columna se lee como $a_9$.
   `_TABLE_A2` en
   [`sound_power_in_duct.py`](../src/phonometry/emission/sound_power_in_duct.py)
-  lleva la fila de 20 000 Hz como los diez coeficientes $a_0$ a $a_9$, y
+  lleva la fila de 20 000 Hz como los diez coeficientes $a_0$ a $a_9$, y
   `test_table_a2_20_khz_row_reads_the_last_column_as_a9` en
   [`tests/emission/test_sound_power_in_duct.py`](../tests/emission/test_sound_power_in_duct.py)
   desarrolla la fila. No cambia ningún valor de coeficiente.
 - **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
 
-## ISO 5136:2003, Tabla A.6, fila de 16 000 Hz ($a_1$ impreso con el signo de multiplicación duplicado)
+## ISO 5136:2003, Tabla A.6, fila de 16 000 Hz ($a_1$ impreso con el signo de multiplicación duplicado)
 
 - **Ubicación:** Anexo A, Tabla A.6, «... for duct diameters 1,25 m $\le d
-  \le$ 2 m», fila de 16 000 Hz, columna $a_1$.
+  \le$ 2 m», fila de 16 000 Hz, columna $a_1$.
 - **El impreso:** $4{,}52 \times\!\times 10^{-01}$, dos signos de
   multiplicación donde todas las demás celdas imprimen uno.
 - **El problema:** solo tipográfico; la mantisa y el exponente son legibles y
@@ -4441,10 +4441,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   [`sound_power_in_duct.py`](../src/phonometry/emission/sound_power_in_duct.py).
 - **Estado:** sin notificar (tipográfico, sin consecuencia numérica).
 
-## ISO 5136:2003, Tabla I.2 (continuación), fila de 20 000 Hz (los exponentes de $a_8$ y $a_9$)
+## ISO 5136:2003, Tabla I.2 (continuación), fila de 20 000 Hz (los exponentes de $a_8$ y $a_9$)
 
 - **Ubicación:** Anexo I, Tabla I.2, «... for duct diameters 3,55 m $\le d
-  \le$ 5 m», la página de continuación, fila de 20 000 Hz, columnas $a_8$ y
+  \le$ 5 m», la página de continuación, fila de 20 000 Hz, columnas $a_8$ y
   $a_9$.
 - **El impreso:** $a_8 = -5{,}88 \times 10^{-10}$ y
   $a_9 = 2{,}25 \times 10^{-10}$.
@@ -4852,10 +4852,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
   para las demás columnas, a partir de
   $p_{vc} = p_1\left[1 - x/(F_{LP}/F_P)^2\right]$ con $F_{LP} = 0{,}792$.
 - **El problema:** las dos cosas no pueden ser ciertas a la vez. Despejar
-  $(F_{LP}/F_P)^2$ de la Ecuación (2) en cada pareja impresa da 0,647 829,
-  0,647 827, 0,647 821, 0,647 829 y 0,647 833 en las cinco columnas que
+  $(F_{LP}/F_P)^2$ de la Ecuación (2) en cada pareja impresa da 0,647 829,
+  0,647 827, 0,647 821, 0,647 829 y 0,647 833 en las cinco columnas que
   imprimen valor, que es $F_p = 0{,}984$ con cuatro cifras en todas ellas. Con
-  el 0,98 impreso sale 0,653 128 y $p_{vc} = 571\,294$ Pa, a 3 507 Pa de la
+  el 0,98 impreso sale 0,653 128 y $p_{vc} = 571\,294$ Pa, a 3 507 Pa de la
   cifra impresa. El valor es calculado, no un dato: el propio anexo dice que
   viene de la IEC 60534-2-1, y con el coeficiente de pérdida de carga que
   imprime, $\Sigma\zeta = 0{,}86$, sale $F_p = 0{,}984$ para el caso DN 100.
@@ -4981,7 +4981,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 - **Ubicación:** anexo A (informativo), Tabla A.1, la fila de la Ecuación (22a)
   del folio impreso 25 (página 27 del PDF), las tres columnas.
-- **Lo impreso:** las tres celdas ponen «TL (8 000 Hz) = 51,76 dB», sin signo
+- **Lo impreso:** las tres celdas ponen «TL (8 000 Hz) = 51,76 dB», sin signo
   delante del 5.
 - **El problema:** la Ecuación (22a) es $TL(f_i) = TL_{fr} + \Delta TL(f_i)$, y
   la tabla imprime sus dos entradas una fila más arriba y dos folios antes:
@@ -5238,18 +5238,18 @@ dos ediciones con las mismas entradas y en el mismo orden.
   factor que cierra la identidad es el **cociente** de las dos respuestas en la
   frecuencia de referencia, no la ponderación global que imprime la Tabla 1. En
   ocho de las nueve ponderaciones la distinción es invisible, porque su
-  ponderación de limitación de banda vale entre 0,999 68 y 0,999 97 en su
+  ponderación de limitación de banda vale entre 0,999 68 y 0,999 97 en su
   propia frecuencia de referencia y las dos lecturas coinciden al 0,03 %. La
-  excepción es `Wf`: su frecuencia de referencia, 2,5 rad/s = 0,397 887 Hz,
+  excepción es `Wf`: su frecuencia de referencia, 2,5 rad/s = 0,397 887 Hz,
   cae dentro de su propia falda de limitación de banda, cuyas esquinas sitúa la
   Tabla 3 en 0,08 Hz y 0,63 Hz. Ahí la ponderación de limitación de banda vale
-  0,928 078 y la global 0,388 848, valores que la Tabla B.5 imprime como
-  0,927 9 y 0,388 4 en el centro de banda vecino de 0,398 1 Hz. Leído como el
-  0,388 8 de la Tabla 1, el ensayo le pide a un vibrómetro `Wf` conforme un
+  0,928 078 y la global 0,388 848, valores que la Tabla B.5 imprime como
+  0,927 9 y 0,388 4 en el centro de banda vecino de 0,398 1 Hz. Leído como el
+  0,388 8 de la Tabla 1, el ensayo le pide a un vibrómetro `Wf` conforme un
   valor que dista un 7,75 % del que muestra, frente al ±5 % que la Tabla 2
   permite a la vibración de cuerpo entero de baja frecuencia: la mitad otra vez
   por encima del límite, en un instrumento sin defecto. Leído como el cociente
-  0,418 982, el ensayo es cierto por construcción.
+  0,418 982, el ensayo es cierto por construcción.
 - **Consecuencia:** ninguna para las tablas de la propia norma. El anexo B
   tabula la ponderación de limitación de banda y la global en columnas
   separadas, así que de él se recuperan las dos lecturas; la ambigüedad está
@@ -5585,10 +5585,10 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Lo impreso:** $KB_{FTr} = \sqrt{\tfrac{1}{1920} \cdot (144 \cdot (1{,}0
   \cdot 0)^2 + 144 \cdot (1{,}0 \cdot 0)^2 + 80 \cdot (0{,}7 \cdot 0{,}406\,1)^2 +
   80 \cdot (0{,}7 \cdot 0{,}567\,6)^2)} = 0{,}099\,8 > 0{,}07$.
-- **El problema:** con los 0,406 1 y 0,567 6 de cuatro decimales la fórmula
-  da 0,099 72, que se imprime 0,099 7; el 0,099 8 impreso es lo que dan los
-  0,406 y 0,568 de tres decimales de la tabla B.1, 0,099 76. Los propios
-  pasos de la tabla B.1 dan 0,099 72. Una unidad en el cuarto decimal, y el
+- **El problema:** con los 0,406 1 y 0,567 6 de cuatro decimales la fórmula
+  da 0,099 72, que se imprime 0,099 7; el 0,099 8 impreso es lo que dan los
+  0,406 y 0,568 de tres decimales de la tabla B.1, 0,099 76. Los propios
+  pasos de la tabla B.1 dan 0,099 72. Una unidad en el cuarto decimal, y el
   veredicto, 0,07 superado, no depende de ella.
 - **Evidencia:** la fórmula y su resultado en la página impresa 39 y los
   valores eficaces de la tabla B.1 en la página impresa 38. Verificado en la
@@ -5598,7 +5598,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Comportamiento de la biblioteca:** la fila de conformidad del ejemplo 8
   compara
   [`train_assessment_severity`](../src/phonometry/vibration/immission/train_categories.py)
-  a partir de los 47 pasos con 0,099 7 a media unidad del cuarto decimal, y
+  a partir de los 47 pasos con 0,099 7 a media unidad del cuarto decimal, y
   dice lo que da lo impreso.
 - **Estado:** sin comunicar; el documento es un borrador en consulta.
 
@@ -6138,7 +6138,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   (página 12 del PDF de la copia BS EN ISO 11957:2009 leída aquí, cuyos
   folios van nueve por detrás de las páginas del PDF).
 - **Lo impreso:** «For measurements in the frequency range from 100 Hz to
-  10 000 Hz, the distance between the cabin and the walls and ceiling of the
+  10 000 Hz, the distance between the cabin and the walls and ceiling of the
   room shall be at least one-half wavelength corresponding to the centre
   frequency of the lowest frequency band of interest. [...] For measurements
   in the frequency range from 50 Hz to 80 Hz, the distance shall be at least
@@ -6405,7 +6405,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   $\mathrm{DL}_2(r_n,r_m)$ entre $\lg 2$.
 - **El problema:** las dos son la misma conversión, de una tasa por década a
   una tasa por duplicación de distancia, escrita dos veces con distinta
-  precisión. $\lg 2$ es 0,301 03, así que el 0,3 impreso se queda un 0,34 %
+  precisión. $\lg 2$ es 0,301 03, así que el 0,3 impreso se queda un 0,34 %
   corto, y un documento que imprime la forma exacta en una página no tiene por
   qué redondearla en la anterior.
 - **Evidencia:** las dos ecuaciones en páginas enfrentadas, las dos
@@ -6436,7 +6436,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   125 Hz a 4 kHz.
 - **El problema:** los 6,2 dB son la suma energética de los $P_j$, que es lo
   que normaliza el espectro ponderado a total unidad para que una curva plana
-  vuelva sin cambiar, y los seis $P_j$ impresos suman 6,251 5 dB, que redondea
+  vuelva sin cambiar, y los seis $P_j$ impresos suman 6,251 5 dB, que redondea
   a 6,3 y no a 6,2. La constante impresa se queda 0,051 dB corta respecto a la
   tabla impresa. Las dos son redondeos de la misma curva hechos por separado:
   los $P_j$ son la ponderación A de la IEC 61672-1 en los seis centros de
@@ -6459,7 +6459,7 @@ dos ediciones con las mismas entradas y en el mismo orden.
   enumera los errores técnicos corregidos en el texto alemán y no nombra este.
   El anexo zanja con qué constante se calculó. Recorriendo las tablas C.2 a
   C.4 impresas por el anexo B sin redondear, la última columna de la tabla C.6
-  vuelve con los seis $P_j$ impresos y su propia suma, 6,251 5 dB, dentro del
+  vuelve con los seis $P_j$ impresos y su propia suma, 6,251 5 dB, dentro del
   redondeo impreso en las 11 posiciones (peor 0,041 dB, desviaciones de los
   dos signos), y con los 6,2 dB impresos una unidad alta en la última cifra en
   6 de las 11 (peor 0,092 dB, todas las desviaciones positivas, de +0,011 a

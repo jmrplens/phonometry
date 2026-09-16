@@ -26,7 +26,7 @@ Formula (D.8) to carry a laboratory rating to the field
 
 Citations are to ISO 12354-1:2017. One printed defect is relevant here and is
 recorded in `docs/ERRATA.md`: the overlap of the last two rows of Table D.1
-at 1 600 Hz.
+at 1 600 Hz.
 
 Several relations used here carry no published worked example, so they are
 implemented as printed and checked only for self-consistency: the cavity
@@ -251,18 +251,18 @@ frequency, rounded to the centre of the one-third-octave band in which it
 falls. Below 200 Hz the improvement also depends on the bare element:
 $\Delta R_\mathrm{w} = 74.4 - 20 \log_{10}(f_\mathrm{o}) - R_\mathrm{w}/2$, never below 0 dB
 (NOTE 1). At and above 200 Hz the lining *degrades* the insulation, by
-1 dB at 200 Hz down to 10 dB from 630 Hz to 1 600 Hz, recovering to 5 dB
-from 1 600 Hz to 5 000 Hz.
+1 dB at 200 Hz down to 10 dB from 630 Hz to 1 600 Hz, recovering to 5 dB
+from 1 600 Hz to 5 000 Hz.
 
 Table D.1 is stated for basic elements with $20 \le R_\mathrm{w} \le 60$ dB.
-Its last two rows both cover 1 600 Hz with different values; this function
+Its last two rows both cover 1 600 Hz with different values; this function
 takes the more conservative −10 dB there (see `docs/ERRATA.md`).
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `resonance_frequency` | Resonance frequency `fo` of the lining, in Hz ([`lining_resonance_frequency`](/phonometry/reference/api/building/linings/#lining_resonance_frequency)); must fall in the 30 Hz to 5 000 Hz range Table D.1 covers. |
+| `resonance_frequency` | Resonance frequency `fo` of the lining, in Hz ([`lining_resonance_frequency`](/phonometry/reference/api/building/linings/#lining_resonance_frequency)); must fall in the 30 Hz to 5 000 Hz range Table D.1 covers. |
 | `base_rating` | Weighted sound reduction index `Rw` of the bare wall or floor, in dB. |
 
 **Returns:** The weighted improvement `ΔRw`, in dB.

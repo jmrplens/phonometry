@@ -792,7 +792,7 @@ _BLOCK_NEPERS = 20.0
 #: The assembled system grows with the block count, so an input that would
 #: need more than this is rejected rather than silently turned into a very
 #: large solve. At the budget above the limit corresponds to about 1300
-#: nepers, some 11 000 dB, across a single layer: no physical stack reaches
+#: nepers, some 11 000 dB, across a single layer: no physical stack reaches
 #: it, but a vanishing shear modulus does, because the shear wavenumber of
 #: Eq. (6.87) diverges as ``1 / sqrt(N)``.
 _MAX_BLOCKS = 64

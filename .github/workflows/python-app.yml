@@ -650,6 +650,8 @@ jobs:
       run: python scripts/check_language_forwarding.py
     - name: Check that no style default collides with its own alias
       run: python scripts/check_plot_style_defaults.py
+    - name: Check that no grouped number can break across a line
+      run: python scripts/check_digit_grouping.py
 
   # A private module-level constant is a number lifted out of a standard so the
   # code that uses it can say where it came from, and one nothing reads is

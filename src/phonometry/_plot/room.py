@@ -94,7 +94,7 @@ _RC_HISS_MIN_HZ = 1000.0
 _EXCITATION_KINDS = ("sweep", "mls")
 
 #: Typical range of the sound strength G in unoccupied halls up to
-#: 25 000 m3, in dB (ISO 3382-1:2009, Table A.1).
+#: 25 000 m3, in dB (ISO 3382-1:2009, Table A.1).
 #:
 #: Table A.1 gives its ranges for the SINGLE NUMBER of each quantity, the
 #: average over the bands its own column names, not for one band at a time.

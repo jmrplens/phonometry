@@ -26,7 +26,7 @@ so the report never merely repeats a manufacturer number:
      L_M = 20 \log_{10}(M / M_\mathrm{r}), \qquad M_\mathrm{r} = 1\ \mathrm{V/Pa}
 
   the rated sensitivity referring to the standard reference frequency of
-  1 000 Hz (11.3). This is the first clean-room oracle: 12.5 mV/Pa returns
+  1 000 Hz (11.3). This is the first clean-room oracle: 12.5 mV/Pa returns
   :math:`20 \log_{10} 0.0125 = -38.06` dB re 1 V/Pa exactly.
 
 * **Effective frequency range** (12.2). The range of frequencies over which
@@ -778,7 +778,7 @@ def microphone_characteristics(
     :param sensitivity_mv_per_pa: Rated free-field sensitivity ``M`` at the
         reference frequency, in mV/Pa (11.2.1/11.3).
     :param reference_frequency: Stated reference frequency, in Hz; the 11.3
-        standard reference frequency of 1 000 Hz by default.
+        standard reference frequency of 1 000 Hz by default.
     :param tolerance_db: Half-width of the response tolerance, in dB
         (default 2), defining the effective frequency range (12.2).
     :param directivity: Directional characteristics of Clause 13 as a

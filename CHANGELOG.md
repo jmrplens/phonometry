@@ -264,6 +264,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `**kwargs`. The committed figures are unchanged: a default only moves when
   the caller expressed an opinion, and until now such a caller got an exception.
 
+- **A long number cannot be split by a line break any more.** ISO 80000-1 groups
+  long numbers in threes and the corpus follows the standards it reads, writing
+  `6,251 5` and `101 325`. Every one of those groupings was held by an ordinary
+  space, so a line break could fall inside the number and leave half of it on
+  the next line, reading as two numbers. The 1 268 groupings in the published
+  prose now use U+202F, the narrow no-break space, and
+  `scripts/check_digit_grouping.py` keeps it that way.
+
+  The gate knows the two shapes that look like a grouping and are not, because
+  a first sweep took both for one: the printed output of an array, where the
+  space separates two values, and a value followed by its unit, where the digit
+  belongs to the unit. It also leaves figure labels alone, where text cannot
+  reflow, and every Python string that is not a docstring or a comment, because
+  a string may be a key a caller passes in.
 - The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.
 
@@ -1294,7 +1308,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   That is the sixth example of Annex A, the only column the annex works
   Clause 7 for, and every printed intermediate of it now has a conformance
-  row: 460 m/s at the expander inlet, 47 854 W of stream power, 42,0 W of
+  row: 460 m/s at the expander inlet, 47 854 W of stream power, 42,0 W of
   sound, a peak at 920 Hz where the trim peaks at 7,9 kHz, and 151 dB inside
   the pipe. With them the column closes at the 94 dB(A) the annex prints,
   where the trim alone gives 93.
@@ -1362,7 +1376,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the seat count, two microphone positions per doubling, so
   `minimum_receiver_positions` can answer for a hall between them. It will
   not answer past them: A.4 asks for "a minimum of between 6 and 10", and a
-  5 000-seat arena does not get thirteen positions on the strength of three
+  5 000-seat arena does not get thirteen positions on the strength of three
   rows.
 
   Clause 9 is the one normative part of all this. Its 9.1 prints two routes
@@ -1370,7 +1384,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   fiche was taking neither for a one-third-octave analysis: it averaged the
   two one-third-octave bands called 500 Hz and 1 kHz, which is a sixth of the
   band the octave route covers. It now takes the printed route, the six bands
-  from 400 Hz to 1 250 Hz, and says so on the sheet. Its 9.2 lists fifteen
+  from 400 Hz to 1 250 Hz, and says so on the sheet. Its 9.2 lists fifteen
   things a test report shall carry, and `TEST_REPORT_ITEMS` carries them in
   order.
 
@@ -2221,7 +2235,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   *Principles of Sonar Performance Modelling* (Springer 2010), Equation (4.6)
   on printed folio 127, which that book attributes to Pierce (1989, p. 34). Three conformance
   rows pin it: the 1027 kg/m3 the book gives for the standard ocean, the
-  atmosphere its Equation (4.11) puts at the surface, and the 0,043 855 kg/m3
+  atmosphere its Equation (4.11) puts at the surface, and the 0,043 855 kg/m3
   the pressure term is worth.
 
   The four sound-speed equations move here with it, because a medium's own
@@ -2298,7 +2312,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   one standard atmosphere puts the density about 13 % high, while the whole
   span of humidity is worth about 1 % of it. Supplying both is silent, which is the
   property a caller who measured their air should get. The carbon dioxide mole
-  fraction defaults without warning, because 0,000 4 is a value Clause F.2
+  fraction defaults without warning, because 0,000 4 is a value Clause F.2
   names for laboratory conditions rather than a guess about the caller's air.
 
   Nothing is refused but what cannot exist. Annex F states 15 °C to 27 °C,
@@ -2421,7 +2435,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   of its own paragraph reconciles the two.
 
   Two things the standard leaves the reader to work out are said at the point
-  of use rather than left in a table. Asking for the 5 000 Hz band of the
+  of use rather than left in a table. Asking for the 5 000 Hz band of the
   table that serves 0,8 m to 1,25 m warns that its $a_3$ is the one
   coefficient of Annex A that is read rather than transcribed, since it moves
   the correction by 0,64 dB per unit of the missing digit at 40 m/s. And a
@@ -2641,9 +2655,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - A temperature at or below absolute zero is refused rather than computed
   with.
-  `sea_water_sound_speed(-273.15, 35.0, 0.0)` returned -31 457 m/s, a negative
+  `sea_water_sound_speed(-273.15, 35.0, 0.0)` returned -31 457 m/s, a negative
   speed of sound; `sound_speed_profile` checked only that its temperatures were
-  finite, so -300 degC went straight through to [-44 562, -45 333] m/s; and
+  finite, so -300 degC went straight through to [-44 562, -45 333] m/s; and
   `seawater_absorption(1e3, temperature=-300.0)` returned 0,495 dB/km, which is
   the dangerous one, because nothing about that number says where it came from
   next to the 0,0185 dB/km of real cold water.
@@ -2916,7 +2930,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   published with is `PUBLISHED_AIR`, and the keyword is `fluid=` rather than
   `air=`. Nothing about the numbers changed: `PUBLISHED_AIR` carries the same
   343,0 m/s, 1,205 kg/m3, 1,84 x 10^-5 Pa s, Pr = 0,71, gamma = 1,4 and
-  101 325 Pa those models always defaulted to.
+  101 325 Pa those models always defaulted to.
 
   What changes is what a caller can pass instead. `AirProperties` held six
   numbers and no account of where they came from, so an air measured at 30 degC
@@ -2938,7 +2952,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   unit and a different datum under one word.
 
   No guard can separate those two, which is why the fix is the name. A fan
-  pressure of 101 325 Pa is a legitimate duty for a panel or propeller fan, so
+  pressure of 101 325 Pa is a legitimate duty for a panel or propeller fan, so
   no plausibility band exists that would refuse the ambient value without also
   refusing a real operating point.
 
@@ -2959,7 +2973,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Two errata registered against Ainslie (2010). Its folio 177 quotes
   1024,2 kg/m3 for sea water at 23 degC, salinity 35 and atmospheric pressure,
   where its own Equation (4.6) read with its own Equation (4.4) gives
-  1024,287 9, which prints as 1024,3; the printed value is what the equation
+  1024,287 9, which prints as 1024,3; the printed value is what the equation
   gives with the pressure term at zero, against the definition the same chapter
   states. And its Equation (4.13), which rearranges (4.6), prints the pressure
   coefficient as 4,3e-5 where (4.6) has 4,3e-7, two orders of magnitude and
@@ -3028,7 +3042,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   nowhere before. And the boundary-layer assertion says what it means: b is
   printed to three significant figures, so reproducing it means rounding to it,
   which is what the test now asserts rather than a tolerance that reads like
-  spare room. There is none: the true 1,834 8 mm sits near the upper edge of
+  spare room. There is none: the true 1,834 8 mm sits near the upper edge of
   that rounding band, and did so before this change too.
 
 - The five air-property helpers of `materials` take degrees Celsius, spell the
@@ -3074,7 +3088,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   that glibc ships, in numpy operations IEEE 754 pins exactly: plain
   arithmetic, integer bit work and table takes, with the routine's fused
   multiply-adds emulated through error-free transformations. Verified bit for
-  bit against glibc's `log` over the 91 658 333 distinct values the whole
+  bit against glibc's `log` over the 91 658 333 distinct values the whole
   design corpus evaluates, zero mismatches, and the corpus of designs is
   byte-identical before and after: no shipped coefficient, figure or
   conformance value moved. Beyond the corpus the agreement with glibc is
@@ -3144,8 +3158,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
   `high_accuracy=False` keeps its old meaning: the plain bilinear transform of
   the printed prototype, the closed form a reader can check against the
-  standard term by term. It verifies to class 1 for fs >= 44 100 Hz, degrades
-  to class 2 at 32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
+  standard term by term. It verifies to class 1 for fs >= 44 100 Hz, degrades
+  to class 2 at 32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
 
   What is shipped is the routine, not a table of coefficients: nothing between
   the standard's constants and the sections a caller runs is stored, and a test
@@ -4159,7 +4173,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `a_weighted_maximum_impact_level` is the normative single number of
   ISO 717-2 Annex D, an A-weighted energy sum rather than a shifted reference
   curve, and reproduces the Table D.4 worked example to every printed digit
-  including its deliberately unrounded 55,350 66... intermediate. The
+  including its deliberately unrounded 55,350 66... intermediate. The
   rubber-ball spectrum is pinned against three independent printings
   (ISO 16283-2 Table A.1, ISO 10140-5 Table F.1, JIS A 1418-2 Table A.2) and
   the bang machine against JIS A 1418-2 Table A.1; the standardization is
@@ -4240,8 +4254,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   worked example anywhere in 2.3, so the equations are pinned end to end on the
   emission test workbook the European Commission published with its reference
   source module: fed the 2015 coefficient database that workbook was computed
-  with, the shipped model reproduces all 34 560 published rows of the twenty
-  vehicles whose catalogue entries are well formed, 17 280 cases at both source
+  with, the shipped model reproduces all 34 560 published rows of the twenty
+  vehicles whose catalogue entries are well formed, 17 280 cases at both source
   heights, to 0,0055 dB, and 123 of those cases are committed and run in CI.
 - Poroelastic (Biot) layers in the multilayer absorber solver
   (`materials/biot.py`, Allard & Atalla 2e chapters 6 and 11). Every porous
@@ -4325,7 +4339,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is how Appendix F is meant to be used: as a database a Member State may
   substitute.
 
-  Anchored on the European Commission's own test set: 60 of the 4 875 cases of
+  Anchored on the European Commission's own test set: 60 of the 4 875 cases of
   the CIRCABC road emission workbook are committed under `tests/data/cnossos/`
   with the 2015 coefficient tables they were computed with, and the shipped
   equations reproduce every published band level to 0,005 dB, inside the two
@@ -4377,7 +4391,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and `lining_improvement_in_situ` for the laboratory-to-field transfer.
   Anchored on the 21 printed per-band values of ISO 12354-2:2017 Table G.4 and
   its `DeltaLw = 32,2 dB`, reproduced to the table's printed precision of
-  0,1 dB, on Hopkins's printed cut-off frequencies (7 000, 2 300 and 100 Hz),
+  0,1 dB, on Hopkins's printed cut-off frequencies (7 000, 2 300 and 100 Hz),
   on the over/under-critical classification of his four walking surfaces, on
   the double-floating-floor resonances of his Fig. 4.73 (74 Hz and 195 Hz) and
   the lining resonances of his Fig. 4.48 (104, 123, 247 and 542 Hz), and on
@@ -4393,11 +4407,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Performance" in English and Spanish.
 
 - Two entries in `docs/ERRATA.md`, and a standing rule at the top of that file.
-  ISO 12354-1:2017 Table D.1 covers 1 600 Hz with two rows carrying different
-  values, "630 to 1 600 -> -10" and "1 600 <= f0 <= 5 000 -> -5"; the
-  predecessor EN 12354-1:2000 Table D.3 printed the second as "> 1 600"
+  ISO 12354-1:2017 Table D.1 covers 1 600 Hz with two rows carrying different
+  values, "630 to 1 600 -> -10" and "1 600 <= f0 <= 5 000 -> -5"; the
+  predecessor EN 12354-1:2000 Table D.3 printed the second as "> 1 600"
   strictly, so the 2017 rewrite is what created the overlap, and the library
-  keeps the 2000 reading of -10 dB at exactly 1 600 Hz. Vigran, *Building
+  keeps the 2000 reading of -10 dB at exactly 1 600 Hz. Vigran, *Building
   Acoustics* (2008), gives the carpet-squares stiffness in the caption of
   Fig. 8.37 as 3.2e6 N/m where the body text on p. 321 says it is the same as
   Fig. 8.36's, printed as 3.2e5 N/m, the only value that reproduces the
@@ -8036,7 +8050,7 @@ the whole of the migration.
   decimals to a comma; the English output is unchanged. An unsupported code
   raises a clear `ValueError`.
 - The frequency/band axes, the shifted-reference rating figure, the
-  band-level bar chart, the façade x-axis, the ISO 717-2 500 Hz annotation
+  band-level bar chart, the façade x-axis, the ISO 717-2 500 Hz annotation
   and the time axis shared by every domain's `.plot()` renderers now
   localise their own axis labels and legend entries for `language="es"`
   ("Frequency [Hz]" to "Frecuencia [Hz]", "Measured" to "Medido", "Band" to
@@ -8652,7 +8666,7 @@ the whole of the migration.
   clause 11.8/12.8 aural examination and clause 8/9 hearing-threshold screen
   are the caller's responsibility).
 - `docs/ERRATA.md` entries for the review findings: the ECMA-418-1 clause
-  4.1.2 "11 220 Hz" range misprint, the internally inconsistent
+  4.1.2 "11 220 Hz" range misprint, the internally inconsistent
   ECMA-418-2 clause 5.1.5.2 last-block formula, the ISO/PAS 20065 clause
   5.3.4 edge-steepness print that contradicts the executable DIN 45681
   Annex J program, and the Osses 2016 Eq. (3) Bark-constant exponent typo.
@@ -8990,7 +9004,7 @@ the whole of the migration.
   per flight-path segment instead of a per-point Python loop; numerically
   identical (guarded by the golden baseline and a scalar-equivalence test)
   and ~45x faster on small grids, several hundred times on production-size
-  grids (30 000 points in ~0.2 s).
+  grids (30 000 points in ~0.2 s).
 - The test suite now runs in parallel: `make test`, `make coverage` and the CI
   test job invoke `pytest -n auto` (pytest-xdist, added to the dev
   requirements) so the 3241 tests fan out across every CPU core. Each worker

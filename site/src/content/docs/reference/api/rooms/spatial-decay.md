@@ -51,7 +51,7 @@ at one conventional distance by Equation (8).
 
 **The 0,3 of Equation (5).** The slope of a least-squares fit of $D$
 against $\lg r$ is a rate per decade; a doubling is $\lg 2$ of a
-decade, which is 0,301 03. The clause prints 0,3, and that is what
+decade, which is 0,301 03. The clause prints 0,3, and that is what
 [`DECADE_TO_DOUBLING`](/phonometry/reference/api/rooms/spatial-decay/#decade_to_doubling) carries, because the printed constant is what
 reproduces the printed results. Equation (8) prints $\lg 2$ in full a page
 later, so the two are not the same number in the same document; the difference
@@ -66,7 +66,7 @@ yet what will be installed in it.
 A-weighting curve over the six octaves, 6,23 dB, printed to one decimal, and it
 is there so that a flat curve comes back unchanged. Table 1 prints the same
 curve to one decimal weight by weight, and the six printed weights sum to
-6,251 5 dB, so the printed equation returns a flat curve 0,05 dB high.
+6,251 5 dB, so the printed equation returns a flat curve 0,05 dB high.
 [`NORMALIZED_OFFSET_DB`](/phonometry/reference/api/rooms/spatial-decay/#normalized_offset_db) carries the printed 6,2 on the same rule as the
 0,3 above: four printings print it and a reader checking against the page will
 use it. Annex C was normalised exactly: its normalized column and its
@@ -412,7 +412,7 @@ industrial machine: the spectra met in practice are too varied for any
 average to mean anything.
 
 The 6,2 dB is the energy sum of the A-weighting curve printed to one
-decimal, and the six printed weights of Table 1 sum to 6,251 5 dB, so the
+decimal, and the six printed weights of Table 1 sum to 6,251 5 dB, so the
 printed equation returns a flat curve 0,05 dB high. It is used as printed:
 the result is what a hand evaluation of the printed equation gives, which
 is 0,05 dB above Annex C, normalised exactly (see the errata registry). For

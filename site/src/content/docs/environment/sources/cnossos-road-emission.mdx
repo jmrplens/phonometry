@@ -141,10 +141,10 @@ plt.show()
 
 </details>
 
-**What a road source is worth.** This urban arterial (1 200 light, 90 medium
+**What a road source is worth.** This urban arterial (1 200 light, 90 medium
 heavy, 45 heavy vehicles and 60 motorcycles per hour at 50 km/h) comes out at
 **84,2 dB(A) per metre of line**; the free-flowing motorway link of section 6
-(1 000 light and 120 heavy vehicles per hour at 90 and 80 km/h) reaches
+(1 000 light and 120 heavy vehicles per hour at 90 and 80 km/h) reaches
 **88,6 dB(A) per metre**. Those are the two magnitudes to check your own result
 against. The arithmetic behind them is worth holding on to: doubling the flow
 adds exactly 3 dB, while halving the speed adds 3 dB to the flow term
@@ -390,7 +390,7 @@ both (2.2.2) and (2.2.3), that for speeds under 20 km/h the sound power takes it
 20 km/h value: the tabulated regressions were fitted to free-flowing traffic and
 are not extrapolated into a queue. The flow term keeps the *true* speed, so the
 two halves of (2.2.1) pull in opposite directions and the line power has a
-minimum. For 1 000 light vehicles per hour on the reference surface,
+minimum. For 1 000 light vehicles per hour on the reference surface,
 `road_source_power` returns 81,5 dB(A) per metre at 50 km/h, **76,2 at 20 km/h**,
 79,2 at 10 km/h and 82,2 at 5 km/h; the same road gets *louder* per metre as the
 stream slows below the floor, purely because more vehicles are on each metre of
@@ -577,7 +577,7 @@ with: reaching for a category it does not carry raises `ValueError` rather than
 failing later.
 
 That mechanism is also what pins the implementation: the European Commission
-published a test set of 4 875 road emission cases computed with the 2015
+published a test set of 4 875 road emission cases computed with the 2015
 coefficients, and feeding the shipped equations that superseded database (not
 the 2021 tables the library ships by default) reproduces every published band
 level to 0,005 dB, inside the two decimals the test set prints.

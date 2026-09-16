@@ -35,7 +35,7 @@ funciones de Doc 29: cómo abrirla, qué contiene el registro de una aeronave, y
 cómo pasar de un identificador a un nivel de evento o un contorno sin escribir
 tú ninguna tabla.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records.svg" alt="Tres franjas. Arriba, una aeronave en las tablas ANP. Un recuadro discontinuo de la tabla de sustituciones que mantiene la web de ANP indica que el A320neo, que la base no tiene, se modela con el A320-211 restando 6,7 dB a los niveles NPD de despegue del A320-211 o contando cada despegue del A320neo como 0,21 de uno, y apunta al registro de Aircraft.csv del A320-211: un reactor bimotor de clase de peso grande, NPD_ID CFM565, con el empuje neto corregido en libras como parámetro de potencia, motores montados en el ala. Desde NPD_ID una flecha lleva a la tabla NPD, dibujada como una malla de cuatro reglajes de potencia de 12 000 a 22 500 lb por diez distancias oblicuas, con las cuatro celdas de 19 000 y 22 500 lb a 2 000 y 4 000 ft recuadradas y rellenas con sus niveles. Desde el identificador de la aeronave otra flecha lleva a las tablas de trayectoria: una tabla discontinua de perfiles de punto fijo sin filas para esta aeronave, o los pasos de procedimiento de despegue del perfil DEFAULT en la etapa 1, con el peso por defecto y los coeficientes de motor y aerodinámicos. En medio, a la izquierda, el tercero de los diez segmentos del perfil en su plano con un receptor O: el segmento mide 1 236 m, el pie de la perpendicular cae a 676 m de su inicio y O está a 612 m de él. En medio, a la derecha, los primeros 5 km del despegue volado a nivel del mar, con la carrera de despegue, el segmento que sube de 305 m a 392 m, el cambio de empuje de despegue a empuje de ascenso y el receptor a 3 000 m a lo largo de la traza y 500 m a un costado. Abajo, tres recuadros encadenan la consulta NPD de 89,3 dB, las correcciones del segmento que la dejan en 88,0 dB y la suma energética de los diez segmentos del perfil, 89,0 dB en O, sobre las ecuaciones del nivel de segmento y del nivel de evento" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_anp_records.svg" alt="Tres franjas. Arriba, una aeronave en las tablas ANP. Un recuadro discontinuo de la tabla de sustituciones que mantiene la web de ANP indica que el A320neo, que la base no tiene, se modela con el A320-211 restando 6,7 dB a los niveles NPD de despegue del A320-211 o contando cada despegue del A320neo como 0,21 de uno, y apunta al registro de Aircraft.csv del A320-211: un reactor bimotor de clase de peso grande, NPD_ID CFM565, con el empuje neto corregido en libras como parámetro de potencia, motores montados en el ala. Desde NPD_ID una flecha lleva a la tabla NPD, dibujada como una malla de cuatro reglajes de potencia de 12 000 a 22 500 lb por diez distancias oblicuas, con las cuatro celdas de 19 000 y 22 500 lb a 2 000 y 4 000 ft recuadradas y rellenas con sus niveles. Desde el identificador de la aeronave otra flecha lleva a las tablas de trayectoria: una tabla discontinua de perfiles de punto fijo sin filas para esta aeronave, o los pasos de procedimiento de despegue del perfil DEFAULT en la etapa 1, con el peso por defecto y los coeficientes de motor y aerodinámicos. En medio, a la izquierda, el tercero de los diez segmentos del perfil en su plano con un receptor O: el segmento mide 1 236 m, el pie de la perpendicular cae a 676 m de su inicio y O está a 612 m de él. En medio, a la derecha, los primeros 5 km del despegue volado a nivel del mar, con la carrera de despegue, el segmento que sube de 305 m a 392 m, el cambio de empuje de despegue a empuje de ascenso y el receptor a 3 000 m a lo largo de la traza y 500 m a un costado. Abajo, tres recuadros encadenan la consulta NPD de 89,3 dB, las correcciones del segmento que la dejan en 88,0 dB y la suma energética de los diez segmentos del perfil, 89,0 dB en O, sobre las ecuaciones del nivel de segmento y del nivel de evento" width="100%" />
 
 *Una aeronave, de su registro a un solo número. Un tipo que la base no tiene
 entra por arriba, con un sustituto que recomienda la web de ANP y un ajuste que
@@ -43,7 +43,7 @@ aplicas tú. El A320-211 no trae ningún despegue de punto fijo, así que sus pa
 publicados se vuelan en un aeródromo a nivel del mar; el tercero de los diez
 segmentos del perfil que resultan pasa a 612 m de un receptor situado 3 km traza
 abajo y 500 m a un costado, lee las cuatro celdas de la tabla NPD que rodean
-20 159 lb y 612 m, y con 88,0 dB aporta cerca de cuatro quintos de la energía
+20 159 lb y 612 m, y con 88,0 dB aporta cerca de cuatro quintos de la energía
 sonora del suceso de 89,0 dB.*
 
 ## 1. Abrir la base de datos
@@ -235,12 +235,12 @@ La **longitud de etapa** selecciona el tramo de distancia de viaje: una etapa m�
 larga significa más combustible, más peso y una subida más tendida, así que la
 misma aeronave tiene un perfil por tramo. El Apéndice G3.5 del Vol. 2 de la
 Doc 29 define los tramos por longitud de viaje en millas náuticas: el 1 es 0-500,
-el 2 es 500-1 000, el 3 es 1 000-1 500, el 4 es 1 500-2 500, el 5 es 2 500-3 500,
-el 6 es 3 500-4 500, el 7 es 4 500-5 500, y así en pasos de 1 000 nmi hasta el 10
-(7 500-8 500), con el 11 para cualquier cosa más larga y «M» para el alcance
+el 2 es 500-1 000, el 3 es 1 000-1 500, el 4 es 1 500-2 500, el 5 es 2 500-3 500,
+el 6 es 3 500-4 500, el 7 es 4 500-5 500, y así en pasos de 1 000 nmi hasta el 10
+(7 500-8 500), con el 11 para cualquier cosa más larga y «M» para el alcance
 máximo con la masa máxima de despegue. El peso de despegue de cada perfil se
 calcula al alcance representativo del tramo, definido como el mínimo más el 70 %
-de la horquilla, así que el tramo 1 se pesa a 350 nmi y el tramo 4 a 2 200 nmi.
+de la horquilla, así que el tramo 1 se pesa a 350 nmi y el tramo 4 a 2 200 nmi.
 No todas las aeronaves vuelan todos los tramos, y los perfiles de punto fijo que
 se distribuyen cubren las etapas 1 a 7 para despegues y solo la 1 para llegadas.
 
@@ -279,7 +279,7 @@ dicen lo que hace el avión, no adónde va: sube a este régimen hasta tal altit
 acelera hasta tal velocidad, cambia a empuje de ascenso. Dónde lo dejan esas
 instrucciones sobre el terreno depende del campo, porque los mismos pasos
 volados desde una pista caliente y muy sobre el nivel del mar alcanzan los
-10 000 ft mucho más lejos que desde una fría junto a la costa. No hay nada que
+10 000 ft mucho más lejos que desde una fría junto a la costa. No hay nada que
 tabular, y por eso la base distribuye los pasos y no los puntos.
 
 `flight_profile` los vuela, con el modelo de actuaciones de vuelo del [Apéndice B
@@ -301,12 +301,12 @@ print(len(flown.points), round(flown.distance_ft[-1]), flown.altitude_ft[-1])
 flown.plot(language="es")
 ```
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Perfil de despegue de un Airbus A320-211 sintetizado a partir de sus pasos de procedimiento publicados: la altura sube hasta 10 000 ft frente a la distancia sobre la ruta, con el empuje neto corregido en un segundo eje cayendo durante la carrera de despegue y escalonándose en el cambio a empuje de ascenso" width="82%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anp_procedural_profile.svg" alt="Perfil de despegue de un Airbus A320-211 sintetizado a partir de sus pasos de procedimiento publicados: la altura sube hasta 10 000 ft frente a la distancia sobre la ruta, con el empuje neto corregido en un segundo eje cayendo durante la carrera de despegue y escalonándose en el cambio a empuje de ascenso" width="82%" />
 
 *El A320-211 no distribuye ningún perfil de despegue de punto fijo, así que esta
 es la única forma de volarlo. La banda sombreada es la carrera de despegue; la
 línea de puntos marca dónde el procedimiento pasa de empuje de despegue a empuje
-de ascenso, una caída de 3 047 lb por motor que la curva de altura apenas acusa.
+de ascenso, una caída de 3 047 lb por motor que la curva de altura apenas acusa.
 Eso es lo que da calcular el empuje frente a leer una trayectoria: nada en la
 forma del ascenso dice que se redujeron los motores, y el ruido lo dice sin
 lugar a dudas.*
@@ -405,7 +405,7 @@ print(round(float(flyover.level), 1))     # 100.4 dB
 
 Ese es el nivel de exposición sonora de evento único de un despegue de 747-100 en
 un receptor a 3 km traza abajo y 500 m a un costado de ella. Aparta el receptor
-hasta 1 500 m de separación lateral y cuesta más que la distancia añadida sola,
+hasta 1 500 m de separación lateral y cuesta más que la distancia añadida sola,
 porque la atenuación lateral se enciende a medida que el ángulo de elevación cae
 por debajo de 50°.
 
@@ -436,7 +436,7 @@ Es más estrecha y mucho más alargada que el contorno didáctico de la guía de
 ruido de aeropuertos, porque un perfil de subida real pone el avión arriba
 enseguida y la parte ruidosa del suceso se queda cerca de la pista. El receptor
 marcado es la llamada a `event_level` de arriba, así que las dos mitades de esta
-sección son el mismo cálculo en un punto y en 1 200 de ellos.*
+sección son el mismo cálculo en un punto y en 1 200 de ellos.*
 
 <details>
 <summary>Ver el código de esta figura</summary>

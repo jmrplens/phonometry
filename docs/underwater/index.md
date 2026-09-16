@@ -14,7 +14,7 @@ airborne acoustics, and it is worth settling before anything else. The same
 pressure expressed re 1 µPa is **26 dB larger** than expressed re 20 µPa, which
 is arithmetic. On top of that, the same pressure in water carries far less
 intensity than in air, because sea water's characteristic impedance is some
-3 700 times that of air. An underwater 120 dB and an airborne 120 dB therefore
+3 700 times that of air. An underwater 120 dB and an airborne 120 dB therefore
 describe entirely different physical situations, and the two must never be
 compared. The rule this section follows is simple: every level carries its
 reference explicitly, a conversion between the two conventions is pure

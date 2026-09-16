@@ -264,7 +264,7 @@ el segundo mecanismo, mucho menor: quita un 0,4 % al decaimiento de 250 Hz y un
 reflexiones sencillamente no recorren distancia suficiente), y es la razón de que
 la absorción del aire sea un
 [efecto de volumen](/phonometry/es/buildings/rooms/reverberation-prediction/#1-sabine-eyring-y-millington-sette)
-más que un efecto de frecuencia: pon esas mismas paredes alrededor de 2 000 m³ y
+más que un efecto de frecuencia: pon esas mismas paredes alrededor de 2 000 m³ y
 el mismo argumento le quita decenas de por ciento a la banda más alta.*
 
 <details>
@@ -397,15 +397,15 @@ la cola sencillamente falta, y el T30 ajustado sale corto:
 
 | `max_order` | imágenes audibles | T30 ajustado | tiempo de ejecución |
 | ---: | ---: | ---: | ---: |
-| 12 | 2 624 | 0,28 s | < 0,1 s |
-| 20 (por defecto) | 11 520 | 0,43 s | < 0,1 s |
-| 30 | 37 880 | 0,60 s | < 0,1 s |
-| 40 | 88 640 | 0,75 s | 0,1 s |
-| 60 | 295 360 | 1,06 s | 0,2 s |
+| 12 | 2 624 | 0,28 s | < 0,1 s |
+| 20 (por defecto) | 11 520 | 0,43 s | < 0,1 s |
+| 30 | 37 880 | 0,60 s | < 0,1 s |
+| 40 | 88 640 | 0,75 s | 0,1 s |
+| 60 | 295 360 | 1,06 s | 0,2 s |
 
 La estimación de Eyring para esta sala es de 0,93 s, así que el orden 12 se
 queda corto por un factor de 3,3 y el 20 por defecto, por un factor de 2,1. La
-objeción del coste no vale: el orden 60 son 295 360 imágenes y se resuelve en
+objeción del coste no vale: el orden 60 son 295 360 imágenes y se resuelve en
 dos décimas de segundo.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/image_source_order_convergence.svg" alt="T30 y EDT ajustados de la sala de 7 por 5 por 3 metros frente al corte de orden de reflexión, de 8 a 60: ambos suben de forma pronunciada y casi lineal con el orden, y el T30 cruza la línea de Eyring de 0,93 segundos y su banda sombreada de más menos 10 por ciento hacia el orden 51 y sigue subiendo, mientras un segundo eje muestra el recuento de imágenes audibles creciendo de unas 800 a 295 mil" width="88%" />

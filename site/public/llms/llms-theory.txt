@@ -1769,7 +1769,7 @@ for f, pxx in zip(freq_bins[in_band], psd[in_band]):
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a six-tone signal with the raw PSD in the background" width="80%"></picture>
 
 *The two objects on one axis, for a six-tone signal at 20, 100, 500, 2000,
-4000 and 15 000 Hz. The grey trace is a Welch PSD ($f_\mathrm{s}$ = 48 kHz,
+4000 and 15 000 Hz. The grey trace is a Welch PSD ($f_\mathrm{s}$ = 48 kHz,
 `nperseg = 8192`, so a fixed 5.86 Hz bin everywhere); the markers are the
 standardized third-octave levels of the same signal. The bin width never
 changes and the band width does: 4.60 Hz at the 20 Hz band, narrower than one

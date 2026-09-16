@@ -92,6 +92,11 @@ If you are an AI assistant setting this up for a user: install from PyPI (no sys
 - [Overview](https://jmrplens.github.io/phonometry/fluids/)
 - [Humid air](https://jmrplens.github.io/phonometry/fluids/humid-air/)
 
+## Elastic solids
+
+- [Overview](https://jmrplens.github.io/phonometry/solids/)
+- [Wave speeds of a solid](https://jmrplens.github.io/phonometry/solids/wave-speeds/)
+
 ## Audio files
 
 - [Overview](https://jmrplens.github.io/phonometry/io/)
@@ -394,6 +399,7 @@ One file per area, each small enough to fetch whole. `llms-full.txt` is the comp
 - [Signals and spectra](https://jmrplens.github.io/phonometry/llms/llms-signals-spectra.txt)
 - [Calibration and uncertainty](https://jmrplens.github.io/phonometry/llms/llms-signals-metrology.txt)
 - [The medium](https://jmrplens.github.io/phonometry/llms/llms-fluids.txt)
+- [Elastic solids](https://jmrplens.github.io/phonometry/llms/llms-solids.txt)
 - [Audio files](https://jmrplens.github.io/phonometry/llms/llms-io.txt)
 - [Hearing and perception](https://jmrplens.github.io/phonometry/llms/llms-perception.txt)
 - [Psychoacoustics](https://jmrplens.github.io/phonometry/llms/llms-perception-psychoacoustics.txt)
@@ -600,6 +606,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [simulation/elastic-fdtd](https://jmrplens.github.io/phonometry/reference/api/simulation/elastic-fdtd/)
 - [simulation/fdtd](https://jmrplens.github.io/phonometry/reference/api/simulation/fdtd/)
 - [simulation/ntff](https://jmrplens.github.io/phonometry/reference/api/simulation/ntff/)
+- [solids/elastic](https://jmrplens.github.io/phonometry/reference/api/solids/elastic/)
 - [speech/objective-intelligibility](https://jmrplens.github.io/phonometry/reference/api/speech/objective-intelligibility/)
 - [speech/sii](https://jmrplens.github.io/phonometry/reference/api/speech/sii/)
 - [speech/sti](https://jmrplens.github.io/phonometry/reference/api/speech/sti/)

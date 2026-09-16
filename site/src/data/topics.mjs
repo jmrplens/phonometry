@@ -136,6 +136,16 @@ export const topics = [
     ],
   },
   {
+    id: 'solids',
+    label: { en: 'Elastic solids', es: 'Sólidos elásticos' },
+    link: '/solids/',
+    items: [
+      { slug: 'solids', label: 'Overview', translations: { es: 'Resumen' } },
+      'solids/wave-speeds',
+      apiGroup('solids'),
+    ],
+  },
+  {
     id: 'io',
     label: { en: 'Audio files', es: 'Archivos de audio' },
     link: '/io/',

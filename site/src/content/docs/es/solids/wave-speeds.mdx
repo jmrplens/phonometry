@@ -1,0 +1,140 @@
+---
+title: "Velocidades de onda de un sólido"
+description: "Viga, placa y sólido extenso: las tres velocidades longitudinales que lleva un sólido, cuál de ellas está en una tabla impresa, la inversa que devuelve el módulo de Young, y la columna que permite que dos libros se comprueben entre sí."
+---
+
+import Scope from '../../../../components/Scope.astro';
+import ScopeClaim from '../../../../components/ScopeClaim.astro';
+
+<Scope>
+<ScopeClaim status="covered" label="Cubierto">
+Las tres velocidades longitudinales de un sólido homogéneo e isótropo, cada una
+con la inversa que devuelve el módulo de Young, y el producto de espesor por
+frecuencia crítica que imprimen las tablas de materiales.
+</ScopeClaim>
+
+<ScopeClaim status="not-covered" label="No cubierto">
+Ondas de flexión y de cizalla, placas anisótropas, y cualquier dependencia de
+la temperatura o de la edad del espécimen.
+</ScopeClaim>
+</Scope>
+
+## El problema que resuelve
+
+Tienes una tabla. Te da una velocidad de onda de 5 270 m/s para el acero, una
+densidad y un coeficiente de Poisson, y ningún módulo de Young. Tu función
+quiere el módulo. Otra tabla te da 200 GPa y ninguna velocidad, y la función que
+alimentas después quiere la velocidad. Una tercera te da 12,3 m Hz y ninguno de
+los dos.
+
+Las tres describen el mismo acero. Pasar de una a otra cuesta una línea de
+álgebra, que es una línea de álgebra de más para hacerla de memoria, porque la
+respuesta depende de algo que la tabla muchas veces no dice: si su velocidad es
+la de una viga, la de una placa o la de un sólido extenso.
+
+## Las tres velocidades
+
+```python
+from phonometry import solids
+
+modulus, density, poisson = 2.0e11, 7800.0, 0.28
+
+beam = solids.beam_longitudinal_speed(modulus, density_kg_m3=density)
+plate = solids.plate_longitudinal_speed(
+    modulus, density_kg_m3=density, poisson_ratio=poisson
+)
+bulk = solids.bulk_longitudinal_speed(
+    modulus, density_kg_m3=density, poisson_ratio=poisson
+)
+
+print(f"{beam:.0f} {plate:.0f} {bulk:.0f}")  # 5064 5275 5725
+```
+
+El orden es siempre el mismo, y es el de cuánto está sujeto el material: una
+viga puede contraerse de lado libremente, una placa está sujeta a lo ancho, y
+un sólido extenso está sujeto por todos lados.
+
+$$
+c_{\mathrm{L,b}} = \sqrt{\frac{E}{\rho}}
+\qquad
+c_{\mathrm{L,p}} = \sqrt{\frac{E}{\rho\,(1-\nu^2)}}
+\qquad
+c'_{\mathrm{L}} = \sqrt{\frac{E\,(1-\nu)}{\rho\,(1+\nu)(1-2\nu)}}
+$$
+
+Las dos primeras son las Ecs. (2.20) y (2.21) de Hopkins, la tercera es la Ec.
+(1.225) de Norton y Karczub. Con $\nu = 0$ las tres colapsan en una, que es la
+forma más rápida de recordar que lo único que las separa es cómo se paga la
+deformación lateral.
+
+## Cuál está en tu tabla
+
+La acústica de la edificación imprime la de **placa**. La Tabla B.3 de
+EN 12354-1, la Tabla A2 de Hopkins y la Tabla 3 de Mechel la tabulan todas, y
+Hopkins lo dice en una nota al pie: los valores sirven de estimación para vigas
+o placas, que es a la vez admitir que las dos difieren y afirmar que para esos
+materiales la diferencia cae dentro de la dispersión de la tabla.
+
+Un solucionador elástico en el dominio del tiempo integra la de **sólido
+extenso**, porque el material que discretiza no tiene bordes a escala de una
+celda. Meter una tabla de placa en un solucionador es una trampa documentada:
+para el acero la diferencia es del once por ciento, para el aluminio del quince.
+
+Una velocidad de **viga** aparece donde de verdad se midió una barra, que es de
+donde una tabla de velocidades del sonido de un texto general suele sacar sus
+sólidos.
+
+## Volver al módulo
+
+Cada velocidad tiene su inversa, y son las que permiten comparar dos libros:
+
+```python
+from phonometry import solids
+
+# Tabla A2 de Hopkins, acero: velocidad de placa, densidad y Poisson.
+modulus = solids.youngs_modulus_from_plate_speed(
+    5270.0, density_kg_m3=7800.0, poisson_ratio=0.28
+)
+print(f"{modulus / 1e9:.0f} GPa")  # 200 GPa
+```
+
+Doscientos gigapascales, que es lo que tiene un acero estructural, y el número
+que imprimen Cremer y Mechel en la columna que Hopkins deja fuera.
+
+## La columna que comprueba la tabla
+
+Hopkins, Long y Mechel imprimen los tres el producto del espesor por la
+frecuencia crítica. Es una propiedad del material a secas, porque el espesor se
+cancela, y por eso es la comprobación cruzada más barata que hay entre libros
+que no comparten ninguna otra columna:
+
+```python
+from phonometry import solids
+
+print(f"{solids.thickness_critical_frequency_product(5270.0):.2f}")  # 12.31
+```
+
+La Tabla A2 de Hopkins imprime 12,3 m Hz para ese acero y dice en su cabecera
+que la columna supone $c_0 = 343$ m/s.
+
+$$
+h f_\mathrm{c} = \frac{c_0^2 \sqrt{12}}{2 \pi\, c_{\mathrm{L,p}}}
+$$
+
+La constante importa. ISO 12354-1 escribe la frecuencia crítica con un 1,8
+redondeado en el denominador, que es $2\pi/\sqrt{12} = 1{,}8138$ con dos cifras.
+La forma redondeada es la aritmética de la norma y
+`phonometry.building.critical_frequency` la conserva, porque una medida que
+dice seguir la norma tiene que hacerlo. Aquí la constante exacta es la buena:
+reproduce las veinticinco filas de la Tabla A2, y la redondeada falla la fila
+del acero por un 0,8 por ciento.
+
+## Qué rechazan las funciones
+
+Un coeficiente de Poisson de 0,5 describe un material incompresible, y un
+material incompresible no tiene onda longitudinal pura que pueda tener
+velocidad, así que `bulk_longitudinal_speed` lanza en lugar de dividir por
+cero. La forma de placa es más laxa, porque sólo necesita que $1-\nu^2$ siga
+siendo positivo, pero rechaza un coeficiente de 1 por la misma razón. Los dos
+mensajes nombran el coeficiente que recibieron y el término que se habría
+anulado.

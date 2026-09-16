@@ -105,6 +105,14 @@ _SECTION_LIST: tuple[Section, ...] = (
         ),
     ),
     Section(
+        key="solids",
+        label_en="Elastic solids",
+        label_es="Sólidos elásticos",
+        # Everything the package publishes is defined in ``elastic``; the
+        # ``__init__`` only re-exports, so it holds no public name of its own.
+        modules=("phonometry.solids.elastic",),
+    ),
+    Section(
         key="io",
         label_en="Audio files",
         label_es="Archivos de audio",
@@ -402,6 +410,7 @@ _SECTION_SUBPACKAGES: dict[str, tuple[str, ...]] = {
     # ``phonometry.io`` is documented as the package itself (two dotted
     # parts), which the parent derivation reports as the top level.
     "fluids": ("", "fluids"),
+    "solids": ("solids",),
     "io": ("",),
     "signals": ("signals",),
     "psychoacoustics": ("psychoacoustics",),
@@ -449,6 +458,10 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "DEFAULT_CO2_MOLE_FRACTION": "phonometry.fluids.air",
     "DEFAULT_RELATIVE_HUMIDITY_PERCENT": "phonometry.fluids.air",
     "DEFAULT_STATIC_PRESSURE_PA": "phonometry.fluids.air",
+    # The speed of sound the critical-frequency columns are printed for is
+    # owned by the module that uses it and re-exported by the package, the
+    # same shape as the three above.
+    "DEFAULT_SPEED_OF_SOUND_M_S": "phonometry.solids.elastic",
     # The band ranges, the leak ratio and the seal ratio are printed in the
     # same words by ISO 11546 and ISO 11957, so they are defined once and
     # re-exported by both modules, and a plain scan sees them twice. The

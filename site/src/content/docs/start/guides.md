@@ -1,6 +1,6 @@
 ---
 title: "Guides"
-description: "The 137 guides of phonometry, grouped into the twelve topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
+description: "The 138 guides of phonometry, grouped into the thirteen topics the library covers: what each area is for, the standards implemented in it, and a one-line summary of every guide inside it."
 head:
   - tag: script
     attrs:
@@ -11,9 +11,9 @@ head:
         "@type": "ItemList",
         "@id": "https://jmrplens.github.io/phonometry/start/guides/#areas",
         "name": "phonometry documentation areas",
-        "description": "The twelve documented areas of the phonometry guides, each with the standards it implements.",
+        "description": "The thirteen documented areas of the phonometry guides, each with the standards it implements.",
         "inLanguage": "en",
-        "numberOfItems": 12,
+        "numberOfItems": 13,
         "itemListOrder": "https://schema.org/ItemListUnordered",
         "itemListElement": [
           {
@@ -33,69 +33,76 @@ head:
           {
             "@type": "ListItem",
             "position": 3,
+            "name": "Elastic solids",
+            "description": "The elastic constants of a solid and the three longitudinal wave speeds that follow from them, each named after the shape it belongs to.",
+            "url": "https://jmrplens.github.io/phonometry/solids/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
             "name": "Audio files",
             "description": "Measurement audio in and out: calibrated reading, provenance, streaming, BWF writing and lossless conversion.",
             "url": "https://jmrplens.github.io/phonometry/io/"
           },
           {
             "@type": "ListItem",
-            "position": 4,
+            "position": 5,
             "name": "Hearing and perception",
             "description": "Loudness, sound quality, speech intelligibility, hearing and exposure.",
             "url": "https://jmrplens.github.io/phonometry/perception/"
           },
           {
             "@type": "ListItem",
-            "position": 5,
+            "position": 6,
             "name": "Rooms and buildings",
             "description": "Room parameters, background noise, field and laboratory insulation, prediction.",
             "url": "https://jmrplens.github.io/phonometry/buildings/"
           },
           {
             "@type": "ListItem",
-            "position": 6,
+            "position": 7,
             "name": "Materials and surfaces",
             "description": "Absorption, airflow resistance, impedance tube, porous and metamaterial models, diffusers, scattering.",
             "url": "https://jmrplens.github.io/phonometry/materials/"
           },
           {
             "@type": "ListItem",
-            "position": 7,
+            "position": 8,
             "name": "Vibration and structure-borne sound",
             "description": "Mobility and FRFs, isolators, radiated power, junctions, human vibration.",
             "url": "https://jmrplens.github.io/phonometry/vibration/"
           },
           {
             "@type": "ListItem",
-            "position": 8,
+            "position": 9,
             "name": "Environment and transport",
             "description": "Outdoor propagation, barriers, refraction, road, rail and wind-turbine sources, and the assessment built on them.",
             "url": "https://jmrplens.github.io/phonometry/environment/"
           },
           {
             "@type": "ListItem",
-            "position": 9,
+            "position": 10,
             "name": "Aircraft noise",
             "description": "Certification levels, airport contours and the rotorcraft hemisphere method.",
             "url": "https://jmrplens.github.io/phonometry/aircraft/"
           },
           {
             "@type": "ListItem",
-            "position": 10,
+            "position": 11,
             "name": "Underwater acoustics",
             "description": "Levels re 1 microPa, ship radiated noise, pile driving, ambient noise, propagation loss.",
             "url": "https://jmrplens.github.io/phonometry/underwater/"
           },
           {
             "@type": "ListItem",
-            "position": 11,
+            "position": 12,
             "name": "Sources and devices",
             "description": "Sound power, intensity, emission declarations, electroacoustics, programme loudness.",
             "url": "https://jmrplens.github.io/phonometry/devices/"
           },
           {
             "@type": "ListItem",
-            "position": 12,
+            "position": 13,
             "name": "Wave simulation",
             "description": "Deterministic 2D FDTD solvers, acoustic and elastic P-SV, validated against analytic oracles rather than a standard.",
             "url": "https://jmrplens.github.io/phonometry/simulation/"
@@ -110,7 +117,7 @@ makes, then runnable code and the figure it draws. Nothing here is a survey of
 the field; each page is the working documentation of a module, written so that
 a result can be defended clause by clause rather than trusted.
 
-This page is the map. A hundred and thirty-seven guides sit in twelve topics, and each topic has its
+This page is the map. A hundred and thirty-eight guides sit in thirteen topics, and each topic has its
 own overview page with the longer story of how its pieces fit together. If you
 are arriving without a specific question, read
 [Getting Started](/phonometry/start/getting-started/) first: it runs one signal
@@ -258,6 +265,18 @@ domains have and others do not. Implements IEC 61094-2:2009 Annex F
   measured temperature, pressure and humidity, what each condition is worth,
   the domain the annex states for itself, and what the model refuses to
   guess.
+
+## [Elastic solids](/phonometry/solids/)
+
+The elastic constants of a solid and the three longitudinal wave speeds that
+follow from them, named after the shape the wave travels in. A plate table and
+a solver table print different numbers for the same steel, and the conversion
+between them is written here once instead of in each caller's head.
+
+- [Wave speeds](/phonometry/solids/wave-speeds/): the beam, plate and
+  unbounded longitudinal speeds, the inverse that turns each back into a
+  Young's modulus, and the thickness-critical-frequency product that lets two
+  books be checked against each other for free.
 
 ## [Audio files](/phonometry/io/)
 

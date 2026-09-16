@@ -21,7 +21,7 @@ conditions beside the result, and says which model produced it.
 
 ## Why it is not a domain
 
-Nineteen of the twenty packages are domains of application: you go to
+Nineteen of the twenty-one packages are domains of application: you go to
 `building` because you are measuring a building, to `underwater` because you
 are working in water. You never go to `fluids` because you are measuring a
 fluid. You go there because whatever else you are measuring happens in one.
@@ -61,7 +61,8 @@ single measurement silently ceasing to reproduce the standard it cites.
 **No solids.** A `Fluid` carries no shear speed, and the elastic materials of
 the wave solvers keep their own type with its own precondition. The two are
 different quantities that happen to share the word "medium", and a solid's
-properties are tabulated where a fluid's are computed.
+properties are tabulated where a fluid's are computed: they live next door, in
+`phonometry.solids`.
 
 **No fields, only states.** A `Fluid` is one fluid at one point. The
 stratified profiles that ray tracers march through stay in the packages that

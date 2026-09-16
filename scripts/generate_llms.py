@@ -97,6 +97,7 @@ NOT_PAGES = frozenset({"README", "CONFORMANCE", "ERRATA", "ERRATA.es"})
 AREAS: tuple[tuple[str, str], ...] = (
     ("signals", "Signal analysis"),
     ("fluids", "The medium"),
+    ("solids", "Elastic solids"),
     ("io", "Audio files"),
     ("perception", "Hearing and perception"),
     ("buildings", "Rooms and buildings"),

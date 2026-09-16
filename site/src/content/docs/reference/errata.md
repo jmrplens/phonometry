@@ -4274,6 +4274,41 @@ in the same order.
 - **Status:** unreported. Both prints are superseded and neither successor is
   held.
 
+## VDI 2081 Blatt 2:2005-05, Table 1, element 14 (the element's own row contradicts the one above it)
+
+- **Location:** Table 1, printed folio 15 (PDF page 15), element 14, the round
+  bend: the rows "$\Sigma L_\mathrm{W}$" and "$\Sigma L_\mathrm{W}$ (log)",
+  8 kHz cell.
+- **The print:** the two rows read, over the octaves 63 Hz to 8 kHz, $68{,}5$
+  $61{,}7$ $55{,}7$ $43{,}4$ $30{,}1$ $28{,}5$ $34{,}0$ $34$ and $68{,}5$
+  $61{,}7$ $55{,}7$ $43{,}4$ $30{,}1$ $28{,}5$ $34{,}0$ $33{,}6$. Seven cells
+  agree and the eighth does not.
+- **The problem:** the second row is the first with the element's own flow noise
+  added, so it can never be lower. Element 13 hands 8 kHz over at $37{,}0$ dB,
+  the bend attenuates $3$ dB, and the first row prints the $34{,}0$ dB that
+  leaves. The bend's own noise in that band is $-14{,}4$ dB, which the same
+  element prints two rows higher, and adding it moves the level by less than
+  $0{,}0001$ dB. The second row should therefore print $34{,}0$ dB and prints
+  $33{,}6$.
+
+  Read the other way the cell is equally unreachable: $33{,}6$ dB would need
+  $36{,}6$ dB to arrive from element 13, and element 13 prints $37{,}0$ dB in
+  its own $\Sigma L_\mathrm{W}$ row on the same page.
+- **Consequence:** $0{,}4$ dB at 8 kHz, carried into element 15 and everything
+  after it. The A-weighted total of the element is printed as $50{,}9$ dB in
+  both rows, which is what hides it: at 8 kHz the A-weighting is $-1{,}1$ dB and
+  the band is $16$ dB under the 4 kHz one, so $0{,}4$ dB there does not reach
+  the first decimal of the total.
+- **Evidence:** the two rows of element 14 and the $\Sigma L_\mathrm{W}$ row of
+  element 13, with the sum recomputed at full precision from the printed
+  hand-over, attenuation and flow noise. Verified on PDF page 15 (printed
+  p. 15) of VDI 2081 Blatt 2:2005-05.
+- **Library behaviour:** the conformance rows for element 14 compare the flow
+  noise the bend makes, $26{,}9$ down to $-14{,}4$ dB, against the row that
+  prints it, and the chain row carries the $34{,}0$ dB the arithmetic gives
+  rather than the printed $33{,}6$.
+- **Status:** unreported. The print is superseded and the successor is not held.
+
 ## VDI 2081 Blatt 2:2005-05, Table 1, element 2 (a cross-reference to the wrong clause)
 
 - **Location:** Table 1, printed folio 12 (PDF page 12), element 2, the box

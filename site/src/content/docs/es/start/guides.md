@@ -1,6 +1,6 @@
 ---
 title: "Guías"
-description: "Las 137 guías de phonometry, agrupadas en los doce temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
+description: "Las 138 guías de phonometry, agrupadas en los trece temas que cubre la biblioteca: para qué sirve cada área, las normas que implementa y un resumen de una línea de cada guía que contiene."
 head:
   - tag: script
     attrs:
@@ -11,9 +11,9 @@ head:
         "@type": "ItemList",
         "@id": "https://jmrplens.github.io/phonometry/es/start/guides/#areas",
         "name": "Áreas de la documentación de phonometry",
-        "description": "Las doce áreas documentadas de las guías de phonometry, cada una con las normas que implementa.",
+        "description": "Las trece áreas documentadas de las guías de phonometry, cada una con las normas que implementa.",
         "inLanguage": "es",
-        "numberOfItems": 12,
+        "numberOfItems": 13,
         "itemListOrder": "https://schema.org/ItemListUnordered",
         "itemListElement": [
           {
@@ -33,69 +33,76 @@ head:
           {
             "@type": "ListItem",
             "position": 3,
+            "name": "Sólidos elásticos",
+            "description": "Las constantes elásticas de un sólido y las tres velocidades longitudinales que se siguen de ellas, cada una nombrada por la forma a la que pertenece.",
+            "url": "https://jmrplens.github.io/phonometry/es/solids/"
+          },
+          {
+            "@type": "ListItem",
+            "position": 4,
             "name": "Archivos de audio",
             "description": "Audio de medición de entrada y salida: lectura calibrada, procedencia, flujo por bloques, escritura BWF y conversión sin pérdidas.",
             "url": "https://jmrplens.github.io/phonometry/es/io/"
           },
           {
             "@type": "ListItem",
-            "position": 4,
+            "position": 5,
             "name": "Audición y percepción",
             "description": "Sonoridad, calidad sonora, inteligibilidad del habla, audición y exposición.",
             "url": "https://jmrplens.github.io/phonometry/es/perception/"
           },
           {
             "@type": "ListItem",
-            "position": 5,
+            "position": 6,
             "name": "Salas y edificación",
             "description": "Parámetros de sala, ruido de fondo, aislamiento en campo y laboratorio, predicción.",
             "url": "https://jmrplens.github.io/phonometry/es/buildings/"
           },
           {
             "@type": "ListItem",
-            "position": 6,
+            "position": 7,
             "name": "Materiales y superficies",
             "description": "Absorción, resistencia al flujo de aire, tubo de impedancia, modelos porosos y de metamaterial, difusores, dispersión.",
             "url": "https://jmrplens.github.io/phonometry/es/materials/"
           },
           {
             "@type": "ListItem",
-            "position": 7,
+            "position": 8,
             "name": "Vibración y ruido estructural",
             "description": "Movilidad y FRF, aisladores, potencia radiada, uniones, vibración en humanos.",
             "url": "https://jmrplens.github.io/phonometry/es/vibration/"
           },
           {
             "@type": "ListItem",
-            "position": 8,
+            "position": 9,
             "name": "Medio ambiente y transporte",
             "description": "Propagación en exteriores, barreras, refracción, fuentes viarias, ferroviarias y de aerogenerador, y la valoración construida sobre ellas.",
             "url": "https://jmrplens.github.io/phonometry/es/environment/"
           },
           {
             "@type": "ListItem",
-            "position": 9,
+            "position": 10,
             "name": "Ruido de aeronaves",
             "description": "Niveles de certificación, contornos de aeropuerto y el método del hemisferio.",
             "url": "https://jmrplens.github.io/phonometry/es/aircraft/"
           },
           {
             "@type": "ListItem",
-            "position": 10,
+            "position": 11,
             "name": "Acústica submarina",
             "description": "Niveles re 1 microPa, ruido radiado por buques, hincado de pilotes, ruido ambiente, pérdidas por transmisión.",
             "url": "https://jmrplens.github.io/phonometry/es/underwater/"
           },
           {
             "@type": "ListItem",
-            "position": 11,
+            "position": 12,
             "name": "Fuentes y dispositivos",
             "description": "Potencia acústica, intensidad, declaraciones de emisión, electroacústica, sonoridad de programa.",
             "url": "https://jmrplens.github.io/phonometry/es/devices/"
           },
           {
             "@type": "ListItem",
-            "position": 12,
+            "position": 13,
             "name": "Simulación de ondas",
             "description": "Simulación FDTD 2D determinista, acústica y elástica P-SV, validada frente a oráculos analíticos y no frente a una norma.",
             "url": "https://jmrplens.github.io/phonometry/es/simulation/"
@@ -111,7 +118,7 @@ hay ninguna panorámica del campo: cada página es la documentación de trabajo 
 un módulo, escrita para que un resultado se pueda defender apartado por
 apartado en lugar de darlo por bueno.
 
-Esta página es el mapa. Ciento treinta y siete guías repartidas en doce temas, y cada
+Esta página es el mapa. Ciento treinta y ocho guías repartidas en trece temas, y cada
 área tiene su propio índice con el relato largo de cómo encajan sus piezas. Si
 llegas sin una pregunta concreta, lee primero la
 [introducción](/phonometry/es/start/getting-started/): recorre una señal por toda la
@@ -269,6 +276,19 @@ Implementa el Anexo F de IEC 61094-2:2009 (CIPM-2007).
   difusividad térmica del aire a partir de la temperatura, la presión y la
   humedad medidas, cuánto vale cada condición, el dominio que el anexo
   enuncia para sí mismo y qué se niega el modelo a adivinar.
+
+## [Sólidos elásticos](/phonometry/es/solids/)
+
+Las constantes elásticas de un sólido y las tres velocidades longitudinales que
+se siguen de ellas, nombradas por la forma por la que viaja la onda. Una tabla
+de placa y una de solucionador imprimen números distintos para el mismo acero,
+y la conversión entre ellas está escrita aquí una vez en lugar de en la cabeza
+de cada llamante.
+
+- [Velocidades de onda](/phonometry/es/solids/wave-speeds/): las velocidades
+  longitudinales de viga, de placa y de sólido extenso, la inversa que devuelve
+  el módulo de Young desde cada una, y el producto de espesor por frecuencia
+  crítica que permite comprobar dos libros uno contra otro sin coste.
 
 ## [Archivos de audio](/phonometry/es/io/)
 

@@ -2,9 +2,9 @@
 
 # API Reference
 
-All core functionality lives in twenty domain subpackages, and every public
-name is reached through the one that owns it. The top-level `phonometry`
-package publishes those twenty and four names that belong to no domain:
+All core functionality lives in twenty-one subpackages, and every public name is
+reached through the one that owns it. The top-level `phonometry` package
+publishes those twenty-one and four names that belong to none of them:
 `Signal`, `ReportMetadata`, `PhonometryWarning` and `__version__`.
 
 > **Note.** This page is the curated quick table for the GitHub/PyPI audience:
@@ -15,8 +15,8 @@ package publishes those twenty and four names that belong to no domain:
 
 ## Namespaces
 
-The library is organized into twenty domain subpackages, and importing the
-domain namespace is the primary form used throughout the documentation:
+The library is organized into twenty-one subpackages, and importing the
+namespace is the primary form used throughout the documentation:
 
 ```python
 from phonometry import aircraft
@@ -30,6 +30,7 @@ contour = aircraft.noise_contour(..., x=..., y=...)   # the shape of every call
 | `phonometry.signals` | Levels (Leq, LAeq, percentiles), Welch and multitaper spectra, coherence, time-frequency, correlation, envelope, cepstrum, phase, synchronous averaging, test signals |
 | `phonometry.metrology` | Calibration, GUM uncertainty and Monte Carlo, data qualification (stationarity, trends, peak statistics) |
 | `phonometry.fluids` | The state of the propagating medium: humid air from IEC 61094-2:2009 Annex F (CIPM-2007), with the conditions it was computed for and the domain its model states for itself |
+| `phonometry.solids` | The elastic constants of a solid and the three longitudinal wave speeds that follow from them, named apart by the shape the wave travels in (beam, plate, unbounded), with the inverse of each and the `h f_c` a materials table prints |
 | `phonometry.io` | Measurement audio files: WAV/BWF/RF64 read and write with `bext` provenance (EBU Tech 3285), headers-only `info`, block streaming, lossless conversion, calibration sidecar; FLAC, AIFF, Ogg/Opus and MP3 via the `[audio]` extra |
 | `phonometry.psychoacoustics` | Two families: `loudness` (ISO 532-1 Zwicker, ISO 532-2 and ISO 532-3 Moore-Glasberg, ECMA-418-2, ISO 226 equal-loudness contours) and `quality` (sharpness, roughness, fluctuation strength, tonality, tone audibility, annoyance), plus the ERB scale both measure on |
 | `phonometry.speech` | Speech Transmission Index (IEC 60268-16), Speech Intelligibility Index (ANSI S3.5), STOI and ESTOI |
@@ -1323,6 +1324,10 @@ documents, one page per module.
 | `FluidWarning` | `warning class` | **State outside the domain its model states for itself.**<br>Annex F states 15 °C to 27 °C, 60 kPa to 110 kPa, 10 % to 90 % RH; outside it the result is an extrapolation, not a refusal | `warnings.simplefilter("error", fluids.FluidWarning)`<br>Emitted by `fluids.air` |
 | `FluidAssumptionWarning` | `warning class` | **A condition the caller did not supply was assumed.**<br>Names the assumed values and what they are worth; passing every condition silences it | `warnings.simplefilter("error", fluids.FluidAssumptionWarning)`<br>Emitted by `fluids.air` |
 | `FluidPropertyUnavailable` | `exception` | **A quantity the model does not determine.**<br>Raised instead of returning a number no source printed; names the model and what it does fix | `f.density  # on a model that fixes only a speed of sound` |
+| `plate_longitudinal_speed` / `youngs_modulus_from_plate_speed` | `function` / `function` | **Quasi-longitudinal wave speed along a plate, and back (Hopkins Eq. 2.21).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL [m/s]<br>• `density_kg_m3` ρ, `poisson_ratio` ν between -1 and 1<br>• cL = sqrt(E / (ρ (1 - ν²))): the value the building-acoustics tables print | `solids.plate_longitudinal_speed(2.0e11, density_kg_m3=7800.0, poisson_ratio=0.28)  # 5274.6` |
+| `beam_longitudinal_speed` / `youngs_modulus_from_beam_speed` | `function` / `function` | **Quasi-longitudinal wave speed along a beam, and back (Hopkins Eq. 2.20).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL [m/s]<br>• `density_kg_m3` ρ<br>• cL = sqrt(E / ρ): a beam is unconstrained on its sides, so ν does not appear | `solids.beam_longitudinal_speed(2.0e11, density_kg_m3=7800.0)  # 5063.7` |
+| `bulk_longitudinal_speed` / `youngs_modulus_from_bulk_speed` | `function` / `function` | **Pure longitudinal wave speed in an unbounded solid, and back (Norton & Karczub Eq. 1.225).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL' [m/s]<br>• `density_kg_m3` ρ, `poisson_ratio` ν between -1 and 0.5<br>• cL' = sqrt(E (1 - ν) / (ρ (1 + ν)(1 - 2ν))): the speed an elastic solver integrates, not the one a plate table prints | `solids.bulk_longitudinal_speed(2.0e11, density_kg_m3=7800.0, poisson_ratio=0.28)  # 5724.8` |
+| `thickness_critical_frequency_product` / `DEFAULT_SPEED_OF_SOUND_M_S` | `function` / `float` | **The `h f_c` column of a materials table, from the plate wave speed.**<br>• `plate_speed_m_s` cL,p [m/s]<br>• `speed_of_sound_m_s` c0 [m/s] (Default: 343)<br>• h f_c = c0² sqrt(12) / (2 π cL,p), the exact constant: the rounded 1.8 of ISO 12354-1 misses Hopkins Table A2 by 0.8 % | `solids.thickness_critical_frequency_product(5270.0)  # 12.31 m Hz, Table A2 prints 12.3` |
 | `DEFAULT_STATIC_PRESSURE_PA` | `float` | **One standard atmosphere [Pa].**<br>101325.0 | `DEFAULT_STATIC_PRESSURE_PA  # 101325.0` |
 | `DEFAULT_RELATIVE_HUMIDITY_PERCENT` | `float` | **Humidity assumed when none is supplied [%].**<br>50.0. There is no standard humidity: Annex F's own examples use 50 % and 65 % | `DEFAULT_RELATIVE_HUMIDITY_PERCENT  # 50.0` |
 | `DEFAULT_CO2_MOLE_FRACTION` | `float` | **CO₂ mole fraction assumed when none is supplied.**<br>0.0004, the value Clause F.2 recommends for laboratory conditions | `DEFAULT_CO2_MOLE_FRACTION  # 0.0004` |

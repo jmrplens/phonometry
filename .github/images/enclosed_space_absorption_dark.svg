@@ -1553,30 +1553,30 @@ z
    </g>
    <g id="legend_1">
     <g id="patch_7">
-     <path d="M 327.945938 64.319687 
-L 437.285 64.319687 
-Q 439.285 64.319687 439.285 62.319687 
-L 439.285 33.318125 
-Q 439.285 31.318125 437.285 31.318125 
-L 327.945938 31.318125 
-Q 325.945938 31.318125 325.945938 33.318125 
-L 325.945938 62.319687 
-Q 325.945938 64.319687 327.945938 64.319687 
+     <path d="M 47.927344 64.319687 
+L 157.266406 64.319687 
+Q 159.266406 64.319687 159.266406 62.319687 
+L 159.266406 33.318125 
+Q 159.266406 31.318125 157.266406 31.318125 
+L 47.927344 31.318125 
+Q 45.927344 31.318125 45.927344 33.318125 
+L 45.927344 62.319687 
+Q 45.927344 64.319687 47.927344 64.319687 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="line2d_53">
-     <path d="M 329.945938 39.416562 
-L 339.945938 39.416562 
-L 349.945938 39.416562 
+     <path d="M 49.927344 39.416562 
+L 59.927344 39.416562 
+L 69.927344 39.416562 
 " style="fill: none; stroke: #d62728; stroke-width: 1.5; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#mc99916e8d1" x="339.945938" y="39.416562" style="fill: #d62728; stroke: #d62728"/>
+      <use xlink:href="#mc99916e8d1" x="59.927344" y="39.416562" style="fill: #d62728; stroke: #d62728"/>
      </g>
     </g>
     <g id="text_23">
      <!-- bare ceiling -->
-     <g style="fill: #ffffff" transform="translate(357.945938 42.916562) scale(0.1 -0.1)">
+     <g style="fill: #ffffff" transform="translate(77.927344 42.916562) scale(0.1 -0.1)">
       <defs>
        <path id="DejaVuSans-4a" d="M 2906 1791 
 Q 2906 2416 2648 2759 
@@ -1628,17 +1628,17 @@ z
      </g>
     </g>
     <g id="line2d_54">
-     <path d="M 329.945938 54.417344 
-L 339.945938 54.417344 
-L 349.945938 54.417344 
+     <path d="M 49.927344 54.417344 
+L 59.927344 54.417344 
+L 69.927344 54.417344 
 " style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m49466b02c9" x="339.945938" y="54.417344" style="fill: #1f77b4; stroke: #1f77b4"/>
+      <use xlink:href="#m49466b02c9" x="59.927344" y="54.417344" style="fill: #1f77b4; stroke: #1f77b4"/>
      </g>
     </g>
     <g id="text_24">
      <!-- acoustic ceiling -->
-     <g style="fill: #ffffff" transform="translate(357.945938 57.917344) scale(0.1 -0.1)">
+     <g style="fill: #ffffff" transform="translate(77.927344 57.917344) scale(0.1 -0.1)">
       <use xlink:href="#DejaVuSans-44"/>
       <use xlink:href="#DejaVuSans-46" transform="translate(61.28125 0)"/>
       <use xlink:href="#DejaVuSans-52" transform="translate(116.265625 0)"/>

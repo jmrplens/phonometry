@@ -1927,7 +1927,10 @@ def generate_peak_oversampling(output_dir: str) -> None:
     ax_left.set_title("The crest falls between two samples", pad=12)
     ax_left.set_xlabel("Time [ms]")
     ax_left.set_ylabel("Amplitude")
-    ax_left.set_ylim(-1.25, 1.35)
+    # Room under the trough for the legend: the tone fills the panel from -1 to
+    # +1 at every instant, so the box has nowhere inside the curve to stand and
+    # the one that stood at -1,25 covered three of the samples it names.
+    ax_left.set_ylim(-1.75, 1.35)
     ax_left.grid(color=COLOR_GRID, linestyle="-")
     ax_left.legend(loc="lower right", fontsize=8)
 

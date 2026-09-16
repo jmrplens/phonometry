@@ -375,7 +375,10 @@ def generate_rotorcraft_ground_effect(output_dir: str) -> None:
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6, which="both")
     ax.set_axisbelow(True)
     format_frequency_axis(ax, float(freqs.min()), float(freqs.max()), language=_LANG)
-    ax.legend(loc="lower left", fontsize=9)
+    # The depth of the first destructive interference is the reading this panel
+    # exists for, and it is the lowest point of the hard-ground curve, so the
+    # box goes where the two curves have already flattened out.
+    ax.legend(loc="upper right", fontsize=9)
     ax.text(
         0.98,
         0.05,
@@ -1461,7 +1464,10 @@ def generate_rotorcraft_mean_ground_plane(output_dir: str) -> None:
     ax.set_title(
         "Mean Ground Plane and Equivalent Heights (ECAC Doc 32 / NORAH2)", pad=12
     )
-    ax.legend(loc="upper left", fontsize=9)
+    # The source stands at the left end of the section and is the highest point
+    # drawn, so the free corner is the other one: the ground rises towards the
+    # receiver but stays well under the box.
+    ax.legend(loc="upper right", fontsize=9)
     ax.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
     ax.set_axisbelow(True)
 
@@ -1613,6 +1619,11 @@ def generate_rotorcraft_flight_conditions(output_dir: str) -> None:
         axis.set_title(title, pad=10)
         axis.grid(color=COLOR_GRID, linestyle="--", alpha=0.6)
         axis.set_axisbelow(True)
+        # Headroom over the matrix for the three-line legend. The highest
+        # condition of both planes is the climb at Vy, and it sits at the low
+        # airspeed end, which is the corner the box goes in.
+        low, high = float(pts[:, 1].min()), float(pts[:, 1].max())
+        axis.set_ylim(low - 0.05 * (high - low), high + 0.25 * (high - low))
         axis.legend(loc="upper left", fontsize=8)
     # Three short lines: at the old two-line width the box's first line ran
     # under the legend in the Spanish variant.

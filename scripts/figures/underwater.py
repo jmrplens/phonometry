@@ -1015,7 +1015,7 @@ def generate_detection_range(output_dir: str) -> None:
     ax_m.annotate(
         f"still detectable at {last / 1000.0:.2f} km",
         xy=(last / 1000.0, fom),
-        xytext=(0.52, 0.86),
+        xytext=(0.30, 0.74),
         textcoords="axes fraction",
         fontsize=9,
         color=COLOR_FG,
@@ -1027,7 +1027,11 @@ def generate_detection_range(output_dir: str) -> None:
     ax_m.set_title(f"Real Waveguide: {len(crossings)} Crossings", pad=12)
     ax_m.grid(color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax_m.set_axisbelow(True)
-    ax_m.legend(loc="lower right", fontsize=9)
+    # Above the curve rather than under it. The crossings are the subject of
+    # this panel and they all sit on the 60 dB line at the bottom right, which
+    # is where the legend used to stand: the box covered every one of the
+    # eight the title counts.
+    ax_m.legend(loc="upper right", fontsize=9)
     plt.tight_layout()
     save_figure(output_dir, "detection_range.svg")
     plt.close(fig)

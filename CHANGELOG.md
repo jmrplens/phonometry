@@ -305,6 +305,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A legend no longer closes over a plotted point.** A legend is an opaque
+  plate the author places by hand, and its width is set by its longest label,
+  which is a defect waiting to happen in a bilingual corpus: the Spanish label
+  is routinely half again as long as the English one, so a box that clears the
+  data in one language reaches back over it in the other. Every other gate
+  stays green, because the drawing matches its generator, the colours pass, and
+  the annotation audit measures labels and looks at no legend at all.
+  `make figure-legends` reads the committed SVGs for a plotted point under a
+  legend frame, which costs seconds and needs no regeneration, and fails on
+  every drawing that is not written down with the reason the mark under the box
+  is not a reading. `true_peak_intersample` is the one written down: what its
+  legend covers is the comb of the oversampled grid, a rail of identical ticks
+  that continues either side of the box.
+
+  Eleven drawings were fixed. The legend of `detection_range` hid all eight
+  crossings its own title counts, and both panels of `runs_test` and three
+  samples of `peak_oversampling` lost points the same way. The rest were the
+  reading the panel exists for: the last two bands of the treated ceiling in
+  `enclosed_space_absorption`, the 125 Hz point of both curves of
+  `hearing_threshold`, the peak of the signal model in `fluctuation_strength`,
+  the highest condition of both planes of `rotorcraft_flight_conditions`, the
+  source in `rotorcraft_mean_ground_plane`, the depth of the first interference
+  null in `rotorcraft_ground_effect`, the 500 Hz peak of the splitter unit in
+  `silencer_selection`, and the last point of the noise reduction in
+  `room_to_room_chain`.
+
+  The last of them is a two-scale panel, where the box was not placed by hand
+  at all: `loc="best"` scores the candidate boxes against the artists of the
+  axes that carries the legend, and a twin is a separate axes, so whatever the
+  second scale draws is invisible to the search and the box lands on it as
+  readily as on clear paper. The figure now states the corner it wants, which
+  is the middle of the right-hand half, where neither scale draws.
+
 - `SpatialDecayWarning` is emitted by the three conditions it names. The class
   was published with the release that brought ISO 14257 in, exported, and
   documented as the advisory for a measurement outside a condition the standard

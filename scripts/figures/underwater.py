@@ -2221,3 +2221,132 @@ def generate_piling_campaign_accumulation(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "piling_campaign_accumulation.svg")
     plt.close()
+
+
+def generate_sonar_detection_terms(output_dir: str) -> None:
+    """The two terms of the sonar equation that come from the receiver."""
+    print("Generating sonar_detection_terms...")
+    from phonometry import underwater
+
+    fig, (ax_dt, ax_di) = plt.subplots(1, 2, figsize=(13.5, 5.4))
+
+    # (a) The detection threshold against the false-alarm probability.
+    p_fa = np.logspace(-8.0, -1.0, 400)
+    threshold = np.array([underwater.detection_threshold(float(p)) for p in p_fa])
+    ax_dt.semilogx(
+        p_fa,
+        threshold,
+        color=COLOR_PRIMARY,
+        linewidth=1.9,
+        label="DT at 50 % detection probability",
+    )
+    # The closed form is stated to 0,1 dB below 1e-2 and is an extrapolation
+    # above it, which is why the curve is drawn and shaded there rather than
+    # stopped: a reader who works at 5e-2 should see what the formula gives
+    # and that it is outside the stated accuracy.
+    ax_dt.axvspan(1e-2, 1e-1, color=theme_fill(COLOR_MUTED, ax_dt), zorder=0)
+    ax_dt.text(
+        3.0e-2,
+        float(threshold.max()) - 0.3,
+        "outside the stated\n$\\pm$ 0.1 dB",
+        ha="center",
+        va="top",
+        fontsize=9,
+        color=COLOR_FG,
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.3",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+    )
+    working = 1e-4
+    ax_dt.plot(
+        [working],
+        [underwater.detection_threshold(working)],
+        "o",
+        color=COLOR_SECONDARY,
+        markersize=7,
+        zorder=5,
+        label="$p_\\mathrm{fa} = 10^{-4}$",
+    )
+    ax_dt.annotate(
+        f"{underwater.detection_threshold(working):.1f} dB of signal-to-noise\n"
+        "after processing, for one false alarm\nin ten thousand empty beams",
+        xy=(working, underwater.detection_threshold(working)),
+        xytext=(0.06, 0.60),
+        textcoords="axes fraction",
+        fontsize=9,
+        color=COLOR_FG,
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.4",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        arrowprops={"arrowstyle": "->", "color": COLOR_MUTED, "linewidth": 1.0},
+    )
+    ax_dt.set_xlabel("False-alarm probability $p_\\mathrm{fa}$")
+    ax_dt.set_ylabel("Detection threshold DT [dB]")
+    ax_dt.set_title("Detection Threshold (Ainslie Eq. 11.22)", pad=26)
+    ax_dt.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_dt.set_axisbelow(True)
+    ax_dt.legend(loc="lower left", fontsize=9)
+
+    # (b) The array gain of an unshaded line array against its length.
+    ratio = np.logspace(-1.0, 2.0, 400)
+    wavelength = 1.0
+    for angle_deg, color, style, label in (
+        (0.0, COLOR_PRIMARY, "-", "Broadside"),
+        (60.0, COLOR_TERTIARY, "--", "Steered 60\u00b0"),
+        (90.0, COLOR_SECONDARY, "-.", "Endfire"),
+    ):
+        gain = [
+            underwater.array_directivity_index(
+                float(r) * wavelength,
+                wavelength,
+                steer_angle_rad=np.deg2rad(angle_deg),
+            )
+            for r in ratio
+        ]
+        ax_di.semilogx(ratio, gain, color=color, linewidth=1.8, ls=style, label=label)
+    ax_di.semilogx(
+        ratio,
+        10.0 * np.log10(2.0 * ratio),
+        color=COLOR_MUTED,
+        linewidth=1.0,
+        ls=":",
+        label="$10\\,\\lg(2L/\\lambda)$ and $10\\,\\lg(4L/\\lambda)$",
+    )
+    ax_di.semilogx(
+        ratio, 10.0 * np.log10(4.0 * ratio), color=COLOR_MUTED, linewidth=1.0, ls=":"
+    )
+    ax_di.annotate(
+        "half a wavelength of array still\nreturns 1.1 dB: the 0 dB is a\n"
+        "limit and not a cut-off\n\nat the half-wavelength spacing an\n"
+        "array is usually built with,\n$L/\\lambda$ is $(N - 1)/2$ elements",
+        xy=(0.5, underwater.array_directivity_index(0.5, 1.0)),
+        xytext=(0.05, 0.60),
+        textcoords="axes fraction",
+        fontsize=9,
+        color=COLOR_FG,
+        zorder=6,
+        bbox={
+            "boxstyle": "round,pad=0.4",
+            "facecolor": COLOR_PANEL,
+            "edgecolor": COLOR_GRID,
+        },
+        arrowprops={"arrowstyle": "->", "color": COLOR_MUTED, "linewidth": 1.0},
+    )
+    ax_di.set_ylim(bottom=-1.0)
+    ax_di.set_xlabel("Array length in wavelengths $L/\\lambda$")
+    ax_di.set_ylabel("Array gain DI [dB]")
+    ax_di.set_title("Array Gain of a Line Array (Ainslie Eq. 6.56)", pad=26)
+    ax_di.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_di.set_axisbelow(True)
+    # Bottom right, under the broadside curve: the note on the low-frequency
+    # limit has to point at 0,5 wavelengths, which puts it in the top left.
+    ax_di.legend(loc="lower right", fontsize=9)
+    plt.tight_layout()
+    save_figure(output_dir, "sonar_detection_terms.svg")
+    plt.close(fig)

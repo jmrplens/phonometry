@@ -31,6 +31,11 @@ from .air import (
     DEFAULT_STATIC_PRESSURE_PA,
     air,
 )
+from .gas import (
+    IDEAL_GAS_VALIDITY,
+    MOLAR_GAS_CONSTANT,
+    ideal_gas,
+)
 from .water import (
     depth_to_absolute_pressure_pa,
     depth_to_gauge_pressure_mpa,
@@ -43,12 +48,15 @@ __all__ = [
     "DEFAULT_CO2_MOLE_FRACTION",
     "DEFAULT_RELATIVE_HUMIDITY_PERCENT",
     "DEFAULT_STATIC_PRESSURE_PA",
+    "IDEAL_GAS_VALIDITY",
+    "MOLAR_GAS_CONSTANT",
     "Fluid",
     "FluidAssumptionWarning",
     "FluidPropertyUnavailable",
     "FluidWarning",
     "air",
     "characteristic_impedance",
+    "ideal_gas",
     "depth_to_absolute_pressure_pa",
     "depth_to_gauge_pressure_mpa",
     "sea_water",

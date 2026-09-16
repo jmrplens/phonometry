@@ -17,6 +17,14 @@ Esta área existe para evitarlo. `phonometry.fluids` calcula el estado del
 fluido a partir de las condiciones que de verdad se midieron, conserva esas
 condiciones junto al resultado y dice qué modelo lo produjo.
 
+Aquí se construyen tres medios. El aire húmedo tiene el modelo mejor enunciado
+de la literatura acústica y tiene guía propia más abajo. El agua de mar tiene
+cuatro ajustes rivales de la velocidad del sonido y lleva el que se le pidió.
+Cualquier otro gas es `fluids.ideal_gas`, que toma la relación de calores
+específicos y la masa molar que imprime una tabla de gases y devuelve la
+velocidad y la densidad que se siguen, con hasta dónde llega ese cierre escrito
+en el propio resultado.
+
 ## Por qué no es un dominio
 
 Dieciséis de los veintiún paquetes son dominios de aplicación: uno va a

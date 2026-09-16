@@ -419,6 +419,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   The table spans PDF pages 635 and 636, both landscape, and neither prints a
   folio of its own; they sit between folios 607 and 610.
 
+- **Every warning row of the API quick table says the same thing the same way.**
+  The 43 rows that publish a warning class had drifted into three spellings of
+  the kind column, `warning class`, `warning` and plain `class`, and into two
+  verbs, with thirteen rows naming no verb at all and leaving the reader to
+  guess where the advisory comes from. They now all read `warning class` and
+  `Emitted by`, which is the verb the majority already used and the one that is
+  true: `warnings.warn` emits, and only a filter turns the advisory into a
+  raise. The rows that named nothing now name the module that emits them.
+
 - The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.
 

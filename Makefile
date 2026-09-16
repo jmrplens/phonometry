@@ -146,6 +146,15 @@ language-forwarding:
 plot-style-defaults:
 	$(PYTHON) scripts/check_plot_style_defaults.py
 
+# ISO 80000-1 groups long numbers in threes, and the standards this library
+# reads print them that way, so the corpus writes 6,251 5 and 101 325. Written
+# with an ordinary space a line break can fall inside the number and leave half
+# of it on the next line, reading as two numbers. This asks for U+202F, and it
+# knows the two shapes that are not groupings at all: an array's printed output
+# and a value followed by its unit.
+digit-grouping:
+	$(PYTHON) scripts/check_digit_grouping.py
+
 # ISO 80000-2 sets a subscript by what it is, so a glyph pair can honestly take
 # both slopes: the z of the ISO 9613-2 barrier screening is a path-length
 # difference and the z of the ISO 2631-5 dose is a direction, and both

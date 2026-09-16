@@ -46,7 +46,7 @@ fused multiply-add and is not needed here: the Dekker split takes its place
 exactly.
 
 What "without touching a single output bit" rests on, measured on this
-project's own corpus rather than asserted: over the 91 658 333 distinct
+project's own corpus rather than asserted: over the 91 658 333 distinct
 values the weighting fit feeds its logarithm across 133 (curve, rate)
 designs, this function and glibc's ``log`` return identical bit patterns --
 zero exceptions, and that is the fact the shipped designs stand on. Beyond

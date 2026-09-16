@@ -93,7 +93,7 @@ exact one-third-octave midband $f_\mathrm{m} = 1000 \cdot 10^{k/10}$ (Eq. (6), N
 used to compute Table 1, so the library reproduces every tabulated point to under
 0.4 %, the standard's own three-significant-figure precision, far inside its
 stated $\pm 10$ % accuracy (Clause 7.1). Inputs outside the tabulated ranges
-(−20…+50 °C, 10…100 % RH, 50…10 000 Hz, or above the 200 kPa validity envelope)
+(−20…+50 °C, 10…100 % RH, 50…10 000 Hz, or above the 200 kPa validity envelope)
 still compute but raise an `AtmosphericAbsorptionWarning`; non-physical inputs
 (non-positive frequency, humidity outside 0…100 %, sub-absolute-zero
 temperature) raise `ValueError`. `air_attenuation_m` composes $\alpha$ with the
@@ -105,7 +105,7 @@ atmospheric conditions straight into `absorption_area` /
 
 | Parameter | Type / shape | Units | Range / default | Notes |
 | :--- | :--- | :--- | :--- | :--- |
-| `frequencies` | scalar or 1D array | Hz | > 0 | Vectorized; 50–10 000 Hz tabulated |
+| `frequencies` | scalar or 1D array | Hz | > 0 | Vectorized; 50–10 000 Hz tabulated |
 | `temperature_c` | float | °C | default `20.0` | −20…+50 tabulated; outside warns |
 | `relative_humidity_percent` | float | % | default `50.0` | 10…100 tabulated; `[0, 100]` allowed |
 | `atmospheric_pressure_kpa` | float | kPa | default `101.325` | ≤ 200 valid (Clause 7); above warns |

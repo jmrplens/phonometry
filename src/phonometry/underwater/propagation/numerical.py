@@ -526,7 +526,7 @@ def normal_modes(
         :math:`\max(400, \operatorname{ceil}(60 D f / c_{\mathrm{min}}))`,
         which keeps the near-cutoff
         eigenvalue error small at any frequency/depth combination, capped at
-        20 000 points (very high :math:`f D` products exceed the cap; the
+        20 000 points (very high :math:`f D` products exceed the cap; the
         near-cutoff warning then indicates whether the capped grid suffices,
         and an explicit ``n_depth_points`` overrides the cap).
     :return: A :class:`NormalModeResult`.

@@ -47,8 +47,8 @@ Every example of Annex B that the draft works with these formulae is a
 conformance row: the 47 passages of Table B.1 and their eight derived values,
 and the four assessment severities of Example 9. The two night-time
 severities of those four are printed over 920 intervals where 6.5.3.2 fixes
-960, and the day-time one of Example 8 is printed as 0,099 8 where its own
-four-decimal inputs give 0,099 7; both are registered in ``docs/ERRATA.md``,
+960, and the day-time one of Example 8 is printed as 0,099 8 where its own
+four-decimal inputs give 0,099 7; both are registered in ``docs/ERRATA.md``,
 and the rows run the standard's own 960 and its own inputs.
 """
 

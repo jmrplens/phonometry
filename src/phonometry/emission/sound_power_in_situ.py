@@ -57,7 +57,7 @@ Annex C carries either level to the reference meteorological conditions of
 :math:`C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}((273.15 + \theta)/296)`,
 the same ``C2`` as ISO 3741:2010 clause 9.1.4, reused from that module; the
 whole ISO 3740 family prints :math:`\theta_\mathrm{ref}` = 296 K beside a
-23,0 °C reference, so at the reference conditions ``C2`` is +0,003 3 dB
+23,0 °C reference, so at the reference conditions ``C2`` is +0,003 3 dB
 rather than zero. Eq. (C.2) estimates the static pressure from the altitude
 of the site. Annex D forms the A-weighted totals from the Table D.1 band
 corrections, which are the ISO 3744 Annex E octave values digit for digit.
@@ -320,7 +320,7 @@ def static_pressure_from_altitude(altitude: float) -> float:
        \qquad a = 2{,}2560 \times 10^{-5}\ \mathrm{m}^{-1},
        \quad b = 5{,}255\,3
 
-    Annex C prints :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5 Pa and states
+    Annex C prints :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5 Pa and states
     the quantity in pascals. The result here is in kilopascals so that it feeds
     ``static_pressure_kpa`` of :func:`sound_power_in_situ` directly, matching
     ISO 3741, ISO 3744 and ISO 3745, which do print kilopascals. The pressure
@@ -874,7 +874,7 @@ def sound_power_in_situ(
     :param temperature_c: Air temperature at the test, in degrees Celsius.
     :param static_pressure_kpa: Static pressure at the test, in kilopascals
         (see :func:`static_pressure_from_altitude`). Annex C prints this
-        quantity in pascals, with :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5
+        quantity in pascals, with :math:`p_{\mathrm{s},0}` = 1,013 25 x 10^5
         Pa, and is alone in its family in doing so: ISO 3741:2010,
         ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument
         follows the three, so that one unit serves the whole ISO 3740 family;

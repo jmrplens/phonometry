@@ -190,7 +190,7 @@ _TABLE_C1: dict[int, float] = {
     20000: -9.3,
 }
 #: Table 2: standard deviation of reproducibility sigma_R of the sampling tube
-#: per one-third-octave band, dB (clause 4). "80 to 100" and "125 to 4 000"
+#: per one-third-octave band, dB (clause 4). "80 to 100" and "125 to 4 000"
 #: are printed as ranges; they are unrolled here band by band.
 _TABLE_2_SIGMA_R: dict[int, float] = {
     50: 3.5,
@@ -460,7 +460,7 @@ _TABLE_A4: _Rows = (
 _RECONSTRUCTED_BAND_HZ = 5000
 _RECONSTRUCTED_DIAMETER_RANGE_M = (0.8, 1.25)
 
-#: Table A.5: 0,8 m <= d < 1,25 m. The a3 of the 5 000 Hz row is printed with
+#: Table A.5: 0,8 m <= d < 1,25 m. The a3 of the 5 000 Hz row is printed with
 #: its leading digit missing, "- ,24 x 10-05"; it is read as -1,24e-05, the
 #: value the neighbouring tables bracket (-1,17e-05 in A.4, -1,27e-05 in
 #: A.6). Asking for that band raises a warning that says so. See
@@ -737,8 +737,8 @@ def _nominal_bands(frequencies: ArrayLike) -> np.ndarray:
     The coefficients of Annex A, the A-weighting of Table C.1 and the
     reproducibility of Table 2 are all keyed by the nominal one-third-octave
     centre frequency, so a band the standard does not print cannot be served
-    at all. Nominal means the printed integer: 1 000 Hz, not the exact
-    1 000,0 Hz or the base-ten 1 000 Hz of IEC 61260-1, which are the same
+    at all. Nominal means the printed integer: 1 000 Hz, not the exact
+    1 000,0 Hz or the base-ten 1 000 Hz of IEC 61260-1, which are the same
     label once rounded.
 
     :param frequencies: The band centres, in hertz.
@@ -843,7 +843,7 @@ def _check_informative_bands(frequencies: np.ndarray, flow_velocity: float) -> N
     extended :math:`|U| \le 60` m/s; the rows for 12,5 kHz to 20 kHz sit under
     a second header that reads ":math:`|U| \le 40` m/s", and the footnote
     grants them no velocity extension: "Also for information only, values are
-    given for an extended frequency range, 12 500 Hz to 20 000 Hz, for flow
+    given for an extended frequency range, 12 500 Hz to 20 000 Hz, for flow
     velocities :math:`|U| \le 40`".
 
     The two extensions therefore do not compose. Evaluated past 40 m/s the
@@ -881,7 +881,7 @@ def _annex_a_rows(duct_diameter_m: float) -> _Rows:
 def _warn_reconstructed_coefficient(duct_diameter_m: float, freqs: np.ndarray) -> None:
     """Say so when a band is answered with a coefficient that is a reading.
 
-    One cell of Annex A is not legible: the ``a3`` of the 5 000 Hz row of
+    One cell of Annex A is not legible: the ``a3`` of the 5 000 Hz row of
     Table A.5 is printed without its leading digit. Every other coefficient in
     the annex is transcribed; this one is reconstructed, and the caller is
     entitled to know which of the two it is holding. The reading moves the
@@ -943,7 +943,7 @@ def flow_modal_correction(
     the outlet side (Table 1 NOTE 2), so the same speed reads as a different
     correction on the two sides of the fan.
 
-    One cell of Annex A is not legible, the :math:`a_3` of the 5 000 Hz row of
+    One cell of Annex A is not legible, the :math:`a_3` of the 5 000 Hz row of
     the table that serves 0,8 m to 1,25 m, and asking for that band and that
     diameter emits a :class:`SoundPowerWarning` saying the coefficient is a
     reading rather than a transcription (see ``docs/ERRATA.md``). Every other

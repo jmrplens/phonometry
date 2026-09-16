@@ -42,7 +42,7 @@ report from eleven years before the test code existed (P302808, Enclosure 24,
 reproduced. A fourth arrangement is the E-400 mounting of G. van Hout, The
 Acoustic Performance of Suspended Ceiling Systems, master of engineering
 thesis, University of Canterbury, 2016, which prints the 400 mm cavity and the
-3 600 mm by 3 000 mm, 10,8 m2 specimen on printed page 27 (PDF page 45).
+3 600 mm by 3 000 mm, 10,8 m2 specimen on printed page 27 (PDF page 45).
 """
 
 from __future__ import annotations

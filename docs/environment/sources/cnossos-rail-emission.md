@@ -377,8 +377,8 @@ Official Journal text of the instrument that enacted it. And the whole chain of
 equations end to end, against the emission test workbook the European Commission
 published with its reference source module: feeding the shipped equations the
 **2015** coefficient database that workbook was computed with reproduces **all
-34 560 published rows of the twenty vehicles whose catalogue entries are well
-formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
+34 560 published rows of the twenty vehicles whose catalogue entries are well
+formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
 two decimals it prints. A hundred and twenty-three of those cases are committed
 to the repository and run in CI. The three vehicles left out are described in
 `tests/data/cnossos/README.md`: their rows record defects of the reference

@@ -802,7 +802,7 @@ def _chk_iso3747_event_forms() -> Outcome:
 @register(
     "Intensity & sound power",
     "ISO 3747:2010 Annex C",
-    "C2 at 101,325 kPa and 23,0 degC is 15 lg(296,15/296) = 0,003 300 dB (theta_ref = 296 K)",
+    "C2 at 101,325 kPa and 23,0 degC is 15 lg(296,15/296) = 0,003 300 dB (theta_ref = 296 K)",
 )
 def _chk_iso3747_c2_reference_conditions() -> Outcome:
     res = ph.emission.sound_power_in_situ(
@@ -863,7 +863,7 @@ def _chk_iso5136_table_d1() -> Outcome:
     """All 162 printed cells against Eq. (7) with the Table A.4 coefficients.
 
     The table prints to 0,1 dB, so the budget is half of that. The widest
-    gap is the 4 000 Hz row at U = +5 m/s, where the polynomial gives 6,151 dB
+    gap is the 4 000 Hz row at U = +5 m/s, where the polynomial gives 6,151 dB
     against a printed 6,2, which is 0,049 dB and only just inside the budget.
     """
     worst = 0.0

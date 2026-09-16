@@ -64,7 +64,7 @@ is the interpolation. The two curves are close to parallel (8.7 to 9.2 dB
 apart over the whole range), so thrust mostly shifts the level while distance
 sets the shape, and the fall is 21.7 dB per decade of slant distance rather
 than the 20 dB of pure divergence, the excess being the reference atmosphere's
-absorption. Power is interpolated **linearly**, not in decibels: 16 000 N reads
+absorption. Power is interpolated **linearly**, not in decibels: 16 000 N reads
 88.15 dB at 1 km, exactly halfway between the two tabulated rows.*
 
 <details>
@@ -154,7 +154,7 @@ $N$ points make $N-1$ segments, so every per-segment mask carries $N-1$ entries.
 This is why the ground-roll masks below read `xs[:-1] < 1500.0` and not
 `xs < 1500.0`. Two defaults decide more than they look like they do. The speed
 column enters the duration correction relative to `reference_speed`, whose
-default is 82.31 m/s, the Doc 29 160 kn reference, so a path flown at exactly
+default is 82.31 m/s, the Doc 29 160 kn reference, so a path flown at exactly
 that speed carries no duration correction at all, which is the case in every
 example on this page, and varying the column is how you see the term work. And
 `mounting=` defaults to `"wing"`: that is a property of the aeroplane rather

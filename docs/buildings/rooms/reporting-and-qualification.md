@@ -66,8 +66,8 @@ about. Both are in
 
 ## 2. How many positions, and where
 
-Table A.2 prints three rows: 500 seats want 6 microphone positions, 1 000
-want 8 and 2 000 want 10. They lie exactly on a straight line in the
+Table A.2 prints three rows: 500 seats want 6 microphone positions, 1 000
+want 8 and 2 000 want 10. They lie exactly on a straight line in the
 logarithm of the seat count, two positions per doubling, which is what lets
 a hall between the rows be answered at all.
 
@@ -81,7 +81,7 @@ print(round(float(room.minimum_receiver_positions(5000)), 2))   # 10.0
 ```
 
 The line stops where the table does. A.4 asks for "a minimum of between 6
-and 10 representative microphone positions", so a 5 000-seat arena does not
+and 10 representative microphone positions", so a 5 000-seat arena does not
 get thirteen positions on the strength of three rows, and a 200-seat studio
 does not get four. A.4 adds the geometry the table does not: at least three
 on-stage source positions in the normal case, a source height of 1,5 m, a
@@ -89,7 +89,7 @@ microphone height of 1,2 m at audience seat locations, positions evenly
 distributed over all the seating, and more of them wherever a hall breaks
 into balconies and under-balcony areas.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves: the source surveyed in a free field, on a turntable or, where no turntable can be used, from seventy-two readings taken every 5 degrees, with one gliding 30 degree arc of six readings and the Table 1 limits, and a 1 000-seat hall in plan and in section with three source positions on the stage at 1,5 m, the microphone positions of Table A.2 at 1,2 m, and more under the balcony" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves: the source surveyed in a free field, on a turntable or, where no turntable can be used, from seventy-two readings taken every 5 degrees, with one gliding 30 degree arc of six readings and the Table 1 limits, and a 1 000-seat hall in plan and in section with three source positions on the stage at 1,5 m, the microphone positions of Table A.2 at 1,2 m, and more under the balcony" width="100%"></picture>
 
 **How the measurement goes.** Qualify the source first: octave bands of pink
 noise in a free field, the microphone at least 1,5 m away, and the output
@@ -188,7 +188,7 @@ them.
 Clause 9.1 prints two ways to quote one number for the reverberation time
 and no third: the average of $T_{30}$ over the 500 Hz and 1 kHz **octave**
 bands, or "averages over the six one-third-octave bands from 400 Hz to
-1 250 Hz".
+1 250 Hz".
 
 ```python
 from phonometry import room

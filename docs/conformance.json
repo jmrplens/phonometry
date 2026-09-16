@@ -1144,7 +1144,7 @@
           }
         ]
       },
-      "quantity": "Set A (23 C, 101 325 Pa, 50 % RH): rho, c0, kappa, eta and alpha_t, as a fraction of the rounding of the last printed figure",
+      "quantity": "Set A (23 C, 101 325 Pa, 50 % RH): rho, c0, kappa, eta and alpha_t, as a fraction of the rounding of the last printed figure",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -1176,7 +1176,7 @@
           }
         ]
       },
-      "quantity": "Set B (20 C, 80 000 Pa, 65 % RH): rho, c0, kappa, eta and alpha_t, as a fraction of the rounding of the last printed figure",
+      "quantity": "Set B (20 C, 80 000 Pa, 65 % RH): rho, c0, kappa, eta and alpha_t, as a fraction of the rounding of the last printed figure",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -4320,7 +4320,7 @@
           }
         ]
       },
-      "quantity": "C2 at 101,325 kPa and 23,0 degC is 15 lg(296,15/296) = 0,003 300 dB (theta_ref = 296 K)",
+      "quantity": "C2 at 101,325 kPa and 23,0 degC is 15 lg(296,15/296) = 0,003 300 dB (theta_ref = 296 K)",
       "kind": "scalar",
       "expected": {
         "value": 0.003300388770355855
@@ -7173,7 +7173,7 @@
       "kind": "scalar",
       "expected": {
         "value": 55.350667,
-        "label": "55,350 66... dB (rated 55 dB)"
+        "label": "55,350 66... dB (rated 55 dB)"
       },
       "computed": {
         "value": 55.350668
@@ -8130,7 +8130,7 @@
           }
         ]
       },
-      "quantity": "Tapping machine: vo, cut-off frequencies fco of a bare slab and two soft coverings (7 000 / 2 300 / 100 Hz)",
+      "quantity": "Tapping machine: vo, cut-off frequencies fco of a bare slab and two soft coverings (7 000 / 2 300 / 100 Hz)",
       "kind": "scalar",
       "expected": {
         "value": 0.0
@@ -20823,7 +20823,7 @@
           }
         ]
       },
-      "quantity": "KB_FTr of the day by Formula (6), 144 metros at 1,0 and 80 trams at 0,7 a track (the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal inputs give 0,099 7)",
+      "quantity": "KB_FTr of the day by Formula (6), 144 metros at 1,0 and 80 trams at 0,7 a track (the print says 0,099 8, which its three-decimal r.m.s. give; its four-decimal inputs give 0,099 7)",
       "kind": "scalar",
       "expected": {
         "value": 0.0997
@@ -28339,7 +28339,7 @@
           }
         ]
       },
-      "quantity": "Line power of the 60 committed cases of the 4 875-case published test set, 8 octave bands each, dB re 1 pW/m",
+      "quantity": "Line power of the 60 committed cases of the 4 875-case published test set, 8 octave bands each, dB re 1 pW/m",
       "kind": "scalar",
       "expected": {
         "value": 0.0,
@@ -32812,7 +32812,7 @@
           }
         ]
       },
-      "quantity": "18 x 12 in duct, 6 ft, 1 in lining at 1 kHz -> 1.77 (10/3)^0.695 6 dB",
+      "quantity": "18 x 12 in duct, 6 ft, 1 in lining at 1 kHz -> 1.77 (10/3)^0.695 6 dB",
       "kind": "scalar",
       "expected": {
         "value": 24.520269813491062
@@ -35871,7 +35871,7 @@
           }
         ]
       },
-      "quantity": "The mean velocity in the passages of a splitter silencer carrying 16 000 m3/h, from the face velocity and the area ratio",
+      "quantity": "The mean velocity in the passages of a splitter silencer carrying 16 000 m3/h, from the face velocity and the area ratio",
       "kind": "scalar",
       "expected": {
         "value": 14.81
@@ -37667,7 +37667,7 @@
       "kind": "scalar",
       "expected": {
         "value": 0.3010299956639812,
-        "label": "lg 2 = 0,301 03"
+        "label": "lg 2 = 0,301 03"
       },
       "computed": {
         "value": 0.3,
@@ -38542,7 +38542,7 @@
           }
         ]
       },
-      "quantity": "The equivalent absorption area of a 6 000 m3 production hall, from the reverberation times measured in it",
+      "quantity": "The equivalent absorption area of a 6 000 m3 production hall, from the reverberation times measured in it",
       "kind": "record",
       "expected": {
         "label": "500 Hz = 279 m²; 1 kHz = 257 m²; 2 kHz = 296 m²; 4 kHz = 391 m²",
@@ -38587,7 +38587,7 @@
           }
         ]
       },
-      "quantity": "The mean absorption coefficient of the same hall, which is that area over the 2 200 m2 of boundary the sheet works out from its dimensions",
+      "quantity": "The mean absorption coefficient of the same hall, which is that area over the 2 200 m2 of boundary the sheet works out from its dimensions",
       "kind": "record",
       "expected": {
         "label": "500 Hz = 0.13; 1 kHz = 0.12; 2 kHz = 0.13; 4 kHz = 0.18",
@@ -41000,7 +41000,7 @@
       "kind": "scalar",
       "expected": {
         "value": 1.2073230191102495,
-        "label": "(101 325 + 200) / (287 x 293) = 1,207323 kg/m³"
+        "label": "(101 325 + 200) / (287 x 293) = 1,207323 kg/m³"
       },
       "computed": {
         "value": 1.207323

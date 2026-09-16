@@ -167,7 +167,7 @@ print(vibration.weighting_tolerance_percent("Wk", [10 ** 1.8, 63.1])[1])
 application, and the Table 4 corners straddle it rather than coincide with it.
 Whole-body vibration is specified from 0.5 Hz to 80 Hz while the tight region
 runs from 0.631 Hz to 63.1 Hz; hand-transmitted vibration from 8 Hz to
-1 000 Hz against 10 Hz to 794.3 Hz; low-frequency whole-body vibration from
+1 000 Hz against 10 Hz to 794.3 Hz; low-frequency whole-body vibration from
 0.1 Hz to 0.5 Hz against 0.1259 Hz to 0.3981 Hz. In all three cases both ends
 of the working range fall in a skirt, and the tails begin beyond it.
 

@@ -59,7 +59,7 @@ Cada nivel de certificación de esta página se exige en uno de los tres puntos
 de referencia que el Anexo 16 fija alrededor de la pista, así que conviene
 verlos antes de las matemáticas.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification.svg" alt="Los tres puntos de certificación de ruido del Capítulo 3 del Anexo 16 de la OACI, en planta y alzado con la misma escala de distancias: una línea lateral de referencia paralela a la pista a 450 m donde el ruido de despegue es máximo, con un punto simétrico al otro lado; el punto de sobrevuelo sobre la prolongación del eje a 6 500 m del inicio del recorrido de despegue, bajo la subida inicial; y el punto de aproximación a 2 000 m del umbral, 120 m bajo la senda de 3 grados que corta el suelo 300 m más allá del umbral; los micrófonos van a 1,2 m del suelo y la métrica en los tres puntos es el EPNL en EPNdB" width="92%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_aircraft_certification.svg" alt="Los tres puntos de certificación de ruido del Capítulo 3 del Anexo 16 de la OACI, en planta y alzado con la misma escala de distancias: una línea lateral de referencia paralela a la pista a 450 m donde el ruido de despegue es máximo, con un punto simétrico al otro lado; el punto de sobrevuelo sobre la prolongación del eje a 6 500 m del inicio del recorrido de despegue, bajo la subida inicial; y el punto de aproximación a 2 000 m del umbral, 120 m bajo la senda de 3 grados que corta el suelo 300 m más allá del umbral; los micrófonos van a 1,2 m del suelo y la métrica en los tres puntos es el EPNL en EPNdB" width="92%" />
 
 Tres puntos, porque un avión de transporte es ruidoso de tres maneras
 distintas. El punto **lateral**, sobre una línea a 450 m del costado de la pista
@@ -68,12 +68,12 @@ despegue completo con un ángulo de elevación bajo, que es donde más pesan el
 efecto suelo y la instalación de los motores. El punto de **sobrevuelo**, a
 6,5 km del inicio del recorrido de despegue sobre la prolongación del eje,
 recoge el avión después de la reducción de empuje, que es el caso de la
-población. El punto de **aproximación**, 2 000 m antes del umbral y 120 m por
+población. El punto de **aproximación**, 2 000 m antes del umbral y 120 m por
 debajo de la senda de 3°, recoge una condición a baja potencia dominada por la
 estructura del avión y por el ventilador. Los tres se puntúan con el EPNL de
 esta página, pero los límites son distintos y no son números sueltos: el
 Capítulo 3 §3.4 los fija como rectas que crecen con la masa máxima de despegue
-certificada, 101 EPNdB en sobrevuelo para un bimotor de 385 000 kg o más, 104
+certificada, 101 EPNdB en sobrevuelo para un bimotor de 385 000 kg o más, 104
 para un trirreactor y 106 para cuatro motores o más, frente a 103 en lateral y
 105 en aproximación en lo alto de sus propios intervalos de masa, así que un
 mismo EPNL puede cumplir en un punto e incumplir en otro. El micrófono va a
@@ -192,7 +192,7 @@ La estación que produce esos espectros está fijada apartado por apartado.
   (§2.2.2.4.1). Para helicópteros los límites de viento se aprietan a 5,1 m/s y
   2,6 m/s, y los límites de temperatura y humedad se aplican solo a 10 m. La
   temperatura, la humedad, la velocidad y la dirección del viento se miden a
-  10 m sobre el suelo y a menos de 2 000 m del punto de medida de ruido
+  10 m sobre el suelo y a menos de 2 000 m del punto de medida de ruido
   (§2.2.2.2).
 - **El seguimiento.** La posición de la aeronave se determina mediante un método
   independiente de la instrumentación de vuelo de cabina y sincronizado en el
@@ -472,7 +472,7 @@ método exacto mucho más allá del límite de 50 dB del método aproximado.
 *La línea continua es la banda y la discontinua el tono puro en el centro de
 banda, y las dos solo coinciden donde la absorción es pequeña. A 1 km la
 diferencia es de 0,18 dB en la banda de 4 kHz y de 10,78 dB en la de 10 kHz; a
-7 620 m es de 29,95 dB en 4 kHz y de 167,97 dB en 10 kHz, frente a un valor
+7 620 m es de 29,95 dB en 4 kHz y de 167,97 dB en 10 kHz, frente a un valor
 medio de banda de 753,92 dB. Las dos son la misma atmósfera de 25 °C y 70 % HR:
 la diferencia está en que una banda conserva la energía de su borde inferior
 mucho después de que su frecuencia central se haya ido.*
@@ -484,7 +484,7 @@ de banda que sobrevive la lleva casi entera esa mitad inferior. La atenuación d
 banda se va quedando por tanto cada vez más atrás del valor de tono puro, que es
 lo que muestran las dos curvas: a 1 km son indistinguibles por debajo de unos
 pocos kilohercios y solo se separan en lo alto del intervalo, mientras que a
-7 620 m la diferencia en alta frecuencia es grande, que es justo el régimen que
+7 620 m la diferencia en alta frecuencia es grande, que es justo el régimen que
 el antiguo método aproximado de ARP 866B, limitado a 50 dB, no podía seguir. La
 consecuencia para el §8 es directa: corregir un sobrevuelo a condiciones de
 referencia con el coeficiente de tono puro exagera la corrección en alta
@@ -530,7 +530,7 @@ att.plot()   # banda frente a tono puro medio de banda (requiere matplotlib)
 
 La regresión se ajustó para aproximadamente 6-32 °C y 20-95 % de humedad
 relativa, la ventana de ensayo de 14 CFR Part 36, y para longitudes de trayecto
-de hasta 7 620 m (25 000 ft); los valores por defecto de la función, 25 °C y
+de hasta 7 620 m (25 000 ft); los valores por defecto de la función, 25 °C y
 70 % de HR, son el punto de referencia de ARP 5534 y el día de referencia del
 Anexo 16. La aplicación es recíproca, así que la misma llamada sirve para las
 dos direcciones del ajuste a condiciones de referencia: quitar la absorción del

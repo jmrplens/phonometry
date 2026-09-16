@@ -335,7 +335,7 @@ and $b$ = 5,2553. The result exposes `c2` and the properties
 `sound_power_level_ref` and `sound_energy_level_ref` (Eq. C.1, C.3).
 $\theta_\mathrm{ref}$ is printed as 296 K beside a reference temperature of
 23,0 °C (296,15 K), so at exactly the reference conditions $C_2$ is
-+0,003 3 dB and not zero; ISO 3741 and ISO 3744 print the same 296 K, so the
++0,003 3 dB and not zero; ISO 3741 and ISO 3744 print the same 296 K, so the
 library keeps the family's rounding.
 
 ```python

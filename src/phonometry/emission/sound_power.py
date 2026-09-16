@@ -274,7 +274,7 @@ _THETA1_K = 296.0
 #: Celsius to kelvin offset as Annex G prints it, (273,15 + theta).
 _KELVIN_OFFSET = 273.15
 #: Static pressure from the altitude of the test site (Eq. G.2):
-#: p_s = p_s,0 (1 - a H_a)^b, a = 2,256 0 x 10^-5 m^-1, b = 5,255 3.
+#: p_s = p_s,0 (1 - a H_a)^b, a = 2,256 0 x 10^-5 m^-1, b = 5,255 3.
 _ALTITUDE_A_PER_M = 2.2560e-5
 _ALTITUDE_B = 5.2553
 

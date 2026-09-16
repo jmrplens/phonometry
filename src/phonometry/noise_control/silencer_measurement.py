@@ -206,8 +206,8 @@ ISO7235_SPREAD_LIMITS: tuple[tuple[float, float], ...] = (
 #:
 #: The insertion-loss column comes from tests on 1 m long parallel-baffle
 #: silencers; the other two are estimates based on experience (7.9). The
-#: sound-intensity column is qualified by a footnote limiting it to 5 000 Hz,
-#: which is why its last pair stops there rather than at 10 000 Hz.
+#: sound-intensity column is qualified by a footnote limiting it to 5 000 Hz,
+#: which is why its last pair stops there rather than at 10 000 Hz.
 ISO7235_REPRODUCIBILITY: dict[str, tuple[tuple[float, float], ...]] = {
     "insertion_loss": (
         (100.0, 1.5),

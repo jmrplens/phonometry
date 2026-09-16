@@ -89,7 +89,7 @@ print(clipped, dead, round(offset, 4), spikes, round(kurtosis, 2))
 
 The synthetic record above prints `0 1 0.0024 0 3.02`, which is what clean looks
 like: no clipped samples, no repeated sample, an offset of 0.002σ, not one
-excursion beyond 5σ in 65 536 Gaussian samples, and a kurtosis of 3.0 as a
+excursion beyond 5σ in 65 536 Gaussian samples, and a kurtosis of 3.0 as a
 Gaussian record must have.
 
 Alongside the numbers, the acquisition metadata has to travel with the file or
@@ -589,7 +589,7 @@ res.plot()   # empirical exceedance against the Rice mixture (figure below)
 
 *One number decides which curve the peaks follow. Ideal low-pass noise has the
 closed-form $r = \sqrt5/3 = 0.745$, and the record measures 0.746 — which is
-also why 12.6 % of its 39 534 maxima are **negative**, an impossibility under
+also why 12.6 % of its 39 534 maxima are **negative**, an impossibility under
 Rayleigh. The empirical staircase sits on the Rice mixture for that $r$ and
 between the two limits everywhere: the chance of a peak beyond $4\sigma$ is
 $2.5\times10^{-4}$, a quarter below the Rayleigh $e^{-8} = 3.4\times10^{-4}$.

@@ -397,7 +397,7 @@ Digit 3 of the track descriptor: rail-pad **dynamic** stiffness.
 
 (EU) 2021/1226 Annex point (3) replaced "acoustic" stiffness by
 **dynamic** stiffness and re-worded the hard class as
-"Hard (800-1 000 MN/m)".
+"Hard (800-1 000 MN/m)".
 
 ## RailRoughnessClass
 

@@ -563,7 +563,7 @@ def limp_frame_applicable(
     :param criterion: Key into :data:`LIMP_FRAME_CRITERIA`, ``"doutres"``
         (Default, 0,2) or ``"beranek"`` (0,05).
     :param fluid_bulk_modulus: Bulk modulus of the pore fluid ``K_f``, in Pa
-        (Default: 101 325, the isothermal value for fluid).
+        (Default: 101 325, the isothermal value for fluid).
     :return: ``True`` when :math:`\lvert K_c/K_\mathrm{f} \rvert` does not exceed
         the threshold.
     :raises ValueError: for a negative modulus or an unknown criterion.

@@ -462,7 +462,7 @@ res.plot()   # weighted spectrum against the criteria (needs matplotlib)
 Read those six numbers in order, because each one is a step. The record's
 unweighted single-strike exposure is **135.7 dB re 1 µPa²·s**; LF weighting takes
 it to **133.5 dB**, costing barely 2 dB, because a 200 Hz hammer sits inside the
-low-frequency cetacean passband. Accumulating 3 000 strikes adds
+low-frequency cetacean passband. Accumulating 3 000 strikes adds
 $10\log_{10}3000 = 34.8$ dB and gives **168.3 dB**: that term, not the
 weighting, is what usually decides the outcome. The margins are then read
 against the criteria: `sel_margin` = **−14.7 dB** against the 183 dB auditory
@@ -506,7 +506,7 @@ plt.show()
 
 </details>
 
-The operational question a campaign asks is not "does 3 000 strikes exceed the
+The operational question a campaign asks is not "does 3 000 strikes exceed the
 criterion" but "how many strikes may be driven, and which group binds first".
 That is one loop over `weighted_exposure` with a rising `n_events`.
 
@@ -515,8 +515,8 @@ That is one loop over `weighted_exposure` with a rising `n_events`.
 *Every curve is a straight line on a log-N axis, because accumulation adds
 $10\log_{10}N$ and nothing else: the group decides the intercept and the strike
 count decides the rest. For this 200 Hz hammer only the low-frequency group
-reaches a criterion at all, at 2 820 strikes, and no group reaches its injury
-criterion within 10 000. The curve is a stationary-receiver worst case: the
+reaches a criterion at all, at 2 820 strikes, and no group reaches its injury
+criterion within 10 000. The curve is a stationary-receiver worst case: the
 library does not move the animal.*
 
 <details>
@@ -590,7 +590,7 @@ Two consequences follow, and both belong in the report. The governing metric can
 **change with range**, because the accumulated SEL carries the $+10\log_{10}N$
 term and the peak does not, so the two isopleths shrink at different rates. And
 a cumulative number means nothing without two facts attached: the range at which
-the strike was measured or modelled, and the **accumulation window**: 3 000
+the strike was measured or modelled, and the **accumulation window**: 3 000
 strikes means one pile driven inside that window, conventionally 24 hours in the
 regulatory guidance, not a whole campaign.
 

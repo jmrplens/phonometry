@@ -57,7 +57,7 @@ from ..registry import Outcome, numeric, register
 
 _VDI2081 = "HVAC noise (VDI 2081)"
 
-#: Table 1, element 1: the supply air fan, 16 000 m3/h against 600 Pa, a radial
+#: Table 1, element 1: the supply air fan, 16 000 m3/h against 600 Pa, a radial
 #: fan with rearwards curved blades (assembly RR) turning at 1250 min^-1.
 _VOLUME_FLOW = 16000.0 / 3600.0
 _TOTAL_PRESSURE = 600.0
@@ -297,7 +297,7 @@ _register_junctions()
 _STRAIGHT_AREA = 0.5 * 0.4
 _STRAIGHT_VELOCITY = (4200.0 / 3600.0) / _STRAIGHT_AREA
 #: Table 1, element 3: the junction. Its approach velocity comes from the whole
-#: system's 16 000 m3/h over the 0,90 m2 feeder, not from the branch's own duty.
+#: system's 16 000 m3/h over the 0,90 m2 feeder, not from the branch's own duty.
 _JUNCTION_APPROACH = (16000.0 / 3600.0) / 0.90
 _JUNCTION_BRANCH = (4200.0 / 3600.0) / 0.30
 _PRINTED_JUNCTION_NOISE = (39.1, 33.5, 27.4, 20.7, 13.7, 6.2, -1.5, -9.6)

@@ -32,7 +32,7 @@ so the report never merely repeats a manufacturer number:
   $$
 
   the rated sensitivity referring to the standard reference frequency of
-  1 000 Hz (11.3). This is the first clean-room oracle: 12.5 mV/Pa returns
+  1 000 Hz (11.3). This is the first clean-room oracle: 12.5 mV/Pa returns
   $20 \log_{10} 0.0125 = -38.06$ dB re 1 V/Pa exactly.
 
 * **Effective frequency range** (12.2). The range of frequencies over which
@@ -101,7 +101,7 @@ them, one bundle per clause, so each may be omitted whole.
 | `frequencies` | Free-field response frequency axis, in Hz (1-D, > 0). |
 | `response_db` | Free-field frequency response, in dB, relative to the output at a stated frequency (12.1.1); it is re-normalized to 0 dB at `reference_frequency`. |
 | `sensitivity_mv_per_pa` | Rated free-field sensitivity `M` at the reference frequency, in mV/Pa (11.2.1/11.3). |
-| `reference_frequency` | Stated reference frequency, in Hz; the 11.3 standard reference frequency of 1 000 Hz by default. |
+| `reference_frequency` | Stated reference frequency, in Hz; the 11.3 standard reference frequency of 1 000 Hz by default. |
 | `tolerance_db` | Half-width of the response tolerance, in dB (default 2), defining the effective frequency range (12.2). |
 | `directivity` | Directional characteristics of Clause 13 as a [`MicrophoneDirectivity`](/phonometry/reference/api/electroacoustics/microphone/#microphonedirectivity): the directional pattern, its stated frequency and the directivity index. |
 | `noise` | Inherent noise of Clause 17 as a [`MicrophoneNoise`](/phonometry/reference/api/electroacoustics/microphone/#microphonenoise): the weighted noise voltage or the stated equivalent noise level, its weighting and the noise spectrum. |

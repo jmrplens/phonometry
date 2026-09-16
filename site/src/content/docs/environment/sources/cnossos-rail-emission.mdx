@@ -113,10 +113,10 @@ the code selects one of them. A vehicle carries four digits and a track six.
 | :--- | :--- | :--- | :--- |
 | 1 | Track base | `B` ballast, `S` slab, `L` ballasted bridge, `N` non-ballasted bridge, `T` embedded, `O` other | With digit 3, the `TrackTransferClass` of G-3a; `L`/`N` also switch on the bridge source of section 8 |
 | 2 | Railhead roughness | `E` well maintained and very smooth, `M` normally maintained, `N` not well maintained, `B` not maintained and bad | `RailRoughnessClass.WELL_MAINTAINED` / `.NORMAL` / `.NOT_WELL_MAINTAINED` / `.BAD` → G-1b |
-| 3 | Rail pad type | `S` soft (150-250 MN/m), `M` medium (250-800), `H` stiff (800-1 000) | The second half of the `TrackTransferClass` label: `MONOBLOCK_MEDIUM` is "M/M" |
+| 3 | Rail pad type | `S` soft (150-250 MN/m), `M` medium (250-800), `H` stiff (800-1 000) | The second half of the `TrackTransferClass` label: `MONOBLOCK_MEDIUM` is "M/M" |
 | 4 | Additional measures | `N` none, `D` rail damper, `B` low barrier, `A` absorber plate on slab, `E` embedded rail, `O` other | Outside the emission model |
 | 5 | Rail joints | `N` none, `S` a single joint or switch, `D` two per 100 m, `M` more than two per 100 m | The joint density $n_l$ of (2.3.12) |
-| 6 | Curvature | `N` straight, `L` 1 000-500 m, `M` below 500 and above 300 m, `H` below 300 m | The radius passed to `curve_squeal_excess` |
+| 6 | Curvature | `N` straight, `L` 1 000-500 m, `M` below 500 and above 300 m, `H` below 300 m | The radius passed to `curve_squeal_excess` |
 
 Two selectors have no descriptor digit at all and have to come from the vehicle
 data sheet: the **wheel diameter** (`WheelDiameter`, which picks the wheel
@@ -587,8 +587,8 @@ Official Journal text of the instrument that enacted it. And the whole chain of
 equations end to end, against the emission test workbook the European Commission
 published with its reference source module: feeding the shipped equations the
 **2015** coefficient database that workbook was computed with reproduces **all
-34 560 published rows of the twenty vehicles whose catalogue entries are well
-formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
+34 560 published rows of the twenty vehicles whose catalogue entries are well
+formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
 two decimals it prints. A hundred and twenty-three of those cases are committed
 to the repository and run in CI. The three vehicles left out are described in
 `tests/data/cnossos/README.md`: their rows record defects of the reference

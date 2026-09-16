@@ -134,7 +134,7 @@ __all__ = [
 #: (ISO 8041-1:2017, 3.1.2.2, after ISO 1683).
 REFERENCE_ACCELERATION = 1e-6
 
-#: Reference duration ``T0 = 8 h = 28 800 s`` of the daily exposure ``A(8)``
+#: Reference duration ``T0 = 8 h = 28 800 s`` of the daily exposure ``A(8)``
 #: (ISO 5349-1:2001, 3.2; ISO 2631-1:1997, B.1).
 REFERENCE_DURATION_S = 28800.0
 

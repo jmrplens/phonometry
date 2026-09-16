@@ -391,7 +391,7 @@ $$
 
 `frequency` is the piston frequency `f` (Hz). The air properties `c0`,
 `rho0`, `C_P` and `k_a` come from `fluid`, which defaults to
-[`ANNEX_A_AIR`](/phonometry/reference/api/materials/airflow-resistance/#annex_a_air): air at 23 degC, 101 325 Pa and 50 % relative humidity
+[`ANNEX_A_AIR`](/phonometry/reference/api/materials/airflow-resistance/#annex_a_air): air at 23 degC, 101 325 Pa and 50 % relative humidity
 computed from IEC 61094-2:2009 Annex F. Note that `c0` cancels: `b` is
 $\sqrt{2 k_\mathrm{a} / (\rho_0 C_\mathrm{P} \omega)}$, so only the pair
 `k_a`/`C_P` and the density move it.

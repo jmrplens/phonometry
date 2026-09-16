@@ -12,8 +12,8 @@ when IEC 61672-1 replaced IEC 60651 (first edition 2002) and is provided for
 historical data and older national codes only.
 
 AU per IEC 61012:1990: the A weighting cascaded with the U low-pass
-(six poles, Table 2: a double real pole at -12 200 Hz and complex pairs at
--7 850 +/- j8 800 Hz and -2 900 +/- j12 150 Hz) for measuring audible sound
+(six poles, Table 2: a double real pole at -12 200 Hz and complex pairs at
+-7 850 +/- j8 800 Hz and -2 900 +/- j12 150 Hz) for measuring audible sound
 in the presence of ultrasound. It is flat relative to A up to 10 kHz and
 cuts steeply above (U alone, Table 1: -2.8 dB at 12.5 kHz; -61.8 dB at
 40 kHz). The Table 2 poles reproduce every Table 1 nominal value within
@@ -342,8 +342,8 @@ def _a_weighting_zpk() -> tuple[np.ndarray, np.ndarray, float]:
 def _u_poles() -> np.ndarray:
     """IEC 61012:1990 Table 2: the six poles of the U low-pass, in rad/s.
 
-    A double real pole at -12 200 Hz and complex-conjugate pairs at
-    -7 850 +/- j8 800 Hz and -2 900 +/- j12 150 Hz. Cascaded with A they make
+    A double real pole at -12 200 Hz and complex-conjugate pairs at
+    -7 850 +/- j8 800 Hz and -2 900 +/- j12 150 Hz. Cascaded with A they make
     the AU weighting of subclause 2.2, for measuring audible sound in the
     presence of ultrasound.
     """
@@ -590,8 +590,8 @@ class WeightingFilter:
             reads 15.7 dB below the design goal at the 19 952.6 Hz row, which
             the class 1 mask does not see because its lower limit there is
             -inf, and 61.4 dB below it at 15 848.9 Hz when fs = 32 kHz, which
-            it does. So it verifies to class 1 for fs >= 44 100 Hz, degrades to
-            class 2 at 32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
+            it does. So it verifies to class 1 for fs >= 44 100 Hz, degrades to
+            class 2 at 32 000 and 22 050 Hz, and meets no class at 16 000 Hz.
             It is refused for the '468' curve, whose skirt puts it 23 dB out at
             16 kHz with no lower grade in the Recommendation to fall back to.
 

@@ -521,7 +521,7 @@ def _chk_iso3382_1_directivity_reference() -> Outcome:
 def _chk_iso3382_1_third_octave_mid() -> Outcome:
     # 9.1 prints two routes to a single-number reverberation time and no
     # third: the two octave bands, or "averages over the six one-third-octave
-    # bands from 400 Hz to 1 250 Hz". What a one-third-octave analysis must
+    # bands from 400 Hz to 1 250 Hz". What a one-third-octave analysis must
     # not do is average the two one-third-octave bands that happen to be
     # called 500 Hz and 1 kHz, which is a sixth of the band the octave route
     # covers. The check is on which bands the route selects, because that is
@@ -681,7 +681,7 @@ def _chk_iso717_2_lnw() -> Outcome:
     # Worked example: Ln,w = 79 dB, CI = -11 dB, unfavourable sum 28,0 dB.
     # CI = -11 is the ISO 717-2:2013 Annex C print; the 2020 reprint of this
     # example is internally inconsistent with its own A.2.1 (it sums the
-    # 3 150 Hz band into Ln,sum and prints CI = -10).
+    # 3 150 Hz band into Ln,sum and prints CI = -10).
     # Integer ratings and CI must match exactly; the unfavourable sum is a
     # one-decimal tabulated intermediate, so 1e-9 = exact up to float noise.
     exp = ref.ISO717_2_ANNEX_C1_EXPECTED
@@ -1188,7 +1188,7 @@ def _chk_intensity_kc_annexb() -> Outcome:
 def _chk_low_frequency_limp_panel() -> Outcome:
     # Annex A is normative and Table A.1 is the only worked calculation in
     # the document. Its plaster-board column (10 kg/m2 over a 10 m2 test
-    # opening, 1 013 hPa, 23 degC) is the oracle of Formulas (A.1) to (A.5).
+    # opening, 1 013 hPa, 23 degC) is the oracle of Formulas (A.1) to (A.5).
     # The steel-sandwich column of the same table is NOT used: it cannot be
     # reproduced from the inputs printed beside it (see docs/ERRATA.md).
     calculated = ph.building.limp_panel_reduction_index(
@@ -1557,7 +1557,7 @@ def _chk_iso7626_reciprocity() -> Outcome:
 
 # --- Heavy and soft impact sources (ISO 16283-2 / JIS A 1418-2 / ISO 717-2) ---
 #: ISO 717-2:2020 Table D.4 (printed p. 22): a field measurement in octave
-#: bands, Li,Fmax at 63/125/250/500 Hz, rated LiA,Fmax = 55,350 66... = 55 dB.
+#: bands, Li,Fmax at 63/125/250/500 Hz, rated LiA,Fmax = 55,350 66... = 55 dB.
 _ISO717_2_D4_LEVELS = (65.3, 64.5, 58.0, 55.8)
 
 
@@ -1575,7 +1575,7 @@ def _chk_iso717_2_annex_d_rating() -> Outcome:
             1e-4,
             unit="dB",
             places=6,
-            expected_label="55,350 66... dB (rated 55 dB)",
+            expected_label="55,350 66... dB (rated 55 dB)",
         )
         if res.rating == 55
         else Outcome(
@@ -2226,7 +2226,7 @@ def _hopkins_plate(
     "Room & building acoustics",
     "Hopkins (2007) 3.6.3.1 / 4.4.3.1, printed pp. 276-282 and 513-514",
     "Tapping machine: vo, cut-off frequencies fco of a bare slab and two soft "
-    "coverings (7 000 / 2 300 / 100 Hz)",
+    "coverings (7 000 / 2 300 / 100 Hz)",
 )
 def _chk_hopkins_tapping_cut_off() -> Outcome:
     _stiffness, impedance = _hopkins_plate(2200.0, 3800.0, 0.2, 0.14)

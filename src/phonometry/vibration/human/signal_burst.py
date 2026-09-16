@@ -736,7 +736,7 @@ def verify_signal_burst_response(
     *,
     amplitude_m_s2: float = 1.0,
 ) -> SignalBurstVerification:
-    """Check measured burst indications against ISO 8041-1 Tables 7 to 9.
+    """Verify measured burst indications against ISO 8041-1 Tables 7 to 9.
 
     The acceptance test of 12.13 (folio 36): "The vibration values indicated
     in response to the signal bursts, relative to the values of the vibration

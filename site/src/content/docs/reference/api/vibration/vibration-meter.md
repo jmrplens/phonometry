@@ -714,7 +714,7 @@ verify_vibration_meter(
 ) -> VibrationMeterVerification
 ```
 
-Check a measured amplitude response against Tables 2 and 3.
+Verify a measured amplitude response against Tables 2 and 3.
 
 Formula (7) is a ratio of ratios: the measured response over the design
 response, each divided by its own value at the reference frequency, so a

@@ -91,7 +91,7 @@ assess_db_hr(
 ) -> DbHrAssessment
 ```
 
-Check a set of achieved values against their DB-HR requirements.
+Judge a set of achieved values against their DB-HR requirements.
 
 **Parameters**
 

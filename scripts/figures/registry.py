@@ -564,6 +564,7 @@ from .underwater import (
     generate_ship_source_level,
     generate_ship_traffic_noise,
     generate_sonar_budget,
+    generate_sonar_detection_terms,
     generate_sonar_equation,
     generate_sound_speed_models,
     generate_underwater_propagation_loss,
@@ -1092,6 +1093,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     generate_sound_speed_models,
     generate_detection_range,
     generate_sonar_budget,
+    generate_sonar_detection_terms,
     # Underwater fauna: audiograms, exposure functions and the assessment.
     generate_marine_mammal_audiograms,
     generate_marine_mammal_exposure_functions,

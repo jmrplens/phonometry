@@ -2647,6 +2647,28 @@ _ES_EXACT = {
     # pages: alcance de detección, cruce, guía de ondas, ceros interiores,
     # ángulo rasante, promediado en distancia, descamar.
     "Closed Form: One Crossing (FOM = 82.7 dB, 50 kHz)": "Forma cerrada: un cruce (FOM = 82,7 dB, 50 kHz)",
+    # The two receiver terms of the sonar equation. The Spanish guide already
+    # calls broadside "través" and endfire "proa", so the figure says the same.
+    "Detection Threshold (Ainslie Eq. 11.22)": "Umbral de detección (Ainslie, Ec. 11.22)",
+    "DT at 50 % detection probability": "DT con 50 % de probabilidad de detección",
+    "False-alarm probability $p_\\mathrm{fa}$": "Probabilidad de falsa alarma $p_\\mathrm{fa}$",
+    "Detection threshold DT [dB]": "Umbral de detección DT [dB]",
+    "outside the stated\n$\\pm$ 0.1 dB": "fuera de los\n$\\pm$ 0,1 dB declarados",
+    "10.1 dB of signal-to-noise\nafter processing, for one false alarm\n"
+    "in ten thousand empty beams": "10,1 dB de relación señal-ruido\ntras el "
+    "procesado, por una falsa alarma\nde cada diez mil haces vacíos",
+    "Array Gain of a Line Array (Ainslie Eq. 6.56)": "Ganancia de un array lineal (Ainslie, Ec. 6.56)",
+    "Broadside": "Través",
+    "Steered 60°": "Orientado 60°",
+    "Endfire": "Proa",
+    "$10\\,\\lg(2L/\\lambda)$ and $10\\,\\lg(4L/\\lambda)$": "$10\\,\\lg(2L/\\lambda)$ y $10\\,\\lg(4L/\\lambda)$",
+    "half a wavelength of array still\nreturns 1.1 dB: the 0 dB is a\n"
+    "limit and not a cut-off\n\nat the half-wavelength spacing an\n"
+    "array is usually built with,\n$L/\\lambda$ is $(N - 1)/2$ elements": "media longitud de onda de array\nsigue dando 1,1 dB: el 0 dB es un\n"
+    "límite y no un corte\n\ncon el espaciado de media longitud\nde onda con "
+    "el que se suele construir,\n$L/\\lambda$ son $(N - 1)/2$ elementos",
+    "Array length in wavelengths $L/\\lambda$": "Longitud del array en longitudes de onda $L/\\lambda$",
+    "Array gain DI [dB]": "Ganancia de array DI [dB]",
     "Crossings": "Cruces",
     "Normal-mode PL (30 Hz, 100 m waveguide, 3 modes)": "PL de modos normales (30 Hz, guía de 100 m, 3 modos)",
     "Total PL": "PL total",

@@ -59,8 +59,8 @@ inside the spread of the table.
 
 A time-domain elastic solver integrates the **bulk** speed, because the
 material it discretises is unbounded at the scale of a cell. Reading a plate
-table into a solver is a documented trap: for steel the gap is eleven per cent,
-for aluminium fifteen.
+table into a solver is a documented trap: for the steel above the gap is eight
+and a half per cent, and for aluminium fifteen.
 
 A **beam** speed turns up where a bar was actually measured, which is where a
 speed-of-sound table in a general acoustics text usually gets its solids.

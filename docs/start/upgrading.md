@@ -14,14 +14,14 @@ one, and one of those three changes a number without raising anything.
 ## The one rule: imports move down one level
 
 In 3.3.0 the root re-exported the whole library, so `from phonometry import
-laeq` worked for almost every name. Today the root exports twenty-four things:
+laeq` worked for almost every name. Today the root exports twenty-five things:
 the twenty-one subpackages, the three classes that belong to no single domain
 (`Signal`, `ReportMetadata`, `PhonometryWarning`) and `__version__`.
 
 ```python
 import phonometry
 
-print(len(phonometry.__all__))          # 24
+print(len(phonometry.__all__))          # 25
 print("laeq" in phonometry.__all__)     # False
 
 from phonometry.signals import laeq     # this is the new spelling

@@ -17,14 +17,14 @@ de esos tres cambia un número sin levantar nada.
 
 En la 3.3.0 la raíz reexportaba la biblioteca entera, así que `from phonometry
 import laeq` funcionaba para casi cualquier nombre. Hoy la raíz exporta
-veinticuatro cosas: los veintiún subpaquetes, las tres clases que no pertenecen a
+veinticinco cosas: los veintiún subpaquetes, las tres clases que no pertenecen a
 ningún dominio concreto (`Signal`, `ReportMetadata`, `PhonometryWarning`) y
 `__version__`.
 
 ```python
 import phonometry
 
-print(len(phonometry.__all__))          # 24
+print(len(phonometry.__all__))          # 25
 print("laeq" in phonometry.__all__)     # False
 
 from phonometry.signals import laeq     # esta es la grafía nueva

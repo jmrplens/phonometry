@@ -22,7 +22,7 @@ are written once instead of in each caller's head.
 
 ## Why it is not a domain
 
-Nineteen of the twenty-one packages are domains of application: you go to
+Sixteen of the twenty-one packages are domains of application: you go to
 `building` because you are measuring a building, to `underwater` because you
 are working in water. Nobody goes to `solids` because they are measuring a
 solid. They go there because whatever they are measuring happens in one, or
@@ -53,7 +53,7 @@ of the three and the one a time-domain elastic solver integrates.
 
 For the steel of Hopkins Table A2, with $\rho = 7800$ kg/m³, $\nu = 0{,}28$ and
 a plate speed of 5 270 m/s, the three are 5 059, 5 270 and 5 720 m/s. Reading
-one into another is a four to nine per cent error in whatever it feeds, and it
+one into another is a four to thirteen per cent error in whatever it feeds, and it
 is an easy mistake to make, because a table that prints one of them often calls
 it $c_\mathrm{L}$ with no qualifier at all.
 
@@ -154,8 +154,8 @@ inside the spread of the table.
 
 A time-domain elastic solver integrates the **bulk** speed, because the
 material it discretises is unbounded at the scale of a cell. Reading a plate
-table into a solver is a documented trap: for steel the gap is eleven per cent,
-for aluminium fifteen.
+table into a solver is a documented trap: for the steel above the gap is eight
+and a half per cent, and for aluminium fifteen.
 
 A **beam** speed turns up where a bar was actually measured, which is where a
 speed-of-sound table in a general acoustics text usually gets its solids.

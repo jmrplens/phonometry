@@ -18,7 +18,7 @@ to depends on the shape the wave travels in, not on the material. The three are
 and they are not interchangeable. Take the steel of Hopkins Table A2,
 ``rho = 7800`` kg/m3, ``nu = 0.28`` and a plate speed of 5 270 m/s, which is a
 Young's modulus of 200 GPa: the beam speed is 5 059 m/s and the bulk speed is
-5 720 m/s. Reading one into another is a four to nine per cent error in
+5 720 m/s. Reading one into another is a four to thirteen per cent error in
 whatever it feeds, and the gap grows with Poisson's ratio. The first two are
 Hopkins (2007) Eqs. (2.20) and
 (2.21), PDF page 144 (printed p. 117), which also records that the ``b`` and

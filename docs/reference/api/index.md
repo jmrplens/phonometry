@@ -2,9 +2,9 @@
 
 # API Reference
 
-All core functionality lives in twenty-one domain subpackages, and every public
-name is reached through the one that owns it. The top-level `phonometry`
-package publishes those twenty and four names that belong to no domain:
+All core functionality lives in twenty-one subpackages, and every public name is
+reached through the one that owns it. The top-level `phonometry` package
+publishes those twenty-one and four names that belong to none of them:
 `Signal`, `ReportMetadata`, `PhonometryWarning` and `__version__`.
 
 > **Note.** This page is the curated quick table for the GitHub/PyPI audience:
@@ -15,8 +15,8 @@ package publishes those twenty and four names that belong to no domain:
 
 ## Namespaces
 
-The library is organized into twenty-one domain subpackages, and importing the
-domain namespace is the primary form used throughout the documentation:
+The library is organized into twenty-one subpackages, and importing the
+namespace is the primary form used throughout the documentation:
 
 ```python
 from phonometry import aircraft

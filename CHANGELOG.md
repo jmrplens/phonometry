@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The two receiver terms of the sonar equation, drawn.** The detection
+  threshold and the array gain arrived with their models and their prose and
+  without a figure, which for two quantities that are each a curve over one
+  variable is the wrong way round. `sonar_detection_terms` puts them side by
+  side: the threshold at 50 % detection probability over eight decades of
+  false-alarm probability, marked where a design usually sits and shaded past
+  the decade the book states its accuracy to, and the gain of an unshaded line
+  array over its length in wavelengths, broadside, steered and at endfire,
+  against the two asymptotes the book gives. Neither is measured at sea, which
+  is the point of drawing them together: both are design choices, and each moves
+  the figure of merit decibel for decibel.
+
 - **ISO 11546-1:1995 and ISO 11546-2:1995**, the insulation an enclosure gives
   once it is built, in `phonometry.noise_control.enclosure_insulation`. The
   quantity is a difference of two runs: determine the machine's sound power

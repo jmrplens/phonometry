@@ -715,6 +715,19 @@ logarítmico en $p_\mathrm{fa}$, así que la década por debajo de $10^{-2}$ cue
 el umbral diverge y la llamada se rechaza: la mitad de los haces vacíos ya se están
 declarando detecciones, y ahí no hay umbral que valga.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms.svg" alt="Dos paneles. A la izquierda, el umbral de detección con 50 por ciento de probabilidad de detección frente a la probabilidad de falsa alarma de diez elevado a menos ocho a diez elevado a menos uno en eje logarítmico: una curva que baja de 13,2 decibelios a 3,2, marcada en diez elevado a menos cuatro donde vale 10,1 decibelios, con la década por encima de diez elevado a menos dos sombreada por quedar fuera de los más menos 0,1 decibelios que declara la aproximación. A la derecha, la ganancia de un array lineal sin ponderar frente a su longitud en longitudes de onda de 0,1 a 100 en eje logarítmico, tres curvas para través, una orientación de 60 grados y proa, subiendo hacia las dos asíntotas punteadas diez lg de dos L partido por lambda y diez lg de cuatro L partido por lambda, y aplanándose a cero decibelios cuando el array es mucho más corto que una longitud de onda" width="94%" />
+
+*Los dos términos que pone el receptor, cada uno sobre la única variable de la
+que depende. Ninguno se mide en el mar: el umbral es una propiedad del detector
+y la ganancia lo es del array, y una decisión de diseño en cualquiera de los dos
+mueve la figura de mérito decibelio a decibelio. La aproximación se dibuja más
+allá del $10^{-2}$ al que el libro la declara, porque quien trabaje ahí debe ver
+lo que da la fórmula y que es una extrapolación. A la derecha las tres
+orientaciones comparten límite y no asíntota: la huella del haz se reduce a la
+mitad cerca de proa, que son los 3 dB entre las dos líneas punteadas, y toda la
+familia se aplana a 0 dB en vez de cortarse, porque medio array de longitud de
+onda sigue dando 1,1 dB.*
+
 ### Alcance de detección
 
 Como la figura de mérito *es* la pérdida de propagación máxima admisible,

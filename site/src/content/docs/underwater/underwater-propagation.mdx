@@ -688,6 +688,18 @@ below $10^{-5}$ only 0.8. At $p_\mathrm{fa} = 1/2$ the threshold diverges and
 the call is refused: half the empty beams are already being
 declared detections, and no threshold rescues that.
 
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms.svg" alt="Two panels. On the left, the detection threshold at 50 per cent detection probability against the false-alarm probability from ten to the minus eight to ten to the minus one on a logarithmic axis: a curve falling from 13.2 decibels to 3.2, marked at ten to the minus four where it reads 10.1 decibels, with the decade above ten to the minus two shaded as lying outside the plus or minus 0.1 decibel the approximation is stated to. On the right, the array gain of an unshaded line array against its length in wavelengths from 0.1 to 100 on a logarithmic axis, three curves for broadside, a 60 degree steer and endfire, rising towards the two dotted asymptotes ten lg of two L over lambda and ten lg of four L over lambda, and flattening to zero decibels where the array is much shorter than a wavelength" width="94%" />
+
+*The two terms the receiver contributes, each over the one variable it depends
+on. Neither is measured at sea: the threshold is a property of the detector and
+the gain one of the array, and a design choice in each moves the figure of merit
+decibel for decibel. The approximation is drawn past the $10^{-2}$ the book
+states it to, because the reader who works there should see what the formula
+gives and that it is an extrapolation. On the right the three steer directions
+share one limit and not one asymptote: the beam's footprint halves near endfire,
+which is the 3 dB between the two dotted lines, and the whole family flattens to
+0 dB rather than cutting off, a half-wavelength array still returning 1,1 dB.*
+
 ### Detection range
 
 Since the figure of merit *is* the maximum allowable propagation loss,

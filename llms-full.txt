@@ -58538,6 +58538,16 @@ below $10^{-5}$ only 0.8. At $p_\mathrm{fa} = 1/2$ the threshold diverges and
 the call is refused: half the empty beams are already being
 declared detections, and no threshold rescues that.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms_dark.svg">
+  <img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sonar_detection_terms.svg" alt="Two panels: the detection threshold at 50 per cent detection probability against the false-alarm probability, falling from 13.2 decibels to 3.2 over eight decades and marked at ten to the minus four where it reads 10.1 decibels; and the array gain of an unshaded line array against its length in wavelengths, for broadside, a 60 degree steer and endfire, rising towards the asymptotes ten lg of two L over lambda and ten lg of four L over lambda and flattening to zero decibels for an array much shorter than a wavelength" width="94%">
+</picture>
+
+*The two terms the receiver contributes, each over the one variable it depends
+on. Neither is measured at sea: the threshold is a property of the detector and
+the gain one of the array. The three steer directions share one limit and not
+one asymptote, and the family flattens to 0 dB rather than cutting off.*
+
 ### 3.2 Detection range
 
 Since the figure of merit *is* the maximum allowable propagation loss,

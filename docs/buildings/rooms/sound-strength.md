@@ -96,7 +96,7 @@ the recording says so.
 An anechoic room 10 m across is rare, so A.2.1 prints three ways to obtain
 $L_{pE,10}$ without one.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes.svg" alt="Left: three printed routes to the free-field reference level at 10 m, plotted on a decibel axis 0.030 dB wide, landing 0.0206 dB apart around the exact value. Right: sound strength against source-receiver distance in a 15 000 cubic metre hall, with the direct-sound contribution alone and the Table A.1 typical range shaded" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/sound_strength_routes.svg" alt="Left: three printed routes to the free-field reference level at 10 m, plotted on a decibel axis 0.030 dB wide, landing 0.0206 dB apart around the exact value. Right: sound strength against source-receiver distance in a 15 000 cubic metre hall, with the direct-sound contribution alone and the Table A.1 typical range shaded" width="100%"></picture>
 
 *The same source, measured three ways. The spread on the left is 0.0206 dB
 and it is not a rounding error in the library: see section 3. The shaded
@@ -219,7 +219,7 @@ useful". Near the source the direct field dominates and $G$ falls 6 dB per
 doubling; past the critical distance the reverberant field takes over and
 the curve flattens, at a level set by the room's absorption alone. Table A.1
 gives −2 dB to +10 dB as the typical range in unoccupied halls up to
-25 000 m³ (for the **single number**, the arithmetic mean of the 500 Hz and
+25 000 m³ (for the **single number**, the arithmetic mean of the 500 Hz and
 1 kHz octave bands), which is what the "m" of $G_m$ marks and what
 `res.plot()` draws across the shaded band.
 

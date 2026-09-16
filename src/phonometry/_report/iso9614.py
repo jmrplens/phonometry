@@ -34,7 +34,7 @@ sheet with the content **that** standard asks a report to state (clause 10):
 
 * the *normalized* sound power level ``LW0`` beside ``LW`` in the per-band
   table, since clause 10 f) 2) asks for the level referred to the reference
-  atmosphere of 23 degrees Celsius and 101 325 Pa (Eq. 10), and the per-band
+  atmosphere of 23 degrees Celsius and 101 325 Pa (Eq. 10), and the per-band
   expanded uncertainty ``U``, twice the standard deviation of reproducibility
   of Table 1 (clause 4.3, clause 10 f) 4));
 * the four Annex B field indicators ``FT``, ``Fp|In|``, ``FpIn`` and ``FS``,

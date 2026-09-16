@@ -56,11 +56,11 @@ def _warn_coarse_resolution(dfc: float, df: float, ft: float) -> None:
 
 
 # Frequency range of interest for discrete tones (clauses 11.5 / 12.6).
-# NOTE: clause 4.1.2 prints the range as "89,1 Hz and 11 220 Hz inclusive",
-# but every formula and table span of the standard uses 11 200 Hz (Tables
-# 2/3 end at 11 200; Formulae (13)/(26) treat the upper end as exclusive).
-# The printed 11 220 Hz is a standard-side typo (see docs/ERRATA.md); the
-# consistent 89.1 Hz - 11 200 Hz reading is used here.
+# NOTE: clause 4.1.2 prints the range as "89,1 Hz and 11 220 Hz inclusive",
+# but every formula and table span of the standard uses 11 200 Hz (Tables
+# 2/3 end at 11 200; Formulae (13)/(26) treat the upper end as exclusive).
+# The printed 11 220 Hz is a standard-side typo (see docs/ERRATA.md); the
+# consistent 89.1 Hz - 11 200 Hz reading is used here.
 _F_MIN = 89.1
 _F_MAX = 11200.0
 

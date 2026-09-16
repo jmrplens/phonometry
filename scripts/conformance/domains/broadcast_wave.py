@@ -41,7 +41,7 @@ _BWF = "Broadcast Wave metadata (EBU Tech 3285 / ITU-R BS.2088)"
 
 #: 13:30:00 at 96 kHz: a first-sample count since midnight that no longer
 #: fits 32 bits, so both TimeReference words must carry weight.
-_TIME_REFERENCE = 13 * 3600 * 96000 + 30 * 60 * 96000  # 4 665 600 000
+_TIME_REFERENCE = 13 * 3600 * 96000 + 30 * 60 * 96000  # 4 665 600 000
 _UMID = bytes(range(64))
 
 #: On-the-hundredth loudness values for the layout check, so the expected

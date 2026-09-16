@@ -1,7 +1,7 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
 r"""Control valve hydrodynamic noise (IEC 60534-8-4:2005).
 
-Water carries sound at 1 400 m/s and is far too stiff to choke the way a gas
+Water carries sound at 1 400 m/s and is far too stiff to choke the way a gas
 does, so a control valve on a water line cannot make the shock cells that
 IEC 60534-8-3 spends five regimes on. It makes two things instead, and the
 whole of this part is the sum of them:
@@ -38,7 +38,7 @@ recorded in ``docs/ERRATA.md``:
   Table A.1 gives it 0,036 and a factor :math:`F_d^{0,75}`. Only the annex
   form reproduces the annex's own printed :math:`N_{Str}`, which is why
   :data:`STROUHAL_CONSTANTS` carries both and the default is ``"annex"``.
-* Table A.1 prints the band transmission loss as ``TL(8 000 Hz) = 51,76 dB``,
+* Table A.1 prints the band transmission loss as ``TL(8 000 Hz) = 51,76 dB``,
   positive, where its own two inputs sum to :math:`-51{,}763` dB.
 * The seat diameter formula of 6.3.2 b), :math:`d_o = 5{,}2\sqrt{N_{34}C_n}`,
   returns millimetres for a symbol Clause 3 declares in metres, which is why
@@ -545,7 +545,7 @@ def turbulent_efficiency(velocity: float, sound_speed: float) -> float:
     5.1 argues the case: at these velocities the jet is slow enough to be a
     monopole, and a monopole's efficiency rises with the first power of the
     Mach number, reaching :math:`10^{-4}` when the jet reaches the speed of
-    sound in the liquid. Water carries sound at about 1 400 m/s and a control
+    sound in the liquid. Water carries sound at about 1 400 m/s and a control
     valve jet runs at tens of metres per second, so the efficiency comes out
     in the :math:`10^{-6}` range: one part in a million of the stream power.
 
@@ -653,7 +653,7 @@ def internal_sound_pressure_level(
     The sound power is spread over the pipe cross-section and turned into a
     pressure through the impedance of the liquid, which is why the density
     and the speed of sound multiply rather than divide: water's impedance is
-    3 400 times air's, so the same acoustic power makes a level some 35 dB
+    3 400 times air's, so the same acoustic power makes a level some 35 dB
     higher inside a water line than inside an air line. Levels of 150 dB in
     the pipe are ordinary here, and it is the transmission loss, not the
     source, that makes the outside habitable.
@@ -838,7 +838,7 @@ def pipe_ring_frequency(
     it worse.
 
     :param internal_diameter_m: :math:`D_i`, in m.
-    :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
+    :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
     :return: :math:`f_r`, in Hz.
     :raises ValueError: If a value is not positive and finite.
     """
@@ -872,8 +872,8 @@ def reference_transmission_loss(  # noqa: PLR0913
 
     :param internal_diameter_m: :math:`D_i`, in m.
     :param wall_thickness: :math:`t_p`, in m.
-    :param pipe_density: :math:`\rho_p`, 7 800 kg/m³ for steel.
-    :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
+    :param pipe_density: :math:`\rho_p`, 7 800 kg/m³ for steel.
+    :param pipe_sound_speed: :math:`c_p`, 5 000 m/s for steel, in m/s.
     :param air_density: :math:`\rho_o` outside the pipe, in kg/m³.
     :param air_sound_speed: :math:`c_o` outside the pipe, in m/s.
     :return: :math:`TL_{fr}`, in dB, negative.
@@ -1748,7 +1748,7 @@ def last_stage_seat_diameter_mm(
     declares :math:`d_o` in metres, and for any real last stage this returns
     tens. It is millimetres, which is why the unit is in the name of this
     function; see ``docs/ERRATA.md``. Equation (12) then wants the result in
-    metres, so divide by 1 000 before passing it on.
+    metres, so divide by 1 000 before passing it on.
 
     :param flow_coefficient: :math:`C_n` of the exit stage.
     :param coefficient: ``"Cv"`` or ``"Kv"``, selecting :math:`N_{34}`.

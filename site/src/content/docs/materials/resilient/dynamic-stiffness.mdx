@@ -306,7 +306,7 @@ for $s'_\mathrm{a}$ as the standard's 0.9 unless it has been measured.
 Pa·s/m², while EN 29052-1 writes it $r$ and thresholds it in **kPa·s/m²**. The
 library follows the standard, so `airflow_resistivity` is in kPa·s/m² (the one
 argument on this page that is not plain SI). A mineral wool measured at
-50 000 Pa·s/m² goes in as `50.0`, not `50000.0`; convert an
+50 000 Pa·s/m² goes in as `50.0`, not `50000.0`; convert an
 [ISO 9053 result](/phonometry/materials/absorbers/airflow-resistance/) with
 `sigma / 1000`. Passing the Pa·s/m² number lands silently in the
 $r \ge 100$ branch, which drops the enclosed-gas term: for the determination

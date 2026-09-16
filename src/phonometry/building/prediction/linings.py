@@ -20,7 +20,7 @@ Formula (D.8) to carry a laboratory rating to the field
 
 Citations are to ISO 12354-1:2017. One printed defect is relevant here and is
 recorded in ``docs/ERRATA.md``: the overlap of the last two rows of Table D.1
-at 1 600 Hz.
+at 1 600 Hz.
 
 Several relations used here carry no published worked example, so they are
 implemented as printed and checked only for self-consistency: the cavity
@@ -64,7 +64,7 @@ _TABLE_D1_LOW = (74.4, 20.0, 2.0)
 _TABLE_D1_LOW_MAX = 160.0
 
 #: ISO 12354-1:2017 Table D.1, the fixed rows above 160 Hz, as
-#: ``(upper bound of fo in Hz, ΔRw in dB)`` evaluated in order. The 1 600 Hz
+#: ``(upper bound of fo in Hz, ΔRw in dB)`` evaluated in order. The 1 600 Hz
 #: row is printed twice with different values; see ``docs/ERRATA.md``.
 _TABLE_D1_HIGH: tuple[tuple[float, float], ...] = (
     (200.0, -1.0),
@@ -268,16 +268,16 @@ def weighted_lining_improvement(
     falls. Below 200 Hz the improvement also depends on the bare element:
     :math:`\Delta R_\mathrm{w} = 74.4 - 20 \log_{10}(f_\mathrm{o}) - R_\mathrm{w}/2`, never below 0 dB
     (NOTE 1). At and above 200 Hz the lining *degrades* the insulation, by
-    1 dB at 200 Hz down to 10 dB from 630 Hz to 1 600 Hz, recovering to 5 dB
-    from 1 600 Hz to 5 000 Hz.
+    1 dB at 200 Hz down to 10 dB from 630 Hz to 1 600 Hz, recovering to 5 dB
+    from 1 600 Hz to 5 000 Hz.
 
     Table D.1 is stated for basic elements with :math:`20 \le R_\mathrm{w} \le 60` dB.
-    Its last two rows both cover 1 600 Hz with different values; this function
+    Its last two rows both cover 1 600 Hz with different values; this function
     takes the more conservative −10 dB there (see ``docs/ERRATA.md``).
 
     :param resonance_frequency: Resonance frequency ``fo`` of the lining, in
         Hz (:func:`lining_resonance_frequency`); must fall in the 30 Hz to
-        5 000 Hz range Table D.1 covers.
+        5 000 Hz range Table D.1 covers.
     :param base_rating: Weighted sound reduction index ``Rw`` of the bare wall
         or floor, in dB.
     :return: The weighted improvement ``ΔRw``, in dB.

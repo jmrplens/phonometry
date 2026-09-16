@@ -546,7 +546,7 @@ def itu_r_468_weighting(frequencies: ArrayLike) -> NDArray[np.float64]:
 
     Reading the 21 rows and interpolating between them, which is what this
     function used to do, departs from the network by up to 0.611 dB at
-    11 058 Hz, where the curve turns over fastest and the table samples it
+    11 058 Hz, where the curve turns over fastest and the table samples it
     most coarsely. (The log-frequency interpolation rule of Table 1's
     footnote (1) governs the *tolerance* column, not the response, and runs
     between six mask frequencies rather than all 21.)

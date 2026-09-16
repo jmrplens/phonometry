@@ -366,7 +366,7 @@ def _chk_printed_factor() -> Outcome:
         float(np.log10(2.0)),
         DECADE_TO_DOUBLING,
         0.002,
-        expected_label="lg 2 = 0,301 03",
+        expected_label="lg 2 = 0,301 03",
         computed_label="the printed 0,3, which is 0,34 % smaller",
     )
 
@@ -1197,7 +1197,7 @@ def _ifa_absorption_area_m2() -> list[float]:
 @register(
     _WORKROOM,
     "IFA-LSA 01-234 (2020) Tab. 4.2 (printed folio 14, PDF p. 14)",
-    "The equivalent absorption area of a 6 000 m3 production hall, from the "
+    "The equivalent absorption area of a 6 000 m3 production hall, from the "
     "reverberation times measured in it",
 )
 def _chk_ifa_absorption_area() -> Outcome:
@@ -1217,7 +1217,7 @@ def _chk_ifa_absorption_area() -> Outcome:
     _WORKROOM,
     "IFA-LSA 01-234 (2020) Tab. 4.2 (printed folio 14, PDF p. 14)",
     "The mean absorption coefficient of the same hall, which is that area "
-    "over the 2 200 m2 of boundary the sheet works out from its dimensions",
+    "over the 2 200 m2 of boundary the sheet works out from its dimensions",
 )
 def _chk_ifa_mean_absorption() -> Outcome:
     labels = ("500 Hz", "1 kHz", "2 kHz", "4 kHz")

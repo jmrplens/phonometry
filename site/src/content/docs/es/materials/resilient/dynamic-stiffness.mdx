@@ -319,7 +319,7 @@ medido.
 en Pa·s/m², mientras que la EN 29052-1 la escribe $r$ y pone sus umbrales en
 **kPa·s/m²**. La biblioteca sigue a la norma, así que `airflow_resistivity` va
 en kPa·s/m²: el único argumento de esta página que no está en SI puro. Una lana
-mineral medida en 50 000 Pa·s/m² entra como `50.0`, no como `50000.0`; un
+mineral medida en 50 000 Pa·s/m² entra como `50.0`, no como `50000.0`; un
 [resultado de ISO 9053](/phonometry/es/materials/absorbers/airflow-resistance/)
 se convierte con `sigma / 1000`. Pasar el número en Pa·s/m² cae en silencio en
 la rama $r \ge 100$, que descarta el término del gas encerrado: para la

@@ -91,7 +91,7 @@ The temperature has no default at all. It is the one condition a caller has
 actually measured, and there is no value that would be defensible to invent
 for it.
 
-The carbon dioxide fraction defaults quietly, to 0,000 4. That is not a guess
+The carbon dioxide fraction defaults quietly, to 0,000 4. That is not a guess
 about the caller's air: Clause F.2 names it as the value to use for laboratory
 conditions in the absence of a measurement, so the library is quoting the
 annex rather than filling a hole.
@@ -190,7 +190,7 @@ all. The tolerance is not chosen. A value is stated to within half a unit of
 the last place it was printed to, so that is what reproducing it means, and the
 test derives that bound from the printed string rather than carrying a constant
 somebody picked. It is the last *place* that sets the bound, not a count of
-significant figures: `1,186 084 8` carries eight of them and `2,115 317 x 10^-5`
+significant figures: `1,186 084 8` carries eight of them and `2,115 317 x 10^-5`
 seven, and the same rule reads both:
 
 <details>

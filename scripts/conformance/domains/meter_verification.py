@@ -521,7 +521,7 @@ def _chk_constant_group_delay() -> Outcome:
     phase deviation, but would influence neither the vibration parameters to
     be measured nor the characteristic phase deviation values", and H.2.3.4 n)
     repeats it: "any remaining constant delay time (except 180°) does not
-    influence the result at all". One millisecond of delay is 1 433 degrees of
+    influence the result at all". One millisecond of delay is 1 433 degrees of
     phase error at the top of the hand-transmitted range and nothing at all
     here.
     """

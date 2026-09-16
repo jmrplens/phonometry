@@ -943,7 +943,7 @@ class PrecisionIntensityResult:
     :math:`L_W = 10 \log_{10}(P/P_0)` (Eq. 9), ``NaN``
     where :math:`P \le 0` (``not_applicable_band`` True, clause 9.2).
     ``sound_power_level_normalized`` is ``LW0`` normalized to 23 deg C /
-    101 325 Pa (Eq. 10). ``sound_power_level_a`` is the A-weighted total over
+    101 325 Pa (Eq. 10). ``sound_power_level_a`` is the A-weighted total over
     applicable bands (``NaN`` without ``frequencies`` and more than one band).
     """
 
@@ -1473,7 +1473,7 @@ def sound_power_intensity_precision(
             np.nan,
         )
 
-    # Eq. 10: meteorological normalization to 23 deg C / 101 325 Pa.
+    # Eq. 10: meteorological normalization to 23 deg C / 101 325 Pa.
     norm = 15.0 * np.log10(
         (barometric_pressure_pa / 101325.0) * (296.15 / (273.15 + temperature_c))
     )

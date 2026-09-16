@@ -368,7 +368,7 @@ FDTD run reproduces the whole curve: 5.8 dB at 10 kHz (where
 the exact form to 0.02 dB), 18.1 dB at 50 kHz, and a transmission-loss
 dip within 0.1 % of the 295 kHz resonance. The same suite stress-tests the
 extreme contrast of an air-steel contact (impedance ratio ~$10^5$:1): stable
-over 10 000 steps with the reflected amplitude conserved to 0.5 %.
+over 10 000 steps with the reflected amplitude conserved to 0.5 %.
 
 At oblique incidence the plate physics gets richer, and the clip below is
 this solver driving the same 10 mm steel plate, now lying in air, with a

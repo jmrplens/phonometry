@@ -205,7 +205,7 @@ AERODYNAMIC_REFERENCE_SPEED = 300.0
 REFERENCE_JOINT_DENSITY = 0.01
 
 #: Wavelength grid of Tables G-1b, G-2 and G-4 as replaced by (EU) 2021/1226,
-#: in mm: the standard 1/3-octave series from 2 000 mm to 0,8 mm.
+#: in mm: the standard 1/3-octave series from 2 000 mm to 0,8 mm.
 _WAVELENGTHS_STANDARD: tuple[float, ...] = (
     2000.0,
     1600.0,
@@ -246,7 +246,7 @@ _WAVELENGTHS_STANDARD: tuple[float, ...] = (
 #: Wavelength grid, in mm, of Table G-1a, the first table of G-1, which
 #: (EU) 2021/1226 did not replace: point (20)(a) replaces "the second table"
 #: only.
-#: It stops at 1 000 mm and keeps the non-standard steps 120, 12 and 3,2 mm
+#: It stops at 1 000 mm and keeps the non-standard steps 120, 12 and 3,2 mm
 #: where the amended tables read 125, 12,5 and 3,15 mm. Each table is therefore
 #: resampled on its own grid rather than forced onto a common one, which is how
 #: this implementation resolves an ambiguity the Directive leaves open.
@@ -368,12 +368,12 @@ class RailPad(Enum):
 
     (EU) 2021/1226 Annex point (3) replaced "acoustic" stiffness by
     **dynamic** stiffness and re-worded the hard class as
-    "Hard (800-1 000 MN/m)".
+    "Hard (800-1 000 MN/m)".
     """
 
     SOFT = "S"  #: Soft, 150-250 MN/m.
     MEDIUM = "M"  #: Medium, 250 to 800 MN/m.
-    HARD = "H"  #: Hard, 800-1 000 MN/m.
+    HARD = "H"  #: Hard, 800-1 000 MN/m.
 
 
 class TrackMeasure(Enum):
@@ -400,7 +400,7 @@ class TrackCurvature(Enum):
     """Digit 6 of the track descriptor, Table [2.3.b]."""
 
     STRAIGHT = "N"  #: Straight track.
-    LOW = "L"  #: Low curvature, 1 000-500 m.
+    LOW = "L"  #: Low curvature, 1 000-500 m.
     MEDIUM = "M"  #: Medium curvature, below 500 m and above 300 m.
     HIGH = "H"  #: High curvature, below 300 m.
 
@@ -681,7 +681,7 @@ _TABLE_G1A: dict[str, tuple[float, ...]] = {
 
 # ---------------------------------------------------------------------------
 # Table G-1b - rail roughness L_r,TR,i, as replaced by (EU) 2021/1226 Annex
-# point (20)(a): a new wavelength grid running to 2 000 mm and a new M column.
+# point (20)(a): a new wavelength grid running to 2 000 mm and a new M column.
 # ---------------------------------------------------------------------------
 _TABLE_G1B: dict[str, tuple[float, ...]] = {
     "E": (
@@ -1123,8 +1123,8 @@ _TABLE_G3A: dict[str, tuple[float, ...]] = {
 
 # ---------------------------------------------------------------------------
 # Table G-3b - wheel transfer function L_H,VEH,i. Values unchanged since
-# 2015/996; the band labels 316, 3 160 and 6 350 Hz were corrected to 315,
-# 3 150 and 6 300 Hz by (EU) 2021/1226 Annex point (20)(d). Columns are the
+# 2015/996; the band labels 316, 3 160 and 6 350 Hz were corrected to 315,
+# 3 150 and 6 300 Hz by (EU) 2021/1226 Annex point (20)(d). Columns are the
 # wheel diameter, all "no measure". Sound power level per axle, dB.
 # ---------------------------------------------------------------------------
 _TABLE_G3B: dict[float, tuple[float, ...]] = {
@@ -1294,7 +1294,7 @@ class TractionVehicle(Enum):
 
 # ---------------------------------------------------------------------------
 # Table G-5 - traction sound power per vehicle, source A then source B. Values
-# unchanged since 2015/996 except the 6 300 Hz pair of the 2 200 kW diesel
+# unchanged since 2015/996 except the 6 300 Hz pair of the 2 200 kW diesel
 # locomotive, which (EU) 2021/1226 Annex point (20)(f) corrected from 31,4/30,7
 # to 81,4/80,7; the same point corrected the band labels. Because
 # L_W,0,const,i = L_W,0,idling,i, this one table serves both running conditions.

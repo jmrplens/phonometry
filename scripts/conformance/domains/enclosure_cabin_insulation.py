@@ -887,8 +887,8 @@ _RATING_BANDS_HZ = np.array(
 #: Clause 6.4 of ISO 11957 corrects the level inside the cabin for the
 #: background "in accordance with ISO 3741". ISO 3741:2010 9.1.2 evaluates its
 #: own Equation (14) at two arguments and prints the results: K_1 is held at
-#: the 6 dB value at 200 Hz and below and at 6 300 Hz and above, and at the
-#: 10 dB value from 250 Hz to 5 000 Hz. These three bands take one rule, then the other, then
+#: the 6 dB value at 200 Hz and below and at 6 300 Hz and above, and at the
+#: 10 dB value from 250 Hz to 5 000 Hz. These three bands take one rule, then the other, then
 #: the first again.
 _K1_CLAMP_BANDS_HZ = np.array([100.0, 1000.0, 6300.0])
 
@@ -899,7 +899,7 @@ _K1_CLAMP_MARGIN_DB = np.array([6.0, 8.0, 6.0])
 
 #: The two values ISO 3741:2010 prints on folio 20 (PDF p. 29) after
 #: Equation (14) on folio 19 (PDF p. 28), in decibels, band by band: the 6 dB
-#: value at 100 Hz and 6 300 Hz, the 10 dB value at 1 000 Hz.
+#: value at 100 Hz and 6 300 Hz, the 10 dB value at 1 000 Hz.
 _PRINTED_K1_DB = np.array(
     [
         oracle.ISO3741_K1_PRINTED_DB[6.0],
@@ -1194,7 +1194,7 @@ _BARRON_LP_WITHOUT_DB = np.array(oracle.BARRON_TABLE_7_5_LP_WITHOUT_DB)
 _BARRON_LP_WITH_DB = np.array(oracle.BARRON_TABLE_7_5_LP_WITH_DB)
 
 #: The five bands of Table 7-5 where the sound power rows close on themselves:
-#: the printed insertion loss is the figure that is right at 2 000 Hz, which is
+#: the printed insertion loss is the figure that is right at 2 000 Hz, which is
 #: why the Equation (3) row keeps all six bands and only the Equation (1) row,
 #: which reads L_W,out, drops one.
 _BARRON_POWER_BANDS = _BOOK_OCTAVES_HZ != oracle.BARRON_TABLE_7_5_INCONSISTENT_BAND_HZ

@@ -307,7 +307,7 @@ def _inferred_kind(expected: str, delta: str) -> Kind:
 
 #: Decimals a deviation is never reported coarser than, whatever precision the
 #: check displays its *values* at. A precision is chosen to suit the value - a
-#: distance of 5 280 ft reads at zero decimals - and the deviation from it is a
+#: distance of 5 280 ft reads at zero decimals - and the deviation from it is a
 #: much smaller number, so applying the same precision to both would report a
 #: real deviation of 0.036 ft as zero. This is the floor the old
 #: ``_DELTA_PLACES`` was, with its cap removed: a check that declares more

@@ -78,7 +78,7 @@ _TMID_BANDS = (500.0, 1000.0)
 
 #: The other route ISO 3382-1:2009, 9.1 prints to a single-number
 #: reverberation time: "averages over the six one-third-octave bands from
-#: 400 Hz to 1 250 Hz". The clause prints these two routes and no third, so
+#: 400 Hz to 1 250 Hz". The clause prints these two routes and no third, so
 #: a one-third-octave analysis takes this one rather than a mean of the two
 #: one-third-octave bands that happen to be called 500 Hz and 1 kHz, which
 #: is a sixth of the band the octave route averages.
@@ -339,7 +339,7 @@ def _reverberation_descriptor(
 
     ISO 3382-1:2009, 9.1 prints two routes to a single-number reverberation
     time and no third: the mean of the 500 Hz and 1 kHz **octave** bands, or
-    "averages over the six one-third-octave bands from 400 Hz to 1 250 Hz".
+    "averages over the six one-third-octave bands from 400 Hz to 1 250 Hz".
     The descriptor takes whichever route the analysis bandwidth calls for,
     and ``is_mid`` is True when it could (``band`` is NaN).
 
@@ -401,7 +401,7 @@ def _statement(
         ).format(value=_cell(t_value, 2, language))
     elif t_is_mid:
         # One-third-octave data: 9.1's other route, the six bands from
-        # 400 Hz to 1 250 Hz, so the octave "500-1000 Hz" label would be
+        # 400 Hz to 1 250 Hz, so the octave "500-1000 Hz" label would be
         # false; the extended note names the range (the long label does not
         # fit the boxed statement).
         statement = t("T<sub>mid</sub> = <b>{value} s</b>", language).format(

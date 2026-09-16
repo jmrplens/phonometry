@@ -208,7 +208,7 @@ _MIN_VARIATION_OBSERVATIONS = 2
 _BandRow = tuple[tuple[float, float] | None, tuple[float, float], float, float]
 
 #: ISO 9614-1:1993 Table B.2, "Valores para el factor C" (printed p. 25), as
-#: the four per-band rows are printed. The 6 300 Hz row has no octave
+#: the four per-band rows are printed. The 6 300 Hz row has no octave
 #: counterpart, and the whole of grade 3 in this table is the A-weighted 8 of
 #: :data:`_C_A_WEIGHTED`.
 _TABLE_B2: tuple[_BandRow, ...] = (
@@ -421,8 +421,8 @@ def _row_for(
     anything that is not a tabulated centre of its own band type first, and
     every centre it does admit is spanned by a row of both tables, which
     ``test_every_tabulated_band_has_a_row_in_both_tables`` holds them to. The
-    ``None`` span is the 6 300 Hz row, printed for one-third-octave bands only,
-    and it is skipped rather than matched because 6 300 Hz is not an octave
+    ``None`` span is the 6 300 Hz row, printed for one-third-octave bands only,
+    and it is skipped rather than matched because 6 300 Hz is not an octave
     centre and so never arrives asking for one.
 
     :raises LookupError: If a band centre admitted by :func:`_nominal_band` is

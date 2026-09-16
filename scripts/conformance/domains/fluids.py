@@ -81,7 +81,7 @@ def _worst_fraction_of_the_allowance(
 @register(
     _FLUIDS,
     "IEC 61094-2:2009 Table F.1",
-    "Set A (23 C, 101 325 Pa, 50 % RH): rho, c0, kappa, eta and alpha_t, as a "
+    "Set A (23 C, 101 325 Pa, 50 % RH): rho, c0, kappa, eta and alpha_t, as a "
     "fraction of the rounding of the last printed figure",
 )
 def _chk_annex_f_set_a() -> Outcome:
@@ -92,7 +92,7 @@ def _chk_annex_f_set_a() -> Outcome:
 @register(
     _FLUIDS,
     "IEC 61094-2:2009 Table F.1",
-    "Set B (20 C, 80 000 Pa, 65 % RH): rho, c0, kappa, eta and alpha_t, as a "
+    "Set B (20 C, 80 000 Pa, 65 % RH): rho, c0, kappa, eta and alpha_t, as a "
     "fraction of the rounding of the last printed figure",
 )
 def _chk_annex_f_set_b() -> Outcome:

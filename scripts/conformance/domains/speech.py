@@ -289,7 +289,7 @@ def _chk_sti_annex_m_step2_rows() -> Outcome:
         ),
         _PrintedRow("ART", ref.IEC60268_16_ANNEX_M_ART_DB, _ART_DB, 0.05),
         # Four of the seven I_rt,k cells are printed to two figures (4,5 for
-        # 10^0,65 = 4,4668), and 40 000 for 10^4,6 = 39 811 is two as well.
+        # 10^0,65 = 4,4668), and 40 000 for 10^4,6 = 39 811 is two as well.
         _PrintedRow(
             "I_rt,k",
             ref.IEC60268_16_ANNEX_M_INTENSITY_THRESHOLD,

@@ -107,8 +107,8 @@ about. Both are in
 
 ## 2. How many positions, and where
 
-Table A.2 prints three rows: 500 seats want 6 microphone positions, 1 000
-want 8 and 2 000 want 10. They lie exactly on a straight line in the
+Table A.2 prints three rows: 500 seats want 6 microphone positions, 1 000
+want 8 and 2 000 want 10. They lie exactly on a straight line in the
 logarithm of the seat count, two positions per doubling, which is what lets
 a hall between the rows be answered at all.
 
@@ -122,7 +122,7 @@ print(round(float(room.minimum_receiver_positions(5000)), 2))   # 10.0
 ```
 
 The line stops where the table does. A.4 asks for "a minimum of between 6
-and 10 representative microphone positions", so a 5 000-seat arena does not
+and 10 representative microphone positions", so a 5 000-seat arena does not
 get thirteen positions on the strength of three rows, and a 200-seat studio
 does not get four. A.4 adds the geometry the table does not: at least three
 on-stage source positions in the normal case, a source height of 1,5 m, a
@@ -130,7 +130,7 @@ microphone height of 1,2 m at audience seat locations, positions evenly
 distributed over all the seating, and more of them wherever a hall breaks
 into balconies and under-balcony areas.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves. Left, seen from above: a source in a free field on a turntable, and around it the seventy-two bearings of the survey made every 5 degrees where no turntable can be used, with a microphone on that ring at least one and a half metres from the acoustic centre. Six neighbouring readings are picked out as one gliding 30 degree arc, an arrow shows the next arc starting one reading on, and every arc is compared with the 360 degree energetic average in the measurement plane. Under it, Table 1 for octave bands of pink noise: plus or minus 1 dB at 125, 250 and 500 Hz, 3 dB at 1 kHz, 5 dB at 2 kHz and 6 dB at 4 kHz. Right: the plan of a 1 000-seat hall with three source positions on the stage, one on the centre line and one either side of it, eight microphone positions, the fewest Table A.2 asks for at that size, spread over the seating on one side of the centre line, and two more under the balcony, and below the plan a section with the source one and a half metres above the stage floor and a microphone one point two metres above the floor beside a seated listener. Two boxes at the foot carry the deviation of an arc from the reference, and the minimum number of microphone positions as a line through Table A.2, 6 for 500 seats, 8 for 1 000 and 10 for 2 000, kept between 6 and 10" width="100%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_source_qualification.svg" alt="Two halves. Left, seen from above: a source in a free field on a turntable, and around it the seventy-two bearings of the survey made every 5 degrees where no turntable can be used, with a microphone on that ring at least one and a half metres from the acoustic centre. Six neighbouring readings are picked out as one gliding 30 degree arc, an arrow shows the next arc starting one reading on, and every arc is compared with the 360 degree energetic average in the measurement plane. Under it, Table 1 for octave bands of pink noise: plus or minus 1 dB at 125, 250 and 500 Hz, 3 dB at 1 kHz, 5 dB at 2 kHz and 6 dB at 4 kHz. Right: the plan of a 1 000-seat hall with three source positions on the stage, one on the centre line and one either side of it, eight microphone positions, the fewest Table A.2 asks for at that size, spread over the seating on one side of the centre line, and two more under the balcony, and below the plan a section with the source one and a half metres above the stage floor and a microphone one point two metres above the floor beside a seated listener. Two boxes at the foot carry the deviation of an arc from the reference, and the minimum number of microphone positions as a line through Table A.2, 6 for 500 seats, 8 for 1 000 and 10 for 2 000, kept between 6 and 10" width="100%" />
 
 ### How the measurement goes
 
@@ -147,7 +147,7 @@ across, its sensitivity calibrated if $G$ is wanted. Normally use at least
 three source positions on the stage, more with a large stage or an orchestra
 pit, for instance one on the centre line and two at equal distances either
 side, with the acoustic centre 1,5 m above the floor. Take the minimum number
-of microphone positions from Table A.2, 6 for 500 seats up to 10 for 2 000, at
+of microphone positions from Table A.2, 6 for 500 seats up to 10 for 2 000, at
 1,2 m above the floor at seats, about 2 m apart at least, spread evenly, and
 add more where balconies split the seating. Without synchronous averaging,
 hold the source at least 45 dB over the background in every band, or at least
@@ -241,7 +241,7 @@ them.
 Clause 9.1 prints two ways to quote one number for the reverberation time
 and no third: the average of $T_{30}$ over the 500 Hz and 1 kHz **octave**
 bands, or "averages over the six one-third-octave bands from 400 Hz to
-1 250 Hz".
+1 250 Hz".
 
 ```python
 from phonometry import room

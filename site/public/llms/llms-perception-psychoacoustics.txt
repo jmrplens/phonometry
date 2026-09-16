@@ -1344,7 +1344,7 @@ calibration (the ratios are level differences).
 | :--- | :--- | :--- | :--- | :--- |
 | `x` | 1D array | any (uncalibrated OK) | ≥ `fs/resolution_hz` samples | Ratios are level differences: calibration cancels out |
 | `fs` | int | Hz | > 0 | |
-| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
+| `tone_freq` | float, optional | Hz | 89.1–11 200; default `None` | `None` assesses the highest peak in the range of interest |
 | `resolution_hz` | float | Hz | > 0; default `1.0` | Tone band must stay within 15 % of the critical band (clause 11.2) |
 
 Both return a `ToneAssessment(frequency, ratio_db, criterion_db, prominent)`.

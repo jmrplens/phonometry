@@ -159,7 +159,7 @@ def _chk_fan_sound_power_reference_point() -> Outcome:
 @register(
     _NOISE_CONTROL,
     "Long 2e Eq. 14.12 with Table 14.2 (Reynolds lined rectangular duct)",
-    "18 x 12 in duct, 6 ft, 1 in lining at 1 kHz -> 1.77 (10/3)^0.695 6 dB",
+    "18 x 12 in duct, 6 ft, 1 in lining at 1 kHz -> 1.77 (10/3)^0.695 6 dB",
 )
 def _chk_lined_rectangular_duct() -> Outcome:
     res = ph.noise_control.lined_rectangular_duct_attenuation(

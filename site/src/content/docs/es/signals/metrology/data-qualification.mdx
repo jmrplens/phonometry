@@ -90,7 +90,7 @@ print(clipped, dead, round(offset, 4), spikes, round(kurtosis, 2))
 
 El registro sintético de arriba imprime `0 1 0.0024 0 3.02`, que es el aspecto de
 lo limpio: ninguna muestra recortada, ninguna muestra repetida, un desplazamiento
-de 0,002σ, ni una sola excursión más allá de 5σ en 65 536 muestras gaussianas y
+de 0,002σ, ni una sola excursión más allá de 5σ en 65 536 muestras gaussianas y
 una curtosis de 3,0, como debe tener un registro gaussiano.
 
 Junto a los números, los metadatos de adquisición tienen que viajar con el
@@ -605,7 +605,7 @@ res.plot(language="es")   # excedencia empírica contra la mezcla de Rice (figur
 
 *Un solo número decide qué curva siguen los picos. El ruido paso bajo ideal
 tiene la forma cerrada $r = \sqrt5/3 = 0{,}745$, y el registro mide 0,746, que
-es también por lo que el 12,6 % de sus 39 534 máximos son **negativos**, algo
+es también por lo que el 12,6 % de sus 39 534 máximos son **negativos**, algo
 imposible bajo Rayleigh. La escalera empírica se apoya en la mezcla de Rice para
 ese $r$ y queda en todas partes entre los dos límites: la probabilidad de un
 pico más allá de $4\sigma$ es $2{,}5\times10^{-4}$, una cuarta parte por debajo

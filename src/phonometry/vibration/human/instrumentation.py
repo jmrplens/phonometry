@@ -164,7 +164,7 @@ REFERENCE_ACCELERATION_M_S2: dict[str, float] = {
 
 #: Table 1: the nominal frequency range of each weighting, in hertz, as the
 #: ``(lower, upper)`` pair the column prints. These are the nominal values
-#: printed in the table (``8 to 1 000``, ``0,5 to 80``, ``1 to 80``,
+#: printed in the table (``8 to 1 000``, ``0,5 to 80``, ``1 to 80``,
 #: ``0,1 to 0,5``), not the exact one-third-octave centres ``10**(k/10)``
 #: that Annex B tabulates the response at, and they are deliberately kept
 #: that way: 5.7, 5.10, 12.11 and the Table 15 test grids all read "for all
@@ -982,29 +982,29 @@ def band_limited_weighting_factor(name: str) -> float:
     ==========  ==================  ===================
     Weighting   This ratio          Table 1 prints
     ==========  ==================  ===================
-    ``Wb``      0,812 819           0,812 6
-    ``Wc``      0,514 617           0,514 5
-    ``Wd``      0,126 120           0,126 1
-    ``We``      0,062 891           0,062 87
-    ``Wf``      0,418 982           0,388 8
-    ``Wh``      0,202 025           0,202 0
-    ``Wj``      1,018 841           1,019
-    ``Wk``      0,772 066           0,771 8
-    ``Wm``      0,336 336           0,336 2
+    ``Wb``      0,812 819           0,812 6
+    ``Wc``      0,514 617           0,514 5
+    ``Wd``      0,126 120           0,126 1
+    ``We``      0,062 891           0,062 87
+    ``Wf``      0,418 982           0,388 8
+    ``Wh``      0,202 025           0,202 0
+    ``Wj``      1,018 841           1,019
+    ``Wk``      0,772 066           0,771 8
+    ``Wm``      0,336 336           0,336 2
     ==========  ==================  ===================
 
     For eight of the nine the distinction is academic: their band-limiting
-    weighting is between 0,999 68 and 0,999 97 at their reference frequency,
+    weighting is between 0,999 68 and 0,999 97 at their reference frequency,
     so the printed Table 1 factor is the same number to 0,03 %, well inside
     any of the Table 2 limits the row is judged against. For ``Wf`` it is
-    not. Its reference frequency, 2,5 rad/s = 0,397 887 Hz, sits inside its
+    not. Its reference frequency, 2,5 rad/s = 0,397 887 Hz, sits inside its
     own band-limiting skirt (0,08 Hz and 0,63 Hz corners, Table 3): the
-    band-limiting weighting is 0,928 078 there and the overall weighting
-    0,388 848, values Table B.5 prints as 0,927 9 and 0,388 4 at the
-    neighbouring 0,398 1 Hz band centre. Reading "the appropriate weighting
-    factor" as the 0,388 8 of Table 1 makes a *conforming* ``Wf`` meter miss
+    band-limiting weighting is 0,928 078 there and the overall weighting
+    0,388 848, values Table B.5 prints as 0,927 9 and 0,388 4 at the
+    neighbouring 0,398 1 Hz band centre. Reading "the appropriate weighting
+    factor" as the 0,388 8 of Table 1 makes a *conforming* ``Wf`` meter miss
     the row by 7,75 %, half again over the ±5 % Table 2 allows it; reading it
-    as the ratio 0,418 982 makes the row true by construction. The standard
+    as the ratio 0,418 982 makes the row true by construction. The standard
     does not define the phrase, and the "(see Table 1)" of 12.7 points at the
     reading that cannot be satisfied; the ambiguity is registered in
     ``docs/ERRATA.md``.

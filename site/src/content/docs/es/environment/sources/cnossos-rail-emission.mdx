@@ -115,10 +115,10 @@ y una vía seis.
 | :--- | :--- | :--- | :--- |
 | 1 | Base de la vía | `B` balasto, `S` losa, `L` puente con balasto, `N` puente sin balasto, `T` vía embebida, `O` otras | Con el dígito 3, la `TrackTransferClass` de G-3a; `L`/`N` activan además la fuente de puente de la sección 8 |
 | 2 | Rugosidad de la cabeza del carril | `E` bien mantenida y muy lisa, `M` mantenimiento normal, `N` mal mantenida, `B` sin mantener y en mal estado | `RailRoughnessClass.WELL_MAINTAINED` / `.NORMAL` / `.NOT_WELL_MAINTAINED` / `.BAD` → G-1b |
-| 3 | Tipo de placa de asiento | `S` blanda (150-250 MN/m), `M` media (250-800), `H` rígida (800-1 000) | La segunda mitad de la etiqueta de `TrackTransferClass`: `MONOBLOCK_MEDIUM` es «M/M» |
+| 3 | Tipo de placa de asiento | `S` blanda (150-250 MN/m), `M` media (250-800), `H` rígida (800-1 000) | La segunda mitad de la etiqueta de `TrackTransferClass`: `MONOBLOCK_MEDIUM` es «M/M» |
 | 4 | Medidas adicionales | `N` ninguna, `D` amortiguador de carril, `B` barrera baja, `A` placa absorbente sobre losa, `E` carril embebido, `O` otras | Fuera del modelo de emisión |
 | 5 | Juntas de carril | `N` ninguna, `S` una sola junta o aguja, `D` dos por cada 100 m, `M` más de dos por cada 100 m | La densidad de juntas $n_l$ de (2.3.12) |
-| 6 | Curvatura | `N` recta, `L` 1 000-500 m, `M` por debajo de 500 y por encima de 300 m, `H` por debajo de 300 m | El radio que se pasa a `curve_squeal_excess` |
+| 6 | Curvatura | `N` recta, `L` 1 000-500 m, `M` por debajo de 500 y por encima de 300 m, `H` por debajo de 300 m | El radio que se pasa a `curve_squeal_excess` |
 
 Dos selectores no tienen ningún dígito de descriptor y hay que tomarlos de la
 hoja de características del vehículo: el **diámetro de rueda**
@@ -606,8 +606,8 @@ contra el texto del Diario Oficial del instrumento que las promulgó. Y toda la
 cadena de ecuaciones de extremo a extremo, contra el libro de pruebas de emisión
 que la Comisión Europea publicó con su módulo de fuente de referencia: alimentar
 las ecuaciones distribuidas con la base de coeficientes de **2015** con la que se
-calculó ese libro reproduce **las 34 560 filas publicadas de los veinte vehículos
-cuyas entradas de catálogo están bien formadas**, es decir 17 280 casos en las
+calculó ese libro reproduce **las 34 560 filas publicadas de los veinte vehículos
+cuyas entradas de catálogo están bien formadas**, es decir 17 280 casos en las
 dos alturas de fuente, con 0,0055 dB, dentro de los dos decimales que imprime.
 Ciento veintitrés de esos casos están versionados en el repositorio y se ejecutan
 en integración continua. Los tres vehículos que quedan fuera se describen en

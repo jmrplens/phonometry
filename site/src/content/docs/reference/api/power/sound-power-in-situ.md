@@ -61,7 +61,7 @@ Annex C carries either level to the reference meteorological conditions of
 $C_2 = -10 \log_{10}(p_\mathrm{s}/p_{\mathrm{s},0}) + 15 \log_{10}((273.15 + \theta)/296)$,
 the same `C2` as ISO 3741:2010 clause 9.1.4, reused from that module; the
 whole ISO 3740 family prints $\theta_\mathrm{ref}$ = 296 K beside a
-23,0 °C reference, so at the reference conditions `C2` is +0,003 3 dB
+23,0 °C reference, so at the reference conditions `C2` is +0,003 3 dB
 rather than zero. Eq. (C.2) estimates the static pressure from the altitude
 of the site. Annex D forms the A-weighted totals from the Table D.1 band
 corrections, which are the ISO 3744 Annex E octave values digit for digit.
@@ -367,7 +367,7 @@ conditions of Annex C, and `sound_power_level_a` is the Annex D total.
 | `background_levels` | Octave-band time-averaged background levels `Lpi(B)`, `(n, bands)` or one `(bands,)` spectrum for every position, in decibels; `None` applies no correction, warns, and leaves `background_requirement_met` `False` in every band, since 7.5 has the background measured at each position and 8.1 needs the margin to declare the measurement valid. |
 | `background_levels_ref` | Background for the reference-source measurement, same shapes; `None` reuses `background_levels`, since the procedure takes one background reading (7.5). |
 | `temperature_c` | Air temperature at the test, in degrees Celsius. |
-| `static_pressure_kpa` | Static pressure at the test, in kilopascals (see [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). Annex C prints this quantity in pascals, with $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa, and is alone in its family in doing so: ISO 3741:2010, ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument follows the three, so that one unit serves the whole ISO 3740 family; `C2` carries a pressure term and a temperature term, and the pressure enters only as the ratio $p_\mathrm{s}/p_{\mathrm{s},0}$, so converting both together cannot move a result. |
+| `static_pressure_kpa` | Static pressure at the test, in kilopascals (see [`static_pressure_from_altitude`](/phonometry/reference/api/power/sound-power-in-situ/#static_pressure_from_altitude)). Annex C prints this quantity in pascals, with $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa, and is alone in its family in doing so: ISO 3741:2010, ISO 3744:2010 and ISO 3745:2012 all print kilopascals. This argument follows the three, so that one unit serves the whole ISO 3740 family; `C2` carries a pressure term and a temperature term, and the pressure enters only as the ratio $p_\mathrm{s}/p_{\mathrm{s},0}$, so converting both together cannot move a result. |
 | `conditions` | The [`GradeConditions`](/phonometry/reference/api/power/sound-power-in-situ/#gradeconditions) Table 2 reads to decide the accuracy grade: the excess of sound pressure level at each microphone position (Annex A) and the range of the directivity survey of the source (7.2). `None`, or either condition left out, leaves the determination at survey grade. |
 | `sigma_omc` | Standard deviation of the operating and mounting conditions of the source (9.2, E.3), in decibels; `None` leaves `sigma_tot` and the expanded uncertainty `NaN`. |
 | `coverage_factor` | `k` of Eq. (23): 2 for the two-sided 95 % interval (default), 1,6 for a one-sided comparison with a limit. |
@@ -393,7 +393,7 @@ $$
 p_\mathrm{s} = p_{\mathrm{s},0}\,(1 - a H_\mathrm{a})^{b}, \qquad a = 2{,}2560 \times 10^{-5}\ \mathrm{m}^{-1}, \quad b = 5{,}255\,3
 $$
 
-Annex C prints $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa and states
+Annex C prints $p_{\mathrm{s},0}$ = 1,013 25 x 10^5 Pa and states
 the quantity in pascals. The result here is in kilopascals so that it feeds
 `static_pressure_kpa` of [`sound_power_in_situ`](/phonometry/reference/api/power/sound-power-in-situ/#sound_power_in_situ) directly, matching
 ISO 3741, ISO 3744 and ISO 3745, which do print kilopascals. The pressure

@@ -38,9 +38,9 @@ DEFAULT_STATIC_PRESSURE_PA = 101325.0
 DEFAULT_RELATIVE_HUMIDITY_PERCENT = 50.0
 #: Carbon dioxide mole fraction assumed when none is supplied. Clause F.2:
 #: "The composition of standard air is based upon a carbon dioxide mole fraction
-#: of 0,000 314. It is generally accepted that under laboratory conditions a
+#: of 0,000 314. It is generally accepted that under laboratory conditions a
 #: higher value is found and in the absence of actual measurements a value of
-#: x_c = 0,000 4 is recommended."
+#: x_c = 0,000 4 is recommended."
 DEFAULT_CO2_MOLE_FRACTION = 0.0004
 
 #: Relative humidity is saturation at 100 %, so that is the bound, not a choice.

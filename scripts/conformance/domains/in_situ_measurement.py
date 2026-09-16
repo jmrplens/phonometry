@@ -679,7 +679,7 @@ def _chk_barron_absorption_area() -> Outcome:
     )
     # The example prints its reverberation times to three figures and its
     # absorption areas to four, so the residual is the rounding of the time
-    # rather than the arithmetic: 40,41 m2 needs T = 0,458 709 s, which is
+    # rather than the arithmetic: 40,41 m2 needs T = 0,458 709 s, which is
     # what the printed 0,459 s rounds from.
     return numeric(
         0.0,
@@ -743,7 +743,7 @@ def _chk_ntp668_flow_velocity() -> Outcome:
     "ISO 11820:1996 Eq. (31) / VDI 2081 Blatt 2:2005-05 Tabelle 1, "
     "PDF page 12, folio 12",
     "The mean velocity in the passages of a splitter silencer carrying "
-    "16 000 m3/h, from the face velocity and the area ratio",
+    "16 000 m3/h, from the face velocity and the area ratio",
 )
 def _chk_vdi2081_gap_velocity() -> Outcome:
     face_velocity = (
@@ -1597,11 +1597,11 @@ def _chk_fhwa_worked_example() -> Outcome:
 )
 def _chk_iso10847_rounding_tie_break() -> Outcome:
     # Annex B prints its ties at a rounding range of 10, where 1 225,0 becomes
-    # 1 220 and 1 235,0 becomes 1 240. Divided by that range they are the two
+    # 1 220 and 1 235,0 becomes 1 240. Divided by that range they are the two
     # exact halves 122,5 and 123,5 at the 1 dB rounding range clause 10 c)
     # asks for, and both are exact in binary, which the ties of the printed
     # 0,1 range are not. Rule B, the other convention in use, would print
-    # 1 230 for the first of the two, so the pair discriminates.
+    # 1 230 for the first of the two, so the pair discriminates.
     ties = {
         # "B.3 Rule A, 1 225,0 at range 10" is reported as "1 225,0".
         key.split(", ", 1)[1].split(" at ", 1)[

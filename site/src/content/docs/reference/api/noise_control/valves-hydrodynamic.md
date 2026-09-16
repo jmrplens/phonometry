@@ -7,7 +7,7 @@ sidebar:
 
 Control valve hydrodynamic noise (IEC 60534-8-4:2005).
 
-Water carries sound at 1 400 m/s and is far too stiff to choke the way a gas
+Water carries sound at 1 400 m/s and is far too stiff to choke the way a gas
 does, so a control valve on a water line cannot make the shock cells that
 IEC 60534-8-3 spends five regimes on. It makes two things instead, and the
 whole of this part is the sum of them:
@@ -44,7 +44,7 @@ recorded in `docs/ERRATA.md`:
   Table A.1 gives it 0,036 and a factor $F_d^{0,75}$. Only the annex
   form reproduces the annex's own printed $N_{Str}$, which is why
   [`STROUHAL_CONSTANTS`](/phonometry/reference/api/noise_control/valves-hydrodynamic/#strouhal_constants) carries both and the default is `"annex"`.
-* Table A.1 prints the band transmission loss as `TL(8 000 Hz) = 51,76 dB`,
+* Table A.1 prints the band transmission loss as `TL(8 000 Hz) = 51,76 dB`,
   positive, where its own two inputs sum to $-51{,}763$ dB.
 * The seat diameter formula of 6.3.2 b), $d_o = 5{,}2\sqrt{N_{34}C_n}$,
   returns millimetres for a symbol Clause 3 declares in metres, which is why
@@ -612,7 +612,7 @@ $$
 The sound power is spread over the pipe cross-section and turned into a
 pressure through the impedance of the liquid, which is why the density
 and the speed of sound multiply rather than divide: water's impedance is
-3 400 times air's, so the same acoustic power makes a level some 35 dB
+3 400 times air's, so the same acoustic power makes a level some 35 dB
 higher inside a water line than inside an air line. Levels of 150 dB in
 the pipe are ordinary here, and it is the transmission loss, not the
 source, that makes the outside habitable.
@@ -759,7 +759,7 @@ and the one whose unit does not survive its own arithmetic: Clause 3
 declares $d_o$ in metres, and for any real last stage this returns
 tens. It is millimetres, which is why the unit is in the name of this
 function; see `docs/ERRATA.md`. Equation (12) then wants the result in
-metres, so divide by 1 000 before passing it on.
+metres, so divide by 1 000 before passing it on.
 
 **Parameters**
 
@@ -960,7 +960,7 @@ it worse.
 | Name | Description |
 | :--- | :--- |
 | `internal_diameter_m` | $D_i$, in m. |
-| `pipe_sound_speed` | $c_p$, 5 000 m/s for steel, in m/s. |
+| `pipe_sound_speed` | $c_p$, 5 000 m/s for steel, in m/s. |
 
 **Returns:** $f_r$, in Hz.
 
@@ -1011,8 +1011,8 @@ out at −44,7 dB.
 | :--- | :--- |
 | `internal_diameter_m` | $D_i$, in m. |
 | `wall_thickness` | $t_p$, in m. |
-| `pipe_density` | $\rho_p$, 7 800 kg/m³ for steel. |
-| `pipe_sound_speed` | $c_p$, 5 000 m/s for steel, in m/s. |
+| `pipe_density` | $\rho_p$, 7 800 kg/m³ for steel. |
+| `pipe_sound_speed` | $c_p$, 5 000 m/s for steel, in m/s. |
 | `air_density` | $\rho_o$ outside the pipe, in kg/m³. |
 | `air_sound_speed` | $c_o$ outside the pipe, in m/s. |
 
@@ -1203,7 +1203,7 @@ $$
 5.1 argues the case: at these velocities the jet is slow enough to be a
 monopole, and a monopole's efficiency rises with the first power of the
 Mach number, reaching $10^{-4}$ when the jet reaches the speed of
-sound in the liquid. Water carries sound at about 1 400 m/s and a control
+sound in the liquid. Water carries sound at about 1 400 m/s and a control
 valve jet runs at tens of metres per second, so the efficiency comes out
 in the $10^{-6}$ range: one part in a million of the stream power.
 

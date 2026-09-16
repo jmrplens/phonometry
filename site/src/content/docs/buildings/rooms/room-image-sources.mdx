@@ -257,7 +257,7 @@ here: it takes 0.4 % off the 250 Hz decay and 4.4 % off the 4 kHz decay. That is
 the honest size of the effect in a 105 m³ room (the reflections simply do not
 travel far enough), and it is why air absorption is a
 [volume effect](/phonometry/buildings/rooms/reverberation-prediction/#1-sabine-eyring-and-millington-sette)
-rather than a frequency effect: put the same walls around 2 000 m³ and the same
+rather than a frequency effect: put the same walls around 2 000 m³ and the same
 argument takes tens of per cent off the top band.*
 
 <details>
@@ -387,15 +387,15 @@ the fitted T30 comes out short:
 
 | `max_order` | audible images | fitted T30 | runtime |
 | ---: | ---: | ---: | ---: |
-| 12 | 2 624 | 0.28 s | < 0.1 s |
-| 20 (default) | 11 520 | 0.43 s | < 0.1 s |
-| 30 | 37 880 | 0.60 s | < 0.1 s |
-| 40 | 88 640 | 0.75 s | 0.1 s |
-| 60 | 295 360 | 1.06 s | 0.2 s |
+| 12 | 2 624 | 0.28 s | < 0.1 s |
+| 20 (default) | 11 520 | 0.43 s | < 0.1 s |
+| 30 | 37 880 | 0.60 s | < 0.1 s |
+| 40 | 88 640 | 0.75 s | 0.1 s |
+| 60 | 295 360 | 1.06 s | 0.2 s |
 
 The Eyring estimate for this room is 0.93 s, so order 12 is 3.3× short and the
 default 20 is 2.1× short. The cost objection does not apply: order 60 is
-295 360 images and runs in a fifth of a second.
+295 360 images and runs in a fifth of a second.
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/image_source_order_convergence.svg" alt="Fitted T30 and EDT of the 7 by 5 by 3 metre room against the reflection-order cut-off from 8 to 60: both rise steeply and almost linearly with order, T30 crossing the 0.93 second Eyring line and its shaded plus or minus 10 per cent band at about order 51 and continuing to rise, while a second axis shows the audible image count growing from about 800 to 295 thousand" width="88%" />
 

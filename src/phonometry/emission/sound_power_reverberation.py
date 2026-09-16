@@ -330,8 +330,8 @@ def _k1_eq14(delta: np.ndarray, frequencies: np.ndarray) -> tuple[np.ndarray, bo
     :math:`K_1 = -10 \log_{10}(1 - 10^{-0.1 \Delta L_p})`. The precision-grade
     qualification is frequency dependent (clause 9.1.2):
     :math:`\Delta L_p \ge 15` dB gives :math:`K_1 = 0`; below
-    the lower criterion (6 dB for bands <= 200 Hz and >= 6 300 Hz, 10 dB for
-    250 Hz to 5 000 Hz) ``K1`` is clamped to the criterion value (1.26 dB /
+    the lower criterion (6 dB for bands <= 200 Hz and >= 6 300 Hz, 10 dB for
+    250 Hz to 5 000 Hz) ``K1`` is clamped to the criterion value (1.26 dB /
     0.46 dB) and the levels become upper bounds. ``delta`` may be per band
     ``(NB,)`` or per position and band ``(NM, NB)``; the second returned value
     flags whether any element fell below the lower criterion.

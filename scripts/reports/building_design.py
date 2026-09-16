@@ -176,7 +176,7 @@ def _structure_borne_power_example() -> tuple[object, ReportMetadata, str]:
     """Structure-borne source power fiche: an EN 15657 reception-plate test.
 
     A pump fixed to the low-mobility reception plate EN 15657 clause 7.2.2
-    specifies: 100 mm concrete of 2 300 kg/m3, so a mass per area
+    specifies: 100 mm concrete of 2 300 kg/m3, so a mass per area
     m = 230 kg/m2, over 3,15 m x 2,23 m = 7,0 m2 (above the 5 m2 minimum, sides
     near sqrt(2):1) with a structural reverberation time Ts = 0,25 s, which
     gives the plate loss factor eta = 2,2/(f*Ts) (Formula 13) and keeps it at
@@ -298,7 +298,7 @@ def _detailed_airborne_example() -> tuple[object, ReportMetadata, str]:
     taken corrected rather than as printed, both registered in docs/ERRATA.md:
     the Formula (C.1) perimeter sums, derived from Formula (C.4) with the
     unrounded Annex E junction indices, and the external walls' internal loss
-    factor, 0,012 5 from the element specification rather than the 0,013 of the
+    factor, 0,012 5 from the element specification rather than the 0,013 of the
     input block.
     """
     import iso12354_building as bld

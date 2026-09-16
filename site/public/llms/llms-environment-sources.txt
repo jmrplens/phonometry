@@ -392,7 +392,7 @@ with: reaching for a category it does not carry raises `ValueError` rather than
 failing later.
 
 That mechanism is also what pins the implementation: the European Commission
-published a test set of 4 875 road emission cases computed with the 2015
+published a test set of 4 875 road emission cases computed with the 2015
 coefficients, and feeding the shipped equations that superseded database (not
 the 2021 tables the library ships by default) reproduces every published band
 level to 0,005 dB, inside the two decimals the test set prints.
@@ -843,8 +843,8 @@ Official Journal text of the instrument that enacted it. And the whole chain of
 equations end to end, against the emission test workbook the European Commission
 published with its reference source module: feeding the shipped equations the
 **2015** coefficient database that workbook was computed with reproduces **all
-34 560 published rows of the twenty vehicles whose catalogue entries are well
-formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
+34 560 published rows of the twenty vehicles whose catalogue entries are well
+formed**, that is 17 280 cases at both source heights, to 0,0055 dB, inside the
 two decimals it prints. A hundred and twenty-three of those cases are committed
 to the repository and run in CI. The three vehicles left out are described in
 `tests/data/cnossos/README.md`: their rows record defects of the reference

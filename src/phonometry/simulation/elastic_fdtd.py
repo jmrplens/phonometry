@@ -255,7 +255,7 @@ WATER = Material(c_p=1480.0, c_s=0.0, rho=1000.0)
 # the wrong one: EN 12354-1 Table B.3 tabulates the quasi-longitudinal phase
 # velocity of a *plate*, sqrt(E / (rho (1 - nu^2))), which is a different
 # quantity from the bulk c_p, sqrt(E (1 - nu) / (rho (1 + nu) (1 - 2 nu))). For
-# steel the two are 5 291 and 5 856 m/s, an eleven per cent gap that grows to
+# steel the two are 5 291 and 5 856 m/s, an eleven per cent gap that grows to
 # fifteen for aluminium; the table also lists neither steel nor aluminium at
 # all. Reading c_L into c_p would put the wrong physics behind a citation.
 

@@ -444,7 +444,7 @@ def _chk_normal_air_density() -> Outcome:
         1e-12,
         unit="kg/m3",
         places=6,
-        expected_label="(101 325 + 200) / (287 x 293) = 1,207323 kg/m³",
+        expected_label="(101 325 + 200) / (287 x 293) = 1,207323 kg/m³",
     )
 
 

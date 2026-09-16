@@ -2,7 +2,7 @@
 
 # Hydrodynamic valve noise (IEC 60534-8-4)
 
-Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
+Water is compressible enough to carry sound at 1 400 m/s and far too stiff to
 choke the way a gas does, so a control valve on a water line cannot build
 the shock cells that [the aerodynamic part](control-valve-noise.md) spends
 five regimes on. It makes noise two ways instead, and the whole of
@@ -94,7 +94,7 @@ print(round(speed, 3), round(power, 1))                 # 28.801 14042.1
 Then two efficiencies say what fraction of those fourteen kilowatts leaves as
 sound. Equation (8) makes the turbulent one linear in the jet Mach number,
 reaching $10^{-4}$ only when the jet reaches the speed of sound in the liquid,
-which for water is 1 400 m/s and never happens in a control valve:
+which for water is 1 400 m/s and never happens in a control valve:
 
 $$
 \eta_{turb} = 10^{-4}\left(\frac{U_{vc}}{c_L}\right)

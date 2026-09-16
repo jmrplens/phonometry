@@ -24,7 +24,7 @@ self-contained algorithm implemented here is the 2007/2009 Annex C one.)
 
 **Survey method (ISO 1996-2:2017 Annex K).**
 :func:`tonal_seeking_survey` flags a one-third-octave band that exceeds *both*
-neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB (500–10 000 Hz).
+neighbours by 15 dB (25–125 Hz), 8 dB (160–400 Hz) or 5 dB (500–10 000 Hz).
 
 **Mean-audibility route (ISO 1996-2:2017 Table J.1).**
 :func:`tonal_adjustment_from_mean_audibility` maps the ISO/PAS 20065 mean
@@ -294,7 +294,7 @@ def tonal_seeking_survey(
 
     A band is flagged when it exceeds *both* adjacent one-third-octave bands by
     the level difference for its range: 15 dB (25–125 Hz), 8 dB (160–400 Hz),
-    5 dB (500–10 000 Hz). The two end bands (no pair of neighbours) are never
+    5 dB (500–10 000 Hz). The two end bands (no pair of neighbours) are never
     flagged.
 
     .. note::

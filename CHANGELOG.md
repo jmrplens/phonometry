@@ -426,7 +426,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   guess where the advisory comes from. They now all read `warning class` and
   `Emitted by`, which is the verb the majority already used and the one that is
   true: `warnings.warn` emits, and only a filter turns the advisory into a
-  raise. The rows that named nothing now name the module that emits them.- The in situ standards of this release did not do what their printed clauses
+  raise. The rows that named nothing now name the module that emits them.
+
+- The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.
 
   The reference microphone of ISO 10847 could stand lower than the clause

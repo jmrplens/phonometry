@@ -96,6 +96,70 @@ modification.
 ADJACENT_BAND_LIMIT_DB = 8.0
 ```
 
+## BackgroundMarginCheck
+
+```python
+BackgroundMarginCheck(
+    margins_db: NDArray[np.float64],
+    needs_correction: NDArray[np.bool_],
+    unusable: NDArray[np.bool_],
+    satisfied: bool,
+)
+```
+
+Whether the levels clear the background by what 5.1.4 asks.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `margins_db` | The level of the source less the background at each position and band given, in decibels, in the shape they came in. |
+| `needs_correction` | True where the margin is under [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db) and over [`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db), which is the window where the clause asks for the ISO 3744 background correction. |
+| `unusable` | True where the margin is at or under [`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_min_signal_to_background_db), which the clause offers no correction for. |
+| `satisfied` | True when every margin clears [`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`](/phonometry/reference/api/rooms/spatial-decay/#iso14257_preferred_signal_to_background_db), which is the only case that needs nothing done to it. |
+
+## check_background_margin
+
+```python
+check_background_margin(
+    levels_db: ArrayLike,
+    background_levels_db: ArrayLike,
+) -> BackgroundMarginCheck
+```
+
+Does the source stand clear of the background? 5.1.4.
+
+The clause asks for 10 dB at every position and in every octave band the
+curve is measured over. Between 10 dB and 6 dB it asks for the background
+correction of ISO 3744 ([`phonometry.emission.background_correction`](/phonometry/reference/api/building/lab-insulation/#background_correction))
+before the levels are used; at 6 dB or less it asks for neither, because
+there is no longer a source level to correct towards.
+
+The verdict is returned rather than applied: correcting the levels here
+would change a measured number behind the caller's back, and the correction
+the clause names belongs to the standard that prints it. A margin under
+10 dB anywhere also emits [`SpatialDecayWarning`](/phonometry/reference/api/rooms/spatial-decay/#spatialdecaywarning), so a curve computed
+from levels nobody checked says so on the way past.
+
+One octave band at a time, as every other function of clause 6 takes its
+positions: the clause asks the same 10 dB of every band, and a curve is
+read band by band.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `levels_db` | $L_p$ with the test source running, in decibels, one value per measured position of one octave band. |
+| `background_levels_db` | The background at the same positions, in decibels, as a scalar or one value per position. |
+
+**Returns:** The verdict, as a [`BackgroundMarginCheck`](/phonometry/reference/api/rooms/spatial-decay/#backgroundmargincheck).
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | For inputs that are not finite or do not match position for position. |
+
 ## corrected_distribution_value
 
 ```python

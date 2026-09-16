@@ -2307,7 +2307,7 @@ def generate_silencer_selection(output_dir: str) -> None:
     ax.axvline(limit, color=COLOR_PRIMARY, lw=1.6, ls=":")
     ax.text(
         limit * 1.10,
-        45.0,
+        51.0,
         f"first duct cut-on, {limit:.0f} Hz: the blue "
         "four-pole\ncurves stop applying beyond it; the "
         "dissipative\nregressions carry on",
@@ -2316,7 +2316,11 @@ def generate_silencer_selection(output_dir: str) -> None:
         va="top",
     )
     ax.set_xlim(40.0, 8000.0)
-    ax.set_ylim(0.0, 48.0)
+    # Five entries of a legend, and the widest of them names a lining in
+    # millimetres and a duct in inches, so the box reaches across most of the
+    # panel: the top has to clear the splitter unit's 500 Hz peak, which is
+    # under the middle of it.
+    ax.set_ylim(0.0, 54.0)
     format_frequency_axis(ax, 40.0, 8000.0, language=_LANG)
     ax.set_xlabel(LABEL_FREQ_HZ)
     ax.set_ylabel("Attenuation [dB]")
@@ -4562,6 +4566,15 @@ def generate_room_to_room_chain(output_dir: str) -> None:
     # curve and the band-by-band noise reduction on the twin axis.
     result.plot(ax=ax, language=_LANG)
     ax.set_ylim(20.0, 115.0)
+    # The renderer asks matplotlib for the best corner, which scores the
+    # candidate boxes against the artists of the axes that carries the legend
+    # and so never sees the second scale: here it lands on the last point of
+    # the noise reduction, at 4 kHz. The free strip of this panel is the middle
+    # of the right-hand half, between the source spectrum above and the
+    # receiving one below, and neither scale draws in it.
+    legend = ax.get_legend()
+    if legend is not None:
+        legend.set_loc("center right")
     ax.set_title(
         "Plant room to operator room: what the wall delivers, and NC 45",
         pad=10,

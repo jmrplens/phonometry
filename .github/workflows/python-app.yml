@@ -525,6 +525,18 @@ jobs:
       # of distances each shipped that way. Reads the committed SVGs, so it
       # needs no rendering stack.
       run: python scripts/check_figure_decimal_point.py
+    - name: Fail if a legend closes over a plotted point
+      # A legend is an opaque plate the author places by hand, and its width is
+      # set by its longest label, which is a defect waiting to happen in a
+      # bilingual corpus: the Spanish label is routinely half again as long as
+      # the English one, so a box that clears the data in one language reaches
+      # back over it in the other. Every other gate stays green, because the
+      # figure matches its generator, the colours pass and the annotation audit
+      # measures labels rather than legends. This reads the committed SVGs for
+      # a plotted point under a legend frame, and carries the drawings where
+      # the mark under the box is a rail rather than a reading with the reason
+      # each one is a decision.
+      run: python scripts/check_figure_legends.py
 
   # The Python snippets printed in the guides must run. They are the first
   # thing a reader copies, and nothing executed them until this job existed:

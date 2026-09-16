@@ -1701,7 +1701,10 @@ def generate_fluctuation_strength(output_dir: str) -> None:
     )
     ax.set_xlabel(r"Modulation frequency $f_{\mathrm{mod}}$ [Hz]")
     ax.set_ylabel("Fluctuation strength $F$ [vacil]")
-    ax.set_ylim(0.0, max(float(f_bbn.max()), float(f_noise.max())) * 1.20)
+    # Headroom for the three-line legend above the taller peak rather than on
+    # it: the peak of the signal model sits at 4 Hz, which is the middle of the
+    # axis, so a box in either top corner reaches it once the labels are long.
+    ax.set_ylim(0.0, max(float(f_bbn.max()), float(f_noise.max())) * 1.35)
     ax.set_title("Both models on AM broadband noise, 60 dB", pad=10)
     ax.grid(which="both", color=COLOR_GRID, linestyle="--", alpha=0.5)
     ax.set_axisbelow(True)
@@ -2565,7 +2568,10 @@ def generate_hearing_threshold(output_dir: str) -> None:
     ax_ref.set_title("ISO 389-7: reference threshold of hearing", pad=10)
     ax_ref.grid(which="both", color=COLOR_GRID, linestyle="-", alpha=0.4)
     ax_ref.set_axisbelow(True)
-    ax_ref.legend(loc="upper left")
+    # The reference threshold is a valley, high at both ends, so the top of the
+    # panel is clear everywhere except the two corners: a box in the left one
+    # sits on the 125 Hz point of both curves.
+    ax_ref.legend(loc="upper center")
 
     plt.tight_layout()
     save_figure(output_dir, "hearing_threshold.png")

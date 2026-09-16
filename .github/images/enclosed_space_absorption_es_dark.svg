@@ -1493,30 +1493,30 @@ z
    </g>
    <g id="legend_1">
     <g id="patch_7">
-     <path d="M 332.925625 66.729687 
-L 438.985 66.729687 
-Q 440.985 66.729687 440.985 64.729687 
-L 440.985 35.328125 
-Q 440.985 33.328125 438.985 33.328125 
-L 332.925625 33.328125 
-Q 330.925625 33.328125 330.925625 35.328125 
-L 330.925625 64.729687 
-Q 330.925625 66.729687 332.925625 66.729687 
+     <path d="M 49.627344 66.729687 
+L 155.686719 66.729687 
+Q 157.686719 66.729687 157.686719 64.729687 
+L 157.686719 35.328125 
+Q 157.686719 33.328125 155.686719 33.328125 
+L 49.627344 33.328125 
+Q 47.627344 33.328125 47.627344 35.328125 
+L 47.627344 64.729687 
+Q 47.627344 66.729687 49.627344 66.729687 
 z
 " style="opacity: 0.8; stroke: #cccccc; stroke-linejoin: miter"/>
     </g>
     <g id="line2d_53">
-     <path d="M 334.925625 41.426562 
-L 344.925625 41.426562 
-L 354.925625 41.426562 
+     <path d="M 51.627344 41.426562 
+L 61.627344 41.426562 
+L 71.627344 41.426562 
 " style="fill: none; stroke: #d62728; stroke-width: 1.5; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#mc99916e8d1" x="344.925625" y="41.426562" style="fill: #d62728; stroke: #d62728"/>
+      <use xlink:href="#mc99916e8d1" x="61.627344" y="41.426562" style="fill: #d62728; stroke: #d62728"/>
      </g>
     </g>
     <g id="text_23">
      <!-- techo desnudo -->
-     <g style="fill: #ffffff" transform="translate(362.925625 44.926562) scale(0.1 -0.1)">
+     <g style="fill: #ffffff" transform="translate(79.627344 44.926562) scale(0.1 -0.1)">
       <defs>
        <path id="DejaVuSans-4b" d="M 3513 2113 
 L 3513 0 
@@ -1554,17 +1554,17 @@ z
      </g>
     </g>
     <g id="line2d_54">
-     <path d="M 334.925625 56.827344 
-L 344.925625 56.827344 
-L 354.925625 56.827344 
+     <path d="M 51.627344 56.827344 
+L 61.627344 56.827344 
+L 71.627344 56.827344 
 " style="fill: none; stroke: #1f77b4; stroke-width: 1.5; stroke-linecap: square"/>
      <g>
-      <use xlink:href="#m49466b02c9" x="344.925625" y="56.827344" style="fill: #1f77b4; stroke: #1f77b4"/>
+      <use xlink:href="#m49466b02c9" x="61.627344" y="56.827344" style="fill: #1f77b4; stroke: #1f77b4"/>
      </g>
     </g>
     <g id="text_24">
      <!-- techo acústico -->
-     <g style="fill: #ffffff" transform="translate(362.925625 60.327344) scale(0.1 -0.1)">
+     <g style="fill: #ffffff" transform="translate(79.627344 60.327344) scale(0.1 -0.1)">
       <defs>
        <path id="DejaVuSans-bc" d="M 544 1381 
 L 544 3500 

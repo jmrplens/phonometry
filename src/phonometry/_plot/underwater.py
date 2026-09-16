@@ -19,6 +19,9 @@ from .common import (
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    style_default,
+    style_pop,
+    styled,
 )
 
 if TYPE_CHECKING:
@@ -182,7 +185,7 @@ def plot_ship_source_level(
     ls = np.asarray(result.source_level, dtype=np.float64)
     dl = np.asarray(result.surface_correction, dtype=np.float64)
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Source level $L_\mathrm{s}$", language))
     ax.semilogx(freqs, ls, "o-", **kwargs)
     ax.semilogx(
@@ -252,7 +255,7 @@ def plot_pile_strike(
     total = float(energy[-1]) if energy.size else 0.0
     cum = energy / total if total > 0.0 else energy
     peak_idx = int(np.argmax(np.abs(pressure)))
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     def _waveform(axw: Axes) -> None:
         axw.plot(t, pressure, color=color, lw=0.8, **kwargs)
@@ -320,7 +323,7 @@ def plot_sound_speed_profile(
     depth = np.asarray(result.depth, dtype=np.float64)
     speed = np.asarray(result.sound_speed, dtype=np.float64)
     label = f"{result.model} $c(z)$"
-    ax.plot(speed, depth, **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs})
+    ax.plot(speed, depth, **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=label))
     if not ax.yaxis_inverted():
         ax.invert_yaxis()
     ax.set_xlabel(_t("Sound speed [m/s]", language))
@@ -357,7 +360,7 @@ def plot_propagation_loss(
     ax.plot(
         r,
         np.asarray(result.pl),
-        **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs},
+        **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=label),
     )
     ax.plot(
         r,
@@ -411,7 +414,7 @@ def plot_sonar_equation(
     ax.plot(
         pl[order],
         se[order],
-        **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs},
+        **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=label),
     )
     ax.axhline(
         0.0,
@@ -459,12 +462,7 @@ def plot_bottom_loss(
     ax.plot(
         phi,
         loss,
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.6,
-            "label": _t("Bottom loss", language),
-            **kwargs,
-        },
+        **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=_t("Bottom loss", language)),
     )
     if result.critical_angle_deg is not None:
         ax.axvline(
@@ -506,9 +504,7 @@ def plot_seabed_reflection(
     ax = ax if ax is not None else _new_axes()
     phi = np.asarray(result.grazing_angle_deg, dtype=np.float64)
     magnitude = np.asarray(result.magnitude, dtype=np.float64)
-    ax.plot(
-        phi, magnitude, **{"color": _C_PRIMARY, "lw": 1.6, "label": "$|R|$", **kwargs}
-    )
+    ax.plot(phi, magnitude, **styled(kwargs, color=_C_PRIMARY, lw=1.6, label="$|R|$"))
     if result.critical_angle_deg is not None:
         ax.axvline(
             result.critical_angle_deg,
@@ -550,7 +546,7 @@ def plot_ambient_noise(
     ax.plot(
         f,
         np.asarray(result.spectrum_level),
-        **{"color": _C_PRIMARY, "lw": 1.8, "label": label, **kwargs},
+        **styled(kwargs, color=_C_PRIMARY, lw=1.8, label=label),
     )
     ax.plot(
         f,
@@ -612,7 +608,7 @@ def plot_ship_traffic_spectrum(
         label = f"{result.model} ({result.vessel_class})"
     else:
         label = result.model
-    ax.plot(f, psd, **{"color": _C_PRIMARY, "lw": 1.6, "label": label, **kwargs})
+    ax.plot(f, psd, **styled(kwargs, color=_C_PRIMARY, lw=1.6, label=label))
     ax.set_xscale("log")
     ax.set_xlabel(_t(_FREQUENCY_LABEL, language))
     ax.set_ylabel(_t("Source spectral density [dB re 1 µPa²/Hz at 1 m]", language))
@@ -645,9 +641,7 @@ def plot_normal_modes(
     r = np.asarray(result.ranges, dtype=np.float64)
     pl = np.asarray(result.propagation_loss, dtype=np.float64)
     label = f"{result.wavenumbers.size} {_t('modes', language)} ({format_number(result.frequency, language, decimals=0)} Hz)"
-    ax.plot(
-        r / 1000.0, pl, **{"color": _C_PRIMARY, "lw": 1.2, "label": label, **kwargs}
-    )
+    ax.plot(r / 1000.0, pl, **styled(kwargs, color=_C_PRIMARY, lw=1.2, label=label))
     ax.set_xlabel(_t(_RANGE_KM_LABEL, language))
     ax.set_ylabel(_t(_PROPAGATION_LOSS_LABEL, language))
     ax.set_title(_t("Normal-mode propagation loss", language))
@@ -683,7 +677,7 @@ def plot_ray_trace(
         ax.plot(
             r[i] / 1000.0,
             z[i],
-            **{"color": _C_PRIMARY, "lw": 0.7, "alpha": 0.7, **kwargs},
+            **styled(kwargs, color=_C_PRIMARY, lw=0.7, alpha=0.7),
         )
     _draw_bathymetry(ax, result, float(np.max(r)), language, labelled=True)
     ax.plot(
@@ -1018,12 +1012,7 @@ def plot_weston_regimes(
     ax.plot(
         r,
         np.asarray(result.propagation_loss, dtype=np.float64),
-        **{
-            "color": _C_PRIMARY,
-            "lw": 2.0,
-            "label": _t("Composite", language),
-            **kwargs,
-        },
+        **styled(kwargs, color=_C_PRIMARY, lw=2.0, label=_t("Composite", language)),
     )
     for boundary in (
         result.boundaries.spherical_to_cylindrical,
@@ -1075,7 +1064,7 @@ def plot_marine_mammal_audiogram(
     ax.plot(
         freqs,
         np.asarray(result.threshold, dtype=np.float64),
-        **{"color": _C_PRIMARY, "lw": 1.4, "label": result.group, **kwargs},
+        **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=result.group),
     )
     ax.plot(
         [result.best_frequency],
@@ -1122,7 +1111,7 @@ def plot_auditory_weighting(
     ax.plot(
         freqs,
         np.asarray(result.weighting, dtype=np.float64),
-        **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs},
+        **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=label),
     )
     ax.axhline(0.0, color=_C_MUTED, ls=":", lw=0.8)
     ax.legend(loc="lower center", fontsize="small")
@@ -1168,14 +1157,14 @@ def plot_weighted_exposure(
     ax.plot(
         freqs,
         _plottable(result.weighted_band_sel),
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.6,
-            "marker": "o",
-            "ms": 3,
-            "label": f"{_t('Weighted', language)} ({result.group}, {result.guidance})",
-            **kwargs,
-        },
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            lw=1.6,
+            marker="o",
+            ms=3,
+            label=f"{_t('Weighted', language)} ({result.group}, {result.guidance})",
+        ),
     )
     for level, color, name in (
         (result.criteria.tts_sel, _C_SECONDARY, "TTS"),
@@ -1234,14 +1223,14 @@ def plot_strike_sel_spectrum(
     ax.plot(
         freqs,
         _plottable(result.band_sel),
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.4,
-            "marker": "o",
-            "ms": 3,
-            "label": f"1/{result.fraction}",
-            **kwargs,
-        },
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            lw=1.4,
+            marker="o",
+            ms=3,
+            label=f"1/{result.fraction}",
+        ),
     )
     ax.axhline(
         result.total_sel,
@@ -1281,7 +1270,7 @@ def plot_detection_range(
     ax.plot(
         r,
         np.asarray(result.propagation_loss, dtype=np.float64),
-        **{"color": _C_PRIMARY, "lw": 1.4, "label": _t("Total PL", language), **kwargs},
+        **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=_t("Total PL", language)),
     )
     ax.axhline(
         result.figure_of_merit,

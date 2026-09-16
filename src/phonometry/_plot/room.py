@@ -28,6 +28,8 @@ from .common import (
     _new_axes_column,
     _time_axis,
     format_frequency_axis,
+    style_default,
+    style_pop,
 )
 
 if TYPE_CHECKING:
@@ -461,7 +463,7 @@ def plot_sound_strength(
             zorder=2,
             label=_t(r"Single number, $G_m$ (500 Hz to 1 kHz)", language),
         )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured $G$", language))
     ax_strength.plot(positions, strength, "o-", zorder=3, **kwargs)
     ax_strength.set_ylabel(_t("Sound strength $G$ [dB]", language))
@@ -556,7 +558,7 @@ def plot_lateral_energy(
     symbol = r"Measured $J_\mathrm{LF}$"
     if result.weighting == "cosine":
         symbol = r"Measured $J_\mathrm{LFC}$"
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(symbol, language))
     ax.plot(positions, values, "o-", zorder=3, **kwargs)
     ax.set_ylabel(_t("Early lateral energy fraction", language))
@@ -618,7 +620,7 @@ def plot_late_lateral(
             zorder=2,
             label=_t(r"Energy average, $L_{J,\mathrm{avg}}$", language),
         )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Measured $L_J$", language))
     ax.plot(positions, values, "o-", zorder=3, **kwargs)
     ax.set_ylabel(_t(r"Late lateral sound level $L_J$ [dB]", language))
@@ -667,7 +669,7 @@ def plot_stage_support(
             alpha=0.25,
             label=_t(rf"Typical range of $ST_\mathrm{{{key}}}$ (Table C.1)", language),
         )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Early support, $ST_\mathrm{Early}$", language))
     ax.plot(positions, early, "o-", zorder=3, **kwargs)
     ax.plot(
@@ -768,7 +770,7 @@ def plot_decay_curve(
     ax = ax if ax is not None else _new_axes()
     time = np.asarray(result.time, dtype=np.float64)
     level = np.asarray(result.level, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(_SCHROEDER_DECAY_LABEL, language))
     ax.plot(time, level, **kwargs)
 
@@ -833,7 +835,7 @@ def plot_impulse_response(
     total = float(energy[0]) if energy.size else 0.0
     edc_db = 10.0 * np.log10(np.maximum(energy, tiny) / (total if total > 0.0 else 1.0))
 
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     from .._i18n import localize_axes
 
@@ -905,7 +907,7 @@ def plot_noise_criterion(
             va="center",
         )
     valid = ~np.isnan(levels)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured", language))
     ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
     # Nearest *valid* band rather than float equality against the stored
@@ -987,7 +989,7 @@ def plot_room_criterion(
         alpha=0.45,
         label=_t("Hiss tolerance (+3 dB)", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured", language))
     ax.plot(freqs[valid], levels[valid], "o-", zorder=3, **kwargs)
     _freq_axis(ax, freqs, language=language)
@@ -1017,7 +1019,7 @@ def plot_enclosed_space_absorption(
     ax = ax if ax is not None else _new_axes()
     freq = np.asarray(result.frequencies, dtype=np.float64)
     rt = np.asarray(result.reverberation_time, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     ax.plot(freq, rt, **kwargs)
     _freq_axis(ax, freq, language=language)
@@ -1121,7 +1123,7 @@ def plot_open_plan(
     r = np.geomspace(2.0, r_max, 200)
     level = result.lp_as_4m - result.d2s * np.log2(r / 4.0)
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault(
         "label",
         rf"$D_{{2,\mathrm{{S}}}}$ = {format_number(result.d2s, language, decimals=1)}"
@@ -1210,7 +1212,7 @@ def plot_excitation(
         msg = "excitation signal is empty; nothing to plot."
         raise ValueError(msg)
     t = np.arange(n) / float(fs)
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     two_panel = ax is None
     if two_panel:
@@ -1418,8 +1420,8 @@ def plot_steady_field(
         lw=1.4,
         label=_t("Reverberant field", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 2.4)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 2.4)
     kwargs.setdefault("label", _t("Total", language))
     ax.plot(r, np.asarray(result.total, dtype=np.float64), **kwargs)
     ax.axvline(
@@ -1485,7 +1487,7 @@ def plot_shaped_sweep(
     fs = float(result.fs)
     f1, f2 = result.f_range
     time, xlabel = _time_axis(x.size, int(fs), language=language)
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     # Welch magnitude of the sweep and the synthesis target, both in dB
     # re their in-band maximum (power dB and magnitude dB share the shape).
@@ -1790,7 +1792,7 @@ def plot_spatial_decay(
         lw=1.6,
         label=_t(r"Fitted slope, $\mathrm{DL_2}$", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Measured curve, $D$", language))
     kwargs.setdefault("zorder", 3)
     axes.semilogx(radii, values, "o-", **kwargs)

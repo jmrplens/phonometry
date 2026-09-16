@@ -23,6 +23,8 @@ from .common import (
     _new_axes,
     _plot_two_runs,
     format_frequency_axis,
+    style_default,
+    styled,
 )
 
 if TYPE_CHECKING:
@@ -199,7 +201,7 @@ def plot_atmospheric_attenuation(
     # dB/km is already a logarithmic quantity, so the ordinate stays linear;
     # only the frequency axis is logarithmic (semilogx + format_frequency_axis).
     ax.semilogx(
-        freqs, alpha_km, **{"color": _C_PRIMARY, "lw": 1.8, "label": label, **kwargs}
+        freqs, alpha_km, **styled(kwargs, color=_C_PRIMARY, lw=1.8, label=label)
     )
     fmin, fmax = float(freqs.min()), float(freqs.max())
     ax.set_xlim(fmin, fmax)
@@ -239,12 +241,9 @@ def plot_wind_turbine_tonality(
     ax.plot(
         freqs,
         levels,
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.0,
-            "label": _t("Narrowband spectrum", language),
-            **kwargs,
-        },
+        **styled(
+            kwargs, color=_C_PRIMARY, lw=1.0, label=_t("Narrowband spectrum", language)
+        ),
     )
     ax.axvspan(
         lo, hi, color=_C_TERTIARY, alpha=0.12, label=_t("Critical band", language)
@@ -313,7 +312,7 @@ def plot_impulse_prominence(
         label=f"{_t('threshold', language)} $P = {decimal_comma(f'{ADJUSTMENT_THRESHOLD:g}', language)}$",
     )
 
-    kwargs.setdefault("color", _C_PRIMARY_LIGHT)
+    style_default(kwargs, "color", _C_PRIMARY_LIGHT)
     kwargs.setdefault("zorder", 3)
     kwargs.setdefault("label", _t("Impulses", language))
     ax.scatter(per, impulse_adjustment(per), **kwargs)
@@ -371,7 +370,7 @@ def plot_tonal_adjustment(
     )
     ax.axvline(10.0, color=_C_MUTED, ls=":")
 
-    kwargs.setdefault("color", _C_REFERENCE)
+    style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("zorder", 4)
     kwargs.setdefault("s", 90)
     kwargs.setdefault("marker", "*")
@@ -437,7 +436,7 @@ def plot_outdoor_attenuation(
         pos_bottom += np.maximum(term, 0.0)
         neg_bottom += np.minimum(term, 0.0)
 
-    kwargs.setdefault("color", _C_REFERENCE)
+    style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("marker", "D")
     kwargs.setdefault("label", _t(_TOTAL_A_LABEL, language))
     ax.plot(positions, np.asarray(result.a_total, dtype=np.float64), zorder=4, **kwargs)
@@ -477,7 +476,7 @@ def plot_cnossos_rail_emission(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
 
-    kwargs.setdefault("color", _C_PRIMARY_LIGHT)
+    style_default(kwargs, "color", _C_PRIMARY_LIGHT)
     kwargs.setdefault("label", _t("Both heights", language))
     # A silent source carries -inf, which no axis can hold; masking it leaves
     # the band out of the drawing instead of collapsing the whole scale.
@@ -539,14 +538,14 @@ def plot_spherical_ground(
     ax.plot(
         freqs,
         d_l,
-        **{
-            "color": _C_PRIMARY,
-            "lw": 1.4,
-            "marker": "o",
-            "ms": 3.0,
-            "label": _t("Excess attenuation $\\Delta L$", language),
-            **kwargs,
-        },
+        **styled(
+            kwargs,
+            color=_C_PRIMARY,
+            lw=1.4,
+            marker="o",
+            ms=3.0,
+            label=_t("Excess attenuation $\\Delta L$", language),
+        ),
     )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8, label=_t("Free field (0 dB)", language))
     ax.axhline(
@@ -604,14 +603,7 @@ def plot_barrier_insertion_loss(
     ax.plot(
         freqs,
         il,
-        **{
-            "color": _C_SECONDARY,
-            "lw": 1.4,
-            "marker": "s",
-            "ms": 3.0,
-            "label": label,
-            **kwargs,
-        },
+        **styled(kwargs, color=_C_SECONDARY, lw=1.4, marker="s", ms=3.0, label=label),
     )
     ax.axhline(0.0, color=_C_MUTED, lw=0.8)
     ax.axhline(
@@ -648,7 +640,7 @@ def plot_sound_speed_profile(
     z = np.asarray(profile.heights, dtype=np.float64)
     c = np.asarray(profile.sound_speeds, dtype=np.float64)
     label = profile.description or r"$c_\mathrm{eff}(z)$"
-    ax.plot(c, z, **{"color": _C_PRIMARY, "lw": 1.4, "label": label, **kwargs})
+    ax.plot(c, z, **styled(kwargs, color=_C_PRIMARY, lw=1.4, label=label))
     ax.set_xlabel(_t("Effective sound speed [m/s]", language))
     ax.set_ylabel(_t(_HEIGHT_LABEL, language))
     ax.set_title(_t("Effective sound-speed profile", language))
@@ -680,7 +672,7 @@ def plot_atmospheric_rays(
     r = np.asarray(result.ranges, dtype=np.float64)
     z = np.asarray(result.heights, dtype=np.float64)
     for i in range(r.shape[0]):
-        ax.plot(r[i], z[i], **{"color": _C_PRIMARY, "lw": 0.7, "alpha": 0.7, **kwargs})
+        ax.plot(r[i], z[i], **styled(kwargs, color=_C_PRIMARY, lw=0.7, alpha=0.7))
     ax.plot(
         [0.0],
         [result.source_height],
@@ -794,7 +786,7 @@ def plot_tonal_correction_rd1367(
     lt = np.asarray(result.differences, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
 
-    kwargs.setdefault("color", _C_PRIMARY_LIGHT)
+    style_default(kwargs, "color", _C_PRIMARY_LIGHT)
     kwargs.setdefault("label", _t("Band level", language))
     ax.bar(positions, levels, width=0.72, **kwargs)
     ax.set_ylabel(_t("Band level [dB]", language))
@@ -915,13 +907,13 @@ def plot_activity_assessment(
         limit_label,
         offset,
         dash,
-        styled,
+        takes_kwargs,
     ) in series:
         # matplotlib types the dash style as a Literal; the series table above
         # carries it as a plain str, so narrow it back for the hlines call.
         style = cast("Any", dash)
         opts: dict[str, Any] = {"color": colour, "label": label}
-        if styled:
+        if takes_kwargs:
             # The caller's bar kwargs apply to the daily LKeq,x series, the one
             # the fiche and the guides treat as the headline result.
             opts.update(kwargs)
@@ -1005,7 +997,7 @@ def plot_cnossos_road_emission(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = _band_axis(ax, freqs, language=language)
 
-    kwargs.setdefault("color", _C_PRIMARY_LIGHT)
+    style_default(kwargs, "color", _C_PRIMARY_LIGHT)
     kwargs.setdefault("label", _t("Total line", language))
     # An empty category carries -inf, which no axis can hold; masking it leaves
     # the band out of the drawing instead of collapsing the whole scale.
@@ -1065,7 +1057,7 @@ def plot_road_device_rating(
     positions = _band_axis(ax, freqs, language=language)
     absorbing = result.quantity == "absorption"
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault(
         "label",
         _t(r"$\alpha_\mathrm{S}$, absorption coefficient", language)

@@ -48,6 +48,8 @@ from .common import (
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    style_default,
+    style_pop,
 )
 
 #: The two edge bins (DC and Nyquist) trimmed from a per-frequency array
@@ -233,7 +235,7 @@ def _plot_density_with_band(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     pos = freqs > 0.0
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
     ax.fill_between(
         freqs[pos],
         _db10(np.asarray(result.ci_lower, dtype=np.float64)[pos]),
@@ -372,7 +374,7 @@ def plot_cross_spectral_density(
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     pos = freqs > 0.0
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     def _magnitude(axm: Axes) -> None:
         kwargs.setdefault("label", "$|\\hat{G}_{xy}(f)|$")
@@ -444,7 +446,7 @@ def plot_coherent_output_spectrum(
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     pos = freqs > 0.0
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     def _spectra_panel(axs: Axes) -> None:
         axs.semilogx(
@@ -713,7 +715,7 @@ def plot_zoom_fft(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequencies, dtype=np.float64)
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
     be = format_number(result.resolution_bandwidth, language, decimals=2)
     df = format_number(result.bin_spacing, language, decimals=3)
     kwargs.setdefault("label", f"$B_\\mathrm{{e}}$ = {be} Hz, $\\Delta f$ = {df} Hz")
@@ -750,7 +752,7 @@ def plot_correlation(
     ax = ax if ax is not None else _new_axes()
     symbol = "\\hat{\\rho}" if result.normalization == "coefficient" else "\\hat{R}"
     sub = "xx" if result.kind == "autocorrelation" else "xy"
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", f"${symbol}_{{{sub}}}(\\tau)$")
     ax.plot(result.lags, result.values, **kwargs)
     ax.axvline(0.0, color=_C_MUTED, ls=":", lw=1.0)
@@ -796,7 +798,7 @@ def plot_time_delay(
         "gcc": f"GCC ({result.weighting})",
         "phase": _t(r"$\hat{R}_{xy}(\tau)$ (context)", language),
     }[result.method]
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", label)
     ax.plot(result.lags, result.correlation, **kwargs)
     if result.delay_interval is not None:
@@ -851,7 +853,7 @@ def plot_aligned_impulse_response(
     ax.plot(
         t, result.reference, color=_C_MUTED, lw=1.0, label=_t("Reference IR", language)
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     n = decimal_comma(fmt_minus(result.delay_samples, "+.3f"), language)
     kwargs.setdefault("label", _t("Aligned IR (delay {n} samples)", language, n=n))
     ax.plot(t, result.aligned, lw=1.2, **kwargs)
@@ -894,7 +896,7 @@ def plot_envelope(
             lw=0.7,
             label=_t("Signal", language),
         )
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         kwargs.setdefault("label", _t("Envelope $A(t)$ (Eq. 13.17)", language))
         axe.plot(result.times, result.envelope, lw=1.8, **kwargs)
         axe.set_ylabel(_t("Amplitude", language))
@@ -950,7 +952,7 @@ def plot_phase_decomposition(
     pos = freqs > 0.0
 
     def _phase_panel(axp: Axes) -> None:
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         kwargs.setdefault("label", _t("Measured phase", language))
         axp.semilogx(freqs[pos], result.phase[pos], **kwargs)
         axp.semilogx(
@@ -1031,7 +1033,7 @@ def plot_tone_burst(
 
     ax = ax if ax is not None else _new_axes()
     t = np.arange(result.signal.size) / result.fs
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.plot(t, result.signal, **kwargs)
     for sign in (1.0, -1.0):
         ax.plot(
@@ -1107,7 +1109,7 @@ def plot_resampled_signal(
     tiny = np.finfo(np.float64).tiny
     mag_db = 20.0 * np.log10(np.maximum(np.abs(h), tiny))
     view = (freqs > 0.0) & (freqs <= f_hi)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     if "lw" not in kwargs and "linewidth" not in kwargs:
         kwargs["lw"] = 1.2
     kwargs.setdefault("label", _t("Anti-alias filter $|H(f)|$", language))
@@ -1197,8 +1199,8 @@ def plot_cepstrum(
         ax = _new_axes()
         ax.set_title(_t(_CEPSTRUM_TITLES[result.kind], language))
     half = result.nfft // 2 + 1
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.0)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.0)
     ax.plot(1e3 * result.quefrencies[:half], result.cepstrum[:half], **kwargs)
     ax.set_xlabel(_t(_QUEFRENCY_LABEL, language))
     ax.set_ylabel(_t("Cepstrum", language))
@@ -1235,7 +1237,7 @@ def plot_window_metrics(
         level = _window_spectrum_db(result.taps, _WINDOW_OVERSAMPLE)
         bins = np.arange(level.size) / _WINDOW_OVERSAMPLE
         shown = bins <= max_bins
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         enbw = decimal_comma(f"{result.enbw_bins:.3f}", language)
         kwargs.setdefault("label", _t(_ENBW_LABEL, language, enbw=enbw))
         axs.plot(bins[shown], level[shown], **kwargs)
@@ -1309,7 +1311,7 @@ def plot_lifter(
             lw=0.8,
             label=_t("Log spectrum", language),
         )
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         kwargs.setdefault(
             "label",
             _t("Liftered ({mode})", language, mode=_t(result.mode, language)),
@@ -1380,8 +1382,8 @@ def plot_echo_detection(
         ax = _new_axes()
         ax.set_title(_t("Echo detection on the power cepstrum", language))
     half = result.nfft // 2 + 1
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.0)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.0)
     ax.plot(1e3 * result.quefrencies[:half], result.cepstrum[:half], **kwargs)
     ax.axvspan(
         1e3 * result.search_range[0],
@@ -1435,8 +1437,8 @@ def plot_envelope_spectrum(
     from .._i18n import localize_axes
 
     def _spectrum_panel(axe: Axes) -> None:
-        kwargs.setdefault("color", _C_PRIMARY)
-        kwargs.setdefault("lw", 1.2)
+        style_default(kwargs, "color", _C_PRIMARY)
+        style_default(kwargs, "lw", 1.2)
         axe.plot(result.frequencies, result.amplitude, **kwargs)
         axe.set_xlabel(_t(_FREQ_LABEL, language))
         axe.set_ylabel(_t("Modulation amplitude", language))
@@ -1505,7 +1507,7 @@ def plot_inverse_filter(
     peak = float(np.max(h_mag))
     inv_mag = np.abs(np.asarray(result.spectrum))
     eq_mag = h_mag * inv_mag
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
     f1, f2 = result.f_range
 
     kwargs.setdefault("label", _t("Measured response $|H|$", language))
@@ -1569,8 +1571,8 @@ def plot_synchronous_average(
     from .._i18n import localize_axes
 
     def _waveform(axw: Axes) -> None:
-        kwargs.setdefault("color", _C_PRIMARY)
-        kwargs.setdefault("lw", 1.6)
+        style_default(kwargs, "color", _C_PRIMARY)
+        style_default(kwargs, "lw", 1.6)
         kwargs.setdefault(
             "label",
             _t("Averaged periodic waveform ($N$ = {n})", language, n=result.n_averages),

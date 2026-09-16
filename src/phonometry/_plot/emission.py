@@ -22,6 +22,7 @@ from .common import (
     _plot_band_level_bars,
     _sound_power_designation,
     format_frequency_axis,
+    style_default,
     theme_fill,
 )
 
@@ -199,7 +200,7 @@ def plot_emission_pressure(
         )
         raise TypeError(msg)
     kwargs.setdefault("width", 0.62)
-    kwargs.setdefault("color", colours)
+    style_default(kwargs, "color", colours)
     kwargs.setdefault("edgecolor", _C_EDGE)
     bars = ax.bar(range(len(heights)), heights, bottom=bottoms, **kwargs)
     if result.upper_bound:
@@ -320,7 +321,7 @@ def plot_sound_power(
         else np.zeros(n, dtype=bool)
     )
     colors = [_C_MUTED if b else _C_PRIMARY for b in neg]
-    kwargs.setdefault("color", colors)
+    style_default(kwargs, "color", colors)
     bars = ax.bar(positions, np.nan_to_num(lw), **kwargs)
     _hatch_invalid(bars, neg)
 
@@ -391,7 +392,7 @@ def plot_sound_energy(
         positions = _band_axis(
             ax, np.asarray(freqs, dtype=np.float64), language=language
         )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.bar(positions, lj, **kwargs)
 
     ax.set_ylabel(_t("Sound energy level $L_J$ [dB]", language))
@@ -446,7 +447,7 @@ def plot_in_situ_sound_power(
         ax, np.asarray(result.frequencies, dtype=np.float64), language=language
     )
     upper = ~np.asarray(result.background_requirement_met, dtype=bool)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     bars = ax.bar(positions, np.nan_to_num(levels), **kwargs)
     _hatch_invalid(bars, upper)
 
@@ -509,7 +510,7 @@ def plot_intensity(
     li = np.asarray(result.intensity_level, dtype=np.float64)
     index = np.asarray(result.pressure_intensity_index, dtype=np.float64)
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Pressure level $L_p$", language))
     ax.plot(freqs, lp, "o-", **kwargs)
     ax.plot(
@@ -591,7 +592,7 @@ def plot_field_indicators(
     f3 = np.atleast_1d(np.asarray(result.f3, dtype=np.float64))
     f4 = np.atleast_1d(np.asarray(result.f4, dtype=np.float64))
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("$F_2$ (surface pressure-intensity)", language))
     ax.plot(freqs, f2, "o-", **kwargs)
     ax.plot(
@@ -773,10 +774,10 @@ def plot_intensity_class(
         label=_t("Class 2 minimum", language),
     )
 
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.6)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 3.0)
+    style_default(kwargs, "ms", 3.0)
     kwargs.setdefault("drawstyle", "steps-mid")
     kwargs.setdefault("label", _t(r"Measured $\delta_{pI0}$", language))
     ax.plot(freqs, measured, **kwargs)

@@ -458,6 +458,42 @@ with a point in it, whichever pass was meant to write the comma. That is the
 gate that closes the class: a panel none of the three passes reached shipped
 `31.5` beside `52,4` in the same figure, and nothing else could see it.
 
+### 7c. Defaulting a style the caller may spell either way
+
+Matplotlib gives seven artist properties two names: `color` is also `c`,
+`linewidth` is `lw`, `linestyle` is `ls`, `markersize` is `ms`, and the
+marker-edge and marker-face colours and widths have short forms of their own.
+Since matplotlib 3.3 an artist that receives both spellings of one property
+raises `TypeError: Got both 'color' and 'c', which are aliases of one another`.
+
+A renderer that installs its own default and then forwards `**kwargs` is
+therefore choosing a spelling on the caller's behalf. `result.plot(c="red")`
+came back as a traceback, and the shape that reads the default back out was
+quieter and worse: `kwargs.pop("color", _C_PRIMARY)` takes one name, so the
+second artist was drawn in the library's blue while the first kept the
+caller's red, with nothing in the figure to say why.
+
+Use the helpers of `phonometry._plot.common` rather than touching the mapping
+by hand:
+
+| Instead of | Write |
+|---|---|
+| `kwargs.setdefault("color", _C_PRIMARY)` | `style_default(kwargs, "color", _C_PRIMARY)` |
+| `kwargs["color"]` | `style_get(kwargs, "color", _C_PRIMARY)` |
+| `kwargs.pop("color", _C_PRIMARY)` | `style_pop(kwargs, "color", _C_PRIMARY)` |
+| `{"color": _C_PRIMARY, "lw": 1.5, **kwargs}` | `styled(kwargs, color=_C_PRIMARY, lw=1.5)` |
+
+```bash
+python scripts/check_plot_style_defaults.py   # or: make plot-style-defaults
+```
+
+The gate reads every module of `src/phonometry` and prints `file:line` for each
+of those four shapes on a mapping that is the function's own `**kwargs`. A
+local dictionary the caller never sees is left alone, and so are the properties
+with one name: `label`, `marker` and `zorder` cost nothing. It also compares its
+own alias table against the one the helpers read, so teaching the helpers an
+eighth pair without teaching the gate fails rather than passing quietly.
+
 ### 8. Writing the code fences of a documentation page
 
 The Python fences of one page form **one sequential example**: a later fence

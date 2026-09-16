@@ -30,6 +30,8 @@ from ..common import (
     _C_PRIMARY,
     _C_SECONDARY,
     _new_axes,
+    style_default,
+    style_pop,
 )
 from ._draft import (
     _check_language,
@@ -135,7 +137,7 @@ def _draw_duct(ax: Axes, x0: float, x1: float, d: float, **kwargs: Any) -> Recta
     wall = max(0.05 * d, 0.002)
     kwargs.setdefault("facecolor", "none")
     kwargs.setdefault("edgecolor", _C_EDGE)
-    kwargs.setdefault("linewidth", 1.2)
+    style_default(kwargs, "linewidth", 1.2)
     bore = Rectangle((x0, -0.5 * d), x1 - x0, d, **kwargs)
     ax.add_patch(bore)
     _duct_walls(ax, x0, x1, d, wall)
@@ -169,7 +171,7 @@ def _draw_chamber(
     wall = max(0.03 * d_c, 0.003)
     kwargs.setdefault("facecolor", "none")
     kwargs.setdefault("edgecolor", _C_EDGE)
-    kwargs.setdefault("linewidth", 1.4)
+    style_default(kwargs, "linewidth", 1.4)
     ax.add_patch(Rectangle((0.0, -0.5 * d_c), length, d_c, **kwargs))
     for y in (-0.5 * d_c - wall, 0.5 * d_c):
         _material_rect(ax, 0.0, y, length, wall, "plate", linewidth=0.5)
@@ -890,8 +892,8 @@ def plot_plenum_geometry(
     box_h = rise + 2.0 * margin
     y_in = margin
     y_out = margin + rise
-    lw = kwargs.pop("linewidth", 1.6)
-    colour = kwargs.pop("color", _C_EDGE)
+    lw = style_pop(kwargs, "linewidth", 1.6)
+    colour = style_pop(kwargs, "color", _C_EDGE)
     # Walls drawn as segments so the inlet and outlet mouths stay open.
     walls = [
         ((0.0, box_w), (0.0, 0.0)),

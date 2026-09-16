@@ -322,15 +322,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reflow, and every Python string that is not a docstring or a comment, because
   a string may be a key a caller passes in.
 
-- Two figures of the duct chain lost something on the Spanish page. The legend
+- Three figures of the duct chain covered something the reader needs. The legend
   of the self-noise panel of `duct_regenerated_noise` is titled with a line half
   again as long in Spanish, and the box that title sizes reached back to 500 Hz
   and closed over the 40 m/s point at 1 kHz; it sits in the empty bottom corner
   now, which neither language reaches. The note on the velocity law of the same
   panel sits two decibels lower, clear of the 10 m/s curve its second line ended
-  on. In `silencer_extended_tube` the outlet curve climbs through the note on the
-  surviving trough and crossed its last word in both languages, so that note
-  carries the chip the convention gives a label with nowhere to go.- The in situ standards of this release did not do what their printed clauses
+  on. The four panels of `duct_attenuation_elements` all put their legend in the
+  top left, which is empty in the three that rise to the right and is where the
+  two curves of the open-end panel start: its 63 Hz points were under the frame,
+  the first showing half a marker and the second nothing at all, and that panel
+  carries its legend on the right now. In `silencer_extended_tube` the outlet
+  curve climbs through the note on the surviving trough and crossed its last word
+  in both languages, so that note carries the chip the convention gives a label
+  with nowhere to go.
+
+- The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.
 
   The reference microphone of ISO 10847 could stand lower than the clause

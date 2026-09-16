@@ -3750,7 +3750,13 @@ def generate_duct_attenuation_elements(output_dir: str) -> None:
             ax.set_ylim(bottom=0.0)
             format_frequency_axis(ax, 50.0, 10000.0, language=_LANG)
             ax.grid(visible=True, which="both", alpha=0.4)
-            ax.legend(loc="upper left", fontsize="x-small")
+            # Three of the four panels rise to the right and leave the top
+            # left empty. Panel (c) is the one that falls from its first
+            # band, and the legend there sat on the 63 Hz point of both
+            # curves: the blue marker showed half of itself under the frame
+            # and the red one not at all.
+            corner = "upper right" if ax is axes[1][0] else "upper left"
+            ax.legend(loc=corner, fontsize="x-small")
     plt.tight_layout()
     save_figure(output_dir, "duct_attenuation_elements.svg")
     plt.close()

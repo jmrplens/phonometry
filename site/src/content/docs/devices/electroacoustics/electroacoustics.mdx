@@ -152,9 +152,9 @@ an off-centre voice coil), a dominant third at symmetric compression (clipping,
 a suspension reaching its limit). Each marker reads directly as a percentage,
 since $-34$ dB relative to the fundamental is 2 %. The four annotated numbers
 are one capture read four ways: $\mathrm{THD}_F$ counts the harmonics against
-the fundamental, $\mathrm{THD}_R$ against the total — they differ by the factor
+the fundamental, $\mathrm{THD}_R$ against the total: they differ by the factor
 $1/\sqrt{1 + \mathrm{THD}_F^2}$ and are indistinguishable below about 10 %,
-which is why the two annotations sit on top of each other here — while THD+N
+which is why the two annotations sit on top of each other here, while THD+N
 adds the grass between the harmonics, and SINAD is its reciprocal in dB.*
 
 ```python
@@ -291,13 +291,13 @@ print(electroacoustics.itu_r_468_weighting([6300.0]))                    # [+12.
 guide, so it is worth reading once. It is not a loudness contour: it is steeper
 than A-weighting on both flanks and peaks two octaves higher. For the 100 Hz
 fundamental of the snippet it discounts the second harmonic by 13.8 dB and the
-third by 10.3 dB and lifts everything above 1 kHz — the tenth order and up — so
+third by 10.3 dB and lifts everything above 1 kHz (the tenth order and up) so
 a weighted THD is not a "more accurate" THD but a deliberate re-ranking: it
 forgives the low-order distortion of a soft non-linearity and penalises the
 high-order products a crossover or a slew-rate limit throws off. That is why
 the clause restricts the measurement to fundamentals between 31.5 Hz and
 400 Hz, where the orders that matter land under the peak. The CCIR-RMS form is
-the same curve moved down so that 2 kHz rather than 1 kHz is the unity point —
+the same curve moved down so that 2 kHz rather than 1 kHz is the unity point:
 a renormalisation, not a different network.*
 
 <details>
@@ -477,7 +477,7 @@ difference-frequency test counts the low product $f_2 - f_1$ and the two
 third-order products that straddle the pair; the total difference-frequency
 test keeps only the two products that the fixed tone pair drops near $f_0$; DIM
 counts every $|k f_\text{square} \pm f_\text{sine}|$ that lands below the sine.
-The denominator differs too — $a_{f_1} + a_{f_2}$ for the first two, the sine
+The denominator differs too: $a_{f_1} + a_{f_2}$ for the first two, the sine
 amplitude alone for DIM, which is the quantity the
 [errata registry](/phonometry/reference/errata/) entry is about.*
 
@@ -524,7 +524,7 @@ coherence down to $\mathrm{SNR}/(1+\mathrm{SNR})$.
 *Pick the estimator whose noisy channel is the denominator: $H_1$ when the
 noise is on the output, $H_2$ when it is on the input, and the same record
 inverts the verdict when the noise moves. The coherence panel tells you how
-much you are being lied to — its collapse at the band edges is not a property
+much you are being lied to: its collapse at the band edges is not a property
 of the device but of the signal-to-noise ratio there, and it is what says which
 part of the magnitude curve to believe.*
 

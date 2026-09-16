@@ -152,8 +152,8 @@ and stays out of scope.
 
 *The quantity this standard reports is a curve, not a number: the same machine
 is 98.6 dB(A) at 4 m/s and 109.9 dB(A) at 12 m/s. The shape is the machine's
-control strategy — steepest where the rotor is accelerating, flat once it is at
-rated power — so quoting a single $L_{W\mathrm{A}}$ without its wind speed says nothing.
+control strategy: steepest where the rotor is accelerating, flat once it is at
+rated power, so quoting a single $L_{W\mathrm{A}}$ without its wind speed says nothing.
 The struck bin and the asterisked one are the standard's own bookkeeping: below
 a 3 dB total-minus-background margin the bin is void, between 3 and 6 dB it is
 reported with a flag. The upper axis is the same series against the Formula (29)
@@ -216,8 +216,8 @@ $\Delta L_\mathrm{a} \ge -3\ \text{dB}$ and audible when $\Delta L_\mathrm{a} > 
 *Left: two different critical bandwidths live on this page. The IEC 61400-11
 Zwicker band is what `WindTurbineTonalityResult.critical_bandwidth` reports
 (117.3 Hz for the 500 Hz tone of the fiche below), while
-`environment.critical_bandwidth` is the **ISO 1996-2 Table C.1** band — 100 Hz
-up to 500 Hz and 20 % of $f_\mathrm{c}$ above it — used by the ISO tonal-audibility
+`environment.critical_bandwidth` is the **ISO 1996-2 Table C.1** band (100 Hz
+up to 500 Hz and 20 % of $f_\mathrm{c}$ above it) used by the ISO tonal-audibility
 route on the environmental-levels page. They are not interchangeable. Right: the
 criterion is nearly flat below 500 Hz and then tightens, so a low-frequency tone
 is judged on almost the same emergence as a mid-frequency one; the reportable

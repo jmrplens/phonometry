@@ -57,7 +57,7 @@ are provided.
 
 *The same room, the same background noise, three excitations. The pistol
 recovers 46 dB of range; a 1 s deconvolved sweep recovers 75 dB, the 29 dB
-that clause 6.2.3 predicts. Two further doublings of the sweep add 8 dB —
+that clause 6.2.3 predicts. Two further doublings of the sweep add 8 dB,
 B.6 quotes about 3 dB per doubling as the normal figure, and the extra here
 is the deconvolution's own noise tail (B.5) falling away with the longer
 sweep. The number quoted is the peak-to-floor distance, with the floor read
@@ -256,8 +256,8 @@ print(excitation_budget(1.5))    # (4.5, 1.5, 17, 2.73)
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/excitation_robustness.svg" alt="Four recovered impulse-response envelopes from the same synthetic room: the sweep recovered under stationary conditions and under a slow warming of 0.3 kelvin lie on top of each other and reach 90 dB below the peak, the stationary MLS follows them to about 75 dB, and the drifted MLS collapses to a flat floor 15 dB below the peak with no decay left" width="90%" />
 
 *What "more sensitive to time variance" costs. A slow warming of about 0.3 K
-across the take — a resampling of 500 parts per million, which is what a
-falling speed of sound does to the arrival times — leaves the sweep recovery
+across the take (a resampling of 500 parts per million, which is what a
+falling speed of sound does to the arrival times) leaves the sweep recovery
 unchanged and destroys the MLS one, because the correlation averages periods
 that no longer line up. ISO 18233 B.7.3.1 states the same result
 qualitatively; A.4.3.1 Eq. (A.8) gives the guide limit
@@ -583,8 +583,8 @@ mistake in the result:
 
 *EDT, T30 and C80 of the room above against source distance, from synthetic
 impulse responses. Inside $d_\mathrm{min}$, EDT is short by a factor of about 2.5 and
-C80 is 7 dB high — many times the 5 % relative and 1 dB just-noticeable
-differences of ISO 3382-1 Table A.1 — while T30 wanders by 0.12 s over the
+C80 is 7 dB high, many times the 5 % relative and 1 dB just-noticeable
+differences of ISO 3382-1 Table A.1, while T30 wanders by 0.12 s over the
 whole sweep with no trend at the close end. That asymmetry is the trap: a
 survey that reports only T30 will not notice that the microphone was too
 close, and every energy parameter beside it is wrong.*

@@ -84,7 +84,7 @@ separate software) is out of scope.
 transmissibility: unity at DC, peaking at $|H| \approx 1.54$ near 5 Hz and
 rolling off above it, which is why $W_\mathrm{k}$ had to be replaced for shocks. Right,
 the Table C.1 Weibull law $\Pi(R)$ with the Annex C worked example marked at
-$R = 1.22$, $\Pi = 0.37$ — the risk rises steeply over a narrow band of $R$, so
+$R = 1.22$, $\Pi = 0.37$: the risk rises steeply over a narrow band of $R$, so
 a dose that doubles does not double the probability.*
 
 See the [Human Vibration guide](../../vibration/human/human-vibration.md) and the
@@ -120,8 +120,8 @@ usage.
 
 *The three closed forms drawn against the finite resonator. The 140 mm concrete
 plate is real and frequency-independent at $2.6 \times 10^{-6}$ m/(N·s); the
-100 × 200 mm steel beam falls as $f^{-1/2}$ — a factor 63 over the twelve
-octaves shown — at a constant −45°; the longitudinal strut is real and flat.
+100 × 200 mm steel beam falls as $f^{-1/2}$, a factor 63 over the twelve
+octaves shown, at a constant −45°; the longitudinal strut is real and flat.
 None of them resonates, which is exactly the difference from a finite structure
 and the reason the closed forms are band-average substitutes rather than
 point-by-point predictions.*
@@ -130,7 +130,7 @@ point-by-point predictions.*
 
 *Not one of the closed forms above: this is a **finite** one-degree-of-freedom
 resonator, receptance, mobility and accelerance being the same resonance seen
-through the three kinematic quantities. It is here as the contrast — the
+through the three kinematic quantities. It is here as the contrast: the
 infinite-structure results are frequency-independent or smoothly falling,
 while anything finite resonates.*
 
@@ -141,7 +141,7 @@ while anything finite resonates.*
 $1/(\omega m)$, and the peak height is set by the damping alone. A real
 structure has many such resonances, and the infinite-structure closed forms
 above are the average the measured mobility oscillates about, not the value it
-takes at a given frequency — which is why they are used with octave or
+takes at a given frequency, which is why they are used with octave or
 third-octave inputs and are least trustworthy in the lowest bands of a small
 or lightly damped element.*
 

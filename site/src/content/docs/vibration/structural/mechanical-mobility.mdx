@@ -51,9 +51,9 @@ frequency because they describe the same resonator; what distinguishes them is
 the **slope** on either side of it, which differs by one power of $\omega$ from
 one row of the table to the next. That is why receptance emphasises the
 low-frequency, stiffness-controlled end, accelerance the high-frequency,
-mass-controlled end, and mobility sits between them — and it is why mobility is
+mass-controlled end, and mobility sits between them, and it is why mobility is
 the currency of power flow (section 1). Each curve is scaled by the constant
-printed in its legend entry — $k$, $k/\omega_0$ and $k/\omega_0^2$ — so the
+printed in its legend entry ($k$, $k/\omega_0$ and $k/\omega_0^2$) so the
 three peak at the same height and their shapes are comparable; the absolute
 levels differ by orders of magnitude.*
 
@@ -406,7 +406,7 @@ coherence you expect:
 
 *What the criterion costs, as a function of how good the measurement already
 is. Reaching 5 % takes 11 averages at $\gamma^2 = 0.95$ and 200 at
-$\gamma^2 = 0.5$ — a factor of twenty for a factor of two in coherence. That is
+$\gamma^2 = 0.5$: a factor of twenty for a factor of two in coherence. That is
 the argument for fixing the measurement, with the Annex A.1 diagnosis above,
 rather than averaging through it.*
 
@@ -539,7 +539,7 @@ res.plot()   # |Y(f)| with the resonance marked (needs matplotlib)
 *Reading a driving-point mobility is a structural diagnosis. Below the
 resonance the magnitude climbs along the **stiffness line** $\omega/k$, above
 it it falls along the **mass line** $1/(\omega m)$, and the height of the peak
-between them is $1/c$ — a direct read of the damping, for this isolated
+between them is $1/c$: a direct read of the damping, for this isolated
 resonator; on a real structure with overlapping modes the damping is estimated
 by modal fitting or from the half-power bandwidth instead. The lower panel is
 the same statement in phase: $+90°$ on the stiffness line, $-90°$ on the mass

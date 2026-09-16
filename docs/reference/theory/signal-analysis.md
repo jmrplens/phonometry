@@ -181,7 +181,7 @@ and have no −3 dB point there. Two cases need special handling:
 flatness of the passband top (Butterworth and Chebyshev II flat, Chebyshev I and
 elliptic rippling by the design ripple), the steepness of the skirt just outside
 the edges, and the shape of the deep stopband. The zoom at the crossover is where
-the band-edge rule below becomes visible — the two equiripple designs are not at
+the band-edge rule below becomes visible: the two equiripple designs are not at
 −3 dB there, because that is not where their edge is defined.*
 
 ## Filter Bank Design & Numerical Stability
@@ -390,7 +390,7 @@ $k = t_{0.99}(\nu_{\mathrm{eff}} = 16) = 2.92$ and $U_{99} = 93$ nm.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget.svg" alt="Two panels for the A-weighted level example. Left: the GUM uncertainty budget, a horizontal bar chart of each input's contribution to the combined uncertainty with a dashed line at uc of 0.407 dB. Right: the Monte Carlo output histogram overlaid with the GUM Gaussian and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" width="96%"></picture>
 
-*The two routes on one problem — an A-weighted level, not the Supplement 1
+*The two routes on one problem, an A-weighted level, not the Supplement 1
 four-term example quoted above. Left is the law of propagation as a budget:
 one bar per input, so the term worth reducing is visible. Right is the
 Supplement 1 route: the Monte Carlo output distribution with the GUM Gaussian

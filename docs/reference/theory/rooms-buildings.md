@@ -60,7 +60,7 @@ with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centr
 one set of values per band. The upper panel is the decay itself (EDT, T20 and
 T30 falling with frequency as air and surfaces absorb more), the lower panel
 the early/late split of the same impulse response, and C50 and C80 rise with
-frequency for the same reason the decay time falls — the later the energy, the
+frequency for the same reason the decay time falls: the later the energy, the
 more of it the room has already removed.*
 
 ### Open-plan spatial decay (ISO 3382-3, Clause 6)
@@ -77,7 +77,7 @@ The distraction distance rD and privacy distance rP are the distances where a **
 
 *Two regressions on two different axes, which is what makes this clause hard to
 hold in the head. The level line is fitted against $\log_{10}(r/r_0)$ and read
-twice — as the slope $D_{2,\mathrm{S}}$ per doubling, and at $r = 4$ m for
+twice, as the slope $D_{2,\mathrm{S}}$ per doubling, and at $r = 4$ m for
 $L_{p,A,S,4\text{m}}$. The STI line is fitted against $r$ itself, **linearly**,
 and read where it crosses 0.50 and 0.20 for the distraction and privacy
 distances. If that second fit comes out flat or rising, the two distances do
@@ -264,8 +264,8 @@ distributed absorption is out of scope.
 *What Formula 1 does band by band: the equivalent absorption area on the left
 and the reverberation time it implies through Formula 5 on the right, for the
 same room bare and treated. The Annex E case quoted above is the same
-arithmetic on a smaller room — $A$ from 2.26 to 5.03 m² and $T$ from 2.1 to
-0.9 s at 1 kHz — and the figure shows why the two move in opposite directions
+arithmetic on a smaller room: $A$ from 2.26 to 5.03 m² and $T$ from 2.1 to
+0.9 s at 1 kHz, and the figure shows why the two move in opposite directions
 and not proportionally.*
 
 See the [Enclosed-Space Absorption guide](../../buildings/rooms/enclosed-space-absorption.md) for usage.

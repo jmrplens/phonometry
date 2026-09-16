@@ -150,7 +150,7 @@ stripe that looks exactly like a broadband event.
 its power inside one resolution bandwidth and the `'spectrum'` cell is therefore
 its mean square. The pink background does **not** read 45 dB anywhere. That
 45 dB is its *broadband* level spread over the whole band, and each cell carries
-only the part inside one $B_\mathrm{e}$ — some 25 dB lower here, for a 1024-point segment
+only the part inside one $B_\mathrm{e}$, some 25 dB lower here, for a 1024-point segment
 at 16 kHz. To recover a level from noise, convert cells to a density by
 subtracting $10\log_{10} B_\mathrm{e}$ and integrate over the band of interest, or use
 `'density'` and integrate directly. And the impact's peak cell is not the
@@ -284,7 +284,7 @@ apart and it shows one lump at 1000 Hz. The zoom transforms the **whole**
 record, whose Hann resolution bandwidth is 1.5 Hz, and puts a 0.25 Hz grid on
 it: the peaks land on 997.00 and 1000.00 Hz at −1.94 and −6.02 dB, the
 amplitudes of the two tones. A finer grid on a 1024-sample record would have
-changed nothing — this is the distinction the section makes between sampling
+changed nothing: this is the distinction the section makes between sampling
 density and resolution.*
 
 <details>

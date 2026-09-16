@@ -171,7 +171,7 @@ $m = \alpha/(10 \log_{10} e)$, exposed as `air_attenuation_m`.
 *The humidity claim of the paragraph above, drawn: four atmospheres, and a
 spread far wider than the $\pm 10$ % claimed for any one of them. At 2 kHz the
 coefficient is 9.9 dB/km at the 20 °C / 50 % reference and **45.5 dB/km** at the
-same temperature and 10 % humidity — a factor 4.6 from humidity alone, worth
+same temperature and 10 % humidity, a factor 4.6 from humidity alone, worth
 36 dB over a kilometre. Note which way it goes: drying the air *increases* the
 mid-band attenuation, because the oxygen relaxation frequency falls with
 humidity and drags its peak down into the band. Temperature moves the curves far
@@ -275,7 +275,7 @@ effective-day level (see the [Occupational Noise Exposure guide](https://jmrplen
 
 *What the budget buys: the Annex D worked day, its three task contributions, the
 energy-summed $L_\mathrm{EX,8h}$ and the band up to $L_\mathrm{EX,8h} + U$ that the one-sided
-95 % interval adds on top. The reported result is the pair, not the line — and
+95 % interval adds on top. The reported result is the pair, not the line, and
 with $U = 2.7$ dB the upper limit sits 2.7 dB above the number, which is enough
 to cross an action value on its own.*
 
@@ -408,7 +408,7 @@ and the two repeated sweeps agree within the Table 2 limit.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/field_indicators_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/field_indicators.svg" alt="ISO 9614-1 field indicators of a ten-position scan over six octave bands: F2 and F3 climb towards low frequency as the field turns reactive, crossing the dashed dynamic-capability line Ld at 125 Hz where F3 also rises above F2, with the field non-uniformity F4 drawn as bars on a twin axis" width="88%"></picture>
 
-*The gate as a picture rather than an inequality — drawn here in the ISO 9614-1
+*The gate as a picture rather than an inequality, drawn here in the ISO 9614-1
 naming, $F_2$ for what Part 2 calls $F_{pI}$. The reactivity indicator climbs
 towards low frequency and crosses the dynamic-capability line at 125 Hz: that
 band fails, and no amount of averaging will rescue it, because the cause is the
@@ -1081,7 +1081,7 @@ Where the STI characterizes a transmission channel, the SII (ANSI S3.5-1997) pre
 
 *The importance function is where the speech cues are, and all four band
 procedures below agree about it: the same rise to a maximum near 2 kHz, the same
-total of 1.0 redistributed over wider or narrower bands — which is why the
+total of 1.0 redistributed over wider or narrower bands, which is why the
 octave steps stand at 0.265 where the one-third-octave steps stand at 0.090. A
 band lost at 2 kHz costs several times what the same band costs at 160 Hz.*
 
@@ -1095,7 +1095,7 @@ The same chain runs over the standard's other three band tables, selected with `
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/standard_speech_spectrum.svg" alt="The four ANSI S3.5-1997 standard speech spectra (normal, raised, loud, shout) as one labelled family: the standard speech spectrum level in dB SPL over 160 Hz to 8000 Hz, each higher effort lifting the whole spectrum" width="90%"></picture>
 
-*The four vocal efforts, in spectrum level rather than band level — which is why
+*The four vocal efforts, in spectrum level rather than band level, which is why
 the normal-effort curve passes through 25.01 dB at 1 kHz rather than through the
 60-odd dB a talker measures as a band level at a metre. Raising the effort does
 not lift the family uniformly: shouting adds 27.6 dB at 2.5 kHz, 26.3 dB at
@@ -1142,7 +1142,7 @@ The Annex D worked examples (Tables D.1–D.4; e.g. 100 dB / 40 yr at 3 kHz: 29/
 at 4 kHz is what makes noise-induced loss recognisable in a clinic, and it is
 here only because $L_0$ is lowest (75 dB) in that band. Mind the fractile
 direction the paragraph above states: the edge of the shaded band showing the
-**deeper** shift is the library's `fractile=0.90`, the most susceptible tenth —
+**deeper** shift is the library's `fractile=0.90`, the most susceptible tenth,
 which ISO 1999 and its Annex D column headings label $Q = 10\ \%$. At 4 kHz
 this case runs 19.5 / 26.0 / 36.0 dB at `fractile` 0.10 / 0.50 / 0.90.*
 
@@ -1270,7 +1270,7 @@ with $t_\mathrm{e} = 50$ ms (C50, speech) or 80 ms (C80, music), and the **centr
 one set of values per band. The upper panel is the decay itself (EDT, T20 and
 T30 falling with frequency as air and surfaces absorb more), the lower panel
 the early/late split of the same impulse response, and C50 and C80 rise with
-frequency for the same reason the decay time falls — the later the energy, the
+frequency for the same reason the decay time falls: the later the energy, the
 more of it the room has already removed.*
 
 ### Open-plan spatial decay (ISO 3382-3, Clause 6)
@@ -1287,7 +1287,7 @@ The distraction distance rD and privacy distance rP are the distances where a **
 
 *Two regressions on two different axes, which is what makes this clause hard to
 hold in the head. The level line is fitted against $\log_{10}(r/r_0)$ and read
-twice — as the slope $D_{2,\mathrm{S}}$ per doubling, and at $r = 4$ m for
+twice, as the slope $D_{2,\mathrm{S}}$ per doubling, and at $r = 4$ m for
 $L_{p,A,S,4\text{m}}$. The STI line is fitted against $r$ itself, **linearly**,
 and read where it crosses 0.50 and 0.20 for the distraction and privacy
 distances. If that second fit comes out flat or rising, the two distances do
@@ -1474,8 +1474,8 @@ distributed absorption is out of scope.
 *What Formula 1 does band by band: the equivalent absorption area on the left
 and the reverberation time it implies through Formula 5 on the right, for the
 same room bare and treated. The Annex E case quoted above is the same
-arithmetic on a smaller room — $A$ from 2.26 to 5.03 m² and $T$ from 2.1 to
-0.9 s at 1 kHz — and the figure shows why the two move in opposite directions
+arithmetic on a smaller room: $A$ from 2.26 to 5.03 m² and $T$ from 2.1 to
+0.9 s at 1 kHz, and the figure shows why the two move in opposite directions
 and not proportionally.*
 
 See the [Enclosed-Space Absorption guide](https://jmrplens.github.io/phonometry/buildings/rooms/enclosed-space-absorption/) for usage.
@@ -1847,7 +1847,7 @@ and have no −3 dB point there. Two cases need special handling:
 flatness of the passband top (Butterworth and Chebyshev II flat, Chebyshev I and
 elliptic rippling by the design ripple), the steepness of the skirt just outside
 the edges, and the shape of the deep stopband. The zoom at the crossover is where
-the band-edge rule below becomes visible — the two equiripple designs are not at
+the band-edge rule below becomes visible: the two equiripple designs are not at
 −3 dB there, because that is not where their edge is defined.*
 
 ## Filter Bank Design & Numerical Stability
@@ -2056,7 +2056,7 @@ $k = t_{0.99}(\nu_{\mathrm{eff}} = 16) = 2.92$ and $U_{99} = 93$ nm.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/uncertainty_budget.svg" alt="Two panels for the A-weighted level example. Left: the GUM uncertainty budget, a horizontal bar chart of each input's contribution to the combined uncertainty with a dashed line at uc of 0.407 dB. Right: the Monte Carlo output histogram overlaid with the GUM Gaussian and the shaded 95 percent coverage interval; the title reads Y equals 74.00 dB, U equals 0.86 dB, k equals 2.11" width="96%"></picture>
 
-*The two routes on one problem — an A-weighted level, not the Supplement 1
+*The two routes on one problem, an A-weighted level, not the Supplement 1
 four-term example quoted above. Left is the law of propagation as a budget:
 one bar per input, so the term worth reducing is visible. Right is the
 Supplement 1 route: the Monte Carlo output distribution with the GUM Gaussian
@@ -2215,7 +2215,7 @@ separate software) is out of scope.
 transmissibility: unity at DC, peaking at $|H| \approx 1.54$ near 5 Hz and
 rolling off above it, which is why $W_\mathrm{k}$ had to be replaced for shocks. Right,
 the Table C.1 Weibull law $\Pi(R)$ with the Annex C worked example marked at
-$R = 1.22$, $\Pi = 0.37$ — the risk rises steeply over a narrow band of $R$, so
+$R = 1.22$, $\Pi = 0.37$: the risk rises steeply over a narrow band of $R$, so
 a dose that doubles does not double the probability.*
 
 See the [Human Vibration guide](https://jmrplens.github.io/phonometry/vibration/human/human-vibration/) and the
@@ -2251,8 +2251,8 @@ usage.
 
 *The three closed forms drawn against the finite resonator. The 140 mm concrete
 plate is real and frequency-independent at $2.6 \times 10^{-6}$ m/(N·s); the
-100 × 200 mm steel beam falls as $f^{-1/2}$ — a factor 63 over the twelve
-octaves shown — at a constant −45°; the longitudinal strut is real and flat.
+100 × 200 mm steel beam falls as $f^{-1/2}$, a factor 63 over the twelve
+octaves shown, at a constant −45°; the longitudinal strut is real and flat.
 None of them resonates, which is exactly the difference from a finite structure
 and the reason the closed forms are band-average substitutes rather than
 point-by-point predictions.*
@@ -2261,7 +2261,7 @@ point-by-point predictions.*
 
 *Not one of the closed forms above: this is a **finite** one-degree-of-freedom
 resonator, receptance, mobility and accelerance being the same resonance seen
-through the three kinematic quantities. It is here as the contrast — the
+through the three kinematic quantities. It is here as the contrast: the
 infinite-structure results are frequency-independent or smoothly falling,
 while anything finite resonates.*
 
@@ -2272,7 +2272,7 @@ while anything finite resonates.*
 $1/(\omega m)$, and the peak height is set by the damping alone. A real
 structure has many such resonances, and the infinite-structure closed forms
 above are the average the measured mobility oscillates about, not the value it
-takes at a given frequency — which is why they are used with octave or
+takes at a given frequency, which is why they are used with octave or
 third-octave inputs and are least trustworthy in the lowest bands of a small
 or lightly damped element.*
 

@@ -87,6 +87,7 @@ modification.
 from __future__ import annotations
 
 import math
+import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
 
@@ -125,8 +126,10 @@ __all__ = [
     "STABILITY_TOLERANCE_DB",
     "TYPICAL_FAR_LIMIT_M",
     "TYPICAL_NEAR_LIMIT_M",
+    "BackgroundMarginCheck",
     "SpatialDecayResult",
     "SpatialDecayWarning",
+    "check_background_margin",
     "corrected_distribution_value",
     "distance_region",
     "floor_reference_value",
@@ -276,6 +279,102 @@ STABILITY_TOLERANCE_DB: dict[tuple[float, float], float] = {
     (100.0, 160.0): 1.0,
     (200.0, 5000.0): 0.5,
 }
+
+
+@dataclass(frozen=True)
+class BackgroundMarginCheck:
+    """Whether the levels clear the background by what 5.1.4 asks.
+
+    :param margins_db: The level of the source less the background at each
+        position and band given, in decibels, in the shape they came in.
+    :param needs_correction: True where the margin is under
+        :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB` and over
+        :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`, which is the window where the
+        clause asks for the ISO 3744 background correction.
+    :param unusable: True where the margin is at or under
+        :data:`ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB`, which the clause offers no
+        correction for.
+    :param satisfied: True when every margin clears
+        :data:`ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB`, which is the only case that needs
+        nothing done to it.
+    """
+
+    margins_db: NDArray[np.float64]
+    needs_correction: NDArray[np.bool_]
+    unusable: NDArray[np.bool_]
+    satisfied: bool
+
+
+def check_background_margin(
+    levels_db: ArrayLike, background_levels_db: ArrayLike
+) -> BackgroundMarginCheck:
+    """Does the source stand clear of the background? 5.1.4.
+
+    The clause asks for 10 dB at every position and in every octave band the
+    curve is measured over. Between 10 dB and 6 dB it asks for the background
+    correction of ISO 3744 (:func:`phonometry.emission.background_correction`)
+    before the levels are used; at 6 dB or less it asks for neither, because
+    there is no longer a source level to correct towards.
+
+    The verdict is returned rather than applied: correcting the levels here
+    would change a measured number behind the caller's back, and the correction
+    the clause names belongs to the standard that prints it. A margin under
+    10 dB anywhere also emits :class:`SpatialDecayWarning`, so a curve computed
+    from levels nobody checked says so on the way past.
+
+    One octave band at a time, as every other function of clause 6 takes its
+    positions: the clause asks the same 10 dB of every band, and a curve is
+    read band by band.
+
+    :param levels_db: :math:`L_p` with the test source running, in decibels,
+        one value per measured position of one octave band.
+    :param background_levels_db: The background at the same positions, in
+        decibels, as a scalar or one value per position.
+    :return: The verdict, as a :class:`BackgroundMarginCheck`.
+    :raises ValueError: For inputs that are not finite or do not match position
+        for position.
+    """
+    levels = require_finite_array(levels_db, "levels_db")
+    background = require_finite_array(background_levels_db, "background_levels_db")
+    if background.size not in (1, levels.size):
+        msg = (
+            "'background_levels_db' must be a scalar or match 'levels_db' "
+            "position for position."
+        )
+        raise ValueError(msg)
+    margins = np.asarray(levels - background, dtype=np.float64)
+    unusable = margins <= ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB
+    needs_correction = (
+        margins < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB
+    ) & ~unusable
+    satisfied = not bool(np.any(margins < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))
+    if not satisfied:
+        worst = float(np.min(margins))
+        detail = (
+            f"{int(np.count_nonzero(unusable))} of them at or under "
+            f"{ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB:g} dB, which 5.1.4 offers no "
+            "correction for"
+            if bool(np.any(unusable))
+            else (
+                "which 5.1.4 asks the ISO 3744 background correction for "
+                "before the levels are used"
+            )
+        )
+        warnings.warn(
+            f"ISO 14257 5.1.4 asks for {ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB:g} dB over the "
+            f"background at every position and in every octave band; "
+            f"{int(np.count_nonzero(margins < ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB))} of "
+            f"{margins.size} clear less than that and the worst is "
+            f"{worst:.1f} dB, {detail}.",
+            SpatialDecayWarning,
+            stacklevel=2,
+        )
+    return BackgroundMarginCheck(
+        margins_db=margins,
+        needs_correction=needs_correction,
+        unusable=unusable,
+        satisfied=satisfied,
+    )
 
 
 @dataclass(frozen=True)
@@ -644,6 +743,25 @@ def spatial_decay_rate(
         )
         raise ValueError(msg)
     slope, _mean_log = _regression(values, radii)
+    if values.size == _MIN_REGRESSION_POINTS:
+        # After the regression, not before: two positions at one distance are
+        # refused by it, and an advisory about a fit that cannot be made would
+        # be noise in front of the error that says so.
+        #
+        # Two positions define a line, so the fit has nothing left over to
+        # describe: the answer is the slope between those two points and a
+        # position that was misread carries straight into it. The recommended
+        # distributions of 5.3.2 put many more than two in a region, and the
+        # clause calls the count they give a minimum.
+        warnings.warn(
+            "Equation (5) over two positions is the line through them, not a "
+            "regression with anything to spare: the rate returned is the slope "
+            "between the two and no position can be checked against the rest. "
+            "5.3.2 of ISO 14257 calls the positions of its recommended "
+            "distributions a minimum number.",
+            SpatialDecayWarning,
+            stacklevel=2,
+        )
     return -DECADE_TO_DOUBLING * slope
 
 
@@ -750,6 +868,21 @@ def level_excess_at(
     target = require_positive(distance_m, "distance_m")
     if values.shape != radii.shape:
         raise ValueError(_MISMATCH_MSG)
+    nearest, farthest = float(np.min(radii)), float(np.max(radii))
+    if not nearest <= target <= farthest:
+        # Equation (8) reads the fitted line, and outside the range it was
+        # fitted over it is reading a line nothing measured holds up. The far
+        # region is where this happens: its conventional distance is 30 m and
+        # 6.2 recommends the path reach 24 m, so a path that stops there
+        # answers the far region by extrapolation or not at all.
+        warnings.warn(
+            f"Equation (8) reads the regression line at {target:g} m, outside "
+            f"the {nearest:g} m to {farthest:g} m the positions given cover, "
+            "so the value is an extrapolation of the fit rather than a "
+            "reading of the measurement.",
+            SpatialDecayWarning,
+            stacklevel=2,
+        )
     decay = spatial_decay_rate(values, radii)
     log_target = math.log10(target / ISO14257_REFERENCE_DISTANCE_M)
     mean_value = float(np.mean(values))

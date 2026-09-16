@@ -157,6 +157,28 @@ direction, and two describe a room. Record the path height, the source
 position, and any obstacle you could not avoid, because the report is what
 makes the curve reproducible.
 
+The margin is a judgement the library will make for you, one octave band at a
+time, and it says which of the three cases each position falls in rather than
+correcting anything: the correction 5.1.4 asks for between 6 dB and 10 dB is
+the one ISO 3744 prints, and applying it here would move a measured level
+behind your back.
+
+```python
+check = room.check_background_margin([80.0, 70.0, 66.0], 60.0)
+print(check.margins_db)        # [20. 10.  6.]
+print(check.unusable)          # [False False  True]
+print(check.satisfied)         # False
+```
+
+Two other conditions are read where they can be seen rather than asked about. A
+region that holds exactly the two positions a regression needs gives a rate that
+is the line through them, with nothing left over to check either position
+against, and 5.3.2 calls the count of its recommended distributions a minimum.
+And `level_excess_at` reading the fitted line outside the distances it was
+fitted over is an extrapolation, which is what the 30 m of 6.4.3 asks of a path
+that stopped at 24 m. Both emit `SpatialDecayWarning`, so a result that came
+out of one of them says so.
+
 The source itself has to qualify first. Annex A asks for more than ISO 6926:
 its directivity index must stay inside ± 2 dB up to 630 Hz, rising to ± 8 dB at
 1 kHz and holding there to 5 kHz, its spectrum may not step more than 8 dB

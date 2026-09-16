@@ -225,6 +225,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- `SpatialDecayWarning` is emitted by the three conditions it names. The class
+  was published with the release that brought ISO 14257 in, exported, and
+  documented as the advisory for a measurement outside a condition the standard
+  states, and nothing in the library raised it. All three now do.
+  `check_background_margin` is the 10 dB of 5.1.4, one octave band at a time: it
+  returns the margin at every position and says which of the three cases each
+  falls in, the clear one, the window between 6 dB and 10 dB where the clause
+  asks for the ISO 3744 correction, and the 6 dB or less it offers no correction
+  for. The verdict is returned and never applied, because the correction belongs
+  to the standard that prints it. `spatial_decay_rate` says so when a region
+  holds exactly the two positions a regression needs, where the rate is the line
+  through them and no position can be checked against the rest; 5.3.2 calls the
+  count of its recommended distributions a minimum. And `level_excess_at` says so
+  when it is asked to read the fitted line outside the distances it was fitted
+  over, which is what the 30 m of 6.4.3 asks of a path that stopped at 24 m.
+
+  `ISO14257_PREFERRED_SIGNAL_TO_BACKGROUND_DB` and
+  `ISO14257_MIN_SIGNAL_TO_BACKGROUND_DB` were published in the same release and
+  read by nothing; they are what the first of the three compares against.
+
 - **The three verbs of a judgement have a written criterion.** Of the public
   functions only a handful carry a verb, and they are the ones that return a
   judgement rather than a magnitude, in three families whose boundary was

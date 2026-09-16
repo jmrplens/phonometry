@@ -57,6 +57,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Prandtl number are transport properties that nothing in the closure
   determines, so reading one raises rather than returning a plausible number.
 
+- **A catalogue row completes itself from what its table printed.** Four
+  published relations join `materials`, each one filling a hole a published
+  specimen usually has. `porosity_from_bulk_density` is Hopkins Eq. (1.160), the
+  porosity of a fibrous material from its bulk and fibre densities.
+  `airflow_resistivity_from_bulk_density` is his Eq. (1.165), the resistivity of
+  a mineral wool from its bulk density and fibre diameter, taking a
+  `FibreResistivityFit` and warning outside the range that fit was made over;
+  the rock wool of his Fig. 1.49 is published both ways round, lateral and
+  longitudinal, because mineral wool is anisotropic and resists more through the
+  sheet than across it. `viscous_characteristic_length` is Allard & Atalla
+  Eq. (5.25), the viscous length from the three parameters that are measured
+  routinely, and `fibre_characteristic_lengths` their Eqs. (5.29) and (5.30),
+  both lengths from the fibre geometry instead.
+
+  Each of them is an estimate and each says how good an estimate it is, measured
+  rather than claimed. Hopkins' two equations check each other: the ends of the
+  bulk-density range one was fitted over, put through the other at the fibre
+  density he states, return the porosity range he prints beside them.
+  Eq. (5.25) is held against the twenty-three specimens Allard & Atalla print
+  with all four columns at once, where a unit shape factor lands within a factor
+  of two on eighteen of them and nowhere near a carpet. And the two routes to
+  the viscous length are made to disagree on purpose on the same rock wool,
+  because they are different models: the fibre geometry is the lower estimate
+  throughout, by 1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
+
+  So the numbers that come out of these can be told apart from the numbers a
+  table printed, which is the point. Measuring a characteristic length is still
+  better than computing one.
+
 - **The two receiver terms of the sonar equation, drawn.** The detection
   threshold and the array gain arrived with their models and their prose and
   without a figure, which for two quantities that are each a curve over one

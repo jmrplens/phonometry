@@ -177,6 +177,14 @@ SOURCED: dict[tuple[str, str], str] = {
         "PUBLISHED_POROUS_MATERIALS",
     ): "Allard & Atalla 2e, two porous specimens",
     (
+        "materials/absorbers/porous.py",
+        "ROCK_WOOL_LATERAL_FIT",
+    ): "Hopkins (2007) Eq. (1.165), the lateral k1 and k2 of the rock wool",
+    (
+        "materials/absorbers/porous.py",
+        "ROCK_WOOL_LONGITUDINAL_FIT",
+    ): "Hopkins (2007) Eq. (1.165), the longitudinal k1 and k2 of the rock wool",
+    (
         "materials/resilient/dynamic_stiffness.py",
         "PUBLISHED_RESILIENT_LAYERS",
     ): "Hopkins (2007) Table A3, fifteen resilient layers",

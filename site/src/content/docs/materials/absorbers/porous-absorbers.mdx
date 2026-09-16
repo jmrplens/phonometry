@@ -300,6 +300,8 @@ against a measured normal-incidence surface impedance, the quantity the
 where even that is out of reach, the closed-form fallback
 $\Lambda = \Lambda' = \sqrt{8\alpha_\infty\eta/(\phi\sigma)}$ with
 $\alpha_\infty = 1$ collapses JCA back onto Delany–Bazley over its fit range.
+That fallback is `viscous_characteristic_length`, and the next section says what
+it and three relations like it are worth.
 
 The inverse fit is a few lines, and it is worth running against a synthetic
 "measurement" first so that the recovery can be checked:
@@ -337,6 +339,93 @@ and let the fit find $\sigma$ and the lengths. And when a fitted $\sigma$ comes
 out far from the flow rig's answer, believe the rig: a fit that has absorbed a
 mounting error into the material parameters will predict every other
 construction wrong.
+
+### 1.2 Filling in what a table did not print
+
+Published specimens are incomplete in a regular way. A building-materials table
+gives a bulk density and no porosity. A manufacturer's sheet gives a bulk
+density and no flow resistivity. Almost nothing gives a characteristic length,
+because measuring one needs an ultrasonic bench. Four published relations close
+those gaps, and each of them is an estimate that says how good an estimate it
+is.
+
+**Porosity from the two densities.** `porosity_from_bulk_density` is Hopkins
+Eq. (1.160), $\phi = 1 - \rho_\mathrm{bulk}/\rho_\mathrm{fibre}$, which holds
+when the fibres are solid and the binder has negligible mass.
+
+**Resistivity from the bulk density.** `airflow_resistivity_from_bulk_density`
+is his Eq. (1.165), $r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$ with
+the fibre diameter in micrometres. The constants belong to a material, not to
+mineral wool in general, so they travel in a `FibreResistivityFit` that carries
+the fibre diameter they were fitted at and the bulk-density range they were
+fitted over, and a density outside that range is announced rather than
+extrapolated in silence. Two are published from Hopkins' page, for the same rock
+wool measured both ways round: mineral wool is anisotropic, its fibres lie
+mostly in the plane of the sheet, and a flow through the sheet crosses more of
+them than a flow along it.
+
+```python
+# The rock wool of Hopkins Fig. 1.49, at a density every supplier stocks.
+sigma = materials.airflow_resistivity_from_bulk_density(
+    60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
+)
+phi = materials.porosity_from_bulk_density(
+    60.0, fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3
+)
+print(round(sigma), round(phi, 3))
+# 23226 0.977
+
+# Across the sheet the same wool resists about half as much.
+lateral = materials.airflow_resistivity_from_bulk_density(
+    60.0, fit=materials.ROCK_WOOL_LATERAL_FIT
+)
+print(round(lateral), round(sigma / lateral, 2))
+# 12382 1.88
+```
+
+The two equations are printed on facing pages and they check each other. Put the
+ends of the bulk-density range the resistivity fit was made over through the
+porosity relation, at the fibre density Hopkins states, and the porosity range
+he prints beside them comes back: 0,99 at 31 kg/m³ and 0,94 at 155 kg/m³.
+
+**The viscous length from the three measured parameters.**
+`viscous_characteristic_length` is Allard & Atalla Eq. (5.25),
+$\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$ with a shape factor $c$
+close to 1. How close is the question, and the book answers it against itself:
+across the twenty-three specimens it prints with all four columns at once, a
+unit shape factor lands within a factor of two on eighteen, with the middle of
+the set near 1,2. The five it misses are the two carpets, the woven screen and
+two rows whose lengths the book took from a different model. So the relation is
+worth a factor of two on a bulk fibrous or open-cell absorber, and nothing at
+all on a floor covering.
+
+**Both lengths from the fibre geometry.** `fibre_characteristic_lengths` is
+their Eqs. (5.29) and (5.30) for a bundle of cylinders, $\Lambda = 1/(2\pi L R)$
+and $\Lambda' = 2\Lambda$, with the fibre length per unit volume $L$ eliminated
+through its own definition, leaving
+$\Lambda = R\rho_\mathrm{fibre}/(2\rho_\mathrm{bulk})$.
+
+These last two are different models and not two opinions on one. Give them the
+same rock wool and they drift apart with density: the cylinder bundle is the
+lower estimate throughout, by 1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
+
+```python
+# Both routes, on the 60 kg/m3 wool above.
+from_parameters = materials.viscous_characteristic_length(
+    sigma, porosity=phi, tortuosity=1.0
+)
+from_geometry = materials.fibre_characteristic_lengths(
+    2.375e-6,  # half of Hopkins' 4,75 um fibre diameter
+    bulk_density_kg_m3=60.0,
+    fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3,
+)
+print(round(from_parameters * 1e6, 1), round(from_geometry.viscous_length_m * 1e6, 1))
+# 80.5 51.5
+```
+
+Which to believe is a question about the material, and neither answers it.
+Estimating a characteristic length is what to do when the alternative is
+guessing one; it is not what to do when a tube is available.
 
 ### Limp frames: when the skeleton moves (Allard & Atalla 11.3.4)
 

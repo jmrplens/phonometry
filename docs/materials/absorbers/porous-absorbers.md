@@ -66,6 +66,41 @@ worked examples and not a material catalogue: a real specimen is characterised
 to ISO 9053 and ISO 10534-2, and every model here keeps its parameters as
 explicit arguments.
 
+Where a specimen is incomplete rather than absent, four published relations
+close the gap. `porosity_from_bulk_density` is Hopkins Eq. (1.160),
+$\phi = 1 - \rho_\mathrm{bulk}/\rho_\mathrm{fibre}$;
+`airflow_resistivity_from_bulk_density` is his Eq. (1.165),
+$r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$, taking a
+`FibreResistivityFit` that carries the bulk-density range it was fitted over and
+warning outside it, with the rock wool of his Fig. 1.49 published both lateral
+and longitudinal because mineral wool is anisotropic;
+`viscous_characteristic_length` is Allard & Atalla Eq. (5.25),
+$\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$; and
+`fibre_characteristic_lengths` their Eqs. (5.29) and (5.30) for a bundle of
+cylinders, which gives both lengths from the fibre radius and the two densities.
+
+Each says what it is worth. Hopkins' two equations return the porosity range he
+prints beside them, 0,99 at 31 kg/m³ and 0,94 at 155 kg/m³. A unit shape
+factor in Eq. (5.25) lands within a factor of two on eighteen of the twenty-three
+specimens Allard & Atalla print with all four columns, and nowhere near a carpet.
+And the two routes to $\Lambda$ are different models, not two readings of one:
+on the same rock wool the cylinder bundle is the lower estimate throughout, by
+1,4 at 38 kg/m³ and 1,9 at 155 kg/m³.
+
+```python
+from phonometry import materials
+
+sigma = materials.airflow_resistivity_from_bulk_density(
+    60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
+)
+phi = materials.porosity_from_bulk_density(
+    60.0, fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3
+)
+print(round(sigma), round(phi, 3))                       # 23226 0.977
+print(round(materials.viscous_characteristic_length(
+    sigma, porosity=phi, tortuosity=1.0) * 1e6, 1))      # 80.5
+```
+
 ```python
 import numpy as np
 from phonometry import materials
@@ -760,14 +795,17 @@ sheet geometries all enter as numbers the caller supplies. Of their
 characterisation methods only the flow resistivity has a guide
 ([Airflow Resistance](airflow-resistance.md)); an inverse fit of the remaining
 parameters against a measured impedance is a `scipy.optimize` exercise, not a
-library function.
+library function. The four relations above estimate four of them from published
+correlations, which is a different thing from measuring them and is labelled as
+such wherever the estimate is worse than a factor of two.
 
 **Fit ranges.** Delany–Bazley warns (and extrapolates) outside
 $0.01 < X < 1$ and Miki outside $0.01 < f/\sigma < 1$; treat sub-range
 values as qualitative. JCA needs four extra
 parameters but behaves physically everywhere; with
 $\Lambda = \Lambda' = \sqrt{8\alpha_\infty\eta/(\phi\sigma)}$ and
-$\alpha_\infty = 1$ it tracks Delany–Bazley over the fit range.
+$\alpha_\infty = 1$ it tracks Delany–Bazley over the fit range; that expression
+is `viscous_characteristic_length`.
 
 **Rigid or limp frame.** Every equivalent-fluid model above assumes a
 motionless frame, which only holds above the decoupling frequency

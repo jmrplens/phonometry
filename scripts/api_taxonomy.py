@@ -655,7 +655,7 @@ _MODULE_TO_SECTION: dict[str, Section] = _build_module_index()
 def public_names() -> dict[str, ModuleType]:
     """Every public name in the library, mapped to the package that owns it.
 
-    Since 4.0 the top level publishes the twenty domain packages and the
+    Since 4.0 the top level publishes the twenty-one domain packages and the
     four names that belong to no domain, and a function is reached through its
     package. "The public API" is therefore the union of the domain ``__all__``
     plus those four, which is what the coverage gate walks and what the

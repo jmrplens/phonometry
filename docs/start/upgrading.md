@@ -15,7 +15,7 @@ one, and one of those three changes a number without raising anything.
 
 In 3.3.0 the root re-exported the whole library, so `from phonometry import
 laeq` worked for almost every name. Today the root exports twenty-four things:
-the twenty subpackages, the three classes that belong to no single domain
+the twenty-one subpackages, the three classes that belong to no single domain
 (`Signal`, `ReportMetadata`, `PhonometryWarning`) and `__version__`.
 
 ```python

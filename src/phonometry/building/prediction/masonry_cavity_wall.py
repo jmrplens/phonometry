@@ -103,8 +103,8 @@ __all__ = [
 ]
 
 #: Dynamic stiffness of wall ties, transcribed digit-for-digit from Hopkins
-#: (2007) **Table A4** (printed p. 610), as ``(cavity width in m, dynamic
-#: stiffness ``sX mm`` in N/m)``. The three 50 mm ties are those of
+#: (2007) **Table A4**, PDF page 637 (printed p. 610), as ``(cavity width in m,
+#: dynamic stiffness ``sX mm`` in N/m)``. The three 50 mm ties are those of
 #: BS 1243:1978 measured by Hopkins, Wilson & Craik (1999) (their Table 1
 #: prints the same 1,7 / 16,1 / 94,0 MN/m, with a standard deviation only for
 #: the two butterfly rows, the other two being single samples); the 100 mm

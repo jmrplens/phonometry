@@ -58,10 +58,11 @@ if TYPE_CHECKING:
 
 _C_AIR = 343.0
 
-#: Norton & Karczub Table 7.1 -- the ``pi alpha_pq`` eigenvalues solving
-#: ``J'_p(kappa_pq a_i) = 0`` for the first twelve higher-order acoustic modes
-#: of a rigid circular duct, keyed by the mode order ``(p, q)``: ``p`` plane
-#: diametral nodal surfaces and ``q`` cylindrical nodal surfaces.
+#: Norton & Karczub (2003) Table 7.1, PDF page 468 (printed p. 448): the
+#: ``pi alpha_pq`` eigenvalues solving ``J'_p(kappa_pq a_i) = 0`` for the
+#: first twelve higher-order acoustic modes of a rigid circular duct, keyed
+#: by the mode order ``(p, q)``: ``p`` plane diametral nodal surfaces and
+#: ``q`` cylindrical nodal surfaces.
 CIRCULAR_EIGENVALUES: dict[tuple[int, int], float] = {
     (1, 0): 1.8412,
     (2, 0): 3.0542,

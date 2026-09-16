@@ -56,6 +56,16 @@ bulk modulus with the exact limits $j\omega\rho_\mathrm{e} \to \sigma$ at DC,
 $\rho_\mathrm{e} \to (\alpha_\infty \rho_0/\phi)(1 + (1-j)\,\delta_v/\Lambda)$ at high
 frequency, and the isothermal-to-adiabatic transition in $K_\mathrm{e}$.
 
+Five parameters is four more than a caller usually has, so the two specimens
+this guide computes with are published as `PUBLISHED_POROUS_MATERIALS`, each
+carrying the page it was read on in its `source`: the 'Domisol Coffrage' glass
+wool of Allard & Atalla Table 6.1 (printed p. 124), whose characteristic
+lengths are printed in the prose of their Sect. 6.5.4 on the facing folio, and
+the soft fibrous layer of their Table 11.2 (printed p. 254). That is a pair of
+worked examples and not a material catalogue: a real specimen is characterised
+to ISO 9053 and ISO 10534-2, and every model here keeps its parameters as
+explicit arguments.
+
 ```python
 import numpy as np
 from phonometry import materials
@@ -179,18 +189,29 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# Allard & Atalla Table 11.2: soft fibrous layer, 50 mm.
-f = np.linspace(1.0, 2000.0, 800)
-rigid = materials.johnson_champoux_allard(
-    f, 25e3, porosity=0.98, tortuosity=1.02,
-    viscous_length=90e-6, thermal_length=180e-6,
-)
-limp = materials.limp_frame(rigid, frame_density=30.0, porosity=0.98)
+# The soft fibrous layer of Allard & Atalla Table 11.2, 50 mm, published
+# once with the page it was read on.
+soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+print(soft.source)
+# Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)
 
-print(round(materials.decoupling_frequency(25e3, porosity=0.98, frame_density=30.0), 1))
+f = np.linspace(1.0, 2000.0, 800)
+rigid = soft.medium(f)
+limp = materials.limp_frame(
+    rigid, frame_density=soft.frame_density_kg_m3, porosity=soft.porosity
+)
+
+print(round(materials.decoupling_frequency(
+    soft.flow_resistivity_pa_s_m2,
+    porosity=soft.porosity,
+    frame_density=soft.frame_density_kg_m3,
+), 1))
 # 127.4
 print(round(float(limp.effective_density[0].real), 1))     # 31.2 = rho_t
-print(materials.limp_frame_applicable(20e3), materials.limp_frame_applicable(25e3))  # True False
+# Both arguments are a frame bulk modulus in pascals, not a flow resistivity:
+# the criterion is the book's 20 kPa.
+print(materials.limp_frame_applicable(20e3),
+      materials.limp_frame_applicable(25e3))  # True False
 
 limp.plot()   # normalised Zc and k of the corrected medium
 plt.show()
@@ -226,11 +247,11 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 1000], dtype=float)
-rigid = materials.johnson_champoux_allard(
-    bands, 25e3, porosity=0.98, tortuosity=1.02,
-    viscous_length=90e-6, thermal_length=180e-6,
+soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+rigid = soft.medium(bands)
+limp = materials.limp_frame(
+    rigid, frame_density=soft.frame_density_kg_m3, porosity=soft.porosity
 )
-limp = materials.limp_frame(rigid, frame_density=30.0, porosity=0.98)
 for medium in (rigid, limp):
     print(materials.layered_absorber(bands, [materials.PorousLayer(0.05, medium)]).absorption.round(2))
 # [0.07 0.11 0.17 0.24 0.32 0.43 0.54 0.64 0.88]   rigid frame
@@ -322,21 +343,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# Allard & Atalla Table 6.1: glass wool "Domisol Coffrage", 100 mm, glued.
-f = np.linspace(200.0, 1500.0, 1301)
-shear = 2.2e6 * (1 + 0.1j)          # 220 N/cm2, loss factor 0.1
-med = materials.johnson_champoux_allard(
-    f, 40e3, porosity=0.94, tortuosity=1.06,
-    viscous_length=0.56e-4, thermal_length=1.1e-4,
-)
+# The published glass wool "Domisol Coffrage", 100 mm, glued.
+glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+print(glass_wool.source)
+# Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)
 
-print(materials.frame_elastic_coefficient(shear, 0.0))       # (4400000+440000j)
+f = np.linspace(200.0, 1500.0, 1301)
+shear, poisson = glass_wool.frame_constants()   # 220 N/cm2 in pascals, eta 0.1
+med = glass_wool.medium(f)
+
+print(materials.frame_elastic_coefficient(shear, poisson))   # (4400000+440000j)
 print(round(materials.frame_quarter_wave_resonance(
-    0.10, shear_modulus=shear, poisson_ratio=0.0, frame_density=130.0), 1))
+    0.10, shear_modulus=shear, poisson_ratio=poisson,
+    frame_density=glass_wool.frame_density_kg_m3), 1))
 # 459.9
 
-waves = materials.biot_waves(med, porosity=0.94, tortuosity=1.06,
-                             frame_density=130.0, shear_modulus=shear)
+waves = materials.biot_waves(
+    med, porosity=glass_wool.porosity, tortuosity=glass_wool.tortuosity,
+    frame_density=glass_wool.frame_density_kg_m3, shear_modulus=shear,
+    poisson_ratio=poisson,
+)
 print(round(float(abs(waves.airborne_velocity_ratio[800])), 1))     # 42.4
 print(np.round(waves.frame_borne_velocity_ratio[-1], 3))  # (0.811+0.473j)
 
@@ -379,13 +405,14 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([250, 315, 400, 500, 630, 800, 1000], dtype=float)
-med = materials.johnson_champoux_allard(
-    bands, 40e3, porosity=0.94, tortuosity=1.06,
-    viscous_length=0.56e-4, thermal_length=1.1e-4,
+glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+shear, poisson = glass_wool.frame_constants()
+med = glass_wool.medium(bands)
+poroelastic = materials.PoroelasticLayer(
+    0.10, med, glass_wool.porosity, glass_wool.tortuosity,
+    glass_wool.frame_density_kg_m3, shear, poisson,
 )
-shear = 2.2e6 * (1 + 0.1j)
-for layer in (materials.PorousLayer(0.10, med),
-              materials.PoroelasticLayer(0.10, med, 0.94, 1.06, 130.0, shear)):
+for layer in (materials.PorousLayer(0.10, med), poroelastic):
     print(materials.layered_absorber(bands, [layer]).absorption.round(2))
 # [0.55 0.58 0.62 0.65 0.69 0.74 0.78]   rigid frame
 # [0.53 0.56 0.61 0.77 0.71 0.74 0.78]   Biot poroelastic

@@ -21,6 +21,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   is the point of drawing them together: both are design choices, and each moves
   the figure of merit decibel for decibel.
 
+- **Seventeen published inputs that carry the page they were read on.**
+  `materials.PUBLISHED_POROUS_MATERIALS` holds the two porous specimens this
+  library already computed with, and `materials.RESILIENT_LAYER_STIFFNESS` the
+  fifteen resilient layers of Hopkins Table A3, each row naming the document,
+  the table, the PDF page and the printed folio in its `source`, and naming in
+  `attributed_to` whoever the book itself credits.
+
+  This is not a material database and does not try to be one. A row is here
+  only because a published function already made the caller type it:
+  `johnson_champoux_allard` takes five parameters and had no published set to
+  pass it, so the same numbers were written out by hand in eleven places, and
+  `natural_frequency` takes an `s'` a caller had to find elsewhere. Both module
+  docstrings carry the rule for admitting the eighteenth row, and the models
+  keep their parameters as explicit arguments: nothing in the library reads
+  either table, which the test suite asserts.
+
+  `PorousMaterial.medium(f)` returns the equivalent fluid of a specimen and
+  `ResilientLayer.natural_frequency(m')` the resonance of a floor on a layer,
+  so a reader opens the object rather than copying out of it.
+
+- **`make published-sources`**, a provenance gate. Every published record
+  carrying a `source` is held to the grammar the errata registry uses, and
+  every table in `src` transcribed from a book or a paper to a banner that
+  names both its PDF page and its printed folio. It re-runs its own census over
+  the banners, so a table transcribed from a new book fails until it is
+  registered. Standards stay outside it: they number their own clauses and
+  tables, and this project cites them that way.
 - **ISO 11546-1:1995 and ISO 11546-2:1995**, the insulation an enclosure gives
   once it is built, in `phonometry.noise_control.enclosure_insulation`. The
   quantity is a difference of two runs: determine the machine's sound power
@@ -232,6 +259,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- Eight transcribed tables gained the PDF page their banner never gave
+  (`PLATEAU_MATERIALS`, `DELANY_BAZLEY_COEFFICIENTS`, `CIRCULAR_EIGENVALUES`,
+  `SOURCE_POWER_MODELS`, `WESTON_SEABEDS`, `WALL_TIE_STIFFNESS` and the four
+  Southall tables of the underwater bioacoustics module). Norton & Karczub
+  (2003), which three of them transcribe from, gained the bibliography entry
+  the `docs/` edition never carried.
+
 - The documentation, the figures and the docstrings are written without the em
   dash. Every clause that hung off one is now a parenthesis where it explains,
   a colon where it announces, a comma where it qualifies, or a sentence of its
@@ -336,6 +370,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   curve climbs through the note on the surviving trough and crossed its last word
   in both languages, so that note carries the chip the convention gives a label
   with nowhere to go.
+
+- The conformance rows, tests, figure builders and guide snippets that reach
+  for the Allard & Atalla glass wool cited **Table 6.1** for its two
+  characteristic lengths, which that table does not print. They are printed in
+  the prose of Sect. 6.5.4 on the facing folio, where a fibre diameter of 12 um
+  gives Lambda = 0,56e-4 m and Lambda' = 2 Lambda = 1,1e-4 m. No number moves:
+  the citation now names both pages, and the sixteen call sites read one
+  published object instead of writing the numbers out again.
+
+- The oracle banner for Hopkins Table A2 claimed "printed p. 608 / pdf p. 635".
+  The table spans PDF pages 635 and 636, both landscape, and neither prints a
+  folio of its own; they sit between folios 607 and 610.
 
 - The in situ standards of this release did not do what their printed clauses
   say in five places, and could not reach one textbook case.

@@ -35,10 +35,14 @@ Oracle strategy (no free fitting anywhere):
 
 from __future__ import annotations
 
+import inspect
+import pathlib
+
 import numpy as np
 import pytest
 import reference_data as ref
 
+import phonometry
 from phonometry.materials.absorbers.four_microphone import (
     TransferMatrix,
 )
@@ -60,7 +64,9 @@ from phonometry.materials.absorbers.porous import (
     DELANY_BAZLEY_COEFFICIENTS,
     DELANY_BAZLEY_VALIDITY,
     PUBLISHED_AIR,
+    PUBLISHED_POROUS_MATERIALS,
     PorousAbsorberWarning,
+    PorousMaterial,
     PorousMediumResult,
     delany_bazley,
     helmholtz_resonance_frequency,
@@ -896,3 +902,172 @@ class TestRandomIncidence:
             ValueError, match=r"'normalized_impedance' must have a positive real part"
         ):
             statistical_absorption(negative_real)
+
+
+# ---------------------------------------------------------------------------
+# The published porous specimens: the printed digits, the conversion, and what
+# publishing them is not
+# ---------------------------------------------------------------------------
+class TestPublishedPorousMaterials:
+    """``PUBLISHED_POROUS_MATERIALS`` against the pages it cites.
+
+    The printed digits live once, in ``tests/reference_data``; the library-unit
+    values live once, in ``src``. These assertions are what makes the two one
+    copy: every stored number is the printed one times its conversion factor,
+    so neither representation can drift from the other in silence.
+    """
+
+    def test_glass_wool_is_the_printed_table_6_1_row(self) -> None:
+        """Folio 124 prints six columns and the object stores all six."""
+        specimen = PUBLISHED_POROUS_MATERIALS["glass_wool"]
+        assert specimen.tortuosity == ref.ALLARD_TABLE_6_1_TORTUOSITY
+        assert specimen.frame_density_kg_m3 == ref.ALLARD_TABLE_6_1_FRAME_DENSITY
+        assert specimen.porosity == ref.ALLARD_TABLE_6_1_POROSITY
+        # sigma: the book's N s/m^-4 is the Pa s/m2 of the signature, spelled
+        # differently, so this one is an identity and not a conversion.
+        assert (
+            specimen.flow_resistivity_pa_s_m2 == ref.ALLARD_TABLE_6_1_FLOW_RESISTIVITY
+        )
+        shear, poisson = specimen.frame_constants()
+        # N is printed in N/cm2, and 1 N/cm2 is 1e4 Pa.
+        assert shear == pytest.approx(
+            ref.ALLARD_TABLE_6_1_SHEAR_MODULUS_N_PER_CM2 * 1.0e4, rel=1e-12
+        )
+        assert poisson == ref.ALLARD_TABLE_6_1_POISSON_RATIO
+
+    def test_glass_wool_lengths_come_from_the_prose_of_folio_123(self) -> None:
+        """Table 6.1 prints no characteristic length; Sect. 6.5.4 prints both.
+
+        The book writes them in metres there, the object stores micrometres,
+        and this is the 1e-6 that assertion pins. Table 11.8 on folio 275
+        prints the same two lengths for the same specimen in micrometres, which
+        is the independent second reading and settles the thermal length at 110
+        rather than the 112 that ``Lambda' = 2 Lambda`` would give.
+        """
+        specimen = PUBLISHED_POROUS_MATERIALS["glass_wool"]
+        assert specimen.viscous_length_um / 1e6 == pytest.approx(
+            ref.ALLARD_SECT_6_5_4_VISCOUS_LENGTH_M, rel=1e-12
+        )
+        assert specimen.thermal_length_um / 1e6 == pytest.approx(
+            ref.ALLARD_SECT_6_5_4_THERMAL_LENGTH_M, rel=1e-12
+        )
+        assert specimen.viscous_length_um == ref.ALLARD_TABLE_11_8_VISCOUS_LENGTH_UM
+        assert specimen.thermal_length_um == ref.ALLARD_TABLE_11_8_THERMAL_LENGTH_UM
+
+    def test_the_two_glass_wool_tables_describe_one_specimen(self) -> None:
+        """Folio 275 repeats folio 124, and its E is folio 124's N.
+
+        Table 11.8 states a Young's modulus and a Poisson ratio where Table 6.1
+        states a complex shear modulus. ``N = E/(2(1 + nu))`` with the printed
+        loss factor as the imaginary part reproduces the Table 6.1 cell, which
+        is what licenses reading the two tables as one material.
+        """
+        assert ref.ALLARD_TABLE_11_8_POROSITY == ref.ALLARD_TABLE_6_1_POROSITY
+        assert ref.ALLARD_TABLE_11_8_TORTUOSITY == ref.ALLARD_TABLE_6_1_TORTUOSITY
+        assert ref.ALLARD_TABLE_11_8_FRAME_DENSITY == ref.ALLARD_TABLE_6_1_FRAME_DENSITY
+        assert (
+            ref.ALLARD_TABLE_11_8_FLOW_RESISTIVITY
+            == ref.ALLARD_TABLE_6_1_FLOW_RESISTIVITY
+        )
+        shear_from_young = (
+            ref.ALLARD_TABLE_11_8_YOUNGS_MODULUS
+            / (2.0 * (1.0 + ref.ALLARD_TABLE_11_8_POISSON_RATIO))
+            * (1.0 + 1j * ref.ALLARD_TABLE_11_8_LOSS_FACTOR)
+        )
+        shear, _ = PUBLISHED_POROUS_MATERIALS["glass_wool"].frame_constants()
+        assert shear == pytest.approx(shear_from_young, rel=1e-12)
+
+    def test_soft_fibrous_is_the_printed_table_11_2_row(self) -> None:
+        """Folio 254 prints all seven columns of the one row it has."""
+        specimen = PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+        assert specimen.thickness_mm == ref.ALLARD_TABLE_11_2_THICKNESS_MM
+        assert specimen.porosity == ref.ALLARD_TABLE_11_2_POROSITY
+        assert (
+            specimen.flow_resistivity_pa_s_m2 == ref.ALLARD_TABLE_11_2_FLOW_RESISTIVITY
+        )
+        assert specimen.tortuosity == ref.ALLARD_TABLE_11_2_TORTUOSITY
+        assert specimen.viscous_length_um == ref.ALLARD_TABLE_11_2_VISCOUS_LENGTH_UM
+        assert specimen.thermal_length_um == ref.ALLARD_TABLE_11_2_THERMAL_LENGTH_UM
+        assert specimen.frame_density_kg_m3 == ref.ALLARD_TABLE_11_2_FRAME_DENSITY
+
+    def test_every_specimen_cites_a_document_a_page_and_a_folio(self) -> None:
+        for key, specimen in PUBLISHED_POROUS_MATERIALS.items():
+            for citation in specimen.source.split("; "):
+                assert citation.startswith("Allard & Atalla 2e "), key
+                assert "PDF page " in citation, key
+                assert "(printed p. " in citation, key
+
+    def test_medium_is_the_model_called_with_the_stored_parameters(self) -> None:
+        """``medium()`` converts the lengths and dispatches, and does no more."""
+        specimen = PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+        f = np.array([125.0, 500.0, 2000.0])
+        direct = johnson_champoux_allard(
+            f,
+            specimen.flow_resistivity_pa_s_m2,
+            porosity=specimen.porosity,
+            tortuosity=specimen.tortuosity,
+            viscous_length=specimen.viscous_length_um / 1e6,
+            thermal_length=specimen.thermal_length_um / 1e6,
+        )
+        np.testing.assert_array_equal(
+            specimen.medium(f).characteristic_impedance,
+            direct.characteristic_impedance,
+        )
+
+    @pytest.mark.filterwarnings("ignore::phonometry.PhonometryWarning")
+    def test_medium_dispatches_to_the_one_parameter_models(self) -> None:
+        specimen = PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+        f = np.array([500.0])
+        assert specimen.medium(f, model="miki").model == "miki"
+        assert (
+            specimen.medium(f, model="delany_bazley").model
+            == "delany_bazley[delany_bazley]"
+        )
+
+    def test_medium_rejects_an_unknown_model(self) -> None:
+        specimen = PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+        with pytest.raises(ValueError, match=r"'model' must be one of"):
+            specimen.medium(np.array([500.0]), model="biot")
+
+    def test_frame_constants_refuses_a_specimen_published_without_them(self) -> None:
+        """Table 11.2 prints no elastic constants, and the object says so."""
+        specimen = PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+        assert specimen.shear_modulus_pa is None
+        assert specimen.poisson_ratio is None
+        with pytest.raises(ValueError, match=r"published without frame elastic"):
+            specimen.frame_constants()
+
+    def test_no_model_defaults_to_a_published_specimen(self) -> None:
+        """Removing the table costs no capability (the removal policy).
+
+        Every model keeps its parameters as explicit arguments, so nothing in
+        the library reads this table and deleting it would break no call that
+        does not name it.
+        """
+        for function in (johnson_champoux_allard, delany_bazley, miki):
+            defaults = [
+                parameter.default
+                for parameter in inspect.signature(function).parameters.values()
+                if parameter.default is not inspect.Parameter.empty
+            ]
+            assert not any(
+                isinstance(default, PorousMaterial) for default in defaults
+            ), function.__name__
+
+    def test_nothing_in_the_library_reads_the_published_tables(self) -> None:
+        """No module of ``src`` imports either table (the removal policy)."""
+        root = pathlib.Path(phonometry.__file__).parent
+        readers = [
+            path.relative_to(root).as_posix()
+            for path in root.rglob("*.py")
+            if "PUBLISHED_POROUS_MATERIALS" in path.read_text(encoding="utf-8")
+            or "RESILIENT_LAYER_STIFFNESS" in path.read_text(encoding="utf-8")
+        ]
+        # Only where they are defined and rolled up for export.
+        assert sorted(readers) == [
+            "materials/__init__.py",
+            "materials/absorbers/__init__.py",
+            "materials/absorbers/porous.py",
+            "materials/resilient/__init__.py",
+            "materials/resilient/dynamic_stiffness.py",
+        ]

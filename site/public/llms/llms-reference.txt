@@ -41,6 +41,18 @@ it; the list grows as guides gain their References sections.
   Cited by [Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/),
   [Loudspeaker characterisation](https://jmrplens.github.io/phonometry/devices/electroacoustics/loudspeakers/) and
   [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+- Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and vibration
+  analysis for engineers* (2nd ed.). Cambridge University Press.
+  [doi:10.1017/CBO9781139163927](https://doi.org/10.1017/CBO9781139163927).
+  The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the
+  room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure
+  design equation of section 4.10 (Eqs. 4.102-4.115), the plateau method for
+  panel transmission loss of section 3.9 (Table 3.1) and the higher-order
+  acoustic modes of a rigid circular duct of section 7.2 (Table 7.1).
+  Cited by [Room to Room: Partition, Receiving Room, Criterion](https://jmrplens.github.io/phonometry/devices/noise-control/room-to-room/),
+  [Duct-Borne Noise: Fan to Room](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/),
+  [Bending-wave transmission at plate junctions](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/) and
+  [Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/).
 
 ## Signal processing
 

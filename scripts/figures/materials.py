@@ -933,17 +933,13 @@ def generate_limp_frame_effective_density(output_dir: str) -> None:
     from phonometry import materials
 
     # Allard & Atalla Table 11.2 (printed p. 254): the soft fibrous material
-    # behind their Figure 11.2.
-    porosity, resistivity, frame_density = 0.98, 25.0e3, 30.0
+    # behind their Figure 11.2, read from the published object.
+    specimen = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+    porosity = specimen.porosity
+    resistivity = specimen.flow_resistivity_pa_s_m2
+    frame_density = specimen.frame_density_kg_m3
     f = np.linspace(1.0, 2000.0, 800)
-    rigid = materials.johnson_champoux_allard(
-        f,
-        resistivity,
-        porosity=porosity,
-        tortuosity=1.02,
-        viscous_length=90e-6,
-        thermal_length=180e-6,
-    )
+    rigid = specimen.medium(f)
     limp = materials.limp_frame(rigid, frame_density, porosity=porosity)
     rho0 = rigid.air_density
     total = frame_density + porosity * rho0
@@ -1052,20 +1048,16 @@ def generate_biot_frame_resonance(output_dir: str) -> None:
     print("Generating biot_frame_resonance...")
     from phonometry import materials
 
-    # Allard & Atalla Table 6.1 (printed p. 124): the glass wool "Domisol
-    # Coffrage", with the characteristic lengths of their printed p. 123.
-    porosity, tortuosity, resistivity = 0.94, 1.06, 40.0e3
-    frame_density, shear_modulus = 130.0, 2.2e6 * (1.0 + 0.1j)
+    # Allard & Atalla Sect. 6.5.4: the glass wool "Domisol Coffrage", six
+    # parameters from Table 6.1 on printed p. 124 and the two characteristic
+    # lengths from the prose of printed p. 123, read from the published object.
+    specimen = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+    porosity, tortuosity = specimen.porosity, specimen.tortuosity
+    frame_density = specimen.frame_density_kg_m3
+    shear_modulus, poisson_ratio = specimen.frame_constants()
     thickness = 0.10
     f = np.linspace(200.0, 1500.0, 1300)
-    medium = materials.johnson_champoux_allard(
-        f,
-        resistivity,
-        porosity=porosity,
-        tortuosity=tortuosity,
-        viscous_length=0.56e-4,
-        thermal_length=1.1e-4,
-    )
+    medium = specimen.medium(f)
     rigid = materials.layered_absorber(f, [materials.PorousLayer(thickness, medium)])
     biot = materials.layered_absorber(
         f,
@@ -1078,7 +1070,7 @@ def generate_biot_frame_resonance(output_dir: str) -> None:
     f_r = materials.frame_quarter_wave_resonance(
         thickness,
         shear_modulus=shear_modulus,
-        poisson_ratio=0.0,
+        poisson_ratio=poisson_ratio,
         frame_density=frame_density,
     )
 
@@ -3810,20 +3802,18 @@ def generate_biot_waves(output_dir: str) -> None:
     print("Generating biot_waves...")
     from phonometry import materials
 
-    # Allard & Atalla Table 6.1 glass wool, the same input set as the
-    # frame-resonance figure on the same page.
+    # Allard & Atalla Sect. 6.5.4 glass wool, the same input set as the
+    # frame-resonance figure, read from the published object.
+    specimen = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+    shear, poisson_ratio = specimen.frame_constants()
     freq = np.linspace(50.0, 1500.0, 1451)
-    shear = 2.2e6 * (1 + 0.1j)
-    medium = materials.johnson_champoux_allard(
-        freq,
-        40e3,
-        porosity=0.94,
-        tortuosity=1.06,
-        viscous_length=0.56e-4,
-        thermal_length=1.1e-4,
-    )
     waves = materials.biot_waves(
-        medium, porosity=0.94, tortuosity=1.06, frame_density=130.0, shear_modulus=shear
+        specimen.medium(freq),
+        porosity=specimen.porosity,
+        tortuosity=specimen.tortuosity,
+        frame_density=specimen.frame_density_kg_m3,
+        shear_modulus=shear,
+        poisson_ratio=poisson_ratio,
     )
 
     fig, (ax_k, ax_mu) = plt.subplots(

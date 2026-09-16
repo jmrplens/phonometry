@@ -104,13 +104,23 @@ _HEAT_CAPACITY_RATIO = 1.4
 #: Default atmospheric pressure, in Pa.
 _ATMOSPHERIC_PRESSURE = 101325.0
 
+#: Micrometres per metre. The characteristic lengths of
+#: :data:`PUBLISHED_POROUS_MATERIALS` are stored in the unit their tables print
+#: and converted here, in one place, to the metres the models take. The
+#: conversion divides rather than multiplying by 1e-6, because 1e6 is exact in
+#: binary floating point and 1e-6 is not: dividing returns the same double the
+#: literal ``90e-6`` parses to, which is what keeps every figure and every
+#: printed digit where it was before these specimens were published.
+_MICROMETRES_PER_METRE = 1e6
+
 #: Shared validation message for fractional open areas.
 _OPEN_AREA_MESSAGE = "'open_area' must not exceed 1."
 #: Shared validation message for open porosities.
 _POROSITY_MESSAGE = "'porosity' must not exceed 1."
 
 #: Delany-Bazley power-law coefficient presets ``(C1..C8)`` from Bies 5e
-#: Appendix D, Table D.1: ``Zc = rho c (1 + C1 X^-C2 - j C3 X^-C4)`` and
+#: Table D.1, PDF page 757 (printed p. 728), in Appendix D:
+#: ``Zc = rho c (1 + C1 X^-C2 - j C3 X^-C4)`` and
 #: ``k = (w/c)(1 + C5 X^-C6 - j C7 X^-C8)`` with ``X = rho f / sigma``.
 DELANY_BAZLEY_COEFFICIENTS: Mapping[str, tuple[float, ...]] = {
     # Rockwool / fibreglass (Delany & Bazley 1970).
@@ -149,7 +159,9 @@ __all__ = [
     "LIMP_FRAME_CRITERIA",
     "MIKI_VALIDITY",
     "PUBLISHED_AIR",
+    "PUBLISHED_POROUS_MATERIALS",
     "PorousAbsorberWarning",
+    "PorousMaterial",
     "PorousMediumResult",
     "decoupling_frequency",
     "delany_bazley",
@@ -665,6 +677,233 @@ def limp_frame(
         speed_of_sound=medium.speed_of_sound,
         air_density=rho0,
     )
+
+
+# ---------------------------------------------------------------------------
+# Published parameter sets
+#
+# Source and authorship. Allard, J. F., & Atalla, N. (2009). "Propagation of
+# sound in porous media: Modelling sound absorbing materials" (2nd ed.),
+# Wiley, ISBN 978-0-470-74661-5, listed in docs/reference/bibliography.md. The
+# book is not redistributed with this library and no page of it is reproduced
+# here.
+#
+# Contents. Two specimens: one row of Table 11.2, and the worked example of
+# Sect. 6.5.4, whose parameters are split between Table 6.1 and the prose of
+# the facing page. The book prints twenty-two property tables and this takes
+# columns from two of them. Each specimen is transcribed column by column and
+# converted into the units this library computes in, so what is stored is
+# neither the printed table nor a facsimile of it: it is the argument list the
+# functions below already take. The columns kept are the ones a published
+# function consumes; everything else those pages print stays in the book.
+#
+# Basis. The parameters are physical constants of a measured specimen, cited
+# per row to the document, table, PDF page and printed folio they were read
+# on. No compilation is reproduced, whole or in substantial part. This
+# repository's MIT licence covers the code, not the values, which remain the
+# authors' to describe.
+#
+# Removal policy. Withdrawing this table costs no capability: every model here
+# takes its parameters as explicit arguments and none of them defaults to a
+# published specimen, which the test suite asserts. Requests go through the
+# contact in SECURITY.md.
+#
+# Admission rule for a row that is not here yet:
+#
+# 1. A row enters only when a published function consumes it. No caller, no
+#    row: that is the brake that stops this growing into the material database
+#    this library does not ship.
+# 2. A row enters only after its page has been read as a rendered image, and
+#    it carries document, table, PDF page and printed folio, plus
+#    ``attributed_to`` wherever the book credits the number to someone else.
+# 3. Values are stored in library units. The printed unit is stated in the
+#    banner and the conversion is pinned by an assertion against
+#    ``tests/reference_data``, never left as a comment.
+# 4. A row whose table already ships anywhere in the tree does not ship twice;
+#    where it overlaps, it is tied to the existing constant by an explicit
+#    consistency assertion.
+# 5. One key, one dimension, one spelling. A quantity that appears in two
+#    dimensions gets two field names.
+# 6. When a single source starts contributing more than one table, the
+#    copyright decision is reopened: the next form is a data directory with its
+#    own provenance statement, and that is a different piece of work.
+#
+# The twenty-five Allard rows that print a Young's modulus and a structural
+# loss factor stay out under rule 1 until this library publishes an
+# ``E, nu, eta -> N`` conversion: :func:`~phonometry.materials.biot_waves`,
+# :func:`~phonometry.materials.frame_quarter_wave_resonance` and
+# :class:`~phonometry.materials.PoroelasticLayer` all take a complex shear
+# modulus, and ``biot.py`` converts only the other way, so a row transcribed as
+# printed would not be usable.
+# ---------------------------------------------------------------------------
+@dataclass(frozen=True, kw_only=True)
+class PorousMaterial:
+    r"""A porous specimen as its source prints it, in library units.
+
+    A published parameter set for the rigid-frame and poroelastic models, so a
+    caller who has not characterised a specimen to ISO 9053 and ISO 10534-2 can
+    still reproduce a printed example and cite the page it came from. The
+    models take the parameters as arguments; nothing here is a default for any
+    of them.
+
+    :ivar name: The specimen as the table names it.
+    :ivar flow_resistivity_pa_s_m2: Airflow resistivity ``sigma``, in Pa s/m2.
+    :ivar porosity: Open porosity ``phi``.
+    :ivar tortuosity: Tortuosity :math:`\alpha_\infty`.
+    :ivar viscous_length_um: Viscous characteristic length ``Lambda``, in
+        micrometres.
+    :ivar thermal_length_um: Thermal characteristic length ``Lambda'``, in
+        micrometres.
+    :ivar source: Document, locator, PDF page and printed folio. A specimen
+        whose columns come off two pages of one book names both, separated by
+        ``"; "``.
+    :ivar frame_density_kg_m3: Frame density ``rho1``, in kg/m3.
+    :ivar thickness_mm: Layer thickness ``h`` of the specimen the table
+        describes, in millimetres.
+    :ivar shear_modulus_pa: Complex in-vacuo shear modulus ``N``, in pascals,
+        or ``None`` when the table prints no elastic constants. ``None``
+        together with :attr:`poisson_ratio`, because a table that prints one
+        prints the other.
+    :ivar poisson_ratio: Frame Poisson ratio ``nu``, or ``None``.
+    :ivar attributed_to: The source the book itself credits, empty when the
+        number is the book's own.
+    """
+
+    name: str
+    flow_resistivity_pa_s_m2: float
+    porosity: float
+    tortuosity: float
+    viscous_length_um: float
+    thermal_length_um: float
+    frame_density_kg_m3: float
+    thickness_mm: float
+    source: str
+    shear_modulus_pa: complex | None = None
+    poisson_ratio: float | None = None
+    attributed_to: str = ""
+
+    def frame_constants(self) -> tuple[complex, float]:
+        """The in-vacuo frame constants ``(N, nu)`` the source prints.
+
+        The complex shear modulus and the Poisson ratio are what
+        :func:`~phonometry.materials.biot_waves`,
+        :func:`~phonometry.materials.frame_quarter_wave_resonance` and
+        :class:`~phonometry.materials.PoroelasticLayer` take together, and a
+        table that prints one prints the other, so they are asked for together
+        and a specimen characterised as a rigid frame alone says so here rather
+        than handing out a ``None`` that fails further down.
+
+        :return: ``(shear_modulus_pa, poisson_ratio)``.
+        :raises ValueError: when the source prints no elastic constants.
+        """
+        if self.shear_modulus_pa is None or self.poisson_ratio is None:
+            msg = (
+                f"{self.name!r} is published without frame elastic constants "
+                f"({self.source}); the poroelastic models need a shear modulus "
+                "and a Poisson ratio, so pass them explicitly."
+            )
+            raise ValueError(msg)
+        return self.shear_modulus_pa, self.poisson_ratio
+
+    def medium(
+        self,
+        frequency: ArrayLike,
+        *,
+        model: str = "johnson_champoux_allard",
+        fluid: Fluid = PUBLISHED_AIR,
+    ) -> PorousMediumResult:
+        """The equivalent fluid of this specimen.
+
+        The characteristic lengths are stored in the micrometres both tables
+        print and converted, here and once, to the metres
+        :func:`johnson_champoux_allard` takes.
+
+        :param frequency: Frequency vector ``f``, in hertz.
+        :param model: ``"johnson_champoux_allard"`` (Default),
+            ``"delany_bazley"`` or ``"miki"``. The last two read the flow
+            resistivity alone, so they describe a coarser specimen than the one
+            the other four parameters pin.
+        :param fluid: The medium, a :class:`~phonometry.fluids.Fluid`
+            (Default: :data:`PUBLISHED_AIR`).
+        :return: A :class:`PorousMediumResult`.
+        :raises ValueError: for an unknown model name.
+        """
+        require_choice(
+            model, "model", ("johnson_champoux_allard", "delany_bazley", "miki")
+        )
+        if model == "delany_bazley":
+            return delany_bazley(frequency, self.flow_resistivity_pa_s_m2, fluid=fluid)
+        if model == "miki":
+            return miki(frequency, self.flow_resistivity_pa_s_m2, fluid=fluid)
+        return johnson_champoux_allard(
+            frequency,
+            self.flow_resistivity_pa_s_m2,
+            porosity=self.porosity,
+            tortuosity=self.tortuosity,
+            viscous_length=self.viscous_length_um / _MICROMETRES_PER_METRE,
+            thermal_length=self.thermal_length_um / _MICROMETRES_PER_METRE,
+            fluid=fluid,
+        )
+
+
+#: The two porous specimens this library already computes with, published once
+#: so that every example, figure and conformance row reads the same numbers off
+#: the same page. Not a material catalogue: the models take ``sigma``, ``phi``,
+#: ``alpha_inf``, ``Lambda`` and ``Lambda'`` as arguments, and a real specimen
+#: is characterised to ISO 9053 and ISO 10534-2 rather than looked up.
+#:
+#: ``glass_wool`` is the 'Domisol Coffrage' of the worked example of
+#: **Sect. 6.5.4**, and it takes two pages. **Table 6.1** (PDF page 133,
+#: printed p. 124) prints ``alpha_inf``, ``rho_1``, ``sigma``, ``phi``, the
+#: complex shear modulus ``N = 220(1 + j0,1)`` N/cm2 and ``nu = 0``, and
+#: **prints neither characteristic length**. The two lengths the equivalent
+#: fluid needs are printed in the prose of Sect. 6.5.4 on the facing folio
+#: (PDF page 132, printed p. 123), where the fibre diameter of 12 um gives,
+#: through Eqs. (5.29) and (5.30), ``Lambda = 0,56 x 10^-4 m`` and
+#: ``Lambda' = 2 Lambda = 1,1 x 10^-4 m``. That last step is the book's own
+#: rounding of 1,12 to two figures, and **Table 11.8** (PDF page 281, printed
+#: p. 275) prints the same specimen's lengths independently as 56 and 110 um,
+#: which is why 110 and not 112 is what a re-reading finds. Both pages of the
+#: example are named in ``source``, because neither of them alone supplies the
+#: five parameters the model takes.
+#:
+#: ``soft_fibrous`` is the one row of **Table 11.2** (PDF page 260, printed
+#: p. 254), which prints all seven of its columns.
+#:
+#: Stored in library units: ``sigma`` in Pa s/m2 (the book prints N s/m4, which
+#: is the same unit spelled differently), the two characteristic lengths in
+#: micrometres, and the shear modulus in pascals rather than in the N/cm2 of
+#: Table 6.1. Every conversion is asserted against the printed digits in
+#: tests/materials/absorbers/test_porous.py.
+PUBLISHED_POROUS_MATERIALS: dict[str, PorousMaterial] = {
+    "glass_wool": PorousMaterial(
+        name="Domisol Coffrage glass wool",
+        flow_resistivity_pa_s_m2=40.0e3,
+        porosity=0.94,
+        tortuosity=1.06,
+        viscous_length_um=56.0,
+        thermal_length_um=110.0,
+        frame_density_kg_m3=130.0,
+        thickness_mm=3.8,
+        shear_modulus_pa=2.2e6 * (1.0 + 0.1j),
+        poisson_ratio=0.0,
+        source=(
+            "Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); "
+            "Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)"
+        ),
+    ),
+    "soft_fibrous": PorousMaterial(
+        name="Soft fibrous",
+        flow_resistivity_pa_s_m2=25.0e3,
+        porosity=0.98,
+        tortuosity=1.02,
+        viscous_length_um=90.0,
+        thermal_length_um=180.0,
+        frame_density_kg_m3=30.0,
+        thickness_mm=50.0,
+        source="Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)",
+    ),
+}
 
 
 # ---------------------------------------------------------------------------

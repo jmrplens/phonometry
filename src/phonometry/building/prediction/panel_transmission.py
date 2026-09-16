@@ -122,9 +122,10 @@ _FREQ_POSITIVE_MSG = "'frequency' must be positive."
 #: Error message for a malformed frequency axis (shared by the module funcs).
 _FREQ_1D_MSG = "'frequency' must be a non-empty 1-D array."
 
-#: Norton & Karczub (2003) Table 3.1: plateau-method data for common
-#: materials, as ``(surface density in kg/m2 per mm of thickness, coincidence
-#: plateau height in dB, frequency ratio B/A)``.
+#: Norton & Karczub (2003) Table 3.1, PDF page 261 (printed p. 241):
+#: plateau-method data for common materials, as ``(surface density in kg/m2
+#: per mm of thickness, coincidence plateau height in dB, frequency ratio
+#: B/A)``.
 PLATEAU_MATERIALS: dict[str, tuple[float, float, float]] = {
     "aluminium": (2.66, 29.0, 11.0),
     "brick": (2.10, 37.0, 4.5),

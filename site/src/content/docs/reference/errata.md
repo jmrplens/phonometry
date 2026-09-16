@@ -6476,5 +6476,32 @@ published sources:
   each with its own sign convention and its own refusal, and a conformance
   check holds them against each other at the margin where they part. Do not
   merge them into one helper.
+- **Beranek & Mellow 2e Table 7.1, the Delany and Bazley column:** the table
+  prints $a_1$ to $a_4$ = 0.0511, 0.0768, 0.0858, 0.175 where
+  [`DELANY_BAZLEY_COEFFICIENTS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/materials/absorbers/porous.py)
+  holds $C_1$, $C_3$, $C_5$, $C_7$ = 0.0571, 0.087, 0.0978, 0.189 from Bies 5e
+  Table D.1. The four amplitudes are 8 % to 14 % apart and the ratios are not
+  constant (1.117, 1.133, 1.140, 1.080), so no single scale factor relates
+  them. The reason is the variable. Beranek's Equation (7.11), printed above
+  the table on the same page, is written in $R_f/f$ with **positive**
+  exponents, while Delany and Bazley, and Bies after them, write
+  $X = \rho_0 f / R_f$ with negative ones. The two forms differ by exactly
+  $\rho_0^{\,b}$, and solving $C = a\,\rho_0^{\,b}$ row by row gives
+  $\rho_0$ = 1.16, 1.19, 1.21, 1.14 kg/m³, which is the density of air in
+  every row; carrying the conversion the other way with $\rho_0$ = 1.18 kg/m³
+  reproduces the four printed amplitudes to 0.4 %, 1.4 %, 1.5 % and 2.1 %. The
+  exponents agree independently: Beranek prints $b_1$ to $b_4$ = 0.75, 0.73,
+  0.70, 0.59 against $C_2$, $C_4$, $C_6$, $C_8$ = 0.754, 0.732, 0.700, 0.595,
+  the same numbers to two decimals. The control is the table's other column:
+  Miki's variable is $f/\sigma$ and carries no density, and Beranek's Miki
+  column, 0.070, 0.107, 0.109, 0.160 with 0.632, 0.632, 0.618, 0.618, agrees
+  digit for digit with the constants `miki` is written from. Verified on PDF
+  page 352 (printed p. 349) of Beranek & Mellow, *Acoustics: Sound Fields,
+  Transducers and Vibration* 2e (2019), and on PDF page 757 (printed p. 728)
+  of Bies, Hansen & Howard, *Engineering Noise Control* 5e (2017). Neither
+  book is in error: they print one regression in two variables. The library
+  follows Delany and Bazley through Bies, in $X = \rho_0 f/\sigma$, so its
+  amplitudes must **not** be "corrected" towards Beranek's, which would apply
+  the air density a second time.
 
 <!-- END GENERATED BODY -->

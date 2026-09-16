@@ -6908,5 +6908,34 @@ concordancia con las fuentes publicadas:
   cada una con su convenio de signo y su propio rechazo, y una comprobación de
   conformidad las enfrenta en el margen en el que se separan. No hay que
   fundirlas en un único auxiliar.
+- **Beranek & Mellow 2e, tabla 7.1, columna de Delany y Bazley:** la tabla
+  imprime $a_1$ a $a_4$ = 0.0511, 0.0768, 0.0858, 0.175 donde
+  [`DELANY_BAZLEY_COEFFICIENTS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/materials/absorbers/porous.py)
+  tiene $C_1$, $C_3$, $C_5$, $C_7$ = 0.0571, 0.087, 0.0978, 0.189, de la tabla
+  D.1 de Bies 5e. Las cuatro amplitudes se separan entre un 8 % y un 14 % y las
+  razones no son constantes (1.117, 1.133, 1.140, 1.080), así que ningún factor
+  de escala único las relaciona. El motivo es la variable. La ecuación (7.11)
+  de Beranek, impresa sobre la tabla en esa misma página, está escrita en
+  $R_f/f$ con exponentes **positivos**, mientras que Delany y Bazley, y Bies
+  tras ellos, escriben $X = \rho_0 f / R_f$ con exponentes negativos. Las dos
+  formas se diferencian exactamente en $\rho_0^{\,b}$, y despejar
+  $C = a\,\rho_0^{\,b}$ fila a fila da $\rho_0$ = 1.16, 1.19, 1.21,
+  1.14 kg/m³, que es la densidad del aire en todas ellas; hacer la conversión
+  en sentido contrario con $\rho_0$ = 1.18 kg/m³ reproduce las cuatro
+  amplitudes impresas con un 0,4 %, un 1,4 %, un 1,5 % y un 2,1 % de
+  diferencia. Los exponentes lo corroboran por su cuenta: Beranek imprime
+  $b_1$ a $b_4$ = 0.75, 0.73, 0.70, 0.59 frente a $C_2$, $C_4$, $C_6$, $C_8$ =
+  0.754, 0.732, 0.700, 0.595, los mismos números con dos decimales. El control
+  es la otra columna de la tabla: la variable de Miki es $f/\sigma$ y no lleva
+  densidad, y la columna de Miki de Beranek, 0.070, 0.107, 0.109, 0.160 con
+  0.632, 0.632, 0.618, 0.618, coincide dígito a dígito con las constantes con
+  las que está escrita `miki`. Verificado en la página 352 del PDF (página
+  impresa 349) de Beranek & Mellow, *Acoustics: Sound Fields, Transducers and
+  Vibration* 2e (2019), y en la página 757 del PDF (página impresa 728) de
+  Bies, Hansen & Howard, *Engineering Noise Control* 5e (2017). Ninguno de los
+  dos libros se equivoca: imprimen una misma regresión en dos variables. La
+  biblioteca sigue a Delany y Bazley a través de Bies, en
+  $X = \rho_0 f/\sigma$, de modo que sus amplitudes **no** deben «corregirse»
+  hacia las de Beranek, lo que aplicaría la densidad del aire por segunda vez.
 
 <!-- END GENERATED BODY -->

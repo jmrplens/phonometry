@@ -32761,6 +32761,16 @@ bulk modulus with the exact limits $j\omega\rho_\mathrm{e} \to \sigma$ at DC,
 $\rho_\mathrm{e} \to (\alpha_\infty \rho_0/\phi)(1 + (1-j)\,\delta_v/\Lambda)$ at high
 frequency, and the isothermal-to-adiabatic transition in $K_\mathrm{e}$.
 
+Five parameters is four more than a caller usually has, so the two specimens
+this guide computes with are published as `PUBLISHED_POROUS_MATERIALS`, each
+carrying the page it was read on in its `source`: the 'Domisol Coffrage' glass
+wool of Allard & Atalla Table 6.1 (printed p. 124), whose characteristic
+lengths are printed in the prose of their Sect. 6.5.4 on the facing folio, and
+the soft fibrous layer of their Table 11.2 (printed p. 254). That is a pair of
+worked examples and not a material catalogue: a real specimen is characterised
+to ISO 9053 and ISO 10534-2, and every model here keeps its parameters as
+explicit arguments.
+
 ```python
 import numpy as np
 from phonometry import materials
@@ -32884,18 +32894,27 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# Allard & Atalla Table 11.2: soft fibrous layer, 50 mm.
-f = np.linspace(1.0, 2000.0, 800)
-rigid = materials.johnson_champoux_allard(
-    f, 25e3, porosity=0.98, tortuosity=1.02,
-    viscous_length=90e-6, thermal_length=180e-6,
-)
-limp = materials.limp_frame(rigid, frame_density=30.0, porosity=0.98)
+# The soft fibrous layer of Allard & Atalla Table 11.2, 50 mm, published
+# once with the page it was read on.
+soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+print(soft.source)
+# Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)
 
-print(round(materials.decoupling_frequency(25e3, porosity=0.98, frame_density=30.0), 1))
+f = np.linspace(1.0, 2000.0, 800)
+rigid = soft.medium(f)
+limp = materials.limp_frame(
+    rigid, frame_density=soft.frame_density_kg_m3, porosity=soft.porosity
+)
+
+print(round(materials.decoupling_frequency(
+    soft.flow_resistivity_pa_s_m2,
+    porosity=soft.porosity,
+    frame_density=soft.frame_density_kg_m3,
+), 1))
 # 127.4
 print(round(float(limp.effective_density[0].real), 1))     # 31.2 = rho_t
-print(materials.limp_frame_applicable(20e3), materials.limp_frame_applicable(25e3))  # True False
+print(materials.limp_frame_applicable(20e3),
+      materials.limp_frame_applicable(soft.flow_resistivity_pa_s_m2))  # True False
 
 limp.plot()   # normalised Zc and k of the corrected medium
 plt.show()
@@ -32931,11 +32950,11 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 1000], dtype=float)
-rigid = materials.johnson_champoux_allard(
-    bands, 25e3, porosity=0.98, tortuosity=1.02,
-    viscous_length=90e-6, thermal_length=180e-6,
+soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+rigid = soft.medium(bands)
+limp = materials.limp_frame(
+    rigid, frame_density=soft.frame_density_kg_m3, porosity=soft.porosity
 )
-limp = materials.limp_frame(rigid, frame_density=30.0, porosity=0.98)
 for medium in (rigid, limp):
     print(materials.layered_absorber(bands, [materials.PorousLayer(0.05, medium)]).absorption.round(2))
 # [0.07 0.11 0.17 0.24 0.32 0.43 0.54 0.64 0.88]   rigid frame
@@ -33027,21 +33046,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 from phonometry import materials
 
-# Allard & Atalla Table 6.1: glass wool "Domisol Coffrage", 100 mm, glued.
-f = np.linspace(200.0, 1500.0, 1301)
-shear = 2.2e6 * (1 + 0.1j)          # 220 N/cm2, loss factor 0.1
-med = materials.johnson_champoux_allard(
-    f, 40e3, porosity=0.94, tortuosity=1.06,
-    viscous_length=0.56e-4, thermal_length=1.1e-4,
-)
+# The published glass wool "Domisol Coffrage", 100 mm, glued.
+glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+print(glass_wool.source)
+# Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)
 
-print(materials.frame_elastic_coefficient(shear, 0.0))       # (4400000+440000j)
+f = np.linspace(200.0, 1500.0, 1301)
+shear, poisson = glass_wool.frame_constants()   # 220 N/cm2 in pascals, eta 0.1
+med = glass_wool.medium(f)
+
+print(materials.frame_elastic_coefficient(shear, poisson))   # (4400000+440000j)
 print(round(materials.frame_quarter_wave_resonance(
-    0.10, shear_modulus=shear, poisson_ratio=0.0, frame_density=130.0), 1))
+    0.10, shear_modulus=shear, poisson_ratio=poisson,
+    frame_density=glass_wool.frame_density_kg_m3), 1))
 # 459.9
 
-waves = materials.biot_waves(med, porosity=0.94, tortuosity=1.06,
-                             frame_density=130.0, shear_modulus=shear)
+waves = materials.biot_waves(
+    med, porosity=glass_wool.porosity, tortuosity=glass_wool.tortuosity,
+    frame_density=glass_wool.frame_density_kg_m3, shear_modulus=shear,
+    poisson_ratio=poisson,
+)
 print(round(float(abs(waves.airborne_velocity_ratio[800])), 1))     # 42.4
 print(np.round(waves.frame_borne_velocity_ratio[-1], 3))  # (0.811+0.473j)
 
@@ -33084,13 +33108,14 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([250, 315, 400, 500, 630, 800, 1000], dtype=float)
-med = materials.johnson_champoux_allard(
-    bands, 40e3, porosity=0.94, tortuosity=1.06,
-    viscous_length=0.56e-4, thermal_length=1.1e-4,
+glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+shear, poisson = glass_wool.frame_constants()
+med = glass_wool.medium(bands)
+poroelastic = materials.PoroelasticLayer(
+    0.10, med, glass_wool.porosity, glass_wool.tortuosity,
+    glass_wool.frame_density_kg_m3, shear, poisson,
 )
-shear = 2.2e6 * (1 + 0.1j)
-for layer in (materials.PorousLayer(0.10, med),
-              materials.PoroelasticLayer(0.10, med, 0.94, 1.06, 130.0, shear)):
+for layer in (materials.PorousLayer(0.10, med), poroelastic):
     print(materials.layered_absorber(bands, [layer]).absorption.round(2))
 # [0.55 0.58 0.62 0.65 0.69 0.74 0.78]   rigid frame
 # [0.53 0.56 0.61 0.77 0.71 0.74 0.78]   Biot poroelastic
@@ -35095,6 +35120,41 @@ res.report(
 ```
 
 [![EN 29052-1 dynamic-stiffness example report: a metadata header with the total mass per unit area and the loaded thickness, a metrics table of the resonant frequency, the apparent, enclosed-gas and installed dynamic stiffnesses and the natural frequency beside the f0(s') design curve, and the boxed apparent dynamic stiffness s't](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en29052_dynamic_stiffness_example.webp)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/en29052_dynamic_stiffness_example.pdf)
+
+### Published layers, when there is no declared value
+
+Designing a floating floor starts from the manufacturer's $s'$, declared to
+EN 29052-1 for that product. When there is none, fifteen measured layers are
+published as `RESILIENT_LAYER_STIFFNESS`, transcribed from Hopkins Table A3
+(printed p. 610), whose caption states they were measured according to
+ISO 9052-1. Each row carries the page it was read on, and the four rebond
+foams carry the second-level attribution the printed cell gives them.
+
+The key says which specimen a row is, `<material>_<density>_<thickness>`,
+because four rock-wool rows and four glass-wool rows differ only by those two
+numbers and the printed table separates them by position in a merged cell.
+
+```python
+from phonometry import materials
+
+layer = materials.resilient_layer_stiffness("mineral_wool_rock_60_30")
+print(layer.name, layer.density_kg_m3, layer.thickness_mm)   # Mineral wool, rock 60.0 30.0
+print(layer.source)
+# Hopkins (2007) Table A3, PDF page 637 (printed p. 610)
+print(round(layer.dynamic_stiffness_n_m3 / 1e6, 1))          # 10.0 MN/m3, as printed
+print(round(layer.natural_frequency(120.0), 1))              # 45.9 Hz under a 120 kg/m2 screed
+
+rebond = materials.RESILIENT_LAYER_STIFFNESS["rebond_foam_64_20"]
+print(rebond.attributed_to)                                  # Hopkins and Hall (2006)
+print(round(rebond.natural_frequency(120.0), 1))             # 43.6
+```
+
+These are measured specimens and not declared product values: they are the
+order of magnitude to reason with while a product is chosen, not an input to a
+compliance calculation. The softest row in the table, 40 mm glass wool at
+7 MN/m³, puts the same screed at 38.4 Hz, and the stiffest, 5 mm closed-cell
+polyethylene foam at 115 MN/m³, at 155.8 Hz; that spread is the whole design
+question.
 
 ## 3. What the resonance method assumes, and where it bites
 
@@ -41863,6 +41923,7 @@ documents, one page per module.
 | `installed_dynamic_stiffness` | `function` | **Installed s' by airflow resistivity (EN 29052-1 clause 8.2).**<br>• `apparent_stiffness` s't [N/m³]<br>• `airflow_resistivity` r [kPa·s/m²]<br>• `gas_stiffness` s'a [N/m³]<br>r≥100 → s't · 10≤r<100 → s't+s'a · r<10 → s't if s'a negligible else nan (warns) | `installed_dynamic_stiffness(20e6, 50.0, gas_stiffness=3e6)  # 23e6` |
 | `natural_frequency` | `function` | **Floating-floor natural frequency f0 (EN 29052-1 Formula 2).**<br>• `dynamic_stiffness` s' [N/m³] (scalar/array)<br>• `mass_per_area` m' [kg/m²]<br>f0 = (1/2π)√(s'/m') | `natural_frequency(10e6, 120.0)  # 45.9 Hz` |
 | `floating_floor_resonance` | `function` | **Full EN 29052-1 chain → result.**<br>• `resonant_frequency`, `total_mass_per_area`, `floor_mass_per_area`<br>• `airflow_resistivity` (Default: inf), `thickness`, `porosity`, `atmospheric_pressure_pa` | `res = materials.floating_floor_resonance(25.0, 200.0, 120.0)`<br><br>• `DynamicStiffnessResult` |
+| `ResilientLayer` / `RESILIENT_LAYER_STIFFNESS` / `resilient_layer_stiffness` | `dataclass` / `mapping` / `function` | **Fifteen resilient layers as Hopkins Table A3 prints them (printed p. 610).**<br>• `layer`: `'<material>_<density>_<thickness>'`, e.g. `'mineral_wool_rock_60_30'`, `'rebond_foam_64_20'`<br>• `dynamic_stiffness_n_m3` s′ [N/m³] (the book prints MN/m³), `density_kg_m3`, `thickness_mm`, `source`, `attributed_to`<br>• `.natural_frequency(m')` → f₀ [Hz] (Formula 2)<br>• Measured specimens, not declared product values: design with the manufacturer's s′ to EN 29052-1 | `layer = materials.resilient_layer_stiffness('mineral_wool_rock_60_30')`<br>`layer.natural_frequency(100.0)  # 50.3 Hz` |
 | `DynamicStiffnessResult` | `dataclass` | **Dynamic-stiffness measurement result.**<br>• `apparent_stiffness`/`gas_stiffness`/`dynamic_stiffness` [N/m³]<br>• `resonant_frequency` [Hz], `floor_mass_per_area` [kg/m²]<br>• `natural_frequency` [Hz]<br>• `.plot()` | `res.dynamic_stiffness, res.natural_frequency` |
 | `DynamicStiffnessWarning` | `warning class` | **EN 29052-1 advisory.**<br>Emitted when the enclosed-gas term makes s′ unresolvable (clause 8.2) | `warnings.simplefilter('error', DynamicStiffnessWarning)` |
 | `convert_frf` | `function` | **Convert between any two FRFs (ISO 7626-1 Table 1).**<br>• `value`: complex FRF value(s) of kind *source*<br>• `frequency` f [Hz] (scalar/array, broadcast)<br>• `source`/`target`: `receptance`/`mobility`/`accelerance`/`dynamic_stiffness`/`impedance`/`apparent_mass`<br>Pivots through the receptance H | `convert_frf(2e-3, 80.0, "mobility", "impedance")  # 500 N.s/m` |
@@ -42116,7 +42177,7 @@ documents, one page per module.
 | `miki` | `function` | **Miki (1990) positive-real revision of Delany–Bazley.**<br>• `frequency` f [Hz]<br>• `flow_resistivity` σ [Pa·s/m²]<br>• `fluid`: `Fluid` (Default: `PUBLISHED_AIR`)<br>• Stays passive below the fit range; warns outside 0.01 < f/σ < 1 | `med = materials.miki(f, 20000.0)`<br><br>• `PorousMediumResult` |
 | `johnson_champoux_allard` | `function` | **JCA five-parameter rigid-frame model (Cox & D'Antonio 3e Eqs. 6.19–6.25).**<br>• `frequency` f [Hz], `flow_resistivity` σ [Pa·s/m²]<br>• `porosity` φ, `tortuosity` T = α∞<br>• `viscous_length` Λ / `thermal_length` Λ′ [m]<br>• `fluid`: `Fluid` carrying the air state the model needs, viscosity, Prandtl number, ratio of specific heats and static pressure (Default: `PUBLISHED_AIR`) | `med = materials.johnson_champoux_allard(f, 20000.0, porosity=0.98, tortuosity=1.05, viscous_length=8.7e-5, thermal_length=1.7e-4)`<br><br>• `PorousMediumResult` |
 | `limp_frame` | `function` | **Limp-frame correction of any rigid-frame model (Allard & Atalla 2e Eqs. 11.53-11.55, Panneton 2007).**<br>• `medium`: a rigid-frame `PorousMediumResult`<br>• `frame_density` ρ₁ [kg/m³] (bulk density of the frame)<br>• `porosity` φ (Default: 1.0)<br>• keeps K_e, corrects ρ_e; → ρ_t = ρ₁ + φρ₀ as ω → 0 and → rigid as ρ₁ → ∞ | `soft = materials.limp_frame(jca, frame_density=30.0, porosity=0.98)`<br><br>• `PorousMediumResult`, model 'materials.limp_frame(...)' |
-| `decoupling_frequency` | `function` | **Zwikker-Kosten decoupling frequency Fd (Allard & Atalla 2e Sect. 11.3.4 / Eq. 6.90).**<br>• `flow_resistivity` σ [Pa·s/m²]<br>• `porosity` φ, `frame_density` ρ₁ [kg/m³]<br>• Fd = σφ²/(2πρ₁): above it the frame stands still | `decoupling_frequency(40e3, porosity=0.94, frame_density=130.0)  # 43.27`<br><br>• [Hz] |
+| `decoupling_frequency` | `function` | **Zwikker-Kosten decoupling frequency Fd (Allard & Atalla 2e Sect. 11.3.4 / Eq. 6.90).**<br>• `flow_resistivity` σ [Pa·s/m²]<br>• `porosity` φ, `frame_density` ρ₁ [kg/m³]<br>• Fd = σφ²/(2πρ₁): above it the frame stands still | `gw = materials.PUBLISHED_POROUS_MATERIALS['glass_wool']`<br>`decoupling_frequency(gw.flow_resistivity_pa_s_m2, porosity=gw.porosity, frame_density=gw.frame_density_kg_m3)  # 43.27`<br><br>• [Hz] |
 | `limp_frame_applicable` / `LIMP_FRAME_CRITERIA` | `function` / `mapping` | **Published rule of thumb for treating a frame as limp (Allard & Atalla 2e pp. 253-254).**<br>• `frame_bulk_modulus` K_c [Pa]<br>• `criterion`: 'doutres' (0.2, Default) / 'beranek' (0.05)<br>• `fluid_bulk_modulus` K_f [Pa] (Default: 101325, isothermal air) → the book's "bulk modulus lower than 20 kPa" | `limp_frame_applicable(20e3)  # True`<br><br>• `bool` |
 | `biot_waves` | `function` | **The three Biot waves of a poroelastic layer (Allard & Atalla 2e Eqs. 6.67–6.84).**<br>• `medium`: the **rigid-frame** `PorousMediumResult` of the pores<br>• `porosity` φ, `tortuosity` α∞<br>• `frame_density` ρ₁ [kg/m³], `shear_modulus` N [Pa] (complex, Im ≥ 0)<br>• `poisson_ratio` ν (Default: 0) | `w = materials.biot_waves(jca, porosity=0.94, tortuosity=1.06, frame_density=130.0, shear_modulus=2.2e6*(1+0.1j))`<br><br>• `BiotWavesResult` |
 | `BiotWavesResult` | `dataclass` | **Two compressional waves and one shear wave.**<br>• `compressional_wavenumber_1` / `_2`, `shear_wavenumber` δ [rad/m]<br>• `velocity_ratio_1` / `_2` / `_3` μ (fluid over frame)<br>• `elastic_p` / `_q` / `_r` P, Q, R [Pa]; `density_11` / `_12` / `_22`<br>• `.airborne_wavenumber`, `.frame_borne_wavenumber`, `.airborne_velocity_ratio`, `.frame_borne_velocity_ratio`, `.airborne_is_second`<br>• `.plot()`: the three wavenumbers vs frequency | `w.airborne_wavenumber, w.plot()` |
@@ -42126,6 +42187,7 @@ documents, one page per module.
 | `frame_elastic_coefficient` | `function` | **Longitudinal coefficient Kc of the frame in vacuum (Allard & Atalla 2e Eq. 6.111).**<br>• `shear_modulus` N [Pa], `poisson_ratio` ν<br>• Kc = 2(1−ν)N/(1−2ν) = Kb + 4N/3 | `frame_elastic_coefficient(2.2e6, 0.0)  # 4.4e6`<br><br>• complex [Pa] |
 | `frame_quarter_wave_resonance` | `function` | **λ/4 frame resonance of a glued layer (Allard & Atalla 2e Eq. 6.110).**<br>• `thickness` l [m]<br>• `shear_modulus` N, `poisson_ratio` ν, `frame_density` ρ₁<br>• fr = (1/4l)√(Re(Kc)/ρ₁): the peak no equivalent fluid produces | `frame_quarter_wave_resonance(0.10, shear_modulus=2.2e6*(1+0.1j), poisson_ratio=0.0, frame_density=130.0)  # 459.9`<br><br>• [Hz] |
 | `PorousMediumResult` | `dataclass` | **Equivalent-fluid characterisation.**<br>• `characteristic_impedance` Zc [Pa·s/m], `wavenumber` k [rad/m] (Im < 0)<br>• `effective_density`, `bulk_modulus` (surface-normalised)<br>• `.normalized_impedance`, `.normalized_wavenumber`<br>• `.plot()`: normalised Zc/k components | `med.characteristic_impedance, med.plot()` |
+| `PorousMaterial` / `PUBLISHED_POROUS_MATERIALS` | `dataclass` / `mapping` | **Two porous specimens as their pages print them (Allard & Atalla 2e).**<br>• `'glass_wool'`: 'Domisol Coffrage', Table 6.1 (printed p. 124) and the Λ = 56 µm / Λ′ = 110 µm of Sect. 6.5.4 (printed p. 123)<br>• `'soft_fibrous'`: Table 11.2 (printed p. 254)<br>• `flow_resistivity_pa_s_m2`, `porosity`, `tortuosity`, `viscous_length_um`, `thermal_length_um`, `frame_density_kg_m3`, `thickness_mm`, `source`, `attributed_to`<br>• `.medium(f)` → `PorousMediumResult`; `.frame_constants()` → (N, ν)<br>• Not a material catalogue: a real specimen is characterised to ISO 9053 and ISO 10534-2 | `gw = materials.PUBLISHED_POROUS_MATERIALS['glass_wool']`<br>`med = gw.medium(f)`<br><br>• `gw.source` prints the page |
 | `DELANY_BAZLEY_COEFFICIENTS` | `mapping` | **Bies 5e Table D.1 coefficient presets (C1…C8).**<br>'delany_bazley' (rockwool/fibreglass), 'garai_pompoli' (polyester), 'dunn_davern' / 'wu' (foams) | `DELANY_BAZLEY_COEFFICIENTS['garai_pompoli']` |
 | `DELANY_BAZLEY_VALIDITY` | `tuple` | **Stated fit range in X = ρf/σ.**<br>(0.01, 1.0) | `DELANY_BAZLEY_VALIDITY  # (0.01, 1.0)` |
 | `MIKI_VALIDITY` | `tuple` | **Miki fit range in f/σ.**<br>(0.01, 1.0) | `MIKI_VALIDITY  # (0.01, 1.0)` |
@@ -42438,6 +42500,18 @@ it; the list grows as guides gain their References sections.
   Cited by [Electroacoustics](https://jmrplens.github.io/phonometry/devices/electroacoustics/electroacoustics/),
   [Loudspeaker characterisation](https://jmrplens.github.io/phonometry/devices/electroacoustics/loudspeakers/) and
   [Sound Power](https://jmrplens.github.io/phonometry/devices/emission/sound-power/).
+- Norton, M. P., & Karczub, D. G. (2003). *Fundamentals of noise and vibration
+  analysis for engineers* (2nd ed.). Cambridge University Press.
+  [doi:10.1017/CBO9781139163927](https://doi.org/10.1017/CBO9781139163927).
+  The sound power models of section 4.6 (Table 4.5, Eqs. 4.53-4.56), the
+  room-to-room power balance of section 4.9 (Eqs. 4.92-4.101), the enclosure
+  design equation of section 4.10 (Eqs. 4.102-4.115), the plateau method for
+  panel transmission loss of section 3.9 (Table 3.1) and the higher-order
+  acoustic modes of a rigid circular duct of section 7.2 (Table 7.1).
+  Cited by [Room to Room: Partition, Receiving Room, Criterion](https://jmrplens.github.io/phonometry/devices/noise-control/room-to-room/),
+  [Duct-Borne Noise: Fan to Room](https://jmrplens.github.io/phonometry/devices/noise-control/duct-path/),
+  [Bending-wave transmission at plate junctions](https://jmrplens.github.io/phonometry/vibration/structural/junction-transmission/) and
+  [Machine fault frequencies](https://jmrplens.github.io/phonometry/vibration/machinery/machine-diagnostics/).
 
 ## Signal processing
 

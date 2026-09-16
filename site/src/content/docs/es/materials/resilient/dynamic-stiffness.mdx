@@ -393,6 +393,42 @@ res.report(
 	caption="Ficha de rigidez dinámica (DynamicStiffnessResult.report): las métricas de resonancia y la curva de diseño f0(s')."
 />
 
+### Capas publicadas, cuando no hay valor declarado
+
+El diseño de un suelo flotante parte del $s'$ del fabricante, declarado según
+la EN 29052-1 para ese producto. Cuando no lo hay, se publican quince capas
+medidas en `RESILIENT_LAYER_STIFFNESS`, transcritas de la tabla A3 de Hopkins
+(p. impresa 610), cuyo pie dice que se midieron según la ISO 9052-1. Cada fila
+lleva la página de la que se leyó, y las cuatro espumas rebond llevan la
+atribución de segundo nivel que les da la celda impresa.
+
+La clave dice de qué probeta es cada fila,
+`<material>_<densidad>_<espesor>`, porque cuatro filas de lana de roca y cuatro
+de lana de vidrio solo se diferencian en esos dos números y la tabla impresa
+las separa por su posición dentro de una celda combinada.
+
+```python
+from phonometry import materials
+
+layer = materials.resilient_layer_stiffness("mineral_wool_rock_60_30")
+print(layer.name, layer.density_kg_m3, layer.thickness_mm)   # Mineral wool, rock 60.0 30.0
+print(layer.source)
+# Hopkins (2007) Table A3, PDF page 637 (printed p. 610)
+print(round(layer.dynamic_stiffness_n_m3 / 1e6, 1))          # 10.0 MN/m3, como se imprime
+print(round(layer.natural_frequency(120.0), 1))              # 45.9 Hz bajo una losa de 120 kg/m2
+
+rebond = materials.RESILIENT_LAYER_STIFFNESS["rebond_foam_64_20"]
+print(rebond.attributed_to)                                  # Hopkins and Hall (2006)
+print(round(rebond.natural_frequency(120.0), 1))             # 43.6
+```
+
+Son probetas medidas y no valores declarados de producto: sirven para
+razonar sobre el orden de magnitud mientras se elige el producto, no como
+entrada de un cálculo de cumplimiento. La fila más blanda de la tabla, lana de
+vidrio de 40 mm con 7 MN/m³, deja esa misma losa en 38,4 Hz, y la más rígida,
+espuma de polietileno de celda cerrada de 5 mm con 115 MN/m³, en 155,8 Hz; ese
+margen es toda la cuestión de diseño.
+
 ## 3. Qué supone el método de resonancia, y dónde muerde
 
 La evaluación trata el banco como un sistema de un grado de libertad: la

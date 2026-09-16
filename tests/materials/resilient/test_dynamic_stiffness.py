@@ -9,10 +9,13 @@ a genuine published numeric oracle.
 
 from __future__ import annotations
 
+import dataclasses
+import inspect
 import math
 
 import numpy as np
 import pytest
+import reference_data as ref
 
 from phonometry import materials
 from phonometry.materials.resilient.dynamic_stiffness import DynamicStiffnessWarning
@@ -263,3 +266,136 @@ def test_natural_frequency_vigran_lightweight_floating_floor() -> None:
     # f0 ~= 90 Hz, rounded to the nearest 10 Hz (the reconstruction gives
     # 85.1 Hz), so 5.5 Hz covers the rounding plus the nominal plate masses.
     assert materials.natural_frequency(8.0e6, 28.0) == pytest.approx(90.0, abs=5.5)
+
+
+# ---------------------------------------------------------------------------
+# The published resilient layers: the printed digits, the conversion, and what
+# publishing them is not
+# ---------------------------------------------------------------------------
+class TestResilientLayerStiffness:
+    """``RESILIENT_LAYER_STIFFNESS`` against Hopkins Table A3 as printed.
+
+    The printed digits live once, in ``tests/reference_data``, in the MN/m3 the
+    book prints; the N/m3 values live once, in ``src``. These assertions are
+    what makes the two one copy and what pins the factor of 1e6 between them.
+    """
+
+    def test_every_printed_row_ships_once(self) -> None:
+        assert len(materials.RESILIENT_LAYER_STIFFNESS) == len(
+            ref.HOPKINS_TABLE_A3_MN_PER_M3
+        )
+
+    def test_each_row_is_the_printed_row_converted(self) -> None:
+        """s' in N/m3 is the printed MN/m3 times 1e6; the rest is as printed."""
+        rows = zip(
+            materials.RESILIENT_LAYER_STIFFNESS.values(),
+            ref.HOPKINS_TABLE_A3_MN_PER_M3,
+            strict=True,
+        )
+        for layer, (name, density, thickness, stiffness_mn) in rows:
+            assert layer.name == name
+            assert layer.density_kg_m3 == density
+            assert layer.thickness_mm == thickness
+            assert layer.dynamic_stiffness_n_m3 == pytest.approx(
+                stiffness_mn * 1.0e6, rel=1e-12
+            )
+
+    def test_the_key_says_which_specimen_the_row_is(self) -> None:
+        """``<material>_<density>_<thickness>``, because the print does not.
+
+        Four rock-wool rows and four glass-wool rows differ only by those two
+        numbers, and the printed table separates them by position in a merged
+        cell.
+        """
+        for key, layer in materials.RESILIENT_LAYER_STIFFNESS.items():
+            assert key.endswith(
+                f"_{int(layer.density_kg_m3)}_{int(layer.thickness_mm)}"
+            ), key
+        assert len(set(materials.RESILIENT_LAYER_STIFFNESS)) == len(
+            materials.RESILIENT_LAYER_STIFFNESS
+        )
+
+    def test_second_level_attribution_is_a_field_not_a_name(self) -> None:
+        """Eleven rows are the book's own; the four rebond rows are credited."""
+        credited = [
+            layer
+            for layer in materials.RESILIENT_LAYER_STIFFNESS.values()
+            if layer.attributed_to
+        ]
+        first_hand = len(materials.RESILIENT_LAYER_STIFFNESS) - len(credited)
+        assert first_hand == ref.HOPKINS_TABLE_A3_FIRST_HAND_ROWS
+        assert {layer.attributed_to for layer in credited} == {
+            "Hopkins and Hall (2006)"
+        }
+        assert all(layer.name.startswith("Rebond foam") for layer in credited)
+        # The attribution is out of the name, which is what lets the key exist.
+        assert not any(
+            "Hopkins" in layer.name
+            for layer in materials.RESILIENT_LAYER_STIFFNESS.values()
+        )
+
+    def test_every_row_cites_document_table_page_and_folio(self) -> None:
+        for key, layer in materials.RESILIENT_LAYER_STIFFNESS.items():
+            assert layer.source == (
+                "Hopkins (2007) Table A3, PDF page 637 (printed p. 610)"
+            ), key
+
+    def test_natural_frequency_is_formula_2_on_the_stored_stiffness(self) -> None:
+        layer = materials.RESILIENT_LAYER_STIFFNESS["mineral_wool_rock_60_30"]
+        expected = materials.natural_frequency(layer.dynamic_stiffness_n_m3, 100.0)
+        assert layer.natural_frequency(100.0) == pytest.approx(expected, rel=1e-12)
+        # 10 MN/m3 under 100 kg/m2: f0 = sqrt(1e7/100)/(2 pi) = 50,3 Hz.
+        assert layer.natural_frequency(100.0) == pytest.approx(50.33, abs=0.01)
+
+    def test_lookup_accepts_a_key_or_a_layer(self) -> None:
+        layer = materials.resilient_layer_stiffness("mineral_wool_glass_75_40")
+        assert layer.dynamic_stiffness_n_m3 == pytest.approx(7.0e6)
+        assert materials.resilient_layer_stiffness(layer) is layer
+
+    def test_lookup_names_the_keys_there_are(self) -> None:
+        with pytest.raises(ValueError, match=r"Unknown resilient layer 'rockwool'"):
+            materials.resilient_layer_stiffness("rockwool")
+        with pytest.raises(ValueError, match=r"mineral_wool_rock_60_30"):
+            materials.resilient_layer_stiffness("rockwool")
+
+    def test_the_layers_are_frozen(self) -> None:
+        layer = materials.RESILIENT_LAYER_STIFFNESS["expanded_polystyrene_14_50"]
+        with pytest.raises(dataclasses.FrozenInstanceError):
+            layer.dynamic_stiffness_n_m3 = 1.0  # type: ignore[misc]
+
+    def test_no_function_defaults_to_a_published_layer(self) -> None:
+        """Removing the table costs no capability (the removal policy)."""
+        for function in (
+            materials.natural_frequency,
+            materials.installed_dynamic_stiffness,
+            materials.floating_floor_resonance,
+        ):
+            defaults = [
+                parameter.default
+                for parameter in inspect.signature(function).parameters.values()
+                if parameter.default is not inspect.Parameter.empty
+            ]
+            assert not any(
+                isinstance(default, materials.ResilientLayer) for default in defaults
+            ), function.__name__
+
+    def test_table_a4_next_door_keeps_its_own_dimension(self) -> None:
+        """One key, one dimension: A3 is N/m3 per unit area, A4 is N/m per tie.
+
+        The two tables sit on the same printed folio and are two quantities, so
+        they are two names and neither is expressed in the other's unit.
+        """
+        from phonometry import building
+
+        assert set(building.WALL_TIE_STIFFNESS) == {
+            "butterfly",
+            "double_triangle",
+            "vertical_twist",
+            "vertical_twist_100mm",
+        }
+        a3 = {
+            layer.dynamic_stiffness_n_m3
+            for layer in materials.RESILIENT_LAYER_STIFFNESS.values()
+        }
+        a4 = {stiffness for _, stiffness in building.WALL_TIE_STIFFNESS.values()}
+        assert not (a3 & a4)

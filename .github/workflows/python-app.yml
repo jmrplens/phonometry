@@ -648,6 +648,8 @@ jobs:
         python-version: "3.13"
     - name: Check that no call leaves the caller's language behind
       run: python scripts/check_language_forwarding.py
+    - name: Check that no style default collides with its own alias
+      run: python scripts/check_plot_style_defaults.py
 
   # A private module-level constant is a number lifted out of a standard so the
   # code that uses it can say where it came from, and one nothing reads is

@@ -17,6 +17,7 @@ from .common import (
     _STI_BAND_CENTERS,
     _band_axis,
     _new_axes,
+    style_default,
 )
 
 if TYPE_CHECKING:
@@ -92,7 +93,7 @@ def plot_sti(
     ax = ax if ax is not None else _new_axes()
     mti = np.asarray(result.mti, dtype=np.float64)
     positions = np.arange(mti.size)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.bar(positions, mti, **kwargs)
     banded = mti.size == len(_STI_BAND_CENTERS)
     if banded:
@@ -144,7 +145,7 @@ def plot_stoi(
         freqs = np.asarray(result.band_frequencies, dtype=np.float64)
         scores = np.asarray(result.band_scores, dtype=np.float64)
         positions = np.arange(scores.size)
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         ax.bar(positions, scores, **kwargs)
         ax.set_xticks(positions)
         # The STOI band centres are exact one-third-octave ratios from 150 Hz
@@ -159,7 +160,7 @@ def plot_stoi(
         ax.set_ylabel(_t("Mean intermediate correlation", language))
     else:
         scores = np.asarray(result.segment_scores, dtype=np.float64)
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         ax.plot(np.arange(scores.size), scores, **kwargs)
         ax.set_xlabel(_t("Analysis segment", language))
         ax.set_ylabel(_t("Spectral correlation $d_\\mathrm{m}$", language))
@@ -209,7 +210,7 @@ def plot_sii(
         color=_C_PRIMARY_LIGHT,
         label=_t("Band audibility $A_i$", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     # A fully masked speech signal (SII = 0) has an all-zero contribution;
     # keep the zero bars rather than dividing 0/0 into NaN.
     peak = float(contribution.max()) if contribution.size else 0.0

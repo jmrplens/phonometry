@@ -322,6 +322,28 @@ def test_every_plot_forwards_kwargs_to_primary_artist(
     )
     plt.close("all")
 
+    # Matplotlib gives seven properties two names, and since 3.3 a call that
+    # receives both is `TypeError: Got both 'color' and 'c', which are aliases
+    # of one another`. A renderer that defaults its own colour under one
+    # spelling therefore refuses every caller who wrote the other, which is
+    # what 195 `setdefault` calls across 24 modules did until `style_default`
+    # replaced them. The long spelling is checked above; this is the short one,
+    # and it has to reach the artist rather than raise.
+    # `c` is the short spelling of `color` on a Line2D only: a Rectangle has no
+    # such alias, so the bar renderers are held to `lw`, which every artist
+    # aliases, and the colour half of the check stays with the line renderers.
+    out = res.plot(c="red", lw=2) if kind == "line" else res.plot(lw=2)
+    ax = out[0] if isinstance(out, np.ndarray) else out
+    artists = ax.lines if kind == "line" else ax.patches
+    assert any(a.get_linewidth() == 2.0 for a in artists), (
+        f"{name}: the short spelling of linewidth did not reach the artist"
+    )
+    if kind == "line":
+        assert any(_is_red(a) for a in artists), (
+            f"{name}: the short spelling of color did not reach the artist"
+        )
+    plt.close("all")
+
 
 # --------------------------------------------------------------------------
 # Common contract: ax=None creates a figure; passing ax composes

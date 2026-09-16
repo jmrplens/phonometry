@@ -16,6 +16,7 @@ from .common import (
     _fractile_band,
     _freq_axis,
     _new_axes,
+    style_default,
     theme_fill,
 )
 
@@ -127,7 +128,7 @@ def plot_age_threshold(
     sl = np.asarray(result.spread_lower, dtype=np.float64)
 
     _fractile_band(ax, freqs, median, sl, su, color=_C_PRIMARY, language=language)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Median", language))
     ax.plot(freqs, median, "o-", **kwargs)
     if abs(result.fractile - 0.5) > _MEDIAN_FRACTILE_EPS:
@@ -188,7 +189,7 @@ def plot_nipts(
         floor=0.0,
         language=language,
     )
-    kwargs.setdefault("color", _C_SECONDARY)
+    style_default(kwargs, "color", _C_SECONDARY)
     kwargs.setdefault("label", _t("Median $N_{50}$", language))
     ax.plot(freqs, median, "o-", **kwargs)
     if abs(result.fractile - 0.5) > _MEDIAN_FRACTILE_EPS:
@@ -255,7 +256,7 @@ def plot_htlan(
         color=_C_SECONDARY,
         label=_t("Noise (NIPTS)", language),
     )
-    kwargs.setdefault("color", _C_REFERENCE)
+    style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("label", _t("Age + noise (HTLAN)", language))
     ax.plot(freqs, np.asarray(result.threshold, dtype=np.float64), "s--", **kwargs)
     _freq_axis(ax, freqs, language=language)
@@ -310,7 +311,7 @@ def plot_occupational_exposure(
     contributions = [t.lex_8h_contribution for t in result.tasks]
     labels = [t.label for t in result.tasks]
     positions = np.arange(len(contributions), dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.bar(positions, contributions, **kwargs)
     ax.set_xticks(positions)
     ax.set_xticklabels(labels, rotation=45, ha="right")
@@ -400,8 +401,8 @@ def plot_assumed_protection(
         "label",
         _t("assumed protection $APV_{{f{x}}}$", language).format(x=result.performance),
     )
-    apv_kwargs.setdefault("color", _C_SECONDARY)
-    apv_kwargs.setdefault("linewidth", 2.4)
+    style_default(apv_kwargs, "color", _C_SECONDARY)
+    style_default(apv_kwargs, "linewidth", 2.4)
     ax.plot(
         freqs,
         np.asarray(result.apv, dtype=np.float64),
@@ -451,8 +452,8 @@ def plot_hml_rating(
     left = np.linspace(-4.0, 2.0, 2)
     right = np.linspace(2.0, 12.0, 2)
     curve_kwargs = dict(kwargs)
-    curve_kwargs.setdefault("color", _C_PRIMARY)
-    curve_kwargs.setdefault("linewidth", 2.4)
+    style_default(curve_kwargs, "color", _C_PRIMARY)
+    style_default(curve_kwargs, "linewidth", 2.4)
     curve_kwargs.setdefault(
         "label", _t(_HML_CURVE_LABEL, language).format(h=high, m=medium, l=low)
     )
@@ -516,7 +517,7 @@ def plot_snr_rating(
     per_subject = np.asarray(result.subject_snr, dtype=np.float64)
     positions = np.arange(1, per_subject.size + 1)
     bar_kwargs = dict(kwargs)
-    bar_kwargs.setdefault("color", _C_PRIMARY)
+    style_default(bar_kwargs, "color", _C_PRIMARY)
     bar_kwargs.setdefault("label", _t("per subject", language))
     ax.bar(positions, per_subject, width=0.7, zorder=2, **bar_kwargs)
     ax.axhline(
@@ -582,7 +583,7 @@ def plot_protected_level(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     positions = np.arange(freqs.size)
     bar_kwargs = dict(kwargs)
-    bar_kwargs.setdefault("color", _C_PRIMARY)
+    style_default(bar_kwargs, "color", _C_PRIMARY)
     bar_kwargs.setdefault("label", _t("protected band level", language))
     ax.bar(
         positions,

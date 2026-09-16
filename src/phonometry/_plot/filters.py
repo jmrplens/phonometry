@@ -23,6 +23,8 @@ from .common import (
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    style_default,
+    style_pop,
     theme_fill,
     theme_line,
 )
@@ -182,8 +184,8 @@ def plot_filter_class(
     fin = win & finite_upper
     ax.plot(omega[fin], upper[fin], color=_C_TERTIARY, lw=1.0, ls="--")
 
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.6)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.6)
     kwargs.setdefault("label", _t(r"Measured $\Delta A$", language))
     ax.plot(omega[win], delta_a[win], **kwargs)
 
@@ -269,7 +271,7 @@ def plot_parametric_eq(
 
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     fmin, fmax = float(freqs[0]), float(freqs[-1])
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     def _magnitude(axm: Axes) -> None:
         if show_sections and result.section_magnitude_db.shape[0] > 1:
@@ -294,7 +296,7 @@ def plot_parametric_eq(
                     alpha=0.7,
                     label=label if idx < _MAX_LABELED_SECTIONS else None,
                 )
-        kwargs.setdefault("lw", 1.8)
+        style_default(kwargs, "lw", 1.8)
         kwargs.setdefault("label", _t("Cascade", language))
         axm.semilogx(freqs, result.magnitude_db, color=color, **kwargs)
         # Quiet by colour, not by opacity: half opacity on a 0.8 pt line
@@ -364,9 +366,9 @@ def plot_time_weighted_envelope(
 
     new_figure = ax is None
     axw = _new_axes() if ax is None else ax
-    kwargs.setdefault("lw", 0.9)
+    style_default(kwargs, "lw", 0.9)
     if envelope.shape[0] == 1:
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         axw.plot(result.times, y[0], **kwargs)
     else:
         for index, channel in enumerate(y):

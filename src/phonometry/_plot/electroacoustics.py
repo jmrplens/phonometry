@@ -20,6 +20,8 @@ from .common import (
     _new_axes,
     _new_axes_column,
     format_frequency_axis,
+    style_default,
+    style_pop,
 )
 
 if TYPE_CHECKING:
@@ -181,7 +183,7 @@ def plot_harmonic_distortion(
     floor_db = -160.0  # display floor of the panel, in dB re the fundamental
 
     ax.vlines(orders, floor_db, levels_db, color=_C_PRIMARY, lw=1.5)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Harmonics", language))
     ax.plot(orders, levels_db, "o", **kwargs)
     for order, level in zip(orders, levels_db, strict=True):
@@ -295,7 +297,7 @@ def plot_modulation_distortion(
         label=_t("Carrier $f_2$", language),
     )
     ax.vlines(sb_freqs, floor, np.maximum(sb_db, floor), color=_C_PRIMARY, lw=1.5)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Sidebands $f_2 \pm n \cdot f_1$", language))
     ax.plot(sb_freqs, np.maximum(sb_db, floor), "o", **kwargs)
     for order, idx in ((3, 0), (2, 1), (2, 2), (3, 3)):
@@ -355,7 +357,7 @@ def plot_frequency_response(
     phase_deg = np.degrees(np.asarray(result.phase, dtype=np.float64))
     coh = np.asarray(result.coherence, dtype=np.float64)
     pos = freqs > 0.0
-    color = kwargs.pop("color", _C_PRIMARY)
+    color = style_pop(kwargs, "color", _C_PRIMARY)
 
     def _magnitude(axm: Axes) -> None:
         kwargs.setdefault("label", f"$|H|$ ({result.estimator})")
@@ -422,7 +424,7 @@ def plot_swept_sine_distortion(
     nyquist = result.fs / 2.0
 
     def _thd_panel(axt: Axes) -> None:
-        kwargs.setdefault("color", _C_PRIMARY)
+        style_default(kwargs, "color", _C_PRIMARY)
         kwargs.setdefault("label", r"$\mathrm{THD}(f)$")
         axt.loglog(
             result.thd_frequencies,
@@ -503,7 +505,7 @@ def plot_piston_impedance(
 
     ax = ax if ax is not None else _new_axes()
     ka = np.asarray(result.ka, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("$R_1$ (resistance)", language))
     ax.semilogx(ka, np.asarray(result.resistance), lw=1.8, **kwargs)
     ax.semilogx(

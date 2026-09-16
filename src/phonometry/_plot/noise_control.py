@@ -128,9 +128,9 @@ def plot_reactive_silencer(
 
     ax = ax if ax is not None else _new_axes()
     f = np.asarray(result.frequencies, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(_TL_LABEL, language))
-    kwargs.setdefault("lw", 1.8)
+    style_default(kwargs, "lw", 1.8)
     ax.plot(f, np.asarray(result.transmission_loss), **kwargs)
     if result.insertion_loss is not None:
         ax.plot(
@@ -182,11 +182,11 @@ def plot_hvac_spectrum(
     ax = ax if ax is not None else _new_axes()
     f = np.asarray(result.frequencies, dtype=np.float64)
     is_power = result.quantity == "sound_power_level"
-    kwargs.setdefault("color", _C_SECONDARY if is_power else _C_PRIMARY)
+    style_default(kwargs, "color", _C_SECONDARY if is_power else _C_PRIMARY)
     kwargs.setdefault("label", result.label)
-    kwargs.setdefault("lw", 1.8)
+    style_default(kwargs, "lw", 1.8)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 3)
+    style_default(kwargs, "ms", 3)
     ax.plot(f, np.asarray(result.values), **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(
@@ -295,11 +295,11 @@ def plot_duct_path(
             lw=1.5,
             label=f"{result.criterion} {target}",
         )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Received level", language))
-    kwargs.setdefault("lw", 2.4)
+    style_default(kwargs, "lw", 2.4)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 4)
+    style_default(kwargs, "ms", 4)
     ax.semilogx(f, np.asarray(result.received_level), **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
@@ -361,11 +361,11 @@ def plot_room_to_room(
             lw=1.5,
             label=f"{result.criterion} {target}",
         )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Receiving room", language))
-    kwargs.setdefault("lw", 2.4)
+    style_default(kwargs, "lw", 2.4)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 4)
+    style_default(kwargs, "ms", 4)
     ax.semilogx(f, np.asarray(result.received_level), **kwargs)
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(f"{_t('Room-to-room transmission', language)}: {result.label}")
@@ -451,13 +451,13 @@ def plot_duct_modes(
         lw=1.3,
         label=_t("No flow", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault(
         "label", f"$M$ = {format_number(result.mach, language, decimals=3)}"
     )
-    kwargs.setdefault("lw", 1.8)
+    style_default(kwargs, "lw", 1.8)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 5)
+    style_default(kwargs, "ms", 5)
     ax.plot(x, np.asarray(result.cut_on), **kwargs)
     ax.set_xticks(x)
     ax.set_xticklabels([f"({p}, {q})" for p, q in result.modes])
@@ -512,11 +512,11 @@ def plot_enclosure(
         ms=3,
         label=_t("Interior correction $C$", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Insertion loss ($R - C$)", language))
-    kwargs.setdefault("lw", 1.9)
+    style_default(kwargs, "lw", 1.9)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 3)
+    style_default(kwargs, "ms", 3)
     ax.plot(x, np.asarray(result.insertion_loss), **kwargs)
     ax.set_ylabel(_t(_LEVEL_LABEL, language))
     ax.set_title(_t("Machine enclosure insertion loss", language))
@@ -561,8 +561,8 @@ def plot_operating_line(
     ax = ax if ax is not None else _new_axes()
     low, high = result.valid_range
     span = np.geomspace(low, high, 128)
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.8)
     kwargs.setdefault(
         "label",
         _t("Least-squares fit", language)

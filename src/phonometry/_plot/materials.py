@@ -20,6 +20,8 @@ from .common import (
     _new_axes,
     _plot_rating,
     format_frequency_axis,
+    style_default,
+    style_get,
     theme_fill_alpha,
 )
 
@@ -215,7 +217,7 @@ def plot_sound_absorption(
         ax, freqs, xlabel=_t(_FREQ_LABEL, language), language=language
     )
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.plot(positions, alpha, **kwargs)
     ax.set_ylabel(_t(r"Sound absorption coefficient $\alpha_\mathrm{s}$", language))
     # alpha_s can exceed 1,0 (Clause 3.7 NOTE 2); grow the top so it stays shown.
@@ -247,7 +249,7 @@ def plot_scattering_coefficient(
     freqs = np.asarray(result.frequencies, dtype=np.float64)
     s = np.asarray(result.scattering, dtype=np.float64)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.plot(freqs, s, **kwargs)
     _freq_axis(ax, freqs, language=language)
     ax.set_ylabel(_t("Scattering coefficient $s$", language))
@@ -278,7 +280,7 @@ def plot_diffusion_polar(
     angles = np.radians(np.asarray(result.angles_deg, dtype=np.float64))
     levels = np.asarray(result.levels, dtype=np.float64)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     from .._i18n import format_number
 
     ax.plot(angles, levels, **kwargs)
@@ -286,8 +288,8 @@ def plot_diffusion_polar(
     ax.fill(
         angles,
         levels,
-        color=kwargs["color"],
-        alpha=theme_fill_alpha(kwargs["color"], ax),
+        color=style_get(kwargs, "color", _C_PRIMARY),
+        alpha=theme_fill_alpha(style_get(kwargs, "color", _C_PRIMARY), ax),
     )
     ax.set_title(
         f"{_t('Diffusion coefficient $d$ = ', language)}"
@@ -342,7 +344,7 @@ def plot_scattering_report(
         label=r"$\alpha_\mathrm{s}$",
     )
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$s$")
     ax.plot(positions, s, ms=4, zorder=3, **kwargs)
     ax.set_ylabel(_t("Coefficient", language))
@@ -401,7 +403,7 @@ def plot_diffusion_report(
             label=r"$d_\mathrm{n}$",
         )
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$d$")
     ax.plot(positions, d, ms=4, zorder=3, **kwargs)
     ax.set_ylabel(_t("Coefficient", language))
@@ -434,7 +436,7 @@ def plot_diffusion_polar_report(
     angles = np.radians(angles_deg)
     levels = np.asarray(result.levels, dtype=np.float64)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.fill(angles, levels, color=_C_PRIMARY_LIGHT, edgecolor="none", zorder=1)
     ax.plot(angles, levels, ms=4, zorder=3, **kwargs)
     # The theta-orientation setters live on the polar axes, not the base Axes.
@@ -484,7 +486,7 @@ def plot_insitu_absorption(
     positions = _band_axis(
         ax, freqs, xlabel=_t(_FREQ_LABEL, language), language=language
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     measured = np.isfinite(alpha)
     ax.bar(positions[measured], alpha[measured], **kwargs)
     for position in positions[~measured]:
@@ -537,7 +539,7 @@ def plot_dynamic_stiffness(
         [s_mn, s_mn], [0.0, result.natural_frequency], color=_C_MUTED, ls=":", lw=0.8
     )
 
-    kwargs.setdefault("color", _C_REFERENCE)
+    style_default(kwargs, "color", _C_REFERENCE)
     kwargs.setdefault("zorder", 5)
     kwargs.setdefault("s", 80)
     kwargs.setdefault(
@@ -580,7 +582,7 @@ def plot_impedance_tube(
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequency, dtype=np.float64)
     alpha = np.asarray(result.absorption, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Absorption $\alpha$", language))
     ax.plot(freqs, alpha, **kwargs)
     ax.plot(
@@ -628,7 +630,7 @@ def plot_static_airflow(
     u = np.linspace(0.0, 2.0 * u_eval, 200)
     dp = result.linear_coefficient * u + result.quadratic_coefficient * u**2
 
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Fit $\Delta p = a\,u + b\,u^2$", language))
     # Millimetres per second keep the clause 7.5 reference (0.5 mm/s) legible.
     ax.plot(u * 1e3, dp, **kwargs)
@@ -687,7 +689,7 @@ def plot_absorption_uncertainty(
     freqs = result.frequencies
     value = result.values
     u_expanded = result.expanded_uncertainty
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("marker", "o")
     ax.fill_between(
         freqs,
@@ -733,7 +735,7 @@ def _absorption_spectrum_axes(
     from .._i18n import localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", label)
     ax.semilogx(freqs, alpha, **kwargs)
     ax.set_xlabel(_t(_FREQ_LABEL, language))
@@ -806,7 +808,7 @@ def plot_porous_medium(
     freqs = np.asarray(result.frequency, dtype=np.float64)
     zn = np.asarray(result.normalized_impedance, dtype=np.complex128)
     kn = np.asarray(result.normalized_wavenumber, dtype=np.complex128)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", r"$\mathrm{Re}(Z_\mathrm{c})/\rho c$")
     ax.loglog(freqs, zn.real, **kwargs)
     ax.loglog(
@@ -862,7 +864,7 @@ def plot_biot_waves(
 
     ax = ax if ax is not None else _new_axes()
     freqs = np.asarray(result.frequency, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t("Airborne", language) + _BIOT_REAL_PART)
     ax.semilogx(freqs, result.airborne_wavenumber.real, **kwargs)
     ax.semilogx(
@@ -1041,13 +1043,13 @@ def plot_diffuser_polar_response(
     angles = np.radians(angles_deg)
     levels = np.asarray(result.levels, dtype=np.float64)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     # Translucent so the polar grid keeps reading through the lobe.
     ax.fill(
         angles,
         levels,
-        color=kwargs["color"],
-        alpha=theme_fill_alpha(kwargs["color"], ax),
+        color=style_get(kwargs, "color", _C_PRIMARY),
+        alpha=theme_fill_alpha(style_get(kwargs, "color", _C_PRIMARY), ax),
     )
     ax.plot(angles, levels, ms=4, **kwargs)
     polar_ax: Any = ax
@@ -1117,7 +1119,7 @@ def plot_transfer_matrix(
         {"frequency": freqs.shape, "transmission_loss": tl.shape},
         "frequency",
     )
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("label", _t(r"Transmission loss $TL_\mathrm{n}$", language))
     ax.plot(freqs, tl, **kwargs)
     twin = ax.twinx()

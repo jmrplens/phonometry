@@ -29,6 +29,7 @@ from ..common import (
     _C_REFERENCE,
     _C_SECONDARY,
     _new_axes,
+    style_default,
 )
 from ._draft import (
     _check_language,
@@ -674,7 +675,7 @@ def _tube_bore(
     wall = max(0.06 * bore, 0.004)
     kwargs.setdefault("facecolor", "none")
     kwargs.setdefault("edgecolor", _C_EDGE)
-    kwargs.setdefault("linewidth", 1.6)
+    style_default(kwargs, "linewidth", 1.6)
     primary = Rectangle((x_left, 0.0), x_right - x_left, bore, **kwargs)
     ax.add_patch(primary)
     for y_wall in (-wall, bore):
@@ -1144,7 +1145,7 @@ def plot_metadiffuser_panel_geometry(
     )
     back = 0.4 * depth
     _material_rect(ax, -0.01 * total, -back, 1.02 * total, back, "rigid")
-    kwargs.setdefault("linewidth", 0.5)
+    style_default(kwargs, "linewidth", 0.5)
     for index, well in enumerate(cells):
         if well is not None:
             _draw_metadiffuser_well(ax, well, index * d + 0.12 * d, depth, kwargs)
@@ -1584,7 +1585,7 @@ def plot_goniometer_geometry(
     angles = np.radians(np.arange(-90.0, 90.0 + 0.5 * angular_step, angular_step))
     xs = receiver_radius * np.sin(angles)
     ys = receiver_radius * np.cos(angles)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     kwargs.setdefault("s", 14)
     ax.scatter(xs, ys, zorder=5, **kwargs)
     ax.plot(xs, ys, color=_C_MUTED, linewidth=0.6, linestyle=":", zorder=2)

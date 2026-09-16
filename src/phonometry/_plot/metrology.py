@@ -25,6 +25,7 @@ from .common import (
     _C_REFERENCE,
     _LEGEND_UPPER_RIGHT,
     _new_axes,
+    style_default,
 )
 
 #: Legend label of the Rice peak-height curve, parameterised by the
@@ -109,7 +110,7 @@ def plot_uncertainty_budget(
     # one label the same bars the same way.
     names = list(result.names) or [f"x{i + 1}" for i in range(contributions.size)]
     positions = np.arange(contributions.size)
-    kwargs.setdefault("color", _C_PRIMARY)
+    style_default(kwargs, "color", _C_PRIMARY)
     ax.barh(positions, contributions, **kwargs)
     uc = decimal_comma(f"{result.combined_uncertainty:.3g}", language)
     ax.axvline(
@@ -157,7 +158,7 @@ def plot_monte_carlo(
         raise ValueError(msg)
     ax = ax if ax is not None else _new_axes()
     samples = np.asarray(result.samples, dtype=np.float64)
-    kwargs.setdefault("color", _C_PRIMARY_LIGHT)
+    style_default(kwargs, "color", _C_PRIMARY_LIGHT)
     kwargs.setdefault("bins", 120)
     kwargs.setdefault("density", True)
     ax.hist(samples, **kwargs)
@@ -269,10 +270,10 @@ def plot_trend_test(
         result.method, result.statistic, result.bounds, verdict, language
     )
     index = np.arange(1, result.n + 1)
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.2)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.2)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 4.5)
+    style_default(kwargs, "ms", 4.5)
     kwargs.setdefault("label", label)
     ax.plot(index, result.values, **kwargs)
     if result.method == "runs" and result.median is not None:
@@ -315,10 +316,10 @@ def plot_stationarity_test(
         result.method, result.count, result.bounds, verdict, language
     )
     index = np.arange(1, result.n_segments + 1)
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.2)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.2)
     kwargs.setdefault("marker", "o")
-    kwargs.setdefault("ms", 4.5)
+    style_default(kwargs, "ms", 4.5)
     kwargs.setdefault("label", label)
     ax.plot(index, result.segment_values, **kwargs)
     if result.method == "runs":
@@ -360,8 +361,8 @@ def plot_level_crossing_rate(
         lw=1.4,
         label=_t("Rice expectation (Eq. 5.196)", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("ms", 6.0)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "ms", 6.0)
     kwargs.setdefault("label", _t("Measured rate", language))
     ax.plot(
         result.levels,
@@ -435,8 +436,8 @@ def plot_peak_statistics(
             ),
         ),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("lw", 1.2)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "lw", 1.2)
     kwargs.setdefault("label", _t("Empirical peak exceedance", language))
     ax.plot(
         peaks,

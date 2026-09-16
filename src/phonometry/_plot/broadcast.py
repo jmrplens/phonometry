@@ -16,6 +16,7 @@ from .common import (
     _LEGEND_UPPER_RIGHT,
     _new_axes,
     format_frequency_axis,
+    style_default,
     theme_fill,
     theme_line,
 )
@@ -108,8 +109,8 @@ def plot_program_loudness(
             label=_t("Momentary (400 ms)", language),
         )
     if result.short_term.size:
-        kwargs.setdefault("color", _C_PRIMARY)
-        kwargs.setdefault("linewidth", 2.0)
+        style_default(kwargs, "color", _C_PRIMARY)
+        style_default(kwargs, "linewidth", 2.0)
         kwargs.setdefault("label", _t("Short-term (3 s)", language))
         ax.plot(
             result.short_term_time,
@@ -183,8 +184,8 @@ def plot_k_weighting_response(
         linestyle=":",
         label=_t("Stage 2: RLB high-pass", language),
     )
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("linewidth", 2.0)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 2.0)
     kwargs.setdefault("label", _t("K-weighting (combined)", language))
     ax.plot(freqs, np.asarray(result.magnitude_db, dtype=np.float64), **kwargs)
     # The +4 dB shelf plateau is the reference the whole response is read
@@ -228,8 +229,8 @@ def plot_quasi_peak(
     from .._i18n import format_number, localize_axes
 
     ax = ax if ax is not None else _new_axes()
-    kwargs.setdefault("color", _C_PRIMARY)
-    kwargs.setdefault("linewidth", 1.8)
+    style_default(kwargs, "color", _C_PRIMARY)
+    style_default(kwargs, "linewidth", 1.8)
     kwargs.setdefault("label", _t("Quasi-peak trace", language))
     ax.plot(result.time, result.trace, **kwargs)
     reading = format_number(result.reading, language, decimals=4)

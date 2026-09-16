@@ -40,6 +40,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   for them, and the bending stiffness was being derived separately in
   `point_mobility` and `panel_transmission`.
 
+- **`fluids.ideal_gas`**, a gas at one state from the two numbers a gas table
+  prints. A ratio of specific heats and a molar mass close the ideal-gas state
+  completely, `c = sqrt(gamma R T / M)` and `rho = p M / (R T)`, so a caller
+  whose medium is argon or carbon dioxide gets a computed `Fluid` instead of a
+  typed number, the same way air and sea water already do.
+
+  How far the closure goes is measured rather than asserted. Hopkins (2007)
+  Table A1, PDF page 634 (printed p. 607), prints both the inputs and the
+  outputs for six gases at the 20 degC and 1,013e5 Pa its own footnote states:
+  the speeds land within 0,5 m/s for all six, and the densities within two
+  parts in a thousand for air, argon, nitrogen and oxygen. Carbon dioxide is
+  0,7 per cent light and sulphur hexafluoride 2,1 per cent, which is the
+  compressibility factor and not an error in the arithmetic, and the model says
+  so in its own `validity` string. Viscosity, thermal conductivity and the
+  Prandtl number are transport properties that nothing in the closure
+  determines, so reading one raises rather than returning a plausible number.
+
 - **The two receiver terms of the sonar equation, drawn.** The detection
   threshold and the array gain arrived with their models and their prose and
   without a figure, which for two quantities that are each a curve over one

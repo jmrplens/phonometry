@@ -4576,6 +4576,41 @@ dos ediciones con las mismas entradas y en el mismo orden.
   y Blatt 2:2022-10) y no se dispone de ninguno de los sucesores, así que aquí
   no consta si la traducción se corrigió.
 
+## VDI 2081 Blatt 2:2005-05, tabla 1, elemento 14 (una fila del elemento contradice a la de encima)
+
+- **Ubicación:** tabla 1, folio impreso 15 (página 15 del PDF), elemento 14, el
+  codo de sección circular: las filas "$\Sigma L_\mathrm{W}$" y
+  "$\Sigma L_\mathrm{W}$ (log)", celda de 8 kHz.
+- **Lo impreso:** las dos filas dicen, de 63 Hz a 8 kHz, $68{,}5$ $61{,}7$
+  $55{,}7$ $43{,}4$ $30{,}1$ $28{,}5$ $34{,}0$ $34$ y $68{,}5$ $61{,}7$ $55{,}7$
+  $43{,}4$ $30{,}1$ $28{,}5$ $34{,}0$ $33{,}6$. Siete celdas coinciden y la
+  octava no.
+- **El problema:** la segunda fila es la primera con el ruido propio del
+  elemento sumado, así que no puede quedar por debajo. El elemento 13 entrega
+  los 8 kHz a $37{,}0$ dB, el codo atenúa $3$ dB y la primera fila imprime los
+  $34{,}0$ dB que quedan. El ruido propio del codo en esa banda es $-14{,}4$ dB,
+  que el mismo elemento imprime dos filas más arriba, y sumarlo mueve el nivel
+  menos de $0{,}0001$ dB. La segunda fila debería imprimir $34{,}0$ dB e imprime
+  $33{,}6$.
+
+  Leído al revés la celda es igual de inalcanzable: para $33{,}6$ dB tendrían
+  que llegar $36{,}6$ dB del elemento 13, y el elemento 13 imprime $37{,}0$ dB
+  en su propia fila $\Sigma L_\mathrm{W}$ de esa misma página.
+- **Consecuencia:** $0{,}4$ dB en 8 kHz, que se arrastran al elemento 15 y a
+  todo lo que viene detrás. El total ponderado A del elemento se imprime como
+  $50{,}9$ dB en las dos filas, y eso es lo que lo tapa: en 8 kHz la ponderación
+  A vale $-1{,}1$ dB y la banda está $16$ dB por debajo de la de 4 kHz, así que
+  $0{,}4$ dB ahí no llegan al primer decimal del total.
+- **Evidencia:** las dos filas del elemento 14 y la fila $\Sigma L_\mathrm{W}$
+  del elemento 13, con la suma recalculada a precisión completa a partir del
+  traspaso, la atenuación y el ruido impresos. Verificado en la página 15 del
+  PDF (folio impreso 15) de VDI 2081 Blatt 2:2005-05.
+- **Comportamiento de la biblioteca:** las filas de conformidad del elemento 14
+  comparan el ruido de flujo que hace el codo, de $26{,}9$ a $-14{,}4$ dB, con
+  la fila que lo imprime, y la fila de la cadena lleva los $34{,}0$ dB que da la
+  aritmética y no los $33{,}6$ impresos.
+- **Estado:** no reportada. La edición está superada y no tenemos la sucesora.
+
 ## VDI 2081 Blatt 2:2005-05, tabla 1, elemento 2 (el diámetro hidráulico que imprime no es con el que calcula)
 
 - **Ubicación:** tabla 1, folio impreso 12 (página 12 del PDF), elemento 2, el

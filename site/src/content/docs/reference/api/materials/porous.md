@@ -222,6 +222,12 @@ leaving $\Lambda = R \rho_\mathrm{fibre} / (2 \rho_\mathrm{bulk})$
 from three numbers a table does print. That substitution is arithmetic on
 the definition and not a second model.
 
+This is a different model from [`viscous_characteristic_length`](/phonometry/reference/api/materials/porous/#viscous_characteristic_length), not a
+second opinion on the same one, and on Hopkins' own rock wool the two drift
+apart with density: the cylinder model is the lower estimate throughout, by
+a factor of 1,4 at 38 kg/m3 and 1,9 at 155 kg/m3. Which to prefer is a
+question about the material, and neither is a substitute for measuring it.
+
 **Parameters**
 
 | Name | Description |
@@ -237,12 +243,6 @@ the definition and not a second model.
 | Exception | When |
 | :--- | :--- |
 | ValueError | for a non-positive input. |
-
-This is a different model from [`viscous_characteristic_length`](/phonometry/reference/api/materials/porous/#viscous_characteristic_length), not a
-second opinion on the same one, and on Hopkins' own rock wool the two drift
-apart with density: the cylinder model is the lower estimate throughout, by
-a factor of 1,4 at 38 kg/m3 and 1,9 at 155 kg/m3. Which to prefer is a
-question about the material, and neither is a substitute for measuring it.
 
 ## FibreCharacteristicLengths
 

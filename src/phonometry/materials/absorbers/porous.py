@@ -908,15 +908,15 @@ def fibre_characteristic_lengths(
     from three numbers a table does print. That substitution is arithmetic on
     the definition and not a second model.
 
-    :param fibre_radius_m: Fibre radius ``R``, in metres (> 0). A table that
-        prints a diameter in micrometres wants half of it, divided by a
-        million.
     This is a different model from :func:`viscous_characteristic_length`, not a
     second opinion on the same one, and on Hopkins' own rock wool the two drift
     apart with density: the cylinder model is the lower estimate throughout, by
     a factor of 1,4 at 38 kg/m3 and 1,9 at 155 kg/m3. Which to prefer is a
     question about the material, and neither is a substitute for measuring it.
 
+    :param fibre_radius_m: Fibre radius ``R``, in metres (> 0). A table that
+        prints a diameter in micrometres wants half of it, divided by a
+        million.
     :param bulk_density_kg_m3: Bulk density of the layer, in kg/m3 (> 0).
     :param fibre_density_kg_m3: Density of the fibre itself, in kg/m3 (> 0).
     :return: The viscous and thermal lengths, in metres.

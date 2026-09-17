@@ -48,6 +48,7 @@ right.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from .._internal.catalogue import read_table, take
@@ -149,10 +150,12 @@ _SOURCE, _ROWS = read_table("phonometry.solids", "hopkins-2007-table-a2.json")
 #: same material name at two densities, which is how the page prints them, so
 #: the keys tell them apart by density rather than by a name the book does not
 #: use.
-PUBLISHED_SOLIDS: Mapping[str, SolidMaterial] = {
-    row["key"]: SolidMaterial(
-        source=_SOURCE,
-        **take(row, frozen=("estimated", "bounded_above")),
-    )
-    for row in _ROWS
-}
+PUBLISHED_SOLIDS: Mapping[str, SolidMaterial] = MappingProxyType(
+    {
+        row["key"]: SolidMaterial(
+            source=_SOURCE,
+            **take(row, frozen=("estimated", "bounded_above")),
+        )
+        for row in _ROWS
+    }
+)

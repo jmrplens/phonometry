@@ -19,7 +19,7 @@ from __future__ import annotations
 import pytest
 import reference_data as ref
 
-from phonometry.solids import PUBLISHED_SOLIDS
+from phonometry.solids import PUBLISHED_SOLIDS, SolidMaterial
 
 
 # ---------------------------------------------------------------------------
@@ -161,7 +161,37 @@ def test_a_row_whose_density_is_a_range_refuses_to_give_a_modulus() -> None:
         PUBLISHED_SOLIDS["aircrete"].youngs_modulus_pa()
 
 
-def test_the_catalogue_is_frozen() -> None:
-    """A shared table that a caller can edit is a bug waiting to happen."""
+def test_the_table_itself_cannot_be_edited() -> None:
+    """The annotation says ``Mapping``; the object has to mean it.
+
+    A row that cannot be edited is only half of it. A plain ``dict`` behind a
+    ``Mapping`` annotation still lets a caller add a material the page never
+    printed, or replace one, and every later reader of the catalogue would
+    have no way to tell.
+    """
+    with pytest.raises(TypeError):
+        PUBLISHED_SOLIDS["unobtainium"] = PUBLISHED_SOLIDS["steel"]  # type: ignore[index]
+
+
+def test_every_row_is_a_solid_material() -> None:
+    """What the next test proves about the class, it proves about every row."""
+    assert all(isinstance(row, SolidMaterial) for row in PUBLISHED_SOLIDS.values())
+
+
+def test_a_row_cannot_be_edited() -> None:
+    """A shared table that a caller can edit is a bug waiting to happen.
+
+    The row built here is this test's own, not one out of the catalogue: the
+    assignment is refused either way, but reaching into shared state to prove
+    it is a habit worth not having in a suite this size.
+    """
+    row = SolidMaterial(
+        name="Steel",
+        source="Hopkins (2007) Table A2, PDF page 635 (printed p. 607)",
+        longitudinal_speed_m_s=5270.0,
+        poisson_ratio=0.28,
+        thickness_critical_frequency_product_m_hz=12.3,
+        density_kg_m3=7800.0,
+    )
     with pytest.raises(AttributeError):
-        PUBLISHED_SOLIDS["steel"].density_kg_m3 = 1.0  # type: ignore[misc]
+        row.density_kg_m3 = 1.0  # type: ignore[misc]

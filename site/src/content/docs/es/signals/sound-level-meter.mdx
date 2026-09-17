@@ -312,7 +312,7 @@ vale 0 dB.*
 <summary>Mostrar el código de esta figura</summary>
 
 ```python
-centres = filters.octave_filter(recording, fs, fraction=3)  # centros exactos.frequencies
+centres = filters.octave_filter(recording, fs, fraction=3).frequencies  # centros exactos
 
 fig, ax = plt.subplots(figsize=(9, 4))
 ax.step(centres, spl, where="mid", label="Z (sin ponderar)")

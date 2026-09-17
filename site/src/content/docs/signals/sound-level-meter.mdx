@@ -296,7 +296,7 @@ the floor without touching the 1 kHz band, where the A curve is 0 dB.*
 <summary>Show the code for this figure</summary>
 
 ```python
-centres = filters.octave_filter(recording, fs, fraction=3)  # exact centres.frequencies
+centres = filters.octave_filter(recording, fs, fraction=3).frequencies  # exact centres
 
 fig, ax = plt.subplots(figsize=(9, 4))
 ax.step(centres, spl, where="mid", label="Z (unweighted)")

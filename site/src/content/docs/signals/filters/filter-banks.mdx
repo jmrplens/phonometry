@@ -287,8 +287,11 @@ bands = filters.octave_filter(x, fs, sigbands=True).require_bands()
 print(len(bands))
 # 11
 
-filters.octave_filter(x, fs).require_bands()
-# ValueError: this result kept no band waveforms: call with sigbands=True to have them
+try:
+    filters.octave_filter(x, fs).require_bands()
+except ValueError as error:
+    print(error)
+# this result kept no band waveforms: call with sigbands=True to have them
 ```
 
 ## 3. `octave_filter()` / `OctaveFilterBank` parameters

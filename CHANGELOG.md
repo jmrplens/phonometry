@@ -9,11 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **Seventy-eight published solids from three books, and a row that can hold
-  all three.** `solids.PUBLISHED_SOLIDS` is Hopkins **Table A2**, twenty-five
-  building materials; Cremer 3e **Table 4.3**, thirteen metals over fifteen
-  rows; and Mechel **Table 3**, thirty-eight construction materials, plastics
-  and metals.
+- **One hundred and eighty-three published solids from four books.**
+  `solids.PUBLISHED_SOLIDS` is Hopkins **Table A2**, twenty-five building
+  materials; Cremer 3e **Table 4.3**, thirteen metals over fifteen rows;
+  Mechel **Table 3**, thirty-eight construction materials, plastics and
+  metals; and Bies 5e **Table C.1**, one hundred and five metals, building
+  materials, woods, plastics and honeycomb panels.
   Each row is keyed by the table it came from, because both books print a steel
   at 7 800 kg/m3 and they are not the same steel: 199,6 GPa at a Poisson ratio
   of 0,28 against 210 GPa at 0,31. `solids_named` gathers every book's reading
@@ -61,6 +62,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cells beside it. The equation reproduces the other thirty-seven rows over
   four decades, which is what makes the one gap a defect rather than a
   misreading, and both halves of that are tests.
+
+  Bies' loss factor column is two quantities and not a range, which is the
+  single most expensive way to misread that table: his footnote says to use
+  the upper limit for panels in building construction and the lower for panels
+  welded together in an enclosure, so the low end is the internal loss factor
+  and the high end the in-situ one. For steel they are 0,0001 and 0,01, and
+  reading them as an interval would be a factor of a hundred. His internal end
+  is where Cremer and Mechel put the same number.
+
+  The closing note of his table prints all three longitudinal speeds and the
+  Poisson ratio from the two moduli, which is an oracle for four of this
+  package's conversions at once and the first printed source for `nu = E/(2G)
+  - 1`. Reading his speed column against his own stated construction of it
+  found three cells that do not follow from the two columns beside them, now
+  in `docs/ERRATA.md`: seventy-nine of the other eighty-four rows agree
+  within one per cent.
+
+  Two rules the loader did not have before, both found by the data rather
+  than by reading the code. Nothing is derived over a cell the page printed
+  as a range, because a single modulus worked back out of a speed would sit
+  next to the interval contradicting it. And nothing is derived over a cell
+  the row can say why is empty: Bies leaves the speed of his honeycomb panels
+  blank because a one-dimensional speed does not mean anything there, and the
+  arithmetic would have answered 4 265 m/s.
 
   The rows are data files inside the package, one per published table, with the
   citation written once in the file that holds them; `check_published_sources.py`

@@ -133,7 +133,7 @@ del acero por un 0,8 por ciento.
 ## La tabla, y lo que no dice
 
 Teclear la fila a mano es la otra mitad del problema que resuelven las tres
-velocidades. `PUBLISHED_SOLIDS` tiene setenta y ocho filas leídas de tres tablas
+velocidades. `PUBLISHED_SOLIDS` tiene ciento ochenta y tres filas leídas de cuatro tablas
 publicadas, con la clave de la tabla de la que salieron, así que un tabique de
 placa de yeso o un forjado de hormigón parten de un número que alguien publicó
 y no de uno que uno recuerda a medias.
@@ -157,7 +157,7 @@ impreso una página.
 
 ### La clave nombra el libro a propósito
 
-Tres tablas imprimen un acero, con la misma densidad, y no son el mismo acero:
+Tres de las cuatro tablas imprimen un acero, y no son el mismo acero:
 Hopkins da una velocidad de placa de 5 270 m/s y un Poisson de 0,28, Cremer un
 módulo de 210 GPa y 0,31, y Mechel un módulo de 200 GPa y ningún Poisson. Un
 `"steel"` a secas tendría que elegir uno de ellos sin decirlo, y elegir en
@@ -211,6 +211,24 @@ comprobación cruzada más barata que hay entre libros que no comparten ninguna
 otra columna: para el acero, los dos imprimen 12,3 m Hz. Cremer no imprime esa
 columna, así que sus filas llevan una derivada y entran en la comparación sólo
 a través de la suposición de cabecera que Hopkins sí declara.
+
+### La forma más cara de leer mal una tabla
+
+Bies imprime una columna titulada «Internal-*in situ* Loss factor», y cada celda
+lleva dos números y no un intervalo. Su nota al pie dice cuál es cuál: el
+extremo alto para paneles montados en un edificio y el bajo para paneles
+soldados dentro de un cerramiento. Para el acero son 0,0001 y 0,01, así que
+leerlos como rango del factor interno sería un factor cien.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["bies-2017-table-c1/steel_mild"]
+print(steel.loss_factor, steel.in_situ_loss_factor)
+# 0.0001 0.01
+```
+
+Su extremo interno cae donde ponen ese mismo número los otros libros: Cremer
+mide el factor de pérdidas a flexión del acero entre 0,2 y 3 por 10⁻⁴, y Mechel
+imprime 1 por 10⁻⁴.
 
 ### Cuatro de veinticinco
 

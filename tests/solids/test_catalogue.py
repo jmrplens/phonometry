@@ -389,14 +389,16 @@ def test_a_bracketed_reference_is_resolved_to_its_authors(
 # ---------------------------------------------------------------------------
 # Two books, one material
 # ---------------------------------------------------------------------------
-def test_a_material_both_books_print_comes_back_twice() -> None:
-    """Choosing between two published steels is the caller's call."""
+def test_a_material_several_books_print_comes_back_several_times() -> None:
+    """Choosing between published steels is the caller's call, not ours."""
     steels = solids_named("Steel")
 
     assert {row.table for row in steels} == {
         "hopkins-2007-table-a2",
         "cremer-2005-table-4-3",
+        "bies-2017-table-c1",
     }
+    assert len(steels) > len({row.table for row in steels})
 
 
 def test_the_lookup_ignores_case_and_answers_nothing_for_an_unknown_name() -> None:
@@ -413,7 +415,7 @@ def test_both_books_reach_the_same_three_speeds_for_their_own_steel() -> None:
     steel and would read as a disagreement between the books rather than
     between two waves.
     """
-    for steel in solids_named("Steel"):
+    for steel in (HOPKINS["steel"], CREMER["steel"]):
         assert steel.bar_longitudinal_speed_m_s is not None
         assert steel.plate_longitudinal_speed_m_s is not None
         assert steel.bulk_longitudinal_speed_m_s is not None
@@ -641,3 +643,187 @@ def test_the_impedance_oracle_covers_every_row_in_the_table() -> None:
     not the table, unless something holds the two together.
     """
     assert set(MECHEL) == {key for key, *_ in ref.MECHEL_3_PRINTED_WALL_IMPEDANCE}
+
+
+# ---------------------------------------------------------------------------
+# Bies Table C.1: a fourth book, and the one that prints the conversions
+# ---------------------------------------------------------------------------
+BIES = {
+    key.split("/", 1)[1]: row
+    for key, row in PUBLISHED_SOLIDS.items()
+    if row.table == "bies-2017-table-c1"
+}
+
+
+def test_the_three_fluids_of_the_page_are_not_in_a_solids_catalogue() -> None:
+    """The table opens with air, fresh water and sea water. They are not solids.
+
+    Their Poisson ratio of 0,5 is the page saying so: the closing note calls it
+    effectively zero for liquids and gases and the 0,5 is the incompressible
+    limit, which is a statement about a fluid and not about a solid.
+    """
+    assert [key for key in BIES if "water" in key or "air" in key] == []
+
+
+@pytest.mark.parametrize(
+    ("key", "modulus", "rho", "speed", "internal", "in_situ"), ref.BIES_C1_SPOT_ROWS
+)
+def test_each_bies_row_carries_the_printed_cells(
+    key: str,
+    modulus: float,
+    rho: float,
+    speed: float,
+    internal: float,
+    in_situ: float,
+) -> None:
+    """One row from each of the five groups the page prints in bold."""
+    material = BIES[key]
+
+    assert material.youngs_modulus_pa == modulus
+    assert material.density_kg_m3 == rho
+    assert material.bar_longitudinal_speed_m_s == speed
+    assert material.loss_factor == internal
+    assert material.in_situ_loss_factor == in_situ
+
+
+def test_the_loss_factor_column_is_two_quantities_and_not_an_interval() -> None:
+    """Footnote a says which end is which, so neither end is a bound on the other.
+
+    Reading "0.0001-0.01" for steel as an interval of the internal loss factor
+    would be a factor of a hundred, and it is the single most expensive way to
+    misread this table. The low end is the material welded into an enclosure
+    and the high end a panel installed in a building.
+    """
+    assert ref.BIES_C1_LOSS_FACTOR_IS_TWO_QUANTITIES
+    steel = BIES["steel_mild"]
+
+    assert steel.loss_factor == 0.0001
+    assert steel.in_situ_loss_factor == 0.01
+    assert "loss_factor" not in steel.ranges
+    assert "in_situ_loss_factor" not in steel.ranges
+
+
+def test_the_internal_end_lands_where_the_other_books_put_it() -> None:
+    """Which is the evidence that the two ends are what footnote a says.
+
+    Cremer measures steel's flexural loss factor between 0,2 and 3 times
+    10^-4 and Mechel prints 1 times 10^-4. Bies' low end is 1 times 10^-4 and
+    his high end a hundred times that, which is a mounting and not a material.
+    """
+    assert BIES["steel_mild"].loss_factor == MECHEL["steel"].loss_factor
+    low, high = CREMER["steel"].ranges["flexural_loss_factor"]
+
+    assert low <= BIES["steel_mild"].loss_factor <= high
+
+
+@pytest.mark.parametrize("key", [row[0] for row in ref.BIES_C1_SPOT_ROWS])
+def test_the_printed_speed_is_the_bar_speed(key: str) -> None:
+    """The page calls column 4 "Speed of sound for a 1-D solid"."""
+    material = BIES[key]
+    assert material.youngs_modulus_pa is not None
+    assert material.density_kg_m3 is not None
+
+    closed_form = math.sqrt(material.youngs_modulus_pa / material.density_kg_m3)
+
+    assert material.bar_longitudinal_speed_m_s == pytest.approx(
+        closed_form, rel=ref.BIES_C1_SPEED_TOLERANCE
+    )
+    assert not material.is_derived("bar_longitudinal_speed_m_s")
+
+
+@pytest.mark.parametrize(("key", "printed", "closed_form"), ref.BIES_C1_SPEED_DEFECTS)
+def test_three_rows_do_not_follow_from_their_own_two_columns(
+    key: str, printed: float, closed_form: float
+) -> None:
+    """The page says the column was calculated from the modulus and the density.
+
+    For eighty-four of the eighty-seven rows that print both as single values
+    it reproduces inside three per cent. These three do not, which is what
+    makes them misprints rather than a looser method, and each says so in its
+    own note.
+    """
+    material = BIES[key]
+    assert material.youngs_modulus_pa is not None
+    assert material.density_kg_m3 is not None
+
+    assert material.bar_longitudinal_speed_m_s == printed
+    assert math.sqrt(
+        material.youngs_modulus_pa / material.density_kg_m3
+    ) == pytest.approx(closed_form, abs=1.0)
+    assert "docs/ERRATA.md" in material.note
+
+
+def test_the_rest_of_the_table_reproduces_to_three_per_cent() -> None:
+    """Without this, three disagreeing rows could be three of many."""
+    off = []
+    for key, row in BIES.items():
+        speed = row.bar_longitudinal_speed_m_s
+        modulus, rho = row.youngs_modulus_pa, row.density_kg_m3
+        if speed is None or modulus is None or rho is None:
+            continue
+        if key in {defect[0] for defect in ref.BIES_C1_SPEED_DEFECTS}:
+            continue
+        off.append(abs(speed / math.sqrt(modulus / rho) - 1))
+
+    assert len(off) == 84
+    assert max(off) <= ref.BIES_C1_SPEED_TOLERANCE
+    assert sum(1 for value in off if value <= 0.01) >= 79
+
+
+def test_the_closing_note_of_the_table_is_an_oracle_for_four_conversions() -> None:
+    """Printed page 721 gives all three speeds and the Poisson ratio at once.
+
+    No other page in the catalogue does, and until now none of the four had
+    this book behind it: the speeds were anchored on Hopkins, Cremer and
+    Norton & Karczub, and ``nu = E/(2G) - 1`` on nothing printed at all.
+    """
+    modulus, density, nu = ref.BIES_CLOSING_NOTE_CASE
+
+    bar = beam_longitudinal_speed(modulus, density_kg_m3=density)
+    plate = plate_longitudinal_speed(modulus, density_kg_m3=density, poisson_ratio=nu)
+    bulk = bulk_longitudinal_speed(modulus, density_kg_m3=density, poisson_ratio=nu)
+    shear = modulus / (2.0 * (1.0 + nu))
+
+    assert bar == pytest.approx(math.sqrt(modulus / density))
+    assert plate == pytest.approx(math.sqrt(modulus / (density * (1.0 - nu**2))))
+    assert bulk == pytest.approx(
+        math.sqrt(modulus * (1.0 - nu) / (density * (1.0 + nu) * (1.0 - 2.0 * nu)))
+    )
+    assert modulus / (2.0 * shear) - 1.0 == pytest.approx(nu)
+
+
+def test_a_cell_the_row_can_say_why_is_empty_is_never_filled_by_arithmetic() -> None:
+    """The honeycomb rows print a modulus and a density and no speed.
+
+    The arithmetic would run: 1,31 GPa over 72 kg/m3 gives 4 265 m/s. The page
+    leaves the cell blank because a one-dimensional speed does not mean
+    anything in a honeycomb, and its modulus and density are effective ones,
+    so the number would be arithmetic standing in for a quantity that does not
+    exist.
+    """
+    panels = [row for key, row in BIES.items() if key.startswith("aluminum_honeycomb")]
+
+    assert len(panels) == 4
+    for panel in panels:
+        assert panel.youngs_modulus_pa is not None
+        assert panel.density_kg_m3 is not None
+        assert panel.bar_longitudinal_speed_m_s is None
+        assert "honeycomb" in panel.why_missing("bar_longitudinal_speed_m_s")
+
+
+def test_no_row_anywhere_is_both_derived_and_printed_as_a_range() -> None:
+    """A field cannot be a number this library worked out and an interval the
+    page gave.
+
+    Bies prints a modulus of 18 to 30 GPa for normal concrete with a speed
+    beside it, and the modulus worked back out of that speed used to sit next
+    to the interval contradicting it.
+    """
+    clashes = [
+        (key, field)
+        for key, row in PUBLISHED_SOLIDS.items()
+        for field in row.derived
+        if field in row.ranges
+    ]
+
+    assert clashes == []

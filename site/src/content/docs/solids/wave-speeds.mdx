@@ -130,7 +130,7 @@ steel row by 0,8 per cent.
 ## The table, and what it does not say
 
 Typing the row yourself is the other half of the problem the three speeds
-solve. `PUBLISHED_SOLIDS` holds seventy-eight rows read from three published tables, keyed
+solve. `PUBLISHED_SOLIDS` holds one hundred and eighty-three rows read from four published tables, keyed
 by the table they came from, so a plasterboard partition or a concrete floor
 starts from a number somebody published rather than one you half remember.
 
@@ -152,7 +152,7 @@ number this library computed is never stored as though a page had printed it.
 
 ### The key names the book on purpose
 
-Three tables print a steel, at the same density, and they are not the same
+Three of the four tables print a steel, and they are not the same
 steel: Hopkins gives a plate speed of 5 270 m/s and a Poisson ratio of 0,28,
 Cremer a modulus of 210 GPa and 0,31, Mechel a modulus of 200 GPa and no
 Poisson ratio at all. A flat `"steel"` would have to pick one of them without
@@ -202,6 +202,25 @@ of sound and no conversion, which makes it the cheapest cross-check there is
 between books that share no other column: for steel, both print 12,3 m Hz.
 Cremer prints no such column, so his rows carry a derived one and join that
 comparison only through the heading assumption Hopkins states.
+
+### The most expensive way to misread a table
+
+Bies prints one column headed "Internal-*in situ* Loss factor", and every cell
+in it holds two numbers rather than an interval. His footnote says which is
+which: use the upper limit for panels used in building construction and the
+lower for panels welded together in an enclosure. For steel they are 0,0001 and
+0,01, so reading them as a range of the internal loss factor would be a factor
+of a hundred.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["bies-2017-table-c1/steel_mild"]
+print(steel.loss_factor, steel.in_situ_loss_factor)
+# 0.0001 0.01
+```
+
+His internal end is where the other books put the same number: Cremer measures
+steel's flexural loss factor between 0,2 and 3 times 10⁻⁴, and Mechel prints
+1 times 10⁻⁴.
 
 ### Four of twenty-five
 

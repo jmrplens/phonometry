@@ -161,10 +161,18 @@ catalogue exists not to do.
 
 ```python
 for row in solids.solids_named("Steel"):
-    print(row.table, round(row.youngs_modulus_pa / 1e9, 1), row.poisson_ratio)
-# hopkins-2007-table-a2 199.6 0.28
-# cremer-2005-table-4-3 210.0 0.31
+    modulus = row.youngs_modulus_pa
+    print(row.table, row.variant or "-", modulus and round(modulus / 1e9, 1))
+# hopkins-2007-table-a2 - 199.6
+# cremer-2005-table-4-3 - 210.0
+# bies-2017-table-c1 mild 207.0
+# bies-2017-table-c1 1% carbon 210.0
+# long-2014-table-12-1 - None
 ```
+
+Long prints no modulus at all, which is why the loop asks whether there is one
+before dividing. A book that gives fewer columns is the normal case here, not
+the exception.
 
 Every row carries all three longitudinal speeds whenever its own cells allow
 it, so the comparison is between the books and not between two waves. Two of

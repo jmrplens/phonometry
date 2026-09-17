@@ -166,10 +166,17 @@ hacer.
 
 ```python
 for row in solids.solids_named("Steel"):
-    print(row.table, round(row.youngs_modulus_pa / 1e9, 1), row.poisson_ratio)
-# hopkins-2007-table-a2 199.6 0.28
-# cremer-2005-table-4-3 210.0 0.31
+    modulus = row.youngs_modulus_pa
+    print(row.table, row.variant or "-", modulus and round(modulus / 1e9, 1))
+# hopkins-2007-table-a2 - 199.6
+# cremer-2005-table-4-3 - 210.0
+# bies-2017-table-c1 mild 207.0
+# bies-2017-table-c1 1% carbon 210.0
+# long-2014-table-12-1 - None
 ```
+
+Long no imprime módulo, y por eso el bucle pregunta si lo hay antes de dividir.
+Que un libro dé menos columnas es aquí el caso normal, no la excepción.
 
 Cada fila lleva las tres velocidades longitudinales siempre que sus propias
 celdas lo permitan, así que la comparación es entre los libros y no entre dos

@@ -155,7 +155,8 @@ def test_the_resistivity_of_a_typical_wool_is_the_order_the_models_expect() -> N
         60.0, fit=ROCK_WOOL_LONGITUDINAL_FIT
     )
 
-    assert 10_000.0 < resistivity < 40_000.0
+    assert resistivity > 10_000.0
+    assert resistivity < 40_000.0
 
 
 def test_the_relation_grows_faster_than_the_density_does() -> None:
@@ -338,7 +339,8 @@ def test_a_wool_of_the_usual_density_has_pores_of_the_usual_size() -> None:
         fibre_density_kg_m3=ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY,
     )
 
-    assert 20e-6 < lengths.viscous_length_m < 200e-6
+    assert lengths.viscous_length_m > 20e-6
+    assert lengths.viscous_length_m < 200e-6
 
 
 @pytest.mark.parametrize(("density", "expected"), [(38.0, 1.42), (155.0, 1.94)])

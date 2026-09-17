@@ -339,13 +339,15 @@ def test_rc_criterion_family() -> None:
 
 
 def test_section_declares_the_plane_wave_limit() -> None:
+    elements = [DuctElement("Duct", 3.0)]
+
     with pytest.warns(
         PlaneWaveWarning, match=r"Supply: .* above the first duct cut-on frequency"
     ):
         duct_path(
             OCTAVE_BANDS,
             FAN_LW,
-            [DuctElement("Duct", 3.0)],
+            elements,
             section={"width": 0.9144, "height": 0.6096},
             flow_velocity=8.0,
             label="Supply",

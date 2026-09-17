@@ -129,6 +129,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 from .._internal.validation import (
+    is_at_most,
+    is_positive,
     require_finite_fields,
     require_ranks,
     require_same_length,
@@ -788,8 +790,7 @@ def partial_power_concentration(
 
     partial = i_n * seg
     total = float(np.sum(partial))
-    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
-    if not total > 0.0:
+    if not is_positive(total):
         msg = (
             "The total sound power of this band is not positive, so ISO "
             "9614-1 is not applicable to it (clause 9.2) and the optional "
@@ -858,8 +859,7 @@ def partial_power_concentration(
     delta_alpha = (
         delta - (1.0 - alpha) * (2.0 / math.sqrt(n_remainder)) * f4_remainder
     ) / alpha
-    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
-    if not delta_alpha > 0.0:
+    if not is_positive(delta_alpha):
         msg = (
             f"The remaining {n_remainder} segments exhaust the ISO 9614-1 "
             f"Table B.1 error factor on their own (Delta_alpha = "
@@ -1127,7 +1127,7 @@ def _band_actions(
     # ``not (f1 <= limit)`` rather than ``f1 > limit`` so a NaN F1, which every
     # comparison answers False, is treated as a field that failed to qualify
     # rather than as one that passed.
-    if f1 is not None and not f1 <= TEMPORAL_VARIABILITY_LIMIT:
+    if f1 is not None and not is_at_most(f1, TEMPORAL_VARIABILITY_LIMIT):
         actions.append(ActionCode.REDUCE_TEMPORAL_VARIABILITY)
     elif not criterion_1 or not inward_flow_ok:
         actions.extend(
@@ -1655,8 +1655,7 @@ def _a_weighted_determination(
     per_position = np.sum(
         intensity[:, summed] * 10.0 ** (0.1 * corrections[summed]), axis=1
     )
-    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
-    if not float(np.mean(per_position)) > 0.0:
+    if not is_positive(float(np.mean(per_position))):
         return level, float("nan"), None
     f4_a = _coefficient_of_variation(
         per_position, non_positive_message=_F4_NON_POSITIVE

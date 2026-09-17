@@ -95,6 +95,7 @@ from ..._internal.levels_math import energy_mean
 from ..._internal.types import as_float_or_array
 from ..._internal.validation import (
     check_engine,
+    is_positive,
     require_equal_counts,
     require_equal_shapes,
     require_ranks,
@@ -946,7 +947,7 @@ def _apparent_reduction_index(
     # `not x > 0` rather than `x <= 0`: NaN answers False to both
     # comparisons, so the plain form let a NaN geometry through and the
     # result carried it. Infinity passes `> 0` and is refused by name.
-    if not area > 0.0 or not volume > 0.0:
+    if not is_positive(area) or not is_positive(volume):
         msg = "'area' and 'volume' must be positive."
         raise ValueError(msg)
     if math.isinf(area) or math.isinf(volume):
@@ -1243,8 +1244,7 @@ def impact_insulation(
 
     l_n: np.ndarray | None = None
     if volume is not None:
-        # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
-        if not volume > 0.0:
+        if not is_positive(volume):
             msg = "'volume' must be positive."
             raise ValueError(msg)
         if math.isinf(volume):
@@ -1282,15 +1282,13 @@ def _validate_facade_geometry(
     sound reduction index needs the surface level, the element area and the
     receiving-room volume together.
     """
-    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
-    if volume is not None and not volume > 0.0:
+    if volume is not None and not is_positive(volume):
         msg = "'volume' must be positive."
         raise ValueError(msg)
     if volume is not None and math.isinf(volume):
         msg = "'volume' must be finite."
         raise ValueError(msg)
-    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
-    if area is not None and not area > 0.0:
+    if area is not None and not is_positive(area):
         msg = "'area' must be positive."
         raise ValueError(msg)
     if area is not None and math.isinf(area):

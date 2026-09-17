@@ -135,6 +135,7 @@ from dataclasses import dataclass
 import numpy as np
 from scipy import signal
 
+from .._internal.validation import is_positive
 from ._pinned_log import pinned_log
 
 #: Decibels per natural log unit of a squared magnitude: ``10 / ln 10``.
@@ -680,8 +681,7 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
             rows[[column, pivot]] = rows[[pivot, column]]
             right[[column, pivot]] = right[[pivot, column]]
         head = rows[column, column]
-        # NaN-safe and zero-safe: a singular pivot is skipped, not divided by.
-        if not abs(head) > 0.0:
+        if not is_positive(abs(head)):
             continue
         factors = rows[column + 1 :, column] / head
         rows[column + 1 :, column + 1 :] -= (
@@ -691,8 +691,7 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     solution = np.zeros(order)
     for column in range(order - 1, -1, -1):
         head = rows[column, column]
-        # NaN-safe and zero-safe: a singular pivot is skipped, not divided by.
-        if not abs(head) > 0.0:
+        if not is_positive(abs(head)):
             continue
         behind = math.fsum(rows[column, column + 1 :] * solution[column + 1 :])
         solution[column] = (right[column] - behind) / head

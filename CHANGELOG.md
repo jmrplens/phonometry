@@ -392,13 +392,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `_layer_terms` also lost a `rho0` it never read. It is private and had two
   call sites, both of which already pass the `Fluid` the density lives in.
 
-- **A guard that refuses a NaN says so.** Eleven places in `building`,
-  `emission` and `filters` write `not x > 0` rather than `x <= 0`, because the
-  two differ on NaN: the first refuses it and the second lets it through, and
-  one of those sites carries a comment recording the day a NaN geometry got
-  past the plain form and came out in the result. Nine of the eleven said
-  nothing about why they were written that way, so they do now. No comparison
-  changed.
+- **A guard that refuses a NaN says so in its name.** Eleven places in
+  `building`, `emission` and `filters` wrote `not x > 0` rather than `x <= 0`,
+  because the two are not the same test: a NaN compares False against
+  everything, so the second lets it through and the first refuses it, and one
+  of those sites carries a comment recording the day a NaN geometry got past
+  the plain form and came out in the result. Nine of the eleven said nothing
+  about why they were written that way, which is how an inverted comparison
+  gets tidied into a bug.
+
+  They now read `if not is_positive(x)`, with the upper-bound case reading
+  `not is_at_most(x, limit)`. The predicates are one line each and the NaN
+  reasoning lives with them instead of being re-derived at every site. No
+  comparison changed meaning.
 
 - **A legend no longer closes over a plotted point.** A legend is an opaque
   plate the author places by hand, and its width is set by its longest label,

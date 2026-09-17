@@ -58,8 +58,16 @@ class OctaveFilterResult:
         or IEC 61260-1 nominal labels when the call asked for ``nominal``.
     :ivar bands: The input split into one waveform per band, in the same
         order, or ``None`` when the call did not ask for ``sigbands``. They
-        come back as :class:`~phonometry.io.Signal` only when the bank read a
-        calibration off the input, because only then are they pascals.
+        come back in the type they went in as: a :class:`~phonometry.io.Signal`
+        input gives Signals and a bare array gives arrays. What that Signal
+        says about its units is a separate question, and it answers it itself:
+        a calibrated input yields bands in pascals carrying
+        ``calibration_factor=1.0``, meaning the conversion is already done,
+        and an uncalibrated one yields bands in digital units carrying
+        ``None``, because the object never invents a calibration. A bank
+        filtering in dBFS, or one carrying a factor of its own, filtered
+        digital units, so its bands are handed back as plain arrays rather
+        than labelled pascals.
     """
 
     levels: np.ndarray | None

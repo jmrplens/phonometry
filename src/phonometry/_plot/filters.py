@@ -464,8 +464,15 @@ def plot_octave_levels(
         axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 
     if nominal:
+        # set_xticklabels installs fixed strings, and localize_axes below does
+        # not reach inside them, so a Spanish nominal plot would keep the
+        # English decimal point that every other figure in the corpus avoids.
+        from .._i18n import decimal_comma
+
         axw.set_xticks(x)
-        axw.set_xticklabels([str(f) for f in result.frequencies])
+        axw.set_xticklabels(
+            [decimal_comma(str(f), language) for f in result.frequencies]
+        )
         axw.set_xlabel(_t("Band centre frequency [Hz]", language))
     else:
         format_frequency_axis(axw, language=language)

@@ -165,6 +165,22 @@ def test_the_spanish_labels_are_spanish() -> None:
     assert "Frecuencia" in ax.get_xlabel()
 
 
+def test_the_spanish_nominal_labels_carry_the_decimal_comma() -> None:
+    """``set_xticklabels`` installs fixed strings that no localiser reaches.
+
+    Every other figure in the corpus writes 31,5 in Spanish, and a gate holds
+    the whole corpus to it. A nominal spectrum sets its tick labels by hand,
+    which is the one way round that gate, so the labels are localised here.
+    """
+    result = filters.octave_filter(_tone_over_noise(), FS, fraction=3, nominal=True)
+
+    ax = result.plot(language="es")
+    drawn = [t.get_text() for t in ax.get_xticklabels()]
+
+    assert "31,5" in drawn
+    assert not any("." in label for label in drawn)
+
+
 def test_an_unknown_language_is_refused() -> None:
     """The house rule for every ``.plot()`` in the tree."""
     result = filters.octave_filter(_tone_over_noise(), FS, fraction=3)

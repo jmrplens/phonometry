@@ -636,18 +636,24 @@ def registry_problems() -> list[Problem]:
     for key, reason in SOURCED.items():
         registered = banners.get(key)
         where = f"{key[0]}::{key[1]}"
-        cite = reason.split(",")[0].strip()
-        try:
-            parsed = references.parse(cite)
-        except ValueError as error:
-            problems.append(
-                Problem(where, f"names {cite!r}, which does not parse: {error}")
-            )
-        else:
-            problems.extend(
-                Problem(where, detail)
-                for detail in _bibliography_problems(cite, parsed)
-            )
+        # A constant built from several tables registers them joined by "; ",
+        # and every one of them has to resolve: checking only the first would
+        # let five of six designations into the tree unparsed and absent from
+        # the bibliography, which is what happened while the solids catalogue
+        # grew from one book to six.
+        for entry in reason.split(";"):
+            cite = entry.split(",")[0].strip()
+            try:
+                parsed = references.parse(cite)
+            except ValueError as error:
+                problems.append(
+                    Problem(where, f"names {cite!r}, which does not parse: {error}")
+                )
+            else:
+                problems.extend(
+                    Problem(where, detail)
+                    for detail in _bibliography_problems(cite, parsed)
+                )
         if registered is None:
             problems.append(
                 Problem(where, f"is registered as {reason!r} and no longer exists")

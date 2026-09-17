@@ -92,10 +92,12 @@ class SolidMaterial:
     One field holding whichever the page happened to print is the mistake this
     catalogue exists to prevent, so there is no such field.
 
-    **The loss factors are three fields** for the same reason. A flexural loss
+    **The loss factors are four fields** for the same reason. A flexural loss
     factor is measured in bending and a longitudinal one is not; an in-situ
     one is not a property of the material at all, but of a panel installed in
-    a building, support and radiation included.
+    a building, support and radiation included; and a page that prints one
+    without saying which it is has said something weaker than any of the
+    three, which is what :attr:`loss_factor` holds.
 
     :ivar name: The material as the table names it, attribution stripped.
     :ivar variant: Which specimen or condition this row is, when the page
@@ -117,6 +119,10 @@ class SolidMaterial:
     :ivar bulk_longitudinal_speed_m_s: the pure longitudinal speed in an
         unbounded solid, in m/s.
     :ivar transverse_speed_m_s: ``sqrt(G/rho)``, the shear wave speed, in m/s.
+    :ivar loss_factor: Internal loss factor for a page that prints one and does
+        not say which wave it was measured with. Mechel, Long and Arau all do.
+        It is a separate field from the two below rather than a guess at which
+        of them it is.
     :ivar flexural_loss_factor: Internal loss factor measured in bending.
     :ivar longitudinal_loss_factor: Internal loss factor measured with
         longitudinal waves.
@@ -161,6 +167,7 @@ class SolidMaterial:
     plate_longitudinal_speed_m_s: float | None = None
     bulk_longitudinal_speed_m_s: float | None = None
     transverse_speed_m_s: float | None = None
+    loss_factor: float | None = None
     flexural_loss_factor: float | None = None
     longitudinal_loss_factor: float | None = None
     in_situ_loss_factor: float | None = None
@@ -378,6 +385,7 @@ _SETS = ("estimated", "approximate", "bounded_above")
 _TABLES = (
     "hopkins-2007-table-a2",
     "cremer-2005-table-4-3",
+    "mechel-2008-table-3",
 )
 
 
@@ -407,9 +415,10 @@ def _load() -> dict[str, SolidMaterial]:
 #: ``"cremer-2005-table-4-3/steel"`` are two different published steels and
 #: the key says which is which. The tables are
 #: ``solids/data/hopkins-2007-table-a2.json``, Hopkins **Table A2** on PDF
-#: pages 635-636, and ``solids/data/cremer-2005-table-4-3.json``, Cremer
-#: **Table 4.3** on PDF page 201. Use :func:`solids_named` to gather every
-#: book's reading of one material.
+#: pages 635-636, ``solids/data/cremer-2005-table-4-3.json``, Cremer
+#: **Table 4.3** on PDF page 201, and ``solids/data/mechel-2008-table-3.json``,
+#: Mechel **Table 3** on PDF pages 544-545. Use :func:`solids_named` to gather
+#: every book's reading of one material.
 PUBLISHED_SOLIDS: Mapping[str, SolidMaterial] = MappingProxyType(_load())
 
 

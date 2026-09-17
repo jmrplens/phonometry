@@ -1,6 +1,6 @@
 ---
 title: "Velocidades de onda de un sólido"
-description: "Viga, placa y sólido extenso: las tres velocidades longitudinales que lleva un sólido, cuál de ellas está en una tabla impresa, la inversa que devuelve el módulo de Young, y la columna que permite que dos libros se comprueben entre sí."
+description: "Viga, placa y sólido extenso: las tres velocidades longitudinales que lleva un sólido, cuál de ellas está en una tabla impresa, la inversa que devuelve el módulo de Young, y la columna que permite que tres libros se comprueben entre sí."
 ---
 
 import Scope from '../../../../components/Scope.astro';
@@ -70,7 +70,7 @@ deformación lateral.
 ## Cuál está en tu tabla
 
 La acústica de la edificación imprime la de **placa**. La Tabla B.3 de
-EN 12354-1, la Tabla A2 de Hopkins y la Tabla 3 de Mechel la tabulan todas, y
+EN 12354-1 y la Tabla A2 de Hopkins la tabulan las dos, y
 Hopkins lo dice en una nota al pie: los valores sirven de estimación para vigas
 o placas, que es a la vez admitir que las dos difieren y afirmar que para esos
 materiales la diferencia cae dentro de la dispersión de la tabla.
@@ -87,7 +87,7 @@ sólidos.
 
 ## Volver al módulo
 
-Cada velocidad tiene su inversa, y son las que permiten comparar dos libros:
+Cada velocidad tiene su inversa, y son las que permiten comparar los libros:
 
 ```python
 from phonometry import solids
@@ -133,7 +133,7 @@ del acero por un 0,8 por ciento.
 ## La tabla, y lo que no dice
 
 Teclear la fila a mano es la otra mitad del problema que resuelven las tres
-velocidades. `PUBLISHED_SOLIDS` tiene cuarenta filas leídas de dos páginas
+velocidades. `PUBLISHED_SOLIDS` tiene setenta y ocho filas leídas de tres tablas
 publicadas, con la clave de la tabla de la que salieron, así que un tabique de
 placa de yeso o un forjado de hormigón parten de un número que alguien publicó
 y no de uno que uno recuerda a medias.
@@ -157,11 +157,12 @@ impreso una página.
 
 ### La clave nombra el libro a propósito
 
-Las dos tablas imprimen un acero, con la misma densidad, y no son el mismo
-acero: Hopkins da una velocidad de placa de 5 270 m/s y un Poisson de 0,28, y
-Cremer un módulo de 210 GPa y 0,31. Un `"steel"` a secas tendría que elegir uno
-de los dos sin decirlo, y elegir en silencio entre dos valores publicados es
-justo lo que un catálogo existe para no hacer.
+Tres tablas imprimen un acero, con la misma densidad, y no son el mismo acero:
+Hopkins da una velocidad de placa de 5 270 m/s y un Poisson de 0,28, Cremer un
+módulo de 210 GPa y 0,31, y Mechel un módulo de 200 GPa y ningún Poisson. Un
+`"steel"` a secas tendría que elegir uno de ellos sin decirlo, y elegir en
+silencio entre valores publicados es justo lo que un catálogo existe para no
+hacer.
 
 ```python
 for row in solids.solids_named("Steel"):
@@ -171,7 +172,7 @@ for row in solids.solids_named("Steel"):
 ```
 
 Cada fila lleva las tres velocidades longitudinales siempre que sus propias
-celdas lo permitan, así que la comparación es entre dos libros y no entre dos
+celdas lo permitan, así que la comparación es entre los libros y no entre dos
 ondas. Dos filas de Hopkins, el hormigón celular y el ladrillo, imprimen la
 densidad sólo como rango, y de una densidad que la página no quiso concretar no
 se deduce nada: esas dos conservan la velocidad de placa que la página imprimió
@@ -183,6 +184,33 @@ velocidad longitudinal pura de un sólido extenso él mismo cifra la diferencia
 en un 16 por ciento con `nu = 0,3`, que es lo que reproducen las tres funciones
 de arriba; la de placa queda en medio, un 4,8 por ciento por encima de la de
 barra.
+
+### Una página llega hasta donde llegan sus columnas
+
+Mechel imprime módulo y ningún coeficiente de Poisson, así que una fila suya
+llega hasta la velocidad de barra y ahí se para. La de placa y la de sólido
+extenso pedirían un coeficiente que él no imprime, y un 0,3 reproduciría su
+tabla estupendamente y sería un número que él no dio. Catorce de sus treinta y
+ocho filas ni siquiera llegan tan lejos, porque la página imprime su densidad o
+su módulo como rango y de una celda que el libro no quiso concretar no se
+deduce nada.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["mechel-2008-table-3/steel"]
+print(steel.poisson_ratio, steel.plate_longitudinal_speed_m_s)
+# None None
+print(round(steel.bar_longitudinal_speed_m_s), steel.is_derived("bar_longitudinal_speed_m_s"))
+# 5064 True
+```
+
+Lo que cruza entre Hopkins y Mechel sin ninguna suposición es `h f_c`, el
+producto del espesor de una placa por su frecuencia crítica, que Hopkins
+imprime como columna y Mechel como `f_cr d`. No necesita ni coeficiente de
+Poisson ni velocidad del sonido ni conversión, y eso lo convierte en la
+comprobación cruzada más barata que hay entre libros que no comparten ninguna
+otra columna: para el acero, los dos imprimen 12,3 m Hz. Cremer no imprime esa
+columna, así que sus filas llevan una derivada y entran en la comparación sólo
+a través de la suposición de cabecera que Hopkins sí declara.
 
 ### Cuatro de veinticinco
 

@@ -194,7 +194,9 @@ SOURCED: dict[tuple[str, str], str] = {
         "PUBLISHED_SOLIDS",
     ): (
         "Hopkins (2007) Table A2, twenty-five solid materials; "
-        "Cremer 3e Table 4.3, thirteen metals over fifteen rows"
+        "Cremer 3e Table 4.3, thirteen metals over fifteen rows; "
+        "Mechel (2008) Table 3, thirty-eight construction materials, "
+        "plastics and metals"
     ),
     (
         "noise_control/duct_modes.py",

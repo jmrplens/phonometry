@@ -105,6 +105,21 @@ class SolidMaterial:
     attributed_to: Mapping[str, str] = field(default_factory=dict)
     note: str = ""
 
+    def __post_init__(self) -> None:
+        """Freeze the two mappings the dataclass holds but does not own.
+
+        ``frozen=True`` refuses to rebind a field and says nothing about what
+        the field points at, so a shared row's ``ranges`` and
+        ``attributed_to`` were editable in place while the row around them was
+        not. The catalogue is one object shared by every caller, and a table
+        whose provenance can be rewritten by one of them is worth less than no
+        table.
+        """
+        object.__setattr__(self, "ranges", MappingProxyType(dict(self.ranges)))
+        object.__setattr__(
+            self, "attributed_to", MappingProxyType(dict(self.attributed_to))
+        )
+
     def youngs_modulus_pa(self) -> float:
         """Young's modulus from the printed speed and density, in pascals.
 

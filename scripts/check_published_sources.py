@@ -542,7 +542,16 @@ def data_citation(banner: str) -> tuple[str, str | None]:
     path = PACKAGE / name
     if not path.is_file():
         return name, None
-    source = json.loads(path.read_text(encoding="utf-8")).get("source")
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        # A file that cannot be read cannot vouch for a page. Saying so through
+        # the same return the caller already reports beats a traceback, which
+        # would stop the walk and leave every later module unchecked.
+        return name, None
+    if not isinstance(document, dict):
+        return name, None
+    source = document.get("source")
     return name, source if isinstance(source, str) else None
 
 

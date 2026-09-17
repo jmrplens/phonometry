@@ -173,6 +173,21 @@ def test_the_table_itself_cannot_be_edited() -> None:
         PUBLISHED_SOLIDS["unobtainium"] = PUBLISHED_SOLIDS["steel"]  # type: ignore[index]
 
 
+def test_the_mappings_inside_a_row_cannot_be_edited() -> None:
+    """``frozen=True`` stops a rebind, not a write through a field.
+
+    The row is shared by every caller, so a ``ranges`` or an ``attributed_to``
+    that one of them can rewrite in place is provenance that cannot be
+    trusted, however frozen the row around it looks.
+    """
+    row = PUBLISHED_SOLIDS["steel"]
+    with pytest.raises(TypeError):
+        row.attributed_to["loss_factor"] = "nobody"  # type: ignore[index]
+    with pytest.raises(TypeError):
+        row.ranges["loss_factor"] = (0.0, 1.0)  # type: ignore[index]
+    assert row.attributed_to["loss_factor"] == "Heckl, 1981"
+
+
 def test_every_row_is_a_solid_material() -> None:
     """What the next test proves about the class, it proves about every row."""
     assert all(isinstance(row, SolidMaterial) for row in PUBLISHED_SOLIDS.values())

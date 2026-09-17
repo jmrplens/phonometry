@@ -43,6 +43,12 @@ Specimen = tuple[str, str, int, int, float, float, float, float, float]
 _ROCK_WOOL_FIBRE_RADIUS_M = ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM / 2.0 * 1e-6
 
 
+def _fit_row(fit: FibreResistivityFit) -> tuple[float, float, float, float]:
+    """The four numbers Hopkins prints for one fit, in the order he prints them."""
+    low, high = fit.bulk_density_range_kg_m3
+    return fit.k1, fit.k2, low, high
+
+
 def _shape_factor(row: Specimen) -> float:
     """What ``c`` of Eq. (5.25) would make the estimate land on the table."""
     _, _, _, _, sigma, phi, alpha, printed_um, _ = row
@@ -110,22 +116,16 @@ def test_both_porosity_densities_have_to_be_positive(bad: float) -> None:
 # ---------------------------------------------------------------------------
 def test_the_two_published_fits_carry_the_printed_coefficients() -> None:
     """The constants are the whole of what the page gives, so they are pinned."""
-    lateral = ROCK_WOOL_LATERAL_FIT
-    longitudinal = ROCK_WOOL_LONGITUDINAL_FIT
+    assert _fit_row(ROCK_WOOL_LATERAL_FIT) == ref.HOPKINS_ROCK_WOOL_LATERAL_FIT
     assert (
-        lateral.k1,
-        lateral.k2,
-        lateral.bulk_density_range_kg_m3[0],
-        lateral.bulk_density_range_kg_m3[1],
-    ) == ref.HOPKINS_ROCK_WOOL_LATERAL_FIT
-    assert (
-        longitudinal.k1,
-        longitudinal.k2,
-        longitudinal.bulk_density_range_kg_m3[0],
-        longitudinal.bulk_density_range_kg_m3[1],
-    ) == ref.HOPKINS_ROCK_WOOL_LONGITUDINAL_FIT
-    assert lateral.fibre_diameter_um == ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM
-    assert longitudinal.fibre_diameter_um == ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM
+        _fit_row(ROCK_WOOL_LONGITUDINAL_FIT) == ref.HOPKINS_ROCK_WOOL_LONGITUDINAL_FIT
+    )
+    assert ROCK_WOOL_LATERAL_FIT.fibre_diameter_um == (
+        ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM
+    )
+    assert ROCK_WOOL_LONGITUDINAL_FIT.fibre_diameter_um == (
+        ref.HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM
+    )
 
 
 @pytest.mark.parametrize("density", [40.0, 60.0, 100.0, 150.0])

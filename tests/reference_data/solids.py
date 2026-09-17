@@ -359,3 +359,61 @@ MECHEL_AND_HOPKINS_SHARED_PRODUCT: tuple[tuple[str, str, float, float], ...] = (
     ("steel", "steel", 12.3, 12.3),
     ("aluminium", "aluminium", 12.7, 12.0),
 )
+
+
+# ---------------------------------------------------------------------------
+# Bies 5e Table C.1, "Properties of materials"
+# PDF pages 747-750 (printed pp. 718-721)
+# ---------------------------------------------------------------------------
+#: A row from each of the five groups the page prints in bold, as printed:
+#: key, modulus in pascals, density in kg/m3, the 1-D speed in m/s, and the
+#: two ends of the loss factor column.
+BIES_C1_SPOT_ROWS: tuple[tuple[str, float, float, float, float, float], ...] = (
+    ("aluminum_sheet", 70e9, 2700.0, 5150.0, 0.0001, 0.01),
+    ("steel_mild", 207e9, 7850.0, 5130.0, 0.0001, 0.01),
+    ("gypsum_board", 2.1e9, 760.0, 1670.0, 0.006, 0.05),
+    ("oak", 12.0e9, 630.0, 4360.0, 0.04, 0.05),
+    ("pvc", 2.8e9, 1400.0, 1410.0, 0.003, 0.1),
+)
+
+#: Footnote a, on printed page 721: "Loss factors of materials shown
+#: characterised by a very large range are very sensitive to specimen mounting
+#: conditions. Use the upper limit for panels used in building construction and
+#: the lower limit for panels welded together in an enclosure." That is what
+#: makes the column two quantities and not one interval.
+BIES_C1_LOSS_FACTOR_IS_TWO_QUANTITIES = True
+
+#: The three rows whose printed speed does not follow from the modulus and the
+#: density printed beside it, with the printed speed and what sqrt(E/rho)
+#: gives. See ``docs/ERRATA.md``, "Bies 5e (2017), Table C.1".
+BIES_C1_SPEED_DEFECTS: tuple[tuple[str, float, float], ...] = (
+    ("plywood_fir", 4540.0, 3719.0),
+    ("cork", 500.0, 632.0),
+    ("brick", 3650.0, 3464.0),
+)
+
+#: How far the rest of the table strays from sqrt(E/rho). Seventy-nine of the
+#: eighty-seven rows that print both columns as single values are inside one
+#: per cent and eighty-four inside three, which is what makes the three above
+#: misprints rather than a looser method than the page claims.
+BIES_C1_SPEED_TOLERANCE = 0.03
+
+#: The closing note of the table, printed page 721, gives all three speeds and
+#: the Poisson ratio from the two moduli. It is an oracle for four of this
+#: library's own conversions at once, from a source that anchors none of them
+#: today: "Speed of sound for a 1-D solid, = sqrt(E/rho); for a 2-D solid
+#: (plate), c_L = sqrt(E/[rho(1-nu^2)]); and for a 3-D solid, c_L =
+#: sqrt(E(1-nu)/[rho(1+nu)(1-2nu)]) [...] nu = E/(2G) - 1".
+BIES_CLOSING_NOTE_CASE = (200e9, 7800.0, 0.3)
+
+
+#: How many rows each packaged table holds. A table that quietly loses a row
+#: would otherwise leave every other test green: the parametrised ones only
+#: check the rows they name, and the statistical ones only the rows that reach
+#: them.
+SOLID_TABLE_SIZES: tuple[tuple[str, int], ...] = (
+    ("hopkins-2007-table-a2", 25),
+    ("cremer-2005-table-4-3", 15),
+    ("mechel-2008-table-3", 38),
+    ("bies-2017-table-c1", 105),
+)

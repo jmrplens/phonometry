@@ -1,0 +1,1293 @@
+{
+  "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
+  "about": "One hundred and five solids from Appendix C, \"Properties of Materials and Gases\", in the five groups the page prints in bold: metals, building materials, wood, plastics and other, and aluminium honeycomb. The table's first three rows are air, fresh water and sea water, which are not solids and are not here. Column 4 is what the page calls \"Speed of sound for a 1-D solid\", sqrt(E/rho), so it is the bar speed; the closing note prints the plate and unbounded forms too. The page says the column was calculated from the modulus and the density, and it reproduces to one per cent on seventy-nine of the eighty-seven rows that print both as single values; three rows do not follow from their own two columns and carry that in their note. The loss factor column holds two numbers, not a range: footnote a says to use the upper limit for panels in building construction and the lower for panels welded together in an enclosure, so the low end is the internal loss factor and the high end the in-situ one. Poisson ratios the sources did not give were calculated by the authors from the three-dimensional speed, and for some plastics taken from a similar material, but the page does not say which cells those are, so none is marked. The values are, in the book's own words, representative only.",
+  "rows": [
+    {
+      "key": "aluminum_sheet",
+      "name": "Aluminum sheet",
+      "density_kg_m3": 2700.0,
+      "youngs_modulus_pa": 70000000000.0,
+      "bar_longitudinal_speed_m_s": 5150.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "brass",
+      "name": "Brass",
+      "density_kg_m3": 8500.0,
+      "youngs_modulus_pa": 95000000000.0,
+      "bar_longitudinal_speed_m_s": 3340.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "brass_70pczn_30pccu",
+      "name": "Brass",
+      "variant": "70%Zn 30%Cu",
+      "density_kg_m3": 8600.0,
+      "youngs_modulus_pa": 101000000000.0,
+      "bar_longitudinal_speed_m_s": 3480.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "carbon_brick",
+      "name": "Carbon brick",
+      "density_kg_m3": 1630.0,
+      "youngs_modulus_pa": 8199999999.999999,
+      "bar_longitudinal_speed_m_s": 2240.0,
+      "poisson_ratio": 0.07,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "carbon_nanotubes",
+      "name": "Carbon nanotubes",
+      "youngs_modulus_pa": 1000000000000.0,
+      "bar_longitudinal_speed_m_s": 27000.0,
+      "poisson_ratio": 0.06,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "ranges": {
+        "density_kg_m3": [
+          1330.0,
+          1400.0
+        ]
+      },
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "graphite_mouldings",
+      "name": "Graphite mouldings",
+      "density_kg_m3": 1700.0,
+      "youngs_modulus_pa": 9000000000.0,
+      "bar_longitudinal_speed_m_s": 2300.0,
+      "poisson_ratio": 0.07,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "chromium",
+      "name": "Chromium",
+      "density_kg_m3": 7200.0,
+      "youngs_modulus_pa": 279000000000.0,
+      "bar_longitudinal_speed_m_s": 6240.0,
+      "poisson_ratio": 0.21,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "copper_annealed",
+      "name": "Copper",
+      "variant": "annealed",
+      "density_kg_m3": 8900.0,
+      "youngs_modulus_pa": 128000000000.0,
+      "bar_longitudinal_speed_m_s": 3790.0,
+      "poisson_ratio": 0.34,
+      "loss_factor": 0.002,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "copper_rolled",
+      "name": "Copper",
+      "variant": "rolled",
+      "density_kg_m3": 8930.0,
+      "youngs_modulus_pa": 126000000000.0,
+      "bar_longitudinal_speed_m_s": 3760.0,
+      "poisson_ratio": 0.34,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "gold",
+      "name": "Gold",
+      "density_kg_m3": 19300.0,
+      "youngs_modulus_pa": 79000000000.0,
+      "bar_longitudinal_speed_m_s": 2020.0,
+      "poisson_ratio": 0.44,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "iron",
+      "name": "Iron",
+      "density_kg_m3": 7600.0,
+      "youngs_modulus_pa": 200000000000.0,
+      "bar_longitudinal_speed_m_s": 5130.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0005,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "iron_white",
+      "name": "Iron",
+      "variant": "white",
+      "density_kg_m3": 7700.0,
+      "youngs_modulus_pa": 180000000000.0,
+      "bar_longitudinal_speed_m_s": 4830.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0005,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "iron_nodular",
+      "name": "Iron",
+      "variant": "nodular",
+      "density_kg_m3": 7600.0,
+      "youngs_modulus_pa": 150000000000.0,
+      "bar_longitudinal_speed_m_s": 4440.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0005,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "iron_wrought",
+      "name": "Iron",
+      "variant": "wrought",
+      "density_kg_m3": 7900.0,
+      "youngs_modulus_pa": 195000000000.0,
+      "bar_longitudinal_speed_m_s": 4970.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0005,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "iron_gray_1",
+      "name": "Iron",
+      "variant": "gray (1)",
+      "density_kg_m3": 7000.0,
+      "youngs_modulus_pa": 83000000000.0,
+      "bar_longitudinal_speed_m_s": 3440.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0005,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "iron_gray_2",
+      "name": "Iron",
+      "variant": "gray (2)",
+      "density_kg_m3": 7200.0,
+      "youngs_modulus_pa": 117000000000.0,
+      "bar_longitudinal_speed_m_s": 4030.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0005,
+      "in_situ_loss_factor": 0.03,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "iron_malleable",
+      "name": "Iron",
+      "variant": "malleable",
+      "density_kg_m3": 7200.0,
+      "youngs_modulus_pa": 180000000000.0,
+      "bar_longitudinal_speed_m_s": 5000.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0005,
+      "in_situ_loss_factor": 0.04,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "lead_annealed",
+      "name": "Lead",
+      "variant": "annealed",
+      "density_kg_m3": 11400.0,
+      "youngs_modulus_pa": 16000000000.0,
+      "bar_longitudinal_speed_m_s": 1180.0,
+      "poisson_ratio": 0.43,
+      "loss_factor": 0.015,
+      "in_situ_loss_factor": 0.03,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "lead_rolled",
+      "name": "Lead",
+      "variant": "rolled",
+      "density_kg_m3": 11400.0,
+      "youngs_modulus_pa": 16700000000.0,
+      "bar_longitudinal_speed_m_s": 1210.0,
+      "poisson_ratio": 0.44,
+      "loss_factor": 0.015,
+      "in_situ_loss_factor": 0.04,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "lead_sheet",
+      "name": "Lead sheet",
+      "density_kg_m3": 11340.0,
+      "youngs_modulus_pa": 13800000000.0,
+      "bar_longitudinal_speed_m_s": 1100.0,
+      "poisson_ratio": 0.44,
+      "loss_factor": 0.015,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "magnesium",
+      "name": "Magnesium",
+      "density_kg_m3": 1740.0,
+      "youngs_modulus_pa": 44700000000.0,
+      "bar_longitudinal_speed_m_s": 5030.0,
+      "poisson_ratio": 0.29,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "molybdenum",
+      "name": "Molybdenum",
+      "density_kg_m3": 10100.0,
+      "youngs_modulus_pa": 280000000000.0,
+      "bar_longitudinal_speed_m_s": 5260.0,
+      "poisson_ratio": 0.32,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "monel_metal",
+      "name": "Monel metal",
+      "density_kg_m3": 8850.0,
+      "youngs_modulus_pa": 180000000000.0,
+      "bar_longitudinal_speed_m_s": 4510.0,
+      "poisson_ratio": 0.33,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "neodymium",
+      "name": "Neodymium",
+      "density_kg_m3": 7000.0,
+      "youngs_modulus_pa": 390000000000.0,
+      "bar_longitudinal_speed_m_s": 7460.0,
+      "poisson_ratio": 0.31,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.03,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "nickel",
+      "name": "Nickel",
+      "density_kg_m3": 8900.0,
+      "youngs_modulus_pa": 205000000000.0,
+      "bar_longitudinal_speed_m_s": 4800.0,
+      "poisson_ratio": 0.31,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "nickel_iron_alloy_invar",
+      "name": "Nickel-iron alloy (Invar)",
+      "density_kg_m3": 8000.0,
+      "youngs_modulus_pa": 143000000000.0,
+      "bar_longitudinal_speed_m_s": 4230.0,
+      "poisson_ratio": 0.33,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "platinum",
+      "name": "Platinum",
+      "density_kg_m3": 21400.0,
+      "youngs_modulus_pa": 168000000000.0,
+      "bar_longitudinal_speed_m_s": 2880.0,
+      "poisson_ratio": 0.27,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "silver",
+      "name": "Silver",
+      "density_kg_m3": 10500.0,
+      "youngs_modulus_pa": 82700000000.0,
+      "bar_longitudinal_speed_m_s": 2790.0,
+      "poisson_ratio": 0.36,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.03,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "steel_mild",
+      "name": "Steel",
+      "variant": "mild",
+      "density_kg_m3": 7850.0,
+      "youngs_modulus_pa": 207000000000.0,
+      "bar_longitudinal_speed_m_s": 5130.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "steel_1pc_carbon",
+      "name": "Steel",
+      "variant": "1% carbon",
+      "density_kg_m3": 7840.0,
+      "youngs_modulus_pa": 210000000000.0,
+      "bar_longitudinal_speed_m_s": 5170.0,
+      "poisson_ratio": 0.29,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "stainless_steel_302",
+      "name": "Stainless steel",
+      "variant": "302",
+      "density_kg_m3": 7910.0,
+      "youngs_modulus_pa": 200000000000.0,
+      "bar_longitudinal_speed_m_s": 5030.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "stainless_steel_316",
+      "name": "Stainless steel",
+      "variant": "316",
+      "density_kg_m3": 7950.0,
+      "youngs_modulus_pa": 200000000000.0,
+      "bar_longitudinal_speed_m_s": 5020.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "stainless_steel_347",
+      "name": "Stainless steel",
+      "variant": "347",
+      "density_kg_m3": 7900.0,
+      "youngs_modulus_pa": 198000000000.0,
+      "bar_longitudinal_speed_m_s": 5010.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "stainless_steel_430",
+      "name": "Stainless steel",
+      "variant": "430",
+      "density_kg_m3": 7710.0,
+      "youngs_modulus_pa": 230000000000.0,
+      "bar_longitudinal_speed_m_s": 5460.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.03,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "tin",
+      "name": "Tin",
+      "density_kg_m3": 7300.0,
+      "youngs_modulus_pa": 54000000000.0,
+      "bar_longitudinal_speed_m_s": 2720.0,
+      "poisson_ratio": 0.33,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "titanium",
+      "name": "Titanium",
+      "density_kg_m3": 4500.0,
+      "youngs_modulus_pa": 116000000000.0,
+      "bar_longitudinal_speed_m_s": 5080.0,
+      "poisson_ratio": 0.32,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "tungsten_drawn",
+      "name": "Tungsten",
+      "variant": "drawn",
+      "density_kg_m3": 19300.0,
+      "youngs_modulus_pa": 360000000000.0,
+      "bar_longitudinal_speed_m_s": 4320.0,
+      "poisson_ratio": 0.34,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.03,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "tungsten_annealed",
+      "name": "Tungsten",
+      "variant": "annealed",
+      "density_kg_m3": 19300.0,
+      "youngs_modulus_pa": 412000000000.0,
+      "bar_longitudinal_speed_m_s": 4620.0,
+      "poisson_ratio": 0.28,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.04,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "tungsten_carbide",
+      "name": "Tungsten carbide",
+      "density_kg_m3": 13800.0,
+      "youngs_modulus_pa": 534000000000.0,
+      "bar_longitudinal_speed_m_s": 6220.0,
+      "poisson_ratio": 0.22,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "zinc_sheet",
+      "name": "Zinc sheet",
+      "density_kg_m3": 7140.0,
+      "youngs_modulus_pa": 96500000000.0,
+      "bar_longitudinal_speed_m_s": 3680.0,
+      "poisson_ratio": 0.33,
+      "loss_factor": 0.0003,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under metals"
+    },
+    {
+      "key": "brick",
+      "name": "Brick",
+      "density_kg_m3": 2000.0,
+      "youngs_modulus_pa": 24000000000.0,
+      "bar_longitudinal_speed_m_s": 3650.0,
+      "poisson_ratio": 0.12,
+      "loss_factor": 0.01,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under building materials; the printed speed is +5 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md"
+    },
+    {
+      "key": "concrete_normal",
+      "name": "Concrete",
+      "variant": "normal",
+      "density_kg_m3": 2300.0,
+      "bar_longitudinal_speed_m_s": 2800.0,
+      "poisson_ratio": 0.2,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "ranges": {
+        "youngs_modulus_pa": [
+          18000000000.0,
+          30000000000.0
+        ]
+      },
+      "note": "the page groups this row under building materials"
+    },
+    {
+      "key": "concrete_aerated",
+      "name": "Concrete",
+      "variant": "aerated",
+      "bar_longitudinal_speed_m_s": 2000.0,
+      "poisson_ratio": 0.2,
+      "loss_factor": 0.05,
+      "ranges": {
+        "density_kg_m3": [
+          300.0,
+          600.0
+        ],
+        "youngs_modulus_pa": [
+          1500000000.0,
+          2000000000.0
+        ]
+      },
+      "note": "the page groups this row under building materials; the loss factor column prints one number here where it prints two elsewhere, so only the internal one is held"
+    },
+    {
+      "key": "concrete_high_strength",
+      "name": "Concrete",
+      "variant": "high strength",
+      "density_kg_m3": 2400.0,
+      "youngs_modulus_pa": 30000000000.0,
+      "bar_longitudinal_speed_m_s": 3530.0,
+      "poisson_ratio": 0.2,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under building materials"
+    },
+    {
+      "key": "masonry_block",
+      "name": "Masonry block",
+      "density_kg_m3": 900.0,
+      "youngs_modulus_pa": 4800000000.0,
+      "bar_longitudinal_speed_m_s": 2310.0,
+      "poisson_ratio": 0.12,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under building materials"
+    },
+    {
+      "key": "cork",
+      "name": "Cork",
+      "density_kg_m3": 250.0,
+      "youngs_modulus_pa": 100000000.0,
+      "bar_longitudinal_speed_m_s": 500.0,
+      "poisson_ratio": 0.15,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under building materials; the printed speed is -21 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md"
+    },
+    {
+      "key": "fibre_board",
+      "name": "Fibre board",
+      "bar_longitudinal_speed_m_s": 2750.0,
+      "poisson_ratio": 0.15,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "ranges": {
+        "density_kg_m3": [
+          480.0,
+          880.0
+        ],
+        "youngs_modulus_pa": [
+          3500000000.0,
+          7000000000.0
+        ]
+      },
+      "note": "the page groups this row under building materials"
+    },
+    {
+      "key": "gypsum_board",
+      "name": "Gypsum board",
+      "density_kg_m3": 760.0,
+      "youngs_modulus_pa": 2100000000.0,
+      "bar_longitudinal_speed_m_s": 1670.0,
+      "poisson_ratio": 0.24,
+      "loss_factor": 0.006,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under building materials"
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "density_kg_m3": 2500.0,
+      "youngs_modulus_pa": 68000000000.0,
+      "bar_longitudinal_speed_m_s": 5290.0,
+      "poisson_ratio": 0.23,
+      "loss_factor": 0.0006,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under building materials"
+    },
+    {
+      "key": "glass_pyrex",
+      "name": "Glass",
+      "variant": "Pyrex",
+      "density_kg_m3": 2320.0,
+      "youngs_modulus_pa": 62000000000.0,
+      "bar_longitudinal_speed_m_s": 5170.0,
+      "poisson_ratio": 0.23,
+      "loss_factor": 0.0006,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under building materials"
+    },
+    {
+      "key": "ash_black",
+      "name": "Ash",
+      "variant": "black",
+      "density_kg_m3": 450.0,
+      "youngs_modulus_pa": 11000000000.0,
+      "bar_longitudinal_speed_m_s": 4940.0,
+      "poisson_ratio": 0.37,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "ash_white",
+      "name": "Ash",
+      "variant": "white",
+      "density_kg_m3": 600.0,
+      "youngs_modulus_pa": 12000000000.0,
+      "bar_longitudinal_speed_m_s": 4470.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "aspen_quaking",
+      "name": "Aspen",
+      "variant": "quaking",
+      "density_kg_m3": 380.0,
+      "youngs_modulus_pa": 8100000000.0,
+      "bar_longitudinal_speed_m_s": 4620.0,
+      "poisson_ratio": 0.49,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "balsa_wood",
+      "name": "Balsa wood",
+      "density_kg_m3": 160.0,
+      "youngs_modulus_pa": 3400000000.0,
+      "bar_longitudinal_speed_m_s": 4610.0,
+      "poisson_ratio": 0.23,
+      "loss_factor": 0.001,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "baltic_whitewood",
+      "name": "Baltic whitewood",
+      "density_kg_m3": 400.0,
+      "youngs_modulus_pa": 10000000000.0,
+      "bar_longitudinal_speed_m_s": 5000.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "baltic_redwood",
+      "name": "Baltic redwood",
+      "density_kg_m3": 480.0,
+      "youngs_modulus_pa": 10100000000.0,
+      "bar_longitudinal_speed_m_s": 4590.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "beech",
+      "name": "Beech",
+      "density_kg_m3": 640.0,
+      "youngs_modulus_pa": 11900000000.0,
+      "bar_longitudinal_speed_m_s": 4310.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "birch_yellow",
+      "name": "Birch",
+      "variant": "yellow",
+      "density_kg_m3": 620.0,
+      "youngs_modulus_pa": 13900000000.0,
+      "bar_longitudinal_speed_m_s": 4740.0,
+      "poisson_ratio": 0.43,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "cedar_white_northern",
+      "name": "Cedar",
+      "variant": "white-northern",
+      "density_kg_m3": 320.0,
+      "youngs_modulus_pa": 5500000000.0,
+      "bar_longitudinal_speed_m_s": 4150.0,
+      "poisson_ratio": 0.34,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "cedar_red_western",
+      "name": "Cedar",
+      "variant": "red-western",
+      "density_kg_m3": 320.0,
+      "youngs_modulus_pa": 7600000000.0,
+      "bar_longitudinal_speed_m_s": 4870.0,
+      "poisson_ratio": 0.38,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "compressed_hardboard_composite",
+      "name": "Compressed hardboard composite",
+      "density_kg_m3": 1000.0,
+      "youngs_modulus_pa": 4000000000.0,
+      "bar_longitudinal_speed_m_s": 2000.0,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "douglas_fir",
+      "name": "Douglas fir",
+      "density_kg_m3": 500.0,
+      "bar_longitudinal_speed_m_s": 4800.0,
+      "poisson_ratio": 0.29,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "ranges": {
+        "youngs_modulus_pa": [
+          9700000000.0,
+          13200000000.0
+        ]
+      },
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "douglas_fir_coastal",
+      "name": "Douglas fir",
+      "variant": "coastal",
+      "density_kg_m3": 450.0,
+      "youngs_modulus_pa": 10800000000.0,
+      "bar_longitudinal_speed_m_s": 4900.0,
+      "poisson_ratio": 0.29,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "douglas_fir_interior",
+      "name": "Douglas fir",
+      "variant": "interior",
+      "density_kg_m3": 430.0,
+      "youngs_modulus_pa": 8000000000.0,
+      "bar_longitudinal_speed_m_s": 4310.0,
+      "poisson_ratio": 0.29,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "mahogany_african",
+      "name": "Mahogany",
+      "variant": "African",
+      "density_kg_m3": 420.0,
+      "youngs_modulus_pa": 9700000000.0,
+      "bar_longitudinal_speed_m_s": 4810.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "mahogany_honduras",
+      "name": "Mahogany",
+      "variant": "Honduras",
+      "density_kg_m3": 450.0,
+      "youngs_modulus_pa": 10300000000.0,
+      "bar_longitudinal_speed_m_s": 4780.0,
+      "poisson_ratio": 0.31,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "maple",
+      "name": "Maple",
+      "density_kg_m3": 600.0,
+      "youngs_modulus_pa": 12000000000.0,
+      "bar_longitudinal_speed_m_s": 4470.0,
+      "poisson_ratio": 0.43,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "mdf",
+      "name": "MDF",
+      "density_kg_m3": 770.0,
+      "youngs_modulus_pa": 3700000000.0,
+      "bar_longitudinal_speed_m_s": 2190.0,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "meranti_light_red",
+      "name": "Meranti",
+      "variant": "light red",
+      "density_kg_m3": 340.0,
+      "youngs_modulus_pa": 10500000000.0,
+      "bar_longitudinal_speed_m_s": 5560.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "meranti_dark_red",
+      "name": "Meranti",
+      "variant": "dark red",
+      "density_kg_m3": 460.0,
+      "youngs_modulus_pa": 11500000000.0,
+      "bar_longitudinal_speed_m_s": 5000.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "oak",
+      "name": "Oak",
+      "density_kg_m3": 630.0,
+      "youngs_modulus_pa": 12000000000.0,
+      "bar_longitudinal_speed_m_s": 4360.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "pine_radiata",
+      "name": "Pine",
+      "variant": "radiata",
+      "density_kg_m3": 420.0,
+      "youngs_modulus_pa": 10200000000.0,
+      "bar_longitudinal_speed_m_s": 4930.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "pine_other",
+      "name": "Pine",
+      "variant": "other",
+      "bar_longitudinal_speed_m_s": 4830.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.06,
+      "ranges": {
+        "density_kg_m3": [
+          350.0,
+          590.0
+        ],
+        "youngs_modulus_pa": [
+          8199999999.999999,
+          13700000000.0
+        ]
+      },
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "plywood_fir",
+      "name": "Plywood",
+      "variant": "fir",
+      "density_kg_m3": 600.0,
+      "youngs_modulus_pa": 8300000000.000001,
+      "bar_longitudinal_speed_m_s": 4540.0,
+      "loss_factor": 0.01,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood; the printed speed is +22 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md"
+    },
+    {
+      "key": "poplar",
+      "name": "Poplar",
+      "youngs_modulus_pa": 10000000000.0,
+      "bar_longitudinal_speed_m_s": 4900.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "ranges": {
+        "density_kg_m3": [
+          350.0,
+          500.0
+        ]
+      },
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "redwood_old",
+      "name": "Redwood",
+      "variant": "old",
+      "density_kg_m3": 390.0,
+      "youngs_modulus_pa": 9600000000.0,
+      "bar_longitudinal_speed_m_s": 4960.0,
+      "poisson_ratio": 0.36,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "redwood_2nd_growth",
+      "name": "Redwood",
+      "variant": "2nd growth",
+      "density_kg_m3": 340.0,
+      "youngs_modulus_pa": 6600000000.0,
+      "bar_longitudinal_speed_m_s": 4410.0,
+      "poisson_ratio": 0.36,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "scots_pine",
+      "name": "Scots pine",
+      "density_kg_m3": 500.0,
+      "youngs_modulus_pa": 10100000000.0,
+      "bar_longitudinal_speed_m_s": 4490.0,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "spruce_sitka",
+      "name": "Spruce",
+      "variant": "Sitka",
+      "density_kg_m3": 400.0,
+      "youngs_modulus_pa": 9600000000.0,
+      "bar_longitudinal_speed_m_s": 4900.0,
+      "poisson_ratio": 0.37,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "spruce_engelmann",
+      "name": "Spruce",
+      "variant": "Engelmann",
+      "density_kg_m3": 350.0,
+      "youngs_modulus_pa": 8900000000.0,
+      "bar_longitudinal_speed_m_s": 5040.0,
+      "poisson_ratio": 0.42,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "teak",
+      "name": "Teak",
+      "density_kg_m3": 550.0,
+      "youngs_modulus_pa": 14600000000.0,
+      "bar_longitudinal_speed_m_s": 5150.0,
+      "loss_factor": 0.02,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "walnut_black",
+      "name": "Walnut",
+      "variant": "black",
+      "density_kg_m3": 550.0,
+      "youngs_modulus_pa": 11600000000.0,
+      "bar_longitudinal_speed_m_s": 4590.0,
+      "poisson_ratio": 0.49,
+      "loss_factor": 0.04,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "wood_chipboard_floor",
+      "name": "Wood chipboard",
+      "variant": "floor",
+      "density_kg_m3": 700.0,
+      "youngs_modulus_pa": 2800000000.0,
+      "bar_longitudinal_speed_m_s": 1980.0,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "wood_chipboard_std",
+      "name": "Wood chipboard",
+      "variant": "std",
+      "density_kg_m3": 625.0,
+      "youngs_modulus_pa": 2100000000.0,
+      "bar_longitudinal_speed_m_s": 1830.0,
+      "loss_factor": 0.005,
+      "in_situ_loss_factor": 0.05,
+      "note": "the page groups this row under wood"
+    },
+    {
+      "key": "lucite",
+      "name": "Lucite",
+      "density_kg_m3": 1200.0,
+      "youngs_modulus_pa": 4000000000.0,
+      "bar_longitudinal_speed_m_s": 1830.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.002,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "plexiglass_acrylic",
+      "name": "Plexiglass (acrylic)",
+      "density_kg_m3": 1190.0,
+      "youngs_modulus_pa": 3500000000.0,
+      "bar_longitudinal_speed_m_s": 1710.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.002,
+      "in_situ_loss_factor": 0.02,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polycarbonate",
+      "name": "Polycarbonate",
+      "density_kg_m3": 1200.0,
+      "youngs_modulus_pa": 2300000000.0,
+      "bar_longitudinal_speed_m_s": 1380.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polyester_thermo",
+      "name": "Polyester (thermo)",
+      "density_kg_m3": 1310.0,
+      "youngs_modulus_pa": 2300000000.0,
+      "bar_longitudinal_speed_m_s": 1320.0,
+      "poisson_ratio": 0.4,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polyethylene_high_density",
+      "name": "Polyethylene",
+      "variant": "high density",
+      "bar_longitudinal_speed_m_s": 1030.0,
+      "poisson_ratio": 0.44,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "ranges": {
+        "density_kg_m3": [
+          940.0,
+          960.0
+        ],
+        "youngs_modulus_pa": [
+          700000000.0,
+          1400000000.0
+        ]
+      },
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polyethylene_low_density",
+      "name": "Polyethylene",
+      "variant": "low density",
+      "bar_longitudinal_speed_m_s": 600.0,
+      "poisson_ratio": 0.44,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "ranges": {
+        "density_kg_m3": [
+          910.0,
+          925.0
+        ],
+        "youngs_modulus_pa": [
+          200000000.0,
+          500000000.0
+        ]
+      },
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polypropylene",
+      "name": "Polypropylene",
+      "density_kg_m3": 905.0,
+      "bar_longitudinal_speed_m_s": 1380.0,
+      "poisson_ratio": 0.4,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "ranges": {
+        "youngs_modulus_pa": [
+          1400000000.0,
+          2100000000.0
+        ]
+      },
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polystyrene_moulded",
+      "name": "Polystyrene",
+      "variant": "moulded",
+      "density_kg_m3": 1050.0,
+      "youngs_modulus_pa": 3200000000.0,
+      "bar_longitudinal_speed_m_s": 1750.0,
+      "poisson_ratio": 0.34,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polystyrene_expanded_foam",
+      "name": "Polystyrene",
+      "variant": "expanded foam",
+      "bar_longitudinal_speed_m_s": 300.0,
+      "poisson_ratio": 0.3,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.02,
+      "ranges": {
+        "density_kg_m3": [
+          16.0,
+          32.0
+        ],
+        "youngs_modulus_pa": [
+          1200000.0,
+          3500000.0
+        ]
+      },
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "polyurethane",
+      "name": "Polyurethane",
+      "density_kg_m3": 900.0,
+      "youngs_modulus_pa": 1600000000.0,
+      "bar_longitudinal_speed_m_s": 1330.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "pvc",
+      "name": "PVC",
+      "density_kg_m3": 1400.0,
+      "youngs_modulus_pa": 2800000000.0,
+      "bar_longitudinal_speed_m_s": 1410.0,
+      "poisson_ratio": 0.4,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "pvdf",
+      "name": "PVDF",
+      "density_kg_m3": 1760.0,
+      "youngs_modulus_pa": 1500000000.0,
+      "bar_longitudinal_speed_m_s": 920.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "nylon_6",
+      "name": "Nylon 6",
+      "density_kg_m3": 1200.0,
+      "youngs_modulus_pa": 2400000000.0,
+      "bar_longitudinal_speed_m_s": 1410.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "nylon_66",
+      "name": "Nylon 66",
+      "bar_longitudinal_speed_m_s": 1590.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "ranges": {
+        "density_kg_m3": [
+          1120.0,
+          1150.0
+        ],
+        "youngs_modulus_pa": [
+          2700000000.0,
+          3000000000.0
+        ]
+      },
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "nylon_12",
+      "name": "Nylon 12",
+      "density_kg_m3": 1010.0,
+      "bar_longitudinal_speed_m_s": 1170.0,
+      "poisson_ratio": 0.35,
+      "loss_factor": 0.003,
+      "in_situ_loss_factor": 0.1,
+      "ranges": {
+        "youngs_modulus_pa": [
+          1200000000.0,
+          1600000000.0
+        ]
+      },
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "rubber_neoprene",
+      "name": "Rubber-neoprene",
+      "bar_longitudinal_speed_m_s": 190.0,
+      "poisson_ratio": 0.49,
+      "loss_factor": 0.05,
+      "in_situ_loss_factor": 0.1,
+      "ranges": {
+        "density_kg_m3": [
+          1100.0,
+          1200.0
+        ],
+        "youngs_modulus_pa": [
+          10000000.0,
+          100000000.0
+        ]
+      },
+      "note": "the page groups this row under plastics and other"
+    },
+    {
+      "key": "kevlar_49_cloth",
+      "name": "Kevlar 49 cloth",
+      "density_kg_m3": 1330.0,
+      "youngs_modulus_pa": 31000000000.0,
+      "bar_longitudinal_speed_m_s": 4830.0,
+      "loss_factor": 0.008,
+      "note": "the page groups this row under plastics and other; the loss factor column prints one number here where it prints two elsewhere, so only the internal one is held"
+    },
+    {
+      "key": "aluminum_honeycomb_64_mm_cell_005_mm_foil",
+      "name": "Aluminum honeycomb",
+      "variant": "6,4 mm cell, 0,05 mm foil",
+      "density_kg_m3": 72.0,
+      "youngs_modulus_pa": 1310000000.0,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
+      "unquantified": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      }
+    },
+    {
+      "key": "aluminum_honeycomb_64_mm_cell_008_mm_foil",
+      "name": "Aluminum honeycomb",
+      "variant": "6,4 mm cell, 0,08 mm foil",
+      "density_kg_m3": 96.0,
+      "youngs_modulus_pa": 2240000000.0,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
+      "unquantified": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      }
+    },
+    {
+      "key": "aluminum_honeycomb_95_mm_cell_005_mm_foil",
+      "name": "Aluminum honeycomb",
+      "variant": "9,5 mm cell, 0,05 mm foil",
+      "density_kg_m3": 48.0,
+      "youngs_modulus_pa": 760000000.0,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
+      "unquantified": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      }
+    },
+    {
+      "key": "aluminum_honeycomb_95_mm_cell_013_mm_foil",
+      "name": "Aluminum honeycomb",
+      "variant": "9,5 mm cell, 0,13 mm foil",
+      "density_kg_m3": 101.0,
+      "youngs_modulus_pa": 1860000000.0,
+      "loss_factor": 0.0001,
+      "in_situ_loss_factor": 0.01,
+      "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
+      "unquantified": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      }
+    }
+  ]
+}

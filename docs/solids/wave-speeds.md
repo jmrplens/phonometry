@@ -111,11 +111,16 @@ Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` holds seventy-eight rows read from three published tables:
+`PUBLISHED_SOLIDS` holds one hundred and eighty-three rows read from four
+published tables:
 Hopkins **Table A2**, twenty-five building materials; Cremer 3e **Table 4.3**,
 thirteen metals over fifteen rows; and Mechel **Table 3**, thirty-eight
 construction materials, plastics and metals. The key names the table, because
-three of them print a steel and they are not the same steel.
+three of them print a steel and they are not the same steel. Bies 5e
+**Table C.1** adds one hundred and five metals, building materials, woods,
+plastics and honeycomb panels, and its loss factor column is two quantities and
+not a range: the low end is the internal loss factor and the high end the one a
+panel has once it is installed.
 
 ```python
 from phonometry import solids

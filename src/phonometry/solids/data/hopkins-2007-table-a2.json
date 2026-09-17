@@ -5,10 +5,10 @@
     {
       "key": "aircrete",
       "name": "Aircrete/Autoclaved Aerated Concrete (AAC) blocks (solid) connected with mortar or thin joint compound",
-      "longitudinal_speed_m_s": 1900.0,
+      "plate_longitudinal_speed_m_s": 1900.0,
       "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.0125,
       "thickness_critical_frequency_product_m_hz": 34.1,
-      "loss_factor": 0.0125,
       "estimated": [
         "poisson_ratio"
       ],
@@ -17,7 +17,7 @@
           400.0,
           800.0
         ],
-        "longitudinal_speed_m_s": [
+        "plate_longitudinal_speed_m_s": [
           1600.0,
           2300.0
         ]
@@ -30,18 +30,18 @@
     {
       "key": "aluminium",
       "name": "Aluminium",
-      "longitudinal_speed_m_s": 5100.0,
+      "density_kg_m3": 2700.0,
+      "plate_longitudinal_speed_m_s": 5100.0,
       "poisson_ratio": 0.34,
       "thickness_critical_frequency_product_m_hz": 12.7,
-      "density_kg_m3": 2700.0,
       "ranges": {
-        "loss_factor": [
+        "flexural_loss_factor": [
           0.0,
           0.001
         ]
       },
       "bounded_above": [
-        "loss_factor"
+        "flexural_loss_factor"
       ],
       "attributed_to": {
         "row": "Heckl, 1981"
@@ -50,12 +50,12 @@
     {
       "key": "brick",
       "name": "Bricks (solid) connected with mortar",
-      "longitudinal_speed_m_s": 2700.0,
+      "plate_longitudinal_speed_m_s": 2700.0,
       "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
       "thickness_critical_frequency_product_m_hz": 24.0,
-      "loss_factor": 0.01,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "ranges": {
@@ -71,11 +71,11 @@
     {
       "key": "calcium_silicate_block",
       "name": "Calcium-silicate blocks (solid) connected with thin joint compound",
-      "longitudinal_speed_m_s": 2500.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 25.9,
       "density_kg_m3": 1800.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 2500.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 25.9,
       "estimated": [
         "poisson_ratio"
       ],
@@ -86,13 +86,13 @@
     {
       "key": "chipboard",
       "name": "Chipboard",
-      "longitudinal_speed_m_s": 2200.0,
-      "poisson_ratio": 0.3,
-      "thickness_critical_frequency_product_m_hz": 29.5,
       "density_kg_m3": 760.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 2200.0,
+      "poisson_ratio": 0.3,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 29.5,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -102,13 +102,13 @@
     {
       "key": "clinker_concrete_block_1030",
       "name": "Clinker concrete blocks (solid) connected with mortar",
-      "longitudinal_speed_m_s": 1850.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 35.1,
       "density_kg_m3": 1030.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 1850.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 35.1,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -118,13 +118,13 @@
     {
       "key": "clinker_concrete_block_1720",
       "name": "Clinker concrete blocks (solid) connected with mortar",
-      "longitudinal_speed_m_s": 2200.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 29.5,
       "density_kg_m3": 1720.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 2200.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 29.5,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -134,13 +134,13 @@
     {
       "key": "clinker_concrete_slab",
       "name": "Clinker concrete slabs",
-      "longitudinal_speed_m_s": 1910.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 34.0,
       "density_kg_m3": 1725.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 1910.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 34.0,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -150,13 +150,13 @@
     {
       "key": "concrete_cast_in_situ",
       "name": "Concrete, cast in situ",
-      "longitudinal_speed_m_s": 3800.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 17.1,
       "density_kg_m3": 2200.0,
-      "loss_factor": 0.005,
+      "plate_longitudinal_speed_m_s": 3800.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.005,
+      "thickness_critical_frequency_product_m_hz": 17.1,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -166,13 +166,13 @@
     {
       "key": "dense_aggregate_block",
       "name": "Dense aggregate blocks (solid) connected with mortar",
-      "longitudinal_speed_m_s": 3200.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 20.3,
       "density_kg_m3": 2000.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 3200.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 20.3,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -182,13 +182,13 @@
     {
       "key": "expanded_clay_block",
       "name": "Expanded clay blocks (solid) connected with mortar",
-      "longitudinal_speed_m_s": 2300.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 28.2,
       "density_kg_m3": 800.0,
-      "loss_factor": 0.007,
+      "plate_longitudinal_speed_m_s": 2300.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.007,
+      "thickness_critical_frequency_product_m_hz": 28.2,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -198,12 +198,12 @@
     {
       "key": "glass",
       "name": "Glass",
-      "longitudinal_speed_m_s": 5200.0,
+      "density_kg_m3": 2500.0,
+      "plate_longitudinal_speed_m_s": 5200.0,
       "poisson_ratio": 0.24,
       "thickness_critical_frequency_product_m_hz": 12.5,
-      "density_kg_m3": 2500.0,
       "ranges": {
-        "loss_factor": [
+        "flexural_loss_factor": [
           0.003,
           0.006
         ]
@@ -215,13 +215,13 @@
     {
       "key": "lightweight_aggregate_block",
       "name": "Lightweight aggregate blocks (solid) connected with mortar",
-      "longitudinal_speed_m_s": 2200.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 29.5,
       "density_kg_m3": 1400.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 2200.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 29.5,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -231,13 +231,13 @@
     {
       "key": "mdf",
       "name": "Medium Density Fibreboard (MDF)",
-      "longitudinal_speed_m_s": 2560.0,
-      "poisson_ratio": 0.3,
-      "thickness_critical_frequency_product_m_hz": 25.3,
       "density_kg_m3": 760.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 2560.0,
+      "poisson_ratio": 0.3,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 25.3,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -247,11 +247,11 @@
     {
       "key": "mortar",
       "name": "Mortar",
-      "longitudinal_speed_m_s": 2450.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 26.5,
       "density_kg_m3": 1600.0,
-      "loss_factor": 0.013,
+      "plate_longitudinal_speed_m_s": 2450.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.013,
+      "thickness_critical_frequency_product_m_hz": 26.5,
       "attributed_to": {
         "row": "Maysenholder and Horvatic, 1998"
       }
@@ -259,17 +259,17 @@
     {
       "key": "osb",
       "name": "Oriented Strand Board (OSB)",
-      "longitudinal_speed_m_s": 2570.0,
-      "poisson_ratio": 0.3,
-      "thickness_critical_frequency_product_m_hz": 25.2,
       "density_kg_m3": 590.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 2570.0,
+      "poisson_ratio": 0.3,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 25.2,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "ranges": {
-        "longitudinal_speed_m_s": [
+        "plate_longitudinal_speed_m_s": [
           2200.0,
           3500.0
         ]
@@ -282,10 +282,10 @@
     {
       "key": "perspex",
       "name": "Perspex, plexiglass",
-      "longitudinal_speed_m_s": 2350.0,
+      "density_kg_m3": 1250.0,
+      "plate_longitudinal_speed_m_s": 2350.0,
       "poisson_ratio": 0.3,
       "thickness_critical_frequency_product_m_hz": 27.6,
-      "density_kg_m3": 1250.0,
       "estimated": [
         "poisson_ratio"
       ],
@@ -296,13 +296,13 @@
     {
       "key": "plaster_gypsum",
       "name": "Plaster, gypsum based",
-      "longitudinal_speed_m_s": 1610.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 40.3,
       "density_kg_m3": 650.0,
-      "loss_factor": 0.012,
+      "plate_longitudinal_speed_m_s": 1610.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.012,
+      "thickness_critical_frequency_product_m_hz": 40.3,
       "estimated": [
-        "loss_factor",
+        "flexural_loss_factor",
         "poisson_ratio"
       ],
       "attributed_to": {
@@ -312,11 +312,11 @@
     {
       "key": "plasterboard_natural_gypsum",
       "name": "Plasterboard, natural gypsum",
-      "longitudinal_speed_m_s": 1490.0,
-      "poisson_ratio": 0.3,
-      "thickness_critical_frequency_product_m_hz": 43.5,
       "density_kg_m3": 860.0,
-      "loss_factor": 0.0141,
+      "plate_longitudinal_speed_m_s": 1490.0,
+      "poisson_ratio": 0.3,
+      "flexural_loss_factor": 0.0141,
+      "thickness_critical_frequency_product_m_hz": 43.5,
       "estimated": [
         "poisson_ratio"
       ],
@@ -327,11 +327,11 @@
     {
       "key": "plasterboard_flue_gas_gypsum",
       "name": "Plasterboard, combination of flue gas gypsum and natural gypsum",
-      "longitudinal_speed_m_s": 1810.0,
-      "poisson_ratio": 0.3,
-      "thickness_critical_frequency_product_m_hz": 35.8,
       "density_kg_m3": 680.0,
-      "loss_factor": 0.0125,
+      "plate_longitudinal_speed_m_s": 1810.0,
+      "poisson_ratio": 0.3,
+      "flexural_loss_factor": 0.0125,
+      "thickness_critical_frequency_product_m_hz": 35.8,
       "estimated": [
         "poisson_ratio"
       ],
@@ -342,10 +342,10 @@
     {
       "key": "plasterboard_glass_fibre",
       "name": "Plasterboard, gypsum with glass fibre and other additives",
-      "longitudinal_speed_m_s": 2010.0,
+      "density_kg_m3": 800.0,
+      "plate_longitudinal_speed_m_s": 2010.0,
       "poisson_ratio": 0.3,
       "thickness_critical_frequency_product_m_hz": 32.3,
-      "density_kg_m3": 800.0,
       "estimated": [
         "poisson_ratio"
       ],
@@ -356,11 +356,11 @@
     {
       "key": "plywood_birch",
       "name": "Plywood (Birch)",
-      "longitudinal_speed_m_s": 3850.0,
-      "poisson_ratio": 0.3,
-      "thickness_critical_frequency_product_m_hz": 16.8,
       "density_kg_m3": 710.0,
-      "loss_factor": 0.016,
+      "plate_longitudinal_speed_m_s": 3850.0,
+      "poisson_ratio": 0.3,
+      "flexural_loss_factor": 0.016,
+      "thickness_critical_frequency_product_m_hz": 16.8,
       "estimated": [
         "poisson_ratio"
       ],
@@ -371,11 +371,11 @@
     {
       "key": "sand_cement_screed",
       "name": "Sand-cement screed",
-      "longitudinal_speed_m_s": 3250.0,
-      "poisson_ratio": 0.2,
-      "thickness_critical_frequency_product_m_hz": 20.0,
       "density_kg_m3": 2000.0,
-      "loss_factor": 0.01,
+      "plate_longitudinal_speed_m_s": 3250.0,
+      "poisson_ratio": 0.2,
+      "flexural_loss_factor": 0.01,
+      "thickness_critical_frequency_product_m_hz": 20.0,
       "estimated": [
         "poisson_ratio"
       ],
@@ -386,32 +386,32 @@
     {
       "key": "steel",
       "name": "Steel",
-      "longitudinal_speed_m_s": 5270.0,
+      "density_kg_m3": 7800.0,
+      "plate_longitudinal_speed_m_s": 5270.0,
       "poisson_ratio": 0.28,
       "thickness_critical_frequency_product_m_hz": 12.3,
-      "density_kg_m3": 7800.0,
       "ranges": {
-        "loss_factor": [
+        "flexural_loss_factor": [
           0.0,
           0.0001
         ]
       },
       "bounded_above": [
-        "loss_factor"
+        "flexural_loss_factor"
       ],
       "attributed_to": {
-        "longitudinal_speed_m_s": "Fahy, 1985",
+        "plate_longitudinal_speed_m_s": "Fahy, 1985",
         "poisson_ratio": "Fahy, 1985",
-        "loss_factor": "Heckl, 1981"
+        "flexural_loss_factor": "Heckl, 1981"
       }
     },
     {
       "key": "timber_softwood",
       "name": "Timber (soft wood) used for joists, studs or battens",
-      "longitudinal_speed_m_s": 5000.0,
+      "density_kg_m3": 440.0,
+      "plate_longitudinal_speed_m_s": 5000.0,
       "poisson_ratio": 0.3,
       "thickness_critical_frequency_product_m_hz": 13.0,
-      "density_kg_m3": 440.0,
       "estimated": [
         "poisson_ratio"
       ],

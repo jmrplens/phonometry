@@ -192,7 +192,10 @@ SOURCED: dict[tuple[str, str], str] = {
     (
         "solids/catalogue.py",
         "PUBLISHED_SOLIDS",
-    ): "Hopkins (2007) Table A2, twenty-five solid materials",
+    ): (
+        "Hopkins (2007) Table A2, twenty-five solid materials; "
+        "Cremer 3e Table 4.3, thirteen metals over fifteen rows"
+    ),
     (
         "noise_control/duct_modes.py",
         "CIRCULAR_EIGENVALUES",
@@ -523,36 +526,42 @@ DATA_FILE = re.compile(r"``([\w./-]+\.json)``")
 
 
 def data_citation(banner: str) -> tuple[str, str | None]:
-    """The data file *banner* names and the ``source`` inside it.
+    """The data files *banner* names and the citations inside them.
 
     A table read out of a packaged file cites the page once, in the file, and
     the banner points at the file. Reading it back here is what lets the two
-    stay one thing: there is no second copy of the citation to go stale.
+    stay one thing: there is no second copy of the citation to go stale. A
+    constant built from several files names them all, and every one of them
+    has to say where it came from: the one that did not would otherwise hide
+    behind the ones that did.
 
-    :return: The file the banner names, empty when it names none, and that
-        file's citation, or ``None`` when the file is not there or carries no
-        ``source``. A banner pointing at a file that has moved is its own
-        defect and the caller reports it as one: falling back to the banner's
-        own words would let a stale pointer pass unseen.
+    :return: The files the banner names joined by ``"; "``, empty when it
+        names none, and their citations joined the same way, or ``None`` when
+        any of them is missing, unreadable or says nothing about a page.
     """
-    found = DATA_FILE.search(banner)
-    if found is None:
+    names = DATA_FILE.findall(banner)
+    if not names:
         return "", None
-    name = found.group(1)
-    path = PACKAGE / name
-    if not path.is_file():
-        return name, None
-    try:
-        document = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
-        # A file that cannot be read cannot vouch for a page. Saying so through
-        # the same return the caller already reports beats a traceback, which
-        # would stop the walk and leave every later module unchecked.
-        return name, None
-    if not isinstance(document, dict):
-        return name, None
-    source = document.get("source")
-    return name, source if isinstance(source, str) else None
+    cites: list[str] = []
+    for name in names:
+        path = PACKAGE / name
+        if not path.is_file():
+            return "; ".join(names), None
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            # A file that cannot be read cannot vouch for a page. Saying so
+            # through the same return the caller already reports beats a
+            # traceback, which would stop the walk and leave every later
+            # module unchecked.
+            return "; ".join(names), None
+        if not isinstance(document, dict):
+            return "; ".join(names), None
+        source = document.get("source")
+        if not isinstance(source, str):
+            return "; ".join(names), None
+        cites.append(source)
+    return "; ".join(names), "; ".join(cites)
 
 
 def module_tables(path: pathlib.Path) -> Iterator[tuple[str, str, str, str | None]]:

@@ -154,9 +154,8 @@ def test_a_field_name_the_dataclass_does_not_have_fails_at_construction() -> Non
             "key": "steel",
             "name": "Steel",
             "source": "Hopkins (2007) Table A2, PDF page 635 (printed p. 607)",
-            "longitudinal_speed_m_s": 5270.0,
+            "plate_longitudinal_speed_m_s": 5270.0,
             "poisson_ratio": 0.28,
-            "thickness_critical_frequency_product_m_hz": 12.3,
             "densty_kg_m3": 7800.0,
         }
     )

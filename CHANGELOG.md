@@ -9,35 +9,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **Twenty-five solids as one published table prints them.**
-  `solids.PUBLISHED_SOLIDS` is Hopkins Table A2: masonry, boards,
-  plasterboards, glass, steel, aluminium and timber, each with the density,
-  the quasi-longitudinal speed, the Poisson ratio, the loss factor and the
-  `h f_c` product the page gives, and each naming the page. `SolidMaterial`
-  also computes the Young's modulus the table does not print, from the row's
-  own speed and density, which is the conversion `solids` was added for.
+- **Forty published solids from two books, and a row that can hold both.**
+  `solids.PUBLISHED_SOLIDS` is Hopkins **Table A2**, twenty-five building
+  materials, and Cremer 3e **Table 4.3**, thirteen metals over fifteen rows.
+  Each row is keyed by the table it came from, because both books print a steel
+  at 7 800 kg/m3 and they are not the same steel: 199,6 GPa at a Poisson ratio
+  of 0,28 against 210 GPa at 0,31. `solids_named` gathers every book's reading
+  of one material, and choosing between them stays the caller's call.
 
-  What the row will not do is the interesting part. A materials table is not a
-  list of measurements: twenty-one of the twenty-five Poisson ratios and twelve
-  of the twenty-two loss factors in Table A2 carry a footnote whose whole text
-  is "Estimate", so the book stands behind four Poisson ratios, not
-  twenty-five. That distinction is kept, because a 0.2 read as a measurement
-  will be trusted further than Hopkins trusts it.
+  **Three speeds are three fields.** Cremer's `c_LII` and Bies' `sqrt(E/rho)`
+  are the bar speed, Hopkins' quasi-longitudinal is the plate speed, and Cremer
+  puts the gap to the pure longitudinal speed at 16 per cent for a Poisson
+  ratio of 0,3. One field holding whichever the page happened to print is the
+  mistake this catalogue exists to prevent, so `bar_longitudinal_speed_m_s`,
+  `plate_longitudinal_speed_m_s` and `bulk_longitudinal_speed_m_s` are separate and every row carries all three:
+  whichever one its page printed is read, and the others follow from the row's
+  own cells. The loss factors are three fields for the same reason, because a
+  flexural loss factor is measured in bending, a longitudinal one is not, and
+  an in-situ one is a property of an installed panel and not of a material.
 
-  Nor is every cell a number. Aircrete and brick print a density range and not
-  a value, so those rows carry the interval and `youngs_modulus_pa()` refuses
-  rather than quietly taking the midpoint of a range the page chose not to
-  collapse. Seven cells in all are intervals: two densities, two wave speeds
-  and three loss factors, two of which are upper bounds rather than bands. OSB
-  is orthotropic and its quoted speed is an effective one. Rows the book credits
-  to Rindel, Schmitz, Heckl or Fahy keep the credit, and the steel row keeps
-  two of them across three cells.
+  What a page said instead of a number now survives the trip into the package.
+  `estimated` is the footnote that reads "Estimate", `approximate` is a `~` the
+  author wrote on purpose, `ranges` and `bounded_above` are the cells printed as
+  an interval or a bound, `unquantified` is a cell that is neither empty nor
+  numeric, `borrowed` is a value a book took from a similar material, and
+  `variant` tells apart two specimens a page prints under one name, as Cremer
+  does for lead, whose two flexural loss factors differ by a factor of fifty.
+  `why_missing` answers, in the page's own terms, why a field is `None`.
 
-  The rows themselves are a data file inside the package,
-  `solids/data/hopkins-2007-table-a2.json`, one record per material, read at
-  import. The citation is written once, in the file that holds the rows, and
-  the provenance gate reads it from there, so a second table is a second file
-  and not a longer literal.
+  Nothing computed is stored as though it had been read: `derived` names, for
+  each field this library worked out, the cells it came from. Cremer Table 4.3
+  is the one table in the catalogue that prints the modulus, the shear modulus,
+  the Poisson ratio and both speeds together, so every row of it checks three
+  independent relations at once, and its bracketed references are resolved to
+  their authors from the book's own list rather than left as `[4.19]`.
+
+  The rows are data files inside the package, one per published table, with the
+  citation written once in the file that holds them; `check_published_sources.py`
+  reads it from there, and a constant built from several files has to have a
+  citation in every one of them.
 
 - **`phonometry.solids`**, the elastic constants of a solid and the three
   longitudinal wave speeds that follow from them. A beam, a plate and an

@@ -100,10 +100,12 @@ neither. A field is `None` when the page had nothing to put there, and
 **The three longitudinal speeds are three fields**, because they are three
 different waves and the books do not agree on what to call them. Cremer's
 `c_LII` and Bies' `sqrt(E/rho)` are the bar speed; Hopkins'
-quasi-longitudinal is the plate speed; they differ by 16 per cent at
-`nu = 0.3`, which Cremer says in so many words. One field holding
-whichever the page happened to print is the mistake this catalogue exists
-to prevent, so there is no such field.
+quasi-longitudinal is the plate speed; and the bulk speed is neither. At
+`nu = 0.3` the plate speed is 4.8 per cent above the bar speed and the
+bulk speed is 16 per cent above it, which is the figure Cremer prints
+under his Eq. (3.32) with the warning that it matters which one is meant.
+One field holding whichever the page happened to print is the mistake this
+catalogue exists to prevent, so there is no such field.
 
 **The loss factors are three fields** for the same reason. A flexural loss
 factor is measured in bending and a longitudinal one is not; an in-situ

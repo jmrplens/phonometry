@@ -26,6 +26,7 @@ from phonometry.solids import (
     SolidMaterial,
     beam_longitudinal_speed,
     bulk_longitudinal_speed,
+    plate_longitudinal_speed,
     solids_named,
 )
 
@@ -433,6 +434,25 @@ def test_the_gap_cremer_prints_between_bar_and_bulk_comes_out_of_the_functions()
     bulk = bulk_longitudinal_speed(modulus, density_kg_m3=density, poisson_ratio=nu)
 
     assert bulk / bar - 1.0 == pytest.approx(ref.CREMER_BAR_TO_BULK_AT_NU_0_3, abs=5e-4)
+
+
+def test_the_plate_speed_sits_between_the_other_two() -> None:
+    """The gap Cremer prints is bar against bulk, not bar against plate.
+
+    The prose of this package quotes his 16 per cent, and a reader who took it
+    for the bar-to-plate gap would be out by a factor of three. Pinning both
+    numbers here keeps that particular slip in the suite rather than only in
+    the documentation, where nothing checks it.
+    """
+    modulus, density, nu = 200e9, 7800.0, 0.3
+
+    bar = beam_longitudinal_speed(modulus, density_kg_m3=density)
+    plate = plate_longitudinal_speed(modulus, density_kg_m3=density, poisson_ratio=nu)
+    bulk = bulk_longitudinal_speed(modulus, density_kg_m3=density, poisson_ratio=nu)
+
+    assert plate / bar == pytest.approx(1.0 / math.sqrt(1.0 - nu**2))
+    assert plate / bar - 1.0 == pytest.approx(0.048, abs=5e-4)
+    assert bar < plate < bulk
 
 
 def test_the_oracle_covers_every_attribution_in_the_data_file() -> None:

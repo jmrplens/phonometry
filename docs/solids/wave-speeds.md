@@ -111,7 +111,7 @@ Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` holds one hundred and eighty-three rows read from four
+`PUBLISHED_SOLIDS` holds two hundred and nineteen rows read from six
 published tables:
 Hopkins **Table A2**, twenty-five building materials; Cremer 3e **Table 4.3**,
 thirteen metals over fifteen rows; and Mechel **Table 3**, thirty-eight
@@ -136,10 +136,11 @@ That modulus is not in the table: it is the inverse above run on the row's own
 cells, and `is_derived` and `derived` say so. A number this library computed is
 never stored as though a page had printed it.
 
-`solids_named("Steel")` gives both books' steels, 199,6 GPa at a Poisson ratio
-of 0,28 and 210 GPa at 0,31, and every row carries all three longitudinal
-speeds whenever its own cells allow it, so the comparison is between two books
-rather than between two waves. Two Hopkins rows, aircrete and brick, print a
+`solids_named("Steel")` gives the steel of four books, from Hopkins' 199,6 GPa
+at a Poisson ratio of 0,28 to Cremer's 210 GPa at 0,31 and Long's row with no
+modulus at all, and every row carries all three longitudinal speeds whenever
+its own cells allow it, so the comparison is between the books rather than
+between two waves. Two Hopkins rows, aircrete and brick, print a
 density only as a range and nothing follows from it, so they keep the plate
 speed the page printed and `why_missing` says why the others are absent.
 Cremer's own column is the bar speed: his Eq. (3.32) defines `c_LII` as
@@ -155,6 +156,18 @@ as a range. What crosses between Hopkins and Mechel without any assumption at
 all is `h f_c`, which Hopkins prints as a column and Mechel as `f_cr d`: for
 steel both print 12,3 m Hz, to the digit. Cremer prints no such column, so his
 rows carry a derived one.
+
+Two of the six tables qualify nothing. Long prints a "Speed of Longitudinal
+Waves" with no modulus and no Poisson ratio beside it, so nothing on the page
+says which of the three it is and the value goes in `longitudinal_speed_m_s`
+rather than in a named one. Comparing it with the tables that do say points at
+the bar speed, because his steel, at 5 050 m/s, is below every steel plate speed
+in the catalogue, but that is a hint and not a reading. Nine of his speed cells print a
+row of dots and one of his loss factors prints "Varies with frequency", and the
+rows say so. Arau prints the critical frequency of a one centimetre plate
+instead of the `h f_c` product, which is a change of unit; on that column he
+and Hopkins agree inside four per cent for aluminium, brick and glass and are
+nineteen per cent apart on steel.
 
 A materials table is not a list of measurements, and these say so. Most of
 Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is

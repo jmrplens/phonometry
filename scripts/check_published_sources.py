@@ -198,7 +198,9 @@ SOURCED: dict[tuple[str, str], str] = {
         "Mechel (2008) Table 3, thirty-eight construction materials, "
         "plastics and metals; "
         "Bies 5e Table C.1, one hundred and five metals, building materials, "
-        "woods, plastics and honeycomb panels"
+        "woods, plastics and honeycomb panels; "
+        "Long 2e Table 12.1, eighteen common building materials; "
+        "Arau-Puchades (1999) Table 4.1, seventeen materials over eighteen rows"
     ),
     (
         "noise_control/duct_modes.py",
@@ -634,18 +636,24 @@ def registry_problems() -> list[Problem]:
     for key, reason in SOURCED.items():
         registered = banners.get(key)
         where = f"{key[0]}::{key[1]}"
-        cite = reason.split(",")[0].strip()
-        try:
-            parsed = references.parse(cite)
-        except ValueError as error:
-            problems.append(
-                Problem(where, f"names {cite!r}, which does not parse: {error}")
-            )
-        else:
-            problems.extend(
-                Problem(where, detail)
-                for detail in _bibliography_problems(cite, parsed)
-            )
+        # A constant built from several tables registers them joined by "; ",
+        # and every one of them has to resolve: checking only the first would
+        # let five of six designations into the tree unparsed and absent from
+        # the bibliography, which is what happened while the solids catalogue
+        # grew from one book to six.
+        for entry in reason.split(";"):
+            cite = entry.split(",")[0].strip()
+            try:
+                parsed = references.parse(cite)
+            except ValueError as error:
+                problems.append(
+                    Problem(where, f"names {cite!r}, which does not parse: {error}")
+                )
+            else:
+                problems.extend(
+                    Problem(where, detail)
+                    for detail in _bibliography_problems(cite, parsed)
+                )
         if registered is None:
             problems.append(
                 Problem(where, f"is registered as {reason!r} and no longer exists")

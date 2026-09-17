@@ -133,7 +133,7 @@ del acero por un 0,8 por ciento.
 ## La tabla, y lo que no dice
 
 Teclear la fila a mano es la otra mitad del problema que resuelven las tres
-velocidades. `PUBLISHED_SOLIDS` tiene ciento ochenta y tres filas leídas de cuatro tablas
+velocidades. `PUBLISHED_SOLIDS` tiene doscientas diecinueve filas leídas de seis tablas
 publicadas, con la clave de la tabla de la que salieron, así que un tabique de
 placa de yeso o un forjado de hormigón parten de un número que alguien publicó
 y no de uno que uno recuerda a medias.
@@ -157,19 +157,30 @@ impreso una página.
 
 ### La clave nombra el libro a propósito
 
-Tres de las cuatro tablas imprimen un acero, y no son el mismo acero:
-Hopkins da una velocidad de placa de 5 270 m/s y un Poisson de 0,28, Cremer un
-módulo de 210 GPa y 0,31, y Mechel un módulo de 200 GPa y ningún Poisson. Un
+Cuatro de las seis tablas imprimen una fila llamada Steel, y no son el mismo
+acero: Hopkins da una velocidad de placa de 5 270 m/s y un Poisson de 0,28,
+Cremer un módulo de 210 GPa y 0,31, Bies 207 GPa para el dulce y 210 para el de
+uno por ciento de carbono, y Long una velocidad y una densidad y ningún módulo.
+Mechel también imprime un acero y lo llama «Steel, cast steel», así que la
+búsqueda no lo alcanza: emparejar un material entre libros es trabajo del
+acuerdo y no del nombre. Un
 `"steel"` a secas tendría que elegir uno de ellos sin decirlo, y elegir en
 silencio entre valores publicados es justo lo que un catálogo existe para no
 hacer.
 
 ```python
 for row in solids.solids_named("Steel"):
-    print(row.table, round(row.youngs_modulus_pa / 1e9, 1), row.poisson_ratio)
-# hopkins-2007-table-a2 199.6 0.28
-# cremer-2005-table-4-3 210.0 0.31
+    modulus = row.youngs_modulus_pa
+    print(row.table, row.variant or "-", modulus and round(modulus / 1e9, 1))
+# hopkins-2007-table-a2 - 199.6
+# cremer-2005-table-4-3 - 210.0
+# bies-2017-table-c1 mild 207.0
+# bies-2017-table-c1 1% carbon 210.0
+# long-2014-table-12-1 - None
 ```
+
+Long no imprime módulo, y por eso el bucle pregunta si lo hay antes de dividir.
+Que un libro dé menos columnas es aquí el caso normal, no la excepción.
 
 Cada fila lleva las tres velocidades longitudinales siempre que sus propias
 celdas lo permitan, así que la comparación es entre los libros y no entre dos
@@ -229,6 +240,38 @@ print(steel.loss_factor, steel.in_situ_loss_factor)
 Su extremo interno cae donde ponen ese mismo número los otros libros: Cremer
 mide el factor de pérdidas a flexión del acero entre 0,2 y 3 por 10⁻⁴, y Mechel
 imprime 1 por 10⁻⁴.
+
+### Cuando la página no dice cuál
+
+Long imprime una velocidad longitudinal sin decir cuál de las tres es, y tanto
+él como Arau imprimen un factor de pérdidas sin decir cuál; Arau no imprime
+ninguna velocidad. La columna de Long se titula «Speed of Longitudinal Waves» y
+a su lado no hay ni módulo ni coeficiente de Poisson, así que nada de la página
+puede decidir si es la de barra, la de placa o la de sólido extenso.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/steel"]
+print(steel.longitudinal_speed_m_s, steel.bar_longitudinal_speed_m_s)
+# 5050.0 None
+```
+
+Compararla con las cuatro tablas que sí lo dicen apunta a la de barra: su
+acero, con 5 050 m/s, queda por debajo de todas las velocidades de placa de los
+aceros del catálogo, que van de 5 270 a 5 458, y su aluminio coincide al dígito
+con la velocidad de barra que imprime Bies. Eso es
+un indicio y no una lectura, y una suposición metida en un campo con nombre se
+compararía después contra columnas que sí se leyeron, así que el valor se queda
+donde lo dejó la página.
+
+Esa misma página imprime una fila de puntos en nueve de sus celdas de velocidad
+y las palabras «Varies with frequency» en uno de sus factores de pérdidas, y
+las filas lo dicen en vez de quedarse vacías sin más.
+
+```python
+block = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/hollow_dense_concrete"]
+print(block.loss_factor, block.why_missing("loss_factor"))
+# None the table prints “Varies with frequency” where the number would be
+```
 
 ### Cuatro de veinticinco
 

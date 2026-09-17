@@ -130,7 +130,7 @@ steel row by 0,8 per cent.
 ## The table, and what it does not say
 
 Typing the row yourself is the other half of the problem the three speeds
-solve. `PUBLISHED_SOLIDS` holds one hundred and eighty-three rows read from four published tables, keyed
+solve. `PUBLISHED_SOLIDS` holds two hundred and nineteen rows read from six published tables, keyed
 by the table they came from, so a plasterboard partition or a concrete floor
 starts from a number somebody published rather than one you half remember.
 
@@ -152,19 +152,30 @@ number this library computed is never stored as though a page had printed it.
 
 ### The key names the book on purpose
 
-Three of the four tables print a steel, and they are not the same
+Four of the six tables print a row named Steel, and they are not the same
 steel: Hopkins gives a plate speed of 5 270 m/s and a Poisson ratio of 0,28,
-Cremer a modulus of 210 GPa and 0,31, Mechel a modulus of 200 GPa and no
-Poisson ratio at all. A flat `"steel"` would have to pick one of them without
+Cremer a modulus of 210 GPa and 0,31, Bies 207 GPa for mild steel and 210 for
+one per cent carbon, and Long a speed and a density and no modulus at all.
+Mechel prints a steel too and calls it "Steel, cast steel", so the lookup does
+not reach it: matching a material across books is the agreement work's job and
+not the name's. A flat `"steel"` would have to pick one of them without
 saying so, and picking silently between published values is the thing a
 catalogue exists not to do.
 
 ```python
 for row in solids.solids_named("Steel"):
-    print(row.table, round(row.youngs_modulus_pa / 1e9, 1), row.poisson_ratio)
-# hopkins-2007-table-a2 199.6 0.28
-# cremer-2005-table-4-3 210.0 0.31
+    modulus = row.youngs_modulus_pa
+    print(row.table, row.variant or "-", modulus and round(modulus / 1e9, 1))
+# hopkins-2007-table-a2 - 199.6
+# cremer-2005-table-4-3 - 210.0
+# bies-2017-table-c1 mild 207.0
+# bies-2017-table-c1 1% carbon 210.0
+# long-2014-table-12-1 - None
 ```
+
+Long prints no modulus at all, which is why the loop asks whether there is one
+before dividing. A book that gives fewer columns is the normal case here, not
+the exception.
 
 Every row carries all three longitudinal speeds whenever its own cells allow
 it, so the comparison is between the books and not between two waves. Two of
@@ -221,6 +232,37 @@ print(steel.loss_factor, steel.in_situ_loss_factor)
 His internal end is where the other books put the same number: Cremer measures
 steel's flexural loss factor between 0,2 and 3 times 10⁻⁴, and Mechel prints
 1 times 10⁻⁴.
+
+### When the page does not say which
+
+Long prints a longitudinal speed without saying which of the three it is, and
+both he and Arau print a loss factor without saying which; Arau prints no speed
+at all. Long's column is headed "Speed of Longitudinal Waves" and there is no
+modulus and no Poisson ratio beside it, so nothing on the page can settle
+whether it is the bar, the plate or the unbounded one.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/steel"]
+print(steel.longitudinal_speed_m_s, steel.bar_longitudinal_speed_m_s)
+# 5050.0 None
+```
+
+Comparing it with the four tables that do say points at the bar speed: his
+steel, at 5 050 m/s, is below every steel plate speed in the catalogue, which run
+from 5 270 to 5 458, and his aluminium matches Bies' printed bar speed to the
+digit. That is a hint and not a reading, and a guess
+put into a named field would then be compared against columns that were read,
+so the value stays where the page left it.
+
+The same page prints a row of dots in nine of its speed cells and the words
+"Varies with frequency" in one of its loss factors, and the rows say so rather
+than being quietly empty.
+
+```python
+block = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/hollow_dense_concrete"]
+print(block.loss_factor, block.why_missing("loss_factor"))
+# None the table prints “Varies with frequency” where the number would be
+```
 
 ### Four of twenty-five
 

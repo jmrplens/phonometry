@@ -1,0 +1,152 @@
+{
+  "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
+  "about": "Eighteen rows over seventeen materials, the glass twice because the page prints a damping factor for monolithic and another for laminated. The names are the ones the page prints, in Spanish, because a catalogue row says what its own page says; matching a material across books is the agreement work's job and not the name's, since Steel, Steel (mild) and Steel, cast steel do not match each other either. The page prints the critical frequency for a one centimetre plate rather than the h f_c product, so the product held here is that frequency times 0,01 m, which is a change of unit and not a derivation. There is no modulus, no Poisson ratio and no wave speed, so a row gives a density, that product and a damping factor and stops. Against Hopkins the aluminium and the brick agree inside one per cent and the glass inside four, and the steel is nineteen per cent low, which the agreement work has to report rather than smooth over: the page prints nothing that could settle it from the inside.",
+  "rows": [
+    {
+      "key": "ladrillo_macizo",
+      "name": "Ladrillo macizo",
+      "density_kg_m3": 1650.0,
+      "thickness_critical_frequency_product_m_hz": 23.8,
+      "loss_factor": 0.006
+    },
+    {
+      "key": "hormigon_denso",
+      "name": "Hormigón denso",
+      "density_kg_m3": 2350.0,
+      "thickness_critical_frequency_product_m_hz": 21.0,
+      "note": "the page prints the damping factor as 1 to 5 times 10^-3",
+      "ranges": {
+        "loss_factor": [
+          0.001,
+          0.005
+        ]
+      }
+    },
+    {
+      "key": "yeso",
+      "name": "Yeso",
+      "density_kg_m3": 1070.0,
+      "thickness_critical_frequency_product_m_hz": 33.25,
+      "loss_factor": 0.003
+    },
+    {
+      "key": "acero",
+      "name": "Acero",
+      "density_kg_m3": 7850.0,
+      "thickness_critical_frequency_product_m_hz": 10.0,
+      "note": "the page prints the damping factor as 1 to 6 times 10^-4",
+      "ranges": {
+        "loss_factor": [
+          0.0001,
+          0.0006
+        ]
+      }
+    },
+    {
+      "key": "aluminio",
+      "name": "Aluminio",
+      "density_kg_m3": 2700.0,
+      "thickness_critical_frequency_product_m_hz": 12.6,
+      "loss_factor": 0.0035
+    },
+    {
+      "key": "plomo",
+      "name": "Plomo",
+      "density_kg_m3": 11300.0,
+      "thickness_critical_frequency_product_m_hz": 50.0,
+      "note": "the page prints the damping factor as 0,5 to 2 times 10^-3",
+      "ranges": {
+        "loss_factor": [
+          0.0005,
+          0.002
+        ]
+      }
+    },
+    {
+      "key": "fibrocemento",
+      "name": "Fibrocemento",
+      "density_kg_m3": 1090.0,
+      "thickness_critical_frequency_product_m_hz": 37.0,
+      "loss_factor": 0.007
+    },
+    {
+      "key": "madera_cemento",
+      "name": "Madera-cemento",
+      "density_kg_m3": 1200.0,
+      "thickness_critical_frequency_product_m_hz": 50.0,
+      "loss_factor": 0.003
+    },
+    {
+      "key": "carton_yeso",
+      "name": "Cartón-yeso",
+      "density_kg_m3": 875.0,
+      "thickness_critical_frequency_product_m_hz": 46.7,
+      "loss_factor": 0.063
+    },
+    {
+      "key": "vidrio_monolitico",
+      "name": "Vidrio",
+      "variant": "monolítico",
+      "density_kg_m3": 2500.0,
+      "thickness_critical_frequency_product_m_hz": 12.0,
+      "loss_factor": 0.002
+    },
+    {
+      "key": "vidrio_laminar",
+      "name": "Vidrio",
+      "variant": "laminar",
+      "density_kg_m3": 2500.0,
+      "thickness_critical_frequency_product_m_hz": 12.0,
+      "loss_factor": 0.02
+    },
+    {
+      "key": "madera_aglomerada",
+      "name": "Madera aglomerada",
+      "density_kg_m3": 750.0,
+      "thickness_critical_frequency_product_m_hz": 29.6,
+      "loss_factor": 0.022
+    },
+    {
+      "key": "madera_pino",
+      "name": "Madera pino",
+      "density_kg_m3": 700.0,
+      "thickness_critical_frequency_product_m_hz": 16.7,
+      "loss_factor": 0.041
+    },
+    {
+      "key": "madera_contrachapada",
+      "name": "Madera contrachapada",
+      "density_kg_m3": 600.0,
+      "thickness_critical_frequency_product_m_hz": 20.75,
+      "loss_factor": 0.0028
+    },
+    {
+      "key": "madera_flandes",
+      "name": "Madera Flandes",
+      "density_kg_m3": 640.0,
+      "thickness_critical_frequency_product_m_hz": 17.14,
+      "loss_factor": 0.021
+    },
+    {
+      "key": "caucho_espumado",
+      "name": "Caucho espumado",
+      "density_kg_m3": 480.0,
+      "thickness_critical_frequency_product_m_hz": 270.78,
+      "loss_factor": 0.02
+    },
+    {
+      "key": "caucho_normal",
+      "name": "Caucho normal",
+      "density_kg_m3": 1000.0,
+      "thickness_critical_frequency_product_m_hz": 850.0,
+      "loss_factor": 0.05
+    },
+    {
+      "key": "poliestireno_extrusionado",
+      "name": "Poliestireno extrusionado",
+      "density_kg_m3": 33.0,
+      "thickness_critical_frequency_product_m_hz": 108.8,
+      "loss_factor": 0.01
+    }
+  ]
+}

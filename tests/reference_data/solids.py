@@ -416,4 +416,50 @@ SOLID_TABLE_SIZES: tuple[tuple[str, int], ...] = (
     ("cremer-2005-table-4-3", 15),
     ("mechel-2008-table-3", 38),
     ("bies-2017-table-c1", 105),
+    ("long-2014-table-12-1", 18),
+    ("arau-1999-table-4-1", 18),
+)
+
+
+# ---------------------------------------------------------------------------
+# Long 2e Table 12.1 and Arau-Puchades (1999) Table 4.1
+# PDF page 487 (printed p. 485) and PDF page 129 (printed p. 126)
+# ---------------------------------------------------------------------------
+#: Long's speed column against the bar and plate speeds the other four tables
+#: hold for the same metal. The steel row is the one that says most: 5050 m/s
+#: is below every plate speed in the catalogue. It is a hint and not a reading,
+#: which is why the value is held unqualified.
+LONG_STEEL_SPEED_M_S = 5050.0
+
+#: Rows of Long's table that print a row of dots where the speed would be:
+#: the brick, the six masonry blocks and plasters, the plywood and the wood
+#: chip board.
+LONG_ROWS_WITHOUT_A_SPEED = 9
+
+#: The row that prints words instead of a loss factor, and the words.
+LONG_UNQUANTIFIED_LOSS_FACTOR = (
+    "hollow_dense_concrete",
+    "the table prints \u201cVaries with frequency\u201d where the number would be",
+)
+
+#: Arau prints the critical frequency of a one centimetre plate, in hertz, so
+#: the product this library holds is that frequency times 0,01 m. Key, the
+#: printed frequency, and the product.
+ARAU_4_1_PRODUCTS: tuple[tuple[str, float, float], ...] = (
+    ("acero", 1000.0, 10.0),
+    ("aluminio", 1260.0, 12.6),
+    ("vidrio_monolitico", 1200.0, 12.0),
+    ("ladrillo_macizo", 2380.0, 23.8),
+    ("caucho_normal", 85000.0, 850.0),
+)
+
+#: What Arau and Hopkins say about the same four materials, as the product in
+#: m Hz. The steel is nineteen per cent apart and nothing on Arau's page can
+#: settle it, which is the agreement work's problem and not a defect of either
+#: book.
+ARAU_AGAINST_HOPKINS: tuple[tuple[str, str, float, float], ...] = (
+    ("aluminio", "aluminium", 12.6, 12.7),
+    ("ladrillo_macizo", "brick", 23.8, 24.0),
+    ("vidrio_monolitico", "glass", 12.0, 12.5),
+    ("acero", "steel", 10.0, 12.3),
 )

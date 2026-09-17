@@ -33,6 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   to Rindel, Schmitz, Heckl or Fahy keep the credit, and the steel row keeps
   two of them across three cells.
 
+  The rows themselves are a data file inside the package,
+  `solids/data/hopkins-2007-table-a2.json`, one record per material, read at
+  import. The citation is written once, in the file that holds the rows, and
+  the provenance gate reads it from there, so a second table is a second file
+  and not a longer literal.
+
 - **`phonometry.solids`**, the elastic constants of a solid and the three
   longitudinal wave speeds that follow from them. A beam, a plate and an
   unbounded solid carry a different longitudinal wave, and which one a printed

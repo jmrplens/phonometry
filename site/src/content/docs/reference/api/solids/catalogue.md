@@ -27,9 +27,20 @@ So every row carries what the cell actually said: [`SolidMaterial.estimated`](/p
 names the fields the page marks as estimates, [`SolidMaterial.ranges`](/phonometry/reference/api/solids/catalogue/#solidmaterial)
 carries the seven cells printed as an interval (two densities, two speeds and
 three loss factors), [`SolidMaterial.bounded_above`](/phonometry/reference/api/solids/catalogue/#solidmaterial) names the two of those
-loss factors the page prints as an upper bound rather than a band, and [`SolidMaterial.attributed_to`](/phonometry/reference/api/solids/catalogue/#solidmaterial) carries the per-cell credit for
-the rows whose columns come from different authors. A field the table leaves
+loss factors the page prints as an upper bound rather than a band, and
+[`SolidMaterial.attributed_to`](/phonometry/reference/api/solids/catalogue/#solidmaterial) carries the per-cell credit for the rows
+whose columns come from different authors. A field the table leaves
 empty is `None` and not a guess.
+
+Where the rows live
+-------------------
+In `solids/data/hopkins-2007-table-a2.json`, one record per material, read
+at import through the package-data reader in `phonometry._internal`. Rows are
+data: keeping them in a file means a second table is a second file rather than
+a longer literal, means a changed digit is one line of a diff, and means the
+citation is written once, in the file that holds the rows it belongs to. The
+provenance gate reads it from there too, so the comment above the constant and
+the page it names cannot drift apart.
 
 What it is not
 --------------
@@ -49,7 +60,9 @@ right.
 
 ```python
 SolidMaterial(
+    *,
     name: str,
+    source: str,
     longitudinal_speed_m_s: float,
     poisson_ratio: float,
     thickness_critical_frequency_product_m_hz: float,
@@ -60,7 +73,6 @@ SolidMaterial(
     bounded_above: frozenset[str] = frozenset(),
     attributed_to: Mapping[str, str] = ...,
     note: str = '',
-    source: str = 'Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)',
 )
 ```
 

@@ -901,7 +901,7 @@ def test_what_long_would_be_if_it_were_a_plate_speed() -> None:
 
 
 def test_the_dotted_cells_say_they_are_dotted() -> None:
-    """Eight rows print a row of dots where a speed would be."""
+    """Nine rows print a row of dots where a speed would be."""
     dotted = [
         key
         for key, row in LONG.items()

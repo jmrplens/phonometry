@@ -108,7 +108,11 @@ quasi-longitudinal is the plate speed; and the bulk speed is neither. At
 bulk speed is 16 per cent above it, which is the figure Cremer prints
 under his Eq. (3.32) with the warning that it matters which one is meant.
 One field holding whichever the page happened to print is the mistake this
-catalogue exists to prevent, so there is no such field.
+catalogue exists to prevent, so there is no field that means "whichever
+one the page happened to print". `longitudinal_speed_m_s` is not
+that: it means the page printed a longitudinal speed and said nothing
+about which, which is a statement about the source rather than a shrug
+about the wave.
 
 **The loss factors are four fields** for the same reason. A flexural loss
 factor is measured in bending and a longitudinal one is not; an in-situ

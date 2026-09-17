@@ -232,11 +232,11 @@ steel's flexural loss factor between 0,2 and 3 times 10⁻⁴, and Mechel prints
 
 ### When the page does not say which
 
-Two of the six tables print a longitudinal speed and a loss factor without
-saying which of each it is. Long's speed column is headed "Speed of
-Longitudinal Waves" and there is no modulus and no Poisson ratio beside it, so
-nothing on the page can settle whether it is the bar, the plate or the
-unbounded one.
+Long prints a longitudinal speed without saying which of the three it is, and
+both he and Arau print a loss factor without saying which; Arau prints no speed
+at all. Long's column is headed "Speed of Longitudinal Waves" and there is no
+modulus and no Poisson ratio beside it, so nothing on the page can settle
+whether it is the bar, the plate or the unbounded one.
 
 ```python
 steel = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/steel"]
@@ -244,9 +244,10 @@ print(steel.longitudinal_speed_m_s, steel.bar_longitudinal_speed_m_s)
 # 5050.0 None
 ```
 
-Comparing it with the four tables that do say points at the bar speed: 5 050 m/s
-is below every plate speed in the catalogue, and Long's aluminium matches Bies'
-printed bar speed to the digit. That is a hint and not a reading, and a guess
+Comparing it with the four tables that do say points at the bar speed: his
+steel, at 5 050 m/s, is below every steel plate speed in the catalogue, which run
+from 5 270 to 5 458, and his aluminium matches Bies' printed bar speed to the
+digit. That is a hint and not a reading, and a guess
 put into a named field would then be compared against columns that were read,
 so the value stays where the page left it.
 

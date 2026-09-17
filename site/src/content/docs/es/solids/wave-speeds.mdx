@@ -239,11 +239,11 @@ imprime 1 por 10⁻⁴.
 
 ### Cuando la página no dice cuál
 
-Dos de las seis tablas imprimen una velocidad longitudinal y un factor de
-pérdidas sin decir cuál de cada uno es. La columna de Long se titula «Speed of
-Longitudinal Waves» y a su lado no hay ni módulo ni coeficiente de Poisson, así
-que nada de la página puede decidir si es la de barra, la de placa o la de
-sólido extenso.
+Long imprime una velocidad longitudinal sin decir cuál de las tres es, y tanto
+él como Arau imprimen un factor de pérdidas sin decir cuál; Arau no imprime
+ninguna velocidad. La columna de Long se titula «Speed of Longitudinal Waves» y
+a su lado no hay ni módulo ni coeficiente de Poisson, así que nada de la página
+puede decidir si es la de barra, la de placa o la de sólido extenso.
 
 ```python
 steel = solids.PUBLISHED_SOLIDS["long-2014-table-12-1/steel"]
@@ -251,9 +251,10 @@ print(steel.longitudinal_speed_m_s, steel.bar_longitudinal_speed_m_s)
 # 5050.0 None
 ```
 
-Compararla con las cuatro tablas que sí lo dicen apunta a la de barra: 5 050 m/s
-queda por debajo de todas las velocidades de placa del catálogo, y el aluminio
-de Long coincide al dígito con la velocidad de barra que imprime Bies. Eso es
+Compararla con las cuatro tablas que sí lo dicen apunta a la de barra: su
+acero, con 5 050 m/s, queda por debajo de todas las velocidades de placa de los
+aceros del catálogo, que van de 5 270 a 5 458, y su aluminio coincide al dígito
+con la velocidad de barra que imprime Bies. Eso es
 un indicio y no una lectura, y una suposición metida en un campo con nombre se
 compararía después contra columnas que sí se leyeron, así que el valor se queda
 donde lo dejó la página.

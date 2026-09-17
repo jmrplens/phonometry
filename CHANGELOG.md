@@ -89,8 +89,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   blank because a one-dimensional speed does not mean anything there, and the
   arithmetic would have answered 4 265 m/s.
 
-  Long and Arau both print a longitudinal speed and a loss factor without
-  saying which of each it is, so both go in the unqualified fields. Long's
+  Long prints a longitudinal speed without saying which of the three it is,
+  and both he and Arau print a loss factor without saying which; all of
+  those go in the unqualified fields. Arau prints no speed at all. Long's
   steel, at 5 050 m/s, is below every plate speed the other tables hold and
   his aluminium matches Bies' printed bar speed to the digit, which is a hint
   and not a reading: his page prints no modulus and no Poisson ratio, so

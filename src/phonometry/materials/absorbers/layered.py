@@ -397,7 +397,6 @@ def _layer_terms(
     k0: Real,
     k0_sin2: Real,
     rc: float,
-    rho0: float,
     fluid: Fluid,
 ) -> list[tuple[str, Complex, Complex]]:
     """Evaluate each layer once: fluid layers as ``(Zx, kx d)``, sheets as z.
@@ -645,7 +644,6 @@ def _stack_blocks(
             k0=k0,
             k0_sin2=k0_sin2,
             rc=rc,
-            rho0=rho0,
             fluid=fluid,
         )
         groups = _split_fluid_run(terms, biot._BLOCK_NEPERS, biot._MAX_BLOCKS)
@@ -776,7 +774,6 @@ def layered_absorber(
             k0=k0,
             k0_sin2=k0_sin2,
             rc=rc,
-            rho0=rho0,
             fluid=fluid,
         )
         g = _surface_admittance(

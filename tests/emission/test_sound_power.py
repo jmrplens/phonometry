@@ -611,13 +611,11 @@ def test_zero_band_levels_raises() -> None:
 def test_k2_over_validity_limit_warns() -> None:
     """K2 above 4 dB (engineering) exceeds the ISO 3744 validity limit."""
     r = 2.0
+    levels = np.full((10, 1), 60.0)
+    room = emission.RoomEnvironment(absorption_area=10.0)
+
     with pytest.warns(emission.SoundPowerWarning):
-        emission.sound_power_pressure(
-            np.full((10, 1), 60.0),
-            "hemisphere",
-            radius=r,
-            room=emission.RoomEnvironment(absorption_area=10.0),
-        )
+        emission.sound_power_pressure(levels, "hemisphere", radius=r, room=room)
 
 
 def test_plot_language_spanish_and_validation() -> None:

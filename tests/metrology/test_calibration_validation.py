@@ -43,10 +43,12 @@ def test_stable_tone_no_warning() -> None:
 
 def test_unstable_tone_warns() -> None:
     """5% AM -> ~0.4 dB fluctuation, far beyond the 0.10 dB class 1 limit."""
+    unstable = _cal_tone(am_depth=0.05)
+
     with pytest.warns(
         metrology.CalibrationWarning, match=r"Calibration tone level fluctuation is"
     ):
-        metrology.sensitivity(_cal_tone(am_depth=0.05), fs=FS)
+        metrology.sensitivity(unstable, fs=FS)
 
 
 def test_validation_can_be_disabled() -> None:
@@ -72,10 +74,12 @@ def test_validation_needs_fs_and_is_skipped_without_it() -> None:
 
 
 def test_custom_fluctuation_limit() -> None:
+    unstable = _cal_tone(am_depth=0.05)
+
     with pytest.warns(metrology.CalibrationWarning):
-        metrology.sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=0.1)
+        metrology.sensitivity(unstable, fs=FS, max_fluctuation_db=0.1)
     with _assert_no_calibration_warning():
-        metrology.sensitivity(_cal_tone(am_depth=0.05), fs=FS, max_fluctuation_db=1.0)
+        metrology.sensitivity(unstable, fs=FS, max_fluctuation_db=1.0)
 
 
 def test_empty_reference_raises() -> None:
@@ -85,8 +89,10 @@ def test_empty_reference_raises() -> None:
 
 
 def test_too_short_recording_warns() -> None:
+    one_second = _cal_tone(seconds=1.0)
+
     with pytest.warns(metrology.CalibrationWarning, match="shorter than 2 s"):
-        metrology.sensitivity(_cal_tone(seconds=1.0), fs=FS)
+        metrology.sensitivity(one_second, fs=FS)
 
 
 def test_multichannel_stable_at_different_levels_no_warning() -> None:

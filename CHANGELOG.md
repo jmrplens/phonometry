@@ -382,6 +382,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Fixed
 
+- **A warning test now has one call that could warn.** Six `pytest.warns`
+  blocks wrapped the call that builds the case as well as the call under test,
+  so a warning raised by the tone generator, the duct element or the room
+  environment would have satisfied a test that says it is checking the model.
+  The setup moved out of the block in all six, which is what the assertion
+  claimed all along.
+
+  `_layer_terms` also lost a `rho0` it never read. It is private and had two
+  call sites, both of which already pass the `Fluid` the density lives in.
+
+- **A guard that refuses a NaN says so in its name.** Eleven places in
+  `building`, `emission` and `filters` wrote `not x > 0` rather than `x <= 0`,
+  because the two are not the same test: a NaN compares False against
+  everything, so the second lets it through and the first refuses it, and one
+  of those sites carries a comment recording the day a NaN geometry got past
+  the plain form and came out in the result. Nine of the eleven said nothing
+  about why they were written that way, which is how an inverted comparison
+  gets tidied into a bug.
+
+  They now read `if not is_positive(x)`, with the upper-bound case reading
+  `not is_at_most(x, limit)`. The predicates are one line each and the NaN
+  reasoning lives with them instead of being re-derived at every site. No
+  comparison changed meaning.
+
 - **A legend no longer closes over a plotted point.** A legend is an opaque
   plate the author places by hand, and its width is set by its longest label,
   which is a defect waiting to happen in a bilingual corpus: the Spanish label

@@ -19,6 +19,42 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
+def is_positive(value: float) -> bool:
+    """True only for a value strictly above zero. NaN answers ``False``.
+
+    The guards through the tree are written ``if not is_positive(x)`` rather
+    than ``if x <= 0.0`` because the two are not the same test. A NaN compares
+    False against everything, so ``x <= 0.0`` lets it through and
+    ``not is_positive(x)`` refuses it, which is the behaviour those guards were
+    given the day a NaN geometry got past the plain form and came out in the
+    result. Naming the predicate keeps that reasoning in one place instead of
+    leaving an inverted comparison at every site for a reader to re-derive.
+
+    Infinity is a separate question: it is strictly above zero and passes here,
+    so a caller that also has to refuse it says so by name.
+
+    :param value: The value to test.
+    :return: ``True`` when ``value > 0``, ``False`` for zero, a negative value
+        and NaN.
+    """
+    return value > 0.0
+
+
+def is_at_most(value: float, limit: float) -> bool:
+    """True when ``value`` is at or below ``limit``. NaN answers ``False``.
+
+    The companion of :func:`is_positive` for an upper bound, and it exists for
+    the same reason: ``not is_at_most(x, limit)`` treats a NaN as a value that
+    failed to qualify, which is what a criterion that cannot be evaluated
+    should do.
+
+    :param value: The value to test.
+    :param limit: The upper bound, inclusive.
+    :return: ``True`` when ``value <= limit``, ``False`` above it and for NaN.
+    """
+    return value <= limit
+
+
 def require_positive(value: float, name: str) -> float:
     """Require a positive finite number (rejects NaN and infinities).
 

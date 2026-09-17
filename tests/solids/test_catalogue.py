@@ -827,3 +827,24 @@ def test_no_row_anywhere_is_both_derived_and_printed_as_a_range() -> None:
     ]
 
     assert clashes == []
+
+
+@pytest.mark.parametrize(("table", "size"), ref.SOLID_TABLE_SIZES)
+def test_every_table_holds_the_rows_its_page_prints(table: str, size: int) -> None:
+    """A row that goes missing must fail something.
+
+    Nothing else here would notice. The parametrised tests only check the rows
+    they name, and the statistical ones only the rows that reach them: of the
+    hundred and five Bies rows, eighty-four reach the speed comparison, three
+    the defect list and four the honeycomb test, so fourteen were covered by
+    nothing at all.
+    """
+    assert sum(1 for row in PUBLISHED_SOLIDS.values() if row.table == table) == size
+
+
+def test_the_catalogue_is_the_sum_of_its_tables() -> None:
+    """And no table is in the catalogue that the oracle does not know about."""
+    assert len(PUBLISHED_SOLIDS) == sum(size for _, size in ref.SOLID_TABLE_SIZES)
+    assert {row.table for row in PUBLISHED_SOLIDS.values()} == {
+        table for table, _ in ref.SOLID_TABLE_SIZES
+    }

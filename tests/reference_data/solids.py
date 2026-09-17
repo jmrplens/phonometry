@@ -405,3 +405,15 @@ BIES_C1_SPEED_TOLERANCE = 0.03
 #: (plate), c_L = sqrt(E/[rho(1-nu^2)]); and for a 3-D solid, c_L =
 #: sqrt(E(1-nu)/[rho(1+nu)(1-2nu)]) [...] nu = E/(2G) - 1".
 BIES_CLOSING_NOTE_CASE = (200e9, 7800.0, 0.3)
+
+
+#: How many rows each packaged table holds. A table that quietly loses a row
+#: would otherwise leave every other test green: the parametrised ones only
+#: check the rows they name, and the statistical ones only the rows that reach
+#: them.
+SOLID_TABLE_SIZES: tuple[tuple[str, int], ...] = (
+    ("hopkins-2007-table-a2", 25),
+    ("cremer-2005-table-4-3", 15),
+    ("mechel-2008-table-3", 38),
+    ("bies-2017-table-c1", 105),
+)

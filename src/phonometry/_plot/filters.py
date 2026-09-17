@@ -42,6 +42,9 @@ _MAX_LABELED_SECTIONS = 8
 #: renderers.
 #: Axis label shared by the class-corridor and the EQ renderers.
 _FREQ_LABEL = "Frequency [Hz]"
+#: Per-channel legend entry, shared by the two renderers that draw one
+#: line per channel. It is a format string: ``_t`` fills the ``n``.
+_CHANNEL_LABEL = "Channel {n}"
 
 _STRINGS: dict[str, str] = {
     _FREQ_LABEL: "Frecuencia [Hz]",
@@ -68,7 +71,7 @@ _STRINGS: dict[str, str] = {
     "bandpass_skirt": "paso banda (faldón)",
     "notch": "muesca",
     "allpass": "paso todo",
-    "Channel {n}": "Canal {n}",
+    _CHANNEL_LABEL: "Canal {n}",
     "Time [s]": "Tiempo [s]",
     "Sound pressure level [dB re 20 uPa]": "Nivel de presión sonora [dB re 20 uPa]",
     "Mean square [FS²]": "Media cuadrática [FS²]",
@@ -381,7 +384,7 @@ def plot_time_weighted_envelope(
             # otherwise hit "got multiple values for keyword argument
             # 'label'". Theirs wins.
             per_channel = dict(kwargs)
-            per_channel.setdefault("label", _t("Channel {n}", language, n=index + 1))
+            per_channel.setdefault("label", _t(_CHANNEL_LABEL, language, n=index + 1))
             axw.plot(result.times, channel, **per_channel)
         axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
     axw.set_xlabel(_t("Time [s]", language))
@@ -459,7 +462,7 @@ def plot_octave_levels(
     else:
         for index, channel in enumerate(levels):
             per_channel = dict(kwargs)
-            per_channel.setdefault("label", _t("Channel {n}", language, n=index + 1))
+            per_channel.setdefault("label", _t(_CHANNEL_LABEL, language, n=index + 1))
             axw.plot(x, channel, **per_channel)
         axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
 

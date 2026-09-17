@@ -353,6 +353,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The filter bank returns a result, not a tuple.** `octave_filter()` and
+  `OctaveFilterBank.filter()` returned two items normally and three when
+  `sigbands=True` asked for the band waveforms. The length of the answer
+  depended on a keyword, which is why the pair carried twelve `@overload`
+  declarations to be typable at all, and why `_, _, bands = bank.filter(...)`
+  was a line a reader had to count commas in. Both now return an
+  `OctaveFilterResult` with `levels`, `frequencies` and `bands`, which is what
+  every other computation in this library has always done.
+
+  `bands` is `None` unless the call asked for it and `levels` is `None` for a
+  call made with `calculate_level=False`, so `require_bands()` and
+  `require_levels()` return the value or raise naming the argument that was
+  missing. That is better than the `None` a caller would otherwise meet
+  several lines later, as an operation on it.
+
+  Like every other result, it draws itself: `result.plot()` is the band
+  spectrum on the library's log frequency axis, in either language. The
+  migration guide has the four before-and-after lines, and the twelve
+  overloads are gone.
+
 - Thirty-one transcribed tables gained the PDF page their banner never gave:
   the eight the first sweep found (`PLATEAU_MATERIALS`,
   `DELANY_BAZLEY_COEFFICIENTS`, `CIRCULAR_EIGENVALUES`, `SOURCE_POWER_MODELS`,

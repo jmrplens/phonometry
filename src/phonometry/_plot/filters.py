@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
     from ..filters.compliance import FilterComplianceResult
+    from ..filters.core import OctaveFilterResult
     from ..filters.equalizer import EQResponseResult
     from ..filters.weighting import TimeWeightedEnvelope
 
@@ -75,6 +76,9 @@ _STRINGS: dict[str, str] = {
     "fast": "rápida",
     "slow": "lenta",
     "impulse": "impulsiva",
+    "Band level [dB]": "Nivel de banda [dB]",
+    "Band levels": "Niveles de banda",
+    "Band centre frequency [Hz]": "Frecuencia central de banda [Hz]",
 }
 
 
@@ -398,5 +402,76 @@ def plot_time_weighted_envelope(
                 mode=_t(result.mode, language).capitalize(),
             )
         )
+    localize_axes(axw, language)
+    return axw
+
+
+def plot_octave_levels(
+    result: OctaveFilterResult,
+    ax: Axes | None = None,
+    *,
+    language: str = "en",
+    **kwargs: Any,
+) -> Axes:
+    """The band levels of an :class:`~phonometry.filters.OctaveFilterResult`.
+
+    One point per band, on the log frequency axis the rest of the corpus uses,
+    so a third-octave spectrum reads the way a meter displays it. A
+    multichannel result draws one line per channel.
+
+    A result whose call asked for no level has nothing to draw, and says so
+    rather than opening an empty figure.
+
+    :param result: An :class:`~phonometry.filters.OctaveFilterResult`.
+    :param ax: Existing axes to draw on, or ``None`` for a fresh figure.
+    :param language: Label language, ``"en"`` (default) or ``"es"``.
+    :param kwargs: Forwarded to every channel's ``plot`` call.
+    :return: The axes drawn on.
+    :raises ValueError: when the result carries no level.
+    """
+    from .._i18n import localize_axes
+
+    if result.levels is None:
+        msg = (
+            "this result carries no level to plot: it was made by a call with "
+            "calculate_level=False"
+        )
+        raise ValueError(msg)
+
+    levels = np.atleast_2d(np.asarray(result.levels, dtype=np.float64))
+    # The nominal labels are strings; the band index is what they sit on, and
+    # the axis then reads them out. Exact centres plot on the frequency axis.
+    nominal = bool(result.frequencies) and isinstance(result.frequencies[0], str)
+    x = (
+        np.arange(len(result.frequencies), dtype=np.float64)
+        if nominal
+        else np.asarray(result.frequencies, dtype=np.float64)
+    )
+
+    new_figure = ax is None
+    axw = _new_axes() if ax is None else ax
+    style_default(kwargs, "lw", 1.2)
+    style_default(kwargs, "marker", "o")
+    style_default(kwargs, "ms", 3.0)
+    if levels.shape[0] == 1:
+        style_default(kwargs, "color", _C_PRIMARY)
+        axw.plot(x, levels[0], **kwargs)
+    else:
+        for index, channel in enumerate(levels):
+            per_channel = dict(kwargs)
+            per_channel.setdefault("label", _t("Channel {n}", language, n=index + 1))
+            axw.plot(x, channel, **per_channel)
+        axw.legend(loc=_LEGEND_UPPER_RIGHT, fontsize="small")
+
+    if nominal:
+        axw.set_xticks(x)
+        axw.set_xticklabels([str(f) for f in result.frequencies])
+        axw.set_xlabel(_t("Band centre frequency [Hz]", language))
+    else:
+        format_frequency_axis(axw, language=language)
+        axw.set_xlabel(_t(_FREQ_LABEL, language))
+    axw.set_ylabel(_t("Band level [dB]", language))
+    if new_figure:
+        axw.set_title(_t("Band levels", language))
     localize_axes(axw, language)
     return axw

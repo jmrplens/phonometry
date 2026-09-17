@@ -260,10 +260,11 @@ cuyo diseño está anclado a los bordes de banda de IEC 61260-1;
 instrumento.
 
 ```python
-spl, bands = filters.octave_filter(
+filtered = filters.octave_filter(
     recording, fs, fraction=3, nominal=True,
     calibration=filters.LevelCalibration(factor=cal),
 )
+spl, bands = filtered.levels, filtered.frequencies
 # 33 niveles de banda de tercio de octava en dB SPL, etiquetados '12.5' ... '20k'.
 # La banda '1k' contiene el evento: ≈70 dB, con sus vecinas ≈25 dB por debajo.
 print(dict(zip(bands, np.round(spl, 1))))
@@ -291,7 +292,7 @@ Para obtener un espectro *ponderado A*, filtra en bandas la señal ya ponderada
 del paso 3 en lugar de la grabación en bruto:
 
 ```python
-spl_a, _ = filters.octave_filter(weighted, fs, fraction=3, nominal=True)
+spl_a = filters.octave_filter(weighted, fs, fraction=3, nominal=True).levels
 print(f"suma de las bandas A {10 * np.log10(np.sum(10 ** (spl_a / 10))):.1f} dB")
 # suma de las bandas A 70.2 dB -> el LAeq del paso 4, con una centésima de decibelio
 ```
@@ -311,7 +312,7 @@ vale 0 dB.*
 <summary>Mostrar el código de esta figura</summary>
 
 ```python
-_, centres = filters.octave_filter(recording, fs, fraction=3)  # centros exactos
+centres = filters.octave_filter(recording, fs, fraction=3)  # centros exactos.frequencies
 
 fig, ax = plt.subplots(figsize=(9, 4))
 ax.step(centres, spl, where="mid", label="Z (sin ponderar)")

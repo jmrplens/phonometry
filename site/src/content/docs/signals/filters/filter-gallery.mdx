@@ -228,8 +228,9 @@ fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Standard one-third-octave measurement
-spl, freq = filters.octave_filter(x, fs, fraction=3,
+filtered = filters.octave_filter(x, fs, fraction=3,
                                   design=filters.FilterDesign(filter_type='butter'))
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_butter_fraction_3_order_6.svg" alt="Butterworth one-third-octave filter bank frequency response" width="60%" />
@@ -263,9 +264,10 @@ fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Selectivity with 0.1 dB passband ripple
-spl, freq = filters.octave_filter(
+filtered = filters.octave_filter(
     x, fs, fraction=3,
     design=filters.FilterDesign(filter_type='cheby1', ripple=0.1))
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby1_fraction_3_order_6.svg" alt="Chebyshev I one-third-octave filter bank frequency response" width="60%" />
@@ -306,8 +308,9 @@ fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Flat passband, class-1 default 72 dB stopband attenuation
-spl, freq = filters.octave_filter(x, fs, fraction=3,
+filtered = filters.octave_filter(x, fs, fraction=3,
                                   design=filters.FilterDesign(filter_type='cheby2'))
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_cheby2_fraction_3_order_6.svg" alt="Chebyshev II one-third-octave filter bank frequency response" width="60%" />
@@ -340,9 +343,10 @@ fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Maximum selectivity for extreme band isolation
-spl, freq = filters.octave_filter(
+filtered = filters.octave_filter(
     x, fs, fraction=3,
     design=filters.FilterDesign(filter_type='ellip', ripple=0.1))
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_ellip_fraction_3_order_6.svg" alt="Elliptic one-third-octave filter bank frequency response" width="60%" />
@@ -382,8 +386,9 @@ fs = 48000
 x = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Best for pulse analysis and transient preservation
-spl, freq = filters.octave_filter(x, fs, fraction=3,
+filtered = filters.octave_filter(x, fs, fraction=3,
                                   design=filters.FilterDesign(filter_type='bessel'))
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/filter_bessel_fraction_3_order_6.svg" alt="Bessel one-third-octave filter bank frequency response" width="60%" />

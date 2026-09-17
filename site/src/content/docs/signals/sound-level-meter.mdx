@@ -247,10 +247,11 @@ anchored to the IEC 61260-1 band edges; `nominal=True` labels them with the
 preferred frequencies you would read on an instrument.
 
 ```python
-spl, bands = filters.octave_filter(
+filtered = filters.octave_filter(
     recording, fs, fraction=3, nominal=True,
     calibration=filters.LevelCalibration(factor=cal),
 )
+spl, bands = filtered.levels, filtered.frequencies
 # 33 one-third-octave band levels in dB SPL, labeled '12.5' ... '20k'.
 # The '1k' band holds the event: ~70 dB, while its neighbors stay ~25 dB below.
 print(dict(zip(bands, np.round(spl, 1))))
@@ -276,7 +277,7 @@ To obtain an *A-weighted* spectrum, band-filter the already weighted signal of
 step 3 instead of the raw recording:
 
 ```python
-spl_a, _ = filters.octave_filter(weighted, fs, fraction=3, nominal=True)
+spl_a = filters.octave_filter(weighted, fs, fraction=3, nominal=True).levels
 print(f"sum of the A bands  {10 * np.log10(np.sum(10 ** (spl_a / 10))):.1f} dB")
 # sum of the A bands  70.2 dB -> the LAeq of step 4, to a hundredth of a decibel
 ```
@@ -295,7 +296,7 @@ the floor without touching the 1 kHz band, where the A curve is 0 dB.*
 <summary>Show the code for this figure</summary>
 
 ```python
-_, centres = filters.octave_filter(recording, fs, fraction=3)  # exact centres
+centres = filters.octave_filter(recording, fs, fraction=3)  # exact centres.frequencies
 
 fig, ax = plt.subplots(figsize=(9, 4))
 ax.step(centres, spl, where="mid", label="Z (unweighted)")

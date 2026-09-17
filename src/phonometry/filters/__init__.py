@@ -14,6 +14,7 @@ from .core import (
     FilterDesign,
     LevelCalibration,
     OctaveFilterBank,
+    OctaveFilterResult,
     ResponsePlot,
     octave_filter,
 )
@@ -45,6 +46,7 @@ __all__ = [
     "FilterDesign",
     "LevelCalibration",
     "OctaveFilterBank",
+    "OctaveFilterResult",
     "ParametricEQ",
     "ResponsePlot",
     "TimeWeightedEnvelope",

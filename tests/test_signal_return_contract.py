@@ -333,17 +333,19 @@ def test_the_band_waveforms_come_back_as_signals_only_when_the_bank_read_the_fac
     from phonometry.filters import LevelCalibration, octave_filter
 
     record = Signal(_RECORD, FS, calibration_factor=CAL)
-    _spl, _freq, bands = octave_filter(record, sigbands=True, detrend=False)
+    filtered = octave_filter(record, sigbands=True, detrend=False)
+    _spl, _freq, bands = filtered.levels, filtered.frequencies, filtered.bands
     assert all(isinstance(band, Signal) for band in bands)
     assert {band.fs for band in bands} == {FS}
     assert {band.calibration_factor for band in bands} == {1.0}
 
-    _spl, _freq, digital = octave_filter(
+    filtered2 = octave_filter(
         record,
         sigbands=True,
         detrend=False,
         calibration=LevelCalibration(dbfs=True),
     )
+    _spl, _freq, digital = filtered2.levels, filtered2.frequencies, filtered2.bands
     assert not any(isinstance(band, Signal) for band in digital)
     assert all(isinstance(band, np.ndarray) for band in digital)
 

@@ -31,13 +31,13 @@ def test_fraction_validation() -> None:
     x = rng.standard_normal(fs)  # 1 second of noise
 
     # Standard fractions
-    _, freq1 = filters.octave_filter(x, fs, fraction=1)
+    freq1 = filters.octave_filter(x, fs, fraction=1).frequencies
     assert len(freq1) > 0
-    _, freq3 = filters.octave_filter(x, fs, fraction=3)
+    freq3 = filters.octave_filter(x, fs, fraction=3).frequencies
     assert len(freq3) > len(freq1)
 
     # Non-standard fraction (should work mathematically via _genfreqs)
-    _, freq2 = filters.octave_filter(x, fs, fraction=2)
+    freq2 = filters.octave_filter(x, fs, fraction=2).frequencies
     assert len(freq2) > 0
 
     # normalized_frequencies only supports 1 and 3
@@ -122,7 +122,8 @@ def test_short_signal() -> None:
     x = rng.standard_normal(100)
 
     # This might fail if resample produces empty array or 0 length
-    spl, freq = filters.octave_filter(x, fs, limits=[12.0, 100.0])
+    filtered = filters.octave_filter(x, fs, limits=[12.0, 100.0])
+    spl, freq = filtered.levels, filtered.frequencies
 
     assert not np.isnan(spl).any()
     assert len(spl) == len(freq)
@@ -173,7 +174,7 @@ def test_silence() -> None:
     fs = 48000
     x = np.zeros(fs)
 
-    spl, _ = filters.octave_filter(x, fs)
+    spl = filters.octave_filter(x, fs).levels
 
     # Should be very low dB (approx -inf, but code clips to eps)
     assert np.all(spl < -100)
@@ -202,7 +203,7 @@ def test_nyquist_limit() -> None:
     # Request up to 1000Hz
     # _deleteouters should warn and remove high bands
     with pytest.warns(UserWarning, match="frequencies above fs/2 removed"):
-        _, freq = filters.octave_filter(x, fs, limits=[10.0, 1000.0])
+        freq = filters.octave_filter(x, fs, limits=[10.0, 1000.0]).frequencies
 
     assert np.all(np.array(freq) < fs / 2)
 
@@ -228,8 +229,8 @@ def test_high_order_stability() -> None:
 
     # Order 12 or 24 is quite high for standard IIR, but SOS is better.
     # We just want to ensure it doesn't explode into NaNs.
-    spl, _ = filters.octave_filter(x, fs, order=12)
+    spl = filters.octave_filter(x, fs, order=12).levels
     assert not np.isnan(spl).any()
 
-    spl2, _ = filters.octave_filter(x, fs, order=24)
+    spl2 = filters.octave_filter(x, fs, order=24).levels
     assert not np.isnan(spl2).any()

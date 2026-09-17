@@ -94,7 +94,8 @@ for frame in sf.blocks("measurement.wav", blocksize=256, overlap=0):
     weighted = afilter.filter(frame)
 
     # Split into octave bands
-    block_spl, _, block_output = octave_filter.filter(weighted, sigbands=True, detrend=False)
+    filtered = octave_filter.filter(weighted, sigbands=True, detrend=False)
+    block_spl, block_output = filtered.levels, filtered.bands
 
     # further signal processing
     ...

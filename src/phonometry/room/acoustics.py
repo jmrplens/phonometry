@@ -488,13 +488,14 @@ def decay_curve(
             order=6,
             limits=[band / half_width, band * half_width],
         )
-        _, freqs, signals = bank.filter(
+        filtered = bank.filter(
             x,
             sigbands=True,
             detrend=False,
             calculate_level=False,
             zero_phase=zero_phase,
         )
+        freqs, signals = filtered.frequencies, filtered.require_bands()
         if len(freqs) == 0:
             msg = (
                 f"'band' ({band:g} Hz) has no filter at fs={fs} Hz; "

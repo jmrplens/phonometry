@@ -53,7 +53,8 @@ left = np.fft.irfft(spec, t.size)
 right = chirp(t, f0=50, t1=duration, f1=10000, method="logarithmic")
 
 x = np.stack([left, right])                    # (2, n_samples)
-spl, freq = filters.octave_filter(x, fs, fraction=3, limits=[20, 20000])
+filtered = filters.octave_filter(x, fs, fraction=3, limits=[20, 20000])
+spl, freq = filtered.levels, filtered.frequencies
 
 fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
 for ax, levels, name in zip(axes, spl, ["Left: pink noise", "Right: log sweep"]):
@@ -83,7 +84,8 @@ left = 0.2 * np.sin(2 * np.pi * 1000 * t)
 right = 0.1 * np.sin(2 * np.pi * 500 * t)
 
 stereo = np.stack([left, right])          # (2, n_samples)
-spl, freq = filters.octave_filter(stereo, fs, fraction=3)
+filtered = filters.octave_filter(stereo, fs, fraction=3)
+spl, freq = filtered.levels, filtered.frequencies
 # spl has shape (2, n_bands): one row per channel
 ```
 
@@ -158,7 +160,8 @@ bank = filters.OctaveFilterBank(
 stream = [stereo]                 # your sequence of multichannel frames
 for frame in stream:
     # detrend=True (default) removes DC offset to improve low-freq accuracy
-    spl, freq = bank.filter(frame, detrend=True)
+    filtered = bank.filter(frame, detrend=True)
+    spl, freq = filtered.levels, filtered.frequencies
 ```
 
 Additional performance notes:

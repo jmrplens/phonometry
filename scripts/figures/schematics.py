@@ -3205,7 +3205,7 @@ def _modulation_transfer_data() -> dict[str, Any]:
                     detrend=False,
                     calculate_level=False,
                     zero_phase=True,
-                )[2]
+                ).require_bands()
             )
             h2 = bands[_MTF_BAND] ** 2
             nb = h2.size // step

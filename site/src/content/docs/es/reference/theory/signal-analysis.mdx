@@ -171,12 +171,13 @@ pressure_signal_pa = 0.02 * np.random.default_rng(0).standard_normal(fs)
 x = pressure_signal_pa
 
 # Niveles de tercio de octava normalizados de phonometry.
-levels, centers = filters.octave_filter(
+filtered = filters.octave_filter(
     x,
     fs=fs,
     fraction=3,
     limits=[12, 20_000],
 )
+levels, centers = filtered.levels, filtered.frequencies
 
 # Las mismas definiciones de banda, incluidos los bordes.
 fc, fl, fu, labels = filters.nominal_frequencies(fraction=3, limits=[12, 20_000])

@@ -24,9 +24,8 @@ def test_block_processing_matches_full_signal(block_size: int) -> None:
     full_filter = filters.OctaveFilterBank(
         fs=fs, design=filters.FilterDesign(resample=False)
     )
-    _full_output_spl, _, full_output_signal = full_filter.filter(
-        signal, sigbands=True, detrend=False
-    )
+    filtered = full_filter.filter(signal, sigbands=True, detrend=False)
+    _full_output_spl, full_output_signal = filtered.levels, filtered.bands
 
     # --- Block-wise processing ---
     block_filter = filters.OctaveFilterBank(
@@ -39,9 +38,8 @@ def test_block_processing_matches_full_signal(block_size: int) -> None:
 
     for start in range(0, n_samples, block_size):
         block = signal[start : start + block_size]
-        _block_output_spl, _, block_output_signal = block_filter.filter(
-            block, sigbands=True, detrend=False
-        )
+        filtered2 = block_filter.filter(block, sigbands=True, detrend=False)
+        _block_output_spl, block_output_signal = filtered2.levels, filtered2.bands
         outputs.append(block_output_signal)
 
     block_output_signal = np.concatenate(outputs, axis=-1)
@@ -136,7 +134,7 @@ def test_stateful_multichannel() -> None:
         block_processing=BlockProcessing(stateful=True, steady_ic=True),
     )
     stereo_block = rng.standard_normal((n_channels, block_size))
-    _spl, _ = bank.filter(stereo_block, detrend=False)
+    _spl = bank.filter(stereo_block, detrend=False).levels
 
     # zi must have correct multichannel shape after first call
     for idx, zi in enumerate(bank.zi):
@@ -144,7 +142,9 @@ def test_stateful_multichannel() -> None:
         assert zi.shape == (n_sections, n_channels, 2)
 
     # Second block should work without error (state reused)
-    spl2, _ = bank.filter(rng.standard_normal((n_channels, block_size)), detrend=False)
+    spl2 = bank.filter(
+        rng.standard_normal((n_channels, block_size)), detrend=False
+    ).levels
     assert spl2 is not None
     assert spl2.shape[0] == n_channels
 

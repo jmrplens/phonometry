@@ -38,7 +38,7 @@ references:
     title: "Audio EQ Cookbook"
     siteName: "Nota de grupo de trabajo del W3C (ed. R. Toy), 8 de junio de 2021"
     url: "https://www.w3.org/TR/audio-eq-cookbook/"
-    note: "Las recetas de coeficientes biquad y la parametrización por Q / ancho de banda / pendiente de shelving detrás de ParametricEQ (sección 3)."
+    note: "Las recetas de coeficientes biquad y la parametrización por Q / ancho de banda / pendiente de shelving detrás de ParametricEQ (sección 4)."
   - type: web
     authors: ["Smith, J. O."]
     title: "Introduction to digital filters with audio applications"
@@ -65,7 +65,7 @@ Al terminar esta página sabrás diseñar un banco para cualquier fracción $1/b
 leer todos los argumentos en una sola tabla, encadenar secciones de EQ RBJ,
 extraer las señales temporales por banda y filtrar con fase cero. El apartado 1
 son las matemáticas sobre las que se apoya el diseño; si solo quieres llamar a
-la función, empieza por el apartado 2. En qué se diferencian las cinco
+la función, empieza por el apartado 3. En qué se diferencian las cinco
 arquitecturas es la
 [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/),
 y qué significa «clase 1» para el resultado es
@@ -148,7 +148,7 @@ constante), y los polos se agrupan justo dentro del círculo unidad en los
 ángulos $\omega = 2\pi f / f_\mathrm{s}$ que abarca la banda de paso. De ahí salen dos
 intuiciones. Primera, la selectividad es proximidad: cuanto más cerca del
 círculo unidad están los polos, más abrupta es la banda y más tiempo resuena
-el filtro (los picos de retardo de grupo de la sección 4 son esa resonancia,
+el filtro (los picos de retardo de grupo de la sección 5 son esa resonancia,
 medida). Segunda, la estabilidad es un margen, no una propiedad de la
 arquitectura: un filtro IIR es estable solo mientras todos sus polos
 permanecen estrictamente dentro del círculo unidad, y una banda estrecha a
@@ -174,7 +174,7 @@ frecuencia central.*
 <details>
 <summary>Cómo se midió esta figura</summary>
 
-Los dos bancos salen de la tabla de parámetros del apartado 2, uno con el
+Los dos bancos salen de la tabla de parámetros del apartado 3, uno con el
 `design` por defecto y otro con `design=FilterDesign(resample=False)`. Las
 posiciones de los polos se leen directamente del banco: `bank.sos[idx]` es la
 cascada SOS de la banda `idx` y `scipy.signal.sos2zpk` la convierte en ceros,
@@ -265,7 +265,53 @@ Cómo difieren realmente las arquitecturas, la comparación en el cruce a
 ejemplos de uso por arquitectura, hasta el crossover Linkwitz-Riley, es la
 [Galería de arquitecturas de filtro](/phonometry/es/signals/filters/filter-gallery/).
 
-## 2. Parámetros de `octave_filter()` / `OctaveFilterBank`
+## 2. Qué devuelve una llamada
+
+Toda llamada devuelve un `OctaveFilterResult`: los niveles de banda en
+`levels`, las `frequencies` sobre las que se apoyan y, cuando la llamada las
+pidió, las señales por banda en `bands`. Los campos tienen nombre porque la
+alternativa era una tupla cuya longitud dependía de una palabra clave, y quien
+leía `_, _, bands = ...` tenía que contar comas para averiguar qué eran los dos
+primeros.
+
+```python
+import numpy as np
+from phonometry import filters
+
+fs = 48000
+t = np.arange(fs) / fs
+rng = np.random.default_rng(7)
+noise = np.cumsum(rng.standard_normal(fs))
+noise /= np.std(noise)
+x = 0.4 * np.sin(2 * np.pi * 1000.0 * t) + 0.05 * noise
+
+result = filters.octave_filter(x, fs, fraction=3, limits=[20.0, 20000.0])
+print(len(result.frequencies), round(float(result.levels.max()), 1))
+# 31 83.0
+ax = result.plot()            # el espectro de abajo
+```
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/octave_band_levels.svg" alt="Espectro de tercio de octava dibujado por el propio objeto de resultado: nivel de banda en decibelios frente a la frecuencia central de banda en eje logarítmico de 16 hercios a 20 kilohercios, con un punto marcado por banda. Un tono de 1 kilohercio se sitúa en 83 decibelios, unos cuarenta decibelios por encima de un suelo de ruido que ronda los 43 decibelios en la parte baja del rango y cae sostenidamente hasta 17 decibelios en la parte alta" width="88%" />
+
+*El espectro de tercio de octava de un tono de 1 kHz sobre ruido. Cualquier
+resultado de la biblioteca se redibuja así: el `result.plot()` de arriba produjo
+exactamente esta figura.*
+
+Hay dos accesores para los campos que una llamada puede no haber rellenado.
+`require_levels()` y `require_bands()` devuelven el valor o dicen qué habría
+tenido que pedir la llamada, lo cual es mejor que encontrarse un `None` varias
+líneas más adelante:
+
+```python
+bands = filters.octave_filter(x, fs, sigbands=True).require_bands()
+print(len(bands))
+# 11
+
+filters.octave_filter(x, fs).require_bands()
+# ValueError: this result kept no band waveforms: call with sigbands=True to have them
+```
+
+## 3. Parámetros de `octave_filter()` / `OctaveFilterBank`
 
 Los argumentos de cada día van primero y por posición (`x`, `fs`, `fraction`,
 `order`, `limits`), y todo lo demás se agrupa en cuatro dataclases congeladas
@@ -299,7 +345,7 @@ constructor y `bank.filter()` es el método por llamada.
 | `mode` | función, `.filter()` | str | — | `'rms'` (por defecto) o `'peak'` | Estadístico por banda devuelto |
 | `nominal` | función, `.filter()` | bool | — | por defecto `False` | Devuelve etiquetas nominales (p. ej. `1000`) en vez de las frecuencias centrales exactas |
 | `detrend` | función, `.filter()` | bool | — | por defecto `True` | Elimina el offset DC de la señal de entrada una sola vez, antes de filtrar (mejora la precisión en graves) |
-| `zero_phase` | solo `.filter()` | bool | — | por defecto `False` | Filtrado adelante-atrás (offline); ver el apartado 5 |
+| `zero_phase` | solo `.filter()` | bool | — | por defecto `False` | Filtrado adelante-atrás (offline); ver el apartado 6 |
 | `calculate_level` | solo `.filter()` | bool | — | por defecto `True` | Con `False` devuelve las señales de banda sin calcular niveles (usar con `sigbands=True`) |
 
 El reparto no es arbitrario: la `octave_filter()` de un solo uso diseña un banco
@@ -341,12 +387,12 @@ atenuada a la banda de paso, donde un diseño máximamente plano se queda en 0 d
 de desviación y el corredor de clase 1 es de ±0,4 dB: subir más el orden compra
 profundidad en la banda atenuada, pero ni un decibelio de margen de clase. Y
 cuesta: cada par de polos de más alarga la resonancia (los picos de retardo de
-grupo del apartado 4 crecen con el orden), que es la razón por la que el trabajo
+grupo del apartado 5 crecen con el orden), que es la razón por la que el trabajo
 con transitorios y los espectrogramas de ventana corta prefieren órdenes bajos.
 La aritmética del margen en sí es
 [Verificación de clase de filtros](/phonometry/es/signals/filters/filter-compliance/).
 
-## 3. EQ paramétrico (`ParametricEQ`)
+## 4. EQ paramétrico (`ParametricEQ`)
 
 Secciones biquad de ecualización según el **RBJ Audio EQ Cookbook**
 (Bristow-Johnson): campana (peaking), shelving grave/agudo, paso bajo/alto,
@@ -428,7 +474,7 @@ la máscara de aceptación de la Tabla 1, la clase 0 más estricta de la edició
 retirada de 1995, qué aporta una clase en una medición y la ficha de
 conformidad acreditada.
 
-## 4. Señales de banda y retardo de grupo
+## 5. Señales de banda y retardo de grupo
 
 `sigbands=True` devuelve las señales temporales por banda junto a los niveles, y
 es lo que hace visible el comportamiento en fase y en transitorio, y lo que deja
@@ -448,12 +494,14 @@ t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # 2. Comparar arquitecturas (Butterworth vs Chebyshev II)
-spl_b, freq, xb_butter = filters.octave_filter(
+filtered = filters.octave_filter(
     y, fs=fs, fraction=1, sigbands=True,
     design=filters.FilterDesign(filter_type='butter'))
-spl_c2, _, xb_cheby2 = filters.octave_filter(
+spl_b, freq, xb_butter = filtered.levels, filtered.frequencies, filtered.bands
+filtered = filters.octave_filter(
     y, fs=fs, fraction=1, sigbands=True,
     design=filters.FilterDesign(filter_type='cheby2'))
+spl_c2, xb_cheby2 = filtered.levels, filtered.bands
 
 # 'xb_butter' y 'xb_cheby2' contienen las señales por banda en el dominio del tiempo
 ```
@@ -482,15 +530,16 @@ y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 bank_b = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
 bank_c = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
                           design=filters.FilterDesign(filter_type="cheby2"))
-_, freq, xb_butter = bank_b.filter(y, sigbands=True)
-_, _, xb_cheby2 = bank_c.filter(y, sigbands=True)
+filtered = bank_b.filter(y, sigbands=True)
+freq, xb_butter = filtered.frequencies, filtered.bands
+xb_cheby2 = bank_c.filter(y, sigbands=True).bands
 
 # La figura publicada lleva dos paneles más: la entrada arriba y, abajo, la
 # banda de 1 kHz de un impulso unitario a través de cada banco.
 impulse = np.zeros_like(t)
 impulse[0] = 1.0
-_, _, imp_butter = bank_b.filter(impulse, sigbands=True)
-_, _, imp_cheby2 = bank_c.filter(impulse, sigbands=True)
+imp_butter = bank_b.filter(impulse, sigbands=True).bands
+imp_cheby2 = bank_c.filter(impulse, sigbands=True).bands
 one_k = int(np.argmin(np.abs(np.asarray(freq) - 1000.0)))
 
 fig, axes = plt.subplots(len(freq) + 2, 1, figsize=(9, 2 * (len(freq) + 2)),
@@ -563,7 +612,7 @@ plt.show()
 
 </details>
 
-## 5. Filtrado de fase cero
+## 6. Filtrado de fase cero
 
 Para análisis offline puedes eliminar por completo el retardo de grupo:
 `OctaveFilterBank.filter(…, zero_phase=True)` filtra cada banda hacia delante y
@@ -586,7 +635,8 @@ t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3)
-spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
+filtered = bank.filter(y, sigbands=True, zero_phase=True)
+spl, freq, xb = filtered.levels, filtered.frequencies, filtered.bands
 ```
 
 <ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zero_phase_comparison.svg" alt="Filtrado causal frente a fase cero de una ráfaga: la salida de fase cero queda alineada con la entrada" width="80%" />
@@ -609,9 +659,9 @@ start, end = int(0.05 * fs), int(0.10 * fs)
 x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
 
 bank = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
-_, _, fwd = bank.filter(x, sigbands=True, calculate_level=False)
-_, _, zp = bank.filter(x, sigbands=True, calculate_level=False,
-                       zero_phase=True)
+fwd = bank.filter(x, sigbands=True, calculate_level=False).bands
+zp = bank.filter(x, sigbands=True, calculate_level=False,
+                       zero_phase=True).bands
 
 fig, ax = plt.subplots(figsize=(9, 4.5))
 ax.plot(t, x, color="gray", alpha=0.5, label="Ráfaga de entrada (250 Hz)")

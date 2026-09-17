@@ -1,0 +1,275 @@
+{
+  "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
+  "about": "Eighteen common building materials, credited by the book to Beranek and Ver (1992) and so attributed at table level rather than row by row. The speed column is headed \"Speed of Longitudinal Waves\" and the page prints no modulus and no Poisson ratio beside it, so nothing on the page says which of the three longitudinal waves it is and nothing here guesses: it goes in longitudinal_speed_m_s. Compared with the four tables already in the catalogue it looks like the bar speed, and the steel row is the clearest, at 5050 m/s against plate speeds of 5270 to 5458; but the books disagree among themselves by more than the gap between the two waves for several materials, so that is a hint and not a reading. Nine rows print a row of dots instead of a speed and one prints \"Varies with frequency\" instead of a loss factor, which is why those cells say why they are empty rather than being empty. The footnote to the loss factor column says its range rests on limited data at 1000 Hz and that the lower value is typical for the material alone.",
+  "rows": [
+    {
+      "key": "aluminum",
+      "name": "Aluminum",
+      "longitudinal_speed_m_s": 5150.0,
+      "density_kg_m3": 2700.0,
+      "ranges": {
+        "loss_factor": [
+          0.0001,
+          0.01
+        ]
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "brick",
+      "name": "Brick",
+      "loss_factor": 0.01,
+      "ranges": {
+        "density_kg_m3": [
+          1900,
+          2300
+        ]
+      },
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "concrete_poured",
+      "name": "Concrete, poured",
+      "longitudinal_speed_m_s": 3400.0,
+      "density_kg_m3": 2300.0,
+      "ranges": {
+        "loss_factor": [
+          0.005,
+          0.02
+        ]
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "hollow_cinder_block",
+      "name": "Masonry block, hollow cinder",
+      "variant": "nominal 6 in thick",
+      "density_kg_m3": 750.0,
+      "ranges": {
+        "loss_factor": [
+          0.005,
+          0.02
+        ]
+      },
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "hollow_cinder_block_sand_plaster",
+      "name": "Masonry block, hollow cinder with 5/8 in sand plaster each side",
+      "variant": "nominal 6 in thick",
+      "density_kg_m3": 900.0,
+      "ranges": {
+        "loss_factor": [
+          0.005,
+          0.02
+        ]
+      },
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "hollow_dense_concrete_sand_filled",
+      "name": "Masonry block, hollow dense concrete, sand-filled",
+      "variant": "6 in thick",
+      "density_kg_m3": 1100.0,
+      "ranges": {
+        "loss_factor": [
+          0.007,
+          0.02
+        ]
+      },
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "hollow_dense_concrete",
+      "name": "Masonry block, hollow dense concrete",
+      "variant": "nominal 6 in thick",
+      "density_kg_m3": 1700.0,
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be",
+        "loss_factor": "the table prints “Varies with frequency” where the number would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "solid_dense_concrete_block",
+      "name": "Masonry block, solid dense concrete",
+      "variant": "4 in thick",
+      "density_kg_m3": 1700.0,
+      "loss_factor": 0.012,
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "fir_timber",
+      "name": "Fir timber",
+      "longitudinal_speed_m_s": 3800.0,
+      "density_kg_m3": 550.0,
+      "loss_factor": 0.04,
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "longitudinal_speed_m_s": 5200.0,
+      "density_kg_m3": 2500.0,
+      "ranges": {
+        "loss_factor": [
+          0.001,
+          0.01
+        ]
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      },
+      "note": "the loss factor carries the table's second footnote, which says it is very sensitive to construction techniques and edge conditions"
+    },
+    {
+      "key": "lead_chemical",
+      "name": "Lead",
+      "variant": "chemical or tellurium",
+      "longitudinal_speed_m_s": 1200.0,
+      "density_kg_m3": 11000.0,
+      "loss_factor": 0.015,
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "lead_antimonial",
+      "name": "Lead",
+      "variant": "antimonial, hard",
+      "longitudinal_speed_m_s": 1200.0,
+      "density_kg_m3": 11000.0,
+      "loss_factor": 0.002,
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "plaster_solid",
+      "name": "Plaster, solid, on metal or gypsum lath",
+      "density_kg_m3": 1700.0,
+      "ranges": {
+        "loss_factor": [
+          0.005,
+          0.01
+        ]
+      },
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "plexiglas",
+      "name": "Plexiglas or Lucite",
+      "longitudinal_speed_m_s": 1800.0,
+      "density_kg_m3": 1150.0,
+      "loss_factor": 0.002,
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "steel",
+      "name": "Steel",
+      "longitudinal_speed_m_s": 5050.0,
+      "density_kg_m3": 7700.0,
+      "ranges": {
+        "loss_factor": [
+          0.0001,
+          0.01
+        ]
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "gypboard",
+      "name": "Gypboard",
+      "variant": "0,5 to 2 in",
+      "longitudinal_speed_m_s": 6800.0,
+      "density_kg_m3": 650.0,
+      "ranges": {
+        "loss_factor": [
+          0.01,
+          0.03
+        ]
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "plywood",
+      "name": "Plywood",
+      "variant": "0,25 to 1,25 in",
+      "density_kg_m3": 600.0,
+      "ranges": {
+        "loss_factor": [
+          0.01,
+          0.04
+        ]
+      },
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    },
+    {
+      "key": "wood_chip_board",
+      "name": "Wood chip board",
+      "variant": "5 lb/ft2",
+      "density_kg_m3": 750.0,
+      "ranges": {
+        "loss_factor": [
+          0.005,
+          0.01
+        ]
+      },
+      "unquantified": {
+        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+      },
+      "attributed_to": {
+        "table": "Beranek and Ver, 1992"
+      }
+    }
+  ]
+}

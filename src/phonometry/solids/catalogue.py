@@ -82,15 +82,20 @@ class SolidMaterial:
     neither. A field is ``None`` when the page had nothing to put there, and
     :meth:`why_missing` says what it had instead.
 
-    **The three longitudinal speeds are three fields**, because they are three
-    different waves and the books do not agree on what to call them. Cremer's
+    **The three longitudinal speeds are three fields**, and a fourth holds the
+    one a page prints without saying which it is. They are three different
+    waves and the books do not agree on what to call them. Cremer's
     ``c_LII`` and Bies' ``sqrt(E/rho)`` are the bar speed; Hopkins'
     quasi-longitudinal is the plate speed; and the bulk speed is neither. At
     ``nu = 0.3`` the plate speed is 4.8 per cent above the bar speed and the
     bulk speed is 16 per cent above it, which is the figure Cremer prints
     under his Eq. (3.32) with the warning that it matters which one is meant.
     One field holding whichever the page happened to print is the mistake this
-    catalogue exists to prevent, so there is no such field.
+    catalogue exists to prevent, so there is no field that means "whichever
+    one the page happened to print". :attr:`longitudinal_speed_m_s` is not
+    that: it means the page printed a longitudinal speed and said nothing
+    about which, which is a statement about the source rather than a shrug
+    about the wave.
 
     **The loss factors are four fields** for the same reason. A flexural loss
     factor is measured in bending and a longitudinal one is not; an in-situ
@@ -112,6 +117,10 @@ class SolidMaterial:
     :ivar youngs_modulus_pa: Young's modulus ``E``, in pascals.
     :ivar shear_modulus_pa: Shear modulus ``G``, in pascals.
     :ivar poisson_ratio: Poisson's ratio ``nu``.
+    :ivar longitudinal_speed_m_s: A longitudinal speed for a page that prints
+        one and does not say which of the three it is. Long's Table 12.1
+        does, with no modulus and no Poisson ratio beside it, so there is
+        nothing on the page to settle it and nothing here that guesses.
     :ivar bar_longitudinal_speed_m_s: ``sqrt(E/rho)``, the quasi-longitudinal
         speed on a rod, in m/s.
     :ivar plate_longitudinal_speed_m_s: ``sqrt(E/(rho(1-nu^2)))``, the
@@ -163,6 +172,7 @@ class SolidMaterial:
     youngs_modulus_pa: float | None = None
     shear_modulus_pa: float | None = None
     poisson_ratio: float | None = None
+    longitudinal_speed_m_s: float | None = None
     bar_longitudinal_speed_m_s: float | None = None
     plate_longitudinal_speed_m_s: float | None = None
     bulk_longitudinal_speed_m_s: float | None = None
@@ -403,6 +413,8 @@ _TABLES = (
     "cremer-2005-table-4-3",
     "mechel-2008-table-3",
     "bies-2017-table-c1",
+    "long-2014-table-12-1",
+    "arau-1999-table-4-1",
 )
 
 
@@ -436,8 +448,10 @@ def _load() -> dict[str, SolidMaterial]:
 #: **Table 4.3** on PDF page 201, and ``solids/data/mechel-2008-table-3.json``,
 #: Mechel **Table 3** on PDF pages 544-545, and
 #: ``solids/data/bies-2017-table-c1.json``, Bies **Table C.1** on PDF pages
-#: 747-750. Use :func:`solids_named` to gather every book's reading of one
-#: material.
+#: 747-750, and ``solids/data/long-2014-table-12-1.json``, Long **Table 12.1**
+#: on PDF page 487, and ``solids/data/arau-1999-table-4-1.json``,
+#: Arau-Puchades **Table 4.1** on PDF page 129. Use :func:`solids_named` to
+#: gather every book's reading of one material.
 PUBLISHED_SOLIDS: Mapping[str, SolidMaterial] = MappingProxyType(_load())
 
 

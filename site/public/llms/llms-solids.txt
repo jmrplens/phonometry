@@ -227,11 +227,13 @@ never stored as though a page had printed it.
 
 `solids_named("Steel")` gives both books' steels, 199,6 GPa at a Poisson ratio
 of 0,28 and 210 GPa at 0,31, and every row carries all three longitudinal
-speeds whichever one its page printed, so the comparison is between two books
-rather than between two waves. Cremer's own column is the bar speed: his
-Eq. (3.32) defines `c_LII` as `sqrt(E/rho)`, and the Roman subscript counts the
-directions along which the cross-sectional contraction is unconstrained, so
-`II` is a rod.
+speeds whenever its own cells allow it, so the comparison is between two books
+rather than between two waves. Two Hopkins rows, aircrete and brick, print a
+density only as a range and nothing follows from it, so they keep the plate
+speed the page printed and `why_missing` says why the others are absent.
+Cremer's own column is the bar speed: his Eq. (3.32) defines `c_LII` as
+`sqrt(E/rho)`, and the Roman subscript counts the directions along which the
+cross-sectional contraction is unconstrained, so `II` is a rod.
 
 A materials table is not a list of measurements, and these say so. Most of
 Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is

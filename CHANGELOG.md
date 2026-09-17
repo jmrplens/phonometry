@@ -21,8 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   are the bar speed, Hopkins' quasi-longitudinal is the plate speed, and Cremer
   puts the gap to the pure longitudinal speed at 16 per cent for a Poisson
   ratio of 0,3. One field holding whichever the page happened to print is the
-  mistake this catalogue exists to prevent, so `bar_`, `plate_` and
-  `bulk_longitudinal_speed_m_s` are separate and every row carries all three:
+  mistake this catalogue exists to prevent, so `bar_longitudinal_speed_m_s`,
+  `plate_longitudinal_speed_m_s` and `bulk_longitudinal_speed_m_s` are separate and every row carries all three:
   whichever one its page printed is read, and the others follow from the row's
   own cells. The loss factors are three fields for the same reason, because a
   flexural loss factor is measured in bending, a longitudinal one is not, and

@@ -207,7 +207,7 @@ that is not a number. Each of those is a different answer.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** What the page had in that cell, or the empty string when the field is not missing at all.
+**Returns:** What the page had in that cell, or the empty string when the field is not missing at all. A field the page has no column for and this library cannot derive, because the cells it would need are themselves a range, answers that it does not follow.
 
 **Raises**
 

@@ -206,27 +206,40 @@ CREMER_4_3_VARIANTS: tuple[tuple[str, str], ...] = (
     ("copper_single_crystal", "single crystal"),
 )
 
-#: The bracketed references the Remarks column carries, resolved against the
-#: chapter's own list on PDF page 243 (printed p. 233).
+#: Every bracketed reference the Remarks column carries, resolved against the
+#: chapter's own list on PDF page 243 (printed p. 233). Twelve of the fifteen
+#: rows credit someone; steel, and the two copper specimens, credit nobody.
 CREMER_4_3_ATTRIBUTIONS: tuple[tuple[str, str, str], ...] = (
     (
         "aluminium",
         "flexural_loss_factor",
         "Wegel and Walter, 1953; Zemanek and Rudnik, 1961; Becker and Oberst, 1956",
     ),
-    ("gold", "flexural_loss_factor", "Forster and Koster, 1937"),
+    ("lead_chemically_pure", "flexural_loss_factor", "Wegel and Walter, 1953"),
+    ("lead_antimonial", "flexural_loss_factor", "Wegel and Walter, 1953"),
     (
         "iron",
         "flexural_loss_factor",
         "Wegel and Walter, 1953; Bennewitz and Rotger, 1936; Becker and Oberst, 1956",
     ),
+    ("gold", "flexural_loss_factor", "Forster and Koster, 1937"),
     ("magnesium", "longitudinal_loss_factor", "Becker and Oberst, 1956"),
+    ("brass", "flexural_loss_factor", "Wegel and Walter, 1953"),
+    ("nickel", "longitudinal_loss_factor", "Becker and Oberst, 1956"),
     (
         "silver",
         "flexural_loss_factor",
         "Bordoni, Nuovo and Verdini, 1959; Forster and Koster, 1937",
     ),
+    ("bismuth", "longitudinal_loss_factor", "Becker and Oberst, 1956"),
+    ("zinc", "longitudinal_loss_factor", "Becker and Oberst, 1956"),
+    ("tin", "longitudinal_loss_factor", "Becker and Oberst, 1956"),
 )
+
+#: The two Hopkins rows whose density the page prints only as a range, so no
+#: modulus follows and neither do the two speeds that would come from one.
+#: They keep the plate speed the page printed.
+HOPKINS_A2_ROWS_WITHOUT_A_DERIVED_SPEED: tuple[str, ...] = ("aircrete", "brick")
 
 #: Cremer states the gap between the bar speed and the pure longitudinal speed
 #: on PDF page 47 (printed p. 37), under Eq. (3.32): "For mu = 0.3, the

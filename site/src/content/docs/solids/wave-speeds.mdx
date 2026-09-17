@@ -165,8 +165,11 @@ for row in solids.solids_named("Steel"):
 # cremer-2005-table-4-3 210.0 0.31
 ```
 
-Every row carries all three longitudinal speeds whichever one its page
-printed, so the comparison is between two books and not between two waves.
+Every row carries all three longitudinal speeds whenever its own cells allow
+it, so the comparison is between two books and not between two waves. Two of
+Hopkins' rows, aircrete and brick, print a density only as a range, and nothing
+follows from a density the page declined to collapse: those two keep the plate
+speed the page printed and `why_missing` says why the other two are absent.
 Cremer's own column is the bar speed, which his Eq. (3.32) defines as
 `sqrt(E/rho)`: the Roman subscript in `c_LII` counts the directions along which
 the cross-sectional contraction is unconstrained, so `II` is a rod and not a

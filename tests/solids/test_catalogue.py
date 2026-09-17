@@ -433,3 +433,38 @@ def test_the_gap_cremer_prints_between_bar_and_bulk_comes_out_of_the_functions()
     bulk = bulk_longitudinal_speed(modulus, density_kg_m3=density, poisson_ratio=nu)
 
     assert bulk / bar - 1.0 == pytest.approx(ref.CREMER_BAR_TO_BULK_AT_NU_0_3, abs=5e-4)
+
+
+def test_the_oracle_covers_every_attribution_in_the_data_file() -> None:
+    """A credit the oracle does not list is a credit nothing checks.
+
+    The parametrised test above only sees what the oracle names, so an
+    attribution added to the data file and not to the oracle would ride along
+    untested. This is what makes that impossible rather than unlikely.
+    """
+    in_catalogue = {
+        (key, field) for key, row in CREMER.items() for field in row.attributed_to
+    }
+
+    assert in_catalogue == {
+        (key, field) for key, field, _ in ref.CREMER_4_3_ATTRIBUTIONS
+    }
+
+
+@pytest.mark.parametrize("key", ref.HOPKINS_A2_ROWS_WITHOUT_A_DERIVED_SPEED)
+def test_a_range_only_density_derives_no_speed_and_says_so(key: str) -> None:
+    """Nothing follows from a density the page declined to collapse.
+
+    Aircrete and brick keep the plate speed Hopkins printed and nothing else:
+    the bar and bulk speeds would have to come through a modulus, and there is
+    no density to work one out with. Filling them from the midpoint of the
+    range would be inventing two numbers out of one the book would not give.
+    """
+    row = HOPKINS[key]
+
+    assert row.plate_longitudinal_speed_m_s is not None
+    assert row.bar_longitudinal_speed_m_s is None
+    assert row.bulk_longitudinal_speed_m_s is None
+    assert row.why_missing("bar_longitudinal_speed_m_s") == (
+        "the page does not give it, and it does not follow from the cells that it does"
+    )

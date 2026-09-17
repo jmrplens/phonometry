@@ -220,7 +220,9 @@ class SolidMaterial:
 
         :param field_name: One of the numeric field names of this class.
         :return: What the page had in that cell, or the empty string when the
-            field is not missing at all.
+            field is not missing at all. A field the page has no column for
+            and this library cannot derive, because the cells it would need
+            are themselves a range, answers that it does not follow.
         :raises AttributeError: for a name this class does not have, because a
             misspelt field would otherwise answer as if the cell were empty.
         """
@@ -233,7 +235,7 @@ class SolidMaterial:
             if field_name in self.bounded_above:
                 return f"the page prints an upper bound of {high:g} and no value"
             return f"the page prints {low:g} to {high:g} and no value"
-        return "the page leaves the cell empty"
+        return "the page does not give it, and it does not follow from the cells that it does"
 
 
 #: How a field this library computed is described in

@@ -228,6 +228,16 @@ parameter-units:
 published-sources:
 	$(PYTHON) scripts/check_published_sources.py
 
+# The solids catalogue holds the same material from up to four books, and two
+# densities that disagree are a digit somebody typed wrong: across these tables
+# a named material's density agrees to within three per cent, every time. This
+# puts the books side by side and fails on that, while reporting the moduli and
+# speeds, which really do disagree by thirty per cent without anybody being
+# wrong. Needs the package importable, for the same reason published-sources
+# does.
+solid-agreement:
+	$(PYTHON) scripts/check_solid_agreement.py
+
 # A conformance row that computes the expected value itself is comparing a
 # formula with a second copy of it, and reports Pass whatever the library does.
 # This resolves what each row reaches, through its helpers and whatever name
@@ -489,4 +499,5 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point figure-legends control-characters hazards dead-constants \
-	conformance-rows conformance-vocabulary parameter-units published-sources
+	conformance-rows conformance-vocabulary parameter-units published-sources \
+	solid-agreement

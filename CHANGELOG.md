@@ -111,6 +111,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   reads it from there, and a constant built from several files has to have a
   citation in every one of them.
 
+  **The books are held against each other, and one of them is wrong about tin.**
+  `check_solid_agreement.py` puts every material several books print on one
+  line. What it fails on is density and only density, because a density is the
+  one property a table cannot get very wrong without describing a different
+  material: across these six tables a named material's density agrees to within
+  2,6 per cent, every time, so a disagreement past 8 per cent is a digit
+  somebody typed wrong and almost always ours. Everything else it reports and
+  never fails on, since moduli disagree by nineteen per cent on aluminium and
+  thirty on lead between these books without anybody being wrong.
+
+  Its first full run found tin. Cremer and Mechel print a Young's modulus of
+  4,4 GPa and Bies 54, a factor of twelve, while the three densities agree to
+  0,3 per cent so nobody has confused the material. Each book is consistent with
+  itself: Cremer's 4,4 GPa reproduces his own printed 780 m/s and his shear
+  modulus and transverse speed besides, Bies' 54 reproduces his printed
+  2 720 m/s exactly, and Mechel's `f_cr d` of 81 m Hz follows from 4,4 and not
+  from 54. So no page contradicts itself and this is not an errata; it is two
+  books sharing an order of magnitude against a third, and the accepted modulus
+  of tin is near the third one. That is the case for keeping six books instead
+  of picking one, and the reason the gate never votes by majority.
+
+  The disagreement it does silence is written down with its reason, and the
+  silencing is a ratchet in both directions: an entry whose books come to agree
+  fails until somebody deletes it. Today it holds one, polypropylene, where
+  Mechel's 1 100 kg/m3 is what his page prints and what his own impedance column
+  is computed from, and Bies' 905 is what the material weighs.
+
 - **`phonometry.solids`**, the elastic constants of a solid and the three
   longitudinal wave speeds that follow from them. A beam, a plate and an
   unbounded solid carry a different longitudinal wave, and which one a printed

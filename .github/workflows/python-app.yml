@@ -405,6 +405,37 @@ jobs:
     - name: Check that every published value cites its page and folio
       run: python scripts/check_published_sources.py
 
+  # The solids catalogue's point is that a published value is worth more beside
+  # another published value than alone, and four books print the same material.
+  # Two densities that disagree are a digit somebody typed wrong, because across
+  # these tables a named material's density agrees to within three per cent
+  # every time, so that is what this fails on. Moduli and speeds disagree by
+  # thirty per cent between books without anybody being wrong, so those it
+  # reports and never fails; the ones it reports by default are the few an order
+  # of magnitude apart, which is how tin's twelvefold modulus surfaced. It walks
+  # the imported package, like the units and sources guards.
+  solid-agreement:
+    name: The books agree about the solids they share
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+    - uses: actions/checkout@v7
+      with:
+        persist-credentials: false
+    - name: Set up Python 3.13
+      uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: 'pip'
+    - name: Install runtime dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+    - name: Check that the books agree about the solids they share
+      run: python scripts/check_solid_agreement.py
+
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in
   # requirements-figures.txt so SVG *structure* (elements, text, colours) and

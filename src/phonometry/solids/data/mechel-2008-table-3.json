@@ -1,0 +1,443 @@
+{
+  "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
+  "about": "Thirty-eight rows in the three groups the page prints as italic headings: construction materials, plastics and metals. Columns: density, the modulus in MN/m2, f_cr.d in Hz m, Z_m and the loss factor. There is no Poisson ratio and no wave speed, so a row gives the bar speed through its modulus and its density and stops there: the plate and bulk speeds need a Poisson ratio this page does not print, and assuming one would attribute a number to Mechel that he did not give. What does cross to the other books is f_cr.d, the same material constant Hopkins prints as h.f_c, which printed page 531 calls out in so many words. Z_m is not held here: it is the wall impedance ratio of Eq. (11), a derived quantity rather than a property of the material, and the one row whose printed Z_m does not follow from that equation carries the discrepancy in its note and an entry in the errata registry.",
+  "rows": [
+    {
+      "key": "concrete",
+      "name": "Concrete",
+      "loss_factor": 0.05,
+      "ranges": {
+        "density_kg_m3": [
+          2100.0,
+          2300.0
+        ],
+        "youngs_modulus_pa": [
+          25000000000.0,
+          40000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          15.0,
+          18.5
+        ]
+      }
+    },
+    {
+      "key": "lean_concrete",
+      "name": "Lean concrete",
+      "density_kg_m3": 2000.0,
+      "youngs_modulus_pa": 15000000000.0,
+      "thickness_critical_frequency_product_m_hz": 23.0
+    },
+    {
+      "key": "light_concrete",
+      "name": "Light concrete",
+      "loss_factor": 0.015,
+      "ranges": {
+        "density_kg_m3": [
+          800.0,
+          1400.0
+        ],
+        "youngs_modulus_pa": [
+          1500000000.0,
+          3000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          37.0,
+          48.0
+        ]
+      }
+    },
+    {
+      "key": "porous_concrete",
+      "name": "Porous concrete",
+      "loss_factor": 0.01,
+      "ranges": {
+        "density_kg_m3": [
+          600.0,
+          700.0
+        ],
+        "youngs_modulus_pa": [
+          1400000000.0,
+          2000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          37.0,
+          45.0
+        ]
+      }
+    },
+    {
+      "key": "cement_floor",
+      "name": "Cement floor",
+      "density_kg_m3": 2200.0,
+      "youngs_modulus_pa": 30000000000.0,
+      "thickness_critical_frequency_product_m_hz": 17.0
+    },
+    {
+      "key": "xylolith_floor",
+      "name": "Xylolith floor",
+      "density_kg_m3": 1600.0,
+      "youngs_modulus_pa": 6000000000.0,
+      "thickness_critical_frequency_product_m_hz": 32.5,
+      "loss_factor": 0.03
+    },
+    {
+      "key": "asphalt_floor",
+      "name": "Asphalt floor",
+      "density_kg_m3": 2200.0,
+      "ranges": {
+        "youngs_modulus_pa": [
+          6000000000.0,
+          15000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          24.0,
+          42.0
+        ],
+        "loss_factor": [
+          0.03,
+          0.3
+        ]
+      }
+    },
+    {
+      "key": "plaster_floor",
+      "name": "Plaster floor",
+      "density_kg_m3": 1200.0,
+      "youngs_modulus_pa": 20000000000.0,
+      "loss_factor": 0.006,
+      "ranges": {
+        "thickness_critical_frequency_product_m_hz": [
+          15.5,
+          16.0
+        ]
+      }
+    },
+    {
+      "key": "gypsum_panel",
+      "name": "Gypsum panel",
+      "loss_factor": 0.004,
+      "ranges": {
+        "density_kg_m3": [
+          1000.0,
+          1200.0
+        ],
+        "youngs_modulus_pa": [
+          3500000000.0,
+          7000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          24.0,
+          35.0
+        ]
+      }
+    },
+    {
+      "key": "plaster_board",
+      "name": "Plaster board",
+      "density_kg_m3": 1000.0,
+      "youngs_modulus_pa": 3200000000.0,
+      "loss_factor": 0.03,
+      "ranges": {
+        "thickness_critical_frequency_product_m_hz": [
+          31.0,
+          35.0
+        ]
+      }
+    },
+    {
+      "key": "fibre_cement_board",
+      "name": "Fibre cement board",
+      "loss_factor": 0.01,
+      "ranges": {
+        "density_kg_m3": [
+          2000.0,
+          2100.0
+        ],
+        "youngs_modulus_pa": [
+          20000000000.0,
+          30000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          16.5,
+          20.0
+        ]
+      }
+    },
+    {
+      "key": "brick_wall",
+      "name": "Brick wall",
+      "loss_factor": 0.04,
+      "ranges": {
+        "density_kg_m3": [
+          1700.0,
+          1800.0
+        ],
+        "youngs_modulus_pa": [
+          9000000000.0,
+          25000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          16.0,
+          27.0
+        ]
+      }
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "density_kg_m3": 2500.0,
+      "loss_factor": 0.001,
+      "ranges": {
+        "youngs_modulus_pa": [
+          60000000000.0,
+          80000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          11.0,
+          13.0
+        ]
+      }
+    },
+    {
+      "key": "chip_board",
+      "name": "Chip board",
+      "loss_factor": 0.03,
+      "ranges": {
+        "density_kg_m3": [
+          600.0,
+          1000.0
+        ],
+        "youngs_modulus_pa": [
+          2000000000.0,
+          5000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          23.0,
+          36.0
+        ]
+      }
+    },
+    {
+      "key": "plywood",
+      "name": "Plywood",
+      "loss_factor": 0.02,
+      "ranges": {
+        "density_kg_m3": [
+          600.0,
+          800.0
+        ],
+        "youngs_modulus_pa": [
+          5000000000.0,
+          12000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          14.0,
+          34.5
+        ]
+      }
+    },
+    {
+      "key": "oak_wood",
+      "name": "Oak wood",
+      "density_kg_m3": 700.0,
+      "loss_factor": 0.01,
+      "ranges": {
+        "youngs_modulus_pa": [
+          200000000.0,
+          1000000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          18.0,
+          32.0
+        ]
+      }
+    },
+    {
+      "key": "pine_wood",
+      "name": "Pine wood",
+      "density_kg_m3": 480.0,
+      "loss_factor": 0.01,
+      "ranges": {
+        "youngs_modulus_pa": [
+          100000000.0,
+          500000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          20.0,
+          32.0
+        ]
+      }
+    },
+    {
+      "key": "hard_board",
+      "name": "Hard board",
+      "density_kg_m3": 1000.0,
+      "loss_factor": 0.015,
+      "ranges": {
+        "youngs_modulus_pa": [
+          3000000000.0,
+          4500000000.0
+        ],
+        "thickness_critical_frequency_product_m_hz": [
+          29.5,
+          36.5
+        ]
+      }
+    },
+    {
+      "key": "acryl_glass",
+      "name": "Acryl glass",
+      "density_kg_m3": 1200.0,
+      "youngs_modulus_pa": 5600000000.0,
+      "thickness_critical_frequency_product_m_hz": 29.0,
+      "loss_factor": 0.06
+    },
+    {
+      "key": "polypropylene",
+      "name": "Polypropylene",
+      "density_kg_m3": 1100.0,
+      "youngs_modulus_pa": 3000000000.0,
+      "thickness_critical_frequency_product_m_hz": 38.0,
+      "loss_factor": 0.1
+    },
+    {
+      "key": "polyester",
+      "name": "Polyester",
+      "density_kg_m3": 1200.0,
+      "youngs_modulus_pa": 4500000000.0,
+      "thickness_critical_frequency_product_m_hz": 32.5,
+      "loss_factor": 0.14
+    },
+    {
+      "key": "pvc_hard",
+      "name": "PVC, hard",
+      "density_kg_m3": 1300.0,
+      "youngs_modulus_pa": 2700000000.0,
+      "thickness_critical_frequency_product_m_hz": 43.5,
+      "loss_factor": 0.04
+    },
+    {
+      "key": "pvc_30_softener",
+      "name": "PVC, 30% softener",
+      "density_kg_m3": 1250.0,
+      "thickness_critical_frequency_product_m_hz": 48.0,
+      "note": "the table prints no modulus and no loss factor, and its Z_m of 1220 is 8.4 times what its own Eq. (11) gives for this row"
+    },
+    {
+      "key": "polyethylene_hard",
+      "name": "Polyethylene, hard",
+      "density_kg_m3": 950.0,
+      "youngs_modulus_pa": 1700000000.0,
+      "thickness_critical_frequency_product_m_hz": 47.0,
+      "loss_factor": 0.04
+    },
+    {
+      "key": "polyethylene_soft",
+      "name": "Polyethylene, soft",
+      "density_kg_m3": 920.0,
+      "youngs_modulus_pa": 400000000.0,
+      "thickness_critical_frequency_product_m_hz": 95.5,
+      "loss_factor": 0.1
+    },
+    {
+      "key": "polystyrene",
+      "name": "Polystyrene",
+      "density_kg_m3": 1070.0,
+      "youngs_modulus_pa": 3000000000.0,
+      "thickness_critical_frequency_product_m_hz": 37.5,
+      "loss_factor": 0.01
+    },
+    {
+      "key": "polystyrene_glass_fibre",
+      "name": "Polystyrene + 30% glass fibre",
+      "density_kg_m3": 1450.0,
+      "youngs_modulus_pa": 8000000000.0,
+      "thickness_critical_frequency_product_m_hz": 27.0
+    },
+    {
+      "key": "polyester_glass_fibre",
+      "name": "Polyester + glass fibre",
+      "density_kg_m3": 2200.0,
+      "youngs_modulus_pa": 11500000000.0,
+      "thickness_critical_frequency_product_m_hz": 27.5,
+      "loss_factor": 0.02
+    },
+    {
+      "key": "aluminium",
+      "name": "Aluminium",
+      "density_kg_m3": 2700.0,
+      "youngs_modulus_pa": 74000000000.0,
+      "thickness_critical_frequency_product_m_hz": 12.0,
+      "loss_factor": 7e-05
+    },
+    {
+      "key": "lead",
+      "name": "Lead",
+      "density_kg_m3": 11400.0,
+      "youngs_modulus_pa": 18000000000.0,
+      "thickness_critical_frequency_product_m_hz": 48.5,
+      "loss_factor": 0.02
+    },
+    {
+      "key": "copper",
+      "name": "Copper",
+      "density_kg_m3": 8900.0,
+      "youngs_modulus_pa": 125000000000.0,
+      "thickness_critical_frequency_product_m_hz": 17.0
+    },
+    {
+      "key": "brass",
+      "name": "Brass",
+      "density_kg_m3": 8500.0,
+      "youngs_modulus_pa": 96000000000.0,
+      "thickness_critical_frequency_product_m_hz": 18.6,
+      "loss_factor": 0.001
+    },
+    {
+      "key": "steel",
+      "name": "Steel, cast steel",
+      "density_kg_m3": 7800.0,
+      "youngs_modulus_pa": 200000000000.0,
+      "thickness_critical_frequency_product_m_hz": 12.3,
+      "loss_factor": 0.0001
+    },
+    {
+      "key": "malleable_iron",
+      "name": "Malleable iron",
+      "density_kg_m3": 7500.0,
+      "youngs_modulus_pa": 170000000000.0,
+      "thickness_critical_frequency_product_m_hz": 13.2
+    },
+    {
+      "key": "cast_iron_spheroidal",
+      "name": "Cast iron with spheroidal graphite",
+      "density_kg_m3": 7250.0,
+      "youngs_modulus_pa": 120000000000.0,
+      "thickness_critical_frequency_product_m_hz": 15.4,
+      "loss_factor": 0.01
+    },
+    {
+      "key": "cast_iron_lamellar",
+      "name": "Cast iron with lamellar graphite",
+      "density_kg_m3": 7250.0,
+      "youngs_modulus_pa": 120000000000.0,
+      "thickness_critical_frequency_product_m_hz": 15.4,
+      "loss_factor": 0.02
+    },
+    {
+      "key": "zinc",
+      "name": "Zinc",
+      "density_kg_m3": 7130.0,
+      "youngs_modulus_pa": 13000000000.0,
+      "thickness_critical_frequency_product_m_hz": 46.5
+    },
+    {
+      "key": "tin",
+      "name": "Tin",
+      "density_kg_m3": 7280.0,
+      "youngs_modulus_pa": 4400000000.0,
+      "thickness_critical_frequency_product_m_hz": 81.0
+    }
+  ]
+}

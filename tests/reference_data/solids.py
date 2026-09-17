@@ -245,3 +245,116 @@ HOPKINS_A2_ROWS_WITHOUT_A_DERIVED_SPEED: tuple[str, ...] = ("aircrete", "brick")
 #: on PDF page 47 (printed p. 37), under Eq. (3.32): "For mu = 0.3, the
 #: difference between these two speeds amounts to 16 %".
 CREMER_BAR_TO_BULK_AT_NU_0_3 = 0.16
+
+
+# ---------------------------------------------------------------------------
+# Mechel (2008) Table 3, "Density and elastic constants of materials"
+# PDF pages 544-545 (printed pp. 529-530)
+# ---------------------------------------------------------------------------
+#: Rows the page prints with a single value in every column this library
+#: reads: key, density in kg/m3, modulus in pascals and ``f_cr d`` in m Hz.
+#: The rest print at least one of the three as a range and are held by
+#: :data:`MECHEL_3_RANGES`.
+MECHEL_3_SCALAR_ROWS: tuple[tuple[str, float, float, float], ...] = (
+    ("lean_concrete", 2000.0, 15000e6, 23.0),
+    ("cement_floor", 2200.0, 30000e6, 17.0),
+    ("xylolith_floor", 1600.0, 6000e6, 32.5),
+    ("acryl_glass", 1200.0, 5600e6, 29.0),
+    ("polypropylene", 1100.0, 3000e6, 38.0),
+    ("polyester", 1200.0, 4500e6, 32.5),
+    ("pvc_hard", 1300.0, 2700e6, 43.5),
+    ("polyethylene_hard", 950.0, 1700e6, 47.0),
+    ("polyethylene_soft", 920.0, 400e6, 95.5),
+    ("polystyrene", 1070.0, 3000e6, 37.5),
+    ("aluminium", 2700.0, 74000e6, 12.0),
+    ("lead", 11400.0, 18000e6, 48.5),
+    ("copper", 8900.0, 125000e6, 17.0),
+    ("brass", 8500.0, 96000e6, 18.6),
+    ("steel", 7800.0, 200000e6, 12.3),
+    ("malleable_iron", 7500.0, 170000e6, 13.2),
+    ("zinc", 7130.0, 13000e6, 46.5),
+    ("tin", 7280.0, 4400e6, 81.0),
+)
+
+#: Rows whose density the page prints as a range, with that range.
+MECHEL_3_DENSITY_RANGES: tuple[tuple[str, float, float], ...] = (
+    ("concrete", 2100.0, 2300.0),
+    ("light_concrete", 800.0, 1400.0),
+    ("porous_concrete", 600.0, 700.0),
+    ("gypsum_panel", 1000.0, 1200.0),
+    ("fibre_cement_board", 2000.0, 2100.0),
+    ("brick_wall", 1700.0, 1800.0),
+    ("chip_board", 600.0, 1000.0),
+    ("plywood", 600.0, 800.0),
+)
+
+#: The ``Z_m`` column as the page prints it, which the catalogue does not hold:
+#: it is the wall impedance ratio of Eq. (11) rather than a property of the
+#: material. It is here because the errata entry for this table rests on it.
+#: Keyed by row, as ``(low, high)`` so a row printing one value repeats it.
+MECHEL_3_PRINTED_WALL_IMPEDANCE: tuple[tuple[str, float, float], ...] = (
+    ("concrete", 77.0, 104.0),
+    ("lean_concrete", 112.0, 112.0),
+    ("light_concrete", 72.0, 164.0),
+    ("porous_concrete", 54.0, 77.0),
+    ("cement_floor", 91.0, 91.0),
+    ("xylolith_floor", 127.0, 127.0),
+    ("asphalt_floor", 129.0, 225.0),
+    ("plaster_floor", 45.0, 47.0),
+    ("gypsum_panel", 58.0, 102.0),
+    ("fibre_cement_board", 80.0, 102.0),
+    ("brick_wall", 66.0, 118.0),
+    ("glass", 67.0, 79.0),
+    ("chip_board", 34.0, 88.0),
+    ("plywood", 20.0, 65.0),
+    ("oak_wood", 31.0, 55.0),
+    ("pine_wood", 23.0, 37.0),
+    ("hard_board", 72.0, 89.0),
+    ("acryl_glass", 85.0, 85.0),
+    ("polypropylene", 102.0, 102.0),
+    ("polyester", 95.0, 95.0),
+    ("pvc_hard", 138.0, 138.0),
+    ("pvc_30_softener", 1220.0, 1220.0),
+    ("polyethylene_hard", 109.0, 109.0),
+    ("polyethylene_soft", 214.0, 214.0),
+    ("polystyrene", 98.0, 98.0),
+    ("polystyrene_glass_fibre", 95.0, 95.0),
+    ("polyester_glass_fibre", 147.0, 147.0),
+    ("aluminium", 79.0, 79.0),
+    ("lead", 1348.0, 1348.0),
+    ("copper", 369.0, 369.0),
+    ("brass", 386.0, 386.0),
+    ("steel", 234.0, 234.0),
+    ("malleable_iron", 241.0, 241.0),
+    ("cast_iron_spheroidal", 272.0, 272.0),
+    ("cast_iron_lamellar", 272.0, 272.0),
+    ("zinc", 809.0, 809.0),
+    ("tin", 1438.0, 1438.0),
+)
+
+#: The characteristic impedance of air the book's Eq. (11) divides by, in
+#: N s/m3. The equation writes ``Z_0`` and the table is reproduced by the
+#: usual 413; the conclusion of the errata entry does not turn on it, because
+#: 400 and 415 move the one disagreeing row by less than four per cent of
+#: itself while it is out by a factor of 8,4.
+MECHEL_REFERENCE_IMPEDANCE_N_S_M3 = 413.0
+
+#: The row whose printed ``Z_m`` does not follow from the book's own Eq. (11),
+#: with what the equation gives for the cells beside it. See
+#: ``docs/ERRATA.md``, "Mechel (2008), Table 3".
+MECHEL_3_WALL_IMPEDANCE_DEFECT = ("pvc_30_softener", 1220.0, 145.3)
+
+#: How far the rest of the table may stray from Eq. (11). Thirty-four of the
+#: thirty-seven rows that can be checked are inside three per cent; the band
+#: is set by "Plaster board", which prints a single ``Z_m`` of 85 where its
+#: ``f_cr d`` is the range 31 to 35, so the value is the top of the band the
+#: equation gives rather than its middle.
+MECHEL_3_WALL_IMPEDANCE_TOLERANCE = 0.12
+
+#: Materials Hopkins Table A2 and Mechel Table 3 both print with a single
+#: ``h f_c``, which is the one column the two pages share outright: no
+#: conversion, no assumed Poisson ratio, no assumed speed of sound.
+MECHEL_AND_HOPKINS_SHARED_PRODUCT: tuple[tuple[str, str, float, float], ...] = (
+    ("steel", "steel", 12.3, 12.3),
+    ("aluminium", "aluminium", 12.7, 12.0),
+)

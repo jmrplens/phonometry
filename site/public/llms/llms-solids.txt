@@ -162,7 +162,7 @@ speed-of-sound table in a general acoustics text usually gets its solids.
 
 ## Going back to the modulus
 
-Each speed has its inverse, and they are what let two books be compared:
+Each speed has its inverse, and they are what let the books be compared:
 
 ```python
 from phonometry import solids
@@ -206,10 +206,11 @@ Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` holds forty rows read from two published pages: Hopkins
-**Table A2**, twenty-five building materials, and Cremer 3e **Table 4.3**,
-thirteen metals over fifteen rows. The key names the table, because both books
-print a steel and they are not the same steel.
+`PUBLISHED_SOLIDS` holds seventy-eight rows read from three published pages:
+Hopkins **Table A2**, twenty-five building materials; Cremer 3e **Table 4.3**,
+thirteen metals over fifteen rows; and Mechel **Table 3**, thirty-eight
+construction materials, plastics and metals. The key names the table, because
+three of them print a steel and they are not the same steel.
 
 ```python
 from phonometry import solids
@@ -234,6 +235,13 @@ speed the page printed and `why_missing` says why the others are absent.
 Cremer's own column is the bar speed: his Eq. (3.32) defines `c_LII` as
 `sqrt(E/rho)`, and the Roman subscript counts the directions along which the
 cross-sectional contraction is unconstrained, so `II` is a rod.
+
+A page gets as far as its own columns allow and no further. Mechel prints a
+modulus and no Poisson ratio, so his rows give the bar speed and stop: the
+plate and bulk speeds would need a ratio he does not print, and assuming one
+would put a number in his mouth. What crosses between all three books without
+any assumption at all is `h f_c`, which Hopkins prints as a column and Mechel
+as `f_cr d`: for steel both print 12,3 m Hz, to the digit.
 
 A materials table is not a list of measurements, and these say so. Most of
 Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is

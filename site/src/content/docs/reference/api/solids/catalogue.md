@@ -73,6 +73,7 @@ SolidMaterial(
     plate_longitudinal_speed_m_s: float | None = None,
     bulk_longitudinal_speed_m_s: float | None = None,
     transverse_speed_m_s: float | None = None,
+    loss_factor: float | None = None,
     flexural_loss_factor: float | None = None,
     longitudinal_loss_factor: float | None = None,
     in_situ_loss_factor: float | None = None,
@@ -107,10 +108,12 @@ under his Eq. (3.32) with the warning that it matters which one is meant.
 One field holding whichever the page happened to print is the mistake this
 catalogue exists to prevent, so there is no such field.
 
-**The loss factors are three fields** for the same reason. A flexural loss
+**The loss factors are four fields** for the same reason. A flexural loss
 factor is measured in bending and a longitudinal one is not; an in-situ
 one is not a property of the material at all, but of a panel installed in
-a building, support and radiation included.
+a building, support and radiation included; and a page that prints one
+without saying which it is has said something weaker than any of the
+three, which is what [`loss_factor`](/phonometry/reference/api/vibration/transfer-stiffness/#loss_factor) holds.
 
 **Attributes**
 
@@ -128,6 +131,7 @@ a building, support and radiation included.
 | `plate_longitudinal_speed_m_s` | `sqrt(E/(rho(1-nu^2)))`, the quasi-longitudinal speed on a plate, in m/s. |
 | `bulk_longitudinal_speed_m_s` | the pure longitudinal speed in an unbounded solid, in m/s. |
 | `transverse_speed_m_s` | `sqrt(G/rho)`, the shear wave speed, in m/s. |
+| `loss_factor` | Internal loss factor for a page that prints one and does not say which wave it was measured with. Mechel, Long and Arau all do. It is a separate field from the two below rather than a guess at which of them it is. |
 | `flexural_loss_factor` | Internal loss factor measured in bending. |
 | `longitudinal_loss_factor` | Internal loss factor measured with longitudinal waves. |
 | `in_situ_loss_factor` | Loss factor of a panel of this material as installed, which combines the internal, support and radiation losses and is therefore not a material constant. |

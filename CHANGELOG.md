@@ -9,9 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **Forty published solids from two books, and a row that can hold both.**
-  `solids.PUBLISHED_SOLIDS` is Hopkins **Table A2**, twenty-five building
-  materials, and Cremer 3e **Table 4.3**, thirteen metals over fifteen rows.
+- **Seventy-eight published solids from three books, and a row that can hold
+  all three.** `solids.PUBLISHED_SOLIDS` is Hopkins **Table A2**, twenty-five
+  building materials; Cremer 3e **Table 4.3**, thirteen metals over fifteen
+  rows; and Mechel **Table 3**, thirty-eight construction materials, plastics
+  and metals.
   Each row is keyed by the table it came from, because both books print a steel
   at 7 800 kg/m3 and they are not the same steel: 199,6 GPa at a Poisson ratio
   of 0,28 against 210 GPa at 0,31. `solids_named` gathers every book's reading
@@ -43,6 +45,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the Poisson ratio and both speeds together, so every row of it checks three
   independent relations at once, and its bracketed references are resolved to
   their authors from the book's own list rather than left as `[4.19]`.
+
+  A page gets as far as its own columns allow. Mechel prints a modulus and no
+  Poisson ratio, so his rows give the bar speed and stop: the plate and bulk
+  speeds would need a ratio he does not print, and a 0,3 would reproduce his
+  table nicely and be a number he did not give. What crosses between all three
+  books with no assumption at all is `h f_c`, which Hopkins prints as a column
+  and Mechel as `f_cr d`: for steel both print 12,3 m Hz, to the digit. His
+  loss factor goes in `loss_factor` rather than in `flexural_loss_factor`,
+  because a column headed "Loss fact." does not say which wave measured it.
+
+  Reading his table against his own Eq. (11) turned up a defect, now in
+  `docs/ERRATA.md`: the row for PVC with 30 per cent softener prints a wall
+  impedance of 1220 where the equation on the facing page gives 145 for the
+  cells beside it. The equation reproduces the other thirty-seven rows over
+  four decades, which is what makes the one gap a defect rather than a
+  misreading, and both halves of that are tests.
 
   The rows are data files inside the package, one per published table, with the
   citation written once in the file that holds them; `check_published_sources.py`

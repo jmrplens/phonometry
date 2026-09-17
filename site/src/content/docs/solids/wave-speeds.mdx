@@ -1,6 +1,6 @@
 ---
 title: "Wave speeds of a solid"
-description: "Beam, plate and unbounded: the three longitudinal wave speeds a solid carries, which one a printed table holds, the inverse that turns a speed back into a Young's modulus, and the column that lets two books check each other."
+description: "Beam, plate and unbounded: the three longitudinal wave speeds a solid carries, which one a printed table holds, the inverse that turns a speed back into a Young's modulus, and the column that lets three books check each other."
 ---
 
 import Scope from '../../../components/Scope.astro';
@@ -84,7 +84,7 @@ speed-of-sound table in a general acoustics text usually gets its solids.
 
 ## Going back to the modulus
 
-Each speed has its inverse, and they are what let two books be compared:
+Each speed has its inverse, and they are what let the books be compared:
 
 ```python
 from phonometry import solids
@@ -130,7 +130,7 @@ steel row by 0,8 per cent.
 ## The table, and what it does not say
 
 Typing the row yourself is the other half of the problem the three speeds
-solve. `PUBLISHED_SOLIDS` holds forty rows read from two published pages, keyed
+solve. `PUBLISHED_SOLIDS` holds seventy-eight rows read from three published pages, keyed
 by the table they came from, so a plasterboard partition or a concrete floor
 starts from a number somebody published rather than one you half remember.
 
@@ -152,11 +152,12 @@ number this library computed is never stored as though a page had printed it.
 
 ### The key names the book on purpose
 
-Both tables print a steel, at the same density, and they are not the same
+Three tables print a steel, at the same density, and they are not the same
 steel: Hopkins gives a plate speed of 5 270 m/s and a Poisson ratio of 0,28,
-Cremer a modulus of 210 GPa and 0,31. A flat `"steel"` would have to pick one
-of them without saying so, and picking silently between two published values is
-the thing a catalogue exists not to do.
+Cremer a modulus of 210 GPa and 0,31, Mechel a modulus of 200 GPa and no
+Poisson ratio at all. A flat `"steel"` would have to pick one of them without
+saying so, and picking silently between published values is the thing a
+catalogue exists not to do.
 
 ```python
 for row in solids.solids_named("Steel"):
@@ -166,7 +167,7 @@ for row in solids.solids_named("Steel"):
 ```
 
 Every row carries all three longitudinal speeds whenever its own cells allow
-it, so the comparison is between two books and not between two waves. Two of
+it, so the comparison is between the books and not between two waves. Two of
 Hopkins' rows, aircrete and brick, print a density only as a range, and nothing
 follows from a density the page declined to collapse: those two keep the plate
 speed the page printed and `why_missing` says why the other two are absent.
@@ -176,6 +177,27 @@ the cross-sectional contraction is unconstrained, so `II` is a rod and not a
 plate. Against the pure longitudinal speed of an unbounded solid he puts the
 gap at 16 per cent for `nu = 0,3`, which is what the three functions above
 reproduce; the plate speed sits between them, 4,8 per cent above the bar.
+
+### A page gets as far as its own columns allow
+
+Mechel prints a modulus and no Poisson ratio, so his rows give the bar speed
+and stop there. The plate and the bulk speed would need a ratio he does not
+print, and a 0,3 would reproduce his table nicely and would be a number he did
+not give.
+
+```python
+steel = solids.PUBLISHED_SOLIDS["mechel-2008-table-3/steel"]
+print(steel.poisson_ratio, steel.plate_longitudinal_speed_m_s)
+# None None
+print(round(steel.bar_longitudinal_speed_m_s), steel.is_derived("bar_longitudinal_speed_m_s"))
+# 5064 True
+```
+
+What crosses between all three books with no assumption at all is `h f_c`, the
+product of a plate's thickness and its critical frequency, which Hopkins prints
+as a column and Mechel as `f_cr d`. It needs no Poisson ratio, no speed of
+sound and no conversion, which makes it the cheapest cross-check there is
+between books that share no other column: for steel, both print 12,3 m Hz.
 
 ### Four of twenty-five
 

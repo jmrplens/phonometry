@@ -488,3 +488,145 @@ def test_a_range_only_density_derives_no_speed_and_says_so(key: str) -> None:
     assert row.why_missing("bar_longitudinal_speed_m_s") == (
         "the page does not give it, and it does not follow from the cells that it does"
     )
+
+
+# ---------------------------------------------------------------------------
+# Mechel Table 3: a third book, and the first with a defect of its own
+# ---------------------------------------------------------------------------
+MECHEL = {
+    key.split("/", 1)[1]: row
+    for key, row in PUBLISHED_SOLIDS.items()
+    if row.table == "mechel-2008-table-3"
+}
+
+
+def test_the_whole_table_is_here() -> None:
+    """Thirty-eight rows on the two pages, thirty-eight in the library."""
+    assert len(MECHEL) == 38
+
+
+@pytest.mark.parametrize(("key", "rho", "modulus", "product"), ref.MECHEL_3_SCALAR_ROWS)
+def test_each_mechel_row_carries_the_printed_cells(
+    key: str, rho: float, modulus: float, product: float
+) -> None:
+    """The three columns this library reads, for the rows printed as values."""
+    material = MECHEL[key]
+
+    assert material.density_kg_m3 == rho
+    assert material.youngs_modulus_pa == modulus
+    assert material.thickness_critical_frequency_product_m_hz == product
+
+
+@pytest.mark.parametrize(("key", "low", "high"), ref.MECHEL_3_DENSITY_RANGES)
+def test_a_mechel_density_printed_as_a_range_stays_one(
+    key: str, low: float, high: float
+) -> None:
+    assert MECHEL[key].density_kg_m3 is None
+    assert MECHEL[key].ranges["density_kg_m3"] == (low, high)
+
+
+def test_a_page_that_does_not_say_which_loss_factor_gets_the_unqualified_one() -> None:
+    """Mechel prints one column headed "Loss fact." and nothing else.
+
+    Putting it in ``flexural_loss_factor`` would be reading a measurement
+    method off a column heading that does not give one.
+    """
+    steel = MECHEL["steel"]
+
+    assert steel.loss_factor == 1e-4
+    assert steel.flexural_loss_factor is None
+    assert steel.longitudinal_loss_factor is None
+
+
+def test_no_mechel_row_invents_a_poisson_ratio() -> None:
+    """The page prints none, so neither the plate nor the bulk speed follows.
+
+    A Poisson ratio of 0,3 would reproduce the table nicely and would be a
+    number Mechel did not give. The bar speed does follow, from the modulus
+    and the density, and that is as far as a row goes.
+    """
+    assert all(row.poisson_ratio is None for row in MECHEL.values())
+    assert all(row.plate_longitudinal_speed_m_s is None for row in MECHEL.values())
+    assert all(row.bulk_longitudinal_speed_m_s is None for row in MECHEL.values())
+    assert MECHEL["steel"].bar_longitudinal_speed_m_s == pytest.approx(5064.0, abs=1.0)
+
+
+# ---------------------------------------------------------------------------
+# The errata entry for Mechel Table 3 rests on these two
+# ---------------------------------------------------------------------------
+def _band(row: SolidMaterial, field: str) -> tuple[float, float]:
+    """A field as ``(low, high)``, whether the page printed a value or a range."""
+    if field in row.ranges:
+        return row.ranges[field]
+    value = getattr(row, field)
+    assert value is not None, field
+    return value, value
+
+
+def _wall_impedance_band(key: str) -> tuple[float, float]:
+    """``Z_m`` from Mechel Eq. (11) on the row's own printed cells.
+
+    The density and the ``h f_c`` come from the catalogue and only ``Z_m``
+    from the oracle, because the claim is about two printed columns agreeing
+    with each other and not about a transcription agreeing with itself.
+    """
+    row = MECHEL[key]
+    rho = _band(row, "density_kg_m3")
+    product = _band(row, "thickness_critical_frequency_product_m_hz")
+    z0 = ref.MECHEL_REFERENCE_IMPEDANCE_N_S_M3
+    return rho[0] * product[0] / z0, rho[1] * product[1] / z0
+
+
+@pytest.mark.parametrize(
+    ("key", "low", "high"),
+    [row for row in ref.MECHEL_3_PRINTED_WALL_IMPEDANCE if row[0] != "pvc_30_softener"],
+)
+def test_the_printed_wall_impedance_follows_from_the_books_own_equation(
+    key: str, low: float, high: float
+) -> None:
+    """Eq. (11) reproduces the column, which is what makes the one gap a defect.
+
+    Without this, the disagreement of a single row could be a mistake in the
+    transcription or in the equation as it was read. Thirty-seven rows over
+    four decades of ``Z_m`` say it is neither.
+    """
+    computed_low, computed_high = _wall_impedance_band(key)
+    tolerance = ref.MECHEL_3_WALL_IMPEDANCE_TOLERANCE
+
+    assert computed_low == pytest.approx(low, rel=tolerance)
+    assert computed_high == pytest.approx(high, rel=tolerance)
+
+
+def test_the_one_row_that_does_not_is_the_one_the_errata_names() -> None:
+    """Mechel prints 1220 where his own Eq. (11) gives 145 for that row."""
+    key, printed, expected = ref.MECHEL_3_WALL_IMPEDANCE_DEFECT
+    low, high = _wall_impedance_band(key)
+
+    assert low == pytest.approx(expected, abs=0.1)
+    assert low == pytest.approx(high)
+    assert printed / low == pytest.approx(8.4, abs=0.05)
+
+
+@pytest.mark.parametrize(
+    ("hopkins_key", "mechel_key", "hopkins_product", "mechel_product"),
+    ref.MECHEL_AND_HOPKINS_SHARED_PRODUCT,
+)
+def test_two_books_agree_on_the_one_column_they_share_outright(
+    hopkins_key: str,
+    mechel_key: str,
+    hopkins_product: float,
+    mechel_product: float,
+) -> None:
+    """``h f_c`` needs no conversion, no Poisson ratio and no speed of sound.
+
+    It is the cheapest cross-check there is between two books, and the reason
+    both pages are worth holding: the steel rows agree to the digit, and the
+    aluminium rows to six per cent.
+    """
+    assert HOPKINS[hopkins_key].thickness_critical_frequency_product_m_hz == (
+        hopkins_product
+    )
+    assert MECHEL[mechel_key].thickness_critical_frequency_product_m_hz == (
+        mechel_product
+    )
+    assert mechel_product / hopkins_product == pytest.approx(1.0, abs=0.06)

@@ -917,14 +917,25 @@ def fibre_characteristic_lengths(
     :param fibre_radius_m: Fibre radius ``R``, in metres (> 0). A table that
         prints a diameter in micrometres wants half of it, divided by a
         million.
-    :param bulk_density_kg_m3: Bulk density of the layer, in kg/m3 (> 0).
+    :param bulk_density_kg_m3: Bulk density of the layer, in kg/m3 (> 0), below
+        the fibre density: the ratio of the two is the fibre volume fraction,
+        and Eqs. (5.29) and (5.30) are stated for a porosity close to 1.
     :param fibre_density_kg_m3: Density of the fibre itself, in kg/m3 (> 0).
     :return: The viscous and thermal lengths, in metres.
-    :raises ValueError: for a non-positive input.
+    :raises ValueError: for a non-positive input, or a bulk density at or above
+        the fibre density, which leaves no pore for a length to describe.
     """
     radius = require_positive(fibre_radius_m, "fibre_radius_m")
     bulk = require_positive(bulk_density_kg_m3, "bulk_density_kg_m3")
     fibre = require_positive(fibre_density_kg_m3, "fibre_density_kg_m3")
+    if bulk >= fibre:
+        msg = (
+            f"bulk_density_kg_m3 {bulk:g} is not below fibre_density_kg_m3 "
+            f"{fibre:g}: their ratio is the fibre volume fraction, so a layer "
+            "at or above the density of its own fibre is solid and has no pore "
+            "for a characteristic length to describe"
+        )
+        raise ValueError(msg)
     viscous = radius * fibre / (2.0 * bulk)
     return FibreCharacteristicLengths(viscous, 2.0 * viscous)
 

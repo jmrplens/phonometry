@@ -233,7 +233,7 @@ question about the material, and neither is a substitute for measuring it.
 | Name | Description |
 | :--- | :--- |
 | `fibre_radius_m` | Fibre radius `R`, in metres (> 0). A table that prints a diameter in micrometres wants half of it, divided by a million. |
-| `bulk_density_kg_m3` | Bulk density of the layer, in kg/m3 (> 0). |
+| `bulk_density_kg_m3` | Bulk density of the layer, in kg/m3 (> 0), below the fibre density: the ratio of the two is the fibre volume fraction, and Eqs. (5.29) and (5.30) are stated for a porosity close to 1. |
 | `fibre_density_kg_m3` | Density of the fibre itself, in kg/m3 (> 0). |
 
 **Returns:** The viscous and thermal lengths, in metres.
@@ -242,7 +242,7 @@ question about the material, and neither is a substitute for measuring it.
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a non-positive input. |
+| ValueError | for a non-positive input, or a bulk density at or above the fibre density, which leaves no pore for a length to describe. |
 
 ## FibreCharacteristicLengths
 

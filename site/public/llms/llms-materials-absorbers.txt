@@ -1843,7 +1843,9 @@ $\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$; and
 `fibre_characteristic_lengths` their Eqs. (5.29) and (5.30) for a bundle of
 cylinders, which gives both lengths from the fibre radius and the two densities.
 
-Each says what it is worth. Hopkins' two equations return the porosity range he
+Each says what it is worth. Hopkins' two equations check each other: the ends of
+the bulk-density range his resistivity fit was made over, put through his
+porosity relation at the fibre density he states, give back the porosity range he
 prints beside them, 0,99 at 31 kg/m³ and 0,94 at 155 kg/m³. A unit shape
 factor in Eq. (5.25) lands within a factor of two on eighteen of the twenty-three
 specimens Allard & Atalla print with all four columns, and nowhere near a carpet.

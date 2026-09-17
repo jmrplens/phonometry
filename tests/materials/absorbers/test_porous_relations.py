@@ -373,6 +373,29 @@ def test_the_two_routes_to_the_viscous_length_drift_apart_with_density(
     assert from_parameters / from_geometry == pytest.approx(expected, abs=0.01)
 
 
+def test_a_layer_as_dense_as_its_own_fibre_is_refused() -> None:
+    """The ratio of the two densities is the fibre volume fraction.
+
+    At or above 1 there is no pore, and a cylinder model that happily returns a
+    positive length for a solid block is worse than one that refuses. The
+    porosity relation already refuses it, and these two agree about what a
+    fibrous layer is.
+    """
+    fibre = ref.HOPKINS_ROCK_WOOL_FIBRE_DENSITY
+    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
+        fibre_characteristic_lengths(
+            _ROCK_WOOL_FIBRE_RADIUS_M,
+            bulk_density_kg_m3=fibre,
+            fibre_density_kg_m3=fibre,
+        )
+    with pytest.raises(ValueError, match="fibre_density_kg_m3"):
+        fibre_characteristic_lengths(
+            _ROCK_WOOL_FIBRE_RADIUS_M,
+            bulk_density_kg_m3=fibre + 1.0,
+            fibre_density_kg_m3=fibre,
+        )
+
+
 @pytest.mark.parametrize("bad", [0.0, -1.0, float("nan")])
 def test_the_three_fibre_inputs_have_to_be_positive(bad: float) -> None:
     """A radius or a density of zero leaves no geometry to compute from."""

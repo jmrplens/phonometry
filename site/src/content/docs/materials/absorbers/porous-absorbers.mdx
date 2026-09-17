@@ -375,7 +375,7 @@ phi = materials.porosity_from_bulk_density(
 print(round(sigma), round(phi, 3))
 # 23226 0.977
 
-# Across the sheet the same wool resists about half as much.
+# In the plane of the sheet the same wool resists about half as much.
 lateral = materials.airflow_resistivity_from_bulk_density(
     60.0, fit=materials.ROCK_WOOL_LATERAL_FIT
 )

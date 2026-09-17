@@ -25,9 +25,9 @@ be claiming twenty-five measured Poisson ratios where the page offers four.
 
 So every row carries what the cell actually said: [`SolidMaterial.estimated`](/phonometry/reference/api/solids/catalogue/#solidmaterial)
 names the fields the page marks as estimates, [`SolidMaterial.ranges`](/phonometry/reference/api/solids/catalogue/#solidmaterial)
-carries the two densities and the one loss factor printed as an interval,
-[`SolidMaterial.bounded_above`](/phonometry/reference/api/solids/catalogue/#solidmaterial) names the two loss factors printed as
-`<=`, and [`SolidMaterial.attributed_to`](/phonometry/reference/api/solids/catalogue/#solidmaterial) carries the per-cell credit for
+carries the seven cells printed as an interval (two densities, two speeds and
+three loss factors), [`SolidMaterial.bounded_above`](/phonometry/reference/api/solids/catalogue/#solidmaterial) names the two of those
+loss factors the page prints as an upper bound rather than a band, and [`SolidMaterial.attributed_to`](/phonometry/reference/api/solids/catalogue/#solidmaterial) carries the per-cell credit for
 the rows whose columns come from different authors. A field the table leaves
 empty is `None` and not a guess.
 

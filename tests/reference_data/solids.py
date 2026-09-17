@@ -302,6 +302,7 @@ MECHEL_3_PRINTED_WALL_IMPEDANCE: tuple[tuple[str, float, float], ...] = (
     ("asphalt_floor", 129.0, 225.0),
     ("plaster_floor", 45.0, 47.0),
     ("gypsum_panel", 58.0, 102.0),
+    ("plaster_board", 85.0, 85.0),
     ("fibre_cement_board", 80.0, 102.0),
     ("brick_wall", 66.0, 118.0),
     ("glass", 67.0, 79.0),

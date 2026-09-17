@@ -70,7 +70,7 @@ deformación lateral.
 ## Cuál está en tu tabla
 
 La acústica de la edificación imprime la de **placa**. La Tabla B.3 de
-EN 12354-1, la Tabla A2 de Hopkins y la Tabla 3 de Mechel la tabulan todas, y
+EN 12354-1 y la Tabla A2 de Hopkins la tabulan las dos, y
 Hopkins lo dice en una nota al pie: los valores sirven de estimación para vigas
 o placas, que es a la vez admitir que las dos difieren y afirmar que para esos
 materiales la diferencia cae dentro de la dispersión de la tabla.
@@ -133,7 +133,7 @@ del acero por un 0,8 por ciento.
 ## La tabla, y lo que no dice
 
 Teclear la fila a mano es la otra mitad del problema que resuelven las tres
-velocidades. `PUBLISHED_SOLIDS` tiene setenta y ocho filas leídas de tres páginas
+velocidades. `PUBLISHED_SOLIDS` tiene setenta y ocho filas leídas de tres tablas
 publicadas, con la clave de la tabla de la que salieron, así que un tabique de
 placa de yeso o un forjado de hormigón parten de un número que alguien publicó
 y no de uno que uno recuerda a medias.
@@ -187,10 +187,13 @@ barra.
 
 ### Una página llega hasta donde llegan sus columnas
 
-Mechel imprime módulo y ningún coeficiente de Poisson, así que sus filas dan la
-velocidad de barra y ahí se paran. La de placa y la de sólido extenso pedirían
-un coeficiente que él no imprime, y un 0,3 reproduciría su tabla estupendamente
-y sería un número que él no dio.
+Mechel imprime módulo y ningún coeficiente de Poisson, así que una fila suya
+llega hasta la velocidad de barra y ahí se para. La de placa y la de sólido
+extenso pedirían un coeficiente que él no imprime, y un 0,3 reproduciría su
+tabla estupendamente y sería un número que él no dio. Catorce de sus treinta y
+ocho filas ni siquiera llegan tan lejos, porque la página imprime su densidad o
+su módulo como rango y de una celda que el libro no quiso concretar no se
+deduce nada.
 
 ```python
 steel = solids.PUBLISHED_SOLIDS["mechel-2008-table-3/steel"]
@@ -200,12 +203,14 @@ print(round(steel.bar_longitudinal_speed_m_s), steel.is_derived("bar_longitudina
 # 5064 True
 ```
 
-Lo que cruza entre los tres libros sin ninguna suposición es `h f_c`, el
+Lo que cruza entre Hopkins y Mechel sin ninguna suposición es `h f_c`, el
 producto del espesor de una placa por su frecuencia crítica, que Hopkins
 imprime como columna y Mechel como `f_cr d`. No necesita ni coeficiente de
 Poisson ni velocidad del sonido ni conversión, y eso lo convierte en la
 comprobación cruzada más barata que hay entre libros que no comparten ninguna
-otra columna: para el acero, los dos imprimen 12,3 m Hz.
+otra columna: para el acero, los dos imprimen 12,3 m Hz. Cremer no imprime esa
+columna, así que sus filas llevan una derivada y entran en la comparación sólo
+a través de la suposición de cabecera que Hopkins sí declara.
 
 ### Cuatro de veinticinco
 

@@ -68,8 +68,8 @@ strain is paid for.
 
 ## Which one is in your table
 
-Building acoustics prints the **plate** speed. EN 12354-1 Table B.3, Hopkins
-Table A2 and Mechel Table 3 all tabulate it, and Hopkins says so in a footnote:
+Building acoustics prints the **plate** speed. EN 12354-1 Table B.3 and
+Hopkins Table A2 both tabulate it, and Hopkins says so in a footnote:
 the values can be used as estimates for beams or plates, which is an admission
 that the two differ and a statement that for these materials the difference is
 inside the spread of the table.
@@ -130,7 +130,7 @@ steel row by 0,8 per cent.
 ## The table, and what it does not say
 
 Typing the row yourself is the other half of the problem the three speeds
-solve. `PUBLISHED_SOLIDS` holds seventy-eight rows read from three published pages, keyed
+solve. `PUBLISHED_SOLIDS` holds seventy-eight rows read from three published tables, keyed
 by the table they came from, so a plasterboard partition or a concrete floor
 starts from a number somebody published rather than one you half remember.
 
@@ -180,10 +180,12 @@ reproduce; the plate speed sits between them, 4,8 per cent above the bar.
 
 ### A page gets as far as its own columns allow
 
-Mechel prints a modulus and no Poisson ratio, so his rows give the bar speed
-and stop there. The plate and the bulk speed would need a ratio he does not
-print, and a 0,3 would reproduce his table nicely and would be a number he did
-not give.
+Mechel prints a modulus and no Poisson ratio, so a row of his gets as far as
+the bar speed and stops. The plate and the bulk speed would need a ratio he
+does not print, and a 0,3 would reproduce his table nicely and would be a
+number he did not give. Fourteen of his thirty-eight rows do not even get that
+far, because the page prints their density or their modulus as a range and
+nothing follows from a cell the book declined to collapse.
 
 ```python
 steel = solids.PUBLISHED_SOLIDS["mechel-2008-table-3/steel"]
@@ -193,11 +195,13 @@ print(round(steel.bar_longitudinal_speed_m_s), steel.is_derived("bar_longitudina
 # 5064 True
 ```
 
-What crosses between all three books with no assumption at all is `h f_c`, the
-product of a plate's thickness and its critical frequency, which Hopkins prints
-as a column and Mechel as `f_cr d`. It needs no Poisson ratio, no speed of
-sound and no conversion, which makes it the cheapest cross-check there is
+What crosses between Hopkins and Mechel with no assumption at all is `h f_c`,
+the product of a plate's thickness and its critical frequency, which Hopkins
+prints as a column and Mechel as `f_cr d`. It needs no Poisson ratio, no speed
+of sound and no conversion, which makes it the cheapest cross-check there is
 between books that share no other column: for steel, both print 12,3 m Hz.
+Cremer prints no such column, so his rows carry a derived one and join that
+comparison only through the heading assumption Hopkins states.
 
 ### Four of twenty-five
 

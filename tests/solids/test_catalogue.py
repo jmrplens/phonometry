@@ -630,3 +630,14 @@ def test_two_books_agree_on_the_one_column_they_share_outright(
         mechel_product
     )
     assert mechel_product / hopkins_product == pytest.approx(1.0, abs=0.06)
+
+
+def test_the_impedance_oracle_covers_every_row_in_the_table() -> None:
+    """A row the oracle does not list is a row nothing checks.
+
+    The same hole opened twice: first in Cremer's attributions and then here,
+    where the row missing from the oracle was the very one whose disagreement
+    sets the tolerance. A parametrised test over an oracle checks the oracle,
+    not the table, unless something holds the two together.
+    """
+    assert set(MECHEL) == {key for key, *_ in ref.MECHEL_3_PRINTED_WALL_IMPEDANCE}

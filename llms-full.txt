@@ -56697,7 +56697,7 @@ the lateral strain is paid for.
 ## Which one is in your table
 
 Building acoustics prints the **plate** speed. EN 12354-1 Table B.3, Hopkins
-Table A2 and Mechel Table 3 all tabulate it, and Hopkins says so in a footnote:
+Table A2 both tabulate it, and Hopkins says so in a footnote:
 the values can be used as estimates for beams or plates, which is an admission
 that the two differ and a statement that for these materials the difference is
 inside the spread of the table.
@@ -56756,7 +56756,7 @@ Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` holds seventy-eight rows read from three published pages:
+`PUBLISHED_SOLIDS` holds seventy-eight rows read from three published tables:
 Hopkins **Table A2**, twenty-five building materials; Cremer 3e **Table 4.3**,
 thirteen metals over fifteen rows; and Mechel **Table 3**, thirty-eight
 construction materials, plastics and metals. The key names the table, because
@@ -56787,11 +56787,14 @@ Cremer's own column is the bar speed: his Eq. (3.32) defines `c_LII` as
 cross-sectional contraction is unconstrained, so `II` is a rod.
 
 A page gets as far as its own columns allow and no further. Mechel prints a
-modulus and no Poisson ratio, so his rows give the bar speed and stop: the
-plate and bulk speeds would need a ratio he does not print, and assuming one
-would put a number in his mouth. What crosses between all three books without
-any assumption at all is `h f_c`, which Hopkins prints as a column and Mechel
-as `f_cr d`: for steel both print 12,3 m Hz, to the digit.
+modulus and no Poisson ratio, so a row of his gets as far as the bar speed and
+stops: the plate and bulk speeds would need a ratio he does not print, and
+assuming one would put a number in his mouth. Fourteen of his thirty-eight rows
+do not get that far either, because their density or their modulus is printed
+as a range. What crosses between Hopkins and Mechel without any assumption at
+all is `h f_c`, which Hopkins prints as a column and Mechel as `f_cr d`: for
+steel both print 12,3 m Hz, to the digit. Cremer prints no such column, so his
+rows carry a derived one.
 
 A materials table is not a list of measurements, and these say so. Most of
 Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is

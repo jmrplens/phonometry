@@ -198,7 +198,9 @@ SOURCED: dict[tuple[str, str], str] = {
         "Mechel (2008) Table 3, thirty-eight construction materials, "
         "plastics and metals; "
         "Bies 5e Table C.1, one hundred and five metals, building materials, "
-        "woods, plastics and honeycomb panels"
+        "woods, plastics and honeycomb panels; "
+        "Long 2e Table 12.1, eighteen common building materials; "
+        "Arau-Puchades (1999) Table 4.1, seventeen materials over eighteen rows"
     ),
     (
         "noise_control/duct_modes.py",

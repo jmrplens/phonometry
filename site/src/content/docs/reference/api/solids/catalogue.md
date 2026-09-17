@@ -69,6 +69,7 @@ SolidMaterial(
     youngs_modulus_pa: float | None = None,
     shear_modulus_pa: float | None = None,
     poisson_ratio: float | None = None,
+    longitudinal_speed_m_s: float | None = None,
     bar_longitudinal_speed_m_s: float | None = None,
     plate_longitudinal_speed_m_s: float | None = None,
     bulk_longitudinal_speed_m_s: float | None = None,
@@ -98,8 +99,9 @@ Mechel a modulus and no speed, Cremer both plus a shear modulus, Arau
 neither. A field is `None` when the page had nothing to put there, and
 `why_missing` says what it had instead.
 
-**The three longitudinal speeds are three fields**, because they are three
-different waves and the books do not agree on what to call them. Cremer's
+**The three longitudinal speeds are three fields**, and a fourth holds the
+one a page prints without saying which it is. They are three different
+waves and the books do not agree on what to call them. Cremer's
 `c_LII` and Bies' `sqrt(E/rho)` are the bar speed; Hopkins'
 quasi-longitudinal is the plate speed; and the bulk speed is neither. At
 `nu = 0.3` the plate speed is 4.8 per cent above the bar speed and the
@@ -127,6 +129,7 @@ three, which is what [`loss_factor`](/phonometry/reference/api/vibration/transfe
 | `youngs_modulus_pa` | Young's modulus `E`, in pascals. |
 | `shear_modulus_pa` | Shear modulus `G`, in pascals. |
 | `poisson_ratio` | Poisson's ratio `nu`. |
+| `longitudinal_speed_m_s` | A longitudinal speed for a page that prints one and does not say which of the three it is. Long's Table 12.1 does, with no modulus and no Poisson ratio beside it, so there is nothing on the page to settle it and nothing here that guesses. |
 | `bar_longitudinal_speed_m_s` | `sqrt(E/rho)`, the quasi-longitudinal speed on a rod, in m/s. |
 | `plate_longitudinal_speed_m_s` | `sqrt(E/(rho(1-nu^2)))`, the quasi-longitudinal speed on a plate, in m/s. |
 | `bulk_longitudinal_speed_m_s` | the pure longitudinal speed in an unbounded solid, in m/s. |

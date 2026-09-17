@@ -397,6 +397,7 @@ def test_a_material_several_books_print_comes_back_several_times() -> None:
         "hopkins-2007-table-a2",
         "cremer-2005-table-4-3",
         "bies-2017-table-c1",
+        "long-2014-table-12-1",
     }
     assert len(steels) > len({row.table for row in steels})
 
@@ -848,3 +849,127 @@ def test_the_catalogue_is_the_sum_of_its_tables() -> None:
     assert {row.table for row in PUBLISHED_SOLIDS.values()} == {
         table for table, _ in ref.SOLID_TABLE_SIZES
     }
+
+
+# ---------------------------------------------------------------------------
+# Long Table 12.1 and Arau Table 4.1: two pages that qualify nothing
+# ---------------------------------------------------------------------------
+LONG = {
+    key.split("/", 1)[1]: row
+    for key, row in PUBLISHED_SOLIDS.items()
+    if row.table == "long-2014-table-12-1"
+}
+ARAU = {
+    key.split("/", 1)[1]: row
+    for key, row in PUBLISHED_SOLIDS.items()
+    if row.table == "arau-1999-table-4-1"
+}
+
+
+def test_long_holds_its_speed_unqualified() -> None:
+    """The column is headed "Speed of Longitudinal Waves" and nothing else.
+
+    The page prints no modulus and no Poisson ratio, so there is nothing on it
+    that could say which of the three waves it is. Putting 5050 m/s in
+    ``bar_longitudinal_speed_m_s`` would be a guess with a decimal point on it,
+    and it would then be compared against columns that were read rather than
+    guessed.
+    """
+    steel = LONG["steel"]
+
+    assert steel.longitudinal_speed_m_s == ref.LONG_STEEL_SPEED_M_S
+    assert steel.bar_longitudinal_speed_m_s is None
+    assert steel.plate_longitudinal_speed_m_s is None
+    assert steel.bulk_longitudinal_speed_m_s is None
+
+
+def test_what_long_would_be_if_it_were_a_plate_speed() -> None:
+    """Which is the measurement behind calling the unqualified field a hint.
+
+    Long's steel is below every plate speed the other tables hold, so it is
+    almost certainly not one. Almost is why the field is unqualified.
+    """
+    plate_speeds = [
+        row.plate_longitudinal_speed_m_s
+        for row in PUBLISHED_SOLIDS.values()
+        if row.name.lower().startswith("steel")
+        and row.plate_longitudinal_speed_m_s is not None
+    ]
+
+    assert plate_speeds
+    assert ref.LONG_STEEL_SPEED_M_S < min(plate_speeds)
+
+
+def test_the_dotted_cells_say_they_are_dotted() -> None:
+    """Eight rows print a row of dots where a speed would be."""
+    dotted = [
+        key
+        for key, row in LONG.items()
+        if "dots" in row.why_missing("longitudinal_speed_m_s")
+    ]
+
+    assert len(dotted) == ref.LONG_ROWS_WITHOUT_A_SPEED
+
+
+def test_a_cell_that_holds_words_instead_of_a_number() -> None:
+    """One row's loss factor is the sentence "Varies with frequency"."""
+    key, words = ref.LONG_UNQUANTIFIED_LOSS_FACTOR
+
+    assert LONG[key].loss_factor is None
+    assert LONG[key].why_missing("loss_factor") == words
+
+
+def test_a_table_the_book_credits_whole_is_credited_whole() -> None:
+    """Long prints the table under "(Beranek and Ver, 1992)"."""
+    assert all(
+        row.attributed_to == {"table": "Beranek and Ver, 1992"} for row in LONG.values()
+    )
+
+
+@pytest.mark.parametrize(("key", "printed_hz", "product"), ref.ARAU_4_1_PRODUCTS)
+def test_arau_prints_the_frequency_of_a_one_centimetre_plate(
+    key: str, printed_hz: float, product: float
+) -> None:
+    """So the product held here is that frequency times 0,01 m.
+
+    A change of unit rather than a derivation, which is why it is not in
+    ``derived``: the page gives the same quantity Hopkins does, per centimetre
+    instead of per metre.
+    """
+    assert ARAU[key].thickness_critical_frequency_product_m_hz == product
+    assert product == pytest.approx(printed_hz * 0.01)
+    assert not ARAU[key].is_derived("thickness_critical_frequency_product_m_hz")
+
+
+@pytest.mark.parametrize(
+    ("arau_key", "hopkins_key", "arau_product", "hopkins_product"),
+    ref.ARAU_AGAINST_HOPKINS,
+)
+def test_arau_against_hopkins_on_the_one_column_they_share(
+    arau_key: str, hopkins_key: str, arau_product: float, hopkins_product: float
+) -> None:
+    """Three agree inside four per cent and the steel is nineteen apart.
+
+    Nothing on Arau's page can settle the steel, because he prints no modulus
+    and no speed, so this is a disagreement between books and not a defect of
+    either. It is pinned here so the gap is a number somebody chose to keep
+    rather than something nobody looked at.
+    """
+    assert ARAU[arau_key].thickness_critical_frequency_product_m_hz == arau_product
+    assert (
+        HOPKINS[hopkins_key].thickness_critical_frequency_product_m_hz
+        == hopkins_product
+    )
+    gap = abs(arau_product / hopkins_product - 1)
+
+    if arau_key == "acero":
+        assert gap == pytest.approx(0.187, abs=0.002)
+    else:
+        assert gap == pytest.approx(0.0, abs=0.041)
+
+
+def test_a_page_that_prints_one_material_twice_gets_two_rows() -> None:
+    """Arau's glass carries one damping factor monolithic and another laminated."""
+    assert ARAU["vidrio_monolitico"].loss_factor == 0.002
+    assert ARAU["vidrio_laminar"].loss_factor == 0.02
+    assert ARAU["vidrio_monolitico"].name == ARAU["vidrio_laminar"].name

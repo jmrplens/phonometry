@@ -111,7 +111,7 @@ Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` holds one hundred and eighty-three rows read from four
+`PUBLISHED_SOLIDS` holds two hundred and nineteen rows read from six
 published tables:
 Hopkins **Table A2**, twenty-five building materials; Cremer 3e **Table 4.3**,
 thirteen metals over fifteen rows; and Mechel **Table 3**, thirty-eight
@@ -155,6 +155,18 @@ as a range. What crosses between Hopkins and Mechel without any assumption at
 all is `h f_c`, which Hopkins prints as a column and Mechel as `f_cr d`: for
 steel both print 12,3 m Hz, to the digit. Cremer prints no such column, so his
 rows carry a derived one.
+
+Two of the six tables qualify nothing. Long prints a "Speed of Longitudinal
+Waves" with no modulus and no Poisson ratio beside it, so nothing on the page
+says which of the three it is and the value goes in `longitudinal_speed_m_s`
+rather than in a named one. Comparing it with the tables that do say points at
+the bar speed, because 5 050 m/s for steel is below every plate speed in the
+catalogue, but that is a hint and not a reading. Nine of his speed cells print a
+row of dots and one of his loss factors prints "Varies with frequency", and the
+rows say so. Arau prints the critical frequency of a one centimetre plate
+instead of the `h f_c` product, which is a change of unit; on that column he
+and Hopkins agree inside four per cent for aluminium, brick and glass and are
+nineteen per cent apart on steel.
 
 A materials table is not a list of measurements, and these say so. Most of
 Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is

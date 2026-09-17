@@ -9,12 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- **One hundred and eighty-three published solids from four books.**
+- **Two hundred and nineteen published solids from six books.**
   `solids.PUBLISHED_SOLIDS` is Hopkins **Table A2**, twenty-five building
   materials; Cremer 3e **Table 4.3**, thirteen metals over fifteen rows;
   Mechel **Table 3**, thirty-eight construction materials, plastics and
-  metals; and Bies 5e **Table C.1**, one hundred and five metals, building
-  materials, woods, plastics and honeycomb panels.
+  metals; Bies 5e **Table C.1**, one hundred and five metals, building
+  materials, woods, plastics and honeycomb panels; Long 2e **Table 12.1**,
+  eighteen building materials the book credits whole to Beranek and Ver;
+  and Arau-Puchades **Table 4.1**, seventeen materials over eighteen rows.
   Each row is keyed by the table it came from, because both books print a steel
   at 7 800 kg/m3 and they are not the same steel: 199,6 GPa at a Poisson ratio
   of 0,28 against 210 GPa at 0,31. `solids_named` gathers every book's reading
@@ -86,6 +88,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the row can say why is empty: Bies leaves the speed of his honeycomb panels
   blank because a one-dimensional speed does not mean anything there, and the
   arithmetic would have answered 4 265 m/s.
+
+  Long and Arau both print a longitudinal speed and a loss factor without
+  saying which of each it is, so both go in the unqualified fields. Long's
+  steel, at 5 050 m/s, is below every plate speed the other tables hold and
+  his aluminium matches Bies' printed bar speed to the digit, which is a hint
+  and not a reading: his page prints no modulus and no Poisson ratio, so
+  nothing on it can settle the question, and a guess in a named field would
+  then be compared against columns that were read.
+
+  Their pages also print cells that are not numbers, and the rows say so
+  rather than being silently empty: nine of Long's rows print a row of dots
+  where a speed would be, and one prints "Varies with frequency" where a loss
+  factor would be. Arau prints the critical frequency of a one centimetre
+  plate instead of the `h f_c` product, which is a change of unit and not a
+  derivation. On that column he and Hopkins agree inside four per cent for
+  aluminium, brick and glass, and are nineteen per cent apart on steel.
 
   The rows are data files inside the package, one per published table, with the
   citation written once in the file that holds them; `check_published_sources.py`

@@ -68,20 +68,20 @@ def test_cheby2_broadband_levels_match_butter() -> None:
     """
     rng = np.random.default_rng(42)
     x = rng.standard_normal(48000 * 5)
-    spl_b, _ = filters.octave_filter(
+    spl_b = filters.octave_filter(
         x,
         48000,
         fraction=3,
         limits=[100, 10000],
         design=filters.FilterDesign(filter_type="butter"),
-    )
-    spl_c, _ = filters.octave_filter(
+    ).levels
+    spl_c = filters.octave_filter(
         x,
         48000,
         fraction=3,
         limits=[100, 10000],
         design=filters.FilterDesign(filter_type="cheby2"),
-    )
+    ).levels
     diff = np.asarray(spl_c) - np.asarray(spl_b)
     assert np.abs(diff).max() < 0.5, f"max deviation {np.abs(diff).max():.2f} dB"
 
@@ -273,11 +273,11 @@ def test_functional_octavefilter_cheby2_default_meets_class1() -> None:
     )
     assert filters.verify_filter_class(bank).overall_class == 1
     x = np.random.default_rng(0).standard_normal(48000)
-    spl, _ = filters.octave_filter(
+    spl = filters.octave_filter(
         x,
         48000,
         fraction=1,
         limits=[100, 5000],
         design=filters.FilterDesign(filter_type="cheby2"),
-    )
+    ).levels
     assert np.all(np.isfinite(spl))

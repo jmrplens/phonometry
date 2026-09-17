@@ -32,13 +32,13 @@ def test_calibration_logic() -> None:
     factor = metrology.sensitivity(ref_signal, target_spl=94.0)
 
     # Analyze same signal with that factor
-    spl, _ = filters.octave_filter(
+    spl = filters.octave_filter(
         ref_signal,
         fs,
         fraction=1,
         limits=[800, 1200],
         calibration=filters.LevelCalibration(factor=factor),
-    )
+    ).levels
 
     # It should be exactly 94 dB
     assert abs(spl[0] - 94.0) < 0.01
@@ -61,13 +61,13 @@ def test_dbfs_logic() -> None:
     t = np.linspace(0, 1, fs)
     x = np.sin(2 * np.pi * 1000 * t)
 
-    spl, _ = filters.octave_filter(
+    spl = filters.octave_filter(
         x,
         fs,
         fraction=1,
         limits=[800, 1200],
         calibration=filters.LevelCalibration(dbfs=True),
-    )
+    ).levels
 
     assert abs(spl[0] - (-3.01)) < 0.05
 
@@ -90,8 +90,8 @@ def test_peak_mode_logic() -> None:
     x = np.zeros(fs)
     x[100] = 0.5  # Large peak
 
-    spl_rms, _ = filters.octave_filter(x, fs, mode="rms", fraction=1)
-    spl_peak, _ = filters.octave_filter(x, fs, mode="peak", fraction=1)
+    spl_rms = filters.octave_filter(x, fs, mode="rms", fraction=1).levels
+    spl_peak = filters.octave_filter(x, fs, mode="peak", fraction=1).levels
 
     # Peak must be greater than RMS for an impulse
     assert np.all(spl_peak > spl_rms)

@@ -782,9 +782,9 @@ def sti_from_impulse_response(
         raise ValueError(msg)
 
     bank = _octave_bank(fs)
-    _, _, bands = bank.filter(
+    bands = bank.filter(
         ir_proc, sigbands=True, detrend=False, calculate_level=False, zero_phase=True
-    )
+    ).bands
     p_bands = np.asarray(bands) ** 2  # h_k^2(t), shape (7, n)
     denom = p_bands.sum(axis=1)
     if np.any(denom <= 0.0):
@@ -811,7 +811,9 @@ def _intensity_envelopes(x: np.ndarray, fs: int) -> np.ndarray:
     verification criteria of IEC 60268-16:2020.
     """
     bank = _octave_bank(fs)
-    _, _, bands = bank.filter(x, sigbands=True, calculate_level=False, zero_phase=True)
+    bands = bank.filter(
+        x, sigbands=True, calculate_level=False, zero_phase=True
+    ).require_bands()
     sos = signal.butter(4, _ENVELOPE_LPF_HZ, btype="lowpass", fs=fs, output="sos")
     env = np.empty((_NUM_BANDS, x.shape[-1]))
     for k, band in enumerate(bands):

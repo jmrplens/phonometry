@@ -830,9 +830,9 @@ def _band_running_rms(
             "band's upper edge."
         )
         raise ValueError(msg)
-    _levels, _centres, bands = bank.filter(
+    bands = bank.filter(
         x, sigbands=True, calculate_level=False, detrend=False
-    )
+    ).require_bands()
     band_rms = np.vstack(
         [_exponential_running_rms(np.asarray(band), fs) for band in bands]
     )

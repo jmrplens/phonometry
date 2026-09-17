@@ -202,7 +202,8 @@ print(round(building.impact_force_exposure_level(force, fs), 2))
 # Los cinco valores por banda de octava en los que sí está escrita la
 # especificación.
 bank = filters.OctaveFilterBank(fs, fraction=1, limits=[31.5, 500.0])
-_, freqs, bands = bank.filter(force, sigbands=True, calculate_level=False)
+filtered = bank.filter(force, sigbands=True, calculate_level=False)
+freqs, bands = filtered.frequencies, filtered.bands
 lfe = [building.impact_force_exposure_level(b, fs) for b in bands]
 print([round(v, 1) for v in lfe])   # [-1.4, 14.0, 22.1, 20.2, 17.1]
 

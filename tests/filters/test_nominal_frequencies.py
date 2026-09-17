@@ -110,7 +110,7 @@ def test_filterbank_nominal_freq_attribute() -> None:
 def test_filter_nominal_false_returns_floats() -> None:
     fb = filters.OctaveFilterBank(fs=48000, fraction=3)
     x = np.zeros(4800)
-    _, freq = fb.filter(x, nominal=False)
+    freq = fb.filter(x, nominal=False).frequencies
     assert all(isinstance(f, float) for f in freq)
 
 
@@ -120,7 +120,7 @@ def test_filter_nominal_false_returns_floats() -> None:
 def test_filter_nominal_true_returns_strings() -> None:
     fb = filters.OctaveFilterBank(fs=48000, fraction=3)
     x = np.zeros(4800)
-    _, freq = fb.filter(x, nominal=True)
+    freq = fb.filter(x, nominal=True).frequencies
     assert all(isinstance(f, str) for f in freq)
     assert "1k" in freq
 
@@ -128,7 +128,8 @@ def test_filter_nominal_true_returns_strings() -> None:
 def test_filter_nominal_true_with_sigbands() -> None:
     fb = filters.OctaveFilterBank(fs=48000, fraction=1)
     x = np.zeros(4800)
-    _, freq, xb = fb.filter(x, sigbands=True, nominal=True)
+    filtered = fb.filter(x, sigbands=True, nominal=True)
+    freq, xb = filtered.frequencies, filtered.bands
     assert all(isinstance(f, str) for f in freq)
     assert len(xb) == len(freq)
 
@@ -138,14 +139,14 @@ def test_filter_nominal_true_with_sigbands() -> None:
 
 def test_octavefilter_nominal_true() -> None:
     x = np.zeros(4800)
-    _, freq = filters.octave_filter(x, fs=48000, fraction=3, nominal=True)
+    freq = filters.octave_filter(x, fs=48000, fraction=3, nominal=True).frequencies
     assert all(isinstance(f, str) for f in freq)
     assert "1k" in freq
 
 
 def test_octavefilter_nominal_false_default() -> None:
     x = np.zeros(4800)
-    _, freq = filters.octave_filter(x, fs=48000, fraction=3)
+    freq = filters.octave_filter(x, fs=48000, fraction=3).frequencies
     assert all(isinstance(f, float) for f in freq)
 
 

@@ -134,13 +134,14 @@ def split_bands(
     bank = OctaveFilterBank(
         fs=fs, fraction=fraction, order=6, limits=[limits[0], limits[1]]
     )
-    _, freqs, bands = bank.filter(
+    filtered = bank.filter(
         x,
         sigbands=True,
         detrend=False,
         calculate_level=False,
         zero_phase=zero_phase,
     )
+    freqs, bands = filtered.frequencies, filtered.require_bands()
     # np.asarray, not a cast: a bank on the default calibration hands back
     # Signals, and every caller does array arithmetic on what comes out.
     band_signals = [np.asarray(band, dtype=np.float64) for band in bands]

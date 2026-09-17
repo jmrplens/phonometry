@@ -46,7 +46,7 @@ just inside the unit circle at the angles
 $\omega = 2\pi f / f_\mathrm{s}$ the passband spans. Two intuitions follow. First,
 selectivity is proximity: the closer the poles sit to the unit circle, the
 sharper the band and the longer the filter rings (the group-delay peaks of
-section 4 are that ringing, measured). Second, stability is a margin, not a
+section 5 are that ringing, measured). Second, stability is a margin, not a
 property of the architecture: an IIR filter is stable only while every pole
 stays strictly inside the unit circle, and a narrow band at a high sample
 rate pushes the poles outward (pole radius $\approx 1 - \pi B / f_\mathrm{s}$ for
@@ -115,7 +115,39 @@ full 1/1 and 1/3 octave response gallery and the usage examples per
 architecture, up to the Linkwitz-Riley crossover, is
 [Filter Architecture Gallery](filter-gallery.md).
 
-## 2. `octave_filter()` / `OctaveFilterBank` parameters
+## 2. What a call gives back
+
+Every call returns an `OctaveFilterResult`: the band `levels`, the
+`frequencies` they sit on, and the per-band `bands` when the call asked for
+them. The fields have names because the alternative was a tuple whose length
+depended on a keyword.
+
+```python
+import numpy as np
+from phonometry import filters
+
+fs = 48000
+t = np.arange(fs) / fs
+rng = np.random.default_rng(7)
+noise = np.cumsum(rng.standard_normal(fs))
+noise /= np.std(noise)
+x = 0.4 * np.sin(2 * np.pi * 1000.0 * t) + 0.05 * noise
+
+result = filters.octave_filter(x, fs, fraction=3, limits=[20.0, 20000.0])
+print(len(result.frequencies), round(float(result.levels.max()), 1))
+# 31 83.0
+ax = result.plot()            # the band spectrum, on a log frequency axis
+```
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/octave_band_levels_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/octave_band_levels.svg" alt="One-third-octave spectrum drawn by the result object itself: band level in decibels against band centre frequency on a log axis from 16 hertz to 20 kilohertz, with one marked point per band. A 1 kilohertz tone stands at 83 decibels, about forty decibels clear of a noise floor that runs near 43 decibels at the bottom of the range and falls steadily to 17 decibels at the top" width="88%"></picture>
+
+*The one-third-octave spectrum of a 1 kHz tone over noise, drawn by the result
+object itself.*
+
+`require_levels()` and `require_bands()` return the value or say what the call
+would have had to ask for, which beats meeting a `None` several lines later.
+
+## 3. `octave_filter()` / `OctaveFilterBank` parameters
 
 The advanced options travel in four small frozen dataclasses, so the four
 everyday arguments stay first: `FilterDesign` (`design`), `LevelCalibration`
@@ -156,7 +188,7 @@ impulsive signals it is dominated by the filter's own ringing. There is no
 Table 1 acceptance limits and reports the class (`1`, `2` or `None` if outside both) with per-band
 margins.
 
-## 3. Parametric EQ (`ParametricEQ`)
+## 4. Parametric EQ (`ParametricEQ`)
 
 Biquad equalizer sections per the **RBJ Audio EQ Cookbook**
 (Bristow-Johnson): peaking (bell), low/high shelf, low/high-pass, band-pass
@@ -228,7 +260,7 @@ decibels, is [Filter class verification](filter-compliance.md): the Table 1
 acceptance mask, the stricter class 0 of the withdrawn 1995 edition, what a
 class buys in a measurement, and the accredited compliance fiche.
 
-## 4. Signal Decomposition and Stability
+## 5. Signal Decomposition and Stability
 
 By setting `sigbands=True`, you can retrieve the time-domain components of each
 band. This allows for advanced analysis or comparing how different architectures
@@ -244,12 +276,14 @@ t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # 2. Compare architectures (Butterworth vs Chebyshev II)
-spl_b, freq, xb_butter = filters.octave_filter(
+filtered = filters.octave_filter(
     y, fs=fs, fraction=1, sigbands=True,
     design=filters.FilterDesign(filter_type='butter'))
-spl_c2, _, xb_cheby2 = filters.octave_filter(
+spl_b, freq, xb_butter = filtered.levels, filtered.frequencies, filtered.bands
+filtered = filters.octave_filter(
     y, fs=fs, fraction=1, sigbands=True,
     design=filters.FilterDesign(filter_type='cheby2'))
+spl_c2, xb_cheby2 = filtered.levels, filtered.bands
 
 # 'xb_butter' and 'xb_cheby2' contain the time-domain signals per band
 ```
@@ -275,8 +309,9 @@ y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 bank_b = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0])
 bank_c = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[100.0, 2000.0],
                           design=filters.FilterDesign(filter_type="cheby2"))
-_, freq, xb_butter = bank_b.filter(y, sigbands=True)
-_, _, xb_cheby2 = bank_c.filter(y, sigbands=True)
+filtered = bank_b.filter(y, sigbands=True)
+freq, xb_butter = filtered.frequencies, filtered.bands
+xb_cheby2 = bank_c.filter(y, sigbands=True).bands
 
 fig, axes = plt.subplots(len(freq), 1, figsize=(9, 2 * len(freq)), sharex=True)
 for ax, fc, xb, xc in zip(axes, freq, xb_butter, xb_cheby2):
@@ -339,7 +374,7 @@ plt.show()
 
 </details>
 
-## 5. Zero-phase filtering
+## 6. Zero-phase filtering
 
 For offline analysis you can eliminate group delay entirely:
 `OctaveFilterBank.filter(…, zero_phase=True)` filters each band
@@ -362,7 +397,8 @@ t = np.linspace(0, 0.5, int(fs * 0.5), endpoint=False)
 y = np.sin(2 * np.pi * 250 * t) + np.sin(2 * np.pi * 1000 * t)
 
 bank = filters.OctaveFilterBank(fs=48000, fraction=3)
-spl, freq, xb = bank.filter(y, sigbands=True, zero_phase=True)
+filtered = bank.filter(y, sigbands=True, zero_phase=True)
+spl, freq, xb = filtered.levels, filtered.frequencies, filtered.bands
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zero_phase_comparison_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/zero_phase_comparison.svg" alt="Causal versus zero-phase filtering of a tone burst: the zero-phase output stays time-aligned with the input" width="80%"></picture>
@@ -385,9 +421,9 @@ start, end = int(0.05 * fs), int(0.10 * fs)
 x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
 
 bank = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
-_, _, fwd = bank.filter(x, sigbands=True, calculate_level=False)
-_, _, zp = bank.filter(x, sigbands=True, calculate_level=False,
-                       zero_phase=True)
+fwd = bank.filter(x, sigbands=True, calculate_level=False).bands
+zp = bank.filter(x, sigbands=True, calculate_level=False,
+                       zero_phase=True).bands
 
 fig, ax = plt.subplots(figsize=(9, 4.5))
 ax.plot(t, x, color="gray", alpha=0.5, label="Input burst (250 Hz)")
@@ -438,7 +474,7 @@ one-third-octave band spans $G^{1/3} \approx 1.2589$, ten bands per decade.
   Group Note (ed. R. Toy), 8 June 2021.
   [w3.org/TR/audio-eq-cookbook](https://www.w3.org/TR/audio-eq-cookbook/).
   The biquad coefficient recipes and the Q / bandwidth / shelf-slope
-  parameterization behind `ParametricEQ` (section 3).
+  parameterization behind `ParametricEQ` (section 4).
 - Smith, J. O. *Introduction to digital filters with audio applications*
   (online book). Center for Computer Research in Music and Acoustics (CCRMA),
   Stanford University.

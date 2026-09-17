@@ -19,6 +19,8 @@ import pathlib
 import sys
 import types
 
+import pytest
+
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
     sys.path.insert(0, _SCRIPTS)
@@ -219,8 +221,102 @@ class TestTheCensus:
             "lowercase = (1.0, 2.0)\n",
             encoding="utf-8",
         )
-        found = {name for name, _ in gate.module_tables(module)}
+        found = {name for name, *_ in gate.module_tables(module)}
         assert found == {"TABLE", "_PRIVATE_TABLE"}
+
+    def test_a_comprehension_that_reads_a_file_is_a_table(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        """A catalogue built from packaged data is as published as a literal.
+
+        The walker used to know a literal and a call and nothing else, so the
+        first table read out of a data file left the census silently, which is
+        the one way a provenance gate fails without saying anything.
+        """
+        module = tmp_path / "sample.py"
+        module.write_text(
+            "#: Hopkins (2007) Table A4, PDF page 637 (printed p. 610).\n"
+            "FROM_FILE = {row['key']: row for row in _ROWS}\n"
+            "#: Hopkins (2007) Table A4, PDF page 637 (printed p. 610).\n"
+            "AS_A_LIST = [row for row in _ROWS]\n",
+            encoding="utf-8",
+        )
+        found = {name for name, *_ in gate.module_tables(module)}
+        assert found == {"FROM_FILE", "AS_A_LIST"}
+
+    def test_a_banner_naming_a_data_file_carries_that_file_s_citation(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        """The page is written once, in the file, and the gate reads it there."""
+        module = tmp_path / "sample.py"
+        module.write_text(
+            "#: Read from ``solids/data/hopkins-2007-table-a2.json``.\n"
+            "FROM_FILE = {row['key']: row for row in _ROWS}\n",
+            encoding="utf-8",
+        )
+        ((name, banner, data_file, cited),) = gate.module_tables(module)
+        assert name == "FROM_FILE"
+        assert data_file == "solids/data/hopkins-2007-table-a2.json"
+        assert cited is not None
+        assert "Hopkins (2007) Table A2" in cited
+        assert cited in banner
+
+    @pytest.mark.parametrize(
+        ("content", "why"),
+        [
+            ("{not json at all", "a file that does not parse"),
+            ('["a", "list"]', "a document that is not an object"),
+            ('{"rows": []}', "an object with no source"),
+            ('{"source": 610}', "a source that is not a string"),
+        ],
+    )
+    def test_a_data_file_that_cannot_vouch_for_a_page_is_reported_not_raised(
+        self,
+        tmp_path: pathlib.Path,
+        monkeypatch: pytest.MonkeyPatch,
+        content: str,
+        why: str,
+    ) -> None:
+        """A broken file must not stop the walk over every later module.
+
+        The citation is read from disk while the census is being built, so an
+        exception here would leave the rest of the tree unchecked and the gate
+        green for the wrong reason. Each case is a different way for a file to
+        be present and still say nothing about a page.
+        """
+        package = tmp_path / "package"
+        (package / "solids" / "data").mkdir(parents=True)
+        (package / "solids" / "data" / "probe.json").write_text(
+            content, encoding="utf-8"
+        )
+        monkeypatch.setattr(gate, "PACKAGE", package)
+        module = tmp_path / "sample.py"
+        module.write_text(
+            "#: Read from ``solids/data/probe.json``.\n"
+            "FROM_FILE = {row['key']: row for row in _ROWS}\n",
+            encoding="utf-8",
+        )
+        ((_, _, data_file, cited),) = gate.module_tables(module)
+        assert data_file == "solids/data/probe.json", why
+        assert cited is None, why
+
+    def test_a_banner_naming_a_file_that_is_not_there_says_so(
+        self, tmp_path: pathlib.Path
+    ) -> None:
+        """A pointer that has gone stale must not fall back to the comment.
+
+        Falling back would let a banner keep a page it no longer reads from,
+        which is exactly the drift the file form exists to remove.
+        """
+        module = tmp_path / "sample.py"
+        module.write_text(
+            "#: Read from ``solids/data/no-such-table.json``.\n"
+            "FROM_FILE = {row['key']: row for row in _ROWS}\n",
+            encoding="utf-8",
+        )
+        ((_, _, data_file, cited),) = gate.module_tables(module)
+        assert data_file == "solids/data/no-such-table.json"
+        assert cited is None
 
 
 class TestTheRatchet:

@@ -204,6 +204,47 @@ keeps it, because a measurement that claims to follow the standard has to. Here
 the exact constant is the right one: it reproduces all twenty-five rows of
 Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
+## The table, and what it does not say
+
+`PUBLISHED_SOLIDS` is Hopkins Table A2, twenty-five materials with the page
+they were read on, so a partition or a floor starts from a published number.
+
+```python
+from phonometry import solids
+
+board = solids.PUBLISHED_SOLIDS["plasterboard_natural_gypsum"]
+print(board.density_kg_m3, board.longitudinal_speed_m_s, board.loss_factor)
+# 860.0 1490.0 0.0141
+print(round(board.youngs_modulus_pa() / 1e9, 2))
+# 1.74
+```
+
+The modulus is not in the table: it is the inverse above, run on the row's own
+numbers.
+
+A materials table is not a list of measurements, and this one says so. Most of
+its Poisson ratios and loss factors carry a footnote whose whole text is
+"Estimate", and only aluminium, glass, mortar and steel print a Poisson ratio
+the book stands behind. The row keeps that in `estimated`, readable through
+`is_estimate`.
+
+Seven cells are not single values, and none of them is flattened: aircrete
+and brick print a density **range** (400 to 800 and 1 500 to 2 000 kg/m³),
+so `density_kg_m3` is `None`, the interval is in `ranges` and
+`youngs_modulus_pa()` refuses rather than picking a midpoint; aluminium and
+steel print a loss factor as an **upper bound** and glass prints one as a
+**band**, so those three have `loss_factor` of `None` too; and two speeds
+carry a spread beside the value, aircrete's 1 900 m/s typically 1 600 to
+2 300, and OSB's 2 570 an effective figure for a material that runs 2 200 to
+3 500 m/s with the direction.
+
+Rows the book credits to another author keep the credit in `attributed_to`, and
+the steel row keeps two of them: Fahy for the speed and Poisson ratio, Heckl
+for the loss factor.
+
+None of this is a specification. Block densities vary by manufacturer, which is
+why the page prints ranges where it does.
+
 ## What the functions refuse
 
 A Poisson ratio of 0,5 describes an incompressible material, and an

@@ -120,7 +120,12 @@ full = ["numba>=0.67.0", "matplotlib>=3.11.1", "reportlab>=5.0.0", "svglib>=2.1.
 where = ["src"]
 
 [tool.setuptools.package-data]
-phonometry = ["py.typed", "aircraft/data/anp/*.csv", "aircraft/data/anp/*.md"]
+phonometry = [
+    "py.typed",
+    "aircraft/data/anp/*.csv",
+    "aircraft/data/anp/*.md",
+    "solids/data/*.json",
+]
 
 [tool.setuptools.dynamic]
 version = {file = "VERSION"}

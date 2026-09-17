@@ -405,3 +405,29 @@ def test_release_workflow_marks_a_candidate_as_a_pre_release(
         pytest.skip("not a version the workflow would release at all")
     _, prerelease = _release_workflow_patterns()
     assert bool(re.search(prerelease, version)) is pre
+
+
+def _package_data_patterns() -> tuple[str, ...]:
+    """The globs ``pyproject.toml`` ships alongside the modules."""
+    with (_ROOT / "pyproject.toml").open("rb") as handle:
+        pyproject = tomllib.load(handle)
+    return tuple(pyproject["tool"]["setuptools"]["package-data"]["phonometry"])
+
+
+def test_every_packaged_data_file_is_declared() -> None:
+    """A data file the wheel leaves behind is a catalogue that is empty on install.
+
+    Nothing in the suite would notice: the tests import from ``src``, where the
+    file is always there. The failure only appears in an installed package, and
+    only when someone reads the table.
+    """
+    package = _ROOT / "src" / "phonometry"
+    patterns = _package_data_patterns()
+    undeclared = sorted(
+        path.relative_to(package).as_posix()
+        for path in package.rglob("*")
+        if path.is_file()
+        and "data" in path.relative_to(package).parts
+        and not any(path.relative_to(package).match(pattern) for pattern in patterns)
+    )
+    assert undeclared == []

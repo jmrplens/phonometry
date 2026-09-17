@@ -74,6 +74,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | Module | Summary |
 | :--- | :--- |
 | [`solids.elastic`](/phonometry/reference/api/solids/elastic/) | Three longitudinal wave speeds of a solid, and which one a table prints. |
+| [`solids.catalogue`](/phonometry/reference/api/solids/catalogue/) | Solid materials as one published table prints them. |
 
 ## Audio files
 

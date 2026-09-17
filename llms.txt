@@ -608,6 +608,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [simulation/elastic-fdtd](https://jmrplens.github.io/phonometry/reference/api/simulation/elastic-fdtd/)
 - [simulation/fdtd](https://jmrplens.github.io/phonometry/reference/api/simulation/fdtd/)
 - [simulation/ntff](https://jmrplens.github.io/phonometry/reference/api/simulation/ntff/)
+- [solids/catalogue](https://jmrplens.github.io/phonometry/reference/api/solids/catalogue/)
 - [solids/elastic](https://jmrplens.github.io/phonometry/reference/api/solids/elastic/)
 - [speech/objective-intelligibility](https://jmrplens.github.io/phonometry/reference/api/speech/objective-intelligibility/)
 - [speech/sii](https://jmrplens.github.io/phonometry/reference/api/speech/sii/)

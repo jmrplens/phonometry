@@ -62,6 +62,7 @@ export const apiSections = {
     collapsed: true,
     items: [
       'reference/api/solids/elastic',
+      'reference/api/solids/catalogue',
     ],
   },
   'io': {

@@ -130,6 +130,87 @@ dice seguir la norma tiene que hacerlo. Aquí la constante exacta es la buena:
 reproduce las veinticinco filas de la Tabla A2, y la redondeada falla la fila
 del acero por un 0,8 por ciento.
 
+## La tabla, y lo que no dice
+
+Teclear la fila a mano es la otra mitad del problema que resuelven las tres
+velocidades. `PUBLISHED_SOLIDS` es la Tabla A2 de Hopkins, veinticinco
+materiales con la página en la que se leyeron, así que un tabique de placa de
+yeso o un forjado de hormigón parten de un número que alguien publicó y no de
+uno que uno recuerda a medias.
+
+```python
+from phonometry import solids
+
+board = solids.PUBLISHED_SOLIDS["plasterboard_natural_gypsum"]
+print(board.density_kg_m3, board.longitudinal_speed_m_s, board.loss_factor)
+# 860.0 1490.0 0.0141
+print(round(board.youngs_modulus_pa() / 1e9, 2))
+# 1.74
+```
+
+El módulo no está en la tabla. Es la inversa del apartado anterior, aplicada a
+la velocidad, la densidad y el coeficiente de Poisson de la propia fila, que es
+justo la conversión que esta página existe para que nadie haga de cabeza.
+
+### Cuatro de veinticinco
+
+Una tabla de materiales no es una lista de medidas, y ésta lo dice. La mayoría
+de sus coeficientes de Poisson y de sus factores de pérdidas llevan una nota al
+pie cuyo texto completo es «Estimate»: de las veinticinco filas, sólo el
+aluminio, el vidrio, el mortero y el acero imprimen un Poisson que el libro
+respalda. El catálogo conserva esa distinción, porque un 0,2 leído como medida
+se creerá más de lo que se lo cree Hopkins.
+
+```python
+print(board.is_estimate("poisson_ratio"), board.is_estimate("loss_factor"))
+# True False
+```
+
+Otras tres cosas que la página dice y que no son números sueltos, siete celdas
+en total, y que la fila conserva en vez de aplanarlas:
+
+- **Una densidad impresa como rango.** El hormigón celular es de 400 a
+  800 kg/m³ y el ladrillo de 1 500 a 2 000, porque eso es lo que se sabe de
+  un bloque. Esas filas tienen `density_kg_m3` a `None`, el intervalo en
+  `ranges`, y `youngs_modulus_pa()` se niega en vez de tomar el punto medio sin
+  decirlo.
+- **Un factor de pérdidas impreso como cota, o como banda.** El aluminio es
+  `≤ 0,001` y el acero `≤ 0,0001`, y los dos están en `bounded_above`; el
+  vidrio es de 0,003 a 0,006, que es una banda y no una cota. Los tres tienen
+  `loss_factor` a `None` y el intervalo en `ranges`.
+- **Una velocidad citada con una horquilla alrededor.** El hormigón celular
+  imprime 1 900 m/s con un rango típico de 1 600 a 2 300, y el OSB imprime
+  2 570 como valor efectivo de un material que va de 2 200 a 3 500 m/s según
+  la dirección. Aquí el valor se mantiene y el intervalo queda a su lado en
+  `ranges`, con el motivo en `note`.
+
+```python
+aircrete = solids.PUBLISHED_SOLIDS["aircrete"]
+print(aircrete.density_kg_m3, aircrete.ranges["density_kg_m3"])
+# None (400.0, 800.0)
+
+try:
+    aircrete.youngs_modulus_pa()
+except ValueError as error:
+    print(error)
+# ... the table prints 400 to 800 kg/m3, so a modulus follows only from a
+# density you choose and can defend
+```
+
+Las filas cuyas columnas el libro toma de otro autor conservan el crédito, y la
+del acero conserva dos: Fahy para la velocidad y el Poisson, Heckl para el
+factor de pérdidas.
+
+```python
+print(solids.PUBLISHED_SOLIDS["steel"].attributed_to["loss_factor"])
+# Heckl, 1981
+```
+
+Nada de esto es una especificación. Las densidades de los bloques varían con el
+fabricante y las placas con el lote, que es la razón por la que la página
+imprime rangos donde los imprime. Una fila sirve para reproducir un ejemplo
+resuelto, para contrastar una medida o para tener un orden de magnitud.
+
 ## Qué rechazan las funciones
 
 Un coeficiente de Poisson de 0,5 describe un material incompresible, y un

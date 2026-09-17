@@ -9,6 +9,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Twenty-five solids as one published table prints them.**
+  `solids.PUBLISHED_SOLIDS` is Hopkins Table A2: masonry, boards,
+  plasterboards, glass, steel, aluminium and timber, each with the density,
+  the quasi-longitudinal speed, the Poisson ratio, the loss factor and the
+  `h f_c` product the page gives, and each naming the page. `SolidMaterial`
+  also computes the Young's modulus the table does not print, from the row's
+  own speed and density, which is the conversion `solids` was added for.
+
+  What the row will not do is the interesting part. A materials table is not a
+  list of measurements: twenty-one of the twenty-five Poisson ratios and twelve
+  of the twenty-two loss factors in Table A2 carry a footnote whose whole text
+  is "Estimate", so the book stands behind four Poisson ratios, not
+  twenty-five. That distinction is kept, because a 0.2 read as a measurement
+  will be trusted further than Hopkins trusts it.
+
+  Nor is every cell a number. Aircrete and brick print a density range and not
+  a value, so those rows carry the interval and `youngs_modulus_pa()` refuses
+  rather than quietly taking the midpoint of a range the page chose not to
+  collapse. Seven cells in all are intervals: two densities, two wave speeds
+  and three loss factors, two of which are upper bounds rather than bands. OSB
+  is orthotropic and its quoted speed is an effective one. Rows the book credits
+  to Rindel, Schmitz, Heckl or Fahy keep the credit, and the steel row keeps
+  two of them across three cells.
+
 - **`phonometry.solids`**, the elastic constants of a solid and the three
   longitudinal wave speeds that follow from them. A beam, a plate and an
   unbounded solid carry a different longitudinal wave, and which one a printed

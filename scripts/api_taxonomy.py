@@ -109,9 +109,10 @@ _SECTION_LIST: tuple[Section, ...] = (
         key="solids",
         label_en="Elastic solids",
         label_es="Sólidos elásticos",
-        # Everything the package publishes is defined in ``elastic``; the
-        # ``__init__`` only re-exports, so it holds no public name of its own.
-        modules=("phonometry.solids.elastic",),
+        # The relations live in ``elastic`` and the published rows in
+        # ``catalogue``; the ``__init__`` only re-exports, so it holds no
+        # public name of its own.
+        modules=("phonometry.solids.elastic", "phonometry.solids.catalogue"),
     ),
     Section(
         key="io",
@@ -463,6 +464,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # owned by the module that uses it and re-exported by the package, the
     # same shape as the three above.
     "DEFAULT_SPEED_OF_SOUND_M_S": "phonometry.solids.elastic",
+    # The published catalogue is a mapping, so a plain scan sees it in the
+    # module that builds it and in the package that re-exports it.
+    "PUBLISHED_SOLIDS": "phonometry.solids.catalogue",
     # The ideal-gas closure and its two published constants are owned by the
     # module that computes with them and re-exported by the package.
     "IDEAL_GAS_VALIDITY": "phonometry.fluids.gas",

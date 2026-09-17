@@ -189,6 +189,10 @@ SOURCED: dict[tuple[str, str], str] = {
         "PUBLISHED_RESILIENT_LAYERS",
     ): "Hopkins (2007) Table A3, fifteen resilient layers",
     (
+        "solids/catalogue.py",
+        "PUBLISHED_SOLIDS",
+    ): "Hopkins (2007) Table A2, twenty-five solid materials",
+    (
         "noise_control/duct_modes.py",
         "CIRCULAR_EIGENVALUES",
     ): "Norton & Karczub (2003) Table 7.1, twelve circular-duct eigenvalues",

@@ -141,8 +141,10 @@ def _annex_d_tasks() -> list[Task]:
 
 def test_annex_d_task_levels_and_contributions() -> None:
     """Annex D: task levels 80.8/90.1 dB and contributions 62.7/78.8/82.8 dB."""
+    tasks = _annex_d_tasks()
+
     with pytest.warns(OccupationalExposureWarning):  # cutting/grinding spans > 3 dB
-        result = task_based_exposure(_annex_d_tasks())
+        result = task_based_exposure(tasks)
     by_label = {t.label: t for t in result.tasks}
     assert by_label["welding"].lp_aeqt == pytest.approx(80.8, abs=0.05)
     assert by_label["cutting/grinding"].lp_aeqt == pytest.approx(90.1, abs=0.05)

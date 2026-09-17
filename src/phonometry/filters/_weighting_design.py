@@ -680,6 +680,7 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
             rows[[column, pivot]] = rows[[pivot, column]]
             right[[column, pivot]] = right[[pivot, column]]
         head = rows[column, column]
+        # NaN-safe and zero-safe: a singular pivot is skipped, not divided by.
         if not abs(head) > 0.0:
             continue
         factors = rows[column + 1 :, column] / head
@@ -690,6 +691,7 @@ def _solve_dense(matrix: np.ndarray, vector: np.ndarray) -> np.ndarray:
     solution = np.zeros(order)
     for column in range(order - 1, -1, -1):
         head = rows[column, column]
+        # NaN-safe and zero-safe: a singular pivot is skipped, not divided by.
         if not abs(head) > 0.0:
             continue
         behind = math.fsum(rows[column, column + 1 :] * solution[column + 1 :])

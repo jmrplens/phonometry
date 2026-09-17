@@ -788,6 +788,7 @@ def partial_power_concentration(
 
     partial = i_n * seg
     total = float(np.sum(partial))
+    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
     if not total > 0.0:
         msg = (
             "The total sound power of this band is not positive, so ISO "
@@ -857,6 +858,7 @@ def partial_power_concentration(
     delta_alpha = (
         delta - (1.0 - alpha) * (2.0 / math.sqrt(n_remainder)) * f4_remainder
     ) / alpha
+    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
     if not delta_alpha > 0.0:
         msg = (
             f"The remaining {n_remainder} segments exhaust the ISO 9614-1 "
@@ -1653,6 +1655,7 @@ def _a_weighted_determination(
     per_position = np.sum(
         intensity[:, summed] * 10.0 ** (0.1 * corrections[summed]), axis=1
     )
+    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
     if not float(np.mean(per_position)) > 0.0:
         return level, float("nan"), None
     f4_a = _coefficient_of_variation(

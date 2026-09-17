@@ -1243,6 +1243,7 @@ def impact_insulation(
 
     l_n: np.ndarray | None = None
     if volume is not None:
+        # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
         if not volume > 0.0:
             msg = "'volume' must be positive."
             raise ValueError(msg)
@@ -1281,12 +1282,14 @@ def _validate_facade_geometry(
     sound reduction index needs the surface level, the element area and the
     receiving-room volume together.
     """
+    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
     if volume is not None and not volume > 0.0:
         msg = "'volume' must be positive."
         raise ValueError(msg)
     if volume is not None and math.isinf(volume):
         msg = "'volume' must be finite."
         raise ValueError(msg)
+    # NaN-safe: 'not x > 0' refuses a NaN that 'x <= 0' would let through.
     if area is not None and not area > 0.0:
         msg = "'area' must be positive."
         raise ValueError(msg)

@@ -127,6 +127,85 @@ claims to follow the standard has to. Here the exact constant is the right one:
 it reproduces all twenty-five rows of Table A2, and the rounded one misses the
 steel row by 0,8 per cent.
 
+## The table, and what it does not say
+
+Typing the row yourself is the other half of the problem the three speeds
+solve. `PUBLISHED_SOLIDS` is Hopkins Table A2, twenty-five materials with the
+page they were read on, so a plasterboard partition or a concrete floor starts
+from a number somebody published rather than one you half remember.
+
+```python
+from phonometry import solids
+
+board = solids.PUBLISHED_SOLIDS["plasterboard_natural_gypsum"]
+print(board.density_kg_m3, board.longitudinal_speed_m_s, board.loss_factor)
+# 860.0 1490.0 0.0141
+print(round(board.youngs_modulus_pa() / 1e9, 2))
+# 1.74
+```
+
+The modulus is not in the table. It is the inverse of the section above, run
+on the row's own speed, density and Poisson ratio, which is exactly the
+conversion this page exists to stop people doing in their heads.
+
+### Four of twenty-five
+
+A materials table is not a list of measurements, and this one says so. Most of
+its Poisson ratios and most of its loss factors carry a footnote whose whole
+text is "Estimate": of the twenty-five rows, only aluminium, glass, mortar and
+steel print a Poisson ratio the book stands behind. The catalogue keeps that
+distinction, because a 0,2 read as a measurement will be trusted further than
+Hopkins trusts it.
+
+```python
+print(board.is_estimate("poisson_ratio"), board.is_estimate("loss_factor"))
+# True False
+```
+
+Three more things the page says are not single numbers, seven cells in all, and
+the row carries each of them rather than flattening it:
+
+- **A density printed as a range.** Aircrete is 400 to 800 kg/m³ and brick
+  1 500 to 2 000, because that is what is known about a block. Those rows
+  have `density_kg_m3` of `None`, the interval in `ranges`, and
+  `youngs_modulus_pa()` refuses rather than quietly picking the midpoint.
+- **A loss factor printed as a bound, or as a band.** Aluminium is `≤ 0,001`
+  and steel `≤ 0,0001`, and both are in `bounded_above`; glass is 0,003 to
+  0,006, which is a band and not a bound. All three have `loss_factor` of
+  `None` and the interval in `ranges`.
+- **A speed quoted with a spread around it.** Aircrete prints 1 900 m/s with
+  a typical 1 600 to 2 300, and OSB prints 2 570 as the effective figure for
+  a material that runs 2 200 to 3 500 m/s with the direction. Here the value
+  stands and the interval sits beside it in `ranges`, with the reason in
+  `note`.
+
+```python
+aircrete = solids.PUBLISHED_SOLIDS["aircrete"]
+print(aircrete.density_kg_m3, aircrete.ranges["density_kg_m3"])
+# None (400.0, 800.0)
+
+try:
+    aircrete.youngs_modulus_pa()
+except ValueError as error:
+    print(error)
+# ... the table prints 400 to 800 kg/m3, so a modulus follows only from a
+# density you choose and can defend
+```
+
+Rows whose columns the book takes from someone else keep the credit, and the
+steel row keeps two: Fahy for the speed and the Poisson ratio, Heckl for the
+loss factor.
+
+```python
+print(solids.PUBLISHED_SOLIDS["steel"].attributed_to["loss_factor"])
+# Heckl, 1981
+```
+
+None of this is a specification. Block densities vary by manufacturer and
+boards vary by batch, which is the reason the page prints ranges where it does.
+A row is for reproducing a worked example, sanity-checking a measurement or
+getting an order of magnitude.
+
 ## What the functions refuse
 
 A Poisson ratio of 0,5 describes an incompressible material, and an

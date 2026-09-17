@@ -77,6 +77,7 @@ import argparse
 import ast
 import dataclasses
 import importlib
+import json
 import pathlib
 import pkgutil
 import re
@@ -188,6 +189,10 @@ SOURCED: dict[tuple[str, str], str] = {
         "materials/resilient/dynamic_stiffness.py",
         "PUBLISHED_RESILIENT_LAYERS",
     ): "Hopkins (2007) Table A3, fifteen resilient layers",
+    (
+        "solids/catalogue.py",
+        "PUBLISHED_SOLIDS",
+    ): "Hopkins (2007) Table A2, twenty-five solid materials",
     (
         "noise_control/duct_modes.py",
         "CIRCULAR_EIGENVALUES",
@@ -511,11 +516,54 @@ def banner_above(lines: Sequence[str], index: int) -> str:
     return " ".join(reversed(out))
 
 
-def module_tables(path: pathlib.Path) -> Iterator[tuple[str, str]]:
-    """``(constant name, banner)`` for every module-level table in *path*.
+#: A banner that says which packaged data file its table was read from, so the
+#: citation can live in the file with the rows instead of being copied into a
+#: comment that then drifts away from them.
+DATA_FILE = re.compile(r"``([\w./-]+\.json)``")
 
-    A table is a literal collection of more than one entry, or a call that
-    builds one; a scalar is a cited number and the errata registry covers it.
+
+def data_citation(banner: str) -> tuple[str, str | None]:
+    """The data file *banner* names and the ``source`` inside it.
+
+    A table read out of a packaged file cites the page once, in the file, and
+    the banner points at the file. Reading it back here is what lets the two
+    stay one thing: there is no second copy of the citation to go stale.
+
+    :return: The file the banner names, empty when it names none, and that
+        file's citation, or ``None`` when the file is not there or carries no
+        ``source``. A banner pointing at a file that has moved is its own
+        defect and the caller reports it as one: falling back to the banner's
+        own words would let a stale pointer pass unseen.
+    """
+    found = DATA_FILE.search(banner)
+    if found is None:
+        return "", None
+    name = found.group(1)
+    path = PACKAGE / name
+    if not path.is_file():
+        return name, None
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        # A file that cannot be read cannot vouch for a page. Saying so through
+        # the same return the caller already reports beats a traceback, which
+        # would stop the walk and leave every later module unchecked.
+        return name, None
+    if not isinstance(document, dict):
+        return name, None
+    source = document.get("source")
+    return name, source if isinstance(source, str) else None
+
+
+def module_tables(path: pathlib.Path) -> Iterator[tuple[str, str, str, str | None]]:
+    """``(name, banner, data file, its citation)`` per module-level table.
+
+    The last two are empty and ``None`` for a table written out in the module,
+    which is most of them.
+
+    A table is a literal collection of more than one entry, a call that builds
+    one, or a comprehension that reads one out of a packaged data file; a
+    scalar is a cited number and the errata registry covers it.
     """
     text = path.read_text(encoding="utf-8")
     lines = text.splitlines()
@@ -533,7 +581,9 @@ def module_tables(path: pathlib.Path) -> Iterator[tuple[str, str]]:
             size = len(value.elts)
         elif isinstance(value, ast.Dict):
             size = len(value.keys)
-        elif isinstance(value, ast.Call):
+        elif isinstance(value, (ast.Call, ast.DictComp, ast.ListComp, ast.SetComp)):
+            # A call or a comprehension builds its entries at import, so how
+            # many there are cannot be counted here. Both are tables.
             size = 2
         else:
             continue
@@ -542,7 +592,10 @@ def module_tables(path: pathlib.Path) -> Iterator[tuple[str, str]]:
         for name in names:
             if not name.lstrip("_").isupper():
                 continue
-            yield name, banner_above(lines, node.lineno - 1)
+            banner = banner_above(lines, node.lineno - 1)
+            data_file, cited = data_citation(banner)
+            whole = f"{banner} {cited}".strip() if cited else banner
+            yield name, whole, data_file, cited
 
 
 def registry_problems() -> list[Problem]:
@@ -552,8 +605,16 @@ def registry_problems() -> list[Problem]:
     census: set[tuple[str, str]] = set()
     for path in sorted(PACKAGE.rglob("*.py")):
         module = path.relative_to(PACKAGE).as_posix()
-        for name, banner in module_tables(path):
+        for name, banner, data_file, cited in module_tables(path):
             banners[module, name] = banner
+            if data_file and cited is None:
+                problems.append(
+                    Problem(
+                        f"{module}::{name}",
+                        f"names the data file {data_file!r}, which is either "
+                        "not there or does not say which page it came from",
+                    )
+                )
             if banner and BOOK_OR_PAPER.search(banner) and LOCATOR.search(banner):
                 census.add((module, name))
 

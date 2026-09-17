@@ -317,7 +317,8 @@ superficial medida a incidencia normal, la magnitud que devuelve el
 ni siquiera eso está al alcance, el recurso en forma cerrada
 $\Lambda = \Lambda' = \sqrt{8\alpha_\infty\eta/(\phi\sigma)}$ con
 $\alpha_\infty = 1$ hace que JCA vuelva a caer sobre Delany–Bazley dentro de su
-rango de ajuste.
+rango de ajuste. Ese recurso es `viscous_characteristic_length`, y el apartado
+siguiente dice cuánto valen esa relación y otras tres como ella.
 
 El ajuste inverso son unas pocas líneas, y merece la pena ejecutarlo primero
 contra una «medida» sintética para poder comprobar la recuperación:
@@ -356,6 +357,96 @@ para moverlo, y deja que el ajuste encuentre $\sigma$ y las longitudes. Y cuando
 una $\sigma$ ajustada sale lejos de la respuesta del banco de flujo, cree al
 banco: un ajuste que ha absorbido un error de montaje dentro de los parámetros
 del material predecirá mal cualquier otra construcción.
+
+### 1.2 Completar lo que la tabla no imprimió
+
+Las probetas publicadas están incompletas de una forma bastante regular. Una
+tabla de materiales de construcción da una densidad aparente y ninguna
+porosidad. La hoja de un fabricante da una densidad aparente y ninguna
+resistividad al flujo. Casi ninguna da una longitud característica, porque
+medirla exige un banco ultrasónico. Cuatro relaciones publicadas cierran esos
+huecos, y cada una es una estimación que dice cómo de buena es.
+
+**La porosidad a partir de las dos densidades.** `porosity_from_bulk_density` es
+la ec. (1.160) de Hopkins, $\phi = 1 - \rho_\mathrm{bulk}/\rho_\mathrm{fibre}$,
+válida cuando las fibras son macizas y el aglomerante tiene masa despreciable.
+
+**La resistividad a partir de la densidad aparente.**
+`airflow_resistivity_from_bulk_density` es su ec. (1.165),
+$r = k_1\rho_\mathrm{bulk}^{1+k_2}/d_\mathrm{fibre}^2$, con el diámetro de fibra
+en micrómetros. Las constantes pertenecen a un material, no a la lana mineral en
+general, así que viajan dentro de un `FibreResistivityFit` que lleva el diámetro
+de fibra con el que se ajustaron y el rango de densidad aparente sobre el que se
+ajustaron, y una densidad fuera de ese rango se avisa en vez de extrapolarse en
+silencio. Se publican dos, para la misma lana de roca medida en los dos
+sentidos: la lana mineral es anisótropa, sus fibras quedan sobre todo en el
+plano de la manta, y un flujo que la atraviesa cruza más fibras que uno que
+corre a lo largo de ella.
+
+```python
+# La lana de roca de la fig. 1.49 de Hopkins, a una densidad de catálogo.
+sigma = materials.airflow_resistivity_from_bulk_density(
+    60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT
+)
+phi = materials.porosity_from_bulk_density(
+    60.0, fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3
+)
+print(round(sigma), round(phi, 3))
+# 23226 0.977
+
+# En el plano de la manta, esa misma lana resiste casi la mitad.
+lateral = materials.airflow_resistivity_from_bulk_density(
+    60.0, fit=materials.ROCK_WOOL_LATERAL_FIT
+)
+print(round(lateral), round(sigma / lateral, 2))
+# 12382 1.88
+```
+
+Las dos ecuaciones están impresas en páginas enfrentadas y se comprueban entre
+sí. Pasa los extremos del rango de densidad aparente sobre el que se ajustó la
+resistividad por la relación de porosidad, con la densidad de fibra que Hopkins
+declara, y sale el rango de porosidad que él imprime al lado: 0,99 a
+31 kg/m³ y 0,94 a 155 kg/m³.
+
+**La longitud viscosa a partir de los tres parámetros medidos.**
+`viscous_characteristic_length` es la ec. (5.25) de Allard & Atalla,
+$\Lambda = (8\eta\alpha_\infty/(\sigma\phi))^{1/2}/c$, con un factor de forma
+$c$ cercano a 1. Cuánto de cercano es la pregunta, y el libro se contesta a sí
+mismo: sobre las veintitrés probetas que imprime con las cuatro columnas a la
+vez, un factor de forma unidad cae dentro de un factor dos en dieciocho, con el
+centro del conjunto cerca de 1,2. Las cinco que falla son las dos moquetas, la
+pantalla tejida y dos filas cuyas longitudes el propio libro tomó de otro
+modelo. Así que la relación vale un factor dos en un absorbente fibroso o de
+espuma de celda abierta, y no vale nada en un revestimiento de suelo.
+
+**Las dos longitudes a partir de la geometría de la fibra.**
+`fibre_characteristic_lengths` son sus ecs. (5.29) y (5.30) para un haz de
+cilindros, $\Lambda = 1/(2\pi L R)$ y $\Lambda' = 2\Lambda$, con la longitud de
+fibra por unidad de volumen $L$ eliminada por su propia definición, lo que deja
+$\Lambda = R\rho_\mathrm{fibre}/(2\rho_\mathrm{bulk})$.
+
+Estas dos últimas son modelos distintos, no dos opiniones sobre uno. Dales la
+misma lana de roca y se separan con la densidad: el haz de cilindros es la
+estimación más baja en todo el rango, por 1,4 a 38 kg/m³ y por 1,9 a
+155 kg/m³.
+
+```python
+# Las dos vías, sobre la lana de 60 kg/m3 de arriba.
+from_parameters = materials.viscous_characteristic_length(
+    sigma, porosity=phi, tortuosity=1.0
+)
+from_geometry = materials.fibre_characteristic_lengths(
+    2.375e-6,  # la mitad del diámetro de fibra de 4,75 um de Hopkins
+    bulk_density_kg_m3=60.0,
+    fibre_density_kg_m3=materials.ROCK_WOOL_FIBRE_DENSITY_KG_M3,
+)
+print(round(from_parameters * 1e6, 1), round(from_geometry.viscous_length_m * 1e6, 1))
+# 80.5 51.5
+```
+
+A cuál creer es una pregunta sobre el material, y ninguna de las dos la
+contesta. Estimar una longitud característica es lo que se hace cuando la
+alternativa es inventarla; no es lo que se hace cuando hay un tubo a mano.
 
 ### Esqueletos flexibles: cuando el armazón se mueve (Allard & Atalla 11.3.4)
 

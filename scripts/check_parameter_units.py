@@ -73,7 +73,9 @@ WORD_QUANTITIES = frozenset(
 #: The unit suffixes the tree uses. Every one of them is already in the
 #: published API. ``_ft`` is here because a pressure altitude is a length: the
 #: quantity a name says is not always the quantity it holds, and the unit still
-#: has to be on it.
+#: has to be on it. ``_um`` is here because a micro-geometry is written in
+#: micrometres by every book that prints one, and an empirical constant fitted
+#: in those units is wrong by twelve orders of magnitude in metres.
 UNITS = (
     "_kpa",
     "_pa",
@@ -83,6 +85,7 @@ UNITS = (
     "_k",
     "_ft",
     "_mm",
+    "_um",
     "_m",
     "_rad",
     "_deg",

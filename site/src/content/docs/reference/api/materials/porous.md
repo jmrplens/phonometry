@@ -70,6 +70,42 @@ stack of them and solving it with the transfer matrix is the subject of
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
+## airflow_resistivity_from_bulk_density
+
+```python
+airflow_resistivity_from_bulk_density(
+    bulk_density_kg_m3: float,
+    *,
+    fit: FibreResistivityFit,
+) -> float
+```
+
+Airflow resistivity of a mineral wool from its bulk density (Eq. 1.165).
+
+$r = k_1 \rho_\mathrm{bulk}^{1+k_2} / d_\mathrm{fibre}^2$, the
+empirical relation Hopkins gives after Bies (1988) and Nichols (1947), with
+the fibre diameter in micrometres.
+
+The relation is a straight line through measured points on a log-log plot,
+not a law, so it belongs to the material the points came from. Passing a
+bulk density outside the range the fit was made over emits a
+[`PorousAbsorberWarning`](/phonometry/reference/api/materials/porous/#porousabsorberwarning) naming both.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `bulk_density_kg_m3` | Bulk density of the wool, in kg/m3 (> 0). |
+| `fit` | The published `k1`, `k2` pair to use, such as [`ROCK_WOOL_LONGITUDINAL_FIT`](/phonometry/reference/api/materials/porous/#rock_wool_longitudinal_fit). |
+
+**Returns:** The airflow resistivity `r`, in Pa s/m2.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a non-positive density. |
+
 ## decoupling_frequency
 
 ```python
@@ -157,6 +193,99 @@ DELANY_BAZLEY_COEFFICIENTS = {'delany_bazley': (0.0571, 0.754, 0.087, 0.732, 0.0
 ```python
 DELANY_BAZLEY_VALIDITY = (0.01, 1.0)
 ```
+
+## fibre_characteristic_lengths
+
+```python
+fibre_characteristic_lengths(
+    fibre_radius_m: float,
+    *,
+    bulk_density_kg_m3: float,
+    fibre_density_kg_m3: float,
+) -> FibreCharacteristicLengths
+```
+
+Both characteristic lengths of a fibrous layer, from its geometry.
+
+Allard & Atalla Eqs. (5.29) and (5.30), PDF page 91 (printed p. 81), model
+the fibres as infinitely long cylinders of radius `R` and give, for a
+porosity close to 1,
+
+$$
+\Lambda = \frac{1}{2 \pi L R} \qquad \Lambda' = \frac{1}{\pi L R} = 2 \Lambda
+$$
+
+where `L` is the total length of fibre per unit volume. Nobody measures
+`L`, so it is eliminated here through its own definition, which for
+cylinders is $\rho_\mathrm{bulk} = \rho_\mathrm{fibre} \pi R^2 L$,
+leaving $\Lambda = R \rho_\mathrm{fibre} / (2 \rho_\mathrm{bulk})$
+from three numbers a table does print. That substitution is arithmetic on
+the definition and not a second model.
+
+This is a different model from [`viscous_characteristic_length`](/phonometry/reference/api/materials/porous/#viscous_characteristic_length), not a
+second opinion on the same one, and on Hopkins' own rock wool the two drift
+apart with density: the cylinder model is the lower estimate throughout, by
+a factor of 1,4 at 38 kg/m3 and 1,9 at 155 kg/m3. Which to prefer is a
+question about the material, and neither is a substitute for measuring it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `fibre_radius_m` | Fibre radius `R`, in metres (> 0). A table that prints a diameter in micrometres wants half of it, divided by a million. |
+| `bulk_density_kg_m3` | Bulk density of the layer, in kg/m3 (> 0), below the fibre density: the ratio of the two is the fibre volume fraction, and Eqs. (5.29) and (5.30) are stated for a porosity close to 1. |
+| `fibre_density_kg_m3` | Density of the fibre itself, in kg/m3 (> 0). |
+
+**Returns:** The viscous and thermal lengths, in metres.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a non-positive input, or a bulk density at or above the fibre density, which leaves no pore for a length to describe. |
+
+## FibreCharacteristicLengths
+
+```python
+FibreCharacteristicLengths(
+    viscous_length_m: ForwardRef('float'),
+    thermal_length_m: ForwardRef('float'),
+)
+```
+
+The two characteristic lengths of a fibrous layer, in metres.
+
+## FibreResistivityFit
+
+```python
+FibreResistivityFit(
+    k1: ForwardRef('float'),
+    k2: ForwardRef('float'),
+    fibre_diameter_um: ForwardRef('float'),
+    bulk_density_range_kg_m3: ForwardRef('tuple[float, float]'),
+    direction: ForwardRef('str'),
+    source: ForwardRef('str'),
+)
+```
+
+A published `k1`, `k2` pair of Hopkins Eq. (1.165), and its range.
+
+The pair is not a property of mineral wool in general: `k1` belongs to a
+material manufactured in a particular way and `k2` to how its fibres are
+oriented, so the fit carries the fibre diameter it was made at and the
+bulk-density range it was fitted over, and using it outside that range is
+announced rather than silent.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `k1` | The constant of the manufacture. |
+| `k2` | The exponent of the fibre orientation. |
+| `fibre_diameter_um` | Average fibre diameter of the fitted material, in micrometres, which is the unit Eq. (1.165) is written in. |
+| `bulk_density_range_kg_m3` | The `(low, high)` the fit was made over. |
+| `direction` | `"lateral"` in the plane of the sheet or `"longitudinal"` through it. Mineral wool is anisotropic and the lateral resistivity is the lower of the two. |
+| `source` | Document, table or equation, PDF page and printed folio. |
 
 ## helmholtz_resonance_frequency
 
@@ -618,6 +747,41 @@ depth) is drawn as a thin sheet.
 
 **Returns:** The axes.
 
+## porosity_from_bulk_density
+
+```python
+porosity_from_bulk_density(
+    bulk_density_kg_m3: float,
+    *,
+    fibre_density_kg_m3: float,
+) -> float
+```
+
+Porosity of a fibrous material from its two densities (Eq. 1.160).
+
+$\phi = 1 - \rho_\mathrm{bulk} / \rho_\mathrm{fibre}$, which holds
+when the fibres are solid and whatever binds them together has negligible
+mass. Hopkins states both conditions.
+
+It closes on its own data: at the 2 600 kg/m3 fibre density and the 31 to
+155 kg/m3 bulk-density range Hopkins prints for his rock wool, this returns
+0,99 and 0,94, which is the porosity range he prints beside them.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `bulk_density_kg_m3` | Bulk density of the material, in kg/m3 (> 0). |
+| `fibre_density_kg_m3` | Density of the fibre itself, in kg/m3, larger than the bulk density. |
+
+**Returns:** The open porosity `phi`, between 0 and 1.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a non-positive density, or a bulk density at or above the fibre density, which is not a porous material. |
+
 ## PorousAbsorberWarning
 
 Advisory for porous-model use outside the published fit range.
@@ -792,3 +956,68 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ```python
 PUBLISHED_POROUS_MATERIALS = {'glass_wool': PorousMaterial(name='Domisol Coffrage glass wool', flow_resistivity_pa_s_m2=40000.0, porosity=0.94, tortuosity=1.06, viscous_length_um=56.0, thermal_length_um=110.0, frame_density_kg_m3=130.0, thickness_mm=3.8, source='Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)', shear_modulus_pa=(2200000+220000j), poisson_ratio=0.0, attributed_to=''), 'soft_fibrous': PorousMaterial(name='Soft fibrous', flow_resistivity_pa_s_m2=25000.0, porosity=0.98, tortuosity=1.02, viscous_length_um=90.0, thermal_length_um=180.0, frame_density_kg_m3=30.0, thickness_mm=50.0, source='Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)', shear_modulus_pa=None, poisson_ratio=None, attributed_to='')}
 ```
+
+## ROCK_WOOL_FIBRE_DENSITY_KG_M3
+
+*Constant* (`float`).
+
+```python
+ROCK_WOOL_FIBRE_DENSITY_KG_M3 = 2600.0
+```
+
+## ROCK_WOOL_LATERAL_FIT
+
+*Constant* (`phonometry.materials.absorbers.porous.FibreResistivityFit`).
+
+## ROCK_WOOL_LONGITUDINAL_FIT
+
+*Constant* (`phonometry.materials.absorbers.porous.FibreResistivityFit`).
+
+## viscous_characteristic_length
+
+```python
+viscous_characteristic_length(
+    flow_resistivity_pa_s_m2: float,
+    *,
+    porosity: float,
+    tortuosity: float,
+    fluid: Fluid = ...,
+    shape_factor: float = 1.0,
+) -> float
+```
+
+The viscous characteristic length from the three measured parameters.
+
+$\Lambda = (8 \eta \alpha_\infty / (\sigma \phi))^{1/2} / c$,
+Allard & Atalla Eq. (5.25), PDF page 90 (printed p. 80), after Johnson et
+al. (1986), with `c` close to 1.
+
+How close is the question the shape factor exists for, and it is worth
+saying what "close" buys. Against the twenty-three specimens Allard & Atalla
+print with all four columns, `c = 1` puts $\Lambda$ within a factor
+of two of the printed length for eighteen of them, with the middle of the
+set near 1,2. The five it misses are the two carpets, the woven screen and
+two rows whose lengths the book itself took from a different model, and
+there the same arithmetic wants a `c` between 2 and 9,5.
+
+So estimating this length rather than measuring it is worth a factor of two
+on a bulk fibrous or open-cell absorber, and nothing at all on a floor
+covering or a screen.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2 (> 0). |
+| `porosity` | Open porosity `phi`, between 0 and 1. |
+| `tortuosity` | Tortuosity `alpha_infinity` (>= 1). |
+| `fluid` | The saturating fluid, for its dynamic viscosity `eta`. |
+| `shape_factor` | The `c` of Eq. (5.25) (> 0). One, unless the micro-geometry is known well enough to say otherwise. |
+
+**Returns:** The viscous characteristic length `Lambda`, in metres.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | for a non-positive input or a porosity out of range. |

@@ -516,3 +516,88 @@ HOPKINS_TABLE_A3_MN_PER_M3: tuple[tuple[str, float, float, float], ...] = (
 #: How many of the fifteen the book gives as its own measurements; the last four
 #: it credits to Hopkins and Hall (2006) in the material cell.
 HOPKINS_TABLE_A3_FIRST_HAND_ROWS = 11
+
+
+# ---------------------------------------------------------------------------
+# Every specimen Allard & Atalla 2e prints with all four Johnson-Champoux-Allard
+# columns at once: the airflow resistivity, the open porosity, the tortuosity
+# and the viscous characteristic length. The lengths are the point. Three of the
+# four are measured routinely and the fourth almost never is, which is why the
+# book gives Eq. (5.25) to estimate it from the other three, and why this table
+# is the only honest way to say how far that estimate goes.
+#
+# Twenty-three rows, gathered from fourteen pages of the same edition, each
+# carrying the table it was printed in, its PDF page and its printed folio, all
+# read from the rendered page. Where a table prints Lambda and Lambda' in metres
+# (Table 13.1) the micrometres here are that number times 1e6, which is the only
+# arithmetic done to any of them. Rows whose length cell reads "model" instead
+# of a number (the screen of Table 11.5) are not here, because a cell that names
+# a model is not a measurement.
+#
+# Mirrors tests/materials/absorbers/test_porous_relations.py.
+# ---------------------------------------------------------------------------
+#: ``(material, table, PDF page, printed folio, sigma in Pa s/m2, porosity,
+#: tortuosity, Lambda in um, Lambda' in um)``.
+ALLARD_JCA_SPECIMENS: tuple[
+    tuple[str, str, int, int, float, float, float, float, float], ...
+] = (
+    ("Material 1", "Table 8.1", 181, 174, 50_000.0, 0.98, 1.4, 50.0, 150.0),
+    ("Material 2", "Table 8.1", 181, 174, 22_100.0, 0.97, 2.2, 39.0, 275.0),
+    ("Soft fibrous", "Table 11.2", 260, 254, 25_000.0, 0.98, 1.02, 90.0, 180.0),
+    ("Foam", "Table 11.3", 272, 266, 5_000.0, 0.98, 1.1, 150.0, 216.0),
+    ("Glass wool", "Table 11.3", 272, 266, 1_100_000.0, 0.7, 1.0, 10.0, 20.0),
+    ("Blanket (1)", "Table 11.4", 276, 270, 34_000.0, 0.98, 1.18, 60.0, 86.0),
+    ("Screen (2)", "Table 11.4", 276, 270, 3_200_000.0, 0.8, 2.56, 6.0, 24.0),
+    ("Foam (3)", "Table 11.4", 276, 270, 87_000.0, 0.97, 2.52, 36.0, 118.0),
+    ("Foam (4)", "Table 11.4", 276, 270, 65_000.0, 0.99, 1.98, 37.0, 120.0),
+    ("Felt (1)", "Table 11.5", 277, 271, 23_000.0, 0.99, 1.4, 64.0, 131.0),
+    ("Foam (3)", "Table 11.5", 277, 271, 10_900.0, 0.99, 1.02, 100.0, 130.0),
+    ("Carpet (1)", "Table 11.7", 280, 274, 5_000.0, 0.99, 1.0, 23.0, 28.0),
+    ("Carpet (2)", "Table 11.7", 280, 274, 5_000.0, 0.99, 1.0, 23.0, 28.0),
+    ("Fibrous layer", "Table 11.7", 280, 274, 33_000.0, 0.98, 1.1, 50.0, 110.0),
+    ("Glass wool", "Table 11.8", 281, 275, 40_000.0, 0.94, 1.06, 56.0, 110.0),
+    ("Foam", "Table 11.9", 282, 276, 6_600.0, 0.98, 1.03, 200.0, 380.0),
+    ("Foam 1", "Table 12.1", 297, 292, 10_900.0, 0.99, 1.02, 100.0, 130.0),
+    ("Mineral wool", "Table 12.2", 298, 293, 34_000.0, 0.95, 1.0, 40.0, 80.0),
+    ("Limp foam", "Table 12.4", 304, 299, 10_900.0, 0.99, 1.02, 100.0, 130.0),
+    ("Limp foam", "Table 12.5", 306, 301, 20_000.0, 0.9, 1.6, 12.0, 24.0),
+    ("Foam", "Table 12.5", 306, 301, 10_900.0, 0.99, 1.02, 100.0, 130.0),
+    ("Foam", "Table 13.1", 332, 328, 12_569.0, 0.99, 1.02, 78.0, 192.0),
+    ("Rockwool", "Table 13.2", 341, 337, 135_000.0, 0.94, 2.1, 49.0, 166.0),
+)
+
+#: The two rows of :data:`ALLARD_JCA_SPECIMENS` that are floor coverings rather
+#: than bulk absorbers. Eq. (5.25) treats the pore as a cylinder, and a carpet
+#: pile is not one: these are the rows that measure how badly it can miss.
+ALLARD_JCA_CARPET_ROWS = ("Carpet (1)", "Carpet (2)")
+
+#: The dynamic viscosity of air Allard & Atalla 2e states, in Pa s: "for air in
+#: standard conditions", PDF page 56 (printed p. 46), below Eq. (4.2). Eq. (5.25)
+#: has it inside a square root, so which value is used moves the estimated length
+#: by half of whatever it is changed by.
+ALLARD_AIR_VISCOSITY_PA_S = 1.84e-5
+
+# ---------------------------------------------------------------------------
+# Hopkins (2007) on mineral wool: the fibre, the bulk density and what follows
+# from them. Equation (1.160) on PDF page 107 (printed p. 80) makes the porosity
+# from the two densities; Equation (1.165) on PDF page 108 (printed p. 81) makes
+# the airflow resistivity from the bulk density and the fibre diameter, with the
+# two coefficient sets printed on that same page for the rock wool of Fig. 1.49.
+#
+# The two equations check each other. Applying (1.160) to the ends of the
+# bulk-density range that (1.165) was fitted over has to give back the porosity
+# range Hopkins prints beside it, and it does, which is why both are here rather
+# than in two places.
+#
+# Mirrors tests/materials/absorbers/test_porous_relations.py.
+# ---------------------------------------------------------------------------
+#: Density of the rock-wool fibre itself, in kg/m3.
+HOPKINS_ROCK_WOOL_FIBRE_DENSITY = 2600.0
+#: Average fibre diameter of the fitted material, in micrometres.
+HOPKINS_ROCK_WOOL_FIBRE_DIAMETER_UM = 4.75
+#: ``(k1, k2, low bulk density, high bulk density)`` in the plane of the sheet.
+HOPKINS_ROCK_WOOL_LATERAL_FIT = (353.0, 0.63, 31.0, 155.0)
+#: The same, through the sheet.
+HOPKINS_ROCK_WOOL_LONGITUDINAL_FIT = (780.0, 0.59, 38.0, 162.0)
+#: The porosity range Hopkins prints for this wool, lowest bulk density first.
+HOPKINS_ROCK_WOOL_POROSITY_RANGE = (0.99, 0.94)

@@ -138,10 +138,10 @@ HOPKINS_A2_ESTIMATED_LOSS_FACTOR = (
 #: The cells the page prints as an interval: ``key -> (field, low, high)``.
 HOPKINS_A2_RANGES: tuple[tuple[str, str, float, float], ...] = (
     ("aircrete", "density_kg_m3", 400.0, 800.0),
-    ("aircrete", "longitudinal_speed_m_s", 1600.0, 2300.0),
+    ("aircrete", "plate_longitudinal_speed_m_s", 1600.0, 2300.0),
     ("brick", "density_kg_m3", 1500.0, 2000.0),
-    ("glass", "loss_factor", 0.003, 0.006),
-    ("osb", "longitudinal_speed_m_s", 2200.0, 3500.0),
+    ("glass", "flexural_loss_factor", 0.003, 0.006),
+    ("osb", "plate_longitudinal_speed_m_s", 2200.0, 3500.0),
 )
 
 #: The two loss factors the page prints as ``<= x``, with their ``x``.
@@ -162,3 +162,73 @@ HOPKINS_A2_ATTRIBUTIONS: tuple[tuple[str, str], ...] = (
     ("plasterboard_natural_gypsum", "Hopkins, 1999"),
     ("plasterboard_flue_gas_gypsum", "Hopkins, 1999"),
 )
+
+
+# ---------------------------------------------------------------------------
+# Cremer 3e Table 4.3, "Mechanical properties of metals at 20 C"
+# PDF page 201 (printed p. 191)
+# ---------------------------------------------------------------------------
+#: Every row as the page prints it: key, density in kg/m3, modulus and shear
+#: modulus in pascals, Poisson ratio, ``c_LII`` and ``c_T`` in m/s. Lead and
+#: copper each print two specimens under one name, which share every column
+#: but the flexural loss factor, so they are two rows.
+CREMER_4_3_ROWS: tuple[tuple[str, float, float, float, float, float, float], ...] = (
+    ("aluminium", 2700.0, 72e9, 27e9, 0.34, 5200.0, 3100.0),
+    ("lead_chemically_pure", 11300.0, 17e9, 6e9, 0.43, 1250.0, 730.0),
+    ("lead_antimonial", 11300.0, 17e9, 6e9, 0.43, 1250.0, 730.0),
+    ("iron", 7800.0, 200e9, 77e9, 0.30, 5050.0, 3100.0),
+    ("steel", 7800.0, 210e9, 77e9, 0.31, 5100.0, 3100.0),
+    ("gold", 19300.0, 80e9, 28e9, 0.423, 2000.0, 1200.0),
+    ("copper_polycrystal", 8900.0, 125e9, 46e9, 0.35, 3700.0, 2300.0),
+    ("copper_single_crystal", 8900.0, 125e9, 46e9, 0.35, 3700.0, 2300.0),
+    ("magnesium", 1740.0, 43e9, 17e9, 0.29, 5000.0, 3100.0),
+    ("brass", 8500.0, 95e9, 36e9, 0.33, 3200.0, 2100.0),
+    ("nickel", 8900.0, 205e9, 77e9, 0.30, 4800.0, 2900.0),
+    ("silver", 10500.0, 80e9, 29e9, 0.37, 2700.0, 1600.0),
+    ("bismuth", 9800.0, 3.3e9, 1.3e9, 0.38, 580.0, 360.0),
+    ("zinc", 7130.0, 13.1e9, 5e9, 0.33, 1350.0, 850.0),
+    ("tin", 7280.0, 4.4e9, 1.6e9, 0.39, 780.0, 470.0),
+)
+
+#: How far the page's own columns may disagree with the three relations that
+#: tie them together, as a fraction. The table prints two significant figures
+#: for most cells, so the worst row, bismuth, is 8.7 per cent out on the shear
+#: modulus purely from ``1.3`` standing for ``1.196``; every other row is
+#: inside 5 per cent on all three at once.
+CREMER_4_3_CONSISTENCY_TOLERANCE = 0.09
+
+#: The two rows that print two specimens under one name, and what tells them
+#: apart in the Remarks column.
+CREMER_4_3_VARIANTS: tuple[tuple[str, str], ...] = (
+    ("lead_chemically_pure", "chemically pure"),
+    ("lead_antimonial", "antimonial"),
+    ("copper_polycrystal", "polycrystal"),
+    ("copper_single_crystal", "single crystal"),
+)
+
+#: The bracketed references the Remarks column carries, resolved against the
+#: chapter's own list on PDF page 243 (printed p. 233).
+CREMER_4_3_ATTRIBUTIONS: tuple[tuple[str, str, str], ...] = (
+    (
+        "aluminium",
+        "flexural_loss_factor",
+        "Wegel and Walter, 1953; Zemanek and Rudnik, 1961; Becker and Oberst, 1956",
+    ),
+    ("gold", "flexural_loss_factor", "Forster and Koster, 1937"),
+    (
+        "iron",
+        "flexural_loss_factor",
+        "Wegel and Walter, 1953; Bennewitz and Rotger, 1936; Becker and Oberst, 1956",
+    ),
+    ("magnesium", "longitudinal_loss_factor", "Becker and Oberst, 1956"),
+    (
+        "silver",
+        "flexural_loss_factor",
+        "Bordoni, Nuovo and Verdini, 1959; Forster and Koster, 1937",
+    ),
+)
+
+#: Cremer states the gap between the bar speed and the pure longitudinal speed
+#: on PDF page 47 (printed p. 37), under Eq. (3.32): "For mu = 0.3, the
+#: difference between these two speeds amounts to 16 %".
+CREMER_BAR_TO_BULK_AT_NU_0_3 = 0.16

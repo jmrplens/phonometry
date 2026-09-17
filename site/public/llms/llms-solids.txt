@@ -206,44 +206,50 @@ Table A2, and the rounded one misses the steel row by 0,8 per cent.
 
 ## The table, and what it does not say
 
-`PUBLISHED_SOLIDS` is Hopkins Table A2, twenty-five materials with the page
-they were read on, so a partition or a floor starts from a published number.
+`PUBLISHED_SOLIDS` holds forty rows read from two published pages: Hopkins
+**Table A2**, twenty-five building materials, and Cremer 3e **Table 4.3**,
+thirteen metals over fifteen rows. The key names the table, because both books
+print a steel and they are not the same steel.
 
 ```python
 from phonometry import solids
 
-board = solids.PUBLISHED_SOLIDS["plasterboard_natural_gypsum"]
-print(board.density_kg_m3, board.longitudinal_speed_m_s, board.loss_factor)
+board = solids.PUBLISHED_SOLIDS["hopkins-2007-table-a2/plasterboard_natural_gypsum"]
+print(board.density_kg_m3, board.plate_longitudinal_speed_m_s, board.flexural_loss_factor)
 # 860.0 1490.0 0.0141
-print(round(board.youngs_modulus_pa() / 1e9, 2))
+print(round(board.youngs_modulus_pa / 1e9, 2))
 # 1.74
 ```
 
-The modulus is not in the table: it is the inverse above, run on the row's own
-numbers.
+That modulus is not in the table: it is the inverse above run on the row's own
+cells, and `is_derived` and `derived` say so. A number this library computed is
+never stored as though a page had printed it.
 
-A materials table is not a list of measurements, and this one says so. Most of
-its Poisson ratios and loss factors carry a footnote whose whole text is
+`solids_named("Steel")` gives both books' steels, 199,6 GPa at a Poisson ratio
+of 0,28 and 210 GPa at 0,31, and every row carries all three longitudinal
+speeds whichever one its page printed, so the comparison is between two books
+rather than between two waves. Cremer's own column is the bar speed: his
+Eq. (3.32) defines `c_LII` as `sqrt(E/rho)`, and the Roman subscript counts the
+directions along which the cross-sectional contraction is unconstrained, so
+`II` is a rod.
+
+A materials table is not a list of measurements, and these say so. Most of
+Hopkins' Poisson ratios and loss factors carry a footnote whose whole text is
 "Estimate", and only aluminium, glass, mortar and steel print a Poisson ratio
-the book stands behind. The row keeps that in `estimated`, readable through
-`is_estimate`.
+the book stands behind; that is in `estimated`, readable through `is_estimate`.
+A cell printed as an interval is in `ranges` and the field is `None`, with
+`why_missing` saying which; a cell printed as a bound is in `bounded_above` too;
+a cell the author rounded on purpose, like Cremer's `≈ 3 · 10⁻⁴` for gold, is in
+`approximate`. Where a page prints two specimens under one name, as Cremer does
+for lead and for copper, they are two rows and `variant` says which is which.
 
-Seven cells are not single values, and none of them is flattened: aircrete
-and brick print a density **range** (400 to 800 and 1 500 to 2 000 kg/m³),
-so `density_kg_m3` is `None`, the interval is in `ranges` and
-`youngs_modulus_pa()` refuses rather than picking a midpoint; aluminium and
-steel print a loss factor as an **upper bound** and glass prints one as a
-**band**, so those three have `loss_factor` of `None` too; and two speeds
-carry a spread beside the value, aircrete's 1 900 m/s typically 1 600 to
-2 300, and OSB's 2 570 an effective figure for a material that runs 2 200 to
-3 500 m/s with the direction.
-
-Rows the book credits to another author keep the credit in `attributed_to`, and
-the steel row keeps two of them: Fahy for the speed and Poisson ratio, Heckl
-for the loss factor.
+Rows whose columns a book takes from another author keep the credit, and the
+bracketed numbers Cremer prints are resolved to their authors from his own
+reference list rather than left as `[4.19]`.
 
 None of this is a specification. Block densities vary by manufacturer, which is
-why the page prints ranges where it does.
+why the pages print ranges where they do, and Cremer says in as many words that
+the loss factor of a metal cannot be considered a material constant.
 
 ## What the functions refuse
 

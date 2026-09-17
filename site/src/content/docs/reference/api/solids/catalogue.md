@@ -63,14 +63,27 @@ SolidMaterial(
     *,
     name: str,
     source: str,
-    longitudinal_speed_m_s: float,
-    poisson_ratio: float,
-    thickness_critical_frequency_product_m_hz: float,
+    table: str = '',
+    variant: str = '',
     density_kg_m3: float | None = None,
-    loss_factor: float | None = None,
+    youngs_modulus_pa: float | None = None,
+    shear_modulus_pa: float | None = None,
+    poisson_ratio: float | None = None,
+    bar_longitudinal_speed_m_s: float | None = None,
+    plate_longitudinal_speed_m_s: float | None = None,
+    bulk_longitudinal_speed_m_s: float | None = None,
+    transverse_speed_m_s: float | None = None,
+    flexural_loss_factor: float | None = None,
+    longitudinal_loss_factor: float | None = None,
+    in_situ_loss_factor: float | None = None,
+    thickness_critical_frequency_product_m_hz: float | None = None,
     estimated: frozenset[str] = frozenset(),
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    borrowed: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float, float]] = ...,
     bounded_above: frozenset[str] = frozenset(),
+    unquantified: Mapping[str, str] = ...,
     attributed_to: Mapping[str, str] = ...,
     note: str = '',
 )
@@ -78,22 +91,86 @@ SolidMaterial(
 
 One row of a published materials table, with what the cell said.
 
+Every quantity is optional, because no two of the books this catalogue
+reads print the same columns: Hopkins gives a plate speed and no modulus,
+Mechel a modulus and no speed, Cremer both plus a shear modulus, Arau
+neither. A field is `None` when the page had nothing to put there, and
+`why_missing` says what it had instead.
+
+**The three longitudinal speeds are three fields**, because they are three
+different waves and the books do not agree on what to call them. Cremer's
+`c_LII` and Bies' `sqrt(E/rho)` are the bar speed; Hopkins'
+quasi-longitudinal is the plate speed; they differ by 16 per cent at
+`nu = 0.3`, which Cremer says in so many words. One field holding
+whichever the page happened to print is the mistake this catalogue exists
+to prevent, so there is no such field.
+
+**The loss factors are three fields** for the same reason. A flexural loss
+factor is measured in bending and a longitudinal one is not; an in-situ
+one is not a property of the material at all, but of a panel installed in
+a building, support and radiation included.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
 | `name` | The material as the table names it, attribution stripped. |
-| `longitudinal_speed_m_s` | Quasi-longitudinal phase velocity `c_L`, in m/s. Hopkins' footnote a states these "can be used as estimates for beams or plates", so the column is the plate speed for the purposes of [`youngs_modulus_from_plate_speed`](/phonometry/reference/api/solids/elastic/#youngs_modulus_from_plate_speed). |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"single crystal"`, `"13 C, 11 per cent bituminous content"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids). |
+| `density_kg_m3` | Density `rho`, in kg/m3. |
+| `youngs_modulus_pa` | Young's modulus `E`, in pascals. |
+| `shear_modulus_pa` | Shear modulus `G`, in pascals. |
 | `poisson_ratio` | Poisson's ratio `nu`. |
-| `thickness_critical_frequency_product_m_hz` | The `h.f_c` column, in m Hz, computed by the book for the 343 m/s its heading states. |
-| `density_kg_m3` | Density `rho`, in kg/m3, or `None` when the table prints a range instead of a value. The range is then in `ranges`. |
-| `loss_factor` | Internal loss factor for bending waves `eta_int`, or `None` when the table prints a dash, a range or an upper bound. |
-| `estimated` | The fields the page marks with its "Estimate" footnote. Reading one of these as a measurement is the mistake this catalogue exists to prevent. |
-| `ranges` | `(low, high)` for each field the table prints as an interval rather than a value. |
-| `bounded_above` | Fields the table prints as `<= x`, with `x` in `ranges` as `(0.0, x)`. |
-| `attributed_to` | Per-field credit, for the rows whose columns the book takes from different authors. |
-| `note` | What the table says about this row beyond its numbers. |
-| `source` | Document, table and PDF pages. |
+| `bar_longitudinal_speed_m_s` | `sqrt(E/rho)`, the quasi-longitudinal speed on a rod, in m/s. |
+| `plate_longitudinal_speed_m_s` | `sqrt(E/(rho(1-nu^2)))`, the quasi-longitudinal speed on a plate, in m/s. |
+| `bulk_longitudinal_speed_m_s` | the pure longitudinal speed in an unbounded solid, in m/s. |
+| `transverse_speed_m_s` | `sqrt(G/rho)`, the shear wave speed, in m/s. |
+| `flexural_loss_factor` | Internal loss factor measured in bending. |
+| `longitudinal_loss_factor` | Internal loss factor measured with longitudinal waves. |
+| `in_situ_loss_factor` | Loss factor of a panel of this material as installed, which combines the internal, support and radiation losses and is therefore not a material constant. |
+| `thickness_critical_frequency_product_m_hz` | The `h.f_c` column, in m Hz, a property of the material alone and the cheapest cross-check there is between books that share no other column. |
+| `estimated` | Fields the page marks as an estimate rather than a measurement. Reading one of these as a measurement is the mistake this catalogue exists to prevent. |
+| `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `borrowed` | Field to the material it was taken from, for the cells a book fills from a similar material rather than leaving empty. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `unquantified` | Field to what the page said in place of a number, for a cell that is neither empty nor numeric: `"varies with frequency"`. |
+| `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `note` | What the page says about this row beyond its numbers. |
+
+### SolidMaterial.is_approximate()
+
+```python
+SolidMaterial.is_approximate(field_name: str) -> bool
+```
+
+Whether the page prints this field with a `~`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page rounded the cell on purpose.
+
+### SolidMaterial.is_derived()
+
+```python
+SolidMaterial.is_derived(field_name: str) -> bool
+```
+
+Whether this library computed this field instead of reading it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
 
 ### SolidMaterial.is_estimate()
 
@@ -109,26 +186,51 @@ Whether the page marks this field as an estimate rather than a value.
 | :--- | :--- |
 | `field_name` | One of the numeric field names of this class. |
 
-**Returns:** `True` when the table carries its "Estimate" footnote there.
+**Returns:** `True` when the page carries an estimate footnote there.
 
-### SolidMaterial.youngs_modulus_pa()
+### SolidMaterial.why_missing()
 
 ```python
-SolidMaterial.youngs_modulus_pa() -> float
+SolidMaterial.why_missing(field_name: str) -> str
 ```
 
-Young's modulus from the printed speed and density, in pascals.
+Why this field is `None`, in the page's own terms.
 
-The table prints a wave speed and a density and no modulus, and the
-functions this library hands a solid to want the modulus, so the
-inversion happens here rather than in the caller's head. It is
-[`youngs_modulus_from_plate_speed`](/phonometry/reference/api/solids/elastic/#youngs_modulus_from_plate_speed) on this
-row's own numbers.
+A catalogue that answers `None` and stops is asking the caller to
+guess whether the material has no such property, whether the book
+measured it and printed a dash, or whether the cell holds something
+that is not a number. Each of those is a different answer.
 
-**Returns:** Young's modulus `E`, in pascals.
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** What the page had in that cell, or the empty string when the field is not missing at all.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | for a row whose density the table printed as a range, because there is then no density to invert with. |
+| AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
+
+## solids_named
+
+```python
+solids_named(name: str) -> tuple[SolidMaterial, ...]
+```
+
+Every published row for a material, across the books.
+
+Comparing two books is the point of holding both, and it has to be a
+deliberate act: a lookup that returned one row for "steel" would be
+choosing between published values on the caller's behalf.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | The material name as a table prints it, matched without regard to case: `"Steel"`, `"steel"`. |
+
+**Returns:** The rows whose [`SolidMaterial.name`](/phonometry/reference/api/solids/catalogue/#solidmaterial) matches, in the order the tables are read, which is empty when no page names it.

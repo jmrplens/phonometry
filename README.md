@@ -84,10 +84,10 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Apply 1/3 octave filter bank
-spl, freq = filters.octave_filter(signal, fs=fs, fraction=3)
+result = filters.octave_filter(signal, fs=fs, fraction=3)
 
-print(f"Bands: {freq}")
-print(f"SPL [dB]: {spl}")
+print(f"Bands: {result.frequencies}")
+print(f"SPL [dB]: {result.levels}")
 ```
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/signal_response_fraction_3.svg" alt="One-third-octave spectrum analysis of a multi-tone signal with the raw PSD in the background" width="80%"></picture>

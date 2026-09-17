@@ -493,6 +493,7 @@ from .signals import (
     generate_level_distribution,
     generate_ln_levels_example,
     generate_multichannel_response,
+    generate_octave_band_levels,
     generate_parametric_eq_cascade,
     generate_parametric_eq_family,
     generate_peak_oversampling,
@@ -659,6 +660,7 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Filter banks: the z-plane behind the multirate design, and the cascade
     # the parametric-EQ snippet builds.
     generate_pole_migration,
+    generate_octave_band_levels,
     generate_parametric_eq_cascade,
     generate_architecture_tradeoff,
     generate_class_mask_architectures,

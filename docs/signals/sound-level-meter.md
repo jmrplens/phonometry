@@ -137,10 +137,11 @@ anchored to the IEC 61260-1 band edges; `nominal=True` labels them with the
 preferred frequencies you would read on an instrument.
 
 ```python
-spl, bands = filters.octave_filter(
+filtered = filters.octave_filter(
     recording, fs, fraction=3, nominal=True,
     calibration=filters.LevelCalibration(factor=cal),
 )
+spl, bands = filtered.levels, filtered.frequencies
 # 33 one-third-octave band levels in dB SPL, labeled '12.5' ... '20k'.
 # The '1k' band holds the event: ~70 dB, while its neighbors stay ~25 dB below.
 print(dict(zip(bands, np.round(spl, 1))))

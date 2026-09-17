@@ -197,20 +197,21 @@ def generate_dbfs_versus_spl(output_dir: str) -> None:
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         factor = metrology.sensitivity(cal, fs=fs)
-        spl, bands = filters.octave_filter(
+        filtered2 = filters.octave_filter(
             record,
             fs,
             fraction=3,
             limits=limits,
             calibration=filters.LevelCalibration(factor=factor),
         )
-        dbfs, _ = filters.octave_filter(
+        spl, bands = filtered2.require_levels(), filtered2.frequencies
+        dbfs = filters.octave_filter(
             record,
             fs,
             fraction=3,
             limits=limits,
             calibration=filters.LevelCalibration(dbfs=True),
-        )
+        ).require_levels()
     offset = 20 * np.log10(factor / 2e-5)
 
     _fig, (ax_l, ax_r) = plt.subplots(1, 2, figsize=(12.5, 5.4))
@@ -248,8 +249,11 @@ def generate_dbfs_versus_spl(output_dir: str) -> None:
     burst = signals.tone_burst(fs, 1000.0, 40, amplitude=drive, post_silence=0.03)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        _levels, _bands, filtered = filters.octave_filter(
-            burst.signal, fs, fraction=1, sigbands=True
+        filtered3 = filters.octave_filter(burst.signal, fs, fraction=1, sigbands=True)
+        _levels, _bands, filtered = (
+            filtered3.require_levels(),
+            filtered3.frequencies,
+            filtered3.require_bands(),
         )
     idx = int(np.argmin(np.abs(np.asarray(_bands, dtype=float) - 1000.0)))
     band = np.asarray(filtered[idx], dtype=float)

@@ -203,8 +203,9 @@ import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots(figsize=(9, 4.5))
 for curve, style in (("Z", "-"), ("C", "--"), ("A", ":")):
-    band_levels, centres = filters.octave_filter(
+    filtered = filters.octave_filter(
         filters.weighting_filter(x, fs, curve=curve), fs, fraction=3)
+    band_levels, centres = filtered.levels, filtered.frequencies
     ax.semilogx(centres, band_levels, style, label=f"Bandas ponderadas {curve}")
 ax.set(xlabel="Frecuencia central de banda [Hz]", ylabel="Nivel de banda [dB]")
 ax.legend()
@@ -267,8 +268,9 @@ onda y luego filtrar por bandas.
 
 ```python
 band_source = signals.noise_signal(fs, 20.0, color="pink", rms=0.05, seed=3)
-weighted_bands, centres = filters.octave_filter(
+filtered = filters.octave_filter(
     filters.weighting_filter(band_source, fs, curve="A"), fs, fraction=3)
+weighted_bands, centres = filtered.levels, filtered.frequencies
 print(f"suma energética de las bandas ponderadas A "
       f"{10 * np.log10(np.sum(10 ** (weighted_bands / 10))):.2f} dB")
 print(f"LAeq de la misma señal                     "

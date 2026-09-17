@@ -111,11 +111,11 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Apply 1/3 octave filter bank
-spl, freq = filters.octave_filter(signal, fs=fs, fraction=3)
+result = filters.octave_filter(signal, fs=fs, fraction=3)
 
-print(f"Bands: {freq}")
+print(f"Bands: {result.frequencies}")
 # Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
-print(f"SPL [dB]: {spl}")
+print(f"SPL [dB]: {result.levels}")
 # SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — 90.71 dB at 100 Hz and 90.95 dB at 1 kHz
 ```
 
@@ -182,7 +182,8 @@ t = np.linspace(0, 5, 5 * fs, endpoint=False)
 tones = [20, 100, 500, 2000, 4000, 15000]
 y = 100 * np.sum([np.sin(2 * np.pi * f * t) for f in tones], axis=0)
 # Apply 1/3 octave filter bank
-spl, freq = filters.octave_filter(y, fs=fs, fraction=3, limits=[12.0, 20000.0])
+filtered = filters.octave_filter(y, fs=fs, fraction=3, limits=[12.0, 20000.0])
+spl, freq = filtered.levels, filtered.frequencies
 
 # Gray background: the raw-signal PSD (Welch), shifted to sit just below the
 # band SPLs so both spectral shapes share one axis.
@@ -218,9 +219,10 @@ they fall away.*
 <summary>Show the code for this figure</summary>
 
 ```python
-spl, freq = filters.octave_filter(
+filtered = filters.octave_filter(
     signal, fs=fs, fraction=3, response_plot=filters.ResponsePlot(show=True)
 )
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 </details>
@@ -260,10 +262,11 @@ cal = p94 / np.sqrt(np.mean(calibrator ** 2))
 print(f"{cal:.1f} Pa per digital unit")
 # 200.0 Pa per digital unit
 
-spl, bands = filters.octave_filter(
+filtered = filters.octave_filter(
     recording, fs=fs, fraction=3, nominal=True,
     calibration=filters.LevelCalibration(factor=cal),
 )
+spl, bands = filtered.levels, filtered.frequencies
 print(f"{bands[9]} Hz: {spl[9]:.2f} dB SPL, {bands[19]}: {spl[19]:.2f} dB SPL")
 # 100 Hz: 90.71 dB SPL, 1k: 90.95 dB SPL
 ```
@@ -390,10 +393,11 @@ if signal.ndim > 1:
 # and it validates the tone's stability as well.
 cal = 2e-5 * 10 ** (94.0 / 20) / np.sqrt(np.mean(calibrator.astype(float) ** 2))
 
-spl, freq = filters.octave_filter(
+filtered = filters.octave_filter(
     signal, fs=fs, fraction=3, nominal=True,
     calibration=filters.LevelCalibration(factor=cal),
 )
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 The two mechanical pitfalls below belong to this raw-scipy route. `io.read`

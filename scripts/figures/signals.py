@@ -186,7 +186,8 @@ def generate_signal_responses(output_dir: str) -> None:
         bank = filters.OctaveFilterBank(
             fs=fs, fraction=frac, order=6, limits=[12.0, 20000.0]
         )
-        spl, freq = bank.filter(y)
+        filtered3 = bank.filter(y)
+        spl, freq = filtered3.require_levels(), filtered3.frequencies
 
         _, ax = plt.subplots()
 
@@ -246,7 +247,8 @@ def generate_multichannel_response(output_dir: str) -> None:
 
     x = np.vstack((ch1, ch2))
     bank = filters.OctaveFilterBank(fs=fs, fraction=3, order=6, limits=[20.0, 20000.0])
-    spl, freq = bank.filter(x)
+    filtered = bank.filter(x)
+    spl, freq = filtered.require_levels(), filtered.frequencies
 
     _fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
 
@@ -348,9 +350,10 @@ def generate_decomposition_plot(output_dir: str) -> None:
     )
 
     # Cast to 3-tuple to satisfy mypy unpacking
-    _, freq, xb_butter = bank_butter.filter(y, sigbands=True)
+    filtered2 = bank_butter.filter(y, sigbands=True)
+    freq, xb_butter = filtered2.frequencies, filtered2.require_bands()
 
-    _, _, xb_cheby2 = bank_cheby2.filter(y, sigbands=True)
+    xb_cheby2 = bank_cheby2.filter(y, sigbands=True).require_bands()
 
     if xb_butter is None or xb_cheby2 is None:
         msg = "Signal bands should not be None"
@@ -395,8 +398,8 @@ def generate_decomposition_plot(output_dir: str) -> None:
     # 3. Impulse Response (Stability/Transient Visualization)
     impulse = np.zeros(len(t))
     impulse[0] = 1.0
-    _, _, ir_butter = bank_butter.filter(impulse, sigbands=True)
-    _, _, ir_cheby2 = bank_cheby2.filter(impulse, sigbands=True)
+    ir_butter = bank_butter.filter(impulse, sigbands=True).require_bands()
+    ir_cheby2 = bank_cheby2.filter(impulse, sigbands=True).require_bands()
 
     idx_1000 = np.argmin(np.abs(np.array(freq) - 1000))
     axes[-1].plot(
@@ -902,10 +905,10 @@ def generate_zero_phase_comparison(output_dir: str) -> None:
     x[start:end] = np.sin(2 * np.pi * 250 * t[start:end]) * np.hanning(end - start)
 
     bank = filters.OctaveFilterBank(fs=fs, fraction=1, order=6, limits=[200.0, 300.0])
-    _, _, bands_fwd = bank.filter(x, sigbands=True, calculate_level=False)
-    _, _, bands_zp = bank.filter(
+    bands_fwd = bank.filter(x, sigbands=True, calculate_level=False).require_bands()
+    bands_zp = bank.filter(
         x, sigbands=True, calculate_level=False, zero_phase=True
-    )
+    ).require_bands()
 
     _, ax = plt.subplots()
     ax.plot(t, x, color="gray", alpha=0.5, linewidth=1.0, label="Input burst (250 Hz)")
@@ -1145,7 +1148,7 @@ def generate_block_processing_continuity(output_dir: str) -> None:
                     sigbands=True,
                     detrend=False,
                     calculate_level=False,
-                )[2][0]
+                ).require_bands()[0]
                 for i in range(n_blocks)
             ]
         else:
@@ -1163,16 +1166,20 @@ def generate_block_processing_continuity(output_dir: str) -> None:
                         sigbands=True,
                         detrend=False,
                         calculate_level=False,
-                    )[2][0]
+                    ).require_bands()[0]
                 )
         return np.concatenate(parts)
 
-    continuous = filters.OctaveFilterBank(
-        fs,
-        fraction=1,
-        limits=[900, 1100],
-        design=filters.FilterDesign(resample=False),
-    ).filter(x, sigbands=True, detrend=False, calculate_level=False)[2][0]
+    continuous = (
+        filters.OctaveFilterBank(
+            fs,
+            fraction=1,
+            limits=[900, 1100],
+            design=filters.FilterDesign(resample=False),
+        )
+        .filter(x, sigbands=True, detrend=False, calculate_level=False)
+        .require_bands()[0]
+    )
     y_stateful = band_output(stateful=True)
     y_stateless = band_output(stateful=False)
 
@@ -1606,14 +1613,15 @@ def generate_slm_third_octave(output_dir: str) -> None:
     print("Generating slm_third_octave.png...")
 
     fs, recording, cal = _slm_walkthrough_signals()
-    spl_z, centres = filters.octave_filter(
+    filtered4 = filters.octave_filter(
         recording,
         fs,
         fraction=3,
         calibration=filters.LevelCalibration(factor=cal),
     )
+    spl_z, centres = filtered4.require_levels(), filtered4.frequencies
     weighted = filters.weighting_filter(cal * recording, fs, curve="A")
-    spl_a, _ = filters.octave_filter(weighted, fs, fraction=3)
+    spl_a = filters.octave_filter(weighted, fs, fraction=3).require_levels()
 
     total_z = 10 * np.log10(np.sum(10 ** (np.asarray(spl_z) / 10)))
     total_a = 10 * np.log10(np.sum(10 ** (np.asarray(spl_a) / 10)))
@@ -2193,7 +2201,8 @@ def generate_c_minus_a_spectrum(output_dir: str) -> None:
     for ax, (title, x) in zip(axes, scenes, strict=True):
         for curve, color, style in curves:
             weighted = filters.weighting_filter(x, fs, curve=curve)
-            band_levels, centres = filters.octave_filter(weighted, fs, fraction=3)
+            filtered8 = filters.octave_filter(weighted, fs, fraction=3)
+            band_levels, centres = filtered8.require_levels(), filtered8.frequencies
             ax.semilogx(
                 centres,
                 band_levels,
@@ -2386,6 +2395,33 @@ def generate_parametric_eq_cascade(output_dir: str) -> None:
     plt.close()
 
 
+def generate_octave_band_levels(output_dir: str) -> None:
+    """The one-third-octave spectrum the result object draws for itself."""
+    print("Generating octave_band_levels.png...")
+
+    fs = 48000
+    t = np.arange(fs) / fs
+    rng = np.random.default_rng(7)
+    # A tone at 1 kHz over pink-ish noise: one band stands well clear of a
+    # sloping floor, which is what a band spectrum is read for.
+    noise = np.cumsum(rng.standard_normal(fs))
+    noise /= np.std(noise)
+    x = 0.4 * np.sin(2 * np.pi * 1000.0 * t) + 0.05 * noise
+
+    result = filters.octave_filter(x, fs, fraction=3, limits=[20.0, 20000.0])
+    result.plot(language=_LANG)
+    # The result object drew through pyplot, so the figure it made is the
+    # current one; asking the axes for it hands back a union this cannot use.
+    fig = plt.gcf()
+    fig.set_size_inches(10, 5)
+    ax = plt.gca()
+    ax.grid(which="major", color=COLOR_GRID, linestyle="-")
+    ax.grid(which="minor", color=COLOR_GRID, linestyle=":", alpha=0.4)
+    fig.tight_layout()
+    save_figure(output_dir, "octave_band_levels.png")
+    plt.close()
+
+
 def generate_architecture_tradeoff(output_dir: str) -> None:
     """The architecture choice as two numbers: rejection and group delay."""
     print("Generating architecture_tradeoff.png...")
@@ -2521,9 +2557,10 @@ def generate_leakage_floor(output_dir: str) -> None:
     calibration = filters.LevelCalibration(factor=1.0)
     _, ax = plt.subplots(figsize=(10, 5.4))
     for order, color, style in ((6, COLOR_PRIMARY, "-"), (10, COLOR_TERTIARY, "--")):
-        levels, centres = filters.octave_filter(
+        filtered7 = filters.octave_filter(
             x, fs, fraction=3, order=order, calibration=calibration
         )
+        levels, centres = filtered7.require_levels(), filtered7.frequencies
         ax.semilogx(
             centres,
             levels,
@@ -2532,9 +2569,10 @@ def generate_leakage_floor(output_dir: str) -> None:
             linewidth=1.8,
             label=f"measured band levels, order {order}",
         )
-    truth, centres = filters.octave_filter(
+    filtered5 = filters.octave_filter(
         floor, fs, fraction=3, order=6, calibration=calibration
     )
+    truth, centres = filtered5.require_levels(), filtered5.frequencies
     ax.semilogx(
         centres,
         truth,
@@ -2736,7 +2774,11 @@ def generate_survey_channel_average(output_dir: str) -> None:
         survey.append(base * rng.uniform(0.85, 1.15) + modal)
     x = np.stack(survey)
 
-    spl, centres = filters.octave_filter(x, fs, fraction=3, limits=[25.0, 10000.0])
+    filtered6 = filters.octave_filter(x, fs, fraction=3, limits=[25.0, 10000.0])
+    spl = filtered6.require_levels()
+    # The exact midband centres, not the nominal labels: this panel does
+    # arithmetic on them.
+    centres = np.asarray(filtered6.frequencies, dtype=np.float64)
     spl = np.asarray(spl)
     energetic = 10 * np.log10(np.mean(10 ** (spl / 10), axis=0))
     arithmetic = np.mean(spl, axis=0)

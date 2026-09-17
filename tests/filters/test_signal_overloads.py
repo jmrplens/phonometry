@@ -137,15 +137,15 @@ def test_parametric_eq_equalizes_in_pascals() -> None:
 
 def test_octave_filter_levels_use_the_signals_calibration() -> None:
     x = _tone()
-    spl, _ = octave_filter(Signal(x, FS, calibration_factor=CAL), fraction=3)
-    spl_ref, _ = octave_filter(CAL * x, FS, fraction=3)
+    spl = octave_filter(Signal(x, FS, calibration_factor=CAL), fraction=3).levels
+    spl_ref = octave_filter(CAL * x, FS, fraction=3).levels
     assert np.array_equal(spl, spl_ref)
 
 
 def test_an_uncalibrated_signal_filters_exactly_like_the_bare_array() -> None:
     x = _tone()
-    spl, _ = octave_filter(Signal(x, FS), fraction=3)
-    spl_ref, _ = octave_filter(x, FS, fraction=3)
+    spl = octave_filter(Signal(x, FS), fraction=3).levels
+    spl_ref = octave_filter(x, FS, fraction=3).levels
     assert np.array_equal(spl, spl_ref)
 
 
@@ -157,14 +157,14 @@ def test_the_explicit_bundle_wins_and_the_factor_is_not_squared() -> None:
     looks entirely plausible on a plot.
     """
     x = _tone()
-    spl, _ = octave_filter(
+    spl = octave_filter(
         Signal(x, FS, calibration_factor=CAL),
         fraction=3,
         calibration=LevelCalibration(factor=CAL),
-    )
-    spl_ref, _ = octave_filter(
+    ).levels
+    spl_ref = octave_filter(
         x, FS, fraction=3, calibration=LevelCalibration(factor=CAL)
-    )
+    ).levels
     assert np.array_equal(spl, spl_ref)
 
 
@@ -172,10 +172,10 @@ def test_dbfs_ignores_the_signals_calibration() -> None:
     """dBFS is relative to digital full scale whatever the object carries."""
     x = _tone()
     dbfs = LevelCalibration(dbfs=True)
-    spl, _ = octave_filter(
+    spl = octave_filter(
         Signal(x, FS, calibration_factor=123.0), fraction=3, calibration=dbfs
-    )
-    spl_ref, _ = octave_filter(x, FS, fraction=3, calibration=dbfs)
+    ).levels
+    spl_ref = octave_filter(x, FS, fraction=3, calibration=dbfs).levels
     assert np.array_equal(spl, spl_ref)
 
 
@@ -199,16 +199,16 @@ def test_the_bank_refuses_a_signal_recorded_at_another_rate() -> None:
 def test_the_bank_honours_the_signals_calibration() -> None:
     x = _tone()
     bank = OctaveFilterBank(fs=FS, fraction=3)
-    spl, _ = bank.filter(Signal(x, FS, calibration_factor=CAL))
-    spl_ref, _ = bank.filter(CAL * x)
+    spl = bank.filter(Signal(x, FS, calibration_factor=CAL)).levels
+    spl_ref = bank.filter(CAL * x).levels
     assert np.array_equal(spl, spl_ref)
 
 
 def test_a_bank_with_its_own_factor_does_not_apply_the_objects_too() -> None:
     x = _tone()
     bank = OctaveFilterBank(fs=FS, fraction=3, calibration=LevelCalibration(factor=CAL))
-    spl, _ = bank.filter(Signal(x, FS, calibration_factor=CAL))
-    spl_ref, _ = bank.filter(x)
+    spl = bank.filter(Signal(x, FS, calibration_factor=CAL)).levels
+    spl_ref = bank.filter(x).levels
     assert np.array_equal(spl, spl_ref)
 
 
@@ -234,8 +234,8 @@ def test_the_eq_cascade_honours_the_signals_calibration() -> None:
 
 def test_a_multichannel_signal_filters_per_channel() -> None:
     x = np.stack([_tone(1000), 0.5 * _tone(1000)])
-    spl, _ = octave_filter(Signal(x, FS, calibration_factor=CAL), fraction=3)
-    spl_ref, _ = octave_filter(CAL * x, FS, fraction=3)
+    spl = octave_filter(Signal(x, FS, calibration_factor=CAL), fraction=3).levels
+    spl_ref = octave_filter(CAL * x, FS, fraction=3).levels
     assert spl.shape == spl_ref.shape
     assert np.array_equal(spl, spl_ref)
 
@@ -306,7 +306,8 @@ def test_the_spectrogram_agrees_with_the_filter_on_the_same_bank() -> None:
     x = _tone(1000.0, seconds=2.0)
     sig = Signal(x, FS, calibration_factor=MIC)
     bank = OctaveFilterBank(fs=FS, fraction=3)
-    spl, freq = bank.filter(sig)
+    filtered = bank.filter(sig)
+    spl, freq = filtered.levels, filtered.frequencies
     levels, _, _ = bank.spectrogram(sig, window_time=0.125)
     # Energy-average the frames back to the whole-record level.
     averaged = 10 * np.log10(np.mean(10 ** (levels / 10), axis=-1))

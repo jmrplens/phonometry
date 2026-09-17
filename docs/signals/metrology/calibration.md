@@ -71,9 +71,10 @@ recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 calibration_factor = metrology.sensitivity(calibrator_recording, target_spl=94.0, fs=fs)
 
 # 3. Apply calibration to your measurements
-spl, freq = filters.octave_filter(
+filtered = filters.octave_filter(
     recording, fs,
     calibration=filters.LevelCalibration(factor=calibration_factor))
+spl, freq = filtered.levels, filtered.frequencies
 # Now 'spl' values are in real-world dB SPL!
 ```
 
@@ -225,8 +226,9 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Assume 'recording' is normalized between -1.0 and 1.0
-spl_dbfs, freq = filters.octave_filter(
+filtered = filters.octave_filter(
     recording, fs, calibration=filters.LevelCalibration(dbfs=True))
+spl_dbfs, freq = filtered.levels, filtered.frequencies
 # Results will be negative (e.g., -20 dBFS)
 ```
 
@@ -249,7 +251,8 @@ fs = 48000
 recording = 0.2 * np.sin(2 * np.pi * 1000 * np.arange(fs) / fs)
 
 # Measure peak-holding levels for impact analysis
-spl_peak, freq = filters.octave_filter(recording, fs, mode='peak')
+filtered = filters.octave_filter(recording, fs, mode='peak')
+spl_peak, freq = filtered.levels, filtered.frequencies
 ```
 
 > [!NOTE]

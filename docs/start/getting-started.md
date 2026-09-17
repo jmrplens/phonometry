@@ -83,11 +83,11 @@ t = np.linspace(0, 1, fs, endpoint=False)
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 
 # Apply 1/3 octave filter bank
-spl, freq = filters.octave_filter(signal, fs=fs, fraction=3)
+result = filters.octave_filter(signal, fs=fs, fraction=3)
 
-print(f"Bands: {freq}")
+print(f"Bands: {result.frequencies}")
 # Bands: [12.589254117941678, 15.848931924611138, ..., 19952.623149688785]  (33 bands)
-print(f"SPL [dB]: {spl}")
+print(f"SPL [dB]: {result.levels}")
 # SPL [dB]: [46.88395351 47.96774897 49.04991279 ...]  — ~90.7 dB at 100 Hz and ~90.9 dB at 1 kHz
 ```
 
@@ -109,7 +109,8 @@ t = np.linspace(0, 1, fs, endpoint=False)
 # Composite signal: 100Hz + 1000Hz
 signal = np.sin(2 * np.pi * 100 * t) + np.sin(2 * np.pi * 1000 * t)
 # Apply 1/3 octave filter bank
-spl, freq = filters.octave_filter(signal, fs=fs, fraction=3)
+filtered = filters.octave_filter(signal, fs=fs, fraction=3)
+spl, freq = filtered.levels, filtered.frequencies
 
 # Gray background: the raw-signal PSD (Welch), shifted to sit just below the
 # band SPLs so both spectral shapes share one axis.
@@ -171,7 +172,8 @@ fs, signal = wavfile.read("measurement.wav")
 # Analyze
 # Note: To obtain real-world SPL values, you must calibrate the input.
 # See the Calibration guide.
-spl, freq = filters.octave_filter(signal, fs=fs, fraction=3)
+filtered = filters.octave_filter(signal, fs=fs, fraction=3)
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 Integer audio (e.g. int16 WAV data) is converted to float64 internally, so it

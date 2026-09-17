@@ -86,7 +86,8 @@ left = np.fft.irfft(spec, t.size)
 right = chirp(t, f0=50, t1=duration, f1=10000, method="logarithmic")
 
 x = np.stack([left, right])                    # (2, n_samples)
-spl, freq = filters.octave_filter(x, fs, fraction=3, limits=[20, 20000])
+filtered = filters.octave_filter(x, fs, fraction=3, limits=[20, 20000])
+spl, freq = filtered.levels, filtered.frequencies
 
 fig, axes = plt.subplots(2, 1, figsize=(9, 7), sharex=True)
 for ax, levels, name in zip(axes, spl, ["Izquierdo: ruido rosa", "Derecho: barrido logarítmico"]):
@@ -128,7 +129,8 @@ left = 0.2 * np.sin(2 * np.pi * 1000 * t)
 right = 0.1 * np.sin(2 * np.pi * 500 * t)
 
 stereo = np.stack([left, right])          # (2, n_samples)
-spl, freq = filters.octave_filter(stereo, fs, fraction=3)
+filtered = filters.octave_filter(stereo, fs, fraction=3)
+spl, freq = filtered.levels, filtered.frequencies
 # spl tiene forma (2, n_bands): una fila por canal
 ```
 
@@ -190,7 +192,7 @@ El error nunca es negativo, así que no se compensa al añadir posiciones.*
 rng = np.random.default_rng(7)
 survey = np.stack([0.02 * (1 + 0.3 * rng.standard_normal())
                    * rng.standard_normal(2 * fs) for _ in range(5)])
-survey_levels, _ = filters.octave_filter(survey, fs, fraction=3)
+survey_levels = filters.octave_filter(survey, fs, fraction=3).levels
 
 energetic = 10 * np.log10(np.mean(10 ** (survey_levels / 10), axis=0))
 arithmetic = np.mean(survey_levels, axis=0)
@@ -213,7 +215,8 @@ procedimiento, y hay tres cosas que deciden si el resultado es correcto.
 factors = np.array([0.01021, 0.00984, 0.01007, 0.00998])
 survey = np.stack([left, right, left, right])      # tu captura (4, n)
 calibrated = survey * factors[:, None]
-spl, freq = filters.octave_filter(calibrated, fs, fraction=3)
+filtered = filters.octave_filter(calibrated, fs, fraction=3)
+spl, freq = filtered.levels, filtered.frequencies
 ```
 
 **Fija las ganancias antes del primer tono y no vuelvas a tocarlas**, porque
@@ -294,7 +297,8 @@ bank = filters.OctaveFilterBank(
 stream = [stereo]                 # tu secuencia de tramas multicanal
 for frame in stream:
     # detrend=True (por defecto) elimina el offset DC y mejora la precisión en graves
-    spl, freq = bank.filter(frame, detrend=True)
+    filtered = bank.filter(frame, detrend=True)
+    spl, freq = filtered.levels, filtered.frequencies
 ```
 
 Notas adicionales de rendimiento:

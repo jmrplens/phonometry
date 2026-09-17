@@ -62,7 +62,8 @@ def test_filterbank_reuse_skips_redesign(design_counter: _DesignCounter) -> None
     #    caches bank designs, so clearing it isolates the redesign cost.
     for _ in range(num_iterations):
         core._cached_filter_bank.cache_clear()
-        spl_func, freq_func = filters.octave_filter(x, fs)
+        filtered2 = filters.octave_filter(x, fs)
+        spl_func, freq_func = filtered2.levels, filtered2.frequencies
     assert design_counter.calls == num_iterations
 
     # 2. The class designs once at construction and never again.
@@ -70,7 +71,8 @@ def test_filterbank_reuse_skips_redesign(design_counter: _DesignCounter) -> None
     bank = filters.OctaveFilterBank(fs)
     assert design_counter.calls == 1
     for _ in range(num_iterations):
-        spl_class, freq_class = bank.filter(x)
+        filtered = bank.filter(x)
+        spl_class, freq_class = filtered.levels, filtered.frequencies
     assert design_counter.calls == 1, "filter() must not re-design the bank"
 
     # 3. Reuse is not a shortcut: the two paths agree band for band.

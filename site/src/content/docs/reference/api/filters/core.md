@@ -79,62 +79,14 @@ octave_filter(
     order: int = 6,
     limits: list[float] | None = None,
     *,
-    sigbands: Literal[False] = False,
+    sigbands: bool = False,
     detrend: bool = True,
     mode: str = 'rms',
-    nominal: Literal[False] = False,
+    nominal: bool = False,
     design: FilterDesign = ...,
     calibration: LevelCalibration = ...,
     response_plot: ResponsePlot = ...,
-) -> tuple[np.ndarray, list[float]]
-
-octave_filter(
-    x: Signal | list[float] | np.ndarray,
-    fs: int | None = None,
-    fraction: float = 1,
-    order: int = 6,
-    limits: list[float] | None = None,
-    *,
-    sigbands: Literal[True] = True,
-    detrend: bool = True,
-    mode: str = 'rms',
-    nominal: Literal[False] = False,
-    design: FilterDesign = ...,
-    calibration: LevelCalibration = ...,
-    response_plot: ResponsePlot = ...,
-) -> tuple[np.ndarray, list[float], list[Signal] | list[np.ndarray]]
-
-octave_filter(
-    x: Signal | list[float] | np.ndarray,
-    fs: int | None = None,
-    fraction: float = 1,
-    order: int = 6,
-    limits: list[float] | None = None,
-    *,
-    sigbands: Literal[False] = False,
-    detrend: bool = True,
-    mode: str = 'rms',
-    nominal: Literal[True] = ...,
-    design: FilterDesign = ...,
-    calibration: LevelCalibration = ...,
-    response_plot: ResponsePlot = ...,
-) -> tuple[np.ndarray, list[str]]
-
-octave_filter(
-    x: Signal | list[float] | np.ndarray,
-    fs: int | None = None,
-    fraction: float = 1,
-    order: int = 6,
-    limits: list[float] | None = None,
-    *,
-    sigbands: Literal[True] = True,
-    detrend: bool = True,
-    mode: str = 'rms',
-    nominal: Literal[True] = ...,
-    design: FilterDesign = ...,
-    calibration: LevelCalibration = ...,
-    response_plot: ResponsePlot = ...,
-) -> tuple[np.ndarray, list[str], list[Signal] | list[np.ndarray]]
+) -> OctaveFilterResult
 ```
 
 Filter a signal with octave or fractional octave filter bank.
@@ -162,7 +114,7 @@ Multichannel support: If x is 2D (channels, samples), each channel is filtered.
 | `calibration` | How band energy becomes a level: calibration factor and dBFS switch ([`LevelCalibration`](/phonometry/reference/api/filters/core/#levelcalibration)). This is the explicit knob: when its `factor` is left at 1.0, a calibrated [`Signal`](/phonometry/reference/api/io/io/#signal) supplies its own and the band levels come out in dB SPL; when it carries a factor, the object's is not applied on top (that would square it). `dbfs=True` ignores both the object and the factor, being referenced to digital full scale. |
 | `response_plot` | Whether to show or save the filter response plot ([`ResponsePlot`](/phonometry/reference/api/filters/core/#responseplot)). Plotting bypasses the design cache. |
 
-**Returns:** A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals). When *nominal=True*, the frequency list contains `List[str]` labels instead of floats. (*Union[Tuple[np.ndarray, List[float]], Tuple[np.ndarray, List[str]], Tuple[np.ndarray, List[float], List[np.ndarray]], Tuple[np.ndarray, List[str], List[np.ndarray]]]*)
+**Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`. With *nominal=True* the frequencies are IEC 61260-1 labels instead of floats.
 
 ## OctaveFilterBank
 
@@ -204,90 +156,13 @@ Initialize the Octave Filter Bank.
 OctaveFilterBank.filter(
     x: Signal | list[float] | np.ndarray,
     *,
-    sigbands: Literal[False] = False,
+    sigbands: bool = False,
     mode: str = 'rms',
     detrend: bool = True,
-    calculate_level: Literal[True] = True,
-    nominal: Literal[False] = False,
+    calculate_level: bool = True,
+    nominal: bool = False,
     zero_phase: bool = False,
-) -> tuple[np.ndarray, list[float]]
-
-OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
-    *,
-    sigbands: Literal[True],
-    mode: str = 'rms',
-    detrend: bool = True,
-    calculate_level: Literal[True] = True,
-    nominal: Literal[False] = False,
-    zero_phase: bool = False,
-) -> tuple[np.ndarray, list[float], list[Signal] | list[np.ndarray]]
-
-OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
-    *,
-    sigbands: Literal[False] = False,
-    mode: str = 'rms',
-    detrend: bool = True,
-    calculate_level: Literal[False] = False,
-    nominal: Literal[False] = False,
-    zero_phase: bool = False,
-) -> tuple[None, list[float]]
-
-OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
-    *,
-    sigbands: Literal[True],
-    mode: str = 'rms',
-    detrend: bool = True,
-    calculate_level: Literal[False] = False,
-    nominal: Literal[False] = False,
-    zero_phase: bool = False,
-) -> tuple[None, list[float], list[Signal] | list[np.ndarray]]
-
-OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
-    *,
-    sigbands: Literal[False] = False,
-    mode: str = 'rms',
-    detrend: bool = True,
-    calculate_level: Literal[True] = True,
-    nominal: Literal[True] = ...,
-    zero_phase: bool = False,
-) -> tuple[np.ndarray, list[str]]
-
-OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
-    *,
-    sigbands: Literal[True],
-    mode: str = 'rms',
-    detrend: bool = True,
-    calculate_level: Literal[True] = True,
-    nominal: Literal[True] = ...,
-    zero_phase: bool = False,
-) -> tuple[np.ndarray, list[str], list[Signal] | list[np.ndarray]]
-
-OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
-    *,
-    sigbands: Literal[False] = False,
-    mode: str = 'rms',
-    detrend: bool = True,
-    calculate_level: Literal[False] = False,
-    nominal: Literal[True] = ...,
-    zero_phase: bool = False,
-) -> tuple[None, list[str]]
-
-OctaveFilterBank.filter(
-    x: Signal | list[float] | np.ndarray,
-    *,
-    sigbands: Literal[True],
-    mode: str = 'rms',
-    detrend: bool = True,
-    calculate_level: Literal[False] = False,
-    nominal: Literal[True] = ...,
-    zero_phase: bool = False,
-) -> tuple[None, list[str], list[Signal] | list[np.ndarray]]
+) -> OctaveFilterResult
 ```
 
 Apply the pre-designed filter bank to a signal.
@@ -304,7 +179,7 @@ Apply the pre-designed filter bank to a signal.
 | `nominal` | If True, return IEC 61260-1 nominal frequency labels (List[str]) instead of exact floats. |
 | `zero_phase` | If True, filter with `sosfiltfilt` (forward-backward): no group delay, but the effective stopband attenuation doubles and the effective passband narrows. The narrowing lowers the measured broadband band level by about 0.2 to 0.3 dB per band relative to forward filtering (a pure in-band tone is unaffected, since it sits where both passes are ~0 dB). Prefer forward filtering when the absolute band SPL must match single-pass conventions; use zero-phase when preserving the temporal envelope matters (e.g. reverberation decay, ISO 3382-2 Clause 7.3). Offline analysis only; incompatible with stateful mode. |
 
-**Returns:** A tuple containing (SPL_array, Frequencies_list) or (SPL_array, Frequencies_list, signals).
+**Returns:** An [`OctaveFilterResult`](/phonometry/reference/api/filters/core/#octavefilterresult) carrying the band `levels`, their `frequencies` and, when `sigbands` asked for them, the per-band `bands`.
 
 ### OctaveFilterBank.spectrogram()
 
@@ -334,6 +209,95 @@ Short-time fractional-octave analysis: level per band over time.
 | `zero_phase` | If True, filter bands forward-backward so their group delays don't skew the frames (offline analysis only). |
 
 **Returns:** Tuple (levels, freq, times). `levels` has shape (num_bands, num_frames) for 1D input and (channels, num_bands, num_frames) for 2D input; `times` holds each window's center in seconds.
+
+## OctaveFilterResult
+
+```python
+OctaveFilterResult(
+    levels: np.ndarray | None,
+    frequencies: list[float] | list[str],
+    bands: list[Signal] | list[np.ndarray] | None = None,
+)
+```
+
+What a filter bank gives back for one signal.
+
+Every other computation in this library hands back a named result, and
+this one used to hand back a tuple whose length depended on a keyword: two
+items normally, three when `sigbands` was set. A caller had to remember
+which call it had written to know how to unpack it, and a reader of
+`_, _, bands = bank.filter(...)` had to count commas to find out what the
+first two were. They have names now.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `levels` | Band levels, in decibels, shaped `(bands,)` for a single-channel input and `(channels, bands)` for a multichannel one. `None` when the call asked for no level. |
+| `frequencies` | One band centre per level: exact midband frequencies, or IEC 61260-1 nominal labels when the call asked for `nominal`. |
+| `bands` | The input split into one waveform per band, in the same order, or `None` when the call did not ask for `sigbands`. They come back in the type they went in as: a [`Signal`](/phonometry/reference/api/io/io/#signal) input gives Signals and a bare array gives arrays. What that Signal says about its units is a separate question, and it answers it itself: a calibrated input yields bands in pascals carrying `calibration_factor=1.0`, meaning the conversion is already done, and an uncalibrated one yields bands in digital units carrying `None`, because the object never invents a calibration. A bank filtering in dBFS, or one carrying a factor of its own, filtered digital units, so its bands are handed back as plain arrays rather than labelled pascals. |
+
+### OctaveFilterResult.plot()
+
+```python
+OctaveFilterResult.plot(
+    ax: Axes | None = None,
+    *,
+    language: str = 'en',
+    **kwargs: Any,
+) -> Axes
+```
+
+Plot the band levels against their band centres.
+
+Requires matplotlib (`pip install phonometry[plot]`); returns the
+`Axes`.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the call that made this result asked for no level, because there is then nothing to draw. |
+
+### OctaveFilterResult.require_bands()
+
+```python
+OctaveFilterResult.require_bands() -> list[Signal] | list[np.ndarray]
+```
+
+The per-band waveforms, or a clear error when none were kept.
+
+Splitting a record into bands costs a copy per band, so it only
+happens when `sigbands` asks for it. This is how code that needs
+them says so.
+
+**Returns:** One waveform per band, in band order.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the call did not ask for `sigbands`. |
+
+### OctaveFilterResult.require_levels()
+
+```python
+OctaveFilterResult.require_levels() -> np.ndarray
+```
+
+The band levels, or a clear error when the call asked for none.
+
+`levels` is `None` for a call made with `calculate_level=False`,
+and code that needs the levels would otherwise meet that `None` some
+lines later, as an operation on it. This says what happened.
+
+**Returns:** The band levels.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the call asked for no level. |
 
 ## ResponsePlot
 

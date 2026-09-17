@@ -16,9 +16,9 @@ def test_zero_phase_no_group_delay() -> None:
     center = FS // 2
     x[center] = 1.0
 
-    _, _, bands_zp = bank.filter(
+    bands_zp = bank.filter(
         x, sigbands=True, zero_phase=True, calculate_level=False
-    )
+    ).bands
     yb = bands_zp[0]
     centroid = int(np.sum(np.arange(len(yb)) * yb**2) / np.sum(yb**2))
     assert abs(centroid - center) < FS // 1000  # within 1 ms
@@ -34,10 +34,10 @@ def test_zero_phase_doubles_attenuation() -> None:
     t = np.arange(FS) / FS
     x = np.sin(2 * np.pi * 4000 * t)  # far out of band
 
-    _, _, bands_fwd = bank.filter(x, sigbands=True, calculate_level=False)
-    _, _, bands_zp = bank.filter(
+    bands_fwd = bank.filter(x, sigbands=True, calculate_level=False).bands
+    bands_zp = bank.filter(
         x, sigbands=True, calculate_level=False, zero_phase=True
-    )
+    ).bands
     mid = slice(FS // 4, 3 * FS // 4)
     rms_fwd = np.sqrt(np.mean(bands_fwd[0][mid] ** 2))
     rms_zp = np.sqrt(np.mean(bands_zp[0][mid] ** 2))
@@ -62,8 +62,8 @@ def test_zero_phase_passband_level_matches() -> None:
     bank = filters.OctaveFilterBank(fs=FS, fraction=1, limits=[800, 1200])
     t = np.arange(FS * 2) / FS
     x = np.sin(2 * np.pi * 1000 * t)
-    spl_fwd, _ = bank.filter(x)
-    spl_zp, _ = bank.filter(x, zero_phase=True)
+    spl_fwd = bank.filter(x).levels
+    spl_zp = bank.filter(x, zero_phase=True).levels
     assert spl_zp[0] == pytest.approx(spl_fwd[0], abs=0.1)
 
 
@@ -74,8 +74,8 @@ def test_zero_phase_broadband_band_narrowing() -> None:
     """
     bank = filters.OctaveFilterBank(fs=FS, fraction=1, limits=[100, 8000])
     x = np.random.default_rng(7).standard_normal(FS * 4)
-    spl_fwd, _ = bank.filter(x)
-    spl_zp, _ = bank.filter(x, zero_phase=True)
+    spl_fwd = bank.filter(x).levels
+    spl_zp = bank.filter(x, zero_phase=True).levels
     delta = spl_zp - spl_fwd
     # Every band shifts down by a small, bounded amount (never up).
     assert np.all(delta < 0.0)
@@ -87,7 +87,8 @@ def test_zero_phase_short_signal_does_not_crash() -> None:
     """Heavily decimated bands can be shorter than sosfiltfilt's default padlen."""
     bank = filters.OctaveFilterBank(fs=FS, fraction=1, limits=[100, 200])
     x = np.random.default_rng(3).standard_normal(4000)  # ~23 samples after decimation
-    spl, _freq = bank.filter(x, zero_phase=True)
+    filtered = bank.filter(x, zero_phase=True)
+    spl, _freq = filtered.levels, filtered.frequencies
     assert np.all(np.isfinite(spl))
 
 

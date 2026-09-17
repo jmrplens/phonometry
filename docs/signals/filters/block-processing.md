@@ -42,13 +42,13 @@ bank = filters.OctaveFilterBank(
 )
 streamed = np.concatenate([
     bank.filter(x[i * block:(i + 1) * block], sigbands=True,
-                detrend=False, calculate_level=False)[2][0]
+                detrend=False, calculate_level=False).require_bands()[0]
     for i in range(4)
 ])
 offline = filters.OctaveFilterBank(
     fs, fraction=1, limits=[900, 1100],
     design=filters.FilterDesign(resample=False),
-).filter(x, sigbands=True, detrend=False, calculate_level=False)[2][0]
+).filter(x, sigbands=True, detrend=False, calculate_level=False).require_bands()[0]
 print(np.max(np.abs(streamed - offline)))     # 0.0 (bit-exact)
 
 fig, ax = plt.subplots(figsize=(9, 4.5))
@@ -94,7 +94,8 @@ for frame in sf.blocks("measurement.wav", blocksize=256, overlap=0):
     weighted = afilter.filter(frame)
 
     # Split into octave bands
-    block_spl, _, block_output = octave_filter.filter(weighted, sigbands=True, detrend=False)
+    filtered = octave_filter.filter(weighted, sigbands=True, detrend=False)
+    block_spl, block_output = filtered.levels, filtered.bands
 
     # further signal processing
     ...

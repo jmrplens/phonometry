@@ -172,13 +172,14 @@ def test_octave_filter_vs_class_consistency() -> None:
     filter_type = "butter"
 
     # 1. Using function
-    spl_func, freq_func = filters.octave_filter(
+    filtered3 = filters.octave_filter(
         x,
         fs=fs,
         fraction=fraction,
         order=order,
         design=filters.FilterDesign(filter_type=filter_type),
     )
+    spl_func, freq_func = filtered3.levels, filtered3.frequencies
 
     # 2. Using class
     bank = filters.OctaveFilterBank(
@@ -187,7 +188,8 @@ def test_octave_filter_vs_class_consistency() -> None:
         order=order,
         design=filters.FilterDesign(filter_type=filter_type),
     )
-    spl_class, freq_class = bank.filter(x)
+    filtered2 = bank.filter(x)
+    spl_class, freq_class = filtered2.levels, filtered2.frequencies
 
     assert np.allclose(spl_func, spl_class)
     assert np.allclose(freq_func, freq_class)
@@ -208,7 +210,8 @@ def test_single_sample_signal() -> None:
     """
     fs = 48000
     x = np.array([1.0])
-    spl, freq = filters.octave_filter(x, fs)
+    filtered4 = filters.octave_filter(x, fs)
+    spl, freq = filtered4.levels, filtered4.frequencies
     assert len(spl) == len(freq)
     assert not np.isnan(spl).any()
 
@@ -238,11 +241,11 @@ def test_multichannel_consistency() -> None:
     bank = filters.OctaveFilterBank(fs, fraction=1)
 
     # Separate
-    spl1, _ = bank.filter(x1)
-    spl2, _ = bank.filter(x2)
+    spl1 = bank.filter(x1).levels
+    spl2 = bank.filter(x2).levels
 
     # Together
-    spl_stereo, _ = bank.filter(x_stereo)
+    spl_stereo = bank.filter(x_stereo).levels
 
     assert np.allclose(spl_stereo[0], spl1)
     assert np.allclose(spl_stereo[1], spl2)
@@ -260,7 +263,7 @@ def test_octave_filter_bank_repr() -> None:
 def test_octavefilter_limits_none() -> None:
     """Verify None limits use package defaults and return nominal labels."""
     rng = np.random.default_rng(42)
-    spl, _ = filters.octave_filter(rng.standard_normal(1000), 1000, limits=None)
+    spl = filters.octave_filter(rng.standard_normal(1000), 1000, limits=None).levels
     assert len(spl) > 0
 
     freq, freq_d, freq_u, labels = nominal_frequencies(1, limits=None)

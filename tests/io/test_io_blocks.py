@@ -280,24 +280,28 @@ def test_streamed_band_leq_through_a_stateful_bank(tmp_path: Path) -> None:
     )
     total, frames = 0.0, 0
     for block in read_blocks(path, 4800):
-        band = bank.filter(block, sigbands=True, detrend=False, calculate_level=False)[
-            2
-        ][0]
+        band = bank.filter(
+            block, sigbands=True, detrend=False, calculate_level=False
+        ).require_bands()[0]
         total += float(np.sum(band**2))
         frames += band.shape[-1]
     streamed = 10 * np.log10((total / frames) / (2e-5) ** 2)
 
-    offline_band = filters.OctaveFilterBank(
-        FS,
-        fraction=1,
-        limits=[900, 1100],
-        design=filters.FilterDesign(resample=False),
-    ).filter(
-        np.asarray(read(path)),
-        sigbands=True,
-        detrend=False,
-        calculate_level=False,
-    )[2][0]
+    offline_band = (
+        filters.OctaveFilterBank(
+            FS,
+            fraction=1,
+            limits=[900, 1100],
+            design=filters.FilterDesign(resample=False),
+        )
+        .filter(
+            np.asarray(read(path)),
+            sigbands=True,
+            detrend=False,
+            calculate_level=False,
+        )
+        .require_bands()[0]
+    )
     assert streamed == pytest.approx(signals.leq(offline_band), abs=1e-9)
 
 

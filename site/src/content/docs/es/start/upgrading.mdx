@@ -284,6 +284,47 @@ verdict = verify_filter_class(OctaveFilterBank(48000, fraction=1, limits=[125, 4
 print(verdict.overall_class, len(verdict.bands))
 ```
 
+## El banco de filtros devuelve un resultado, no una tupla
+
+`octave_filter()` y `OctaveFilterBank.filter()` devolvían dos elementos
+normalmente y tres cuando `sigbands=True` pedía las señales por banda. La
+longitud de la respuesta dependía de una palabra clave, que es la razón por la
+que ese par necesitaba doce declaraciones `@overload` para poder tiparse, y por
+la que `_, _, bands = bank.filter(...)` era una línea en la que había que contar
+comas.
+
+Ahora devuelven un `OctaveFilterResult` con campos con nombre, como cualquier
+otro cálculo de la biblioteca.
+
+| 3.3.0 | 4.0 |
+| --- | --- |
+| `spl, freq = octave_filter(x, fs)` | `r = octave_filter(x, fs)`, y luego `r.levels` y `r.frequencies` |
+| `spl, _ = octave_filter(x, fs)` | `octave_filter(x, fs).levels` |
+| `_, freq = octave_filter(x, fs)` | `octave_filter(x, fs).frequencies` |
+| `_, _, bands = bank.filter(x, sigbands=True)` | `bank.filter(x, sigbands=True).require_bands()` |
+
+```python
+import numpy as np
+from phonometry import filters
+
+result = filters.octave_filter(np.zeros(8000) + 1e-6, 8000, fraction=3)
+print(len(result.frequencies), result.bands)
+# 25 None
+```
+
+`bands` es `None` salvo que la llamada haya pedido `sigbands=True`, y `levels`
+es `None` en una llamada hecha con `calculate_level=False`. El código que
+necesita cualquiera de los dos puede decirlo con `require_bands()` o
+`require_levels()`, que devuelven el valor o fallan nombrando el argumento que
+faltaba, en vez de entregar un `None` que revienta unas líneas más adelante.
+
+El resultado también se dibuja solo, así que el espectro de bandas es una
+llamada:
+
+```python
+ax = result.plot()
+```
+
 ## Los diez nombres que ya no están
 
 Todo lo demás se movió. Estos diez no existen en ningún módulo público:

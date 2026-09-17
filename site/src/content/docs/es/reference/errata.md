@@ -6739,6 +6739,44 @@ dos ediciones con las mismas entradas y en el mismo orden.
   las dos mitades de la evidencia.
 - **Estado:** no reportado.
 
+## Bies 5e (2017), Tabla C.1 (tres velocidades que no se siguen de las dos columnas de las que dice calcularlas)
+
+- **Localización:** Tabla C.1, "Properties of materials", las filas "Brick" y
+  "Cork" de la página impresa 719 (página PDF 748) y "Plywood (fir)" de la
+  página impresa 720 (página PDF 749), frente al texto de la página impresa 717
+  (página PDF 746). Fuente no normativa: un libro de texto.
+- **Lo impreso:** la página 717 dice "The speed of sound values in column 4 of
+  Table C.1 were calculated from the values in columns 2 and 3", que son el
+  módulo de Young en $10^9$ N/m2 y la densidad en kg/m3. Las tres filas dan, en
+  ese orden, $E$ = 24 y $\rho$ = 2000 con una velocidad de 3650 m/s; $E$ = 0,1
+  y $\rho$ = 250 con 500 m/s; y $E$ = 8,3 y $\rho$ = 600 con 4540 m/s.
+- **El problema:** $\sqrt{E/\rho}$ sobre esas celdas da 3464, 632 y 3719 m/s.
+  Las velocidades impresas quedan un 5,4 por ciento por encima, un 20,9 por
+  ciento por debajo y un 22,1 por ciento por encima de lo que dan las dos
+  columnas que tienen al lado.
+- **Evidencia:** la misma expresión reproduce el resto de la tabla. De las
+  ochenta y siete filas que imprimen el módulo y la densidad como valores
+  únicos, setenta y nueve coinciden dentro del 1 por ciento y ochenta y cuatro
+  dentro del 3, con una desviación mediana del 0,03 por ciento, y a lo largo de
+  velocidades de 190 a 27000 m/s. Sólo estas tres se salen, que es la firma de
+  una celda mal impresa y no la de un método más flojo que el que describe la
+  página. Cuál de las celdas está mal no se puede saber desde la página: 4540
+  m/s saldría de un módulo de 12,4 en vez de 8,3, y 500 m/s de una densidad de
+  400 en vez de 250. Verificado contra la página tal como se imprime en las
+  páginas PDF 748 y 749 (páginas impresas 719 y 720) de Bies, Hansen y Howard
+  (2017), *Engineering Noise Control*, quinta edición.
+- **Consecuencia para las tablas del propio libro:** tres celdas. Ninguna otra
+  parte del documento calcula con ellas.
+- **Comportamiento de la biblioteca:** el catálogo guarda las tres columnas tal
+  como se imprimen y no deriva nada por encima, y cada una de las tres filas
+  lleva la discrepancia en su nota. La prueba
+  `test_three_rows_do_not_follow_from_their_own_two_columns` de
+  [`tests/solids/test_catalogue.py`](https://github.com/jmrplens/phonometry/blob/main/tests/solids/test_catalogue.py) fija
+  las tres, y `test_the_rest_of_the_table_reproduces_to_three_per_cent` fija
+  las ochenta y cuatro que sí se siguen, que es lo que convierte a las tres en
+  un defecto.
+- **Estado:** no reportado.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

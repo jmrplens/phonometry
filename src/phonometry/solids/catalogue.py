@@ -264,7 +264,23 @@ _HFC = "thickness_critical_frequency_product_m_hz"
 
 
 def _fill(fields: dict[str, Any], name: str, value: float, how: str) -> None:
-    """Record *value* under *name*, and that it was computed and not read."""
+    """Record *value* under *name*, and that it was computed and not read.
+
+    A field the page printed as an interval is left alone. Bies prints a
+    modulus of 18 to 30 GPa for normal concrete and a speed beside it, and a
+    single modulus worked back out of that speed would sit next to the
+    interval contradicting it: the field would say one number and
+    :attr:`SolidMaterial.ranges` would say the book gave none.
+
+    So is a field the row can say why is empty. Bies leaves the speed of his
+    aluminium honeycomb panels blank because a one-dimensional speed does not
+    mean anything in a honeycomb, and the modulus and density beside it are
+    effective ones; deriving 4 265 m/s from them would be arithmetic standing
+    in for a quantity that does not exist. Wherever
+    :attr:`SolidMaterial.unquantified` gives a reason, that reason wins.
+    """
+    if name in fields.get("ranges", {}) or name in fields.get("unquantified", {}):
+        return
     fields[name] = value
     fields.setdefault("derived", {})
     fields["derived"] = {**fields["derived"], name: how}
@@ -386,6 +402,7 @@ _TABLES = (
     "hopkins-2007-table-a2",
     "cremer-2005-table-4-3",
     "mechel-2008-table-3",
+    "bies-2017-table-c1",
 )
 
 
@@ -417,8 +434,10 @@ def _load() -> dict[str, SolidMaterial]:
 #: ``solids/data/hopkins-2007-table-a2.json``, Hopkins **Table A2** on PDF
 #: pages 635-636, ``solids/data/cremer-2005-table-4-3.json``, Cremer
 #: **Table 4.3** on PDF page 201, and ``solids/data/mechel-2008-table-3.json``,
-#: Mechel **Table 3** on PDF pages 544-545. Use :func:`solids_named` to gather
-#: every book's reading of one material.
+#: Mechel **Table 3** on PDF pages 544-545, and
+#: ``solids/data/bies-2017-table-c1.json``, Bies **Table C.1** on PDF pages
+#: 747-750. Use :func:`solids_named` to gather every book's reading of one
+#: material.
 PUBLISHED_SOLIDS: Mapping[str, SolidMaterial] = MappingProxyType(_load())
 
 

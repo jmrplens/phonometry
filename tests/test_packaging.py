@@ -110,9 +110,10 @@ def test_pypi_readme_matches_generator() -> None:
     """
     readme = (_ROOT / "README.md").read_text(encoding="utf-8")
     tag = f"v{generate_pypi_readme.version()}"
-    assert _committed_pypi_readme() == generate_pypi_readme.pypi_readme(readme, tag), (
-        "README_PYPI.md is stale; regenerate it with `make pypi-readme`"
-    )
+    assets = generate_pypi_readme.assets_commit()
+    assert _committed_pypi_readme() == generate_pypi_readme.pypi_readme(
+        readme, tag, assets
+    ), "README_PYPI.md is stale; regenerate it with `make pypi-readme`"
 
 
 def test_pypi_readme_has_no_stripped_markup() -> None:
@@ -312,7 +313,7 @@ def test_pinning_leaves_unrelated_urls_alone() -> None:
         "[badge](https://img.shields.io/pypi/v/phonometry?logo=main) "
         "[tagged](https://github.com/jmrplens/phonometry/blob/v1.0.0/LICENSE)"
     )
-    assert generate_pypi_readme.pin_to_tag(text, "v9.9.9") == (
+    assert generate_pypi_readme.pin_to_tag(text, "v9.9.9", "0" * 40) == (
         "[guide](https://github.com/jmrplens/phonometry/blob/v9.9.9/docs/main/x.md) "
         "[dir](https://github.com/jmrplens/phonometry/tree/v9.9.9/docs/) "
         "![img](https://raw.githubusercontent.com/jmrplens/phonometry/v9.9.9/a.svg) "
@@ -335,11 +336,29 @@ def test_pinning_leaves_other_repositories_alone() -> None:
         "![logo](https://raw.githubusercontent.com/scipy/scipy/main/doc/logo.svg) "
         "[ours](https://github.com/jmrplens/phonometry/blob/main/LICENSE)"
     )
-    pinned = generate_pypi_readme.pin_to_tag(text, "v9.9.9")
+    pinned = generate_pypi_readme.pin_to_tag(text, "v9.9.9", "0" * 40)
     assert "acoustic-toolbox/blob/main/README.md" in pinned
     assert "numpy/numpy/tree/main/doc/" in pinned
     assert "scipy/scipy/main/doc/logo.svg" in pinned
     assert "jmrplens/phonometry/blob/v9.9.9/LICENSE" in pinned
+
+
+def test_the_posters_pin_to_the_assets_commit_and_not_to_the_tag() -> None:
+    """The assets repository has no release tags; its lock commit is the pin.
+
+    A poster pinned to our tag would 404 over there. Pinned to the commit
+    ``assets.lock`` records it names exactly the file the release's clips
+    were rendered into, and that commit never moves.
+    """
+    text = (
+        "![poster](https://raw.githubusercontent.com/jmrplens/phonometry-assets"
+        "/main/images/anim_x_poster.jpg) "
+        "![fig](https://raw.githubusercontent.com/jmrplens/phonometry/main/a.svg)"
+    )
+    pinned = generate_pypi_readme.pin_to_tag(text, "v9.9.9", "abc123")
+    assert "phonometry-assets/abc123/images/anim_x_poster.jpg" in pinned
+    assert "phonometry-assets/v9.9.9" not in pinned
+    assert "jmrplens/phonometry/v9.9.9/a.svg" in pinned
 
 
 # ==========================================================================

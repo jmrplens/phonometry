@@ -60,9 +60,20 @@ jobs:
     # fingerprint of the code that drew it; this recomputes the fingerprints
     # from the sources and names any clip whose one has moved. It parses the
     # figure package rather than importing it, so it needs no rendering stack
-    # and runs in seconds.
-    - name: Check every committed clip matches the code that draws it
-      run: python scripts/check_animation_freshness.py
+    # and runs in seconds. The clips themselves live in
+    # jmrplens/phonometry-assets, so "is every file there" is answered from
+    # the tree of the commit assets.lock records: a blobless fetch of that one
+    # commit is a few hundred kilobytes, where the clips are a third of a
+    # gigabyte, and the check only ever needed the names.
+    - name: Fetch the names of the published clips, without the clips
+      run: |
+        git init -q assets-tree
+        git -C assets-tree remote add origin https://github.com/jmrplens/phonometry-assets.git
+        git -C assets-tree fetch -q --depth 1 --filter=blob:none origin "$(cat assets.lock)"
+        git -C assets-tree ls-tree -r --name-only FETCH_HEAD images/ > assets-manifest.txt
+        echo "$(wc -l < assets-manifest.txt) clip files published at $(cut -c1-12 assets.lock)"
+    - name: Check every published clip matches the code that draws it
+      run: python scripts/check_animation_freshness.py --manifest assets-manifest.txt
     - name: Lint with Ruff
       run: ruff check .
     # Ruff is also the formatter. Before this step the tree had no formatter at

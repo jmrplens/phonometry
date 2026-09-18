@@ -235,9 +235,9 @@ $$
 with $H_\mathrm{I} = e^{-j k_0 s}$, $H_\mathrm{R} = e^{+j k_0 s}$, microphone spacing $s$ and $x_1$
 the distance from the sample to the farther microphone.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_standing_wave_tube_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_standing_wave_tube.gif" alt="Animation: incident and reflected waves sum into a standing wave inside the impedance tube; a rigid termination gives deep envelope nodes, a porous sample gives shallow ones, sampled by the two wall microphones" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_standing_wave_tube_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_standing_wave_tube.gif" alt="Animation: incident and reflected waves sum into a standing wave inside the impedance tube; a rigid termination gives deep envelope nodes, a porous sample gives shallow ones, sampled by the two wall microphones" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_standing_wave_tube.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_standing_wave_tube.webm)
 
 ```python
 import numpy as np
@@ -598,13 +598,13 @@ duct: the empty tube passes it unchanged, the lossy layer splits it into a
 reflection and an attenuated transmission that the four ASTM microphones
 resolve.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_impedance_tube_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_impedance_tube.gif" alt="Animation: a loudspeaker drives a sustained 850 Hz plane tone into a rigid-walled virtual impedance tube drawn as the real instrument; deep envelope minima against the rigid plug, shallow minima in front of the 10 cm lossy sample, the ISO 10534-2 microphone pair and the recovered absorption of 0.54 annotated" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_impedance_tube_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_impedance_tube.gif" alt="Animation: a loudspeaker drives a sustained 850 Hz plane tone into a rigid-walled virtual impedance tube drawn as the real instrument; deep envelope minima against the rigid plug, shallow minima in front of the 10 cm lossy sample, the ISO 10534-2 microphone pair and the recovered absorption of 0.54 annotated" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_impedance_tube.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_impedance_tube.webm)
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_transmission_tube_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_transmission_tube.gif" alt="Animation: the loudspeaker end fires a carrier packet down a rigid-walled virtual transmission tube drawn as the real instrument with its anechoic termination; the empty tube passes it unchanged while a 10 cm lossy layer splits it into a reflection and an attenuated transmission, the four ASTM E2611 microphones and the 3.1 dB transmission loss annotated" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_transmission_tube_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_transmission_tube.gif" alt="Animation: the loudspeaker end fires a carrier packet down a rigid-walled virtual transmission tube drawn as the real instrument with its anechoic termination; the empty tube passes it unchanged while a 10 cm lossy layer splits it into a reflection and an attenuated transmission, the four ASTM E2611 microphones and the 3.1 dB transmission loss annotated" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_transmission_tube.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_transmission_tube.webm)
 
 
 ## See also

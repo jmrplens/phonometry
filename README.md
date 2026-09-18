@@ -32,7 +32,7 @@ regenerates it on every pull request. Filters are class 1 per
 
 <a href="https://github.com/jmrplens/phonometry/blob/main/docs/CONFORMANCE.md"><picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/badges/conformance-summary_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/badges/conformance-summary.svg" alt="All 1261 conformance checks pass, across 87 domains and 461 standards"></picture></a>
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_pillar_hall_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_pillar_hall.gif" alt="Animation: an 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall.gif" alt="Animation: an 800 Hz plane wavefront sweeps through a hall of rigid columns in a 2D FDTD simulation; every column diffracts the front and the scattered wavelets interfere until the whole hall is filled" width="100%"></picture>
 
 *An 800 Hz wavefront threading a hall of columns, computed with the library's
 own [2D FDTD engine](https://github.com/jmrplens/phonometry/blob/main/docs/simulation/fdtd-simulation.md)

@@ -219,9 +219,9 @@ outside the channel leaks away to depth, as the simulation below shows with an
 intentionally exaggerated gradient. This trapping is why low-frequency sound
 can cross entire oceans.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting.gif" alt="Animation: a 2D FDTD simulation of a low-frequency pulse in a SOFAR-like underwater sound channel with the sound-speed profile drawn beside the field; launched on the channel axis the wavefronts refract back toward the sound-speed minimum and stay trapped, launched near the surface the energy crosses the channel and leaks away to depth" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ducting_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ducting.gif" alt="Animation: a 2D FDTD simulation of a low-frequency pulse in a SOFAR-like underwater sound channel with the sound-speed profile drawn beside the field; launched on the channel axis the wavefronts refract back toward the sound-speed minimum and stay trapped, launched near the surface the energy crosses the channel and leaks away to depth" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_ducting.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_ducting.webm)
 
 At real ocean scale the channel axis sits near 1200 m, and the trapped
 arrivals are rays cycling about the sound-speed minimum over tens of
@@ -492,9 +492,9 @@ energy back), and the mud's **+28.3 %** against **+29.7 %** predicted. That
 difference, paid again at every bounce, is what the Weston loss gradient
 $\eta$ accumulates.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_critical_angle_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_critical_angle.gif" alt="Animation: a 100 Hz burst above a flat seabed simulated twice, over fast sand and over slow mud; as the expanding front's contact with the bed sweeps outward the grazing angle falls, and over the sand transmission into the sediment switches off at the critical ray while over the mud it continues at every angle" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_critical_angle_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_critical_angle.gif" alt="Animation: a 100 Hz burst above a flat seabed simulated twice, over fast sand and over slow mud; as the expanding front's contact with the bed sweeps outward the grazing angle falls, and over the sand transmission into the sediment switches off at the critical ray while over the mud it continues at every angle" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_critical_angle.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_critical_angle.webm)
 
 ## 5. Ocean ambient noise
 

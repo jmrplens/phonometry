@@ -487,6 +487,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The animation clips live in a repository of their own.** Cloning this
+  repository downloaded about 2 GB, and 1,8 GB of it was `.github/images`:
+  not the 2 704 SVG figures, which are text and cost 80 MB across eleven
+  thousand revisions because git stores each as a delta, but the 430 WebM,
+  GIF and JPEG files, re-encoded whole on every render and kept in every
+  version. The clips, their GIF editions and their poster stills now live in
+  [`jmrplens/phonometry-assets`](https://github.com/jmrplens/phonometry-assets)
+  and the code that draws them stays here. `make animations` and
+  `make posters` render into a checkout of that repository beside this one
+  and then publish: they commit and push there and write the resulting commit
+  into `assets.lock`, so the two repositories say which clips go with which
+  code. The guides, the READMEs and the site load the clips from there, the
+  PyPI page pins its poster to the locked commit rather than to a tag, and CI
+  checks the published clips against the code without fetching a byte of
+  video, from the names in that commit's tree. The figures are unchanged and
+  stay: `make graphs` still writes them to `.github/images`, and
+  `check_figures.py` still regenerates and compares them on every pull
+  request. The history that carries the old clips is rewritten separately.
+
 - **The filter bank returns a result, not a tuple.** `octave_filter()` and
   `OctaveFilterBank.filter()` returned two items normally and three when
   `sigbands=True` asked for the band waveforms. The length of the answer

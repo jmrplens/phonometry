@@ -97,28 +97,49 @@ _MAIN_REF = re.compile(
     rf"|https://raw\.githubusercontent\.com/{_SLUG}/)main/"
 )
 
+#: The animation posters are served from the assets repository (see
+#: ``scripts/assets_dir.py``), which has no release tags: its ``main`` moves
+#: whenever a clip is re-rendered. What does not move is the commit
+#: ``assets.lock`` records, which is exactly the one the release's clips were
+#: rendered into, so the PyPI page pins to that commit and keeps the poster it
+#: was published with, the way it keeps every other link.
+_ASSETS_MAIN_REF = re.compile(
+    r"(https://raw\.githubusercontent\.com/jmrplens/phonometry-assets/)main/"
+)
+
 
 def version(root: pathlib.Path = _ROOT) -> str:
     """The version being published, from the repository-root VERSION file."""
     return (root / "VERSION").read_text(encoding="utf-8").strip()
 
 
-def pin_to_tag(text: str, tag: str) -> str:
-    """Point every ``main`` URL into this repository at *tag* instead.
+def pin_to_tag(text: str, tag: str, assets_commit: str) -> str:
+    """Point every ``main`` URL at something that will not move.
 
     :param text: Markdown carrying the README's absolute repository links.
-    :param tag: The git tag to resolve them against, for example ``v3.3.0``.
-    :return: The same markdown with the branch ref replaced by the tag.
+    :param tag: The git tag to resolve links into this repository against,
+        for example ``v3.3.0``.
+    :param assets_commit: The commit of the assets repository to resolve the
+        poster links against, from ``assets.lock``.
+    :return: The same markdown with the branch refs replaced.
     """
-    return _MAIN_REF.sub(rf"\g<1>{tag}/", text)
+    pinned = _MAIN_REF.sub(rf"\g<1>{tag}/", text)
+    return _ASSETS_MAIN_REF.sub(rf"\g<1>{assets_commit}/", pinned)
 
 
-def pypi_readme(readme: str, tag: str) -> str:
+def assets_commit(root: pathlib.Path = _ROOT) -> str:
+    """The assets commit the release's clips live in, from ``assets.lock``."""
+    return (root / "assets.lock").read_text(encoding="utf-8").strip()
+
+
+def pypi_readme(readme: str, tag: str, assets_commit: str) -> str:
     """The PyPI long description derived from *readme* (README.md text).
 
     :param readme: The GitHub README's text.
     :param tag: Tag the repository links are pinned to, for example
         ``v3.3.0``.
+    :param assets_commit: Commit of the assets repository the poster links
+        are pinned to.
     """
 
     def collapse(match: re.Match[str]) -> str:
@@ -138,16 +159,20 @@ def pypi_readme(readme: str, tag: str) -> str:
             )
         return swapped
 
-    return pin_to_tag(_HEADER + _PICTURE.sub(collapse, readme), tag)
+    return pin_to_tag(_HEADER + _PICTURE.sub(collapse, readme), tag, assets_commit)
 
 
 def main() -> None:
     """Rewrite README_PYPI.md next to the repository README."""
     readme = (_ROOT / "README.md").read_text(encoding="utf-8")
     tag = f"v{version()}"
+    assets = assets_commit()
     out = _ROOT / "README_PYPI.md"
-    out.write_text(pypi_readme(readme, tag), encoding="utf-8")
-    print(f"wrote {out} (repository links pinned to {tag})")
+    out.write_text(pypi_readme(readme, tag, assets), encoding="utf-8")
+    print(
+        f"wrote {out} (repository links pinned to {tag}, posters to "
+        f"phonometry-assets@{assets[:12]})"
+    )
 
 
 if __name__ == "__main__":

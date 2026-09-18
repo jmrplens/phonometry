@@ -125,9 +125,9 @@ half-wave resonator and the tone crosses as if it were not there; at
 $kL = \pi/2$ the two area jumps reflect in phase and send the wave back up the
 inlet, the 6.5 dB peak of the four-pole curve above.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_expansion_chamber_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_expansion_chamber.gif" alt="Animation: a 2D FDTD duct with a 0.30 m expansion chamber of area ratio 4 drawn as hardware between a loudspeaker and an anechoic termination, at two frequencies side by side; at 572 Hz the pressure envelope stays flat and the tone crosses the chamber unchanged with the annotated transmission loss of 0.0 dB, while at 286 Hz a standing wave fills the inlet pipe and the outlet is left with less than half the amplitude, matching the annotated 6.5 dB peak" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_expansion_chamber_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_expansion_chamber.gif" alt="Animation: a 2D FDTD duct with a 0.30 m expansion chamber of area ratio 4 drawn as hardware between a loudspeaker and an anechoic termination, at two frequencies side by side; at 572 Hz the pressure envelope stays flat and the tone crosses the chamber unchanged with the annotated transmission loss of 0.0 dB, while at 286 Hz a standing wave fills the inlet pipe and the outlet is left with less than half the amplitude, matching the annotated 6.5 dB peak" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_expansion_chamber.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_expansion_chamber.webm)
 
 ### Side-branch and extended-tube resonators
 
@@ -213,9 +213,9 @@ once on screen: built at the drilled 300 mm, the simulated device rings at
 272.9 Hz, an effective length $c/4f = 314$ mm, the junction end correction
 made visible.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_side_branch_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_side_branch.gif" alt="Animation: a 2D FDTD duct carrying a 0.30 m closed quarter-wave stub, driven at the 285.8 Hz tuning frequency and at 150 Hz side by side, with the closed-end pressure of both runs traced below; on tune the pressure inside the stub ratchets up over about six periods to 8.2 times the incident wave, off tune it settles at 1.5 times immediately, and an annotation reports that the built 300 mm stub rings at 272.9 Hz, an effective length of 314 mm" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_side_branch_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_side_branch.gif" alt="Animation: a 2D FDTD duct carrying a 0.30 m closed quarter-wave stub, driven at the 285.8 Hz tuning frequency and at 150 Hz side by side, with the closed-end pressure of both runs traced below; on tune the pressure inside the stub ratchets up over about six periods to 8.2 times the incident wave, off tune it settles at 1.5 times immediately, and an annotation reports that the built 300 mm stub rings at 272.9 Hz, an effective length of 314 mm" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_side_branch.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_side_branch.webm)
 
 Both branches are small hardware, and `.plot_geometry()` shows just how
 small: the resonator of the 120 Hz spike is a 1 L cavity fed by a 1 cm²

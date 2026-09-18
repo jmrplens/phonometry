@@ -39,9 +39,9 @@ this layout is 6.6 cm between a column and a wall, so
 $\Delta x = \min(\text{smallest aperture}/4,\ \lambda/8)$ allows up to 1.6 cm,
 and the clip runs at 2.5 mm because a banner needs the definition.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_pillar_hall_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_pillar_hall.gif" alt="Animation: an 800 Hz plane wavefront sweeping a 4 metre rigid-walled hall filled with a staggered colonnade of rigid columns, every column shedding a scattered wavelet until the interference of the wavelets fills the hall with structured energy that then drains through the absorbing ends" width="640" height="160" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall.gif" alt="Animation: an 800 Hz plane wavefront sweeping a 4 metre rigid-walled hall filled with a staggered colonnade of rigid columns, every column shedding a scattered wavelet until the interference of the wavelets fills the hall with structured energy that then drains through the absorbing ends" width="640" height="160" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_pillar_hall.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_pillar_hall.webm)
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/diagram_fdtd.svg" alt="Pipeline from the domain definition (sound-speed and density maps with the grid spacing dx) and the geometry (obstacle mask and per-side boundary conditions), through the sources injected at grid cells, the staggered-grid leapfrog update of velocity and pressure, and the Courant stability condition, to the frozen FDTDResult with probe histories, field snapshots and a plot method" width="86%"></picture>
 
@@ -540,9 +540,9 @@ measured deficits are 17.2 %, 4.3 % and 1.1 % against 17.3 %, 4.3 % and 1.1 %
 from the closed form, and the three packets cross a 6.6 m finish line 3.3,
 0.7 and 0.2 ms after the exact wave does.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_dispersion_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_dispersion.gif" alt="Animation: a 500 Hz tone burst travelling down three FDTD tubes meshed at 5, 10 and 20 cells per wavelength, with the exact continuous wave drawn behind each trace in grey; by the end the coarse packet has fallen two wavelengths behind and grown a ripple tail while the finest one still sits on the exact wave" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_dispersion_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_dispersion.gif" alt="Animation: a 500 Hz tone burst travelling down three FDTD tubes meshed at 5, 10 and 20 cells per wavelength, with the exact continuous wave drawn behind each trace in grey; by the end the coarse packet has fallen two wavelengths behind and grown a ripple tail while the finest one still sits on the exact wave" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_dispersion.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_dispersion.webm)
 
 The tests pin the
 solver to analytic oracles: box and duct eigenfrequencies, free-field

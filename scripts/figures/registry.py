@@ -17,6 +17,7 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+import assets_dir
 import matplotlib.pyplot as plt
 
 from .aircraft import (
@@ -1470,16 +1471,18 @@ def _stamp_clips(clips: list[str], output_dir: str) -> None:
     writes would leave the whole batch unstamped and the freshness check
     complaining about clips that were just re-rendered.
 
-    Only a run that wrote into the committed image directory stamps: the
+    Only a run that wrote into the published clips directory stamps: the
     renderer takes any output directory, and a render into a scratch one is
-    for looking at, not a statement about what is committed.
+    for looking at, not a statement about what is published.
     """
     import pathlib
 
     import animation_fingerprint
 
-    committed = pathlib.Path(__file__).resolve().parents[2] / ".github" / "images"
-    if not clips or pathlib.Path(output_dir).resolve() != committed:
+    if (
+        not clips
+        or pathlib.Path(output_dir).resolve() != assets_dir.clips_dir().resolve()
+    ):
         return
     animation_fingerprint.stamp(clips)
 
@@ -1918,9 +1921,13 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.anim and not do_anim:
         parser.error("--anim requires --animations (or --all)")
+    # The clips and their posters are binary and live in a repository of
+    # their own; see scripts/assets_dir.py. Resolved only when a run is about
+    # to write one, so a figures-only run needs no checkout of it.
+    clip_dir = str(assets_dir.require_clips_dir()) if (do_anim or args.posters) else ""
     if args.posters and not do_anim:
-        print("--- Re-extracting animation posters ---")
-        generate_posters(img_dir)
+        print(f"--- Re-extracting animation posters into {clip_dir} ---")
+        generate_posters(clip_dir)
     jobs = args.jobs if args.jobs is not None else _default_jobs()
     if jobs < 1:
         parser.error("--jobs must be >= 1")
@@ -1948,7 +1955,7 @@ def main(argv: list[str] | None = None) -> None:
             # walk the clips one at a time: each clip's field is simulated
             # once and its four language/theme variants then render off that
             # single computation (see _render_anim_variants).
-            generate_animations(img_dir, args.anim, variants=True)
+            generate_animations(clip_dir, args.anim, variants=True)
         else:
             import shutil
 
@@ -1961,9 +1968,9 @@ def main(argv: list[str] | None = None) -> None:
             clips = list(_ANIMATIONS)
             print(
                 f"--- Generating animations ({len(clips)} clips "
-                f"x 4 variants, {jobs} jobs) ---"
+                f"x 4 variants, {jobs} jobs) into {clip_dir} ---"
             )
-            _generate_animations_parallel(img_dir, clips, jobs)
+            _generate_animations_parallel(clip_dir, clips, jobs)
 
     print("Graphics generated successfully.")
 

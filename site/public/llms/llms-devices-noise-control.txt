@@ -765,9 +765,9 @@ run at different axial wavenumbers ($k_x = 5.51$ against $k = 7.33$ rad/m)
 and beat along the duct every 3.45 m, and the profile across the section
 never settles.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_duct_cut_on_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_duct_cut_on.gif" alt="Animation: the same rigid duct driven at 180 Hz and at 400 Hz, with wavefronts that flatten across the section within half a duct width in the lower-frequency strip and a field that stays lumpy the whole length of the duct in the higher-frequency one" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on.gif" alt="Animation: the same rigid duct driven at 180 Hz and at 400 Hz, with wavefronts that flatten across the section within half a duct width in the lower-frequency strip and a field that stays lumpy the whole length of the duct in the higher-frequency one" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_duct_cut_on.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on.webm)
 
 The panel beside each strip draws the instantaneous profile across the
 section at a station 5 m downstream against its own section average, which is
@@ -1297,9 +1297,9 @@ transmission loss the calculation used. Each path shrinks at every element
 and junction it crosses, which is why no single one has to be large for the
 sum of the three to dominate a good partition.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths.gif" alt="Animation: energy pulses leaving the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, every path label lighting up as its pulse re-radiates into the receiving room" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_flanking_paths_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_flanking_paths.gif" alt="Animation: energy pulses leaving the source room over the direct Dd path and the flanking Ff, Fd and Df paths, shrinking at each element and junction, every path label lighting up as its pulse re-radiates into the receiving room" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_flanking_paths.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_flanking_paths.webm)
 
 `DesignCriterion.flanking_penalty` is the explicit debit for that, in
 decibels off the
@@ -1563,9 +1563,9 @@ half-wave resonator and the tone crosses as if it were not there; at
 $kL = \pi/2$ the two area jumps reflect in phase and send the wave back up the
 inlet, the 6.5 dB peak of the four-pole curve above.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_expansion_chamber_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_expansion_chamber.gif" alt="Animation: a 2D FDTD duct with a 0.30 m expansion chamber of area ratio 4 drawn as hardware between a loudspeaker and an anechoic termination, at two frequencies side by side; at 572 Hz the pressure envelope stays flat and the tone crosses the chamber unchanged with the annotated transmission loss of 0.0 dB, while at 286 Hz a standing wave fills the inlet pipe and the outlet is left with less than half the amplitude, matching the annotated 6.5 dB peak" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_expansion_chamber_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_expansion_chamber.gif" alt="Animation: a 2D FDTD duct with a 0.30 m expansion chamber of area ratio 4 drawn as hardware between a loudspeaker and an anechoic termination, at two frequencies side by side; at 572 Hz the pressure envelope stays flat and the tone crosses the chamber unchanged with the annotated transmission loss of 0.0 dB, while at 286 Hz a standing wave fills the inlet pipe and the outlet is left with less than half the amplitude, matching the annotated 6.5 dB peak" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_expansion_chamber.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_expansion_chamber.webm)
 
 ### Side-branch and extended-tube resonators
 
@@ -1651,9 +1651,9 @@ once on screen: built at the drilled 300 mm, the simulated device rings at
 272.9 Hz, an effective length $c/4f = 314$ mm, the junction end correction
 made visible.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_side_branch_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_side_branch.gif" alt="Animation: a 2D FDTD duct carrying a 0.30 m closed quarter-wave stub, driven at the 285.8 Hz tuning frequency and at 150 Hz side by side, with the closed-end pressure of both runs traced below; on tune the pressure inside the stub ratchets up over about six periods to 8.2 times the incident wave, off tune it settles at 1.5 times immediately, and an annotation reports that the built 300 mm stub rings at 272.9 Hz, an effective length of 314 mm" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_side_branch_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_side_branch.gif" alt="Animation: a 2D FDTD duct carrying a 0.30 m closed quarter-wave stub, driven at the 285.8 Hz tuning frequency and at 150 Hz side by side, with the closed-end pressure of both runs traced below; on tune the pressure inside the stub ratchets up over about six periods to 8.2 times the incident wave, off tune it settles at 1.5 times immediately, and an annotation reports that the built 300 mm stub rings at 272.9 Hz, an effective length of 314 mm" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_side_branch.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_side_branch.webm)
 
 Both branches are small hardware, and `.plot_geometry()` shows just how
 small: the resonator of the 120 Hz spike is a 1 L cavity fed by a 1 cm²

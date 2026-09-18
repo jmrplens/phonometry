@@ -158,9 +158,9 @@ outside the frame, and run it twice: top declared `"free"`, then top left at
 the solver default, the clamped rigid wall. Same aluminium, same hit, same
 two body fronts, no surface train at all in the second.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_halfspace_waves_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_halfspace_waves.gif" alt="Animation: a vertical hit on an aluminium half-space, with dotted analytic arcs tracking the compressional and shear fronts as they expand and leave the frame, a train of surface lobes staying behind on the free-surface panel, and no surface train on the rigid-surface panel" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.gif" alt="Animation: a vertical hit on an aluminium half-space, with dotted analytic arcs tracking the compressional and shear fronts as they expand and leave the frame, a train of surface lobes staying behind on the free-surface panel, and no surface train on the rigid-surface panel" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_halfspace_waves.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_halfspace_waves.webm)
 
 Both body arcs run out of the frame and keep going. The surface lobes do not
 go anywhere but along the surface, and they are still there when the body
@@ -189,9 +189,9 @@ the reason this page needs an elastic solver rather than a flexural one. The
 [bending-wave transmission guide](../vibration/structural/junction-transmission.md) takes
 the same run apart against the EN 12354 vibration reduction index.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_plate_junction_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_plate_junction.gif" alt="Animation: a 4 kHz bending-wave packet running along a 10 mm steel plate, passing straight through on the control panel and splitting at an L-junction into a reflected wave, a transmitted wave descending the perpendicular plate and a faster in-plane precursor" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction.gif" alt="Animation: a 4 kHz bending-wave packet running along a 10 mm steel plate, passing straight through on the control panel and splitting at an L-junction into a reflected wave, a transmitted wave descending the perpendicular plate and a faster in-plane precursor" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_plate_junction.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_plate_junction.webm)
 
 ## 4. Fluid-solid coupling at normal incidence
 
@@ -254,9 +254,9 @@ wavelengths wide and at that width a probe sits in the source's near field
 rather than in a formed beam. The measured column above comes from the
 validation suite, which has the room to do it properly.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_mode_conversion_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_mode_conversion.gif" alt="Animation: a sustained oblique beam in water hitting a steel half-space at three incidences, with two transmitted beams at ten degrees, only a shear beam at twenty degrees, and total reflection at thirty-five degrees" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_mode_conversion_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_mode_conversion.gif" alt="Animation: a sustained oblique beam in water hitting a steel half-space at three incidences, with two transmitted beams at ten degrees, only a shear beam at twenty degrees, and total reflection at thirty-five degrees" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_mode_conversion.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_mode_conversion.webm)
 
 At 10° two beams leave along the dashed Snell directions, at different angles
 because they travel at different speeds: the slower shear wave at 22.1° from
@@ -389,9 +389,9 @@ brightness. The
 [panel sound insulation guide](../buildings/design/panel-sound-insulation.md) takes the
 same run apart against the plateau method and the mass law.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_coincidence_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_coincidence.gif" alt="Animation: two elastic FDTD panels of the same 10 mm steel plate in air under a 45-degree plane wave, at 603 Hz where the plate blocks almost everything and at 2413 Hz where a transmitted beam grows below it" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.gif" alt="Animation: two elastic FDTD panels of the same 10 mm steel plate in air under a 45-degree plane wave, at 603 Hz where the plate blocks almost everything and at 2413 Hz where a transmitted beam grows below it" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_elastic_coincidence.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_elastic_coincidence.webm)
 
 ## What this solver does not do
 

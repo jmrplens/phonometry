@@ -59,9 +59,9 @@ constant, and the reason the room, not the array, is what has to be
 qualified. Both routes end on the same $L_W$, because sound power is a
 property of the source and not of the room it is measured in.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room producing different microphone pressures, while the free-field and diffuse-field formulas converge to the same sound power level" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_power_two_rooms_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_power_two_rooms.gif" alt="Animation: the same source in an anechoic room and in a reverberation room producing different microphone pressures, while the free-field and diffuse-field formulas converge to the same sound power level" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_power_two_rooms.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_power_two_rooms.webm)
 
 ```python
 import numpy as np

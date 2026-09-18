@@ -302,27 +302,46 @@ figures:
 # Regenerate the Tier-1 documentation animations (WebM for the site, GIF for
 # the GitHub docs). Kept out of `graphs`/CI because the ffmpeg encoding is slow
 # and video is not byte-reproducible across platforms; run manually to refresh.
-animations:
-	# Records into the same directory as `make graphs`, adding the clips to
-	# whatever that run left there, so `make figure-language` afterwards sees
-	# figures, plates and clips at once.
+# The clips are binary and re-encoded whole whenever the code drawing one
+# changes, and kept in this repository they made a clone of the code download
+# gigabytes of old video. They live in jmrplens/phonometry-assets instead, in
+# a checkout beside this one (or wherever PHONOMETRY_ASSETS_DIR in .env says),
+# which this clones or fast-forwards. scripts/assets_dir.py is the one place
+# that knows the path.
+assets:
+	$(PYTHON) -c "import sys; sys.path.insert(0, 'scripts'); import assets_dir; print(assets_dir.checkout_root(assets_dir.clips_dir()))" > .assets-checkout
+	@dir=$$(cat .assets-checkout); rm -f .assets-checkout; \
+	if [ -d "$$dir/.git" ]; then git -C "$$dir" pull -q --ff-only origin main && echo "$$dir is up to date"; \
+	else git clone -q git@github.com:jmrplens/phonometry-assets.git "$$dir" && echo "cloned into $$dir"; fi
+
+# Renders into the assets checkout (see `assets`) and then publishes what it
+# rendered: commits and pushes there, and writes the resulting commit into
+# assets.lock here, so the code and the clips say which version goes with
+# which. Still records language fragments into the same directory as `make
+# graphs`, so `make figure-language` afterwards sees figures, plates and
+# clips at once. PUBLISH=no renders without pushing, for a look.
+animations: assets
 	$(FIGURE_LANGUAGE_ENV) $(PYTHON) scripts/generate_graphs.py --animations
+	@if [ "$(PUBLISH)" != "no" ]; then $(PYTHON) scripts/publish_assets.py; fi
 
 # The clips are never regenerated in CI, so nothing else can tell that the
-# code drawing one has moved since the clip was committed -- which is how
+# code drawing one has moved since the clip was published -- which is how
 # twelve of them kept an ASCII hyphen in their Spanish tick labels for months
 # after that was repaired. Each render stamps a fingerprint of the code that
 # drew the clip; this recomputes them from the sources (no rendering, a couple
-# of seconds) and names every clip whose fingerprint has moved.
+# of seconds) and names every clip whose fingerprint has moved. Locally it
+# looks in the assets checkout for the files; CI hands it a manifest instead.
 animation-freshness:
 	$(PYTHON) scripts/check_animation_freshness.py
 
 # Re-extract only the deferred-loading poster stills (anim_*_poster.jpg) from
-# the committed animation WebMs, without the slow clip re-encode. Posters are
-# JPEG so they stay outside the SVG/PNG figure pipeline (`graphs` deletion and
-# the check_figures.py staleness compare).
-posters:
+# the published animation WebMs, without the slow clip re-encode, and publish
+# them the same way `animations` does. Posters are JPEG and live with the
+# clips, outside the SVG/PNG figure pipeline (`graphs` deletion and the
+# check_figures.py staleness compare).
+posters: assets
 	$(PYTHON) scripts/generate_graphs.py --posters
+	@if [ "$(PUBLISH)" != "no" ]; then $(PYTHON) scripts/publish_assets.py; fi
 
 # Regenerate the brand mark and every icon derived from it (.github/brand and
 # the site's favicon, touch icon and PWA icons). Deliberately outside `graphs`:
@@ -495,7 +514,7 @@ check: lint security test
 
 .PHONY: install lint format security snyk sonar graphs figure-contrast figure-language \
 	figure-annotations figures reports \
-	animations animation-freshness posters brand lighthouse \
+	assets animations animation-freshness posters brand lighthouse \
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point figure-legends control-characters hazards dead-constants \

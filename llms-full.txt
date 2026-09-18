@@ -56828,6 +56828,21 @@ Rows whose columns a book takes from another author keep the credit, and the
 bracketed numbers Cremer prints are resolved to their authors from his own
 reference list rather than left as `[4.19]`.
 
+Two books printing different numbers for the same material is the catalogue
+working. `check_solid_agreement.py` puts them side by side and fails only when
+two densities are more than 8 per cent apart, which is the one column a table
+cannot get very wrong without describing a different material: every density
+the gate does not already accept agrees to within 2,6 per cent, while the
+moduli disagree by nineteen per cent on aluminium and thirty on lead without
+anybody being wrong, and those it reports and never fails on. Its first full
+run found tin, where Cremer and Mechel print 4,4 GPa and Bies 54 while the
+three densities agree to 0,3 per cent. Each book is consistent with itself, so
+no page contradicts itself and this is not an errata; but a tin of 4,4 GPa
+would carry sound at 780 m/s, among the soft plastics and below every lead row
+here at 1 180 to 1 257 m/s, so the two books that agree are the ones the rest of
+the catalogue argues against. That is why it keeps all six books and nothing in it votes by
+majority.
+
 None of this is a specification. Block densities vary by manufacturer, which is
 why the pages print ranges where they do, and Cremer says in as many words that
 the loss factor of a metal cannot be considered a material constant.

@@ -16,10 +16,19 @@
  * inside markdown, which cannot resolve a content hash.
  */
 
-/** Absolute prefixes that identify a reference to this repository's media. */
+/**
+ * Absolute prefixes that identify a reference to media this site serves.
+ *
+ * The third is the clips: they live in jmrplens/phonometry-assets rather than
+ * here, for the reason scripts/assets_dir.py gives, and stage-media.mjs
+ * copies them from a checkout of that repository at the commit assets.lock
+ * records. So a page on main shows the clips main was built against, whatever
+ * has since been pushed to that repository's own main.
+ */
 export const REMOTE_PREFIXES = [
   'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/',
   'https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/reports/',
+  'https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/',
 ];
 
 /** Where stage-media.mjs puts them, relative to the site root. */

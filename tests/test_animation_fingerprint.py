@@ -445,6 +445,40 @@ def test_a_parallel_task_that_dies_does_not_cost_the_stamps_of_the_ones_before_i
     assert _fake_parallel_batch(monkeypatch, fails="anim_two") == [["anim_one"]]
 
 
+def test_re_extracting_the_posters_stamps_the_clips_they_belong_to(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """The poster extractor is inside the fingerprint, so `make posters` stamps.
+
+    A change to how a poster is cut marks every clip stale, and re-extracting
+    is the answer that renders nothing. It has to stamp the way a render
+    does, once per clip and not once per variant, or the check would keep
+    asking for a re-render of frames that did not change.
+    """
+    from figures import registry
+
+    for name in (
+        "anim_one",
+        "anim_one_dark",
+        "anim_one_es",
+        "anim_one_es_dark",
+        "anim_two",
+    ):
+        (tmp_path / f"{name}.webm").write_bytes(b"")
+    cut: list[str] = []
+    stamped: list[list[str]] = []
+    monkeypatch.setattr(
+        registry, "_extract_poster", lambda webm, ss: cut.append(webm) or webm
+    )
+    monkeypatch.setattr(registry, "_poster_ss_for", lambda webm: None)
+    monkeypatch.setattr(
+        registry, "_stamp_clips", lambda clips, out: stamped.append(list(clips))
+    )
+    registry.generate_posters(str(tmp_path))
+    assert len(cut) == 5
+    assert stamped == [["anim_one", "anim_two"]]
+
+
 # -- what the check says ----------------------------------------------------
 
 
@@ -454,17 +488,17 @@ def _check(
     committed: list[str],
     stamps: dict[str, str],
 ) -> int:
-    """Run the freshness check over a made-up image directory."""
+    """Run the freshness check over a made-up clips directory."""
     import check_animation_freshness as check
 
     images = tmp_path / "images"
     images.mkdir()
     for name in committed:
         (images / name).write_bytes(b"")
-    monkeypatch.setattr(check, "IMAGES", images)
+    monkeypatch.setattr(check.assets_dir, "clips_dir", lambda: images)
     monkeypatch.setattr(check.fp, "fingerprints", lambda root: {"anim_one": "1"})
     monkeypatch.setattr(check.fp, "read_manifest", lambda: stamps)
-    return check.main()
+    return check.main([])
 
 
 def test_a_complete_and_stamped_clip_passes(
@@ -476,11 +510,11 @@ def test_a_complete_and_stamped_clip_passes(
 
     code = _check(monkeypatch, tmp_path, check.outputs("anim_one"), {"anim_one": "1"})
     assert code == 0
-    assert "1 committed clips" in capsys.readouterr().out
+    assert "1 published clips" in capsys.readouterr().out
 
 
 @pytest.mark.parametrize(
-    "dropped", ["anim_one_es.webm", "anim_one_es_dark_poster.jpg", "anim_one_dark.gif"]
+    "dropped", ["anim_one_es.webm", "anim_one_es_dark_poster.webp", "anim_one_dark.gif"]
 )
 def test_every_file_a_render_writes_is_asked_for(
     monkeypatch: pytest.MonkeyPatch,
@@ -515,7 +549,7 @@ def test_a_half_rendered_clip_is_not_called_uncommitted(
     committed = check.outputs("anim_one")[:2]
     assert _check(monkeypatch, tmp_path, committed, {}) == 1
     out = capsys.readouterr().out
-    assert "committed half-rendered, 8 of its 10 files are missing" in out
+    assert "published half-rendered, 8 of its 10 files are missing" in out
     assert "no clip committed" not in out
     assert "no fingerprint recorded; re-render the clip to stamp it" in out
 
@@ -527,5 +561,5 @@ def test_a_clip_with_no_files_at_all_says_so(
 ) -> None:
     assert _check(monkeypatch, tmp_path, [], {}) == 1
     out = capsys.readouterr().out
-    assert "registered but not committed at all" in out
+    assert "registered but not published at all" in out
     assert "half-rendered" not in out

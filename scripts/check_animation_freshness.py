@@ -18,9 +18,8 @@ the code that drew it (:mod:`animation_fingerprint`), written by the renderer
 as the clip is written and committed next to it. Here the fingerprints are
 recomputed from the current sources and compared. A clip whose fingerprint
 moved is stale: the code that draws it has changed since it was last
-rendered, so re-render it and commit the result::
+rendered, so re-render it, which also publishes the result::
 
-    set -a; . .env; set +a          # the AV1 encoder settings
     python scripts/generate_graphs.py --animations --anim <clip>
 
 A render writes more than the four WebM variants, and the extra files are the
@@ -30,12 +29,21 @@ to. They come off the same render as the WebM, so the fingerprint already
 speaks for how old they are; what is checked here is that they are there at
 all (:func:`outputs`).
 
+The clips are not in this repository. They are published to
+``jmrplens/phonometry-assets`` (see :mod:`assets_dir`), so "there at all"
+means present in that repository at the commit ``assets.lock`` records.
+Locally that is the checkout the renders write into; in CI, where fetching
+a third of a gigabyte of video to check file names would be absurd, it is a
+manifest of the names in that commit's tree, handed in with ``--manifest``
+and produced by ``git ls-tree`` on a blobless fetch.
+
 The check is cheap (it parses the figure package, it does not import or run
 it) and needs no rendering stack, so it rides in any job.
 """
 
 from __future__ import annotations
 
+import argparse
 import pathlib
 import sys
 
@@ -44,16 +52,14 @@ if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 
 import animation_fingerprint as fp
-
-#: Where the clips are committed, used only to say which ones exist on disk.
-IMAGES = _SCRIPTS.parent / ".github" / "images"
+import assets_dir
 
 #: The language x theme variants every clip is rendered in.
 VARIANTS = ("", "_dark", "_es", "_es_dark")
 
 
 def outputs(clip: str) -> list[str]:
-    """Every file a four-variant render of *clip* leaves in :data:`IMAGES`.
+    """Every file a four-variant render of *clip* leaves in the clips directory.
 
     The WebM of each variant, the poster still next to it (the site defers
     the video behind it, so a missing poster is a blank box until the reader
@@ -63,14 +69,41 @@ def outputs(clip: str) -> list[str]:
     """
     return (
         [f"{clip}{suffix}.webm" for suffix in VARIANTS]
-        + [f"{clip}{suffix}_poster.jpg" for suffix in VARIANTS]
+        + [f"{clip}{suffix}_poster.webp" for suffix in VARIANTS]
         + [f"{clip}{suffix}.gif" for suffix in ("", "_dark")]
     )
 
 
-def main() -> int:
+def published(manifest: pathlib.Path | None) -> set[str]:
+    """The clip file names that exist, from a manifest or from the checkout.
+
+    A manifest is one path per line as ``git ls-tree -r --name-only`` prints
+    it, with or without the leading ``images/``; only the file name counts.
+    """
+    if manifest is not None:
+        return {
+            pathlib.PurePosixPath(line.strip()).name
+            for line in manifest.read_text(encoding="utf-8").splitlines()
+            if line.strip()
+        }
+    images = assets_dir.clips_dir()
+    return {path.name for path in images.iterdir()} if images.is_dir() else set()
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    parser.add_argument(
+        "--manifest",
+        type=pathlib.Path,
+        default=None,
+        help="file listing the clip names published in the assets repository, "
+        "one per line, in place of looking at a local checkout",
+    )
+    arguments = parser.parse_args(argv)
+
     current = fp.fingerprints(_SCRIPTS.parent)
     stamped = fp.read_manifest()
+    present = published(arguments.manifest)
     problems: list[str] = []
     problems.extend(
         f"{clip}: stamped in {fp.MANIFEST.name} but no longer a registered "
@@ -80,15 +113,15 @@ def main() -> int:
 
     for clip in sorted(current):
         expected = outputs(clip)
-        missing = [name for name in expected if not (IMAGES / name).exists()]
+        missing = [name for name in expected if name not in present]
         if len(missing) == len(expected):
             problems.append(
-                f"{clip}: registered but not committed at all (none of its "
+                f"{clip}: registered but not published at all (none of its "
                 f"{len(expected)} files are there); render it"
             )
         elif missing:
             problems.append(
-                f"{clip}: committed half-rendered, {len(missing)} of its "
+                f"{clip}: published half-rendered, {len(missing)} of its "
                 f"{len(expected)} files are missing "
                 f"({', '.join(missing)})"
             )
@@ -104,7 +137,7 @@ def main() -> int:
 
     if problems:
         print(
-            "::error::a committed clip is incomplete or older than the code "
+            "::error::a published clip is incomplete or older than the code "
             "that draws it - re-render it with "
             "'python scripts/generate_graphs.py --animations --anim <clip>'"
         )
@@ -113,7 +146,7 @@ def main() -> int:
         return 1
 
     print(
-        f"All {len(current)} committed clips are complete and match the "
+        f"All {len(current)} published clips are complete and match the "
         "code that draws them."
     )
     return 0

@@ -450,9 +450,9 @@ corridor for 81 % of them, because a 200 ms burst always fills at least part
 of a block and often fills one completely, and a full block reads the steady
 level, 1.0 dB above the target.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_block_vs_exponential_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_block_vs_exponential.gif" alt="Animation: a 4 kHz tone burst slides across a 125 ms block boundary; the exponential Fast envelope peaks at the same level at every alignment while the block Leq staircase rises and falls with where the burst lands, and a reading-against-alignment panel builds both traces against the shaded class 1 corridor" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_block_vs_exponential_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_block_vs_exponential.gif" alt="Animation: a 4 kHz tone burst slides across a 125 ms block boundary; the exponential Fast envelope peaks at the same level at every alignment while the block Leq staircase rises and falls with where the burst lands, and a reading-against-alignment panel builds both traces against the shaded class 1 corridor" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_block_vs_exponential.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_block_vs_exponential.webm)
 
 *The exponential trace is flat because $10\lg(1-e^{-T_\mathrm{b}/\tau})$
 contains $T_\mathrm{b}$ and nothing about the clock; the block trace, at this fixed

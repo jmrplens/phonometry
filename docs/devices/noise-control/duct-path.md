@@ -640,9 +640,9 @@ run at different axial wavenumbers ($k_x = 5.51$ against $k = 7.33$ rad/m)
 and beat along the duct every 3.45 m, and the profile across the section
 never settles.
 
-<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_duct_cut_on_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_duct_cut_on.gif" alt="Animation: the same rigid duct driven at 180 Hz and at 400 Hz, with wavefronts that flatten across the section within half a duct width in the lower-frequency strip and a field that stays lumpy the whole length of the duct in the higher-frequency one" width="640" height="360" loading="lazy"></picture>
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on_dark.gif"><img src="https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on.gif" alt="Animation: the same rigid duct driven at 180 Hz and at 400 Hz, with wavefronts that flatten across the section within half a duct width in the lower-frequency strip and a field that stays lumpy the whole length of the duct in the higher-frequency one" width="640" height="360" loading="lazy"></picture>
 
-[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/anim_fdtd_duct_cut_on.webm)
+[Watch the high-resolution video (WebM)](https://raw.githubusercontent.com/jmrplens/phonometry-assets/main/images/anim_fdtd_duct_cut_on.webm)
 
 The panel beside each strip draws the instantaneous profile across the
 section at a station 5 m downstream against its own section average, which is

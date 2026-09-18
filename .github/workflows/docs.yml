@@ -38,6 +38,9 @@ on:
       - "CITATION.cff"
       - ".zenodo.json"
       - ".github/workflows/docs.yml"
+      # A re-rendered clip changes nothing here but this one line, and the
+      # site has to be rebuilt to serve it.
+      - "assets.lock"
   pull_request:
     # No base-branch filter: a pull request stacked on another branch has to
     # build the site too, and it is the one most likely to break it. See the
@@ -58,6 +61,9 @@ on:
       - "CITATION.cff"
       - ".zenodo.json"
       - ".github/workflows/docs.yml"
+      # A re-rendered clip changes nothing here but this one line, and the
+      # site has to be rebuilt to serve it.
+      - "assets.lock"
   workflow_dispatch:
 
 permissions:
@@ -116,6 +122,26 @@ jobs:
             docs
             scripts
             site
+      # The animation clips and their posters are not in this repository:
+      # they live in jmrplens/phonometry-assets, and stage-media.mjs copies
+      # them into the site's asset tree from a checkout of it. This is that
+      # checkout, made beside the workspace where the build looks for it, at
+      # the commit assets.lock records rather than at that repository's main:
+      # a clip re-rendered on a branch is pushed there before the branch
+      # merges, and pinning to the lock is what keeps the published site
+      # showing the clips its code was rendered against. Sparse to the WebM
+      # and the WebP posters the site serves (the GIFs are for the GitHub
+      # mirror only), blobless so only those arrive: 344 files, ten seconds.
+      - name: Check out the published clips at the locked commit
+        run: |
+          dir="$GITHUB_WORKSPACE/../phonometry-assets"
+          git init -q "$dir"
+          git -C "$dir" remote add origin https://github.com/jmrplens/phonometry-assets.git
+          git -C "$dir" sparse-checkout set --no-cone '/images/*.webm' '/images/*_poster.webp'
+          git -C "$dir" fetch -q --depth 1 --filter=blob:none origin "$(cat assets.lock)"
+          git -C "$dir" checkout -q FETCH_HEAD
+          echo "PHONOMETRY_ASSETS_DIR=$dir/images" >> "$GITHUB_ENV"
+          echo "$(ls "$dir/images" | wc -l) clip files at phonometry-assets@$(cut -c1-12 assets.lock)"
       - uses: actions/setup-node@v7
         with:
           node-version: 22

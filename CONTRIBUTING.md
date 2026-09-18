@@ -45,18 +45,9 @@ To set up your development environment:
    cd phonometry
    ```
 
-   The 2 700 documentation figures under `.github/images/` are in the tree and
-   in its history, and you will not need them to work on the code. A partial
-   clone leaves them out and brings a working tree of about 60 MB:
-   ```bash
-   git clone --filter=blob:none --no-checkout https://github.com/jmrplens/phonometry.git
-   cd phonometry
-   git sparse-checkout set --cone src tests scripts docs
-   git checkout main
-   ```
-   Cone mode keeps the root files, so `pyproject.toml`, the `Makefile` and the
-   requirements are there; `git sparse-checkout add .github` brings the figures
-   in later if you come to need them, and only then does git fetch them.
+   The documentation figures under `.github/images/` are in the tree and you
+   will not need them to work on the code; a partial clone leaves them out
+   (see [Cloning without the figures](#cloning-without-the-figures) below).
 
 2. **Create a virtual environment:**
    ```bash
@@ -121,12 +112,33 @@ To run a suite against the full original set, drop it in `tests/data-local/`:
 See `tests/data/README.md` for the convention and what each committed oracle
 can and cannot assert.
 
-### 4. Documentation Images (auto-generated)
-Every image under `.github/images/` is generated with the library itself by
-`scripts/generate_graphs.py` (plots) and `scripts/generate_diagrams.py` (setup /
-signal-flow diagrams), never hand-made. If your change alters filter responses,
-weighting curves or any other plotted behavior, regenerate the graphs and commit
-the affected images together with the code change:
+### 4. Documentation media (auto-generated)
+
+Every figure, diagram, animation and report preview in the documentation is
+generated with the library itself, never hand-made. There are two pipelines,
+and they end in two different places. What separates them is whether CI can
+regenerate the output on a pull request: the figures, yes; the clips, no,
+because a clip is an FDTD run plus four video encodes, minutes of GPU each,
+and the encoders are not bit-reproducible across machines anyway.
+
+| What | Made by | Lives in | Checked by CI |
+| --- | --- | --- | --- |
+| Figures: SVG, and lossless WebP for the few rasters an SVG would bloat | `make graphs` | `.github/images`, this repository | `check_figures.py` regenerates every one and compares within tolerance |
+| Animation clips: WebM in four language and theme variants, plus two GIF editions for GitHub | `make animations` | `images/` of [phonometry-assets](https://github.com/jmrplens/phonometry-assets) | `check_animation_freshness.py`: every file present at the locked commit, fingerprint of the drawing code unchanged |
+| Poster stills: one lossy WebP per clip variant | `make posters`, and `make animations` on the way | with the clips | with the clips |
+| Example `.report()` fiches: PDF and WebP preview | `make reports` | `.github/reports`, this repository | `check_reports.py` |
+
+The clips live apart because they are binary and re-encoded whole whenever
+the code that draws one changes, and kept here every re-encode stayed in the
+history of every clone. The figures stay because they are text: git stores a
+new revision of one as a small delta, and regenerating and comparing them on
+every pull request is what catches an unintended change to a plotted result.
+
+#### Figures
+
+If your change alters filter responses, weighting curves or any other plotted
+behaviour, regenerate the figures and commit the affected ones together with
+the code change:
 
 ```bash
 make graphs   # runs both: python scripts/generate_graphs.py && python scripts/generate_diagrams.py
@@ -171,39 +183,89 @@ they are the command lines, and `make graphs` walks the registry, so a function
 added to them is never drawn. Reference the resulting image from the docs; do
 not commit images produced any other way.
 
-#### The animation clips live in another repository
+#### Clips
 
-The figures are text and git stores a new revision of one as a few kilobytes
-of delta. The animation clips are not: a WebM is re-encoded whole whenever the
-code drawing it changes, and kept here they made a clone of this repository
-download gigabytes of superseded video. So the clips, their GIF editions and
-their poster stills live in [`jmrplens/phonometry-assets`](https://github.com/jmrplens/phonometry-assets),
-and the code that draws them stays here.
+The clips are rendered into a local checkout of the assets repository and
+published from it in the same command. Where that checkout is:
 
-`make animations` renders into a checkout of that repository beside this one
-(`../phonometry-assets`, or wherever `PHONOMETRY_ASSETS_DIR` in `.env` points;
-`make assets` clones or updates it) and then publishes what it rendered: it
-commits and pushes there and writes the resulting commit into `assets.lock`
-here. Your commit in this repository is then two text files, the fingerprint
-manifest and the lock, and the video is already published. `make posters`
-does the same for the stills. `PUBLISH=no` on either renders without pushing,
-for a look.
+- `PHONOMETRY_ASSETS_DIR` in `.env`, beside the GPU settings, naming the
+  `images/` directory of a checkout; or otherwise
+- `../phonometry-assets`, a sibling of this repository, which `make assets`
+  clones, and fast-forwards when it already exists.
 
-The README and the guide twins under `docs/` load the clips from that
-repository's `main` through `raw.githubusercontent.com`, because GitHub
-renders them with no build step. The site does not: `site/scripts/stage-media.mjs`
-copies the WebM and the posters into the site's own asset tree from the
-checkout, and the docs workflow makes that checkout at the commit
-`assets.lock` records, so the published site shows the clips its code was
-rendered against whatever has since been pushed to that repository. A clip
-re-rendered on a branch is therefore published the moment it is rendered and
-reaches the site the moment the branch merges, and an abandoned branch cannot
-change what `main` shows.
+Nothing falls back to `.github/images`. A clip written there would be reported
+by `check_figures.py` as a figure nobody committed, and no clip enters this
+repository again.
 
-CI never fetches a clip to check it: the quality job lists the names in the
-tree of the locked commit, a few hundred kilobytes, and
-`scripts/check_animation_freshness.py` checks every clip the code registers
-against that list and against the fingerprint of the code that drew it.
+```bash
+make assets                                              # once: the checkout
+make animations                                          # render every clip
+python scripts/generate_graphs.py --animations --anim anim_<name>   # or one
+make posters                                             # only the stills, no re-encode
+```
+
+After rendering, `make animations` and `make posters` publish what they
+wrote: `scripts/publish_assets.py` stages `images/` in the assets checkout,
+commits with a message naming the clips and the commit here they were rendered
+from, pushes to that repository's `main`, and writes the resulting commit into
+`assets.lock` here. It refuses a checkout that is off `main` or carries changes
+outside `images/`, so a stray file is never published under a message about
+clips, and it does nothing when a render changed no bytes. `PUBLISH=no` on
+either target renders without pushing, for a look.
+
+Your commit in this repository is then two text files:
+
+- `scripts/animation_fingerprints.txt`, the fingerprint of the code each clip
+  was drawn by. The render stamps it, and so does `make posters`, because the
+  poster extractor is part of that code: a change to how a poster is cut marks
+  every clip stale, and re-extracting is the answer that renders nothing.
+- `assets.lock`, the assets commit the clips were published to.
+
+This works from any branch. A clip is published the moment it is rendered and
+reaches the published site the moment the branch merges and the lock moves
+with it, because the site is built against the locked commit and not against
+that repository's `main`. An abandoned branch therefore cannot change what
+`main` shows; it only leaves files nothing references in the assets
+repository.
+
+#### How each consumer gets the media
+
+- **The site** serves its own copy of everything. `site/scripts/stage-media.mjs`
+  copies the figures from `.github/images`, the WebM and posters from the
+  assets checkout and the fiches from `.github/reports` into `public/media`
+  before the build, and the docs workflow makes the assets checkout at the
+  commit `assets.lock` records. `Video.astro`, `ThemeImage.astro` and
+  `ReportPreview.astro` author the raw URL and `src/lib/media.mjs` rewrites it
+  to the local copy. A missing assets checkout stops the build rather than
+  warning, since a site without its videos is broken.
+- **The GitHub README and the guide twins under `docs/`** load figures from
+  this repository and clips from the assets repository, both at `main`,
+  through `raw.githubusercontent.com`, because GitHub renders them with no
+  build step.
+- **The PyPI README** is generated from the GitHub one by `make pypi-readme`,
+  which pins every link into this repository to the release tag and every
+  poster to the commit `assets.lock` records, so a published page keeps the
+  images it was released with.
+- **CI** never fetches a clip to check one. The quality job does a blobless
+  fetch of the locked assets commit, lists the names in its tree and hands
+  `check_animation_freshness.py` that list.
+
+#### Cloning without the figures
+
+The figures are in this repository's tree and history, and you will not need
+them to work on the code. A partial clone leaves them out and brings a working
+tree of the code alone:
+
+```bash
+git clone --filter=blob:none --no-checkout https://github.com/jmrplens/phonometry.git
+cd phonometry
+git sparse-checkout set --cone src tests scripts docs
+git checkout main
+```
+
+Cone mode keeps the root files, so `pyproject.toml`, the `Makefile` and the
+requirements are there. `git sparse-checkout add .github` brings the figures
+in later, and only then does git fetch them.
 
 ### 5. Conformance report (auto-generated)
 `docs/CONFORMANCE.md` is generated by `scripts/conformance_report.py` from the

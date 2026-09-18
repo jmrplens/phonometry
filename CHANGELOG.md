@@ -504,7 +504,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   either side of a boundary are now exactly one apart, and its tolerance is
   one and a half quanta rather than one because 0,01 is not representable in
   binary and a tolerance of exactly one quantum rejected forty-five per cent
-  of the consecutive pairs below a hundred when it was tried.
+  of the consecutive pairs below a hundred when it was tried. Its relative
+  term is zero: the comparison takes the larger of the two terms, and the
+  1e-4 it carried let two quanta through at a coordinate of 200 and nine at
+  900, which review caught and a sweep across the canvas now holds.
 
 - **The animation clips live in a repository of their own.** Cloning this
   repository downloaded about 2 GB, and 1,8 GB of it was `.github/images`:

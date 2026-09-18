@@ -114,29 +114,42 @@ def test_text_without_an_svg_element_is_returned_unchanged() -> None:
     assert ga.compact_svg("not an svg") == "not an svg"
 
 
-def test_the_tolerance_accepts_one_quantum_and_rejects_two_below_a_hundred() -> None:
-    """Every consecutive pair of two-decimal values from 0,00 to 99,99.
+@pytest.mark.parametrize(
+    ("start", "stop"),
+    [(0, 100), (150, 250), (850, 950), (1_950, 2_050)],
+    ids=["below a hundred", "around 200", "around 900", "around 2000"],
+)
+def test_the_tolerance_accepts_one_quantum_and_rejects_two(
+    start: int, stop: int
+) -> None:
+    """Every consecutive pair of two-decimal values across the canvas.
 
-    Below a hundred the relative term is smaller than the absolute one, so
-    this is where the absolute term alone decides, and where a tolerance of
-    exactly 0,01 failed on the binary representation of the difference.
+    Below a hundred is where a tolerance of exactly 0,01 failed on the
+    binary representation of the difference. The other three bands are
+    where a relative term would have let two quanta through: at 200 a
+    relative 1e-4 allowed 0,02 and at 900 it allowed 0,09, and review caught
+    that the sweep had only ever looked below a hundred.
     """
+    tol = check_figures.SVG_TOL
+    values = [round(x / 100, 2) for x in range(start * 100, stop * 100)]
     one_apart_rejected = [
-        i
-        for i in range(10_000)
-        if not ga.numbers_within_tolerance(
-            round(i / 100, 2), round((i + 1) / 100, 2), check_figures.SVG_TOL
-        )
+        a
+        for a, b in zip(values, values[1:], strict=False)
+        if not ga.numbers_within_tolerance(a, b, tol)
     ]
     two_apart_accepted = [
-        i
-        for i in range(10_000)
-        if ga.numbers_within_tolerance(
-            round(i / 100, 2), round((i + 2) / 100, 2), check_figures.SVG_TOL
-        )
+        a
+        for a, b in zip(values, values[2:], strict=False)
+        if ga.numbers_within_tolerance(a, b, tol)
     ]
     assert one_apart_rejected == []
     assert two_apart_accepted == []
+
+
+def test_the_relative_term_is_zero_so_magnitude_buys_no_slack() -> None:
+    """The one number kept at full precision still fits under the absolute term."""
+    assert check_figures.SVG_TOL.relative == 0.0
+    assert ga.numbers_within_tolerance(892.996562, 892.996563, check_figures.SVG_TOL)
 
 
 @pytest.mark.parametrize("decimals", [ga.SVG_DECIMALS])

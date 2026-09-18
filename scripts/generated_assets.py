@@ -27,6 +27,7 @@ precision its own check declares.
 from __future__ import annotations
 
 import io
+import re
 import subprocess
 from dataclasses import dataclass
 
@@ -83,6 +84,75 @@ def numbers_within_tolerance(old: float, new: float, tol: NumericTolerance) -> b
     """
     limit = max(tol.absolute, tol.relative * max(abs(old), abs(new)))
     return abs(old - new) <= limit
+
+
+#: Decimal places kept in the coordinates of a generated SVG. Matplotlib
+#: writes six, which at the figure's scale of one user unit per point is a
+#: hundredth of a micron; two is a hundredth of a point, three and a half
+#: microns, below what any zoom of any display resolves. Measured over the
+#: corpus the cut is a sixth of every file, and a rasterisation of the two at
+#: three times display scale differs only in the antialiasing of glyph edges.
+SVG_DECIMALS = 2
+
+_SVG_NUMBER = re.compile(r"-?\d+\.\d+")
+#: The attributes that carry coordinates or lengths in user units.
+_SVG_COORDINATES = re.compile(
+    r"\b(d|points|x|y|x1|y1|x2|y2|cx|cy|r|rx|ry|width|height|stroke-width|"
+    r'stroke-dasharray|stroke-dashoffset|font-size)="([^"]*)"'
+)
+_SVG_TRANSFORM = re.compile(r'\btransform="([^"]*)"')
+_SVG_TRANSLATE = re.compile(r"translate\(([^)]*)\)")
+
+
+def _round_number(match: re.Match[str]) -> str:
+    text = f"{float(match.group(0)):.{SVG_DECIMALS}f}".rstrip("0").rstrip(".")
+    return "0" if text in ("", "-", "-0") else text
+
+
+def _round_translate(match: re.Match[str]) -> str:
+    return f"translate({_SVG_NUMBER.sub(_round_number, match.group(1))})"
+
+
+def _round_transform(match: re.Match[str]) -> str:
+    return f'transform="{_SVG_TRANSLATE.sub(_round_translate, match.group(1))}"'
+
+
+def _round_coordinates(match: re.Match[str]) -> str:
+    return f'{match.group(1)}="{_SVG_NUMBER.sub(_round_number, match.group(2))}"'
+
+
+def compact_svg(text: str) -> str:
+    """The same drawing with the digits nobody can see and the bytes nobody reads taken out.
+
+    Coordinates and translations are rounded to :data:`SVG_DECIMALS`, and
+    only those. A ``scale()`` keeps every digit, because the glyph outlines
+    are drawn at ``scale(0.015625)`` and two decimals of that is a
+    twenty-eight per cent error in every letter; so does the root ``<svg>``
+    element, whose ``width`` and ``height`` fix the canvas and whose
+    rounding moved it by a pixel. Both were found by rasterising before and
+    after and counting the pixels that differed.
+
+    The indentation between tags, the DOCTYPE and the metadata block go too.
+    Nothing reads them: the figures are embedded as ``<img>``, and the
+    metadata holds the matplotlib version, which is pinned elsewhere.
+
+    ``check_figures.py`` compares the committed and the regenerated file of
+    a figure number by number, and both pass through here, so its structure
+    test sees the same text on both sides. Its numeric tolerance is set for
+    the rounding: two runs that land either side of a rounding boundary are
+    one quantum apart, and it accepts one quantum.
+    """
+    head, tag, body = text.partition("<svg ")
+    if not tag:
+        return text
+    close = body.index(">")
+    root, rest = body[: close + 1], body[close + 1 :]
+    rest = _SVG_COORDINATES.sub(_round_coordinates, rest)
+    rest = _SVG_TRANSFORM.sub(_round_transform, rest)
+    text = head + tag + root + rest
+    text = re.sub(r">\s+<", "><", text)
+    text = re.sub(r"<!DOCTYPE[^>]*>\s*", "", text, flags=re.DOTALL)
+    return re.sub(r"<metadata>.*?</metadata>\s*", "", text, flags=re.DOTALL)
 
 
 def committed_bytes(path: str) -> bytes | None:

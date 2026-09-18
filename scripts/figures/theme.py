@@ -313,7 +313,20 @@ def save_figure(output_dir: str, filename: str, **kwargs: Any) -> None:
         # check_figure_language.py had to work around.
         plt.rcParams["svg.fonttype"] = "path"
         kwargs.setdefault("metadata", {"Date": None})
-        plt.savefig(path, **kwargs)
+        # Through a buffer and generated_assets.compact_svg: the coordinates
+        # are cut to what a display can resolve and the indentation, DOCTYPE
+        # and metadata come off, a sixth of every file. Reversing the SVG_TOL
+        # relationship: the comparison in check_figures.py accepts one
+        # rounding quantum, which is what two machines either side of a
+        # boundary differ by after this.
+        import io
+
+        import generated_assets
+
+        drawn = io.StringIO()
+        plt.savefig(drawn, format="svg", **kwargs)
+        with open(path, "w", encoding="utf-8") as handle:  # noqa: PTH123
+            handle.write(generated_assets.compact_svg(drawn.getvalue()))
         return
     import io
 

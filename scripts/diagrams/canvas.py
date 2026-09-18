@@ -37,6 +37,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import generated_assets
+
 from .i18n import lookup, visit
 from .outline import (
     _COMBINING,
@@ -1034,5 +1036,10 @@ def _write(
             build(svg, th)
             path = Path(output_dir) / f"{name}{lang_suffix}{th.suffix}.svg"
             with path.open("w", encoding="utf-8") as fh:
-                fh.write(svg.render(title))
+                # The same pass the matplotlib figures take (see
+                # generated_assets.compact_svg): this renderer already writes
+                # short numbers and no indentation, so it changes little here,
+                # and one rule over the whole corpus is what keeps the
+                # comparison in check_figures.py the same for every file.
+                fh.write(generated_assets.compact_svg(svg.render(title)))
     print(f"Generated {name}.svg (+dark, +es, +es_dark)")

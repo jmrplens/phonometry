@@ -69,7 +69,7 @@ def outputs(clip: str) -> list[str]:
     """
     return (
         [f"{clip}{suffix}.webm" for suffix in VARIANTS]
-        + [f"{clip}{suffix}_poster.jpg" for suffix in VARIANTS]
+        + [f"{clip}{suffix}_poster.webp" for suffix in VARIANTS]
         + [f"{clip}{suffix}.gif" for suffix in ("", "_dark")]
     )
 

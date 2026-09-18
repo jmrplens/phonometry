@@ -352,11 +352,11 @@ def test_the_posters_pin_to_the_assets_commit_and_not_to_the_tag() -> None:
     """
     text = (
         "![poster](https://raw.githubusercontent.com/jmrplens/phonometry-assets"
-        "/main/images/anim_x_poster.jpg) "
+        "/main/images/anim_x_poster.webp) "
         "![fig](https://raw.githubusercontent.com/jmrplens/phonometry/main/a.svg)"
     )
     pinned = generate_pypi_readme.pin_to_tag(text, "v9.9.9", "abc123")
-    assert "phonometry-assets/abc123/images/anim_x_poster.jpg" in pinned
+    assert "phonometry-assets/abc123/images/anim_x_poster.webp" in pinned
     assert "phonometry-assets/v9.9.9" not in pinned
     assert "jmrplens/phonometry/v9.9.9/a.svg" in pinned
 

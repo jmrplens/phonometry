@@ -70,6 +70,13 @@ function isIndexedPng(file, buffer) {
 	return extname(file).toLowerCase() === '.png' && buffer.length > 25 && buffer[25] === 3;
 }
 
+// The animation posters are lossy WebP already, extracted from the clips at
+// the quality scripts/figures/media.py chose. A second lossy encode at 82
+// would come out a little smaller and be kept for it, having lost twice.
+function isAnimationPoster(file) {
+	return /\/anim_[^/]*_poster\.webp$/.test(file);
+}
+
 // How many images are in flight at once. The step used to run one image at
 // a time and took two minutes over the ~630 rasters a build emits, almost
 // all of it inside sharp's native encoders, which do their work off the
@@ -83,7 +90,7 @@ async function optimize(file) {
 	const encode = encoders[extname(file).toLowerCase()];
 	if (!encode) return null;
 	const original = readFileSync(file);
-	if (isIndexedPng(file, original)) return null;
+	if (isIndexedPng(file, original) || isAnimationPoster(file)) return null;
 	let optimized;
 	try {
 		optimized = await (await encode(sharp(original))).toBuffer();

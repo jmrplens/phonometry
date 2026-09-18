@@ -503,7 +503,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   page on `main` shows the clips `main` was built against whatever a branch
   has pushed since. The PyPI page pins its poster to the locked commit
   rather than to a tag, and CI checks the published clips against the code
-  without fetching a byte of video, from the names in that commit's tree. The figures are unchanged and
+  without fetching a byte of video, from the names in that commit's tree.
+  The poster stills are WebP now, extracted from the WebM directly at a
+  quality measured against the JPEG they replace: 46 per cent of its size
+  at 44 to 48 dB, which is past where a difference can be seen, and 21 MB
+  for the 172 of them where the JPEGs were 40. `make posters` re-extracts
+  them and stamps the clips, so a change to how a poster is cut is answered
+  without rendering a frame. The figures are unchanged and
   stay: `make graphs` still writes them to `.github/images`, and
   `check_figures.py` still regenerates and compares them on every pull
   request. The history that carries the old clips is rewritten separately.

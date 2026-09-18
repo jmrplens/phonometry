@@ -334,11 +334,11 @@ animations: assets
 animation-freshness:
 	$(PYTHON) scripts/check_animation_freshness.py
 
-# Re-extract only the deferred-loading poster stills (anim_*_poster.jpg) from
+# Re-extract only the deferred-loading poster stills (anim_*_poster.webp) from
 # the published animation WebMs, without the slow clip re-encode, and publish
-# them the same way `animations` does. Posters are JPEG and live with the
-# clips, outside the SVG/PNG figure pipeline (`graphs` deletion and the
-# check_figures.py staleness compare).
+# them the same way `animations` does. Posters are lossy WebP at the quality
+# scripts/figures/media.py fixes, and live with the clips, outside the figure
+# pipeline (`graphs` deletion and the check_figures.py staleness compare).
 posters: assets
 	$(PYTHON) scripts/generate_graphs.py --posters
 	@if [ "$(PUBLISH)" != "no" ]; then $(PYTHON) scripts/publish_assets.py; fi

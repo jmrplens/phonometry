@@ -1320,7 +1320,12 @@ def generate_posters(output_dir: str) -> None:
     """Re-extract every animation poster from the already-rendered WebMs.
 
     Used by ``--posters`` (`make posters`) to refresh the stills without the
-    slow re-encode of the clips themselves.
+    slow re-encode of the clips themselves, and it stamps the clips it
+    touched the way a render does: the poster extractor is inside the
+    fingerprint, so a change to it marks every clip stale, and this is the
+    target that brings them back without rendering a frame. It cannot tell a
+    poster change from a frame change, so it is run after the former and is
+    not a way to silence the check after the latter.
     """
     # `_extract_poster` trims the `.webm` off the text it is handed and returns
     # the poster path the same way, so the clips are named as text from here on.
@@ -1331,6 +1336,16 @@ def generate_posters(output_dir: str) -> None:
     for webm in webms:
         poster = _extract_poster(webm, _poster_ss_for(webm))
         print(f"  {Path(webm).name} -> {Path(poster).name}")
+    clips = sorted({_clip_of(Path(webm).stem) for webm in webms})
+    _stamp_clips(clips, output_dir)
+
+
+def _clip_of(stem: str) -> str:
+    """``anim_x`` for ``anim_x``, ``anim_x_dark``, ``anim_x_es`` or ``anim_x_es_dark``."""
+    for suffix in ("_es_dark", "_dark", "_es"):
+        if stem.endswith(suffix):
+            return stem[: -len(suffix)]
+    return stem
 
 
 _ANIMATIONS: dict[str, Callable[[str], None]] = {

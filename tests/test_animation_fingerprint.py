@@ -445,6 +445,40 @@ def test_a_parallel_task_that_dies_does_not_cost_the_stamps_of_the_ones_before_i
     assert _fake_parallel_batch(monkeypatch, fails="anim_two") == [["anim_one"]]
 
 
+def test_re_extracting_the_posters_stamps_the_clips_they_belong_to(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: pathlib.Path
+) -> None:
+    """The poster extractor is inside the fingerprint, so `make posters` stamps.
+
+    A change to how a poster is cut marks every clip stale, and re-extracting
+    is the answer that renders nothing. It has to stamp the way a render
+    does, once per clip and not once per variant, or the check would keep
+    asking for a re-render of frames that did not change.
+    """
+    from figures import registry
+
+    for name in (
+        "anim_one",
+        "anim_one_dark",
+        "anim_one_es",
+        "anim_one_es_dark",
+        "anim_two",
+    ):
+        (tmp_path / f"{name}.webm").write_bytes(b"")
+    cut: list[str] = []
+    stamped: list[list[str]] = []
+    monkeypatch.setattr(
+        registry, "_extract_poster", lambda webm, ss: cut.append(webm) or webm
+    )
+    monkeypatch.setattr(registry, "_poster_ss_for", lambda webm: None)
+    monkeypatch.setattr(
+        registry, "_stamp_clips", lambda clips, out: stamped.append(list(clips))
+    )
+    registry.generate_posters(str(tmp_path))
+    assert len(cut) == 5
+    assert stamped == [["anim_one", "anim_two"]]
+
+
 # -- what the check says ----------------------------------------------------
 
 
@@ -480,7 +514,7 @@ def test_a_complete_and_stamped_clip_passes(
 
 
 @pytest.mark.parametrize(
-    "dropped", ["anim_one_es.webm", "anim_one_es_dark_poster.jpg", "anim_one_dark.gif"]
+    "dropped", ["anim_one_es.webm", "anim_one_es_dark_poster.webp", "anim_one_dark.gif"]
 )
 def test_every_file_a_render_writes_is_asked_for(
     monkeypatch: pytest.MonkeyPatch,

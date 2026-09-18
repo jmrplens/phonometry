@@ -12,8 +12,8 @@
 // What is staged, and what is not:
 //   *.svg    copied verbatim. These are the figure pipeline's output and are
 //            already minimal; re-encoding them is not wanted.
-//   *.webp   copied, then recompressed in dist by optimize-images.mjs.
-//   *.jpg    animation poster stills, same treatment.
+//   *.webp   copied, then recompressed in dist by optimize-images.mjs,
+//            except the animation posters, which arrive at their quality.
 //   *.webm   copied verbatim. Video, nothing here can improve it.
 //   *.gif    NOT staged. The GIFs exist only for the markdown mirror on
 //            GitHub, which cannot play WebM; the site uses the WebM.
@@ -92,7 +92,7 @@ if (!existsSync(clips)) {
 /** Source directories, and the extensions taken from each. */
 const SOURCES = [
   { dir: join(repoRoot, '.github', 'images'), exts: new Set(['.svg', '.webp']) },
-  { dir: clips, exts: new Set(['.jpg', '.webm']) },
+  { dir: clips, exts: new Set(['.webp', '.webm']) },
   // The example fiches: the WebP preview each page shows, and the PDF it links
   // to. Together they are under 6 MB, which is worth paying to leave nothing
   // pointing off-origin.

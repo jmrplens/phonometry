@@ -194,24 +194,47 @@ def _render_clip(
     )
 
 
+#: WebP quality of the poster stills. Measured against the JPEG the pipeline
+#: used to write (``-q:v 3``): 85 gives 46 per cent of its size at 44 to 48 dB
+#: PSNR, which is past where a difference can be seen, and the frame is taken
+#: from the WebM directly rather than through a JPEG, so nothing is encoded
+#: twice.
+POSTER_QUALITY = 85
+
+
 def _extract_poster(webm: str, poster_ss: float | None = None) -> str:
     """Extract the deferred-loading poster still from a rendered WebM.
 
     The frame is grabbed half a second before the end of the clip, i.e.
     inside the closing hold, so the poster shows the settled verdict state.
-    The output sits next to the WebM as ``<stem>_poster.jpg``; JPEG keeps it
-    outside the SVG/WebP figure pipeline (`make graphs` deletion glob and the
-    scripts/check_figures.py regeneration compare).
+    The output sits next to the WebM as ``<stem>_poster.webp``, in the
+    assets repository with the clip, so it never meets the figure pipeline's
+    deletion glob or its regeneration compare. A ``<stem>_poster.jpg`` left
+    by the pipeline before it wrote WebP is removed, so a re-extraction does
+    not leave two posters of one clip behind.
     """
     import subprocess
+    from pathlib import Path
 
-    poster = webm.removesuffix(".webm") + "_poster.jpg"
+    stem = webm.removesuffix(".webm")
+    poster = stem + "_poster.webp"
     subprocess.run(
         ["ffmpeg", "-y", "-loglevel", "error"]
         + (["-ss", f"{poster_ss:.2f}"] if poster_ss is not None else ["-sseof", "-0.5"])
-        + ["-i", webm, "-frames:v", "1", "-q:v", "3", "-update", "1", poster],
+        + [
+            "-i",
+            webm,
+            "-frames:v",
+            "1",
+            "-c:v",
+            "libwebp",
+            "-quality",
+            str(POSTER_QUALITY),
+        ]
+        + ["-compression_level", "6", "-update", "1", poster],
         check=True,
     )
+    Path(stem + "_poster.jpg").unlink(missing_ok=True)
     return poster
 
 
@@ -343,7 +366,7 @@ def _save_animation(
 
     The GIF is derived from the just-written WebM with an ffmpeg palette pass
     so the GitHub docs get a compact, self-contained loop; the site embeds the
-    WebM directly. Every WebM variant also gets a ``_poster.jpg`` still (see
+    WebM directly. Every WebM variant also gets a ``_poster.webp`` still (see
     :func:`_extract_poster`) so the site ``<video>`` embeds can defer loading
     (``preload="none"``) behind a meaningful frame. ``fps`` overrides the
     shared WebM rate and ``gif_fps`` the GIF sampling rate (long clips drop

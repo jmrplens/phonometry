@@ -130,14 +130,14 @@ jobs:
       # a clip re-rendered on a branch is pushed there before the branch
       # merges, and pinning to the lock is what keeps the published site
       # showing the clips its code was rendered against. Sparse to the WebM
-      # and JPEG the site serves (the GIFs are for the GitHub mirror only),
-      # blobless so only those arrive: 344 files, 236 MB, ten seconds.
+      # and the WebP posters the site serves (the GIFs are for the GitHub
+      # mirror only), blobless so only those arrive: 344 files, ten seconds.
       - name: Check out the published clips at the locked commit
         run: |
           dir="$GITHUB_WORKSPACE/../phonometry-assets"
           git init -q "$dir"
           git -C "$dir" remote add origin https://github.com/jmrplens/phonometry-assets.git
-          git -C "$dir" sparse-checkout set --no-cone '/images/*.webm' '/images/*.jpg'
+          git -C "$dir" sparse-checkout set --no-cone '/images/*.webm' '/images/*_poster.webp'
           git -C "$dir" fetch -q --depth 1 --filter=blob:none origin "$(cat assets.lock)"
           git -C "$dir" checkout -q FETCH_HEAD
           echo "PHONOMETRY_ASSETS_DIR=$dir/images" >> "$GITHUB_ENV"

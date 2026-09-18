@@ -63,7 +63,7 @@ def checkout(tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch) -> pathlib
 
 def test_a_render_is_published_as_one_commit_and_locked(checkout: pathlib.Path) -> None:
     (checkout / "images" / "anim_one.webm").write_bytes(b"v2")
-    (checkout / "images" / "anim_one_es_poster.jpg").write_bytes(b"p")
+    (checkout / "images" / "anim_one_es_poster.webp").write_bytes(b"p")
     assert publish_assets.publish(dry_run=False) == 0
     head = _git(checkout, "rev-parse", "HEAD")
     assert _git(checkout, "rev-parse", "origin/main") == head
@@ -72,7 +72,7 @@ def test_a_render_is_published_as_one_commit_and_locked(checkout: pathlib.Path) 
     assert subject == "Rendered anim_one from phonometry abc1234"
     body = _git(checkout, "log", "-1", "--format=%b")
     assert "anim_one.webm" in body
-    assert "anim_one_es_poster.jpg" in body
+    assert "anim_one_es_poster.webp" in body
 
 
 def test_nothing_to_publish_makes_no_commit(checkout: pathlib.Path) -> None:
@@ -119,7 +119,7 @@ def test_a_checkout_off_main_is_refused(checkout: pathlib.Path) -> None:
 @pytest.mark.parametrize(
     ("names", "expected"),
     [
-        (["anim_a.webm", "anim_a_es_dark.webm", "anim_a_poster.jpg"], "anim_a"),
+        (["anim_a.webm", "anim_a_es_dark.webm", "anim_a_poster.webp"], "anim_a"),
         (["anim_a.webm", "anim_b_dark.gif"], "anim_a, anim_b"),
         ([f"anim_{i}.webm" for i in range(5)], "5 clips"),
     ],

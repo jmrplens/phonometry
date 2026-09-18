@@ -7,7 +7,7 @@ does not.
 **Images.** PyPI's readme renderer strips ``<picture>``/``<source>``
 elements, so the GitHub README's theme-aware images would degrade there.
 Each ``<picture>`` element collapses down to its plain light-theme ``<img>``
-fallback, and animated GIFs are swapped for their static ``_poster.jpg``
+fallback, and animated GIFs are swapped for their static ``_poster.webp``
 stills so the package page stays light to load.
 
 **Links.** A PyPI description is frozen at upload and can never be edited
@@ -151,7 +151,7 @@ def pypi_readme(readme: str, tag: str, assets_commit: str) -> str:
             )
             raise ValueError(msg)
         img = imgs[0].replace(' loading="lazy"', "")
-        swapped = re.sub(r'(src="[^"]+)\.gif"', r'\1_poster.jpg"', img)
+        swapped = re.sub(r'(src="[^"]+)\.gif"', r'\1_poster.webp"', img)
         if swapped != img:
             # The still is no longer an animation; fix the alt prefix.
             swapped = re.sub(

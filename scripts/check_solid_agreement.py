@@ -7,12 +7,13 @@ value than alone. But two numbers that disagree are one of three things, and
 only the reader can tell them apart if something separates them first.
 
 1. **A transcription error**, almost always ours. It is the only one of the
-   three this script fails on, and density is where it shows: densities of a
-   named material agree across these books to within three per cent, every
-   time, because a density is the one property a table cannot get very wrong
-   without the material becoming a different material. A density that
-   disagrees by more than :data:`DENSITY_TOLERANCE` is a digit somebody typed
-   wrong, and the somebody is usually whoever transcribed the page.
+   three this script fails on, and density is where it shows: every density
+   this script does not already accept agrees across these books to within
+   2,6 per cent, because a density is the one property a table cannot get very
+   wrong without the material becoming a different material. A density that
+   disagrees by more than :data:`DENSITY_TOLERANCE`, which is 8 per cent, is a
+   digit somebody typed wrong, and the somebody is usually whoever transcribed
+   the page. Anything under that is not reported at all.
 
 2. **A disagreement between the books themselves**, which is not a defect of
    either and must not be smoothed over. Moduli disagree by twenty and thirty
@@ -61,9 +62,11 @@ if TYPE_CHECKING:
     from collections.abc import Iterable, Mapping
 
 #: How far the density of one material may vary between books before it is
-#: read as a typo rather than as a disagreement. The widest real spread in the
-#: catalogue is iron at 2,6 per cent, and a mistyped digit moves a density by
-#: ten per cent at the very least, so the band is set between the two.
+#: read as a typo rather than as a disagreement. The widest spread the script
+#: does not accept is iron at 2,6 per cent, and a mistyped digit moves a
+#: density by ten per cent at the very least, so the band is set between the
+#: two. The one accepted disagreement is far above it, at 21,5 per cent, which
+#: is what a real difference between books looks like beside a rounding.
 DENSITY_TOLERANCE = 0.08
 
 #: Density disagreements that are real rather than typed, with the reason.
@@ -109,8 +112,12 @@ def normalised(name: str) -> str:
     Case and punctuation only, never the variant: Bies prints aerated concrete
     at 300 to 600 kg/m3 beside normal concrete at 2300, and folding those
     together would invent a factor of five where the page put a distinction.
+
+    Digits stay for the same reason. Bies prints Nylon 6, Nylon 66 and Nylon 12
+    as three rows, and they are three polymers rather than one material a page
+    happened to number.
     """
-    return " ".join(re.sub(r"[^a-z ]", " ", name.lower()).split())
+    return " ".join(re.sub(r"[^a-z0-9 ]", " ", name.lower()).split())
 
 
 def _reading(row: SolidMaterial, field: str) -> tuple[str, float, bool] | None:
@@ -252,6 +259,34 @@ def problems(
     return found
 
 
+def verdict(
+    found: list[str], compared: int, accepted: int, *, reporting: bool
+) -> tuple[list[str], int]:
+    """What to print after the comparison, and what to exit with.
+
+    The clean summary is the only line that tells a reader the catalogue is
+    sound, so it is printed when and only when nothing was found. ``--report``
+    returns 0 over a real disagreement, by design, which is exactly why it
+    must not also print a line saying there was none.
+    """
+    if found:
+        return (
+            [
+                "::error::published books disagree about a density",
+                *(f"  {p}" for p in found),
+            ],
+            0 if reporting else 1,
+        )
+    return (
+        [
+            f"{compared} material(s) appear in two or more books, and every "
+            f"density agrees within {DENSITY_TOLERANCE * 100:g} per cent except "
+            f"{accepted} the registry accepts with a reason."
+        ],
+        0,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -273,20 +308,15 @@ def main() -> int:
             print(line)
         print("\n* = derived by this library from the row's other cells\n")
 
-    found = problems(catalogue)
-    if found and not arguments.report:
-        print("::error::published books disagree about a density")
-        for problem in found:
-            print(f"  {problem}")
-        return 1
-    compared = len(groups(catalogue, distinguished=True))
-    accepted = len(ACCEPTED)
-    print(
-        f"{compared} material(s) appear in two or more books, and every "
-        f"density agrees within {DENSITY_TOLERANCE * 100:g} per cent except "
-        f"{accepted} the registry accepts with a reason."
+    lines, status = verdict(
+        problems(catalogue),
+        len(groups(catalogue, distinguished=True)),
+        len(ACCEPTED),
+        reporting=arguments.report,
     )
-    return 0
+    for line in lines:
+        print(line)
+    return status
 
 
 if __name__ == "__main__":

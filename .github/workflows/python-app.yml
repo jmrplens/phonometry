@@ -407,13 +407,14 @@ jobs:
 
   # The solids catalogue's point is that a published value is worth more beside
   # another published value than alone, and four books print the same material.
-  # Two densities that disagree are a digit somebody typed wrong, because across
-  # these tables a named material's density agrees to within three per cent
-  # every time, so that is what this fails on. Moduli and speeds disagree by
-  # thirty per cent between books without anybody being wrong, so those it
-  # reports and never fails; the ones it reports by default are the few an order
-  # of magnitude apart, which is how tin's twelvefold modulus surfaced. It walks
-  # the imported package, like the units and sources guards.
+  # Two densities that disagree are a digit somebody typed wrong, because every
+  # density the script does not already accept agrees across these tables to
+  # within 2,6 per cent, so it fails above 8 per cent and lets anything under
+  # that pass without a word. Moduli and speeds disagree by thirty per cent
+  # between books without anybody being wrong, so those it reports and never
+  # fails; the ones it reports by default are the few an order of magnitude
+  # apart, which is how tin's twelvefold modulus surfaced. It walks the
+  # imported package, like the units and sources guards.
   solid-agreement:
     name: The books agree about the solids they share
     runs-on: ubuntu-latest

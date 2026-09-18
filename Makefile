@@ -229,12 +229,12 @@ published-sources:
 	$(PYTHON) scripts/check_published_sources.py
 
 # The solids catalogue holds the same material from up to four books, and two
-# densities that disagree are a digit somebody typed wrong: across these tables
-# a named material's density agrees to within three per cent, every time. This
-# puts the books side by side and fails on that, while reporting the moduli and
-# speeds, which really do disagree by thirty per cent without anybody being
-# wrong. Needs the package importable, for the same reason published-sources
-# does.
+# densities that disagree are a digit somebody typed wrong: every density the
+# script does not already accept agrees across these tables to within 2,6 per
+# cent. It puts the books side by side and fails above 8 per cent, so a real
+# spread passes without a word, while reporting the moduli and speeds, which do
+# disagree by thirty per cent without anybody being wrong. Needs the package
+# importable, for the same reason published-sources does.
 solid-agreement:
 	$(PYTHON) scripts/check_solid_agreement.py
 

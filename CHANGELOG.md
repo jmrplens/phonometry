@@ -115,11 +115,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `check_solid_agreement.py` puts every material several books print on one
   line. What it fails on is density and only density, because a density is the
   one property a table cannot get very wrong without describing a different
-  material: across these six tables a named material's density agrees to within
-  2,6 per cent, every time, so a disagreement past 8 per cent is a digit
-  somebody typed wrong and almost always ours. Everything else it reports and
-  never fails on, since moduli disagree by nineteen per cent on aluminium and
-  thirty on lead between these books without anybody being wrong.
+  material: every density the gate does not already accept agrees across these
+  six tables to within 2,6 per cent, so a disagreement past 8 per cent is a
+  digit somebody typed wrong and almost always ours. Everything else it reports
+  and never fails on, since moduli disagree by nineteen per cent on aluminium
+  and thirty on lead between these books without anybody being wrong.
 
   Its first full run found tin. Cremer and Mechel print a Young's modulus of
   4,4 GPa and Bies 54, a factor of twelve, while the three densities agree to
@@ -128,9 +128,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   modulus and transverse speed besides, Bies' 54 reproduces his printed
   2 720 m/s exactly, and Mechel's `f_cr d` of 81 m Hz follows from 4,4 and not
   from 54. So no page contradicts itself and this is not an errata; it is two
-  books sharing an order of magnitude against a third, and the accepted modulus
-  of tin is near the third one. That is the case for keeping six books instead
-  of picking one, and the reason the gate never votes by majority.
+  books sharing an order of magnitude against a third. The catalogue does not
+  pick between them, but the rest of it says which way to look: a tin of
+  4,4 GPa carries sound at 780 m/s, which lands it among the soft plastics,
+  below high-density polyethylene at 1 030 and below every lead row in the
+  catalogue, which run from 1 180 to 1 257 m/s although lead is the softer metal
+  and half again as dense. That is the case for keeping six
+  books instead of picking one, and the reason the gate never votes by
+  majority: here the majority is the side the catalogue argues against.
 
   The disagreement it does silence is written down with its reason, and the
   silencing is a ratchet in both directions: an entry whose books come to agree

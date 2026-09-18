@@ -28,7 +28,7 @@ import sys
 
 import pytest
 
-from phonometry.solids import PUBLISHED_SOLIDS, SolidMaterial
+from phonometry.solids import PUBLISHED_SOLIDS, SolidMaterial, solids_named
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -161,6 +161,42 @@ def test_a_quantity_at_zero_is_infinitely_apart_and_never_divides_by_it() -> Non
     assert csa.spread([("a", 0.0, False), ("b", 200.0, False)]) == math.inf
 
 
+def test_a_clean_run_says_so_and_exits_zero() -> None:
+    """The only line that tells a reader the catalogue is sound."""
+    lines, status = csa.verdict([], 18, 1, reporting=False)
+    assert status == 0
+    assert lines == [
+        "18 material(s) appear in two or more books, and every density agrees "
+        "within 8 per cent except 1 the registry accepts with a reason."
+    ]
+
+
+def test_a_disagreement_is_named_and_exits_one() -> None:
+    """What CI sees, with the annotation that makes it a job error."""
+    lines, status = csa.verdict(
+        ["steel: the densities are 333.3"], 18, 1, reporting=False
+    )
+    assert status == 1
+    assert lines[0] == "::error::published books disagree about a density"
+    assert lines[1] == "  steel: the densities are 333.3"
+
+
+def test_the_report_flag_never_claims_agreement_it_did_not_find() -> None:
+    """--report returns 0 over a real disagreement, and must not deny it.
+
+    The flag exists to print the comparison without failing, so its exit
+    status carries no information. That leaves the summary line as the only
+    thing saying the catalogue is sound, and printing it here would make the
+    run state the opposite of what it found.
+    """
+    lines, status = csa.verdict(
+        ["steel: the densities are 333.3"], 18, 1, reporting=True
+    )
+    assert status == 0
+    assert not any("agrees within" in line for line in lines)
+    assert lines[0] == "::error::published books disagree about a density"
+
+
 def test_the_registry_is_not_stale_against_the_published_catalogue() -> None:
     """Every entry in ACCEPTED still silences a disagreement that is there."""
     assert csa.problems(PUBLISHED_SOLIDS.values()) == []
@@ -246,9 +282,52 @@ def test_a_name_is_reduced_to_what_two_books_would_share(
     assert csa.normalised(printed) == expected
 
 
+def test_a_digit_in_the_name_names_the_material_and_survives() -> None:
+    """Nylon 6, Nylon 66 and Nylon 12 are three polymers, not one numbered."""
+    reduced = {csa.normalised(name) for name in ("Nylon 6", "Nylon 66", "Nylon 12")}
+    assert len(reduced) == 3
+
+
+def test_the_catalogue_keeps_its_numbered_materials_apart() -> None:
+    """The same thing held against the rows the catalogue actually has.
+
+    Bies prints the three nylons, so folding the digit away would put them in
+    one group and invent a disagreement out of a distinction his page drew.
+    """
+    nylons = {
+        csa.normalised(row.name)
+        for row in PUBLISHED_SOLIDS.values()
+        if row.name.startswith("Nylon")
+    }
+    assert len(nylons) == 3
+
+
 def test_the_spread_is_the_fraction_of_the_smaller() -> None:
     """A doubling reads as a hundred per cent, not fifty."""
     assert csa.spread([("a", 100.0, False), ("b", 200.0, False)]) == pytest.approx(1.0)
+
+
+def test_the_argument_the_guide_makes_about_tin_still_holds() -> None:
+    """The catalogue's own case against the modulus two of its books share.
+
+    The guide says a tin of 4,4 GPa would carry sound more slowly than every
+    lead row here although lead is the softer metal and half again as dense.
+    That is the only thing deciding the disagreement, since no page
+    contradicts itself, so it has to keep being true of the rows as they are.
+    """
+    tin = min(
+        row.bar_longitudinal_speed_m_s
+        for row in solids_named("Tin")
+        if row.bar_longitudinal_speed_m_s and row.youngs_modulus_pa
+        if row.youngs_modulus_pa < 10e9
+    )
+    leads = [
+        row.bar_longitudinal_speed_m_s
+        for row in solids_named("Lead")
+        if row.bar_longitudinal_speed_m_s
+    ]
+    assert tin < min(leads)
+    assert (min(leads), max(leads)) == (1180.0, pytest.approx(1256.6, abs=0.1))
 
 
 def test_the_tolerance_sits_between_the_real_spread_and_a_typed_digit() -> None:

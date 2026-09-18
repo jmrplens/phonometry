@@ -498,10 +498,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `make posters` render into a checkout of that repository beside this one
   and then publish: they commit and push there and write the resulting commit
   into `assets.lock`, so the two repositories say which clips go with which
-  code. The guides, the READMEs and the site load the clips from there, the
-  PyPI page pins its poster to the locked commit rather than to a tag, and CI
-  checks the published clips against the code without fetching a byte of
-  video, from the names in that commit's tree. The figures are unchanged and
+  code. The README and the guide twins load the clips from there; the site
+  serves its own copy, staged from a checkout at the locked commit, so a
+  page on `main` shows the clips `main` was built against whatever a branch
+  has pushed since. The PyPI page pins its poster to the locked commit
+  rather than to a tag, and CI checks the published clips against the code
+  without fetching a byte of video, from the names in that commit's tree. The figures are unchanged and
   stay: `make graphs` still writes them to `.github/images`, and
   `check_figures.py` still regenerates and compares them on every pull
   request. The history that carries the old clips is rewritten separately.

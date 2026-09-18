@@ -189,10 +189,19 @@ manifest and the lock, and the video is already published. `make posters`
 does the same for the stills. `PUBLISH=no` on either renders without pushing,
 for a look.
 
-The guides and the READMEs load the clips from that repository's `main`
-through `raw.githubusercontent.com`; the site's `Video.astro` builds the URL
-from one constant. CI does not fetch the clips: it lists the names in the tree
-of the commit `assets.lock` records, a few hundred kilobytes, and
+The README and the guide twins under `docs/` load the clips from that
+repository's `main` through `raw.githubusercontent.com`, because GitHub
+renders them with no build step. The site does not: `site/scripts/stage-media.mjs`
+copies the WebM and the posters into the site's own asset tree from the
+checkout, and the docs workflow makes that checkout at the commit
+`assets.lock` records, so the published site shows the clips its code was
+rendered against whatever has since been pushed to that repository. A clip
+re-rendered on a branch is therefore published the moment it is rendered and
+reaches the site the moment the branch merges, and an abandoned branch cannot
+change what `main` shows.
+
+CI never fetches a clip to check it: the quality job lists the names in the
+tree of the locked commit, a few hundred kilobytes, and
 `scripts/check_animation_freshness.py` checks every clip the code registers
 against that list and against the fingerprint of the code that drew it.
 

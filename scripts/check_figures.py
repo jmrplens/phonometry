@@ -54,8 +54,16 @@ IMG_DIR = ".github/images"
 
 # Numeric tokens differing by less than this (absolute, in SVG user units, or
 # relative for large magnitudes) are treated as equal. A 1-ULP coordinate
-# wobble is ~1e-6; a real edit moves a coordinate by whole units.
-SVG_TOL = NumericTolerance(absolute=1e-2, relative=1e-4)
+# wobble is ~1e-6; a real edit moves a coordinate by whole units. The
+# coordinates are written to generated_assets.SVG_DECIMALS places, so two
+# machines that land either side of a rounding boundary differ by exactly one
+# quantum, 0,01, and the absolute term has to accept that. It is one and a
+# half quanta rather than one because 0,01 is not representable in binary:
+# the difference of two such numbers comes out as 0,010000000000000002, and
+# a tolerance of exactly one quantum rejected forty-five per cent of the
+# consecutive pairs below a hundred when it was tried. Two quanta apart is
+# still rejected, which is what keeps a real edit visible.
+SVG_TOL = NumericTolerance(absolute=1.5e-2, relative=1e-4)
 
 # A pixel counts as "meaningfully changed" if any channel differs by more than
 # ``level`` (0..255). Cross-CPU drift perturbs a coordinate by ~1e-6 units,

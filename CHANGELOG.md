@@ -487,6 +487,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The figures are written to two decimals.** Matplotlib writes every
+  coordinate of an SVG to six, which at one user unit per point is a
+  hundredth of a micron; two is a hundredth of a point, below what any zoom
+  of any display resolves. `generated_assets.compact_svg` now cuts the
+  coordinates and translations of every generated figure and diagram to
+  two, and drops the indentation, the DOCTYPE and the metadata block nothing
+  reads. Measured over the 2 704 committed SVGs the corpus goes from
+  258,6 MB to 217,1 MB, and a rasterisation of each version at three times
+  display scale differs only in the antialiasing of glyph edges. Two things
+  are not rounded, both found by that rasterisation: a `scale()`, because
+  the glyph outlines are drawn at `scale(0.015625)` and two decimals of that
+  is a twenty-eight per cent error in every letter, and the root element,
+  whose width and height fix the canvas. The comparison in `check_figures.py`
+  accepts one rounding quantum and rejects two, since two machines that land
+  either side of a boundary are now exactly one apart, and its tolerance is
+  one and a half quanta rather than one because 0,01 is not representable in
+  binary and a tolerance of exactly one quantum rejected forty-five per cent
+  of the consecutive pairs below a hundred when it was tried.
+
 - **The animation clips live in a repository of their own.** Cloning this
   repository downloaded about 2 GB, and 1,8 GB of it was `.github/images`:
   not the 2 704 SVG figures, which are text and cost 80 MB across eleven

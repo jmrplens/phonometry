@@ -201,7 +201,8 @@ licensed copy, or point at a channel that was missed.
 ```bash
 make install   # dependencies + editable install
 make check     # ruff + mypy + bandit + tests
-make graphs    # regenerate documentation images
+make graphs    # regenerate the documentation figures
+make animations  # render the animation clips and publish them to phonometry-assets
 ```
 
 See the

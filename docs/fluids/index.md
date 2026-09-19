@@ -43,7 +43,7 @@ domain may import `fluids` without an architecture edge, and a catalogue here
 that reached into `materials`, `building` and `simulation` would make the
 medium depend on three of the domains that stand on it. The comparison is a
 documentation artefact instead, and the [published
-catalogues](/phonometry/reference/catalogues/) page lists all four side by
+catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/) page lists all four side by
 side.
 
 What `fluids.PUBLISHED_FLUIDS` does hold is the states this library read from

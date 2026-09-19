@@ -453,6 +453,11 @@ jobs:
         pip install -e .
     - name: Check that the books agree about the solids they share
       run: python scripts/check_solid_agreement.py
+    # The same idea over every catalogue: two books that credit one study for
+    # one material are two readings of one measurement, and a pair that does
+    # not overlap is a misread page rather than a disagreement.
+    - name: Check the rows two books took from the same place
+      run: python scripts/check_shared_sources.py
 
   # The committed documentation figures (.github/images) must match a fresh
   # `make graphs` run. The rendering + compute stack is pinned in

@@ -3656,6 +3656,103 @@ in the same order.
 
 ---
 
+## Allard & Atalla 2e (2009), Table 11.7 (the figure its caption names)
+
+*Textbook, not a standard.*
+
+- **Location:** Table 11.7, PDF page 280, printed p. 274, the parameter table
+  of the carpet, screen and fibrous layer of Sect. 11.7.2.
+- **The print:** the caption reads "The parameters used to predict the surface
+  impedance of the material represented in Figure 11.6".
+- **The problem:** Figure 11.6 is on printed p. 266 and is the plastic foam
+  under a sheet of glass wool, whose parameters are Table 11.3. The structure
+  Table 11.7 tabulates, a carpet in two layers over an impervious screen over
+  a fibrous layer, is Figure 11.16, printed on the same page as the table.
+- **Evidence:** the prose beside Figure 11.16 says the material parameters are
+  given in Table 11.7, and the four row names of the table are the four layers
+  Figure 11.16 labels. Verified on PDF page 280 (printed p. 274) and PDF page
+  272 (printed p. 266) of Allard & Atalla, Propagation of Sound in Porous
+  Media 2e:2009.
+- **Library behaviour:** the three porous rows are transcribed as printed and
+  the data file's `about` names Figure 11.16 as the structure, with the
+  caption's own wording quoted.
+- **Status:** unreported.
+
+---
+
+## Allard & Atalla 2e (2009), Table 11.8 (the thickness of the glass wool)
+
+*Textbook, not a standard.*
+
+- **Location:** Table 11.8, PDF page 281, printed p. 275, the glass wool
+  bonded onto an aluminium plate for the normal-incidence transmission example
+  of Sect. 11.7.3.
+- **The print:** the table gives the glass wool a thickness of 3,8 mm; the
+  prose of Sect. 11.7.3 on the facing folio says "A layer of the glass wool
+  studied in Section 6.5.4, of thickness 5 cm, is bonded on to a plate of
+  aluminium, of thickness 1 mm".
+- **The problem:** the two thicknesses differ by more than an order of
+  magnitude and cannot both describe the layer of Figure 11.18.
+- **Evidence:** the plate agrees between the two, 1 mm in both, which is what
+  makes the glass wool the disagreeing cell rather than a column read out of
+  order. Verified on PDF page 281 (printed p. 275) for the table and PDF page
+  280 (printed p. 274) for the sentence, in Allard & Atalla, Propagation of
+  Sound in Porous Media 2e:2009.
+- **Library behaviour:** the row carries the printed 3,8 mm, and its `note`
+  records the sentence. Nothing computes with the thickness: the equivalent
+  fluid of this specimen does not use it.
+- **Status:** unreported.
+
+---
+
+## Allard & Atalla 2e (2009), Table 11.9 (the thickness of the plate)
+
+*Textbook, not a standard.*
+
+- **Location:** Table 11.9, PDF page 282, printed p. 276, the foam and plate
+  of the diffuse-field transmission example of Sect. 11.7.4.
+- **The print:** the plate row gives a thickness of 1,6 mm; the prose of
+  Sect. 11.7.4 on the facing folio says "The material is a foam of thickness
+  h = 2 . 54 cm bonded onto a 0.6 mm aluminium plate".
+- **The problem:** 1,6 against 0,6 mm for the same plate.
+- **Evidence:** the foam agrees between the two, the table's 25,4 mm being the
+  sentence's 2,54 cm, which places the disagreement in the plate row alone.
+  Verified on PDF page 282 (printed p. 276) for the table and PDF page 281
+  (printed p. 275) for the sentence, in Allard & Atalla, Propagation of Sound
+  in Porous Media 2e:2009.
+- **Library behaviour:** the plate is not a porous material and is not in the
+  catalogue; the foam row's `note` records the disagreement so that a reader
+  reproducing the figure knows which plate the curve assumes.
+- **Status:** unreported.
+
+---
+
+## Allard & Atalla 2e (2009), Table 13.2 (the Young's modulus of the rockwool)
+
+*Textbook, not a standard.*
+
+- **Location:** Table 13.2, PDF page 341, printed p. 337, the 5,75 cm rockwool
+  with a central perforation of the double-porosity example.
+- **The print:** the column headed E (Pa) carries 4400 for a frame of
+  130 kg/m3.
+- **The problem:** a frame modulus of 4,4 kPa at that density gives a frame
+  wave speed of $\sqrt{4400/130} = 5,8$ m/s, so the quarter-wave resonance of
+  a 5,75 cm layer lands near 25 Hz. The text on the next page says the
+  numerical model captures "the skeleton resonance occurring around 1350 Hz",
+  which the printed modulus cannot produce: 1350 Hz would need about 12,7 MPa,
+  three orders of magnitude above the cell.
+- **Evidence:** arithmetic on the page's own two cells against the page's own
+  sentence. Nothing on the page says what the modulus should be, so this entry
+  reports the inconsistency and does not repair it. Verified on PDF page 341
+  (printed p. 337) for the table and PDF page 342 (printed p. 338) for the
+  sentence, in Allard & Atalla, Propagation of Sound in Porous Media 2e:2009.
+- **Library behaviour:** the row carries the printed 4400 Pa and its `note`
+  records the resonance the text reports. No example of this library computes
+  a skeleton resonance from it.
+- **Status:** unreported.
+
+---
+
 ## ECAC Doc 29, 5th ed., Volume 2, Appendix B, Eq. (B-41) (descent deceleration)
 
 - **Location:** Appendix B, section B7.1.1, the deceleration $a$ defined under

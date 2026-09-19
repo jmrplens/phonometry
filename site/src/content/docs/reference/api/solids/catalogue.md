@@ -65,6 +65,14 @@ SolidMaterial(
     source: str,
     table: str = '',
     variant: str = '',
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    ranges: Mapping[str, tuple[float, float]] = ...,
+    bounded_above: frozenset[str] = frozenset(),
+    reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
+    unquantified: Mapping[str, str] = ...,
+    attributed_to: Mapping[str, str] = ...,
+    note: str = '',
     density_kg_m3: float | None = None,
     youngs_modulus_pa: float | None = None,
     shear_modulus_pa: float | None = None,
@@ -80,14 +88,7 @@ SolidMaterial(
     in_situ_loss_factor: float | None = None,
     thickness_critical_frequency_product_m_hz: float | None = None,
     estimated: frozenset[str] = frozenset(),
-    approximate: frozenset[str] = frozenset(),
-    derived: Mapping[str, str] = ...,
     borrowed: Mapping[str, str] = ...,
-    ranges: Mapping[str, tuple[float, float]] = ...,
-    bounded_above: frozenset[str] = frozenset(),
-    unquantified: Mapping[str, str] = ...,
-    attributed_to: Mapping[str, str] = ...,
-    note: str = '',
 )
 ```
 
@@ -121,14 +122,16 @@ a building, support and radiation included; and a page that prints one
 without saying which it is has said something weaker than any of the
 three, which is what [`loss_factor`](/phonometry/reference/api/vibration/transfer-stiffness/#loss_factor) holds.
 
+The name, the citation, the variant and the hedges a cell can carry
+instead of a number (`ranges`, `reported`, `unquantified`,
+`approximate`, `derived`, `attributed_to`) are the ones every
+catalogue row has; two are this catalogue's own and are described
+below.
+
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `name` | The material as the table names it, attribution stripped. |
-| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"single crystal"`, `"13 C, 11 per cent bituminous content"`. Empty when the page prints one. |
-| `source` | Document, table, PDF page and printed folio. |
-| `table` | The data file this row was read from, without the extension, which is also the first half of its key in [`PUBLISHED_SOLIDS`](/phonometry/reference/api/solids/catalogue/#published_solids). |
 | `density_kg_m3` | Density `rho`, in kg/m3. |
 | `youngs_modulus_pa` | Young's modulus `E`, in pascals. |
 | `shear_modulus_pa` | Shear modulus `G`, in pascals. |
@@ -144,46 +147,19 @@ three, which is what [`loss_factor`](/phonometry/reference/api/vibration/transfe
 | `in_situ_loss_factor` | Loss factor of a panel of this material as installed, which combines the internal, support and radiation losses and is therefore not a material constant. |
 | `thickness_critical_frequency_product_m_hz` | The `h.f_c` column, in m Hz, a property of the material alone and the cheapest cross-check there is between books that share no other column. |
 | `estimated` | Fields the page marks as an estimate rather than a measurement. Reading one of these as a measurement is the mistake this catalogue exists to prevent. |
+| `borrowed` | Field to the material it was taken from, for the cells a book fills from a similar material rather than leaving empty. |
+| `name` | The material as the table names it, attribution stripped. |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
-| `borrowed` | Field to the material it was taken from, for the cells a book fills from a similar material rather than leaving empty. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
-| `unquantified` | Field to what the page said in place of a number, for a cell that is neither empty nor numeric: `"varies with frequency"`. |
+| `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
+| `unquantified` | Field to what the page said in place of a number, for a cell that is neither empty nor numeric: `"varies with frequency"`, `"model"`. |
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
 | `note` | What the page says about this row beyond its numbers. |
-
-### SolidMaterial.is_approximate()
-
-```python
-SolidMaterial.is_approximate(field_name: str) -> bool
-```
-
-Whether the page prints this field with a `~`.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `field_name` | One of the numeric field names of this class. |
-
-**Returns:** `True` when the page rounded the cell on purpose.
-
-### SolidMaterial.is_derived()
-
-```python
-SolidMaterial.is_derived(field_name: str) -> bool
-```
-
-Whether this library computed this field instead of reading it.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `field_name` | One of the numeric field names of this class. |
-
-**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
 
 ### SolidMaterial.is_estimate()
 
@@ -200,33 +176,6 @@ Whether the page marks this field as an estimate rather than a value.
 | `field_name` | One of the numeric field names of this class. |
 
 **Returns:** `True` when the page carries an estimate footnote there.
-
-### SolidMaterial.why_missing()
-
-```python
-SolidMaterial.why_missing(field_name: str) -> str
-```
-
-Why this field is `None`, in the page's own terms.
-
-A catalogue that answers `None` and stops is asking the caller to
-guess whether the material has no such property, whether the book
-measured it and printed a dash, or whether the cell holds something
-that is not a number. Each of those is a different answer.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `field_name` | One of the numeric field names of this class. |
-
-**Returns:** What the page had in that cell, or the empty string when the field is not missing at all. A field the page has no column for and this library cannot derive, because the cells it would need are themselves a range, answers that it does not follow.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
 ## solids_named
 

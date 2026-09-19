@@ -1,0 +1,34 @@
+{
+  "source": "Allard & Atalla 2e Table 12.5, PDF page 306 (printed p. 301)",
+  "about": "Table 12.5, \"The parameters of the plate-fibre system\": the 0.9 x 0.6 m double plate of a steel panel, a foam and a limp heavy layer, computed twice, once with a limp foam and once with an elastic foam (Figures 12.13 and 12.14). Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s. The two foams are the two porous rows; the elastic one is the foam of Tables 11.5, 12.1 and 12.4. The steel panel (1 mm, 7800 kg/m3, printed E 2.1e10 where Table 12.2 prints 2.1e11 for its steel plate, nu 0.3, eta 0.007) and the heavy PVC layer (1 mm, 1000 kg/m3) are not porous materials and are not here.",
+  "rows": [
+    {
+      "key": "limp_foam",
+      "name": "Limp foam",
+      "flow_resistivity_pa_s_m2": 20000.0,
+      "porosity": 0.9,
+      "tortuosity": 1.6,
+      "viscous_length_um": 12.0,
+      "thermal_length_um": 24.0,
+      "frame_density_kg_m3": 30.0,
+      "thickness_mm": 25.4,
+      "youngs_modulus_pa": 1300.0,
+      "poisson_ratio": 0.0,
+      "structural_loss_factor": 0.4
+    },
+    {
+      "key": "foam",
+      "name": "Foam",
+      "flow_resistivity_pa_s_m2": 10900.0,
+      "porosity": 0.99,
+      "tortuosity": 1.02,
+      "viscous_length_um": 100.0,
+      "thermal_length_um": 130.0,
+      "frame_density_kg_m3": 8.8,
+      "thickness_mm": 25.4,
+      "youngs_modulus_pa": 80000.0,
+      "poisson_ratio": 0.35,
+      "structural_loss_factor": 0.14
+    }
+  ]
+}

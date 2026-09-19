@@ -1,0 +1,20 @@
+{
+  "source": "Allard & Atalla 2e Table 11.9, PDF page 282 (printed p. 276)",
+  "about": "Table 11.9, \"The parameters used to predict the results of Figure 11.19\": the foam of the diffuse field transmission example of Sect. 11.7.4, bonded onto an aluminium plate. Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s. The prose on the facing folio (printed p. 275) says the foam is 2.54 cm thick, which the row's 25.4 mm agrees with, and the plate 0.6 mm, where the plate row prints 1.6; the plate is not a porous material and is not here, and the disagreement is registered.",
+  "rows": [
+    {
+      "key": "foam",
+      "name": "Foam",
+      "flow_resistivity_pa_s_m2": 6600.0,
+      "porosity": 0.98,
+      "tortuosity": 1.03,
+      "viscous_length_um": 200.0,
+      "thermal_length_um": 380.0,
+      "frame_density_kg_m3": 11.2,
+      "thickness_mm": 25.4,
+      "youngs_modulus_pa": 293000.0,
+      "poisson_ratio": 0.2,
+      "structural_loss_factor": 0.06
+    }
+  ]
+}

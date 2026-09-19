@@ -52,7 +52,7 @@ from dataclasses import dataclass, field
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
-from .._internal.catalogue import read_table, take
+from .._internal.catalogue import CatalogueRow, read_table, take
 from .elastic import (
     beam_longitudinal_speed,
     bulk_longitudinal_speed,
@@ -73,7 +73,7 @@ __all__ = [
 
 
 @dataclass(frozen=True, kw_only=True)
-class SolidMaterial:
+class SolidMaterial(CatalogueRow):
     """One row of a published materials table, with what the cell said.
 
     Every quantity is optional, because no two of the books this catalogue
@@ -104,15 +104,12 @@ class SolidMaterial:
     without saying which it is has said something weaker than any of the
     three, which is what :attr:`loss_factor` holds.
 
-    :ivar name: The material as the table names it, attribution stripped.
-    :ivar variant: Which specimen or condition this row is, when the page
-        prints several under one name: ``"chemically pure"``, ``"single
-        crystal"``, ``"13 C, 11 per cent bituminous content"``. Empty when the
-        page prints one.
-    :ivar source: Document, table, PDF page and printed folio.
-    :ivar table: The data file this row was read from, without the
-        extension, which is also the first half of its key in
-        :data:`PUBLISHED_SOLIDS`.
+    The name, the citation, the variant and the hedges a cell can carry
+    instead of a number (``ranges``, ``reported``, ``unquantified``,
+    ``approximate``, ``derived``, ``attributed_to``) are the ones every
+    catalogue row has; two are this catalogue's own and are described
+    below.
+
     :ivar density_kg_m3: Density ``rho``, in kg/m3.
     :ivar youngs_modulus_pa: Young's modulus ``E``, in pascals.
     :ivar shear_modulus_pa: Shear modulus ``G``, in pascals.
@@ -144,30 +141,10 @@ class SolidMaterial:
     :ivar estimated: Fields the page marks as an estimate rather than a
         measurement. Reading one of these as a measurement is the mistake this
         catalogue exists to prevent.
-    :ivar approximate: Fields the page prints with a ``~``. Not an estimate
-        and not an interval: a number the author rounded on purpose.
-    :ivar derived: Field to how it was computed, for the ones this library
-        worked out from the cells the page did print. A derived value is never
-        stored as if it had been read.
     :ivar borrowed: Field to the material it was taken from, for the cells a
         book fills from a similar material rather than leaving empty.
-    :ivar ranges: ``(low, high)`` for each field the page prints as an
-        interval rather than a value.
-    :ivar bounded_above: The subset of :attr:`ranges` the page prints as
-        ``< x`` or ``<= x``, where the low end is a floor and not a
-        measurement.
-    :ivar unquantified: Field to what the page said in place of a number, for
-        a cell that is neither empty nor numeric: ``"varies with frequency"``.
-    :ivar attributed_to: Credit for a cell the book takes from someone else.
-        Keyed by field name, or by ``"row"`` or ``"table"`` when the credit
-        covers all of one.
-    :ivar note: What the page says about this row beyond its numbers.
     """
 
-    name: str
-    source: str
-    table: str = ""
-    variant: str = ""
     density_kg_m3: float | None = None
     youngs_modulus_pa: float | None = None
     shear_modulus_pa: float | None = None
@@ -183,26 +160,12 @@ class SolidMaterial:
     in_situ_loss_factor: float | None = None
     thickness_critical_frequency_product_m_hz: float | None = None
     estimated: frozenset[str] = frozenset()
-    approximate: frozenset[str] = frozenset()
-    derived: Mapping[str, str] = field(default_factory=dict)
     borrowed: Mapping[str, str] = field(default_factory=dict)
-    ranges: Mapping[str, tuple[float, float]] = field(default_factory=dict)
-    bounded_above: frozenset[str] = frozenset()
-    unquantified: Mapping[str, str] = field(default_factory=dict)
-    attributed_to: Mapping[str, str] = field(default_factory=dict)
-    note: str = ""
 
     def __post_init__(self) -> None:
-        """Freeze the mappings the dataclass holds but does not own.
-
-        ``frozen=True`` refuses to rebind a field and says nothing about what
-        the field points at, so a shared row's mappings were editable in place
-        while the row around them was not. The catalogue is one object shared
-        by every caller, and provenance one of them can rewrite is worth less
-        than none.
-        """
-        for name in ("derived", "borrowed", "ranges", "unquantified", "attributed_to"):
-            object.__setattr__(self, name, MappingProxyType(dict(getattr(self, name))))
+        """Freeze the one mapping this class adds to the shared ones."""
+        super().__post_init__()
+        object.__setattr__(self, "borrowed", MappingProxyType(dict(self.borrowed)))
 
     def is_estimate(self, field_name: str) -> bool:
         """Whether the page marks this field as an estimate rather than a value.
@@ -211,50 +174,6 @@ class SolidMaterial:
         :return: ``True`` when the page carries an estimate footnote there.
         """
         return field_name in self.estimated
-
-    def is_approximate(self, field_name: str) -> bool:
-        """Whether the page prints this field with a ``~``.
-
-        :param field_name: One of the numeric field names of this class.
-        :return: ``True`` when the page rounded the cell on purpose.
-        """
-        return field_name in self.approximate
-
-    def is_derived(self, field_name: str) -> bool:
-        """Whether this library computed this field instead of reading it.
-
-        :param field_name: One of the numeric field names of this class.
-        :return: ``True`` when the page did not print it and the value follows
-            from cells that it did. :attr:`derived` says how.
-        """
-        return field_name in self.derived
-
-    def why_missing(self, field_name: str) -> str:
-        """Why this field is ``None``, in the page's own terms.
-
-        A catalogue that answers ``None`` and stops is asking the caller to
-        guess whether the material has no such property, whether the book
-        measured it and printed a dash, or whether the cell holds something
-        that is not a number. Each of those is a different answer.
-
-        :param field_name: One of the numeric field names of this class.
-        :return: What the page had in that cell, or the empty string when the
-            field is not missing at all. A field the page has no column for
-            and this library cannot derive, because the cells it would need
-            are themselves a range, answers that it does not follow.
-        :raises AttributeError: for a name this class does not have, because a
-            misspelt field would otherwise answer as if the cell were empty.
-        """
-        if getattr(self, field_name) is not None:
-            return ""
-        if field_name in self.unquantified:
-            return self.unquantified[field_name]
-        if field_name in self.ranges:
-            low, high = self.ranges[field_name]
-            if field_name in self.bounded_above:
-                return f"the page prints an upper bound of {high:g} and no value"
-            return f"the page prints {low:g} to {high:g} and no value"
-        return "the page does not give it, and it does not follow from the cells that it does"
 
 
 #: How a field this library computed is described in

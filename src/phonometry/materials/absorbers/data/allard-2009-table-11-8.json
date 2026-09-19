@@ -1,0 +1,21 @@
+{
+  "source": "Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)",
+  "about": "Table 11.8, \"The parameters used to predict the results of Figure 11.18\": the glass wool of Sect. 6.5.4, the 'Domisol Coffrage' of Table 6.1, bonded onto an aluminium plate for the normal incidence transmission example of Sect. 11.7.3. Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s. It prints the same specimen as Table 6.1 through a Young's modulus of 4.4e6 Pa, nu = 0 and eta_s = 0.1 where Table 6.1 printed a shear modulus of 2.2e6(1 + j0.1): E / (2(1 + nu)) is 2.2e6, so the two pages agree. The thickness cell prints 3.8 mm while the prose of Sect. 11.7.3 on the facing folio (printed p. 274) says the layer is \"of thickness 5 cm\" and the plate 1 mm, which the plate row confirms; the table's 3.8 is kept as printed and the disagreement is registered. The plate row, 1 mm of aluminium at 2800 kg/m3, E 7.e10, nu 0.3, eta 0.007, is not a porous material and is not here.",
+  "rows": [
+    {
+      "key": "glass_wool",
+      "name": "Glass wool",
+      "flow_resistivity_pa_s_m2": 40000.0,
+      "porosity": 0.94,
+      "tortuosity": 1.06,
+      "viscous_length_um": 56.0,
+      "thermal_length_um": 110.0,
+      "frame_density_kg_m3": 130.0,
+      "thickness_mm": 3.8,
+      "youngs_modulus_pa": 4400000.0,
+      "poisson_ratio": 0.0,
+      "structural_loss_factor": 0.1,
+      "note": "The Domisol Coffrage glass wool of Table 6.1. Thickness printed 3.8 mm; the text of Sect. 11.7.3 says 5 cm."
+    }
+  ]
+}

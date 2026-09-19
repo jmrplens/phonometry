@@ -1,0 +1,28 @@
+{
+  "source": "Allard & Atalla 2e Table 9.1, PDF page 210 (printed p. 203)",
+  "about": "Table 9.1, \"The parameters that characterize the two layers M1 and M2. The layer M1 is in contact with the facing and the layer M2 with the rigid impervious backing\": the two-layer material behind the perforated facing of Figures 9.17 and 9.18 (facing 1 mm thick, holes of radius 0.5 mm, perforation ratio 0.005). Columns as printed: flow resistivity sigma (N m-4 s), viscous dimension Lambda (mm), thermal dimension Lambda' (mm), tortuosity, porosity and thickness e (cm). This is the one table of the book that prints the lengths in millimetres and the thickness in centimetres; both are converted here to the micrometres and millimetres of the rest of the catalogue.",
+  "rows": [
+    {
+      "key": "m1",
+      "name": "M1",
+      "flow_resistivity_pa_s_m2": 5000.0,
+      "porosity": 0.99,
+      "tortuosity": 1.1,
+      "viscous_length_um": 120.0,
+      "thermal_length_um": 270.0,
+      "thickness_mm": 1.0,
+      "note": "Printed Lambda 0.12 mm, Lambda' 0.27 mm, thickness 0.1 cm."
+    },
+    {
+      "key": "m2",
+      "name": "M2",
+      "flow_resistivity_pa_s_m2": 50000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.5,
+      "viscous_length_um": 34.0,
+      "thermal_length_um": 130.0,
+      "thickness_mm": 19.0,
+      "note": "Printed Lambda 0.034 mm, Lambda' 0.13 mm, thickness 1.9 cm."
+    }
+  ]
+}

@@ -9,6 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Thirty-two published porous specimens from nineteen parameter tables.**
+  `materials.PUBLISHED_POROUS` is the porous rows of the nineteen tables
+  Allard & Atalla print across eight chapters, each one the input to a worked
+  example of the book, keyed by the table it came off and the row it is:
+  `'allard-2009-table-6-1/domisol_coffrage'`, `'allard-2009-table-13-1/foam'`.
+  The key names the table because the book prints one foam in four chapters
+  and one glass wool in two, sometimes with a column the other page leaves
+  out, and `porous_materials_named` gathers every printing of a name so that
+  choosing between them stays the caller's call: five pages print a "Foam" and
+  they are five different foams.
+
+  **Every quantity is optional, and a missing one says why.** No two of these
+  tables print the same columns, so a row answers `None` wherever its page had
+  nothing, and `.why_missing(field)` answers in the page's own terms. Table
+  11.5 prints the word `model` in three cells of its screen row, because the
+  lengths there were derived from a measured flow resistance and the
+  tortuosity taken as a frequency-dependent expression, and no single number
+  stands for either; Table 12.1 prints `variable` for a thickness its example
+  sweeps. A float in those cells would be a parameter nobody published.
+  `.printed(field)` is the same reading for a caller who needs the number and
+  would rather be refused, naming the field, the model and the page.
+
+  **The units the pages print in are not the units the models take.** Table
+  9.1 prints its characteristic lengths in millimetres and its thickness in
+  centimetres, Table 13.1 prints its lengths in metres, and everything else is
+  in micrometres; Table 6.1 prints a complex shear modulus in N/cm2 where
+  Table 11.8 prints the same specimen's Young's modulus in pascals. Every
+  conversion is pinned by an assertion against the printed digits, and the two
+  glass-wool pages are reconciled through `E = 2N(1 + nu)`, which is also what
+  lets a row that printed one of the two answer for both, marked `derived`.
+
+  The plates, septa and impervious screens these tables also print are not
+  porous materials and are not in the catalogue; each data file says which of
+  its page's rows are absent and why.
+
+  **Four entries join the errata register**, all found by reading the pages
+  against each other. Table 11.7's caption names Figure 11.6 for a structure
+  that is Figure 11.16 on the same page. Table 11.8 gives its glass wool 3,8 mm
+  where the prose of the facing folio says 5 cm, and Table 11.9 gives its plate
+  1,6 mm where the prose says 0,6; in both the other layer agrees, which is
+  what places the disagreement in one cell. And Table 13.2 prints a frame
+  modulus of 4 400 Pa for a rockwool whose skeleton resonance the next page
+  reports near 1 350 Hz, which that modulus puts near 25 Hz instead. Every row
+  keeps what its page printed.
+
 - **Two hundred and nineteen published solids from six books.**
   `solids.PUBLISHED_SOLIDS` is Hopkins **Table A2**, twenty-five building
   materials; Cremer 3e **Table 4.3**, thirteen metals over fifteen rows;
@@ -486,6 +531,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   hides it.
 
 ### Changed
+
+- **`PUBLISHED_POROUS_MATERIALS` is now `PUBLISHED_POROUS`, and its keys name
+  the table.** The two specimens it held are
+  `'allard-2009-table-6-1/domisol_coffrage'` and
+  `'allard-2009-table-11-2/soft_fibrous'`, and thirty more rows joined them.
+  `PorousMaterial` keeps its name and moves to
+  `materials.absorbers.catalogue`, with every quantity now optional and the
+  shear modulus stored real beside a structural loss factor rather than
+  complex; `frame_constants()` returns the complex modulus as before.
+
+- **A published row carries its hedges from one place.** The fields that say
+  what a cell was when it was not a value (`ranges`, `bounded_above`,
+  `approximate`, `unquantified`, `attributed_to`, `derived`, `note`,
+  `variant`) are now defined once for every catalogue, so a solid and a porous
+  specimen answer `why_missing` the same way. `reported` is new with them: a
+  cell that prints several readings from several studies with no single value,
+  which is how the compiled tables of the absorber literature print a
+  characteristic length.
 
 - **The figures are written to two decimals.** Matplotlib writes every
   coordinate of an SVG to six, which at one user unit per point is a

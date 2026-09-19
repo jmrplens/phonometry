@@ -1,0 +1,17 @@
+{
+  "source": "Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)",
+  "about": "Table 11.2, \"The parameters used to predict the effective density of the material in Figure 11.2\": the soft fibrous material whose measured effective density, by Panneton (2007) with the method of Utsono et al. (1989), the limp-frame model of Sect. 11.3.4 is checked against. Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um) and rho_1 (kg/m3), all seven filled. No elastic constants: the point of the example is that the frame is too limp to need them.",
+  "rows": [
+    {
+      "key": "soft_fibrous",
+      "name": "Soft fibrous",
+      "flow_resistivity_pa_s_m2": 25000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.02,
+      "viscous_length_um": 90.0,
+      "thermal_length_um": 180.0,
+      "frame_density_kg_m3": 30.0,
+      "thickness_mm": 50.0
+    }
+  ]
+}

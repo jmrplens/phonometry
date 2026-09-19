@@ -74,8 +74,8 @@ from phonometry.materials.absorbers.biot import _gamma, _porous_porous_matrix
 # behind Figure 11.2 and the material of the limp-frame tests. Nothing here
 # retypes a printed number.
 # ---------------------------------------------------------------------------
-_GLASS_WOOL = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
-_SOFT_FIBROUS = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+_GLASS_WOOL = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
+_SOFT_FIBROUS = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
 
 TABLE_6_1_TORTUOSITY = _GLASS_WOOL.tortuosity
 TABLE_6_1_FRAME_DENSITY = _GLASS_WOOL.frame_density_kg_m3

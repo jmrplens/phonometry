@@ -88,7 +88,7 @@ def _diffuse_field(language: str) -> Axes:
 
 
 def _biot_waves(language: str) -> Axes:
-    glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+    glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
     shear, poisson = glass_wool.frame_constants()
     result = materials.biot_waves(
         glass_wool.medium(_FREQUENCIES),

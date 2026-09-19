@@ -1,0 +1,21 @@
+{
+  "source": "Allard & Atalla 2e Table 13.2, PDF page 341 (printed p. 337)",
+  "about": "Table 13.2, \"The parameters used to predict the absorption coefficients in Figure 13.16\": the 5.75 cm rockwool with a central perforation, the double-porosity example taken from Atalla et al. (2001b) and measured by Olny and Boutin (2003). Columns as printed: phi, sigma (N.s/m4), alpha_inf, Lambda (um), Lambda' (um), Theta_m(0) (m2), rho_1 (kg/m3), E (Pa), nu and eta_s. Theta_m(0) is the static thermal permeability of Sect. 5.9 and goes in the thermal permeability field. The flow resistivity is printed with a gap, \"1 35 000\", and is 135000. The Young's modulus is printed as 4400 under a heading of pascals; with rho_1 = 130 kg/m3 that is a frame speed of 5.8 m/s and a quarter-wave resonance of the 5.75 cm layer near 25 Hz, where the text on the next page (printed p. 338) says the numerical model captures \"the skeleton resonance occurring around 1350 Hz\". The cell is kept as printed and the disagreement is registered; nothing on the page says what the number should be. The geometry the same page prints for the example is not a property of the material and is not stored: a square cell of side 0.085 m, a hole of radius 0.016 m modelled as an equivalent square of side 0.0283 m, a double porosity of 0.11, and a 5.75 cm layer.",
+  "rows": [
+    {
+      "key": "rockwool",
+      "name": "Rockwool",
+      "flow_resistivity_pa_s_m2": 135000.0,
+      "porosity": 0.94,
+      "tortuosity": 2.1,
+      "viscous_length_um": 49.0,
+      "thermal_length_um": 166.0,
+      "thermal_permeability_m2": 3.3e-09,
+      "frame_density_kg_m3": 130.0,
+      "youngs_modulus_pa": 4400.0,
+      "poisson_ratio": 0.0,
+      "structural_loss_factor": 0.1,
+      "note": "Young's modulus printed 4400 Pa; the text reports a skeleton resonance near 1350 Hz that this value cannot give."
+    }
+  ]
+}

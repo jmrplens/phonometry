@@ -178,6 +178,7 @@ export const apiSections = {
       'reference/api/materials/four-microphone',
       'reference/api/materials/standing-wave',
       'reference/api/materials/porous',
+      'reference/api/materials/catalogue',
       'reference/api/materials/layered',
       'reference/api/materials/biot',
       'reference/api/materials/slow-sound',

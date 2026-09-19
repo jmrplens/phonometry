@@ -1,0 +1,139 @@
+---
+title: "environment.propagation.ground_surfaces"
+description: "Ground surfaces as the pages that print them print them."
+sidebar:
+  label: "ground_surfaces"
+---
+
+Ground surfaces as the pages that print them print them.
+
+Every outdoor propagation model in this package asks the ground how resistive
+it is, and nobody measures that: a prediction over a pasture takes the flow
+resistivity of a pasture from a table. This is that table, or rather the three
+of them this library reads, with the page each row came off attached to it.
+
+What a ground row is
+--------------------
+An **effective** flow resistivity, which is not the flow resistivity of the
+material under your feet. It is the single number that makes a
+semi-infinite, locally reacting, rigid-framed ground model reproduce a
+measured excess attenuation, so it carries the model it was fitted with. Cox
+and D'Antonio say so explicitly and mark each row with the fit it belongs to,
+which is why a surface there is several rows: the same grass fitted with the
+Delany and Bazley model, with the semi-phenomenological model and with the
+variable-porosity model is three numbers, and averaging them would be an
+average of three different quantities.
+
+Why the numbers spread the way they do
+--------------------------------------
+Bies, Hansen and Howard gather theirs from four sources and print the spread
+as they found it, warning on the facing page that "there are great variations
+in flow resistivity measured data from different sources". Grass runs from
+100 to 300 kPa s/m2 in one row of that table; the same grass is 4 to 850
+kPa s/m2 across the fits Cox tabulates. A row is a place to start, not a
+measurement of your site.
+
+The classes are a different thing
+---------------------------------
+Bies's second table is not measured ground at all: it is the eight classes
+A to H the propagation models define, with the ground factor G that ISO
+9613-2 and NMPB-2008 take and the representative resistivity Harmonoise
+assigns each class. Class H is water, and its resistivity is an acoustically
+hard stand-in rather than anything anybody measured. Those rows carry
+[`GroundSurface.harmonoise_class`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface) and the two ground factors; a model
+that wants a class takes the class, and a model that wants a resistivity
+takes the resistivity.
+
+Where the rows live
+-------------------
+In `propagation/data/*.json`, one file per published table, read at import
+through the package-data reader in `phonometry._internal`. The citation is
+written once, in the file that holds the rows it belongs to.
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+## ground_surfaces_named
+
+```python
+ground_surfaces_named(name: str) -> tuple[GroundSurface, ...]
+```
+
+Every published row for a surface name, across the tables.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | The surface as a table prints it, matched without regard to case. |
+
+**Returns:** The rows whose [`GroundSurface.name`](/phonometry/reference/api/environment/ground-surfaces/#groundsurface) matches, in the order the tables are read, which is empty when no page names it.
+
+## GroundSurface
+
+```python
+GroundSurface(
+    *,
+    name: str,
+    source: str,
+    table: str = '',
+    variant: str = '',
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    ranges: Mapping[str, tuple[float, float]] = ...,
+    bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
+    reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
+    unquantified: Mapping[str, str] = ...,
+    uncertainty: Mapping[str, float] = ...,
+    not_derivable: Mapping[str, str] = ...,
+    attributed_to: Mapping[str, str] = ...,
+    group: str = '',
+    note: str = '',
+    flow_resistivity_pa_s_m2: float | None = None,
+    porosity: float | None = None,
+    water_content_percent: float | None = None,
+    porosity_decay_rate_per_m: float | None = None,
+    iso_9613_ground_factor: float | None = None,
+    nmpb_ground_factor: float | None = None,
+    harmonoise_class: str = '',
+)
+```
+
+One ground surface as one table prints it.
+
+Every quantity is optional, because the three tables print three different
+sets of columns, and a quantity the page did not print answers `None`
+with `why_missing`
+saying what the cell held instead.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `flow_resistivity_pa_s_m2` | Effective flow resistivity `R_1` or `sigma_e`, in Pa s/m2. Bies prints it in kPa s/m2 and Cox in rayl/m, which is this unit under another name; the conversion is pinned in the data file's `about`. |
+| `porosity` | Open porosity, where the fit that produced the resistivity also produced one. |
+| `water_content_percent` | Water content of the specimen, per cent, for the sands Cox tabulates wet and dry. The resistivity of a sand is not monotonic in it, which is the point of printing it. |
+| `porosity_decay_rate_per_m` | The rate `zeta` at which porosity falls with depth in the variable-porosity model, in 1/m. It is negative for several surfaces, which is what the page prints. |
+| `iso_9613_ground_factor` | The ground factor `G` of ISO 9613-2 for a ground class: 0 for hard ground, 1 for porous ground. |
+| `nmpb_ground_factor` | The ground factor `G` of NMPB-2008 for the same class, which is not always the ISO one: two of the eight classes differ. |
+| `harmonoise_class` | The class letter, `"A"` to `"H"`, for a row of the class table, and the empty string for a measured surface. |
+| `name` | The material as the table names it, attribution stripped. |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
+| `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
+| `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
+| `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |
+| `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
+| `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
+| `note` | What the page says about this row beyond its numbers. |
+
+## PUBLISHED_GROUND
+
+*Constant* (`mappingproxy`).

@@ -56,6 +56,11 @@ from .ground_barriers import (
     kurze_anderson_attenuation,
     spherical_reflection_coefficient,
 )
+from .ground_surfaces import (
+    PUBLISHED_GROUND,
+    GroundSurface,
+    ground_surfaces_named,
+)
 from .noise_reducing_devices import (
     ABSORPTION_CATEGORIES,
     ABSORPTION_RATIO_LIMIT,
@@ -104,6 +109,7 @@ from .refraction import (
 
 __all__ = [
     "ABSORPTION_CATEGORIES",
+    "PUBLISHED_GROUND",
     "ABSORPTION_RATIO_LIMIT",
     "air_attenuation",
     "air_attenuation_m",
@@ -136,6 +142,8 @@ __all__ = [
     "ground_attenuation",
     "ground_attenuation_alternative",
     "ground_effect",
+    "ground_surfaces_named",
+    "GroundSurface",
     "GroundFactors",
     "HEMI_FREE_FIELD_DISTANCE_FACTOR",
     "HEMI_FREE_FIELD_DISTANCE_M",

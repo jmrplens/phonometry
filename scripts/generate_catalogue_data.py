@@ -40,6 +40,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
 from phonometry.building.prediction.detailed_model import EN_12354_AIR  # noqa: E402
+from phonometry.environment.propagation import PUBLISHED_GROUND  # noqa: E402
 from phonometry.fluids import PUBLISHED_FLUIDS  # noqa: E402
 from phonometry.materials.absorbers import PUBLISHED_POROUS  # noqa: E402
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
@@ -126,6 +127,35 @@ POROUS_COLUMNS = (
         "structural_loss_factor",
         "Structural loss factor",
         "Factor de pérdidas estructural",
+        "",
+    ),
+)
+
+GROUND_COLUMNS = (
+    (
+        "flow_resistivity_pa_s_m2",
+        "Effective flow resistivity",
+        "Resistividad al flujo efectiva",
+        "Pa·s/m²",
+    ),
+    ("porosity", "Porosity", "Porosidad", ""),
+    ("water_content_percent", "Water content", "Contenido de agua", "%"),
+    (
+        "porosity_decay_rate_per_m",
+        "Porosity decay",
+        "Decaimiento de porosidad",
+        "1/m",
+    ),
+    (
+        "iso_9613_ground_factor",
+        "ISO 9613-2 ground factor",
+        "Factor de suelo ISO 9613-2",
+        "",
+    ),
+    (
+        "nmpb_ground_factor",
+        "NMPB-2008 ground factor",
+        "Factor de suelo NMPB-2008",
         "",
     ),
 )
@@ -553,6 +583,7 @@ def render() -> str:
 
     solid_styles = styles(PUBLISHED_SOLIDS, SOLID_COLUMNS)
     porous_styles = styles(PUBLISHED_POROUS, POROUS_COLUMNS)
+    ground_styles = styles(PUBLISHED_GROUND, GROUND_COLUMNS)
     fluid_columns, fluid_rows = fluids()
     document = {
         "solids": {
@@ -578,6 +609,18 @@ def render() -> str:
                 for field, heading, spanish, _ in POROUS_COLUMNS
             ],
             "rows": list(rows(PUBLISHED_POROUS, POROUS_COLUMNS)),
+        },
+        "ground": {
+            "columns": [
+                {
+                    "field": field,
+                    "heading": heading,
+                    "headingEs": spanish,
+                    "unit": ground_styles[field].unit,
+                }
+                for field, heading, spanish, _ in GROUND_COLUMNS
+            ],
+            "rows": list(rows(PUBLISHED_GROUND, GROUND_COLUMNS)),
         },
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
@@ -618,6 +661,7 @@ def main(argv: list[str] | None = None) -> int:
     OUTPUT.write_text(fresh, encoding="utf-8")
     counts = {
         "solids": len(PUBLISHED_SOLIDS),
+        "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }

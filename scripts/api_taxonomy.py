@@ -279,6 +279,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.environment.propagation.outdoor_propagation",
             "phonometry.environment.sources.cnossos_road",
             "phonometry.environment.propagation.ground_barriers",
+            "phonometry.environment.propagation.ground_surfaces",
             "phonometry.environment.propagation.noise_reducing_devices",
             "phonometry.environment.propagation.barrier_in_situ",
             "phonometry.environment.propagation.refraction",
@@ -469,6 +470,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The published catalogue is a mapping, so a plain scan sees it in the
     # module that builds it and in the package that re-exports it.
     "PUBLISHED_SOLIDS": "phonometry.solids.catalogue",
+    "PUBLISHED_GROUND": "phonometry.environment.propagation.ground_surfaces",
     "PUBLISHED_POROUS": "phonometry.materials.absorbers.catalogue",
     "PUBLISHED_FLUIDS": "phonometry.fluids.catalogue",
     # The ideal-gas closure and its two published constants are owned by the

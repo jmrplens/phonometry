@@ -40,6 +40,7 @@ _MAPPINGS = (
     "ranges",
     "reported",
     "unquantified",
+    "uncertainty",
     "not_derivable",
     "attributed_to",
 )
@@ -169,6 +170,12 @@ class CatalogueRow:
         printed, and never a sentence about why the number is missing:
         :meth:`why_missing` composes that sentence around it, so a caller and
         a published table both get the cell as it reads on the page.
+    :ivar uncertainty: Field to the plus-or-minus the page prints beside the
+        value, in the same unit. Cox prints an effective flow resistivity of
+        ``(540 +/- 92) x 10^3``, and two of his rows print an uncertainty as
+        large as the value itself. What the interval means is not stated on
+        the page, so it is not stated here either: it is the number the page
+        prints beside the value and nothing more.
     :ivar not_derivable: Field to why this library leaves it empty although
         the arithmetic would reach it. Bies leaves the speed of his aluminium
         honeycomb panels blank, and the modulus and the density beside it are
@@ -199,6 +206,7 @@ class CatalogueRow:
         default_factory=dict
     )
     unquantified: Mapping[str, str] = field(default_factory=dict)
+    uncertainty: Mapping[str, float] = field(default_factory=dict)
     not_derivable: Mapping[str, str] = field(default_factory=dict)
     attributed_to: Mapping[str, str] = field(default_factory=dict)
     group: str = ""

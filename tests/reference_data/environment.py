@@ -2181,3 +2181,54 @@ def cnossos_road_2015_surfaces() -> dict[
         )
         beta.setdefault(surface, {})[row["category"]] = float(row["beta"])
     return {s: (names[s], alpha[s], beta[s]) for s in names}
+
+
+#: The rows Bies Table 5.1 and Cox Table 6.7 share, because both books take
+#: them from Embleton, Piercy and Daigle (1983): Bies's key, Cox's key, and the
+#: interval both pages print, in Pa s/m2. Two books, two pages, two readings.
+#:
+#: Bies prints kPa s/m2 and Cox prints rayl/m, so a pair that matches here has
+#: matched through a conversion as well as through a reading.
+EMBLETON_SHARED_GROUND: tuple[tuple[str, str, object], ...] = (
+    ("dry_snow_newly_fallen", "dry_snow_newly_fallen", (10_000.0, 30_000.0)),
+    ("sugar_snow", "sugar_snow", (25_000.0, 50_000.0)),
+    (
+        "pine_or_hemlock_forest_floor",
+        "in_forest_pine_or_hemlock",
+        (20_000.0, 80_000.0),
+    ),
+    (
+        "soil_exposed_and_rain_packed",
+        "earth_exposed_and_rain_packed",
+        (4_000_000.0, 8_000_000.0),
+    ),
+    (
+        "sandy_silt_hard_packed_by_vehicles",
+        "sandy_silt_hard_packed_by_vehicles",
+        (800_000.0, 2_500_000.0),
+    ),
+    (
+        "quarry_dust_hard_packed_by_vehicles",
+        "quarry_dust_fine_very_hard_packed_by_vehicles",
+        (5_000_000.0, 20_000_000.0),
+    ),
+    (
+        "asphalt_sealed_by_dust_and_light_use",
+        "asphalt_sealed_by_dust_and_light_use",
+        30_000_000.0,
+    ),
+)
+
+#: The eight ground classes of Bies Table 5.2, as the page prints them: key,
+#: class letter, representative flow resistivity in Pa s/m2, the ISO 9613-2
+#: ground factor and the NMPB-2008 one.
+BIES_GROUND_CLASSES: tuple[tuple[str, str, float, float, float], ...] = (
+    ("very_soft_snow_or_moss", "A", 12.5e3, 1.0, 1.0),
+    ("soft_forest_floor", "B", 31.5e3, 1.0, 1.0),
+    ("uncompacted_loose_ground", "C", 80.0e3, 1.0, 1.0),
+    ("normal_uncompacted_ground", "D", 200.0e3, 1.0, 1.0),
+    ("compacted_fields_lawns_and_gravel", "E", 500.0e3, 0.0, 0.7),
+    ("compacted_dense_ground", "F", 2.0e6, 0.0, 0.3),
+    ("asphalt_concrete", "G", 20.0e6, 0.0, 0.0),
+    ("water", "H", 200.0e6, 0.0, 0.0),
+)

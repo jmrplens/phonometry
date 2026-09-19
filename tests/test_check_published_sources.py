@@ -435,3 +435,25 @@ class TestTheRatchet:
             assert module.endswith(".py"), name
             assert "," in reason, name
             assert gate.BOOK_OR_PAPER.search(reason), name
+
+
+def test_a_banner_naming_files_and_a_directory_keeps_their_order() -> None:
+    """A file, a directory and a file come back in that order.
+
+    The report prints the files beside the citation it read out of each, so
+    the order is what a reader follows. Collecting the named ones first and
+    the expanded ones after put a directory's contents at the end wherever the
+    banner had put the directory.
+    """
+    banner = (
+        "reads ``solids/data/hopkins-2007-table-a2.json``, then "
+        "``materials/absorbers/data/``, then "
+        "``fluids/data/bies-2017-table-c1-fluids.json``"
+    )
+
+    found = gate.data_files(banner)
+
+    assert found[0] == "solids/data/hopkins-2007-table-a2.json"
+    assert found[-1] == "fluids/data/bies-2017-table-c1-fluids.json"
+    assert all(name.startswith("materials/absorbers/data/") for name in found[1:-1])
+    assert found[1:-1] == sorted(found[1:-1])

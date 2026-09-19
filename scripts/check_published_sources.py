@@ -539,17 +539,30 @@ def banner_above(lines: Sequence[str], index: int) -> str:
 DATA_FILE = re.compile(r"``([\w./-]+\.json)``")
 DATA_DIRECTORY = re.compile(r"``([\w./-]+/data)/``")
 
+#: Both references in one pass, so that a banner naming a file, then a
+#: directory, then another file keeps that order. Scanning for one kind and
+#: then the other put every named file before every expanded one, and the
+#: order is what the reader of the report sees beside each citation.
+_REFERENCE = re.compile(
+    r"``(?:(?P<file>[\w./-]+\.json)|(?P<directory>[\w./-]+/data)/)``"
+)
+
 
 def data_files(banner: str) -> list[str]:
     """The packaged data files *banner* points at, named or by directory.
 
     :param banner: The comment above the constant.
-    :return: Paths relative to the package, a directory expanded to the
-        ``.json`` files in it, sorted, and the two forms concatenated in the
-        order the banner uses them.
+    :return: Paths relative to the package, in the order the banner refers to
+        them, with each directory expanded in place to the ``.json`` files in
+        it, sorted among themselves.
     """
-    names = DATA_FILE.findall(banner)
-    for directory in DATA_DIRECTORY.findall(banner):
+    names: list[str] = []
+    for match in _REFERENCE.finditer(banner):
+        named = match.group("file")
+        if named:
+            names.append(named)
+            continue
+        directory = match.group("directory")
         found = sorted(path.name for path in (PACKAGE / directory).glob("*.json"))
         names.extend(f"{directory}/{name}" for name in found)
     return names

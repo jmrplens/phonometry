@@ -1,5 +1,5 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Porous specimens as the pages that print them print them.
+"""Porous specimens as the pages that print them have them.
 
 The five-parameter models of :mod:`~phonometry.materials.absorbers.porous`
 take a flow resistivity, a porosity, a tortuosity and two characteristic
@@ -11,7 +11,7 @@ What it is careful about
 ------------------------
 A parameter table is a set of numbers someone fed a model, not a set of
 measurements of a material, and the books say so in different ways. Allard and
-Atalla print thirty-odd such rows across seventeen tables, every one of them
+Atalla print thirty-odd such rows across nineteen tables, every one of them
 the input to a worked example, and one of the rows prints the word ``model``
 in three of its cells because the quantity there is frequency dependent and no
 single number stands for it. A catalogue that turned that word into a float
@@ -389,7 +389,7 @@ def porous_materials_named(name: str) -> tuple[PorousMaterial, ...]:
     Comparing two printings of one specimen is the point of holding both, and
     it has to be a deliberate act: a lookup that returned one row for "Foam"
     would be choosing between published parameter sets on the caller's behalf,
-    and this book prints four different foams under that name.
+    and this book prints five different foams under that name.
 
     :param name: The specimen name as a table prints it, matched without
         regard to case: ``"Foam"``, ``"foam"``.

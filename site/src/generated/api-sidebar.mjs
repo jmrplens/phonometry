@@ -46,14 +46,15 @@ export const apiSections = {
     ],
   },
   'fluids': {
-    label: 'The medium',
-    translations: { es: 'El medio' },
+    label: 'Fluids',
+    translations: { es: 'Fluidos' },
     collapsed: true,
     items: [
       'reference/api/fluids/fluids',
       'reference/api/fluids/air',
       'reference/api/fluids/gas',
       'reference/api/fluids/water',
+      'reference/api/fluids/catalogue',
     ],
   },
   'solids': {

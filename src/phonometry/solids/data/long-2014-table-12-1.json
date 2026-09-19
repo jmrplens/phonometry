@@ -1,6 +1,6 @@
 {
   "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
-  "about": "Eighteen common building materials, credited by the book to Beranek and Ver (1992) and so attributed at table level rather than row by row. The speed column is headed \"Speed of Longitudinal Waves\" and the page prints no modulus and no Poisson ratio beside it, so nothing on the page says which of the three longitudinal waves it is and nothing here guesses: it goes in longitudinal_speed_m_s. Compared with the four tables already in the catalogue it looks like the bar speed, and the steel row is the clearest, at 5050 m/s against plate speeds of 5270 to 5458; but the books disagree among themselves by more than the gap between the two waves for several materials, so that is a hint and not a reading. Nine rows print a row of dots instead of a speed and one prints \"Varies with frequency\" instead of a loss factor, which is why those cells say why they are empty rather than being empty. The footnote to the loss factor column says its range rests on limited data at 1000 Hz and that the lower value is typical for the material alone.",
+  "about": "Eighteen common building materials, credited by the book to Beranek and Ver (1992) and so attributed at table level rather than row by row. The speed column is headed \"Speed of Longitudinal Waves\" and the page prints no modulus and no Poisson ratio beside it, so nothing on the page says which of the three longitudinal waves it is and nothing here guesses: it goes in longitudinal_speed_m_s. Compared with the four tables already in the catalogue it looks like the bar speed, and the steel row is the clearest, at 5050 m/s against plate speeds of 5270 to 5458; but the books disagree among themselves by more than the gap between the two waves for several materials, so that is a hint and not a reading. Nine rows print a row of dots instead of a speed and one prints \"Varies with frequency\" instead of a loss factor, and each of those cells keeps what the page printed in it rather than being empty. The footnote to the loss factor column says its range rests on limited data at 1000 Hz and that the lower value is typical for the material alone.",
   "rows": [
     {
       "key": "aluminum",
@@ -28,7 +28,7 @@
         ]
       },
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -61,7 +61,7 @@
         ]
       },
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -79,7 +79,7 @@
         ]
       },
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -97,7 +97,7 @@
         ]
       },
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -109,8 +109,8 @@
       "variant": "nominal 6 in thick",
       "density_kg_m3": 1700.0,
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be",
-        "loss_factor": "the table prints “Varies with frequency” where the number would be"
+        "longitudinal_speed_m_s": "…",
+        "loss_factor": "Varies with frequency"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -123,7 +123,7 @@
       "density_kg_m3": 1700.0,
       "loss_factor": 0.012,
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -188,7 +188,7 @@
         ]
       },
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -247,7 +247,7 @@
         ]
       },
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"
@@ -265,7 +265,7 @@
         ]
       },
       "unquantified": {
-        "longitudinal_speed_m_s": "the table prints a row of dots where the speed would be"
+        "longitudinal_speed_m_s": "…"
       },
       "attributed_to": {
         "table": "Beranek and Ver, 1992"

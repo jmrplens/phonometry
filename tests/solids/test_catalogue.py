@@ -809,7 +809,11 @@ def test_a_cell_the_row_can_say_why_is_empty_is_never_filled_by_arithmetic() -> 
         assert panel.youngs_modulus_pa is not None
         assert panel.density_kg_m3 is not None
         assert panel.bar_longitudinal_speed_m_s is None
-        assert "honeycomb" in panel.why_missing("bar_longitudinal_speed_m_s")
+        # The page prints nothing in that cell, so the row holds nothing in it
+        # either; why a honeycomb has no one-dimensional speed is what the row
+        # note is for.
+        assert "bar_longitudinal_speed_m_s" not in panel.unquantified
+        assert "honeycomb" in panel.note
 
 
 def test_no_row_anywhere_is_both_derived_and_printed_as_a_range() -> None:
@@ -900,15 +904,23 @@ def test_what_long_would_be_if_it_were_a_plate_speed() -> None:
     assert ref.LONG_STEEL_SPEED_M_S < min(plate_speeds)
 
 
-def test_the_dotted_cells_say_they_are_dotted() -> None:
-    """Nine rows print a row of dots where a speed would be."""
+def test_the_dotted_cells_keep_the_dots() -> None:
+    """Nine rows print a row of dots where a speed would be.
+
+    The cell keeps what the page printed, and the sentence about why there is
+    no number is composed around it, so a reader of the row and a reader of
+    the published table both see the page.
+    """
     dotted = [
         key
         for key, row in LONG.items()
-        if "dots" in row.why_missing("longitudinal_speed_m_s")
+        if row.unquantified.get("longitudinal_speed_m_s") == ref.LONG_DOTTED_SPEED_CELL
     ]
 
     assert len(dotted) == ref.LONG_ROWS_WITHOUT_A_SPEED
+    assert LONG[dotted[0]].why_missing("longitudinal_speed_m_s") == (
+        f"the page prints \u201c{ref.LONG_DOTTED_SPEED_CELL}\u201d where the number would be"
+    )
 
 
 def test_a_cell_that_holds_words_instead_of_a_number() -> None:
@@ -916,7 +928,10 @@ def test_a_cell_that_holds_words_instead_of_a_number() -> None:
     key, words = ref.LONG_UNQUANTIFIED_LOSS_FACTOR
 
     assert LONG[key].loss_factor is None
-    assert LONG[key].why_missing("loss_factor") == words
+    assert LONG[key].unquantified["loss_factor"] == words
+    assert LONG[key].why_missing("loss_factor") == (
+        f"the page prints \u201c{words}\u201d where the number would be"
+    )
 
 
 def test_a_table_the_book_credits_whole_is_credited_whole() -> None:

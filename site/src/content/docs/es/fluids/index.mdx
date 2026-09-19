@@ -25,6 +25,43 @@ específicos y la masa molar que imprime una tabla de gases y devuelve la
 velocidad y la densidad que se siguen, con hasta dónde llega ese cierre escrito
 en el propio resultado.
 
+## Los aires de esta biblioteca, y por qué son cuatro
+
+Detrás de cada nivel que calcula la biblioteca hay una densidad y una velocidad
+del sonido, y no todas vienen del mismo sitio. En el árbol hay cuatro estados,
+cada uno junto al modelo o la norma que lo fija, y discrepan:
+
+| Clave | c (m/s) | rho (kg/m3) | Qué lo fija |
+| --- | ---: | ---: | --- |
+| `iec-61094-2-annex-f/air` | 345,87 | 1,186 | IEC 61094-2 anexo F en el estado de referencia del anexo A.3 de la ISO 9053-2 |
+| `allard-2009-jca/air` | 343 | 1,205 | las constantes con las que se publicó el modelo de Johnson-Champoux-Allard |
+| `en-12354-annex-a/air` | 340 | 1,29 | EN/ISO 12354, la velocidad del anexo A y la densidad del anexo B |
+| `phonometry-solver/air` | 343 | 1,2 | el valor por defecto de esta biblioteca para el solver acústico |
+
+Ninguno está mal. Cada uno es el aire que supone su propio documento, y cambiar
+uno por otro cambiaría el número que ese documento imprime: el 1,7 % que separa
+el anexo de metrología de la norma de edificación es una discrepancia real
+entre dos comités, no un redondeo.
+
+Cada uno se queda donde está, junto a la cláusula que lo imprime. Reunirlos en
+este paquete invertiría la dependencia que lo pone en la base: cualquier
+dominio puede importar `fluids` sin arista de arquitectura, y un catálogo aquí
+que metiera mano en `materials`, `building` y `simulation` haría que el medio
+dependiera de tres de los dominios que se apoyan en él. La comparación es un
+artefacto de documentación, y la página de [catálogos
+publicados](/phonometry/es/reference/catalogues/) los pone los cuatro uno al
+lado del otro.
+
+Lo que sí lleva `fluids.PUBLISHED_FLUIDS` son los estados que esta biblioteca
+ha leído de una página impresa: los tres fluidos que Bies imprime al principio
+de su Tabla C.1, aire, agua dulce y agua de mar, cada uno nombrando esa página,
+con el folio impreso, en su `model`, porque para un estado leído y no calculado
+la tabla es lo que lo produjo.
+
+No es una tabla donde consultar valores. El aire en unas condiciones medidas es
+`fluids.air`, el agua de mar es `fluids.sea_water`, y los dos calculan el
+estado en vez de recordarlo.
+
 ## Por qué no es un dominio
 
 Dieciséis de los veintiún paquetes son dominios de aplicación: uno va a

@@ -86,6 +86,7 @@ PorousMaterial(
     bounded_above: frozenset[str] = frozenset(),
     reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
     unquantified: Mapping[str, str] = ...,
+    not_derivable: Mapping[str, str] = ...,
     attributed_to: Mapping[str, str] = ...,
     note: str = '',
     flow_resistivity_pa_s_m2: float | None = None,
@@ -142,7 +143,8 @@ instead of a number are the ones every catalogue row has.
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
 | `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
-| `unquantified` | Field to what the page said in place of a number, for a cell that is neither empty nor numeric: `"varies with frequency"`, `"model"`. |
+| `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
+| `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
 | `note` | What the page says about this row beyond its numbers. |
 

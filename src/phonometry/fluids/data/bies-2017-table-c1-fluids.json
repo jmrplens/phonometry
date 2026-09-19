@@ -1,0 +1,27 @@
+{
+  "source": "Bies 5e Table C.1, PDF page 746 (printed p. 717)",
+  "about": "The three fluids Table C.1, \"Properties of materials\", prints before its solids, at the top of Appendix C \"Properties of Materials and Gases\". Columns as printed: Young's modulus E (10^9 N/m2), density rho (kg/m3), sqrt(E/rho) (m/s), the \"Internal-in situ\" loss factor and Poisson's ratio. The temperature of each state is part of the material name and is lifted out of it here: air at 20 degC, fresh water at 20 degC, sea water at 13 degC. All three leave the modulus and the loss factor blank, which means the speed column cannot be what the prose on the same page says it is for the solids, \"calculated from the values in columns 2 and 3\": with no modulus there is nothing to calculate it from, so for these three rows the speed is a printed value and it is stored as one. The closing note of the table says how to read the same column for a fluid, \"For gases, replace E with gamma.P [...] For liquids, replace E with V(dV/dp)^-1\", which is the modulus the blank cell would have held. The two waters print a Poisson ratio of 0,5, which the note calls \"effectively zero for liquids and gases\" as a shear modulus and which is not a property this catalogue stores for a fluid; air prints none. The book says of the whole table that its values \"should be used with caution and should be considered as representative only\".",
+  "rows": [
+    {
+      "key": "air",
+      "name": "Air",
+      "temperature_c": 20.0,
+      "density_kg_m3": 1.206,
+      "speed_of_sound_m_s": 343.0
+    },
+    {
+      "key": "fresh_water",
+      "name": "Fresh water",
+      "temperature_c": 20.0,
+      "density_kg_m3": 998.0,
+      "speed_of_sound_m_s": 1497.0
+    },
+    {
+      "key": "sea_water",
+      "name": "Sea water",
+      "temperature_c": 13.0,
+      "density_kg_m3": 1025.0,
+      "speed_of_sound_m_s": 1530.0
+    }
+  ]
+}

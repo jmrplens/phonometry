@@ -201,14 +201,19 @@ def _fill(fields: dict[str, Any], name: str, value: float, how: str) -> None:
     interval contradicting it: the field would say one number and
     :attr:`SolidMaterial.ranges` would say the book gave none.
 
-    So is a field the row can say why is empty. Bies leaves the speed of his
+    So is a field the row says is not derivable. Bies leaves the speed of his
     aluminium honeycomb panels blank because a one-dimensional speed does not
     mean anything in a honeycomb, and the modulus and density beside it are
     effective ones; deriving 4 265 m/s from them would be arithmetic standing
-    in for a quantity that does not exist. Wherever
-    :attr:`SolidMaterial.unquantified` gives a reason, that reason wins.
+    in for a quantity that does not exist. So is a field whose cell held
+    something that is not a number, because the page has already answered
+    there. Wherever :attr:`SolidMaterial.not_derivable` or
+    :attr:`SolidMaterial.unquantified` speaks, it wins.
     """
-    if name in fields.get("ranges", {}) or name in fields.get("unquantified", {}):
+    if any(
+        name in fields.get(where, {})
+        for where in ("ranges", "unquantified", "not_derivable")
+    ):
         return
     fields[name] = value
     fields.setdefault("derived", {})

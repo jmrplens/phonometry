@@ -171,7 +171,15 @@ def reading(row: CatalogueRow, field: str) -> Reading | None:
     """
     value = getattr(row, field, None)
     if value is not None:
-        return Reading(book_of(row.table), row.table, ((float(value), float(value)),))
+        # A value printed with a plus-or-minus allows the interval around it,
+        # which is what the page said and what a comparison has to respect:
+        # Cox prints (540 +/- 92) x 10^3, and a book giving 500 agrees.
+        spread = float(row.uncertainty.get(field, 0.0))
+        return Reading(
+            book_of(row.table),
+            row.table,
+            ((float(value) - spread, float(value) + spread),),
+        )
     interval = row.ranges.get(field)
     if interval is not None:
         low, high = interval
@@ -236,6 +244,24 @@ def pairs(
     return found
 
 
+def accepted_key(
+    label: str, name: str, field: str, first: CatalogueRow, second: CatalogueRow
+) -> str:
+    """The registry key for one disagreement, naming the two rows it is about.
+
+    A material can be in three books, and two of the three pairs can disagree
+    for different reasons; a key of catalogue, name and quantity would let an
+    exception written for one pair silence the other. The two tables go in, and
+    the variant with each, because a book that prints a surface three times
+    prints three rows under one name.
+    """
+    rows = sorted(
+        f"{row.table}({row.variant})" if row.variant else row.table
+        for row in (first, second)
+    )
+    return f"{label}/{name}/{field}/{rows[0]}|{rows[1]}"
+
+
 def compare(
     label: str,
     catalogue: Iterable[CatalogueRow],
@@ -269,7 +295,7 @@ def compare(
                 continue
             compared += 1
             agrees = overlap(one, other)
-            key = f"{label}/{name}/{field}"
+            key = accepted_key(label, name, field, first, second)
             entries.append(
                 f"    {field:36s} {'overlap' if agrees else 'APART':>8}  "
                 f"{one.spelt()}  |  {other.spelt()}"

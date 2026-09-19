@@ -219,7 +219,10 @@ def test_a_disagreement_somebody_has_read_the_pages_for_is_accepted() -> None:
             "Sugar snow",
             ranges={"flow_resistivity_pa_s_m2": (250_000.0, 500_000.0)},
         ),
-        accepted={"ground/sugar snow/flow_resistivity_pa_s_m2": "read the pages"},
+        accepted={
+            "ground/sugar snow/flow_resistivity_pa_s_m2/"
+            "bies-2017-table-5-1|cox-2017-table-6-7": "read the pages"
+        },
     )
 
     assert not failures
@@ -339,3 +342,61 @@ def test_a_row_credit_covers_every_quantity_of_the_row() -> None:
 
     assert compared == 1
     assert len(failures) == 1
+
+
+def test_a_printed_uncertainty_widens_the_reading() -> None:
+    """Cox prints (540 +/- 92) x 10^3, so 500 is inside what the page allows.
+
+    A value with a plus-or-minus beside it is an interval the page stated, and
+    comparing the centres alone would call two overlapping uncertainties a
+    conflict.
+    """
+    _, failures, compared = _compare(
+        _row(
+            "bies-2017-table-5-1",
+            "Bare sandy plain",
+            flow_resistivity_pa_s_m2=500_000.0,
+        ),
+        _row(
+            "cox-2017-table-6-7",
+            "Bare sandy plain",
+            flow_resistivity_pa_s_m2=540_000.0,
+            uncertainty={"flow_resistivity_pa_s_m2": 92_000.0},
+        ),
+    )
+
+    assert compared == 1
+    assert not failures
+
+
+def test_an_exception_written_for_one_pair_does_not_cover_another() -> None:
+    """A material can be in three books and disagree with two of them.
+
+    The registry key names both rows, so an exception somebody read the pages
+    for covers those two rows and nothing else.
+    """
+    bies = _row(
+        "bies-2017-table-5-1",
+        "Sugar snow",
+        ranges={"flow_resistivity_pa_s_m2": (25_000.0, 50_000.0)},
+    )
+    cox = _row(
+        "cox-2017-table-6-7",
+        "Sugar snow",
+        ranges={"flow_resistivity_pa_s_m2": (250_000.0, 500_000.0)},
+    )
+    mechel = _row(
+        "mechel-2008-section-g1-table-1",
+        "Sugar snow",
+        ranges={"flow_resistivity_pa_s_m2": (700_000.0, 900_000.0)},
+    )
+    excuse = {
+        css.accepted_key(
+            "ground", "sugar snow", "flow_resistivity_pa_s_m2", bies, cox
+        ): "read the pages"
+    }
+
+    _, failures, _ = _compare(bies, cox, mechel, accepted=excuse)
+
+    assert len(failures) == 2
+    assert all("mechel" in failure for failure in failures)

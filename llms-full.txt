@@ -521,6 +521,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [io/io](https://jmrplens.github.io/phonometry/reference/api/io/io/)
 - [materials/airflow-resistance](https://jmrplens.github.io/phonometry/reference/api/materials/airflow-resistance/)
 - [materials/biot](https://jmrplens.github.io/phonometry/reference/api/materials/biot/)
+- [materials/catalogue](https://jmrplens.github.io/phonometry/reference/api/materials/catalogue/)
 - [materials/design](https://jmrplens.github.io/phonometry/reference/api/materials/design/)
 - [materials/dynamic-stiffness](https://jmrplens.github.io/phonometry/reference/api/materials/dynamic-stiffness/)
 - [materials/four-microphone](https://jmrplens.github.io/phonometry/reference/api/materials/four-microphone/)
@@ -32780,15 +32781,28 @@ bulk modulus with the exact limits $j\omega\rho_\mathrm{e} \to \sigma$ at DC,
 $\rho_\mathrm{e} \to (\alpha_\infty \rho_0/\phi)(1 + (1-j)\,\delta_v/\Lambda)$ at high
 frequency, and the isothermal-to-adiabatic transition in $K_\mathrm{e}$.
 
-Five parameters is four more than a caller usually has, so the two specimens
-this guide computes with are published as `PUBLISHED_POROUS_MATERIALS`, each
-carrying the page it was read on in its `source`: the 'Domisol Coffrage' glass
-wool of Allard & Atalla Table 6.1 (printed p. 124), whose characteristic
-lengths are printed in the prose of their Sect. 6.5.4 on the facing folio, and
-the soft fibrous layer of their Table 11.2 (printed p. 254). That is a pair of
-worked examples and not a material catalogue: a real specimen is characterised
-to ISO 9053 and ISO 10534-2, and every model here keeps its parameters as
-explicit arguments.
+Five parameters is four more than a caller usually has, so the specimens this
+guide computes with are published as `PUBLISHED_POROUS`, keyed by the table
+they were read from and the row they are: `'allard-2009-table-6-1/domisol_coffrage'`
+is the glass wool of Allard & Atalla Table 6.1 (printed p. 124), whose
+characteristic lengths are printed in the prose of their Sect. 6.5.4 on the
+facing folio, and `'allard-2009-table-11-2/soft_fibrous'` is the soft fibrous
+layer of their Table 11.2 (printed p. 254). The key names the table because
+the book prints one foam in four chapters and one glass wool in two, sometimes
+with a column the other page leaves out, and picking silently between two
+published parameter sets is the thing a catalogue exists not to do.
+
+Every quantity of a row is optional, because the pages print different
+columns. `.why_missing(field)` answers in the page's own terms: Table 11.5
+prints the word `model` where a screen's tortuosity would go, because the
+quantity is frequency dependent there and no single number stands for it, and
+that is a different answer from a cell the book left empty. `.printed(field)`
+is the same reading for a caller who needs the number and would rather be
+refused than handed a `None`.
+
+These are parameter sets from worked examples and not a material database: a
+real specimen is characterised to ISO 9053 and ISO 10534-2, and every model
+here keeps its parameters as explicit arguments.
 
 Where a specimen is incomplete rather than absent, four published relations
 close the gap. `porosity_from_bulk_density` is Hopkins Eq. (1.160),
@@ -32952,7 +32966,7 @@ from phonometry import materials
 
 # The soft fibrous layer of Allard & Atalla Table 11.2, 50 mm, published
 # once with the page it was read on.
-soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+soft = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
 print(soft.source)
 # Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)
 
@@ -33008,7 +33022,7 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 1000], dtype=float)
-soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+soft = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
 rigid = soft.medium(bands)
 limp = materials.limp_frame(
     rigid, frame_density=soft.frame_density_kg_m3, porosity=soft.porosity
@@ -33105,7 +33119,7 @@ import numpy as np
 from phonometry import materials
 
 # The published glass wool "Domisol Coffrage", 100 mm, glued.
-glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
 print(glass_wool.source)
 # Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)
 
@@ -33169,7 +33183,7 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([250, 315, 400, 500, 630, 800, 1000], dtype=float)
-glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
 shear, poisson = glass_wool.frame_constants()
 med = glass_wool.medium(bands)
 poroelastic = materials.PoroelasticLayer(
@@ -42113,7 +42127,7 @@ documents, one page per module.
 | `beam_longitudinal_speed` / `youngs_modulus_from_beam_speed` | `function` / `function` | **Quasi-longitudinal wave speed along a beam, and back (Hopkins Eq. 2.20).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL [m/s]<br>• `density_kg_m3` ρ<br>• cL = sqrt(E / ρ): a beam is unconstrained on its sides, so ν does not appear | `solids.beam_longitudinal_speed(2.0e11, density_kg_m3=7800.0)  # 5063.7` |
 | `bulk_longitudinal_speed` / `youngs_modulus_from_bulk_speed` | `function` / `function` | **Pure longitudinal wave speed in an unbounded solid, and back (Norton & Karczub Eq. 1.225).**<br>• `youngs_modulus_pa` E [Pa] or `longitudinal_speed_m_s` cL' [m/s]<br>• `density_kg_m3` ρ, `poisson_ratio` ν between -1 and 0.5<br>• cL' = sqrt(E (1 - ν) / (ρ (1 + ν)(1 - 2ν))): the speed an elastic solver integrates, not the one a plate table prints | `solids.bulk_longitudinal_speed(2.0e11, density_kg_m3=7800.0, poisson_ratio=0.28)  # 5724.8` |
 | `thickness_critical_frequency_product` / `DEFAULT_SPEED_OF_SOUND_M_S` | `function` / `float` | **The `h f_c` column of a materials table, from the plate wave speed.**<br>• `plate_speed_m_s` cL,p [m/s]<br>• `speed_of_sound_m_s` c0 [m/s] (Default: 343)<br>• h f_c = c0² sqrt(12) / (2 π cL,p), the exact constant: the rounded 1.8 of ISO 12354-1 misses Hopkins Table A2 by 0.8 % | `solids.thickness_critical_frequency_product(5270.0)  # 12.31 m Hz, Table A2 prints 12.3` |
-| `SolidMaterial` | `dataclass` | **One row of a published materials table, with what the cell said.**<br>• Every quantity optional, because no two books print the same columns; `.why_missing(field)` says what the page had instead<br>• Three speeds are three fields: `bar_longitudinal_speed_m_s`, `plate_longitudinal_speed_m_s` and `bulk_longitudinal_speed_m_s`, and `longitudinal_speed_m_s` holds the one a page prints without saying which, because at ν = 0,3 the plate speed is 4,8 % above the bar speed and the bulk speed 16 % above it<br>• Four loss factors: `flexural_loss_factor`, `longitudinal_loss_factor`, `in_situ_loss_factor`, and `loss_factor` for a page that prints one and does not say which<br>• `estimated`, `approximate`, `ranges`, `bounded_above`, `unquantified`: what the cell was, when it was not a value<br>• `derived`: field → how this library computed it; `borrowed`: field → the material a book took it from<br>• `attributed_to`: per-cell credit; `variant`: which specimen, when a page prints several under one name<br>• `.is_estimate(field)`, `.is_approximate(field)`, `.is_derived(field)` | `steel = solids.PUBLISHED_SOLIDS['hopkins-2007-table-a2/steel']`<br>`steel.youngs_modulus_pa  # 1.996e11, derived`<br><br>• `steel.attributed_to['flexural_loss_factor']  # 'Heckl, 1981'` |
+| `SolidMaterial` | `dataclass` | **One row of a published materials table, with what the cell said.**<br>• Every quantity optional, because no two books print the same columns; `.why_missing(field)` says what the page had instead<br>• Three speeds are three fields: `bar_longitudinal_speed_m_s`, `plate_longitudinal_speed_m_s` and `bulk_longitudinal_speed_m_s`, and `longitudinal_speed_m_s` holds the one a page prints without saying which, because at ν = 0,3 the plate speed is 4,8 % above the bar speed and the bulk speed 16 % above it<br>• Four loss factors: `flexural_loss_factor`, `longitudinal_loss_factor`, `in_situ_loss_factor`, and `loss_factor` for a page that prints one and does not say which<br>• `estimated`, `approximate`, `ranges`, `bounded_above`, `unquantified`: what the cell was, when it was not a value<br>• `derived`: field → how this library computed it; `borrowed`: field → the material a book took it from<br>• `attributed_to`: per-cell credit; `variant`: which specimen, when a page prints several under one name<br>• `.is_estimate(field)`, `.is_approximate(field)`, `.is_derived(field)`, `.printed(field)` to narrow or be refused | `steel = solids.PUBLISHED_SOLIDS['hopkins-2007-table-a2/steel']`<br>`steel.youngs_modulus_pa  # 1.996e11, derived`<br><br>• `steel.attributed_to['flexural_loss_factor']  # 'Heckl, 1981'` |
 | `PUBLISHED_SOLIDS` | `mapping` | **Two hundred and nineteen published solids from six books, keyed `'<table>/<row>'`.**<br>• Hopkins **Table A2**, twenty-five building materials (PDF pages 635-636)<br>• Cremer 3e **Table 4.3**, thirteen metals over fifteen rows (PDF page 201), the one table that prints E, G, ν and both speeds together<br>• Mechel **Table 3**, thirty-eight construction materials, plastics and metals (PDF pages 544-545), with no Poisson ratio, so its rows stop at the bar speed<br>• Bies 5e **Table C.1**, one hundred and five metals, building materials, woods, plastics and honeycomb panels (PDF pages 747-750), whose loss factor column is two quantities and not a range<br>• Long 2e **Table 12.1**, eighteen building materials credited to Beranek and Ver (PDF page 487), and Arau-Puchades **Table 4.1**, seventeen over eighteen rows (PDF page 129), neither of which says which longitudinal wave it prints<br>• The key names the table because four of them print a steel and they are not the same steel<br>• Only four of Hopkins' twenty-five Poisson ratios are measurements; the rest carry the book's 'Estimate' footnote and say so<br>• Not a specification: block densities vary by manufacturer, which is why the pages print ranges | `solids.PUBLISHED_SOLIDS['cremer-2005-table-4-3/gold']`<br><br>• `SolidMaterial`, `solids_named` |
 | `solids_named` | `function` | **Every published row for a material, across the books.**<br>• Matches `SolidMaterial.name` without regard to case; empty when no page names it<br>• Comparing two books has to be a deliberate act: a lookup returning one steel would be choosing between published values for you | `solids.solids_named('Steel')  # two rows, two tables`<br><br>• `PUBLISHED_SOLIDS` |
 | `ideal_gas` / `MOLAR_GAS_CONSTANT` / `IDEAL_GAS_VALIDITY` | `function` / `float` / `str` | **A gas from the two numbers a gas table prints.**<br>• `temperature_c` t [°C], required<br>• `heat_capacity_ratio` γ (> 1: it is c_p/c_v and c_p − c_v is the gas constant), `molar_mass_kg_mol` M [kg/mol], required<br>• `static_pressure_pa` p [Pa] (Default: None → 101 325, warns)<br>• c = sqrt(γRT/M) and ρ = pM/(RT), so a gas that is not air or water is computed rather than typed<br>• the density is light by 1 − Z, the compressibility factor's distance from unity: 0,7 % for CO₂ and 2 % for SF₆<br>• no viscosity, no thermal conductivity and no Prandtl number: nothing in the closure determines them | `fluids.ideal_gas(temperature_c=20.0, heat_capacity_ratio=1.67, molar_mass_kg_mol=0.040, static_pressure_pa=101300.0)`<br><br>• `Fluid`; c = 319.0 m/s, rho = 1.663 kg/m³, which is Hopkins Table A1 for argon |
@@ -42251,7 +42265,7 @@ documents, one page per module.
 | `miki` | `function` | **Miki (1990) positive-real revision of Delany–Bazley.**<br>• `frequency` f [Hz]<br>• `flow_resistivity` σ [Pa·s/m²]<br>• `fluid`: `Fluid` (Default: `PUBLISHED_AIR`)<br>• Stays passive below the fit range; warns outside 0.01 < f/σ < 1 | `med = materials.miki(f, 20000.0)`<br><br>• `PorousMediumResult` |
 | `johnson_champoux_allard` | `function` | **JCA five-parameter rigid-frame model (Cox & D'Antonio 3e Eqs. 6.19–6.25).**<br>• `frequency` f [Hz], `flow_resistivity` σ [Pa·s/m²]<br>• `porosity` φ, `tortuosity` T = α∞<br>• `viscous_length` Λ / `thermal_length` Λ′ [m]<br>• `fluid`: `Fluid` carrying the air state the model needs, viscosity, Prandtl number, ratio of specific heats and static pressure (Default: `PUBLISHED_AIR`) | `med = materials.johnson_champoux_allard(f, 20000.0, porosity=0.98, tortuosity=1.05, viscous_length=8.7e-5, thermal_length=1.7e-4)`<br><br>• `PorousMediumResult` |
 | `limp_frame` | `function` | **Limp-frame correction of any rigid-frame model (Allard & Atalla 2e Eqs. 11.53-11.55, Panneton 2007).**<br>• `medium`: a rigid-frame `PorousMediumResult`<br>• `frame_density` ρ₁ [kg/m³] (bulk density of the frame)<br>• `porosity` φ (Default: 1.0)<br>• keeps K_e, corrects ρ_e; → ρ_t = ρ₁ + φρ₀ as ω → 0 and → rigid as ρ₁ → ∞ | `soft = materials.limp_frame(jca, frame_density=30.0, porosity=0.98)`<br><br>• `PorousMediumResult`, model 'materials.limp_frame(...)' |
-| `decoupling_frequency` | `function` | **Zwikker-Kosten decoupling frequency Fd (Allard & Atalla 2e Sect. 11.3.4 / Eq. 6.90).**<br>• `flow_resistivity` σ [Pa·s/m²]<br>• `porosity` φ, `frame_density` ρ₁ [kg/m³]<br>• Fd = σφ²/(2πρ₁): above it the frame stands still | `gw = materials.PUBLISHED_POROUS_MATERIALS['glass_wool']`<br>`decoupling_frequency(gw.flow_resistivity_pa_s_m2, porosity=gw.porosity, frame_density=gw.frame_density_kg_m3)  # 43.27`<br><br>• [Hz] |
+| `decoupling_frequency` | `function` | **Zwikker-Kosten decoupling frequency Fd (Allard & Atalla 2e Sect. 11.3.4 / Eq. 6.90).**<br>• `flow_resistivity` σ [Pa·s/m²]<br>• `porosity` φ, `frame_density` ρ₁ [kg/m³]<br>• Fd = σφ²/(2πρ₁): above it the frame stands still | `gw = materials.PUBLISHED_POROUS['allard-2009-table-6-1/domisol_coffrage']`<br>`decoupling_frequency(gw.printed('flow_resistivity_pa_s_m2'), porosity=gw.printed('porosity'), frame_density=gw.printed('frame_density_kg_m3'))  # 43.27`<br><br>• [Hz] |
 | `limp_frame_applicable` / `LIMP_FRAME_CRITERIA` | `function` / `mapping` | **Published rule of thumb for treating a frame as limp (Allard & Atalla 2e pp. 253-254).**<br>• `frame_bulk_modulus` K_c [Pa]<br>• `criterion`: 'doutres' (0.2, Default) / 'beranek' (0.05)<br>• `fluid_bulk_modulus` K_f [Pa] (Default: 101325, isothermal air) → the book's "bulk modulus lower than 20 kPa" | `limp_frame_applicable(20e3)  # True`<br><br>• `bool` |
 | `biot_waves` | `function` | **The three Biot waves of a poroelastic layer (Allard & Atalla 2e Eqs. 6.67–6.84).**<br>• `medium`: the **rigid-frame** `PorousMediumResult` of the pores<br>• `porosity` φ, `tortuosity` α∞<br>• `frame_density` ρ₁ [kg/m³], `shear_modulus` N [Pa] (complex, Im ≥ 0)<br>• `poisson_ratio` ν (Default: 0) | `w = materials.biot_waves(jca, porosity=0.94, tortuosity=1.06, frame_density=130.0, shear_modulus=2.2e6*(1+0.1j))`<br><br>• `BiotWavesResult` |
 | `BiotWavesResult` | `dataclass` | **Two compressional waves and one shear wave.**<br>• `compressional_wavenumber_1` / `_2`, `shear_wavenumber` δ [rad/m]<br>• `velocity_ratio_1` / `_2` / `_3` μ (fluid over frame)<br>• `elastic_p` / `_q` / `_r` P, Q, R [Pa]; `density_11` / `_12` / `_22`<br>• `.airborne_wavenumber`, `.frame_borne_wavenumber`, `.airborne_velocity_ratio`, `.frame_borne_velocity_ratio`, `.airborne_is_second`<br>• `.plot()`: the three wavenumbers vs frequency | `w.airborne_wavenumber, w.plot()` |
@@ -42261,7 +42275,9 @@ documents, one page per module.
 | `frame_elastic_coefficient` | `function` | **Longitudinal coefficient Kc of the frame in vacuum (Allard & Atalla 2e Eq. 6.111).**<br>• `shear_modulus` N [Pa], `poisson_ratio` ν<br>• Kc = 2(1−ν)N/(1−2ν) = Kb + 4N/3 | `frame_elastic_coefficient(2.2e6, 0.0)  # 4.4e6`<br><br>• complex [Pa] |
 | `frame_quarter_wave_resonance` | `function` | **λ/4 frame resonance of a glued layer (Allard & Atalla 2e Eq. 6.110).**<br>• `thickness` l [m]<br>• `shear_modulus` N, `poisson_ratio` ν, `frame_density` ρ₁<br>• fr = (1/4l)√(Re(Kc)/ρ₁): the peak no equivalent fluid produces | `frame_quarter_wave_resonance(0.10, shear_modulus=2.2e6*(1+0.1j), poisson_ratio=0.0, frame_density=130.0)  # 459.9`<br><br>• [Hz] |
 | `PorousMediumResult` | `dataclass` | **Equivalent-fluid characterisation.**<br>• `characteristic_impedance` Zc [Pa·s/m], `wavenumber` k [rad/m] (Im < 0)<br>• `effective_density`, `bulk_modulus` (surface-normalised)<br>• `.normalized_impedance`, `.normalized_wavenumber`<br>• `.plot()`: normalised Zc/k components | `med.characteristic_impedance, med.plot()` |
-| `PorousMaterial` / `PUBLISHED_POROUS_MATERIALS` | `dataclass` / `mapping` | **Two porous specimens as their pages print them (Allard & Atalla 2e).**<br>• `'glass_wool'`: 'Domisol Coffrage', Table 6.1 (printed p. 124), the Λ = 56 µm / Λ′ = 110 µm of Sect. 6.5.4 (printed p. 123) and the h = 3.8 mm of Table 11.8 (printed p. 275)<br>• `'soft_fibrous'`: Table 11.2 (printed p. 254)<br>• `flow_resistivity_pa_s_m2`, `porosity`, `tortuosity`, `viscous_length_um`, `thermal_length_um`, `frame_density_kg_m3`, `thickness_mm`, `source`, `attributed_to`<br>• `.medium(f)` → `PorousMediumResult`; `.frame_constants()` → (N, ν)<br>• Not a material catalogue: a real specimen is characterised to ISO 9053 and ISO 10534-2 | `gw = materials.PUBLISHED_POROUS_MATERIALS['glass_wool']`<br>`med = gw.medium(f)`<br><br>• `gw.source` prints the page |
+| `PorousMaterial` | `dataclass` | **One row of a published table of porous-material parameters.**<br>• Every quantity optional, because no two tables print the same columns; `.why_missing(field)` says what the page had instead, and `.printed(field)` narrows or refuses<br>• `flow_resistivity_pa_s_m2`, `porosity`, `tortuosity`, `viscous_length_um`, `thermal_length_um`, `thermal_permeability_m2`, `frame_density_kg_m3`, `thickness_mm`<br>• `youngs_modulus_pa`, `shear_modulus_pa` (**real**), `poisson_ratio`, `structural_loss_factor`: a page printing `N(1 + jη)` has printed the last two of those<br>• `approximate`, `ranges`, `bounded_above`, `reported`, `unquantified`: what the cell was, when it was not a value<br>• `derived`: field → how this library computed it; `attributed_to`: per-cell credit; `variant`: which specimen, when a page prints several under one name<br>• `.medium(f)` → `PorousMediumResult`; `.frame_constants()` → (N, ν) with N complex<br>• Not a material database: a real specimen is characterised to ISO 9053 and ISO 10534-2 | `foam = materials.PUBLISHED_POROUS['allard-2009-table-13-1/foam']`<br>`med = foam.medium(f)`<br><br>• `foam.source` prints the page |
+| `PUBLISHED_POROUS` | `mapping` | **Thirty-two porous specimens from nineteen parameter tables, keyed `'<table>/<row>'`.**<br>• Allard & Atalla 2e, the rows of nineteen tables over eight chapters, each one the input to a worked example of the book<br>• The key names the table because the book prints one foam in four chapters and one glass wool in two, sometimes with a column the other page leaves out<br>• Table 6.1 prints the glass wool's shear modulus in N/cm², Table 11.8 prints the same specimen's Young's modulus in pascals, and `E/(2(1+ν))` reconciles them<br>• Table 9.1 prints its lengths in millimetres and Table 13.1 in metres; all of them are stored in micrometres<br>• Table 11.5 prints the word 'model' where a screen's tortuosity would go, and the row keeps the word rather than a number<br>• The plates, septa and impervious screens these pages also print are not porous materials and are not here | `materials.PUBLISHED_POROUS['allard-2009-table-11-2/soft_fibrous']`<br><br>• `PorousMaterial`, `porous_materials_named` |
+| `porous_materials_named` | `function` | **Every published row for a specimen name, across the tables.**<br>• Matches `PorousMaterial.name` without regard to case; empty when no page names it<br>• Five pages print a 'Foam' and they are five different foams, so a lookup returning one would be choosing between published parameter sets for you | `materials.porous_materials_named('Foam')  # five rows, five tables`<br><br>• `PUBLISHED_POROUS` |
 | `porosity_from_bulk_density` | `function` | **Open porosity of a fibrous material from its two densities (Hopkins 2007 Eq. 1.160, printed p. 80).**<br>• `bulk_density_kg_m3` ρ [kg/m³], `fibre_density_kg_m3` ρ_fibre [kg/m³]<br>• φ = 1 − ρ/ρ_fibre; holds for solid fibres with a binder of negligible mass<br>• Refuses a bulk density at or above the fibre density | `materials.porosity_from_bulk_density(60.0, fibre_density_kg_m3=2 600.0)  # 0.977`<br><br>• φ, between 0 and 1 |
 | `airflow_resistivity_from_bulk_density` / `FibreResistivityFit` | `function` / `class` | **Airflow resistivity of a mineral wool from its bulk density (Hopkins 2007 Eq. 1.165, printed p. 81).**<br>• `bulk_density_kg_m3` ρ [kg/m³]<br>• `fit`: a published `FibreResistivityFit` carrying `k1`, `k2`, `fibre_diameter_um` and the bulk-density range it was fitted over<br>• r = k₁ρ^(1+k₂)/d² with d in micrometres<br>• Warns outside the fitted range: it is a regression through measured points, not a law | `materials.airflow_resistivity_from_bulk_density(60.0, fit=materials.ROCK_WOOL_LONGITUDINAL_FIT)  # 23 226`<br><br>• σ [Pa·s/m²] |
 | `ROCK_WOOL_LATERAL_FIT` / `ROCK_WOOL_LONGITUDINAL_FIT` / `ROCK_WOOL_FIBRE_DENSITY_KG_M3` | `constant` | **The rock wool of Hopkins Fig. 1.49, as its page prints it (printed p. 81).**<br>• lateral k₁ = 353, k₂ = 0,63 over 31 to 155 kg/m³<br>• longitudinal k₁ = 780, k₂ = 0,59 over 38 to 162 kg/m³<br>• fibre diameter 4,75 µm, fibre density 2 600 kg/m³<br>• Mineral wool is anisotropic: the longitudinal resistivity is the higher of the two | `materials.ROCK_WOOL_LATERAL_FIT.k1  # 353.0`<br><br>• `FibreResistivityFit`, `float` |

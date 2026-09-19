@@ -436,11 +436,16 @@ LONG_STEEL_SPEED_M_S = 5050.0
 #: chip board.
 LONG_ROWS_WITHOUT_A_SPEED = 9
 
-#: The row that prints words instead of a loss factor, and the words.
+#: The row that prints words instead of a loss factor, and the words the page
+#: prints there.
 LONG_UNQUANTIFIED_LOSS_FACTOR = (
     "hollow_dense_concrete",
-    "the table prints \u201cVaries with frequency\u201d where the number would be",
+    "Varies with frequency",
 )
+
+#: What Long prints where nine of its rows would give a longitudinal speed: a
+#: row of dots, which the catalogue keeps as the ellipsis it reads as.
+LONG_DOTTED_SPEED_CELL = "\u2026"
 
 #: Arau prints the critical frequency of a one centimetre plate, in hertz, so
 #: the product this library holds is that frequency times 0,01 m. Key, the

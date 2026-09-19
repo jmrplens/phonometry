@@ -6,71 +6,85 @@ export const catalogues = {
       {
         "field": "density_kg_m3",
         "heading": "Density",
+        "headingEs": "Densidad",
         "unit": "kg/m³"
       },
       {
         "field": "youngs_modulus_pa",
         "heading": "Young's modulus",
-        "unit": "Pa"
+        "headingEs": "Módulo de Young",
+        "unit": "GPa"
       },
       {
         "field": "shear_modulus_pa",
         "heading": "Shear modulus",
-        "unit": "Pa"
+        "headingEs": "Módulo de cizalla",
+        "unit": "GPa"
       },
       {
         "field": "poisson_ratio",
         "heading": "Poisson ratio",
+        "headingEs": "Coeficiente de Poisson",
         "unit": ""
       },
       {
         "field": "longitudinal_speed_m_s",
         "heading": "Longitudinal speed",
+        "headingEs": "Velocidad longitudinal",
         "unit": "m/s"
       },
       {
         "field": "bar_longitudinal_speed_m_s",
         "heading": "Bar speed",
+        "headingEs": "Velocidad de barra",
         "unit": "m/s"
       },
       {
         "field": "plate_longitudinal_speed_m_s",
         "heading": "Plate speed",
+        "headingEs": "Velocidad de placa",
         "unit": "m/s"
       },
       {
         "field": "bulk_longitudinal_speed_m_s",
         "heading": "Bulk speed",
+        "headingEs": "Velocidad de medio infinito",
         "unit": "m/s"
       },
       {
         "field": "transverse_speed_m_s",
         "heading": "Transverse speed",
+        "headingEs": "Velocidad transversal",
         "unit": "m/s"
       },
       {
         "field": "loss_factor",
         "heading": "Loss factor",
+        "headingEs": "Factor de pérdidas",
         "unit": ""
       },
       {
         "field": "flexural_loss_factor",
         "heading": "Flexural loss factor",
+        "headingEs": "Factor de pérdidas a flexión",
         "unit": ""
       },
       {
         "field": "longitudinal_loss_factor",
         "heading": "Longitudinal loss factor",
+        "headingEs": "Factor de pérdidas longitudinal",
         "unit": ""
       },
       {
         "field": "in_situ_loss_factor",
         "heading": "In-situ loss factor",
+        "headingEs": "Factor de pérdidas in situ",
         "unit": ""
       },
       {
         "field": "thickness_critical_frequency_product_m_hz",
-        "heading": "h.f_c",
+        "heading": "Thickness × critical frequency",
+        "headingEs": "Espesor × frecuencia crítica",
         "unit": "m·Hz"
       }
     ],
@@ -175,12 +189,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "62 110 000 000",
+            "text": "62,11",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "23 170 000 000",
+            "text": "23,17",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -341,12 +355,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 800 000 000",
+            "text": "10,8",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "4 500 000 000",
+            "text": "4,5",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -424,12 +438,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 347 000 000",
+            "text": "3,347",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "1 287 000 000",
+            "text": "1,287",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -507,12 +521,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 384 000 000",
+            "text": "3,384",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "1 410 000 000",
+            "text": "1,41",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -590,12 +604,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "7 992 000 000",
+            "text": "7,992",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "3 330 000 000",
+            "text": "3,33",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -673,12 +687,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6 041 000 000",
+            "text": "6,041",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "2 517 000 000",
+            "text": "2,517",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -756,12 +770,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "30 500 000 000",
+            "text": "30,5",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "12 710 000 000",
+            "text": "12,71",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -839,12 +853,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "19 660 000 000",
+            "text": "19,66",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "8 192 000 000",
+            "text": "8,192",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -922,12 +936,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 063 000 000",
+            "text": "4,063",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "1 693 000 000",
+            "text": "1,693",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1005,12 +1019,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "63 710 000 000",
+            "text": "63,71",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "25 690 000 000",
+            "text": "25,69",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1088,12 +1102,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6 505 000 000",
+            "text": "6,505",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "2 710 000 000",
+            "text": "2,71",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1171,12 +1185,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 532 000 000",
+            "text": "4,532",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "1 743 000 000",
+            "text": "1,743",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1254,12 +1268,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "9 220 000 000",
+            "text": "9,22",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "3 842 000 000",
+            "text": "3,842",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1337,12 +1351,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 546 000 000",
+            "text": "3,546",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "1 364 000 000",
+            "text": "1,364",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1420,12 +1434,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6 282 000 000",
+            "text": "6,282",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "2 416 000 000",
+            "text": "2,416",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1503,12 +1517,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 617 000 000",
+            "text": "1,617",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "673 900 000",
+            "text": "0,6739",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1586,12 +1600,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 737 000 000",
+            "text": "1,737",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "668 300 000",
+            "text": "0,6683",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1669,12 +1683,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 027 000 000",
+            "text": "2,027",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "779 700 000",
+            "text": "0,7797",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1752,12 +1766,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 941 000 000",
+            "text": "2,941",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "1 131 000 000",
+            "text": "1,131",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1835,12 +1849,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "9 577 000 000",
+            "text": "9,577",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "3 683 000 000",
+            "text": "3,683",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -1918,12 +1932,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "20 280 000 000",
+            "text": "20,28",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "8 450 000 000",
+            "text": "8,45",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -2003,12 +2017,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "199 600 000 000",
+            "text": "199,6",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "77 990 000 000",
+            "text": "77,99",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -2048,7 +2062,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "< 1e-4",
+            "text": "< 0,0001",
             "kind": "bound",
             "note": "the page prints an upper bound of 0.0001 and no value"
           },
@@ -2086,12 +2100,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 010 000 000",
+            "text": "10,01",
             "kind": "derived",
             "note": "from the plate speed, the density and the Poisson ratio"
           },
           {
-            "text": "3 850 000 000",
+            "text": "3,85",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -2169,12 +2183,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "72 000 000 000",
+            "text": "72",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "27 000 000 000",
+            "text": "27",
             "kind": "printed",
             "note": ""
           },
@@ -2214,12 +2228,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3e-6 to 1e-4",
+            "text": "0,000003 to 0,0001",
             "kind": "range",
             "note": "the page prints 3e-06 to 0.0001 and no value"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "approximate",
             "note": "the page prints it with a tilde"
           },
@@ -2252,12 +2266,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "17 000 000 000",
+            "text": "17",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "6 000 000 000",
+            "text": "6",
             "kind": "printed",
             "note": ""
           },
@@ -2335,12 +2349,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "17 000 000 000",
+            "text": "17",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "6 000 000 000",
+            "text": "6",
             "kind": "printed",
             "note": ""
           },
@@ -2418,12 +2432,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "200 000 000 000",
+            "text": "200",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "77 000 000 000",
+            "text": "77",
             "kind": "printed",
             "note": ""
           },
@@ -2463,12 +2477,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4 to 4e-4",
+            "text": "0,0001 to 0,0004",
             "kind": "range",
             "note": "the page prints 0.0001 to 0.0004 and no value"
           },
           {
-            "text": "2e-4 to 6e-4",
+            "text": "0,0002 to 0,0006",
             "kind": "range",
             "note": "the page prints 0.0002 to 0.0006 and no value"
           },
@@ -2499,12 +2513,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "210 000 000 000",
+            "text": "210",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "77 000 000 000",
+            "text": "77",
             "kind": "printed",
             "note": ""
           },
@@ -2544,7 +2558,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2e-5 to 3e-4",
+            "text": "0,00002 to 0,0003",
             "kind": "range",
             "note": "the page prints 2e-05 to 0.0003 and no value"
           },
@@ -2582,12 +2596,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "80 000 000 000",
+            "text": "80",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "28 000 000 000",
+            "text": "28",
             "kind": "printed",
             "note": ""
           },
@@ -2627,7 +2641,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3e-4",
+            "text": "0,0003",
             "kind": "approximate",
             "note": "the page prints it with a tilde"
           },
@@ -2663,12 +2677,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "125 000 000 000",
+            "text": "125",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "46 000 000 000",
+            "text": "46",
             "kind": "printed",
             "note": ""
           },
@@ -2744,12 +2758,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "125 000 000 000",
+            "text": "125",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "46 000 000 000",
+            "text": "46",
             "kind": "printed",
             "note": ""
           },
@@ -2789,7 +2803,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2e-4 to 7e-4",
+            "text": "0,0002 to 0,0007",
             "kind": "range",
             "note": "the page prints 0.0002 to 0.0007 and no value"
           },
@@ -2827,12 +2841,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "43 000 000 000",
+            "text": "43",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "17 000 000 000",
+            "text": "17",
             "kind": "printed",
             "note": ""
           },
@@ -2877,7 +2891,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "approximate",
             "note": "the page prints it with a tilde"
           },
@@ -2910,12 +2924,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "95 000 000 000",
+            "text": "95",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "36 000 000 000",
+            "text": "36",
             "kind": "printed",
             "note": ""
           },
@@ -2955,7 +2969,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2e-4 to 0,001",
+            "text": "0,0002 to 0,001",
             "kind": "range",
             "note": "the page prints 0.0002 to 0.001 and no value"
           },
@@ -2993,12 +3007,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "205 000 000 000",
+            "text": "205",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "77 000 000 000",
+            "text": "77",
             "kind": "printed",
             "note": ""
           },
@@ -3076,12 +3090,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "80 000 000 000",
+            "text": "80",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "29 000 000 000",
+            "text": "29",
             "kind": "printed",
             "note": ""
           },
@@ -3121,7 +3135,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4e-4",
+            "text": "0,0004",
             "kind": "approximate",
             "note": "the page prints it with a tilde"
           },
@@ -3159,12 +3173,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 300 000 000",
+            "text": "3,3",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 300 000 000",
+            "text": "1,3",
             "kind": "printed",
             "note": ""
           },
@@ -3209,7 +3223,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "8e-4",
+            "text": "0,0008",
             "kind": "approximate",
             "note": "the page prints it with a tilde"
           },
@@ -3242,12 +3256,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "13 100 000 000",
+            "text": "13,1",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "5 000 000 000",
+            "text": "5",
             "kind": "printed",
             "note": ""
           },
@@ -3292,7 +3306,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3e-4",
+            "text": "0,0003",
             "kind": "approximate",
             "note": "the page prints it with a tilde"
           },
@@ -3325,12 +3339,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 400 000 000",
+            "text": "4,4",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 600 000 000",
+            "text": "1,6",
             "kind": "printed",
             "note": ""
           },
@@ -3406,7 +3420,7 @@ export const catalogues = {
             "note": "the page prints 2100 to 2300 and no value"
           },
           {
-            "text": "25 000 000 000 to 40 000 000 000",
+            "text": "25 to 40",
             "kind": "range",
             "note": "the page prints 2.5e+10 to 4e+10 and no value"
           },
@@ -3487,7 +3501,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "15 000 000 000",
+            "text": "15",
             "kind": "printed",
             "note": ""
           },
@@ -3568,7 +3582,7 @@ export const catalogues = {
             "note": "the page prints 800 to 1400 and no value"
           },
           {
-            "text": "1 500 000 000 to 3 000 000 000",
+            "text": "1,5 to 3",
             "kind": "range",
             "note": "the page prints 1.5e+09 to 3e+09 and no value"
           },
@@ -3649,7 +3663,7 @@ export const catalogues = {
             "note": "the page prints 600 to 700 and no value"
           },
           {
-            "text": "1 400 000 000 to 2 000 000 000",
+            "text": "1,4 to 2",
             "kind": "range",
             "note": "the page prints 1.4e+09 to 2e+09 and no value"
           },
@@ -3730,7 +3744,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "30 000 000 000",
+            "text": "30",
             "kind": "printed",
             "note": ""
           },
@@ -3811,7 +3825,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6 000 000 000",
+            "text": "6",
             "kind": "printed",
             "note": ""
           },
@@ -3892,7 +3906,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6 000 000 000 to 15 000 000 000",
+            "text": "6 to 15",
             "kind": "range",
             "note": "the page prints 6e+09 to 1.5e+10 and no value"
           },
@@ -3973,7 +3987,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "20 000 000 000",
+            "text": "20",
             "kind": "printed",
             "note": ""
           },
@@ -4054,7 +4068,7 @@ export const catalogues = {
             "note": "the page prints 1000 to 1200 and no value"
           },
           {
-            "text": "3 500 000 000 to 7 000 000 000",
+            "text": "3,5 to 7",
             "kind": "range",
             "note": "the page prints 3.5e+09 to 7e+09 and no value"
           },
@@ -4135,7 +4149,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 200 000 000",
+            "text": "3,2",
             "kind": "printed",
             "note": ""
           },
@@ -4216,7 +4230,7 @@ export const catalogues = {
             "note": "the page prints 2000 to 2100 and no value"
           },
           {
-            "text": "20 000 000 000 to 30 000 000 000",
+            "text": "20 to 30",
             "kind": "range",
             "note": "the page prints 2e+10 to 3e+10 and no value"
           },
@@ -4297,7 +4311,7 @@ export const catalogues = {
             "note": "the page prints 1700 to 1800 and no value"
           },
           {
-            "text": "9 000 000 000 to 25 000 000 000",
+            "text": "9 to 25",
             "kind": "range",
             "note": "the page prints 9e+09 to 2.5e+10 and no value"
           },
@@ -4378,7 +4392,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "60 000 000 000 to 80 000 000 000",
+            "text": "60 to 80",
             "kind": "range",
             "note": "the page prints 6e+10 to 8e+10 and no value"
           },
@@ -4459,7 +4473,7 @@ export const catalogues = {
             "note": "the page prints 600 to 1000 and no value"
           },
           {
-            "text": "2 000 000 000 to 5 000 000 000",
+            "text": "2 to 5",
             "kind": "range",
             "note": "the page prints 2e+09 to 5e+09 and no value"
           },
@@ -4540,7 +4554,7 @@ export const catalogues = {
             "note": "the page prints 600 to 800 and no value"
           },
           {
-            "text": "5 000 000 000 to 12 000 000 000",
+            "text": "5 to 12",
             "kind": "range",
             "note": "the page prints 5e+09 to 1.2e+10 and no value"
           },
@@ -4621,7 +4635,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "200 000 000 to 1 000 000 000",
+            "text": "0,2 to 1",
             "kind": "range",
             "note": "the page prints 2e+08 to 1e+09 and no value"
           },
@@ -4702,7 +4716,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "100 000 000 to 500 000 000",
+            "text": "0,1 to 0,5",
             "kind": "range",
             "note": "the page prints 1e+08 to 5e+08 and no value"
           },
@@ -4783,7 +4797,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 000 000 000 to 4 500 000 000",
+            "text": "3 to 4,5",
             "kind": "range",
             "note": "the page prints 3e+09 to 4.5e+09 and no value"
           },
@@ -4864,7 +4878,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "5 600 000 000",
+            "text": "5,6",
             "kind": "printed",
             "note": ""
           },
@@ -4945,7 +4959,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 000 000 000",
+            "text": "3",
             "kind": "printed",
             "note": ""
           },
@@ -5026,7 +5040,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 500 000 000",
+            "text": "4,5",
             "kind": "printed",
             "note": ""
           },
@@ -5107,7 +5121,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 700 000 000",
+            "text": "2,7",
             "kind": "printed",
             "note": ""
           },
@@ -5269,7 +5283,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 700 000 000",
+            "text": "1,7",
             "kind": "printed",
             "note": ""
           },
@@ -5350,7 +5364,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "400 000 000",
+            "text": "0,4",
             "kind": "printed",
             "note": ""
           },
@@ -5431,7 +5445,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 000 000 000",
+            "text": "3",
             "kind": "printed",
             "note": ""
           },
@@ -5512,7 +5526,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "8 000 000 000",
+            "text": "8",
             "kind": "printed",
             "note": ""
           },
@@ -5593,7 +5607,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "11 500 000 000",
+            "text": "11,5",
             "kind": "printed",
             "note": ""
           },
@@ -5674,7 +5688,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "74 000 000 000",
+            "text": "74",
             "kind": "printed",
             "note": ""
           },
@@ -5714,7 +5728,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "7e-5",
+            "text": "0,00007",
             "kind": "printed",
             "note": ""
           },
@@ -5755,7 +5769,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "18 000 000 000",
+            "text": "18",
             "kind": "printed",
             "note": ""
           },
@@ -5836,7 +5850,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "125 000 000 000",
+            "text": "125",
             "kind": "printed",
             "note": ""
           },
@@ -5917,7 +5931,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "96 000 000 000",
+            "text": "96",
             "kind": "printed",
             "note": ""
           },
@@ -5998,7 +6012,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "200 000 000 000",
+            "text": "200",
             "kind": "printed",
             "note": ""
           },
@@ -6038,7 +6052,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -6079,7 +6093,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "170 000 000 000",
+            "text": "170",
             "kind": "printed",
             "note": ""
           },
@@ -6160,7 +6174,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "120 000 000 000",
+            "text": "120",
             "kind": "printed",
             "note": ""
           },
@@ -6241,7 +6255,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "120 000 000 000",
+            "text": "120",
             "kind": "printed",
             "note": ""
           },
@@ -6322,7 +6336,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "13 000 000 000",
+            "text": "13",
             "kind": "printed",
             "note": ""
           },
@@ -6403,7 +6417,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 400 000 000",
+            "text": "4,4",
             "kind": "printed",
             "note": ""
           },
@@ -6484,12 +6498,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "70 000 000 000",
+            "text": "70",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "25 930 000 000",
+            "text": "25,93",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -6524,7 +6538,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -6565,12 +6579,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "95 000 000 000",
+            "text": "95",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "35 190 000 000",
+            "text": "35,19",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -6646,12 +6660,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "101 000 000 000",
+            "text": "101",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "37 410 000 000",
+            "text": "37,41",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -6727,12 +6741,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "8 199 999 999,999999",
+            "text": "8,2",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 832 000 000",
+            "text": "3,832",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -6808,12 +6822,12 @@ export const catalogues = {
             "note": "the page prints 1330 to 1400 and no value"
           },
           {
-            "text": "1 000 000 000 000",
+            "text": "1 000",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "471 700 000 000",
+            "text": "471,7",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -6889,12 +6903,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "9 000 000 000",
+            "text": "9",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "4 206 000 000",
+            "text": "4,206",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -6970,12 +6984,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "279 000 000 000",
+            "text": "279",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "115 300 000 000",
+            "text": "115,3",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7051,12 +7065,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "128 000 000 000",
+            "text": "128",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "47 760 000 000",
+            "text": "47,76",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7132,12 +7146,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "126 000 000 000",
+            "text": "126",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "47 010 000 000",
+            "text": "47,01",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7213,12 +7227,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "79 000 000 000",
+            "text": "79",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "27 430 000 000",
+            "text": "27,43",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7294,12 +7308,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "200 000 000 000",
+            "text": "200",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "76 920 000 000",
+            "text": "76,92",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7334,7 +7348,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "5e-4",
+            "text": "0,0005",
             "kind": "printed",
             "note": ""
           },
@@ -7375,12 +7389,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "180 000 000 000",
+            "text": "180",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "69 230 000 000",
+            "text": "69,23",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7415,7 +7429,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "5e-4",
+            "text": "0,0005",
             "kind": "printed",
             "note": ""
           },
@@ -7456,12 +7470,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "150 000 000 000",
+            "text": "150",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "57 690 000 000",
+            "text": "57,69",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7496,7 +7510,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "5e-4",
+            "text": "0,0005",
             "kind": "printed",
             "note": ""
           },
@@ -7537,12 +7551,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "195 000 000 000",
+            "text": "195",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "75 000 000 000",
+            "text": "75",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7577,7 +7591,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "5e-4",
+            "text": "0,0005",
             "kind": "printed",
             "note": ""
           },
@@ -7618,12 +7632,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "83 000 000 000",
+            "text": "83",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "31 920 000 000",
+            "text": "31,92",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7658,7 +7672,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "5e-4",
+            "text": "0,0005",
             "kind": "printed",
             "note": ""
           },
@@ -7699,12 +7713,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "117 000 000 000",
+            "text": "117",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "45 000 000 000",
+            "text": "45",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7739,7 +7753,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "5e-4",
+            "text": "0,0005",
             "kind": "printed",
             "note": ""
           },
@@ -7780,12 +7794,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "180 000 000 000",
+            "text": "180",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "69 230 000 000",
+            "text": "69,23",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7820,7 +7834,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "5e-4",
+            "text": "0,0005",
             "kind": "printed",
             "note": ""
           },
@@ -7861,12 +7875,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "16 000 000 000",
+            "text": "16",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "5 594 000 000",
+            "text": "5,594",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -7942,12 +7956,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "16 700 000 000",
+            "text": "16,7",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "5 799 000 000",
+            "text": "5,799",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8023,12 +8037,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "13 800 000 000",
+            "text": "13,8",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "4 792 000 000",
+            "text": "4,792",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8104,12 +8118,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "44 700 000 000",
+            "text": "44,7",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "17 330 000 000",
+            "text": "17,33",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8144,7 +8158,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -8185,12 +8199,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "280 000 000 000",
+            "text": "280",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "106 100 000 000",
+            "text": "106,1",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8225,7 +8239,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -8266,12 +8280,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "180 000 000 000",
+            "text": "180",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "67 670 000 000",
+            "text": "67,67",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8306,7 +8320,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -8347,12 +8361,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "390 000 000 000",
+            "text": "390",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "148 900 000 000",
+            "text": "148,9",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8387,7 +8401,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -8428,12 +8442,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "205 000 000 000",
+            "text": "205",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "78 240 000 000",
+            "text": "78,24",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8509,12 +8523,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "143 000 000 000",
+            "text": "143",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "53 760 000 000",
+            "text": "53,76",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8590,12 +8604,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "168 000 000 000",
+            "text": "168",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "66 140 000 000",
+            "text": "66,14",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8671,12 +8685,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "82 700 000 000",
+            "text": "82,7",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "30 400 000 000",
+            "text": "30,4",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8752,12 +8766,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "207 000 000 000",
+            "text": "207",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "79 620 000 000",
+            "text": "79,62",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8792,7 +8806,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -8833,12 +8847,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "210 000 000 000",
+            "text": "210",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "81 400 000 000",
+            "text": "81,4",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8873,7 +8887,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -8914,12 +8928,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "200 000 000 000",
+            "text": "200",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "76 920 000 000",
+            "text": "76,92",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -8954,7 +8968,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -8995,12 +9009,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "200 000 000 000",
+            "text": "200",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "76 920 000 000",
+            "text": "76,92",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9035,7 +9049,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9076,12 +9090,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "198 000 000 000",
+            "text": "198",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "76 150 000 000",
+            "text": "76,15",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9116,7 +9130,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9157,12 +9171,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "230 000 000 000",
+            "text": "230",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "88 460 000 000",
+            "text": "88,46",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9197,7 +9211,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9238,12 +9252,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "54 000 000 000",
+            "text": "54",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "20 300 000 000",
+            "text": "20,3",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9278,7 +9292,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9319,12 +9333,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "116 000 000 000",
+            "text": "116",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "43 940 000 000",
+            "text": "43,94",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9359,7 +9373,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9400,12 +9414,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "360 000 000 000",
+            "text": "360",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "134 300 000 000",
+            "text": "134,3",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9440,7 +9454,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9481,12 +9495,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "412 000 000 000",
+            "text": "412",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "160 900 000 000",
+            "text": "160,9",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9521,7 +9535,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9562,12 +9576,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "534 000 000 000",
+            "text": "534",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "218 900 000 000",
+            "text": "218,9",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9602,7 +9616,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -9643,12 +9657,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "96 500 000 000",
+            "text": "96,5",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "36 280 000 000",
+            "text": "36,28",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9683,7 +9697,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "3e-4",
+            "text": "0,0003",
             "kind": "printed",
             "note": ""
           },
@@ -9724,12 +9738,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "24 000 000 000",
+            "text": "24",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "10 710 000 000",
+            "text": "10,71",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -9805,7 +9819,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "18 000 000 000 to 30 000 000 000",
+            "text": "18 to 30",
             "kind": "range",
             "note": "the page prints 1.8e+10 to 3e+10 and no value"
           },
@@ -9886,7 +9900,7 @@ export const catalogues = {
             "note": "the page prints 300 to 600 and no value"
           },
           {
-            "text": "1 500 000 000 to 2 000 000 000",
+            "text": "1,5 to 2",
             "kind": "range",
             "note": "the page prints 1.5e+09 to 2e+09 and no value"
           },
@@ -9967,12 +9981,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "30 000 000 000",
+            "text": "30",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "12 500 000 000",
+            "text": "12,5",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10048,12 +10062,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 800 000 000",
+            "text": "4,8",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "2 143 000 000",
+            "text": "2,143",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10129,12 +10143,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "100 000 000",
+            "text": "0,1",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "43 480 000",
+            "text": "0,04348",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10210,7 +10224,7 @@ export const catalogues = {
             "note": "the page prints 480 to 880 and no value"
           },
           {
-            "text": "3 500 000 000 to 7 000 000 000",
+            "text": "3,5 to 7",
             "kind": "range",
             "note": "the page prints 3.5e+09 to 7e+09 and no value"
           },
@@ -10291,12 +10305,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 100 000 000",
+            "text": "2,1",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "846 800 000",
+            "text": "0,8468",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10372,12 +10386,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "68 000 000 000",
+            "text": "68",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "27 640 000 000",
+            "text": "27,64",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10412,7 +10426,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "6e-4",
+            "text": "0,0006",
             "kind": "printed",
             "note": ""
           },
@@ -10453,12 +10467,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "62 000 000 000",
+            "text": "62",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "25 200 000 000",
+            "text": "25,2",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10493,7 +10507,7 @@ export const catalogues = {
             "note": "from the shear modulus and the density"
           },
           {
-            "text": "6e-4",
+            "text": "0,0006",
             "kind": "printed",
             "note": ""
           },
@@ -10534,12 +10548,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "11 000 000 000",
+            "text": "11",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "4 015 000 000",
+            "text": "4,015",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10615,7 +10629,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "12 000 000 000",
+            "text": "12",
             "kind": "printed",
             "note": ""
           },
@@ -10696,12 +10710,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "8 100 000 000",
+            "text": "8,1",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "2 718 000 000",
+            "text": "2,718",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10777,12 +10791,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 400 000 000",
+            "text": "3,4",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 382 000 000",
+            "text": "1,382",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -10858,7 +10872,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 000 000 000",
+            "text": "10",
             "kind": "printed",
             "note": ""
           },
@@ -10939,7 +10953,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 100 000 000",
+            "text": "10,1",
             "kind": "printed",
             "note": ""
           },
@@ -11020,7 +11034,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "11 900 000 000",
+            "text": "11,9",
             "kind": "printed",
             "note": ""
           },
@@ -11101,12 +11115,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "13 900 000 000",
+            "text": "13,9",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "4 860 000 000",
+            "text": "4,86",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11182,12 +11196,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "5 500 000 000",
+            "text": "5,5",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "2 052 000 000",
+            "text": "2,052",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11263,12 +11277,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "7 600 000 000",
+            "text": "7,6",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "2 754 000 000",
+            "text": "2,754",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11344,7 +11358,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 000 000 000",
+            "text": "4",
             "kind": "printed",
             "note": ""
           },
@@ -11425,7 +11439,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "9 700 000 000 to 13 200 000 000",
+            "text": "9,7 to 13,2",
             "kind": "range",
             "note": "the page prints 9.7e+09 to 1.32e+10 and no value"
           },
@@ -11506,12 +11520,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 800 000 000",
+            "text": "10,8",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "4 186 000 000",
+            "text": "4,186",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11587,12 +11601,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "8 000 000 000",
+            "text": "8",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 101 000 000",
+            "text": "3,101",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11668,12 +11682,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "9 700 000 000",
+            "text": "9,7",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 731 000 000",
+            "text": "3,731",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11749,12 +11763,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 300 000 000",
+            "text": "10,3",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 931 000 000",
+            "text": "3,931",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11830,12 +11844,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "12 000 000 000",
+            "text": "12",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "4 196 000 000",
+            "text": "4,196",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -11911,7 +11925,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 700 000 000",
+            "text": "3,7",
             "kind": "printed",
             "note": ""
           },
@@ -11992,7 +12006,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 500 000 000",
+            "text": "10,5",
             "kind": "printed",
             "note": ""
           },
@@ -12073,7 +12087,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "11 500 000 000",
+            "text": "11,5",
             "kind": "printed",
             "note": ""
           },
@@ -12154,12 +12168,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "12 000 000 000",
+            "text": "12",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "4 444 000 000",
+            "text": "4,444",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -12235,7 +12249,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 200 000 000",
+            "text": "10,2",
             "kind": "printed",
             "note": ""
           },
@@ -12316,7 +12330,7 @@ export const catalogues = {
             "note": "the page prints 350 to 590 and no value"
           },
           {
-            "text": "8 199 999 999,999999 to 13 700 000 000",
+            "text": "8,2 to 13,7",
             "kind": "range",
             "note": "the page prints 8.2e+09 to 1.37e+10 and no value"
           },
@@ -12397,7 +12411,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "8 300 000 000,000001",
+            "text": "8,3",
             "kind": "printed",
             "note": ""
           },
@@ -12478,7 +12492,7 @@ export const catalogues = {
             "note": "the page prints 350 to 500 and no value"
           },
           {
-            "text": "10 000 000 000",
+            "text": "10",
             "kind": "printed",
             "note": ""
           },
@@ -12559,12 +12573,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "9 600 000 000",
+            "text": "9,6",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 529 000 000",
+            "text": "3,529",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -12640,12 +12654,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6 600 000 000",
+            "text": "6,6",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "2 426 000 000",
+            "text": "2,426",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -12721,7 +12735,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "10 100 000 000",
+            "text": "10,1",
             "kind": "printed",
             "note": ""
           },
@@ -12802,12 +12816,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "9 600 000 000",
+            "text": "9,6",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 504 000 000",
+            "text": "3,504",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -12883,12 +12897,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "8 900 000 000",
+            "text": "8,9",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 134 000 000",
+            "text": "3,134",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -12964,7 +12978,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "14 600 000 000",
+            "text": "14,6",
             "kind": "printed",
             "note": ""
           },
@@ -13045,12 +13059,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "11 600 000 000",
+            "text": "11,6",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "3 893 000 000",
+            "text": "3,893",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -13126,7 +13140,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 800 000 000",
+            "text": "2,8",
             "kind": "printed",
             "note": ""
           },
@@ -13207,7 +13221,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 100 000 000",
+            "text": "2,1",
             "kind": "printed",
             "note": ""
           },
@@ -13288,12 +13302,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 000 000 000",
+            "text": "4",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 481 000 000",
+            "text": "1,481",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -13369,12 +13383,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 500 000 000",
+            "text": "3,5",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 296 000 000",
+            "text": "1,296",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -13450,12 +13464,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 300 000 000",
+            "text": "2,3",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "851 900 000",
+            "text": "0,8519",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -13531,12 +13545,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 300 000 000",
+            "text": "2,3",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "821 400 000",
+            "text": "0,8214",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -13612,7 +13626,7 @@ export const catalogues = {
             "note": "the page prints 940 to 960 and no value"
           },
           {
-            "text": "700 000 000 to 1 400 000 000",
+            "text": "0,7 to 1,4",
             "kind": "range",
             "note": "the page prints 7e+08 to 1.4e+09 and no value"
           },
@@ -13693,7 +13707,7 @@ export const catalogues = {
             "note": "the page prints 910 to 925 and no value"
           },
           {
-            "text": "200 000 000 to 500 000 000",
+            "text": "0,2 to 0,5",
             "kind": "range",
             "note": "the page prints 2e+08 to 5e+08 and no value"
           },
@@ -13774,7 +13788,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 400 000 000 to 2 100 000 000",
+            "text": "1,4 to 2,1",
             "kind": "range",
             "note": "the page prints 1.4e+09 to 2.1e+09 and no value"
           },
@@ -13855,12 +13869,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3 200 000 000",
+            "text": "3,2",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 194 000 000",
+            "text": "1,194",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -13936,7 +13950,7 @@ export const catalogues = {
             "note": "the page prints 16 to 32 and no value"
           },
           {
-            "text": "1 200 000 to 3 500 000",
+            "text": "0,0012 to 0,0035",
             "kind": "range",
             "note": "the page prints 1.2e+06 to 3.5e+06 and no value"
           },
@@ -13976,7 +13990,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -14017,12 +14031,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 600 000 000",
+            "text": "1,6",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "592 600 000",
+            "text": "0,5926",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -14098,12 +14112,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 800 000 000",
+            "text": "2,8",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 000 000 000",
+            "text": "1",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -14179,12 +14193,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 500 000 000",
+            "text": "1,5",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "555 600 000",
+            "text": "0,5556",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -14260,12 +14274,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 400 000 000",
+            "text": "2,4",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "888 900 000",
+            "text": "0,8889",
             "kind": "derived",
             "note": "from the modulus and the Poisson ratio"
           },
@@ -14341,7 +14355,7 @@ export const catalogues = {
             "note": "the page prints 1120 to 1150 and no value"
           },
           {
-            "text": "2 700 000 000 to 3 000 000 000",
+            "text": "2,7 to 3",
             "kind": "range",
             "note": "the page prints 2.7e+09 to 3e+09 and no value"
           },
@@ -14422,7 +14436,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 200 000 000 to 1 600 000 000",
+            "text": "1,2 to 1,6",
             "kind": "range",
             "note": "the page prints 1.2e+09 to 1.6e+09 and no value"
           },
@@ -14503,7 +14517,7 @@ export const catalogues = {
             "note": "the page prints 1100 to 1200 and no value"
           },
           {
-            "text": "10 000 000 to 100 000 000",
+            "text": "0,01 to 0,1",
             "kind": "range",
             "note": "the page prints 1e+07 to 1e+08 and no value"
           },
@@ -14584,7 +14598,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "31 000 000 000",
+            "text": "31",
             "kind": "printed",
             "note": ""
           },
@@ -14665,7 +14679,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 310 000 000",
+            "text": "1,31",
             "kind": "printed",
             "note": ""
           },
@@ -14685,9 +14699,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel",
-            "kind": "unquantified",
-            "note": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+            "text": "",
+            "kind": "absent",
+            "note": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
           },
           {
             "text": "",
@@ -14705,7 +14719,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -14746,7 +14760,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 240 000 000",
+            "text": "2,24",
             "kind": "printed",
             "note": ""
           },
@@ -14766,9 +14780,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel",
-            "kind": "unquantified",
-            "note": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+            "text": "",
+            "kind": "absent",
+            "note": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
           },
           {
             "text": "",
@@ -14786,7 +14800,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -14827,7 +14841,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "760 000 000",
+            "text": "0,76",
             "kind": "printed",
             "note": ""
           },
@@ -14847,9 +14861,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel",
-            "kind": "unquantified",
-            "note": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+            "text": "",
+            "kind": "absent",
+            "note": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
           },
           {
             "text": "",
@@ -14867,7 +14881,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -14908,7 +14922,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 860 000 000",
+            "text": "1,86",
             "kind": "printed",
             "note": ""
           },
@@ -14928,9 +14942,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel",
-            "kind": "unquantified",
-            "note": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+            "text": "",
+            "kind": "absent",
+            "note": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
           },
           {
             "text": "",
@@ -14948,7 +14962,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4",
+            "text": "0,0001",
             "kind": "printed",
             "note": ""
           },
@@ -15031,7 +15045,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4 to 0,01",
+            "text": "0,0001 to 0,01",
             "kind": "range",
             "note": "the page prints 0.0001 to 0.01 and no value"
           },
@@ -15089,9 +15103,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -15255,9 +15269,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -15338,9 +15352,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -15421,9 +15435,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -15504,9 +15518,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -15529,9 +15543,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints “Varies with frequency” where the number would be",
+            "text": "Varies with frequency",
             "kind": "unquantified",
-            "note": "the table prints “Varies with frequency” where the number would be"
+            "note": "the page prints “Varies with frequency” where the number would be"
           },
           {
             "text": "",
@@ -15587,9 +15601,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -16002,9 +16016,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -16193,7 +16207,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4 to 0,01",
+            "text": "0,0001 to 0,01",
             "kind": "range",
             "note": "the page prints 0.0001 to 0.01 and no value"
           },
@@ -16334,9 +16348,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -16417,9 +16431,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "the table prints a row of dots where the speed would be",
+            "text": "…",
             "kind": "unquantified",
-            "note": "the table prints a row of dots where the speed would be"
+            "note": "the page prints “…” where the number would be"
           },
           {
             "text": "",
@@ -16766,7 +16780,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1e-4 to 6e-4",
+            "text": "0,0001 to 0,0006",
             "kind": "range",
             "note": "the page prints 0.0001 to 0.0006 and no value"
           },
@@ -16928,7 +16942,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "5e-4 to 0,002",
+            "text": "0,0005 to 0,002",
             "kind": "range",
             "note": "the page prints 0.0005 to 0.002 and no value"
           },
@@ -17933,61 +17947,73 @@ export const catalogues = {
       {
         "field": "flow_resistivity_pa_s_m2",
         "heading": "Flow resistivity",
-        "unit": "Pa·s/m²"
+        "headingEs": "Resistividad al flujo",
+        "unit": "kPa·s/m²"
       },
       {
         "field": "porosity",
         "heading": "Porosity",
+        "headingEs": "Porosidad",
         "unit": ""
       },
       {
         "field": "tortuosity",
         "heading": "Tortuosity",
+        "headingEs": "Tortuosidad",
         "unit": ""
       },
       {
         "field": "viscous_length_um",
         "heading": "Viscous length",
+        "headingEs": "Longitud viscosa",
         "unit": "µm"
       },
       {
         "field": "thermal_length_um",
         "heading": "Thermal length",
+        "headingEs": "Longitud térmica",
         "unit": "µm"
       },
       {
         "field": "thermal_permeability_m2",
         "heading": "Thermal permeability",
+        "headingEs": "Permeabilidad térmica",
         "unit": "m²"
       },
       {
         "field": "frame_density_kg_m3",
         "heading": "Frame density",
+        "headingEs": "Densidad del esqueleto",
         "unit": "kg/m³"
       },
       {
         "field": "thickness_mm",
         "heading": "Thickness",
+        "headingEs": "Espesor",
         "unit": "mm"
       },
       {
         "field": "youngs_modulus_pa",
         "heading": "Young's modulus",
-        "unit": "Pa"
+        "headingEs": "Módulo de Young",
+        "unit": "kPa"
       },
       {
         "field": "shear_modulus_pa",
         "heading": "Shear modulus",
-        "unit": "Pa"
+        "headingEs": "Módulo de cizalla",
+        "unit": "kPa"
       },
       {
         "field": "poisson_ratio",
         "heading": "Poisson ratio",
+        "headingEs": "Coeficiente de Poisson",
         "unit": ""
       },
       {
         "field": "structural_loss_factor",
         "heading": "Structural loss factor",
+        "headingEs": "Factor de pérdidas estructural",
         "unit": ""
       }
     ],
@@ -18002,7 +18028,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "40 000",
+            "text": "40",
             "kind": "printed",
             "note": ""
           },
@@ -18042,12 +18068,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 400 000",
+            "text": "4 400",
             "kind": "derived",
             "note": "from the shear modulus and the Poisson ratio"
           },
           {
-            "text": "2 200 000",
+            "text": "2 200",
             "kind": "printed",
             "note": ""
           },
@@ -18073,7 +18099,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "20 000",
+            "text": "20",
             "kind": "printed",
             "note": ""
           },
@@ -18144,7 +18170,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "5 500",
+            "text": "5,5",
             "kind": "printed",
             "note": ""
           },
@@ -18215,7 +18241,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "50 000",
+            "text": "50",
             "kind": "printed",
             "note": ""
           },
@@ -18255,12 +18281,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "195 000",
+            "text": "195",
             "kind": "derived",
             "note": "from the shear modulus and the Poisson ratio"
           },
           {
-            "text": "75 000",
+            "text": "75",
             "kind": "printed",
             "note": ""
           },
@@ -18286,7 +18312,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "22 100",
+            "text": "22,1",
             "kind": "printed",
             "note": ""
           },
@@ -18326,12 +18352,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "230 400",
+            "text": "230,4",
             "kind": "derived",
             "note": "from the shear modulus and the Poisson ratio"
           },
           {
-            "text": "80 000",
+            "text": "80",
             "kind": "printed",
             "note": ""
           },
@@ -18357,7 +18383,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "5 000",
+            "text": "5",
             "kind": "printed",
             "note": ""
           },
@@ -18428,7 +18454,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "50 000",
+            "text": "50",
             "kind": "printed",
             "note": ""
           },
@@ -18499,7 +18525,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "4 000",
+            "text": "4",
             "kind": "printed",
             "note": ""
           },
@@ -18524,7 +18550,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6e-9",
+            "text": "6 × 10⁻⁹",
             "kind": "printed",
             "note": ""
           },
@@ -18570,7 +18596,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "8 000",
+            "text": "8",
             "kind": "printed",
             "note": ""
           },
@@ -18595,7 +18621,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "6e-9",
+            "text": "6 × 10⁻⁹",
             "kind": "printed",
             "note": ""
           },
@@ -18641,7 +18667,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "25 000",
+            "text": "25",
             "kind": "printed",
             "note": ""
           },
@@ -18712,7 +18738,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "5 000",
+            "text": "5",
             "kind": "printed",
             "note": ""
           },
@@ -18752,12 +18778,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "130 000",
+            "text": "130",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "50 000",
+            "text": "50",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -18783,7 +18809,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "1 100 000",
+            "text": "1 100",
             "kind": "printed",
             "note": ""
           },
@@ -18823,12 +18849,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 600 000",
+            "text": "2 600",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 000 000",
+            "text": "1 000",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -18854,7 +18880,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "34 000",
+            "text": "34",
             "kind": "printed",
             "note": ""
           },
@@ -18894,12 +18920,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "286 000",
+            "text": "286",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "110 000",
+            "text": "110",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -18925,7 +18951,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "3 200 000",
+            "text": "3 200",
             "kind": "printed",
             "note": ""
           },
@@ -18965,12 +18991,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "2 600 000",
+            "text": "2 600",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "1 000 000",
+            "text": "1 000",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -18996,7 +19022,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "87 000",
+            "text": "87",
             "kind": "printed",
             "note": ""
           },
@@ -19036,12 +19062,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "143 000 000",
+            "text": "143 000",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "55 000 000",
+            "text": "55 000",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19067,7 +19093,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "65 000",
+            "text": "65",
             "kind": "printed",
             "note": ""
           },
@@ -19107,12 +19133,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "46 800 000",
+            "text": "46 800",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "18 000 000",
+            "text": "18 000",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19138,7 +19164,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "23 000",
+            "text": "23",
             "kind": "printed",
             "note": ""
           },
@@ -19209,7 +19235,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "137 000",
+            "text": "137",
             "kind": "printed",
             "note": ""
           },
@@ -19221,17 +19247,17 @@ export const catalogues = {
           {
             "text": "model",
             "kind": "unquantified",
-            "note": "model"
+            "note": "the page prints “model” where the number would be"
           },
           {
             "text": "model",
             "kind": "unquantified",
-            "note": "model"
+            "note": "the page prints “model” where the number would be"
           },
           {
             "text": "model",
             "kind": "unquantified",
-            "note": "model"
+            "note": "the page prints “model” where the number would be"
           },
           {
             "text": "",
@@ -19280,7 +19306,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "10 900",
+            "text": "10,9",
             "kind": "printed",
             "note": ""
           },
@@ -19351,7 +19377,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "22 000",
+            "text": "22",
             "kind": "printed",
             "note": ""
           },
@@ -19391,12 +19417,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "294 000",
+            "text": "294",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "122 500",
+            "text": "122,5",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19422,7 +19448,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "5 000",
+            "text": "5",
             "kind": "printed",
             "note": ""
           },
@@ -19462,12 +19488,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "20 000",
+            "text": "20",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "10 000",
+            "text": "10",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19493,7 +19519,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "5 000",
+            "text": "5",
             "kind": "printed",
             "note": ""
           },
@@ -19533,12 +19559,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "20 000",
+            "text": "20",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "10 000",
+            "text": "10",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19564,7 +19590,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "33 000",
+            "text": "33",
             "kind": "printed",
             "note": ""
           },
@@ -19604,12 +19630,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "100 000",
+            "text": "100",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "50 000",
+            "text": "50",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19635,7 +19661,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "40 000",
+            "text": "40",
             "kind": "printed",
             "note": ""
           },
@@ -19675,12 +19701,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 400 000",
+            "text": "4 400",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "2 200 000",
+            "text": "2 200",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19706,7 +19732,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "6 600",
+            "text": "6,6",
             "kind": "printed",
             "note": ""
           },
@@ -19746,12 +19772,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "293 000",
+            "text": "293",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "122 100",
+            "text": "122,1",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19777,7 +19803,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "10 900",
+            "text": "10,9",
             "kind": "printed",
             "note": ""
           },
@@ -19814,15 +19840,15 @@ export const catalogues = {
           {
             "text": "variable",
             "kind": "unquantified",
-            "note": "variable"
+            "note": "the page prints “variable” where the number would be"
           },
           {
-            "text": "80 000",
+            "text": "80",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "29 630",
+            "text": "29,63",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19848,7 +19874,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "34 000",
+            "text": "34",
             "kind": "printed",
             "note": ""
           },
@@ -19888,12 +19914,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "40 000",
+            "text": "40",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "20 000",
+            "text": "20",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -19919,7 +19945,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "10 900",
+            "text": "10,9",
             "kind": "printed",
             "note": ""
           },
@@ -19990,7 +20016,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "20 000",
+            "text": "20",
             "kind": "printed",
             "note": ""
           },
@@ -20030,12 +20056,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 300",
+            "text": "1,3",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "650",
+            "text": "0,65",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -20061,7 +20087,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "10 900",
+            "text": "10,9",
             "kind": "printed",
             "note": ""
           },
@@ -20101,12 +20127,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "80 000",
+            "text": "80",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "29 630",
+            "text": "29,63",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -20132,7 +20158,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "12 569",
+            "text": "12,569",
             "kind": "printed",
             "note": ""
           },
@@ -20172,12 +20198,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "93 348",
+            "text": "93,348",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "32 410",
+            "text": "32,41",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -20203,7 +20229,7 @@ export const catalogues = {
         "attributedTo": {},
         "cells": [
           {
-            "text": "135 000",
+            "text": "135",
             "kind": "printed",
             "note": ""
           },
@@ -20228,7 +20254,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "3,3e-9",
+            "text": "3,3 × 10⁻⁹",
             "kind": "printed",
             "note": ""
           },
@@ -20243,12 +20269,12 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "4 400",
+            "text": "4,4",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "2 200",
+            "text": "2,2",
             "kind": "derived",
             "note": "from the Young's modulus and the Poisson ratio"
           },
@@ -20271,21 +20297,25 @@ export const catalogues = {
       {
         "field": "speed_of_sound",
         "heading": "Speed of sound",
+        "headingEs": "Velocidad del sonido",
         "unit": "m/s"
       },
       {
         "field": "density",
         "heading": "Density",
+        "headingEs": "Densidad",
         "unit": "kg/m³"
       },
       {
         "field": "viscosity",
         "heading": "Viscosity",
-        "unit": "Pa·s"
+        "headingEs": "Viscosidad",
+        "unit": "µPa·s"
       },
       {
         "field": "heat_capacity_ratio",
         "heading": "Heat capacity ratio",
+        "headingEs": "Relación de calores específicos",
         "unit": ""
       }
     ],
@@ -20293,7 +20323,7 @@ export const catalogues = {
       {
         "key": "bies-2017-table-c1-fluids/air",
         "table": "bies-2017-table-c1-fluids",
-        "name": "air",
+        "name": "Air",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Air as printed in Bies 5e Table C.1, PDF page 746 (printed p. 717)",
@@ -20324,7 +20354,7 @@ export const catalogues = {
       {
         "key": "bies-2017-table-c1-fluids/fresh_water",
         "table": "bies-2017-table-c1-fluids",
-        "name": "fresh water",
+        "name": "Fresh water",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Fresh water as printed in Bies 5e Table C.1, PDF page 746 (printed p. 717)",
@@ -20355,7 +20385,7 @@ export const catalogues = {
       {
         "key": "bies-2017-table-c1-fluids/sea_water",
         "table": "bies-2017-table-c1-fluids",
-        "name": "sea water",
+        "name": "Sea water",
         "temperature": "13",
         "pressure": "101 325",
         "model": "Sea water as printed in Bies 5e Table C.1, PDF page 746 (printed p. 717)",
@@ -20386,7 +20416,7 @@ export const catalogues = {
       {
         "key": "iec-61094-2-annex-f/air",
         "table": "iec-61094-2-annex-f",
-        "name": "air",
+        "name": "Air",
         "temperature": "23",
         "pressure": "101 325",
         "model": "IEC 61094-2:2009 Annex F (CIPM-2007) at the ISO 9053-2:2020 Annex A.3 reference state",
@@ -20417,7 +20447,7 @@ export const catalogues = {
       {
         "key": "en-12354-annex-a/air",
         "table": "en-12354-annex-a",
-        "name": "air",
+        "name": "Air",
         "temperature": "20",
         "pressure": "101 325",
         "model": "EN/ISO 12354 Annex A speed of sound with the Annex B air density",
@@ -20448,7 +20478,7 @@ export const catalogues = {
       {
         "key": "allard-2009-jca/air",
         "table": "allard-2009-jca",
-        "name": "air",
+        "name": "Air",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Johnson-Champoux-Allard published constants (dry air at 20 degC)",
@@ -20465,7 +20495,7 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1,84e-5",
+            "text": "18,4",
             "kind": "printed",
             "note": ""
           },
@@ -20479,7 +20509,7 @@ export const catalogues = {
       {
         "key": "phonometry-solver/air",
         "table": "phonometry-solver",
-        "name": "air",
+        "name": "Air",
         "temperature": "20",
         "pressure": "101 325",
         "model": "air at room conditions, the acoustic solver's default medium",

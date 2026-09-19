@@ -255,14 +255,20 @@ def test_a_cell_that_prints_a_word_keeps_the_word() -> None:
     row = PUBLISHED_POROUS["allard-2009-table-11-5/screen_2"]
     for field in ("tortuosity", "viscous_length_um", "thermal_length_um"):
         assert getattr(row, field) is None, field
-        assert row.why_missing(field) == "model", field
+        assert row.unquantified[field] == "model", field
+        assert row.why_missing(field) == (
+            "the page prints “model” where the number would be"
+        ), field
 
 
 def test_a_thickness_the_page_calls_variable_is_not_a_number() -> None:
     """Table 12.1 sweeps the foam thickness and prints the word."""
     row = PUBLISHED_POROUS["allard-2009-table-12-1/foam_1"]
     assert row.thickness_mm is None
-    assert row.why_missing("thickness_mm") == "variable"
+    assert row.unquantified["thickness_mm"] == "variable"
+    assert row.why_missing("thickness_mm") == (
+        "the page prints “variable” where the number would be"
+    )
 
 
 def test_a_cell_the_page_leaves_empty_says_so_differently() -> None:

@@ -17,8 +17,13 @@ disagree: there is only one copy to be right or wrong.
 from __future__ import annotations
 
 import json
+import pathlib
+from typing import TYPE_CHECKING
 
 import pytest
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 from phonometry._internal.catalogue import (
     CatalogueError,
@@ -248,3 +253,95 @@ def test_why_missing_refuses_a_field_the_row_does_not_have() -> None:
 def test_a_field_the_row_does_have_has_no_reason_to_be_missing() -> None:
     row = CatalogueRow(name="x", source="y")
     assert row.why_missing("name") == ""
+
+
+# ---------------------------------------------------------------------------
+# What every packaged data file must hold, whatever catalogue it belongs to
+# ---------------------------------------------------------------------------
+#: Every data file this package ships, whichever catalogue reads it. Walked
+#: from disk rather than through an import, so a file a catalogue forgot to
+#: list is checked too, and so this runs in a tree where only some of the
+#: catalogues exist.
+_DATA_FILES = sorted(
+    pathlib.Path(__file__).resolve().parents[1].glob("src/phonometry/*/**/data/*.json")
+)
+
+#: The longest a printed cell can be. ``"Varies with frequency"`` is 21
+#: characters, and it is the longest thing any of these pages prints instead
+#: of a number; a hundred-character string is a sentence about the cell, not
+#: the cell.
+_LONGEST_PRINTED_CELL = 32
+
+#: More significant figures than any of these pages prints. A page gives four
+#: or five; sixteen is what ``0.82e10`` becomes when it is written that way
+#: and read back, and it reaches the published table as
+#: ``8 199 999 999,999999``.
+_MOST_SIGNIFICANT_FIGURES = 9
+
+
+def _numbers(node: object, where: str = "") -> Iterator[tuple[str, float]]:
+    """Every float in a decoded data file, with the path that reaches it."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            yield from _numbers(value, f"{where}.{key}")
+    elif isinstance(node, list):
+        for index, value in enumerate(node):
+            yield from _numbers(value, f"{where}[{index}]")
+    elif isinstance(node, float):
+        yield where, node
+
+
+def _significant_figures(value: float) -> int:
+    """How many digits *value* carries, counted the way ``repr`` writes it."""
+    digits = repr(abs(value)).partition("e")[0]
+    return len(digits.replace(".", "").strip("0")) or 1
+
+
+def test_every_data_file_is_in_the_sweep() -> None:
+    """The glob is the guard; an empty one would pass every test below."""
+    assert _DATA_FILES
+
+
+@pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
+def test_an_unquantified_cell_holds_what_the_page_printed(path: pathlib.Path) -> None:
+    """Not why the number is missing: :meth:`why_missing` composes that.
+
+    A sentence stored here reaches the published table, where it lands inside
+    a numeric column and reads as though the book had printed it.
+    """
+    document = json.loads(path.read_text(encoding="utf-8"))
+    for row in document["rows"]:
+        for field, printed in (row.get("unquantified") or {}).items():
+            assert printed, f"{path.name}: {row['key']}.{field} is empty"
+            assert len(printed) <= _LONGEST_PRINTED_CELL, (
+                f"{path.name}: {row['key']}.{field} holds {printed!r}, which is a "
+                f"sentence about the cell rather than what the page printed in it"
+            )
+
+
+@pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
+def test_a_not_derivable_cell_says_why_in_words(path: pathlib.Path) -> None:
+    """The opposite of the rule above: this field is the sentence."""
+    document = json.loads(path.read_text(encoding="utf-8"))
+    for row in document["rows"]:
+        for field, reason in (row.get("not_derivable") or {}).items():
+            assert len(reason) > _LONGEST_PRINTED_CELL, (
+                f"{path.name}: {row['key']}.{field} says {reason!r}, which does not "
+                f"explain why this library leaves the cell empty"
+            )
+
+
+@pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
+def test_no_number_carries_more_digits_than_a_page_prints(path: pathlib.Path) -> None:
+    """``0.82e10`` read back is ``8199999999.999999``, and the table shows it.
+
+    The value is right and its spelling is not: a modulus printed as 0,82 of
+    ten thousand million is ``8.2e9``, which round-trips, where the other
+    spelling lands one unit in the last place away and prints sixteen digits.
+    """
+    document = json.loads(path.read_text(encoding="utf-8"))
+    for where, value in _numbers(document):
+        assert _significant_figures(value) <= _MOST_SIGNIFICANT_FIGURES, (
+            f"{path.name}{where} is {value!r}, which carries more digits than any "
+            f"page prints: write the number the page printed"
+        )

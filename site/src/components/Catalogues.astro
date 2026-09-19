@@ -96,6 +96,10 @@ const copy = {
 	},
 }[lang];
 
+/** A column's heading in the language this page is published in. */
+const heading = (column: { heading: string; headingEs?: string }) =>
+	(lang === 'es' && column.headingEs) || column.heading;
+
 /** The distinct published tables of a catalogue, for its filter. */
 const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => row.table))].sort();
 
@@ -135,7 +139,7 @@ const tables = tablesOf(data.rows);
 					{
 						data.columns.map((column) => (
 							<th scope="col" class="numeric">
-								{column.heading}
+								{heading(column)}
 								{column.unit && <span class="unit">{column.unit}</span>}
 							</th>
 						))
@@ -156,16 +160,31 @@ const tables = tablesOf(data.rows);
 									{row.name}
 									{row.variant && <span class="variant">{row.variant}</span>}
 								</span>
+								{row.note && <span class="note">{row.note}</span>}
 							</th>
 							{section === 'fluids' && (
-								<td class="conditions">
+								<td class="conditions" data-label={copy.conditions}>
 									<span class="wrap">
 										{row.temperature} °C, {row.pressure} Pa
 									</span>
 								</td>
 							)}
-							{row.cells.map((cell) => (
-								<td class="numeric">
+							{row.cells.map((cell, index) => (
+								/* An empty cell with a note is one this library will not fill
+								   although the arithmetic would reach it, and the note says
+								   why; the cell stays blank because the page is blank there.
+
+								   `data-label` and `data-unit` carry the heading into the cell
+								   because the stacked view a phone gets has no header row to
+								   read up to, and `data-empty` is what lets that view leave
+								   out the quantities this row does not have. */
+								<td
+									class="numeric"
+									data-label={heading(data.columns[index])}
+									data-unit={data.columns[index].unit || undefined}
+									data-empty={cell.text ? undefined : true}
+									title={(!cell.text && cell.note) || undefined}
+								>
 									{cell.text ? (
 										<span
 											class={`cell cell-${cell.kind}`}
@@ -180,7 +199,10 @@ const tables = tablesOf(data.rows);
 									)}
 								</td>
 							))}
-							<td class="source">
+							<td
+								class="source"
+								data-label={section === 'fluids' ? copy.fixedBy : copy.source}
+							>
 								<span class="wrap">{section === 'fluids' ? row.model : row.source}</span>
 							</td>
 						</tr>
@@ -347,9 +369,21 @@ const tables = tablesOf(data.rows);
 		max-width: 22ch;
 	}
 
-	.source .wrap,
+	/* Wider than the name column, because a citation is four fields long and
+	   every row carries one: at 24ch "Hopkins (2007) Table A2, PDF pages
+	   635-636 (no printed folio)" wrapped to four lines and set the height of
+	   a row whose numbers are one line, which is what made the table look
+	   full of holes. */
+	.source .wrap {
+		max-width: 38ch;
+	}
+
+	/* The conditions are one short line, "20 °C, 101 325 Pa", and giving them
+	   the width of a citation pushed the column that says which document
+	   fixes each state off the side of the table: five of the seven rows are
+	   an air, and that column is the only thing that tells them apart. */
 	.conditions .wrap {
-		max-width: 30ch;
+		max-width: 20ch;
 	}
 
 	.variant {
@@ -365,10 +399,15 @@ const tables = tablesOf(data.rows);
 		white-space: nowrap;
 	}
 
-	.source,
+	.source {
+		color: var(--sl-color-gray-3);
+		min-width: 34ch;
+		white-space: normal;
+	}
+
 	.conditions {
 		color: var(--sl-color-gray-3);
-		min-width: 24ch;
+		min-width: 18ch;
 		white-space: normal;
 	}
 
@@ -387,6 +426,13 @@ const tables = tablesOf(data.rows);
 
 	.annotated {
 		cursor: help;
+	}
+
+	/* The note reads on hover in the table and on the card in the stacked
+	   view, because a phone has no hover and the mark alone would promise
+	   something the reader cannot reach. */
+	.note {
+		display: none;
 	}
 
 	/* One mark per kind of cell, so the difference between a number a book
@@ -424,5 +470,149 @@ const tables = tablesOf(data.rows);
 
 	.empty {
 		color: var(--sl-color-gray-3);
+	}
+
+	/* Two hundred and nineteen rows of numbers, and nothing in a cell to hold
+	   the eye to its line. The stripe is mixed rather than picked so that one
+	   declaration serves both themes: `--sl-color-black` is the page behind
+	   the table in each, and a quarter of the mid grey is the same small step
+	   away from it whether that page is white or black. The sticky first
+	   column paints its own background, so it takes the stripe too or the
+	   numbers would scroll under a name of a different colour. */
+	tbody tr:nth-child(even) > * {
+		background: color-mix(in srgb, var(--sl-color-gray-5) 25%, var(--sl-color-black));
+	}
+
+	/* A phone gets the rows stacked instead of a table fifteen columns wide.
+	   Sideways scrolling through a table that is four screens across is not
+	   reading: you lose the material before you reach the modulus, and the
+	   sticky column that keeps the name in view takes a third of the screen
+	   to do it. Each row becomes a card titled by its material, holding only
+	   the quantities that row actually has, and the heading of each column
+	   travels in `data-label` because there is no header row left to look up
+	   to. */
+	@media (max-width: 55rem) {
+		.table-scroll {
+			overflow-x: visible;
+		}
+
+		.table-scroll table {
+			display: block;
+			min-width: 0;
+			font-size: var(--sl-text-sm);
+		}
+
+		thead {
+			display: none;
+		}
+
+		tbody,
+		tr {
+			display: block;
+		}
+
+		tbody tr {
+			margin-block-end: 0.75rem;
+			padding: 0.6rem 0.75rem;
+			border: 1px solid var(--sl-color-gray-5);
+			border-radius: 0.5rem;
+		}
+
+		/* The stripe moves to the card, because a card is the row now. */
+		tbody tr:nth-child(even) > * {
+			background: none;
+		}
+
+		tbody tr:nth-child(even) {
+			background: color-mix(
+				in srgb,
+				var(--sl-color-gray-5) 25%,
+				var(--sl-color-black)
+			);
+		}
+
+		th,
+		td {
+			padding: 0.15rem 0;
+			border-block-end: none;
+		}
+
+		.name {
+			position: static;
+			display: block;
+			min-width: 0;
+			margin-block-end: 0.4rem;
+			padding-block-end: 0.35rem;
+			border-block-end: 1px solid var(--sl-color-gray-5);
+			background: none;
+			font-size: var(--sl-text-base);
+			font-weight: 600;
+		}
+
+		.wrap,
+		.source .wrap,
+		.conditions .wrap {
+			max-width: none;
+		}
+
+		td {
+			display: flex;
+			align-items: baseline;
+			text-align: end;
+		}
+
+		/* A row of a materials table is mostly empty: no book prints all
+		   fourteen quantities for one specimen, and a card that listed the
+		   twelve a row does not have would bury the three it does. */
+		td[data-empty] {
+			display: none;
+		}
+
+		/* The label pushes everything after it to the far side, which is what
+		   keeps the number and its unit together there: `space-between` on
+		   three items would have put the unit on the edge and the number in
+		   the middle of the card. */
+		td::before {
+			content: attr(data-label);
+			flex: 0 1 auto;
+			margin-inline-end: auto;
+			padding-inline-end: 1rem;
+			color: var(--sl-color-gray-3);
+			text-align: start;
+		}
+
+		/* In the table the unit is in the heading, which the card does not
+		   have, so it rides with the number. It hangs off the cell and not
+		   off the number inside it, because `attr()` reads the element the
+		   pseudo-element belongs to and nothing above it, and the unit is an
+		   attribute of the cell. */
+		td[data-unit]::after {
+			content: '\00a0' attr(data-unit);
+			color: var(--sl-color-gray-3);
+			font-style: normal;
+			white-space: nowrap;
+		}
+
+		.note {
+			display: block;
+			margin-block-start: 0.3rem;
+			color: var(--sl-color-gray-3);
+			font-size: var(--sl-text-sm);
+			font-weight: 400;
+		}
+
+		.annotated::after {
+			content: none;
+		}
+
+		.source {
+			display: block;
+			margin-block-start: 0.35rem;
+			text-align: start;
+		}
+
+		.source::before {
+			display: block;
+		}
 	}
 </style>

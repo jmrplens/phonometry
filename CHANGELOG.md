@@ -30,6 +30,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   a catalogue in `fluids` that would have had to import three of the domains
   that stand on it.
 
+- **A cell the library will not fill says so, and a cell that printed a word
+  keeps the word.** `CatalogueRow.not_derivable` names a quantity this library
+  leaves empty although the arithmetic would reach it, with the reason: Bies
+  leaves the speed of his aluminium honeycomb panels blank, and the modulus
+  and density beside it are effective ones, so `sqrt(E/rho)` would put a
+  one-dimensional speed of 4 265 m/s on a panel that has none. `unquantified`
+  now holds only what the page printed in place of a number, and
+  `why_missing` composes the sentence around it, so the same field answers the
+  same way in every catalogue and a published table shows the cell as it reads
+  on the page. The modulus of Bies's carbon brick is 8,2 GPa, which is what
+  the page prints; it was stored as a number that reads back as
+  8 199 999 999,999999.
+
 - **Fluid states read from a printed page.** `fluids.PUBLISHED_FLUIDS` holds
   the three fluids Bies prints at the head of Table C.1, air, fresh water and
   sea water, which the solids catalogue left out because they are not solids.

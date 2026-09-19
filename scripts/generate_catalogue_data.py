@@ -30,10 +30,12 @@ from __future__ import annotations
 
 import argparse
 import decimal
+import functools
 import math
 import pathlib
+import statistics
 import sys
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NamedTuple
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
@@ -46,7 +48,7 @@ from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
 from phonometry.solids import PUBLISHED_SOLIDS  # noqa: E402
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator, Mapping
+    from collections.abc import Iterable, Iterator, Mapping
 
     from phonometry._internal.catalogue import CatalogueRow
 
@@ -55,39 +57,68 @@ OUTPUT = (
     pathlib.Path(__file__).resolve().parents[1] / "site/src/generated/catalogues.mjs"
 )
 
-#: The columns each catalogue shows, as ``(field, heading, unit)``. A unit of
-#: the empty string is a dimensionless quantity, which is not the same as a
-#: quantity whose unit the heading already carries.
+#: The columns each catalogue shows, as ``(field, heading, heading in Spanish,
+#: unit)``. A unit of the empty string is a dimensionless quantity, which is
+#: not the same as a quantity whose unit the heading already carries. The
+#: headings travel in both languages because the site publishes the page in
+#: both and a column called "Young's modulus" over a Spanish table is the one
+#: string a reader cannot look up; the material names do not, because they are
+#: what the book printed.
 SOLID_COLUMNS = (
-    ("density_kg_m3", "Density", "kg/m³"),
-    ("youngs_modulus_pa", "Young's modulus", "Pa"),
-    ("shear_modulus_pa", "Shear modulus", "Pa"),
-    ("poisson_ratio", "Poisson ratio", ""),
-    ("longitudinal_speed_m_s", "Longitudinal speed", "m/s"),
-    ("bar_longitudinal_speed_m_s", "Bar speed", "m/s"),
-    ("plate_longitudinal_speed_m_s", "Plate speed", "m/s"),
-    ("bulk_longitudinal_speed_m_s", "Bulk speed", "m/s"),
-    ("transverse_speed_m_s", "Transverse speed", "m/s"),
-    ("loss_factor", "Loss factor", ""),
-    ("flexural_loss_factor", "Flexural loss factor", ""),
-    ("longitudinal_loss_factor", "Longitudinal loss factor", ""),
-    ("in_situ_loss_factor", "In-situ loss factor", ""),
-    ("thickness_critical_frequency_product_m_hz", "h.f_c", "m·Hz"),
+    ("density_kg_m3", "Density", "Densidad", "kg/m³"),
+    ("youngs_modulus_pa", "Young's modulus", "Módulo de Young", "Pa"),
+    ("shear_modulus_pa", "Shear modulus", "Módulo de cizalla", "Pa"),
+    ("poisson_ratio", "Poisson ratio", "Coeficiente de Poisson", ""),
+    ("longitudinal_speed_m_s", "Longitudinal speed", "Velocidad longitudinal", "m/s"),
+    ("bar_longitudinal_speed_m_s", "Bar speed", "Velocidad de barra", "m/s"),
+    ("plate_longitudinal_speed_m_s", "Plate speed", "Velocidad de placa", "m/s"),
+    ("bulk_longitudinal_speed_m_s", "Bulk speed", "Velocidad de medio infinito", "m/s"),
+    ("transverse_speed_m_s", "Transverse speed", "Velocidad transversal", "m/s"),
+    ("loss_factor", "Loss factor", "Factor de pérdidas", ""),
+    (
+        "flexural_loss_factor",
+        "Flexural loss factor",
+        "Factor de pérdidas a flexión",
+        "",
+    ),
+    (
+        "longitudinal_loss_factor",
+        "Longitudinal loss factor",
+        "Factor de pérdidas longitudinal",
+        "",
+    ),
+    ("in_situ_loss_factor", "In-situ loss factor", "Factor de pérdidas in situ", ""),
+    (
+        "thickness_critical_frequency_product_m_hz",
+        "Thickness × critical frequency",
+        "Espesor × frecuencia crítica",
+        "m·Hz",
+    ),
 )
 
 POROUS_COLUMNS = (
-    ("flow_resistivity_pa_s_m2", "Flow resistivity", "Pa·s/m²"),
-    ("porosity", "Porosity", ""),
-    ("tortuosity", "Tortuosity", ""),
-    ("viscous_length_um", "Viscous length", "µm"),
-    ("thermal_length_um", "Thermal length", "µm"),
-    ("thermal_permeability_m2", "Thermal permeability", "m²"),
-    ("frame_density_kg_m3", "Frame density", "kg/m³"),
-    ("thickness_mm", "Thickness", "mm"),
-    ("youngs_modulus_pa", "Young's modulus", "Pa"),
-    ("shear_modulus_pa", "Shear modulus", "Pa"),
-    ("poisson_ratio", "Poisson ratio", ""),
-    ("structural_loss_factor", "Structural loss factor", ""),
+    (
+        "flow_resistivity_pa_s_m2",
+        "Flow resistivity",
+        "Resistividad al flujo",
+        "Pa·s/m²",
+    ),
+    ("porosity", "Porosity", "Porosidad", ""),
+    ("tortuosity", "Tortuosity", "Tortuosidad", ""),
+    ("viscous_length_um", "Viscous length", "Longitud viscosa", "µm"),
+    ("thermal_length_um", "Thermal length", "Longitud térmica", "µm"),
+    ("thermal_permeability_m2", "Thermal permeability", "Permeabilidad térmica", "m²"),
+    ("frame_density_kg_m3", "Frame density", "Densidad del esqueleto", "kg/m³"),
+    ("thickness_mm", "Thickness", "Espesor", "mm"),
+    ("youngs_modulus_pa", "Young's modulus", "Módulo de Young", "Pa"),
+    ("shear_modulus_pa", "Shear modulus", "Módulo de cizalla", "Pa"),
+    ("poisson_ratio", "Poisson ratio", "Coeficiente de Poisson", ""),
+    (
+        "structural_loss_factor",
+        "Structural loss factor",
+        "Factor de pérdidas estructural",
+        "",
+    ),
 )
 
 #: Significant figures a **derived** number is rounded to before it is shown.
@@ -98,16 +129,52 @@ POROUS_COLUMNS = (
 #: prints, and rounding it here would erase what distinguishes it.
 _DERIVED_FIGURES = 4
 
-#: Below this magnitude a number reads better as a mantissa and an exponent
-#: than as a run of leading zeros.
-_SMALL = 1e-3
+#: Where a column stops reading as digits. A modulus of 471 700 000 000 Pa is
+#: twelve digits of a number nobody says out loud, and a permeability of
+#: 0,0000000033 m2 is eight leading zeros. A column like that is rewritten:
+#: first by moving the prefix into the heading, so the moduli are a column of
+#: GPa, and where the unit takes no prefix, by a mantissa and a power of ten.
+#: The test is made once per column and not per cell, because a column is what
+#: a reader compares down.
+#:
+#: It is made on the median and not on the extremes, because one outlier must
+#: not set the form of a whole column: the loss factors of the solids run from
+#: 0,000003 to 0,3 around a median of 0,005, and writing that column in powers
+#: of ten to spare its smallest cell would turn every ordinary 0,005 in it
+#: into 5 x 10^-3.
+_BIG = 1e7
+_TINY = 1e-4
+
+#: The prefixes a heading may take, as (exponent, symbol), largest first.
+_PREFIXES = (
+    (9, "G"),
+    (6, "M"),
+    (3, "k"),
+    (0, ""),
+    (-3, "m"),
+    (-6, "µ"),
+    (-9, "n"),
+)
+
+#: The units a prefix may be moved into. A unit that already carries one
+#: (``kg/m3``), a squared one (``m2``, where a prefix would square with it) and
+#: a compound of two quantities (``m.Hz``) are left alone, and a column in one
+#: of those that still does not read as digits falls back on a power of ten.
+_PREFIXABLE = frozenset({"Pa", "Pa·s", "Pa·s/m²"})
+
+#: The superscript digits a power of ten is written with, so the exponent sets
+#: as an exponent in a table cell, in the markdown twin of the page and in the
+#: text a reader copies out of either.
+_SUPERSCRIPT = str.maketrans(
+    "-0123456789", "\u207b\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079"
+)
 
 #: The narrow no-break space this corpus groups thousands with, which is what
 #: keeps a group from breaking across a line.
 _GROUP = "\u202f"
 
 
-def _plain(value: float) -> str:
+def _plain(value: float, exponent: int = 0) -> str:
     """*value* as a decimal string: no exponent, no digit it does not carry.
 
     ``repr`` gives the shortest string that round-trips, which is the digits
@@ -116,14 +183,27 @@ def _plain(value: float) -> str:
     be used: it drops into exponent form at 1e5, which is where the densities
     and the moduli of these tables live.
 
+    The scaling is a decimal shift and not a division, because dividing
+    143 000 000 by a thousand in binary floating point gives
+    143 000,000 000 000 01 and the page would print it.
+
     :param value: The number.
+    :param exponent: Powers of ten to take out of it, which is how a column
+        moves its prefix into the heading: 3 writes 4 400 Pa as 4,4 in a
+        column of kPa.
     :return: Its positional form, trailing zeros trimmed.
     """
-    text = format(decimal.Decimal(repr(value)), "f")
+    text = format(decimal.Decimal(repr(value)).scaleb(-exponent), "f")
     return text.rstrip("0").rstrip(".") if "." in text else text
 
 
-def number(value: float, *, exact: bool = True) -> str:
+def number(
+    value: float,
+    *,
+    exact: bool = True,
+    exponent: int = 0,
+    scientific: bool = False,
+) -> str:
     """One number, written the way this corpus writes numbers.
 
     The decimal separator is the comma, as in every figure and every table of
@@ -135,30 +215,138 @@ def number(value: float, *, exact: bool = True) -> str:
         carries is shown. A number this library derived is rounded to
         :data:`_DERIVED_FIGURES` significant figures first, because its inputs
         were printed to no more than that.
+    :param exponent: Powers of ten this column moved into its heading, as a
+        prefix: 3 writes 4 400 Pa as 4,4 under a heading of kPa.
+    :param scientific: Whether this number's column is written as a mantissa
+        and a power of ten, which is what a unit that takes no prefix falls
+        back on. Decided once for the column by :func:`column_style`.
     :return: The number as the site should print it.
     """
     if value == 0:
         return "0"
     if not exact:
         value = round(value, _DERIVED_FIGURES - 1 - math.floor(math.log10(abs(value))))
-    if abs(value) < _SMALL:
-        mantissa, _, exponent = f"{value:e}".partition("e")
-        return f"{_plain(float(mantissa)).replace('.', ',')}e{int(exponent)}"
-    whole, _, fraction = _plain(value).partition(".")
+    if scientific:
+        mantissa, _, power = f"{value:e}".partition("e")
+        written = str(int(power)).translate(_SUPERSCRIPT)
+        return f"{_plain(float(mantissa)).replace('.', ',')} \u00d7 10{written}"
+    whole, _, fraction = _plain(value, exponent).partition(".")
     grouped = f"{int(whole.lstrip('-')):,}".replace(",", _GROUP)
     if whole.startswith("-"):
         grouped = f"-{grouped}"
     return f"{grouped},{fraction}" if fraction else grouped
 
 
-def cell(row: CatalogueRow, field: str) -> dict[str, Any]:
+def values(catalogue: Mapping[str, CatalogueRow], field: str) -> Iterator[float]:
+    """Every number a column holds, wherever in the row it is kept.
+
+    :param catalogue: The catalogue.
+    :param field: The quantity wanted.
+    :return: The printed value, both ends of a range, and every reading of a
+        cell that lists several.
+    """
+    for row in catalogue.values():
+        value = getattr(row, field, None)
+        if value is not None:
+            yield value
+        interval = row.ranges.get(field)
+        if interval is not None:
+            yield from interval
+        for entry in row.reported.get(field, ()):
+            yield from entry if isinstance(entry, tuple) else (entry,)
+
+
+def in_powers_of_ten(numbers: Iterable[float]) -> bool:
+    """Whether a column of *numbers* is written as mantissa and power of ten.
+
+    One decision for the whole column, so that a reader comparing down it
+    compares like with like.
+
+    :param numbers: Every number the column holds.
+    :return: True when the middle of the column is at :data:`_BIG` or beyond,
+        or below :data:`_TINY`, which is where digits stop being readable.
+    """
+    magnitudes = [abs(value) for value in numbers if value != 0]
+    if not magnitudes:
+        return False
+    middle = statistics.median(magnitudes)
+    return middle >= _BIG or middle < _TINY
+
+
+def by_powers(catalogue: Mapping[str, CatalogueRow], field: str) -> bool:
+    """Whether one catalogue column is written in powers of ten.
+
+    :param catalogue: The catalogue.
+    :param field: The quantity wanted.
+    :return: What :func:`in_powers_of_ten` says about that column.
+    """
+    return in_powers_of_ten(values(catalogue, field))
+
+
+class Style(NamedTuple):
+    """How one column is written: its heading's unit and its cells' form.
+
+    :ivar unit: The unit the heading carries, prefix included.
+    :ivar exponent: Powers of ten taken out of every cell to match it.
+    :ivar scientific: Whether the cells are a mantissa and a power of ten,
+        which is where a unit that takes no prefix ends up.
+    """
+
+    unit: str
+    exponent: int = 0
+    scientific: bool = False
+
+
+def column_style(unit: str, numbers: Iterable[float]) -> Style:
+    """How to write a column of *numbers* whose quantity is in *unit*.
+
+    A prefix in the heading beats a power of ten in every cell: a column of
+    GPa reads as 62,11 and 23,17, where the same column in pascals reads as
+    6,211 x 10^10 and 2,317 x 10^10, and a reader comparing two materials is
+    comparing mantissas and exponents instead of numbers. So a unit that takes
+    a prefix gets one, and only a unit that cannot (a squared metre, a unit
+    that already carries a prefix, two quantities multiplied together) falls
+    back on the power of ten.
+
+    Which prefix is chosen by writing the whole column out under each one and
+    keeping the shortest, which is what a reader means by the one that reads
+    best: it is the prefix that leaves the fewest digits on the page, and it
+    ties towards no prefix at all.
+
+    :param unit: The unit of the quantity, as the heading has it.
+    :param numbers: Every number the column holds.
+    :return: The style that column is written in.
+    """
+    magnitudes = [value for value in numbers if value]
+    if not magnitudes:
+        return Style(unit)
+    if unit not in _PREFIXABLE:
+        return Style(unit, scientific=in_powers_of_ten(magnitudes))
+    written = {
+        exponent: sum(len(number(value, exponent=exponent)) for value in magnitudes)
+        for exponent, _ in _PREFIXES
+    }
+    exponent = min(written, key=lambda power: (written[power], abs(power)))
+    prefix = dict(_PREFIXES)[exponent]
+    return Style(f"{prefix}{unit}", exponent)
+
+
+def cell(
+    row: CatalogueRow, field: str, *, style: Style | None = None
+) -> dict[str, Any]:
     """One cell, with the number and what the page said around it.
 
     :param row: The catalogue row.
     :param field: The quantity wanted.
+    :param style: How the column is written, from :func:`column_style`. The
+        default writes plain digits in the unit the quantity is stored in.
     :return: ``text`` to print, ``kind`` for the component to style by, and
         ``note`` for the hedge a reader needs to read the number correctly.
     """
+    style = style or Style("")
+    written = functools.partial(
+        number, exponent=style.exponent, scientific=style.scientific
+    )
     value = getattr(row, field, None)
     if value is not None:
         derived = row.is_derived(field)
@@ -166,22 +354,22 @@ def cell(row: CatalogueRow, field: str) -> dict[str, Any]:
         note = row.derived.get(field, "")
         if row.is_approximate(field):
             kind, note = "approximate", "the page prints it with a tilde"
-        return {"text": number(value, exact=not derived), "kind": kind, "note": note}
+        return {"text": written(value, exact=not derived), "kind": kind, "note": note}
     if field in row.ranges:
         low, high = row.ranges[field]
         bound = field in row.bounded_above
         return {
-            "text": f"< {number(high)}"
+            "text": f"< {written(high)}"
             if bound
-            else f"{number(low)} to {number(high)}",
+            else f"{written(low)} to {written(high)}",
             "kind": "bound" if bound else "range",
             "note": row.why_missing(field),
         }
     if field in row.reported:
         listed = ", ".join(
-            f"{number(entry[0])} to {number(entry[1])}"
+            f"{written(entry[0])} to {written(entry[1])}"
             if isinstance(entry, tuple)
-            else number(entry)
+            else written(entry)
             for entry in row.reported[field]
         )
         return {"text": listed, "kind": "reported", "note": row.why_missing(field)}
@@ -191,19 +379,43 @@ def cell(row: CatalogueRow, field: str) -> dict[str, Any]:
             "kind": "unquantified",
             "note": row.why_missing(field),
         }
+    # A cell this library will not fill although the arithmetic would reach it
+    # reads as empty, because the page is empty there; why it stays empty is
+    # what the note says.
+    if field in row.not_derivable:
+        return {"text": "", "kind": "absent", "note": row.why_missing(field)}
     return {"text": "", "kind": "absent", "note": ""}
+
+
+def styles(
+    catalogue: Mapping[str, CatalogueRow],
+    columns: tuple[tuple[str, str, str, str], ...],
+) -> dict[str, Style]:
+    """How each column of *catalogue* is written.
+
+    :param catalogue: The catalogue.
+    :param columns: The columns to show, as ``(field, heading, heading in
+        Spanish, unit)``.
+    :return: The style of each column, by field name.
+    """
+    return {
+        field: column_style(unit, values(catalogue, field))
+        for field, _, _, unit in columns
+    }
 
 
 def rows(
     catalogue: Mapping[str, CatalogueRow],
-    columns: tuple[tuple[str, str, str], ...],
+    columns: tuple[tuple[str, str, str, str], ...],
 ) -> Iterator[dict[str, Any]]:
     """Every row of a catalogue, formatted.
 
     :param catalogue: The catalogue.
-    :param columns: The columns to show, as ``(field, heading, unit)``.
+    :param columns: The columns to show, as ``(field, heading, heading in
+        Spanish, unit)``.
     :return: One record per row, in the catalogue's own order.
     """
+    written = styles(catalogue, columns)
     for key, row in catalogue.items():
         table, _, _ = key.partition("/")
         yield {
@@ -214,7 +426,9 @@ def rows(
             "source": row.source,
             "note": row.note,
             "attributedTo": dict(row.attributed_to),
-            "cells": [cell(row, field) for field, _, _ in columns],
+            "cells": [
+                cell(row, field, style=written[field]) for field, _, _, _ in columns
+            ],
         }
 
 
@@ -234,7 +448,7 @@ IN_TREE_FLUIDS = {
 }
 
 
-def fluids() -> list[dict[str, Any]]:
+def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     """The fluid states, which are not rows of a table and do not format alike.
 
     A :class:`~phonometry.fluids.Fluid` carries a temperature, a pressure and
@@ -248,33 +462,72 @@ def fluids() -> list[dict[str, Any]]:
     elsewhere, which is the order that puts the airs of the four documents
     next to each other where their disagreement is visible.
 
-    :return: One record per state.
+    :return: The columns, headings and units included, and one record per
+        state.
     """
-    quantities = ("speed_of_sound", "density", "viscosity", "heat_capacity_ratio")
+    quantities = (
+        ("speed_of_sound", "Speed of sound", "Velocidad del sonido", "m/s"),
+        ("density", "Density", "Densidad", "kg/m³"),
+        ("viscosity", "Viscosity", "Viscosidad", "Pa·s"),
+        (
+            "heat_capacity_ratio",
+            "Heat capacity ratio",
+            "Relación de calores específicos",
+            "",
+        ),
+    )
+    states = {**PUBLISHED_FLUIDS, **IN_TREE_FLUIDS}
+    # The same decision the material columns take, made the same way: a
+    # viscosity of 0,0000184 Pa s is a column of leading zeros, and moving the
+    # prefix into the heading makes it 18,4 µPa·s.
+    written = {
+        name: column_style(
+            unit,
+            [
+                state.properties[name]
+                for state in states.values()
+                if name in state.properties
+            ],
+        )
+        for name, _, _, unit in quantities
+    }
+    columns = [
+        {
+            "field": name,
+            "heading": heading,
+            "headingEs": spanish,
+            "unit": written[name].unit,
+        }
+        for name, heading, spanish, _ in quantities
+    ]
     out: list[dict[str, Any]] = []
-    for key, state in {**PUBLISHED_FLUIDS, **IN_TREE_FLUIDS}.items():
+    for key, state in states.items():
         out.append(
             {
                 "key": key,
                 "table": key.partition("/")[0],
-                "name": key.rpartition("/")[2].replace("_", " "),
+                "name": key.rpartition("/")[2].replace("_", " ").capitalize(),
                 "temperature": number(state.temperature_c),
                 "pressure": number(state.static_pressure_pa),
                 "model": state.model,
                 "validity": state.validity,
                 "cells": [
                     {
-                        "text": number(state.properties[name])
+                        "text": number(
+                            state.properties[name],
+                            exponent=written[name].exponent,
+                            scientific=written[name].scientific,
+                        )
                         if name in state.properties
                         else "",
                         "kind": "printed" if name in state.properties else "absent",
                         "note": "",
                     }
-                    for name in quantities
+                    for name, _, _, _ in quantities
                 ],
             }
         )
-    return out
+    return columns, out
 
 
 def render() -> str:
@@ -284,34 +537,35 @@ def render() -> str:
     """
     import json
 
+    solid_styles = styles(PUBLISHED_SOLIDS, SOLID_COLUMNS)
+    porous_styles = styles(PUBLISHED_POROUS, POROUS_COLUMNS)
+    fluid_columns, fluid_rows = fluids()
     document = {
         "solids": {
             "columns": [
-                {"field": field, "heading": heading, "unit": unit}
-                for field, heading, unit in SOLID_COLUMNS
+                {
+                    "field": field,
+                    "heading": heading,
+                    "headingEs": spanish,
+                    "unit": solid_styles[field].unit,
+                }
+                for field, heading, spanish, _ in SOLID_COLUMNS
             ],
             "rows": list(rows(PUBLISHED_SOLIDS, SOLID_COLUMNS)),
         },
         "porous": {
             "columns": [
-                {"field": field, "heading": heading, "unit": unit}
-                for field, heading, unit in POROUS_COLUMNS
+                {
+                    "field": field,
+                    "heading": heading,
+                    "headingEs": spanish,
+                    "unit": porous_styles[field].unit,
+                }
+                for field, heading, spanish, _ in POROUS_COLUMNS
             ],
             "rows": list(rows(PUBLISHED_POROUS, POROUS_COLUMNS)),
         },
-        "fluids": {
-            "columns": [
-                {"field": "speed_of_sound", "heading": "Speed of sound", "unit": "m/s"},
-                {"field": "density", "heading": "Density", "unit": "kg/m³"},
-                {"field": "viscosity", "heading": "Viscosity", "unit": "Pa·s"},
-                {
-                    "field": "heat_capacity_ratio",
-                    "heading": "Heat capacity ratio",
-                    "unit": "",
-                },
-            ],
-            "rows": fluids(),
-        },
+        "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
     body = json.dumps(document, ensure_ascii=False, indent=2, sort_keys=False)
     return (

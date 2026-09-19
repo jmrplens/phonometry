@@ -40,7 +40,7 @@
       "key": "carbon_brick",
       "name": "Carbon brick",
       "density_kg_m3": 1630.0,
-      "youngs_modulus_pa": 8199999999.999999,
+      "youngs_modulus_pa": 8200000000.0,
       "bar_longitudinal_speed_m_s": 2240.0,
       "poisson_ratio": 0.07,
       "loss_factor": 0.001,
@@ -864,7 +864,7 @@
           590.0
         ],
         "youngs_modulus_pa": [
-          8199999999.999999,
+          8200000000.0,
           13700000000.0
         ]
       },
@@ -875,7 +875,7 @@
       "name": "Plywood",
       "variant": "fir",
       "density_kg_m3": 600.0,
-      "youngs_modulus_pa": 8300000000.000001,
+      "youngs_modulus_pa": 8300000000.0,
       "bar_longitudinal_speed_m_s": 4540.0,
       "loss_factor": 0.01,
       "in_situ_loss_factor": 0.05,
@@ -1246,8 +1246,8 @@
       "loss_factor": 0.0001,
       "in_situ_loss_factor": 0.01,
       "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
-      "unquantified": {
-        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      "not_derivable": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
       }
     },
     {
@@ -1259,8 +1259,8 @@
       "loss_factor": 0.0001,
       "in_situ_loss_factor": 0.01,
       "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
-      "unquantified": {
-        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      "not_derivable": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
       }
     },
     {
@@ -1272,8 +1272,8 @@
       "loss_factor": 0.0001,
       "in_situ_loss_factor": 0.01,
       "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
-      "unquantified": {
-        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      "not_derivable": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
       }
     },
     {
@@ -1285,8 +1285,8 @@
       "loss_factor": 0.0001,
       "in_situ_loss_factor": 0.01,
       "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
-      "unquantified": {
-        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, because a one-dimensional speed does not mean anything in a honeycomb panel"
+      "not_derivable": {
+        "bar_longitudinal_speed_m_s": "the page leaves the cell blank, and a one-dimensional speed does not mean anything in a honeycomb panel whose modulus and density are effective ones"
       }
     }
   ]

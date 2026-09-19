@@ -35,7 +35,14 @@ if TYPE_CHECKING:
 _REQUIRED = ("source", "about", "rows")
 
 #: The mappings every row holds and does not own, frozen at construction.
-_MAPPINGS = ("derived", "ranges", "reported", "unquantified", "attributed_to")
+_MAPPINGS = (
+    "derived",
+    "ranges",
+    "reported",
+    "unquantified",
+    "not_derivable",
+    "attributed_to",
+)
 
 
 class CatalogueError(ValueError):
@@ -151,9 +158,18 @@ class CatalogueRow:
         200-450"``, readings from as many studies. Each entry is a number or
         a ``(low, high)`` pair. Not a range, because the page did not print
         one, and not variants, because the page does not say which is which.
-    :ivar unquantified: Field to what the page said in place of a number, for
-        a cell that is neither empty nor numeric: ``"varies with frequency"``,
-        ``"model"``.
+    :ivar unquantified: Field to what the page printed in place of a number,
+        for a cell that is neither empty nor numeric: ``"Varies with
+        frequency"``, ``"model"``, ``"…"`` for a row of dots. What the page
+        printed, and never a sentence about why the number is missing:
+        :meth:`why_missing` composes that sentence around it, so a caller and
+        a published table both get the cell as it reads on the page.
+    :ivar not_derivable: Field to why this library leaves it empty although
+        the arithmetic would reach it. Bies leaves the speed of his aluminium
+        honeycomb panels blank, and the modulus and the density beside it are
+        effective ones, so ``sqrt(E/rho)`` would put a one-dimensional speed
+        on a panel that has none. A row says so here, and nothing fills the
+        cell afterwards.
     :ivar attributed_to: Credit for a cell the book takes from someone else.
         Keyed by field name, or by ``"row"`` or ``"table"`` when the credit
         covers all of one.
@@ -172,6 +188,7 @@ class CatalogueRow:
         default_factory=dict
     )
     unquantified: Mapping[str, str] = field(default_factory=dict)
+    not_derivable: Mapping[str, str] = field(default_factory=dict)
     attributed_to: Mapping[str, str] = field(default_factory=dict)
     note: str = ""
 
@@ -247,7 +264,12 @@ class CatalogueRow:
         if getattr(self, field_name) is not None:
             return ""
         if field_name in self.unquantified:
-            return self.unquantified[field_name]
+            return (
+                f"the page prints “{self.unquantified[field_name]}” "
+                f"where the number would be"
+            )
+        if field_name in self.not_derivable:
+            return self.not_derivable[field_name]
         if field_name in self.ranges:
             low, high = self.ranges[field_name]
             if field_name in self.bounded_above:

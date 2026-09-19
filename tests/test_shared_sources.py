@@ -33,6 +33,7 @@ class _Surface(CatalogueRow):
     """A row with one quantity on it, standing in for a published class."""
 
     flow_resistivity_pa_s_m2: float | None = None
+    porosity: float | None = None
 
 
 def _row(
@@ -140,8 +141,8 @@ def test_two_intervals_that_touch_at_one_end_agree() -> None:
     assert not failures
 
 
-def test_a_cell_listing_several_readings_spans_them() -> None:
-    """A book that lists 25, 207 and 230 has said the value is in there."""
+def test_a_reading_inside_one_of_several_listed_ones_agrees() -> None:
+    """A listed cell is several readings, and matching one of them is enough."""
     _, failures, compared = _compare(
         _row(
             "bies-2017-table-5-1",
@@ -157,6 +158,29 @@ def test_a_cell_listing_several_readings_spans_them() -> None:
 
     assert compared == 1
     assert not failures
+
+
+def test_a_reading_in_the_gap_between_listed_ones_does_not_agree() -> None:
+    """The failure an envelope would hide.
+
+    A cell listing 25, 207 and 230 excludes 100 as firmly as it excludes 400:
+    taking the envelope 25 to 230 would call that agreement.
+    """
+    _, failures, _ = _compare(
+        _row(
+            "bies-2017-table-5-1",
+            "Gravel",
+            flow_resistivity_pa_s_m2=100_000.0,
+        ),
+        _row(
+            "cox-2017-table-6-7",
+            "Gravel",
+            reported={"flow_resistivity_pa_s_m2": (25_000.0, 207_000.0, 230_000.0)},
+        ),
+    )
+
+    assert len(failures) == 1
+    assert "do not overlap" in failures[0]
 
 
 # ---------------------------------------------------------------------------
@@ -248,7 +272,70 @@ def test_the_registry_holds_nothing_stale() -> None:
 def test_overlap_is_inclusive_at_the_ends(
     first: tuple[float, float], second: tuple[float, float], *, expected: bool
 ) -> None:
-    one = css.Reading("a", "a-1", *first)
-    other = css.Reading("b", "b-1", *second)
+    one = css.Reading("a", "a-1", (first,))
+    other = css.Reading("b", "b-1", (second,))
 
     assert css.overlap(one, other) is expected
+
+
+# ---------------------------------------------------------------------------
+# What the credit covers
+# ---------------------------------------------------------------------------
+def test_a_credit_for_one_quantity_does_not_cover_another() -> None:
+    """A study cited for a porosity says nothing about the resistivity.
+
+    The rows pair, because they do share that porosity credit, but the
+    resistivity beside it is credited to two different studies and is not
+    compared: they are two measurements, free to disagree.
+    """
+    first = _Surface(
+        name="Grass",
+        table="bies-2017-table-5-1",
+        source="Bies 5e Table 5.1, PDF page 1 (printed p. 1)",
+        attributed_to={"porosity": _EMBLETON, "flow_resistivity_pa_s_m2": "Bies, 2017"},
+        porosity=0.4,
+        flow_resistivity_pa_s_m2=100_000.0,
+    )
+    second = _Surface(
+        name="Grass",
+        table="cox-2017-table-6-7",
+        source="Cox & D'Antonio 3e Table 6.7, PDF page 1 (printed p. 1)",
+        attributed_to={
+            "porosity": _EMBLETON,
+            "flow_resistivity_pa_s_m2": "Attenborough, 1982",
+        },
+        porosity=0.4,
+        flow_resistivity_pa_s_m2=900_000.0,
+    )
+
+    _, failures, compared = css.compare(
+        "ground", (first, second), ("porosity", "flow_resistivity_pa_s_m2"), {}
+    )
+
+    assert compared == 1
+    assert not failures
+
+
+def test_a_row_credit_covers_every_quantity_of_the_row() -> None:
+    """Which is what a superscript on the material name means."""
+    first = _Surface(
+        name="Grass",
+        table="bies-2017-table-5-1",
+        source="Bies 5e Table 5.1, PDF page 1 (printed p. 1)",
+        attributed_to={"row": _EMBLETON},
+        flow_resistivity_pa_s_m2=100_000.0,
+    )
+    second = _Surface(
+        name="Grass",
+        table="cox-2017-table-6-7",
+        source="Cox & D'Antonio 3e Table 6.7, PDF page 1 (printed p. 1)",
+        attributed_to={"table": _EMBLETON},
+        flow_resistivity_pa_s_m2=900_000.0,
+    )
+
+    _, failures, compared = css.compare(
+        "ground", (first, second), ("flow_resistivity_pa_s_m2",), {}
+    )
+
+    assert compared == 1
+    assert len(failures) == 1

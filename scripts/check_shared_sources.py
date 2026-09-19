@@ -114,21 +114,23 @@ class Reading(NamedTuple):
 
     :ivar book: The book, as the first word of the table key names it.
     :ivar table: The table the row came off.
-    :ivar low: The bottom of what the page allows, which is the value itself
-        when the page printed one.
-    :ivar high: The top of it.
+    :ivar spans: The intervals the page allows, one for a value or a range and
+        several for a cell that lists separate readings. They are kept apart
+        rather than enveloped, because the gap between two of them is a value
+        the page excludes.
     """
 
     book: str
     table: str
-    low: float
-    high: float
+    spans: tuple[tuple[float, float], ...]
 
     def spelt(self) -> str:
         """The reading as the report prints it."""
-        if self.low == self.high:
-            return f"{self.book} {self.low:g}"
-        return f"{self.book} {self.low:g} to {self.high:g}"
+        pieces = [
+            f"{low:g}" if low == high else f"{low:g} to {high:g}"
+            for low, high in self.spans
+        ]
+        return f"{self.book} {', '.join(pieces)}"
 
 
 def book_of(table: str) -> str:
@@ -136,65 +138,101 @@ def book_of(table: str) -> str:
     return table.split("-")[0]
 
 
-def sources(row: CatalogueRow) -> frozenset[str]:
-    """Every study the row credits, however the page attached the credit.
+def _named(text: str) -> set[str]:
+    """The studies one credit string names, which may be several."""
+    return {piece.strip() for piece in text.split(";") if piece.strip()}
 
-    A credit reaches a row per cell, per row or per table, and which of the
-    three it is says nothing about what was copied from whom; all that matters
-    here is the set of studies named.
+
+def sources(row: CatalogueRow, field: str) -> frozenset[str]:
+    """The studies credited for *field* of *row*, scope respected.
+
+    A credit reaches a cell three ways: on the cell itself, on the row, or on
+    the whole table, and the scope is part of what it says. Cox credits one
+    study for a porosity and another for the resistivity beside it, so pooling
+    the two would pair two rows over a study neither of them credits for the
+    quantity being compared, and then compare it.
     """
     named: set[str] = set()
-    for text in row.attributed_to.values():
-        named.update(piece.strip() for piece in text.split(";") if piece.strip())
+    for scope in (field, "row", "table"):
+        text = row.attributed_to.get(scope)
+        if text:
+            named |= _named(text)
     return frozenset(named)
 
 
 def reading(row: CatalogueRow, field: str) -> Reading | None:
-    """What *row* publishes for *field*, as the interval it allows.
+    """What *row* publishes for *field*, as the intervals it allows.
 
-    A printed value is an interval of zero width, an interval is itself, and a
-    cell listing several readings spans them: a book that lists 25, 207 and 230
-    has said the quantity is somewhere in there, which is what an overlap test
-    needs. A cell holding a word, or nothing, is not a reading at all.
+    A printed value is an interval of zero width and an interval is itself. A
+    cell that lists several readings is several intervals and not one: Cox
+    lists 25, 207 and 230 micrometres for a characteristic length, and a book
+    that said 100 would agree with none of them, so envelopes are not taken.
+    A cell holding a word, or nothing, is not a reading at all.
     """
     value = getattr(row, field, None)
     if value is not None:
-        return Reading(book_of(row.table), row.table, float(value), float(value))
+        return Reading(book_of(row.table), row.table, ((float(value), float(value)),))
     interval = row.ranges.get(field)
     if interval is not None:
         low, high = interval
-        return Reading(book_of(row.table), row.table, float(low), float(high))
+        return Reading(book_of(row.table), row.table, ((float(low), float(high)),))
     listed = row.reported.get(field)
     if listed:
-        flat: list[float] = []
-        for entry in listed:
-            flat.extend(entry if isinstance(entry, tuple) else (entry,))
-        return Reading(book_of(row.table), row.table, min(flat), max(flat))
+        spans = tuple(
+            (float(entry[0]), float(entry[1]))
+            if isinstance(entry, tuple)
+            else (float(entry), float(entry))
+            for entry in listed
+        )
+        return Reading(book_of(row.table), row.table, spans)
     return None
 
 
 def overlap(first: Reading, second: Reading) -> bool:
-    """Whether the two readings leave any value both books allow."""
-    return first.low <= second.high and second.low <= first.high
+    """Whether the two readings leave any value both books allow.
+
+    One shared value is enough, and it has to be a value both of them actually
+    reach: a reading of 100 does not agree with a cell listing 25, 207 and 230
+    because it falls in a gap between them, which is exactly what taking the
+    envelope of a listed cell would hide.
+    """
+    return any(
+        low <= other_high and other_low <= high
+        for low, high in first.spans
+        for other_low, other_high in second.spans
+    )
+
+
+def sources_shared(first: CatalogueRow, second: CatalogueRow) -> bool:
+    """Whether the two rows credit one study for any quantity at all.
+
+    A cheap filter over the pair, so that two rows with no credit in common
+    anywhere never reach the per-field comparison. What decides a comparison
+    is the per-field answer of :func:`sources`, not this.
+    """
+    fields = set(first.attributed_to) | set(second.attributed_to)
+    return any(
+        sources(first, field) & sources(second, field)
+        for field in fields | {"row", "table"}
+    )
 
 
 def pairs(
     catalogue: Iterable[CatalogueRow],
-) -> list[tuple[str, CatalogueRow, CatalogueRow, frozenset[str]]]:
+) -> list[tuple[str, CatalogueRow, CatalogueRow]]:
     """Rows of two books, under one name, crediting one study between them."""
     by_name: dict[str, list[CatalogueRow]] = defaultdict(list)
     for row in catalogue:
         by_name[normalised(row.name)].append(row)
 
-    found: list[tuple[str, CatalogueRow, CatalogueRow, frozenset[str]]] = []
+    found: list[tuple[str, CatalogueRow, CatalogueRow]] = []
     for name, rows in sorted(by_name.items()):
         for index, first in enumerate(rows):
             for second in rows[index + 1 :]:
                 if book_of(first.table) == book_of(second.table):
                     continue
-                shared = sources(first) & sources(second)
-                if shared:
-                    found.append((name, first, second, shared))
+                if sources_shared(first, second):
+                    found.append((name, first, second))
     return found
 
 
@@ -217,9 +255,15 @@ def compare(
     lines: list[str] = []
     failures: list[str] = []
     compared = 0
-    for name, first, second, shared in pairs(catalogue):
+    for name, first, second in pairs(catalogue):
         entries: list[str] = []
         for field in fields:
+            # The credit has to cover the quantity being compared. A study one
+            # book cites for a porosity says nothing about the resistivity
+            # beside it, and two rows can share one credit and not the other.
+            shared = sources(first, field) & sources(second, field)
+            if not shared:
+                continue
             one, other = reading(first, field), reading(second, field)
             if one is None or other is None:
                 continue
@@ -240,7 +284,7 @@ def compare(
                 f"really do, say why in ACCEPTED under {key!r}"
             )
         if entries:
-            lines.append(f"{label}: {name} ({min(shared)})")
+            lines.append(f"{label}: {name}")
             lines.extend(entries)
     return lines, failures, compared
 

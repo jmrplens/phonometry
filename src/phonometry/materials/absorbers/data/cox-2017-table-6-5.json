@@ -1,0 +1,517 @@
+{
+  "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+  "about": "Rendered PDF page 253, folio 196 (running head \"196 Acoustic Absorbers and Diffusers\"); the table fills the page and closes with a rule after \"Sandstone\", so it does not continue on PDF page 254 (folio 197), which was rendered to check and holds only prose. Title as printed: \"Table 6.5 Typical porosity values for some materials\". Two columns, headings in italic: \"Material\" and \"Typical porosities\"; no unit (porosity is dimensionless, values carried over with factor 1). Rows sit under four bold section headings, \"Fibrous materials\", \"Cellular materials\", \"Granular materials\" and \"Other\", kept here as the group field; inside each group thin horizontal rules band the rows in threes or fours, a typographic aid only. No footnotes. Material names carry superscript reference numbers into the chapter 6 reference list (PDF pages 276-281, printed pp. 219-224); \"Expanded perlite\" carries none. Section 6.4.2 Open porosity introduces it on PDF page 254 (printed p. 197): \"Although the porosity is a key parameter, for many common porous absorbents, the value does not vary greatly and is close to unity. Table 6.5 gives some typical values. Porosity values for the ground can be found in Table 6.7.\" The same section (PDF 251, printed p. 194) states that \"most mineral wools have a porosity of about 0.98\"; that closed pores are to be excluded from the pore volume because they are inaccessible to sound, which is what makes this an OPEN porosity, is said further on, on PDF page 254 (printed p. 197). Ranges printed with an en dash go to ranges; two cells carry an approximately-equals sign (Vermiculite (granular) \"≈0.65–0.68\", Marble \"≈0.005\") and are flagged approximate; Aerogel prints \">0.75\", which the schema cannot hold natively and is stored as a range bounded below (see its note); Glass beads (1.6 and 0.7 mm) prints \"0.34, 0.38\" with no explicit pairing and is kept as reported. Values are printed to two decimals except 0.995, 0.005, 0.4 and 0.1, kept as printed.",
+  "rows": [
+    {
+      "key": "felts",
+      "name": "Felts",
+      "group": "Fibrous materials",
+      "ranges": {
+        "porosity": [
+          0.83,
+          0.97
+        ]
+      },
+      "note": "Page superscripts: 1, 41.",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978; Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "hemp",
+      "name": "Hemp",
+      "group": "Fibrous materials",
+      "porosity": 0.99,
+      "note": "Page superscript: 41.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "mineral_wool",
+      "name": "Mineral wool",
+      "group": "Fibrous materials",
+      "ranges": {
+        "porosity": [
+          0.92,
+          0.99
+        ]
+      },
+      "note": "Page superscripts: 1, 7, 41.",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978; Mechel, 2002; Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "polyester",
+      "name": "Polyester",
+      "group": "Fibrous materials",
+      "porosity": 0.96,
+      "note": "Page superscript: 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
+      "attributed_to": {
+        "row": "Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "wood_fibre_board",
+      "name": "Wood fibre board",
+      "group": "Fibrous materials",
+      "ranges": {
+        "porosity": [
+          0.65,
+          0.8
+        ]
+      },
+      "note": "Page superscript: 7.",
+      "attributed_to": {
+        "row": "Mechel, 2002"
+      }
+    },
+    {
+      "key": "wood_wool_board",
+      "name": "Wood wool board",
+      "group": "Fibrous materials",
+      "ranges": {
+        "porosity": [
+          0.5,
+          0.65
+        ]
+      },
+      "note": "Page superscript: 7.",
+      "attributed_to": {
+        "row": "Mechel, 2002"
+      }
+    },
+    {
+      "key": "open_cell_acoustic_foams_eg_pu",
+      "name": "Open cell acoustic foams (e.g., PU)",
+      "group": "Cellular materials",
+      "ranges": {
+        "porosity": [
+          0.93,
+          0.995
+        ]
+      },
+      "note": "Page superscripts: 7, 12, 41, 65. Name wraps over two lines on the page (\"Open cell acoustic foams\" / \"(e.g., PU)\"); the superscripts sit after the closing parenthesis.",
+      "attributed_to": {
+        "row": "Mechel, 2002; Doutres, Atalla and Dong, 2011; Bonfiglio and Pompoli, 2013; Hoang, Bonnet and Perrot, 2013"
+      }
+    },
+    {
+      "key": "open_cell_ceramic_foams",
+      "name": "Open cell ceramic foams",
+      "group": "Cellular materials",
+      "ranges": {
+        "porosity": [
+          0.8,
+          0.9
+        ]
+      },
+      "note": "Page superscript: 19.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010"
+      }
+    },
+    {
+      "key": "open_cell_metal_foams",
+      "name": "Open cell metal foams",
+      "group": "Cellular materials",
+      "ranges": {
+        "porosity": [
+          0.75,
+          0.95
+        ]
+      },
+      "note": "Page superscripts: 19, 46.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Panneton and Olny, 2006"
+      }
+    },
+    {
+      "key": "open_cell_synthetic_rubber",
+      "name": "Open cell synthetic rubber",
+      "group": "Cellular materials",
+      "porosity": 0.83,
+      "note": "Page superscript: 41.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "polylactide_foams",
+      "name": "Polylactide foams",
+      "group": "Cellular materials",
+      "ranges": {
+        "porosity": [
+          0.82,
+          0.88
+        ]
+      },
+      "note": "Page superscript: 48.",
+      "attributed_to": {
+        "row": "Mosanenzadeh et al., 2015"
+      }
+    },
+    {
+      "key": "partially_reticulated_foams",
+      "name": "Partially reticulated foams",
+      "group": "Cellular materials",
+      "ranges": {
+        "porosity": [
+          0.97,
+          0.98
+        ]
+      },
+      "note": "Page superscript: 12.",
+      "attributed_to": {
+        "row": "Doutres, Atalla and Dong, 2011"
+      }
+    },
+    {
+      "key": "reticulated_vitreous_carbon",
+      "name": "Reticulated vitreous carbon",
+      "group": "Cellular materials",
+      "ranges": {
+        "porosity": [
+          0.91,
+          0.97
+        ]
+      },
+      "note": "Page superscript: 66.",
+      "attributed_to": {
+        "row": "Muehleisen, Beamer and Tinianov, 2005"
+      }
+    },
+    {
+      "key": "consolidated_foam_granulates",
+      "name": "Consolidated foam granulates",
+      "group": "Granular materials",
+      "porosity": 0.61,
+      "note": "Page superscript: 50.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "coustone",
+      "name": "Coustone",
+      "group": "Granular materials",
+      "porosity": 0.4,
+      "note": "Page superscript: 50.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "expanded_perlite",
+      "name": "Expanded perlite",
+      "group": "Granular materials",
+      "porosity": 0.98,
+      "note": "No superscript on the page."
+    },
+    {
+      "key": "glass_beads_1_6_and_0_7_mm",
+      "name": "Glass beads (1.6 and 0.7 mm)",
+      "group": "Granular materials",
+      "reported": {
+        "porosity": [
+          0.34,
+          0.38
+        ]
+      },
+      "note": "Page superscript: 50. Cell printed \"0.34, 0.38\" against the name \"Glass beads (1.6 and 0.7 mm)\". The page does not make the pairing explicit (the sizes are joined by \"and\", the values by a comma, and the sizes are listed largest first, unlike Table 6.2), so both values are kept as reported rather than split into variants.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "gravel_and_stone_chip_fill",
+      "name": "Gravel and stone chip fill",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.25,
+          0.45
+        ]
+      },
+      "note": "Page superscript: 7.",
+      "attributed_to": {
+        "row": "Mechel, 2002"
+      }
+    },
+    {
+      "key": "lead_shot_random_loose_packing",
+      "name": "Lead shot, random loose packing",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.36,
+          0.45
+        ]
+      },
+      "note": "Page superscript: 55. Name wraps over two lines on the page (\"Lead shot, random loose\" / \"packing\").",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "nitrile_foam_granulate",
+      "name": "Nitrile foam granulate",
+      "group": "Granular materials",
+      "porosity": 0.91,
+      "note": "Page superscript: 53.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "open_porous_asphalt",
+      "name": "Open porous asphalt",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.13,
+          0.29
+        ]
+      },
+      "note": "Page superscripts: 54, 67.",
+      "attributed_to": {
+        "row": "Berengier et al., 1997; Sarradj, Lerch and Hubelt, 2006"
+      }
+    },
+    {
+      "key": "perlite_granular",
+      "name": "Perlite (granular)",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.6,
+          0.78
+        ]
+      },
+      "note": "Page superscript: 53.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "porous_render",
+      "name": "Porous render",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.6,
+          0.65
+        ]
+      },
+      "note": "Page superscript: 1.",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978"
+      }
+    },
+    {
+      "key": "pumice_concrete",
+      "name": "Pumice concrete",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.25,
+          0.5
+        ]
+      },
+      "note": "Page superscript: 7.",
+      "attributed_to": {
+        "row": "Mechel, 2002"
+      }
+    },
+    {
+      "key": "pumice_fill",
+      "name": "Pumice fill",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.65,
+          0.85
+        ]
+      },
+      "note": "Page superscript: 7.",
+      "attributed_to": {
+        "row": "Mechel, 2002"
+      }
+    },
+    {
+      "key": "rubber_crumb",
+      "name": "Rubber crumb",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.44,
+          0.54
+        ]
+      },
+      "note": "Page superscript: 53.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "sand",
+      "name": "Sand",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.39,
+          0.44
+        ]
+      },
+      "note": "Page superscript: 51.",
+      "attributed_to": {
+        "row": "Horoshenkov and Mohamed, 2006"
+      }
+    },
+    {
+      "key": "sintered_metal",
+      "name": "Sintered metal",
+      "group": "Granular materials",
+      "ranges": {
+        "porosity": [
+          0.1,
+          0.25
+        ]
+      },
+      "note": "Page superscript: 7.",
+      "attributed_to": {
+        "row": "Mechel, 2002"
+      }
+    },
+    {
+      "key": "vermiculite_granular",
+      "name": "Vermiculite (granular)",
+      "group": "Granular materials",
+      "approximate": [
+        "porosity"
+      ],
+      "ranges": {
+        "porosity": [
+          0.65,
+          0.68
+        ]
+      },
+      "note": "Page superscript: 53. Cell printed \"≈0.65–0.68\": the approximately-equals sign precedes the whole range.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "aerogel",
+      "name": "Aerogel",
+      "group": "Other",
+      "ranges": {
+        "porosity": [
+          0.75,
+          1.0
+        ]
+      },
+      "bounded_below": [
+        "porosity"
+      ],
+      "note": "Page superscript: 19. Cell printed \">0.75\". The schema has bounded_above for \"< x\" cells only; by analogy this row uses ranges with the printed value as the low end and the physical ceiling of porosity (1.0, NOT a printed number) as the high end, flagged with bounded_below.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010"
+      }
+    },
+    {
+      "key": "asphalt",
+      "name": "Asphalt",
+      "group": "Other",
+      "porosity": 0.1,
+      "note": "Page superscript: 52.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007"
+      }
+    },
+    {
+      "key": "brick",
+      "name": "Brick",
+      "group": "Other",
+      "ranges": {
+        "porosity": [
+          0.25,
+          0.3
+        ]
+      },
+      "note": "Page superscript: 1.",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978"
+      }
+    },
+    {
+      "key": "ceramic_filters",
+      "name": "Ceramic filters",
+      "group": "Other",
+      "ranges": {
+        "porosity": [
+          0.33,
+          0.42
+        ]
+      },
+      "note": "Page superscript: 1.",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978"
+      }
+    },
+    {
+      "key": "firebrick",
+      "name": "Firebrick",
+      "group": "Other",
+      "ranges": {
+        "porosity": [
+          0.15,
+          0.35
+        ]
+      },
+      "note": "Page superscript: 1.",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978"
+      }
+    },
+    {
+      "key": "marble",
+      "name": "Marble",
+      "group": "Other",
+      "porosity": 0.005,
+      "approximate": [
+        "porosity"
+      ],
+      "note": "Page superscript: 1. Cell printed \"≈0.005\".",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978"
+      }
+    },
+    {
+      "key": "porous_ceramic",
+      "name": "Porous ceramic",
+      "group": "Other",
+      "porosity": 0.43,
+      "note": "Page superscript: 56.",
+      "attributed_to": {
+        "row": "Champoux and Allard, 1991"
+      }
+    },
+    {
+      "key": "sandstone",
+      "name": "Sandstone",
+      "group": "Other",
+      "ranges": {
+        "porosity": [
+          0.02,
+          0.06
+        ]
+      },
+      "note": "Page superscript: 1.",
+      "attributed_to": {
+        "row": "Cremer and Müller, 1978"
+      }
+    }
+  ]
+}

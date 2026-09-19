@@ -27,6 +27,26 @@ stores the real modulus and the loss factor separately, which is the form the
 poroelastic models take them in, and :meth:`PorousMaterial.frame_constants`
 puts the complex number back together.
 
+Two kinds of row
+----------------
+A **specimen** row is one sample, with every parameter a model needs beside
+it: Allard and Atalla's tables are all of this kind, and a row of one of them
+reproduces the worked example it belongs to. A **compiled** row is one
+quantity over a class of material, gathered by its book from the literature:
+Cox and D'Antonio compile a flow resistivity, a fibre diameter, a porosity,
+two characteristic lengths and a tortuosity, and Mechel compiles a porosity
+and the fibre data of three product groups. Almost every compiled cell is an
+interval, because there is no such thing as the porosity of mineral wool,
+only the range the measurements fall in, and a row that answered with the
+midpoint of that range would be inventing a measurement.
+
+The two kinds sit in one catalogue because they answer one question between
+them: :func:`porous_materials_named` asks a name of every book at once, and a
+specimen that falls outside the range its class is compiled in is worth
+knowing about. What tells them apart is what a row holds: a specimen carries
+several quantities, a compiled row carries one, and the compiled one carries
+it as a range.
+
 Where the rows live
 -------------------
 In ``absorbers/data/*.json``, one file per published table, read at import
@@ -113,6 +133,17 @@ class PorousMaterial(CatalogueRow):
         micrometres. Metres at the model's ``thermal_length``, as above.
     :ivar thermal_permeability_m2: Static thermal permeability ``q'_0``, in
         m2, which two of the tables print beside the thermal length.
+    :ivar fibre_diameter_um: Fibre diameter ``d``, in micrometres, for the
+        materials a table describes by the fibre rather than by the pore.
+    :ivar fibre_diameter_distribution_parameter: The parameter of the Poisson
+        distribution Mechel fits to a measured spread of fibre diameters,
+        referred to a diameter class one micrometre wide. Dimensionless: the
+        micrometre in the column heading belongs to the class width, which is
+        stated in the file's ``about`` because the value means nothing
+        without it.
+    :ivar shot_content_percent: Shot content, per cent **by weight**, of
+        particles above the diameter the table's own heading names.
+    :ivar binder_content_percent: Organic binder content, per cent by weight.
     :ivar frame_density_kg_m3: Frame density ``rho_1``, in kg/m3, the mass of
         the skeleton per unit volume of material and not the density of the
         material the skeleton is made of.
@@ -136,6 +167,10 @@ class PorousMaterial(CatalogueRow):
     viscous_length_um: float | None = None
     thermal_length_um: float | None = None
     thermal_permeability_m2: float | None = None
+    fibre_diameter_um: float | None = None
+    fibre_diameter_distribution_parameter: float | None = None
+    shot_content_percent: float | None = None
+    binder_content_percent: float | None = None
     frame_density_kg_m3: float | None = None
     thickness_mm: float | None = None
     youngs_modulus_pa: float | None = None
@@ -331,7 +366,7 @@ def _complete(fields: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 #: The row fields the data files write as a list and the row holds as a set.
-_SETS = ("approximate", "bounded_above")
+_SETS = ("approximate", "bounded_above", "bounded_below")
 
 #: The published tables this catalogue reads, in the order the book prints
 #: them.
@@ -355,6 +390,15 @@ _TABLES = (
     "allard-2009-table-12-5",
     "allard-2009-table-13-1",
     "allard-2009-table-13-2",
+    # The compiled tables: one quantity each, over classes of material rather
+    # than over specimens, which is why almost every cell of them is a range.
+    "cox-2017-table-6-2",
+    "cox-2017-table-6-3",
+    "cox-2017-table-6-5",
+    "cox-2017-table-6-8",
+    "cox-2017-table-6-9",
+    "mechel-2008-section-g1-table-1",
+    "mechel-2008-section-g11-table-1",
 )
 
 
@@ -393,7 +437,10 @@ def porous_materials_named(name: str) -> tuple[PorousMaterial, ...]:
     Comparing two printings of one specimen is the point of holding both, and
     it has to be a deliberate act: a lookup that returned one row for "Foam"
     would be choosing between published parameter sets on the caller's behalf,
-    and this book prints five different foams under that name.
+    and one of these books prints five different foams under that name. Across
+    the books it also puts a measured specimen beside the range its class is
+    compiled in: "Mineral wool" answers with Allard's specimen and with the
+    two ranges Cox compiles for it.
 
     :param name: The specimen name as a table prints it, matched without
         regard to case: ``"Foam"``, ``"foam"``.

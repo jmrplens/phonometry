@@ -17981,6 +17981,30 @@ export const catalogues = {
         "unit": "m²"
       },
       {
+        "field": "fibre_diameter_um",
+        "heading": "Fibre diameter",
+        "headingEs": "Diámetro de fibra",
+        "unit": "µm"
+      },
+      {
+        "field": "fibre_diameter_distribution_parameter",
+        "heading": "Diameter distribution",
+        "headingEs": "Distribución de diámetros",
+        "unit": ""
+      },
+      {
+        "field": "shot_content_percent",
+        "heading": "Shot content",
+        "headingEs": "Contenido de perdigón",
+        "unit": "%"
+      },
+      {
+        "field": "binder_content_percent",
+        "heading": "Binder content",
+        "headingEs": "Contenido de ligante",
+        "unit": "%"
+      },
+      {
         "field": "frame_density_kg_m3",
         "heading": "Frame density",
         "headingEs": "Densidad del esqueleto",
@@ -18050,6 +18074,26 @@ export const catalogues = {
           {
             "text": "110",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -18157,6 +18201,26 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -18192,6 +18256,26 @@ export const catalogues = {
           {
             "text": "500",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -18271,6 +18355,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "25",
             "kind": "printed",
             "note": ""
@@ -18334,6 +18438,26 @@ export const catalogues = {
           {
             "text": "275",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -18418,6 +18542,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "1",
             "kind": "printed",
             "note": ""
@@ -18476,6 +18620,26 @@ export const catalogues = {
           {
             "text": "130",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -18555,6 +18719,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "32",
             "kind": "printed",
             "note": ""
@@ -18626,6 +18810,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "32",
             "kind": "printed",
             "note": ""
@@ -18689,6 +18893,26 @@ export const catalogues = {
           {
             "text": "180",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -18768,6 +18992,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "33",
             "kind": "printed",
             "note": ""
@@ -18831,6 +19075,26 @@ export const catalogues = {
           {
             "text": "20",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -18910,6 +19174,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "41",
             "kind": "printed",
             "note": ""
@@ -18973,6 +19257,26 @@ export const catalogues = {
           {
             "text": "24",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -19052,6 +19356,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "31",
             "kind": "printed",
             "note": ""
@@ -19123,6 +19447,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "16",
             "kind": "printed",
             "note": ""
@@ -19186,6 +19530,26 @@ export const catalogues = {
           {
             "text": "131",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -19270,6 +19634,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "0,08",
             "kind": "printed",
             "note": ""
@@ -19328,6 +19712,26 @@ export const catalogues = {
           {
             "text": "130",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -19407,6 +19811,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "30",
             "kind": "printed",
             "note": ""
@@ -19470,6 +19894,26 @@ export const catalogues = {
           {
             "text": "28",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -19549,6 +19993,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "60",
             "kind": "printed",
             "note": ""
@@ -19612,6 +20076,26 @@ export const catalogues = {
           {
             "text": "110",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -19691,6 +20175,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "130",
             "kind": "printed",
             "note": ""
@@ -19754,6 +20258,26 @@ export const catalogues = {
           {
             "text": "380",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -19833,6 +20357,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "8,8",
             "kind": "printed",
             "note": ""
@@ -19896,6 +20440,26 @@ export const catalogues = {
           {
             "text": "80",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -19975,6 +20539,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "8,8",
             "kind": "printed",
             "note": ""
@@ -20038,6 +20622,26 @@ export const catalogues = {
           {
             "text": "24",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -20117,6 +20721,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "8,8",
             "kind": "printed",
             "note": ""
@@ -20180,6 +20804,26 @@ export const catalogues = {
           {
             "text": "192",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -20259,6 +20903,26 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "130",
             "kind": "printed",
             "note": ""
@@ -20286,6 +20950,15054 @@ export const catalogues = {
           {
             "text": "0,1",
             "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/coir",
+        "table": "cox-2017-table-6-2",
+        "name": "Coir",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 39.",
+        "attributedTo": {
+          "row": "Fouladi, Ayub and Nor, 2011"
+        },
+        "cells": [
+          {
+            "text": "1,4 to 1,6",
+            "kind": "range",
+            "note": "the page prints 1400 to 1600 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/felt",
+        "table": "cox-2017-table-6-2",
+        "name": "Felt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscripts: 40, 41.",
+        "attributedTo": {
+          "row": "Fohr et al., 2008; Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "26 to 73,3",
+            "kind": "range",
+            "note": "the page prints 26000 to 73300 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/hemp_fibres",
+        "table": "cox-2017-table-6-2",
+        "name": "Hemp fibres",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 41.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "6,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/mineral_wool",
+        "table": "cox-2017-table-6-2",
+        "name": "Mineral wool",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "No superscript on the page.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1 to 150",
+            "kind": "range",
+            "note": "the page prints 1000 to 150000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/polyester_fibres",
+        "table": "cox-2017-table-6-2",
+        "name": "Polyester fibres",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscripts: 42, 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
+        "attributedTo": {
+          "row": "Garai and Pompoli, 2005; Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "0,88 to 44,4",
+            "kind": "range",
+            "note": "the page prints 880 to 44400 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/wood_fibres",
+        "table": "cox-2017-table-6-2",
+        "name": "Wood fibres",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 44.",
+        "attributedTo": {
+          "row": "Wassilieff, 1996"
+        },
+        "cells": [
+          {
+            "text": "11 to 180",
+            "kind": "range",
+            "note": "the page prints 11000 to 180000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/melamine_foam",
+        "table": "cox-2017-table-6-2",
+        "name": "Melamine foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscripts: 41, 45. Superscript 45 is Kino and Ueno, Appl. Acoust. 69(4) (2008), not their 69(7) paper (ref. 43).",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "10,5 to 17,5",
+            "kind": "range",
+            "note": "the page prints 10500 to 17500 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/metal_foam",
+        "table": "cox-2017-table-6-2",
+        "name": "Metal foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 46.",
+        "attributedTo": {
+          "row": "Panneton and Olny, 2006"
+        },
+        "cells": [
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/plastic_foam",
+        "table": "cox-2017-table-6-2",
+        "name": "Plastic foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 40.",
+        "attributedTo": {
+          "row": "Fohr et al., 2008"
+        },
+        "cells": [
+          {
+            "text": "3,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/polyimide_foam",
+        "table": "cox-2017-table-6-2",
+        "name": "Polyimide foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 47.",
+        "attributedTo": {
+          "row": "Lind-Nordgren and Göransson, 2010"
+        },
+        "cells": [
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/polylactide_and_polyethylene_glycol_foam",
+        "table": "cox-2017-table-6-2",
+        "name": "Polylactide and polyethylene glycol foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 48. Name wraps over two lines on the page (\"Polylactide and polyethylene\" / \"glycol foam\").",
+        "attributedTo": {
+          "row": "Mosanenzadeh et al., 2015"
+        },
+        "cells": [
+          {
+            "text": "6,7 to 13",
+            "kind": "range",
+            "note": "the page prints 6700 to 13000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/pu_foam",
+        "table": "cox-2017-table-6-2",
+        "name": "PU foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscripts: 41, 47.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013; Lind-Nordgren and Göransson, 2010"
+        },
+        "cells": [
+          {
+            "text": "4,5 to 12,9",
+            "kind": "range",
+            "note": "the page prints 4500 to 12900 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/pu_foam_fully_reticulated",
+        "table": "cox-2017-table-6-2",
+        "name": "PU foam, fully reticulated",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscripts: 12, 49.",
+        "attributedTo": {
+          "row": "Doutres, Atalla and Dong, 2011; Dunn and Davern, 1986"
+        },
+        "cells": [
+          {
+            "text": "0,38 to 3,2",
+            "kind": "range",
+            "note": "the page prints 380 to 3200 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/pu_foam_partially_reticulated",
+        "table": "cox-2017-table-6-2",
+        "name": "PU foam, partially reticulated",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 12.",
+        "attributedTo": {
+          "row": "Doutres, Atalla and Dong, 2011"
+        },
+        "cells": [
+          {
+            "text": "3 to 42",
+            "kind": "range",
+            "note": "the page prints 3000 to 42000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/consolidated_foam_granulates",
+        "table": "cox-2017-table-6-2",
+        "name": "Consolidated foam granulates",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 50.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "152",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/coustone_quietstone",
+        "table": "cox-2017-table-6-2",
+        "name": "Coustone (Quietstone)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 50.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "31,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/dry_sand",
+        "table": "cox-2017-table-6-2",
+        "name": "Dry sand",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 51.",
+        "attributedTo": {
+          "row": "Horoshenkov and Mohamed, 2006"
+        },
+        "cells": [
+          {
+            "text": "85 to 314",
+            "kind": "range",
+            "note": "the page prints 85000 to 314000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/glass_beads",
+        "table": "cox-2017-table-6-2",
+        "name": "Glass beads, 0.68 and 1.68 mm in diameter",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 50. The page prints both specimens on one line: the name “Glass beads, 0.68 and 1.68 mm in diameter” (wrapped after “mm”) against the cell “13,000 and 43,200”, and it does not say which resistivity belongs to which diameter. Pairing them by printed order would be a reading the page does not support, and two things argue against it: flow resistivity falls with the square of the grain size, so the larger bead should be the less resistive of the two, and Table 6.5 prints the same pair of beads from the same study with the sizes the other way round (“1.6 and 0.7 mm”). Both readings are kept, unpaired.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "13, 43,2",
+            "kind": "reported",
+            "note": "the page lists 13000, 43200 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/gravel",
+        "table": "cox-2017-table-6-2",
+        "name": "Gravel",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 52.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007"
+        },
+        "cells": [
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/lead_shot",
+        "table": "cox-2017-table-6-2",
+        "name": "Lead shot",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 36.",
+        "attributedTo": {
+          "row": "Umnova et al., 2003"
+        },
+        "cells": [
+          {
+            "text": "1,373",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/open_cell_synthetic_rubber",
+        "table": "cox-2017-table-6-2",
+        "name": "Open cell synthetic rubber",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 41.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "123,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/perlite",
+        "table": "cox-2017-table-6-2",
+        "name": "Perlite",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 53.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "4,3 to 32,8",
+            "kind": "range",
+            "note": "the page prints 4300 to 32800 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/porous_pavement",
+        "table": "cox-2017-table-6-2",
+        "name": "Porous pavement",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 54.",
+        "attributedTo": {
+          "row": "Berengier et al., 1997"
+        },
+        "cells": [
+          {
+            "text": "2 to 15",
+            "kind": "range",
+            "note": "the page prints 2000 to 15000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/vermiculite",
+        "table": "cox-2017-table-6-2",
+        "name": "Vermiculite",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 53.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "7,6 to 135",
+            "kind": "range",
+            "note": "the page prints 7600 to 135000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/asphalt",
+        "table": "cox-2017-table-6-2",
+        "name": "Asphalt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 52.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007"
+        },
+        "cells": [
+          {
+            "text": "30 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/nitrile_foam_granulate",
+        "table": "cox-2017-table-6-2",
+        "name": "Nitrile foam granulate",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 53.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "2,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/porous_aluminium",
+        "table": "cox-2017-table-6-2",
+        "name": "Porous aluminium",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 55.",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "0,205",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/porous_ceramic",
+        "table": "cox-2017-table-6-2",
+        "name": "Porous ceramic",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 56.",
+        "attributedTo": {
+          "row": "Champoux and Allard, 1991"
+        },
+        "cells": [
+          {
+            "text": "44,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-2/wood_shavings",
+        "table": "cox-2017-table-6-2",
+        "name": "Wood shavings",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+        "note": "Page superscript: 44.",
+        "attributedTo": {
+          "row": "Wassilieff, 1996"
+        },
+        "cells": [
+          {
+            "text": "2,5 to 54",
+            "kind": "range",
+            "note": "the page prints 2500 to 54000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/bagasse",
+        "table": "cox-2017-table-6-3",
+        "name": "Bagasse",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 19.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/bamboo",
+        "table": "cox-2017-table-6-3",
+        "name": "Bamboo",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 19.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/ceramic",
+        "table": "cox-2017-table-6-3",
+        "name": "Ceramic",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 19.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 to 6",
+            "kind": "range",
+            "note": "the page prints 2 to 6 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/coir",
+        "table": "cox-2017-table-6-3",
+        "name": "Coir",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 39.",
+        "attributedTo": {
+          "row": "Fouladi, Ayub and Nor, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "156 to 370",
+            "kind": "range",
+            "note": "the page prints 156 to 370 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/cotton",
+        "table": "cox-2017-table-6-3",
+        "name": "Cotton",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 20.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "8 to 33",
+            "kind": "range",
+            "note": "the page prints 8 to 33 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/flax",
+        "table": "cox-2017-table-6-3",
+        "name": "Flax",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 20.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19 to 22",
+            "kind": "range",
+            "note": "the page prints 19 to 22 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/glass_and_mineral_wools",
+        "table": "cox-2017-table-6-3",
+        "name": "Glass and mineral wools",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 44, 57.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Wassilieff, 1996; Yilmaz et al., 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 to 22",
+            "kind": "range",
+            "note": "the page prints 3 to 22 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/graphite",
+        "table": "cox-2017-table-6-3",
+        "name": "Graphite",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 19.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5 to 10",
+            "kind": "range",
+            "note": "the page prints 5 to 10 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/hemp",
+        "table": "cox-2017-table-6-3",
+        "name": "Hemp",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 20, 57.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011; Yilmaz et al., 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22 to 94",
+            "kind": "range",
+            "note": "the page prints 22 to 94 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/jute",
+        "table": "cox-2017-table-6-3",
+        "name": "Jute",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 20.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20 to 81",
+            "kind": "range",
+            "note": "the page prints 20 to 81 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/kenaf",
+        "table": "cox-2017-table-6-3",
+        "name": "Kenaf",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 58.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Alba et al., 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "21 to 78",
+            "kind": "range",
+            "note": "the page prints 21 to 78 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/kevlar",
+        "table": "cox-2017-table-6-3",
+        "name": "Kevlar",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 19.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/polyester",
+        "table": "cox-2017-table-6-3",
+        "name": "Polyester",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 42, 58.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Garai and Pompoli, 2005; Alba et al., 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 to 48",
+            "kind": "range",
+            "note": "the page prints 3 to 48 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/poly_lactic_acid",
+        "table": "cox-2017-table-6-3",
+        "name": "Poly(lactic acid)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 57.",
+        "attributedTo": {
+          "row": "Yilmaz et al., 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/polypropylene",
+        "table": "cox-2017-table-6-3",
+        "name": "Polypropylene",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 57. Cell printed \"5–25, 63\": a range and a separate value with nothing to pair them to.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Yilmaz et al., 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5 to 25, 63",
+            "kind": "reported",
+            "note": "the page lists 5 to 25, 63 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/ramie",
+        "table": "cox-2017-table-6-3",
+        "name": "Ramie",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 20.",
+        "attributedTo": {
+          "row": "Oldham, Egan and Cookson, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/rice_paddy",
+        "table": "cox-2017-table-6-3",
+        "name": "Rice paddy",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 59. Superscript 59 is Putra et al., Adv. Acoust. Vib. 605932 (2013), the paddy-waste paper (ref. 60 is the same first authors' sugarcane paper).",
+        "attributedTo": {
+          "row": "Putra et al., 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "8 to 20",
+            "kind": "range",
+            "note": "the page prints 8 to 20 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/sisal",
+        "table": "cox-2017-table-6-3",
+        "name": "Sisal",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 20.",
+        "attributedTo": {
+          "row": "Oldham, Egan and Cookson, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "213",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/sugar_cane",
+        "table": "cox-2017-table-6-3",
+        "name": "Sugar cane",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 60. Superscript 60 is Putra et al., Procedia Eng. 53 (2013), the sugarcane paper (ref. 59 is the same first authors' paddy-waste paper).",
+        "attributedTo": {
+          "row": "Putra et al., 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "11 to 23",
+            "kind": "range",
+            "note": "the page prints 11 to 23 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/wood",
+        "table": "cox-2017-table-6-3",
+        "name": "Wood",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscripts: 19, 44.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Wassilieff, 1996"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "16 to 38",
+            "kind": "range",
+            "note": "the page prints 16 to 38 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-3/wool",
+        "table": "cox-2017-table-6-3",
+        "name": "Wool",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+        "note": "Page superscript: 20. Cell printed \"14, 37–63\": a value and a separate range with nothing to pair them to.",
+        "attributedTo": {
+          "row": "Oldham, Egan and Cookson, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "14, 37 to 63",
+            "kind": "reported",
+            "note": "the page lists 14, 37 to 63 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/felts",
+        "table": "cox-2017-table-6-5",
+        "name": "Felts",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscripts: 1, 41.",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978; Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,83 to 0,97",
+            "kind": "range",
+            "note": "the page prints 0.83 to 0.97 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/hemp",
+        "table": "cox-2017-table-6-5",
+        "name": "Hemp",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 41.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/mineral_wool",
+        "table": "cox-2017-table-6-5",
+        "name": "Mineral wool",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscripts: 1, 7, 41.",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978; Mechel, 2002; Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,92 to 0,99",
+            "kind": "range",
+            "note": "the page prints 0.92 to 0.99 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/polyester",
+        "table": "cox-2017-table-6-5",
+        "name": "Polyester",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
+        "attributedTo": {
+          "row": "Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/wood_fibre_board",
+        "table": "cox-2017-table-6-5",
+        "name": "Wood fibre board",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 7.",
+        "attributedTo": {
+          "row": "Mechel, 2002"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65 to 0,8",
+            "kind": "range",
+            "note": "the page prints 0.65 to 0.8 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/wood_wool_board",
+        "table": "cox-2017-table-6-5",
+        "name": "Wood wool board",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 7.",
+        "attributedTo": {
+          "row": "Mechel, 2002"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5 to 0,65",
+            "kind": "range",
+            "note": "the page prints 0.5 to 0.65 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/open_cell_acoustic_foams_eg_pu",
+        "table": "cox-2017-table-6-5",
+        "name": "Open cell acoustic foams (e.g., PU)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscripts: 7, 12, 41, 65. Name wraps over two lines on the page (\"Open cell acoustic foams\" / \"(e.g., PU)\"); the superscripts sit after the closing parenthesis.",
+        "attributedTo": {
+          "row": "Mechel, 2002; Doutres, Atalla and Dong, 2011; Bonfiglio and Pompoli, 2013; Hoang, Bonnet and Perrot, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,93 to 0,995",
+            "kind": "range",
+            "note": "the page prints 0.93 to 0.995 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/open_cell_ceramic_foams",
+        "table": "cox-2017-table-6-5",
+        "name": "Open cell ceramic foams",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 19.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,8 to 0,9",
+            "kind": "range",
+            "note": "the page prints 0.8 to 0.9 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/open_cell_metal_foams",
+        "table": "cox-2017-table-6-5",
+        "name": "Open cell metal foams",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscripts: 19, 46.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010; Panneton and Olny, 2006"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,75 to 0,95",
+            "kind": "range",
+            "note": "the page prints 0.75 to 0.95 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/open_cell_synthetic_rubber",
+        "table": "cox-2017-table-6-5",
+        "name": "Open cell synthetic rubber",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 41.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/polylactide_foams",
+        "table": "cox-2017-table-6-5",
+        "name": "Polylactide foams",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 48.",
+        "attributedTo": {
+          "row": "Mosanenzadeh et al., 2015"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,82 to 0,88",
+            "kind": "range",
+            "note": "the page prints 0.82 to 0.88 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/partially_reticulated_foams",
+        "table": "cox-2017-table-6-5",
+        "name": "Partially reticulated foams",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 12.",
+        "attributedTo": {
+          "row": "Doutres, Atalla and Dong, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,97 to 0,98",
+            "kind": "range",
+            "note": "the page prints 0.97 to 0.98 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/reticulated_vitreous_carbon",
+        "table": "cox-2017-table-6-5",
+        "name": "Reticulated vitreous carbon",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 66.",
+        "attributedTo": {
+          "row": "Muehleisen, Beamer and Tinianov, 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,91 to 0,97",
+            "kind": "range",
+            "note": "the page prints 0.91 to 0.97 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/consolidated_foam_granulates",
+        "table": "cox-2017-table-6-5",
+        "name": "Consolidated foam granulates",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 50.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/coustone",
+        "table": "cox-2017-table-6-5",
+        "name": "Coustone",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 50.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/expanded_perlite",
+        "table": "cox-2017-table-6-5",
+        "name": "Expanded perlite",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "No superscript on the page.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/glass_beads_1_6_and_0_7_mm",
+        "table": "cox-2017-table-6-5",
+        "name": "Glass beads (1.6 and 0.7 mm)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 50. Cell printed \"0.34, 0.38\" against the name \"Glass beads (1.6 and 0.7 mm)\". The page does not make the pairing explicit (the sizes are joined by \"and\", the values by a comma, and the sizes are listed largest first, unlike Table 6.2), so both values are kept as reported rather than split into variants.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,34, 0,38",
+            "kind": "reported",
+            "note": "the page lists 0.34, 0.38 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/gravel_and_stone_chip_fill",
+        "table": "cox-2017-table-6-5",
+        "name": "Gravel and stone chip fill",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 7.",
+        "attributedTo": {
+          "row": "Mechel, 2002"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25 to 0,45",
+            "kind": "range",
+            "note": "the page prints 0.25 to 0.45 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/lead_shot_random_loose_packing",
+        "table": "cox-2017-table-6-5",
+        "name": "Lead shot, random loose packing",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 55. Name wraps over two lines on the page (\"Lead shot, random loose\" / \"packing\").",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,36 to 0,45",
+            "kind": "range",
+            "note": "the page prints 0.36 to 0.45 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/nitrile_foam_granulate",
+        "table": "cox-2017-table-6-5",
+        "name": "Nitrile foam granulate",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 53.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/open_porous_asphalt",
+        "table": "cox-2017-table-6-5",
+        "name": "Open porous asphalt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscripts: 54, 67.",
+        "attributedTo": {
+          "row": "Berengier et al., 1997; Sarradj, Lerch and Hubelt, 2006"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,13 to 0,29",
+            "kind": "range",
+            "note": "the page prints 0.13 to 0.29 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/perlite_granular",
+        "table": "cox-2017-table-6-5",
+        "name": "Perlite (granular)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 53.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6 to 0,78",
+            "kind": "range",
+            "note": "the page prints 0.6 to 0.78 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/porous_render",
+        "table": "cox-2017-table-6-5",
+        "name": "Porous render",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 1.",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6 to 0,65",
+            "kind": "range",
+            "note": "the page prints 0.6 to 0.65 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/pumice_concrete",
+        "table": "cox-2017-table-6-5",
+        "name": "Pumice concrete",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 7.",
+        "attributedTo": {
+          "row": "Mechel, 2002"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25 to 0,5",
+            "kind": "range",
+            "note": "the page prints 0.25 to 0.5 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/pumice_fill",
+        "table": "cox-2017-table-6-5",
+        "name": "Pumice fill",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 7.",
+        "attributedTo": {
+          "row": "Mechel, 2002"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65 to 0,85",
+            "kind": "range",
+            "note": "the page prints 0.65 to 0.85 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/rubber_crumb",
+        "table": "cox-2017-table-6-5",
+        "name": "Rubber crumb",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 53.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,44 to 0,54",
+            "kind": "range",
+            "note": "the page prints 0.44 to 0.54 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/sand",
+        "table": "cox-2017-table-6-5",
+        "name": "Sand",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 51.",
+        "attributedTo": {
+          "row": "Horoshenkov and Mohamed, 2006"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,39 to 0,44",
+            "kind": "range",
+            "note": "the page prints 0.39 to 0.44 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/sintered_metal",
+        "table": "cox-2017-table-6-5",
+        "name": "Sintered metal",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 7.",
+        "attributedTo": {
+          "row": "Mechel, 2002"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1 to 0,25",
+            "kind": "range",
+            "note": "the page prints 0.1 to 0.25 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/vermiculite_granular",
+        "table": "cox-2017-table-6-5",
+        "name": "Vermiculite (granular)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 53. Cell printed \"≈0.65–0.68\": the approximately-equals sign precedes the whole range.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65 to 0,68",
+            "kind": "range",
+            "note": "the page prints 0.65 to 0.68 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/aerogel",
+        "table": "cox-2017-table-6-5",
+        "name": "Aerogel",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 19. Cell printed \">0.75\". The schema has bounded_above for \"< x\" cells only; by analogy this row uses ranges with the printed value as the low end and the physical ceiling of porosity (1.0, NOT a printed number) as the high end, flagged with bounded_below.",
+        "attributedTo": {
+          "row": "Arenas and Crocker, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,75 to 1",
+            "kind": "range",
+            "note": "the page prints a lower bound of 0.75 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/asphalt",
+        "table": "cox-2017-table-6-5",
+        "name": "Asphalt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 52.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/brick",
+        "table": "cox-2017-table-6-5",
+        "name": "Brick",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 1.",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25 to 0,3",
+            "kind": "range",
+            "note": "the page prints 0.25 to 0.3 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/ceramic_filters",
+        "table": "cox-2017-table-6-5",
+        "name": "Ceramic filters",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 1.",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,33 to 0,42",
+            "kind": "range",
+            "note": "the page prints 0.33 to 0.42 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/firebrick",
+        "table": "cox-2017-table-6-5",
+        "name": "Firebrick",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 1.",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15 to 0,35",
+            "kind": "range",
+            "note": "the page prints 0.15 to 0.35 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/marble",
+        "table": "cox-2017-table-6-5",
+        "name": "Marble",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 1. Cell printed \"≈0.005\".",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,005",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/porous_ceramic",
+        "table": "cox-2017-table-6-5",
+        "name": "Porous ceramic",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 56.",
+        "attributedTo": {
+          "row": "Champoux and Allard, 1991"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-5/sandstone",
+        "table": "cox-2017-table-6-5",
+        "name": "Sandstone",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
+        "note": "Page superscript: 1.",
+        "attributedTo": {
+          "row": "Cremer and Müller, 1978"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02 to 0,06",
+            "kind": "range",
+            "note": "the page prints 0.02 to 0.06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/felt",
+        "table": "cox-2017-table-6-8",
+        "name": "Felt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscripts: 40, 41.",
+        "attributedTo": {
+          "row": "Fohr et al., 2008; Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "30 to 57",
+            "kind": "range",
+            "note": "the page prints 30 to 57 and no value"
+          },
+          {
+            "text": "60 to 62",
+            "kind": "range",
+            "note": "the page prints 60 to 62 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/fibreglass",
+        "table": "cox-2017-table-6-8",
+        "name": "Fibreglass",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscripts: 41, 45.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "132 to 182",
+            "kind": "range",
+            "note": "the page prints 132 to 182 and no value"
+          },
+          {
+            "text": "237 to 400",
+            "kind": "range",
+            "note": "the page prints 237 to 400 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/polyester_fibres",
+        "table": "cox-2017-table-6-8",
+        "name": "Polyester fibres",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
+        "attributedTo": {
+          "row": "Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "73 to 86",
+            "kind": "range",
+            "note": "the page prints 73 to 86 and no value"
+          },
+          {
+            "text": "133 to 161",
+            "kind": "range",
+            "note": "the page prints 133 to 161 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/cellular_rubber",
+        "table": "cox-2017-table-6-8",
+        "name": "Cellular rubber",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 87. Cellular rubber is listed under Cellular material here and under Granular materials in Table 6.9.",
+        "attributedTo": {
+          "row": "Shravage, Bonfiglio and Pompoli, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/melamine_foam",
+        "table": "cox-2017-table-6-8",
+        "name": "Melamine foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscripts: 41, 45.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "81 to 240",
+            "kind": "range",
+            "note": "the page prints 81 to 240 and no value"
+          },
+          {
+            "text": "255 to 470",
+            "kind": "range",
+            "note": "the page prints 255 to 470 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/metal_foam",
+        "table": "cox-2017-table-6-8",
+        "name": "Metal foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 46. The thermal length cell is a dash, so no thermal length is given.",
+        "attributedTo": {
+          "row": "Panneton and Olny, 2006"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/plastic_foam",
+        "table": "cox-2017-table-6-8",
+        "name": "Plastic foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 40. Cells printed \"25, 207, 230\" and \"70 and 690\": three and two separate values with nothing to pair them to.",
+        "attributedTo": {
+          "row": "Fohr et al., 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "25, 207, 230",
+            "kind": "reported",
+            "note": "the page lists 25, 207, 230 and no single value"
+          },
+          {
+            "text": "70, 690",
+            "kind": "reported",
+            "note": "the page lists 70, 690 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/poroelastic_foam",
+        "table": "cox-2017-table-6-8",
+        "name": "Poroelastic foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 65. The Poroelastic foam row of Table 6.9 carries no superscript.",
+        "attributedTo": {
+          "row": "Hoang, Bonnet and Perrot, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "41 to 48",
+            "kind": "range",
+            "note": "the page prints 41 to 48 and no value"
+          },
+          {
+            "text": "103 to 171",
+            "kind": "range",
+            "note": "the page prints 103 to 171 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/polyimide_foam",
+        "table": "cox-2017-table-6-8",
+        "name": "Polyimide foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 47. The thermal length cell is a dash, so no thermal length is given.",
+        "attributedTo": {
+          "row": "Lind-Nordgren and Göransson, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/polylactide_and_polyethylene_glycol_foam",
+        "table": "cox-2017-table-6-8",
+        "name": "Polylactide and polyethylene glycol foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 48. The name wraps over two lines and the superscript sits on the second line, after \"foam\".",
+        "attributedTo": {
+          "row": "Mosanenzadeh et al., 2015"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5 to 12",
+            "kind": "range",
+            "note": "the page prints 5 to 12 and no value"
+          },
+          {
+            "text": "75 to 167",
+            "kind": "range",
+            "note": "the page prints 75 to 167 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/pu_fully_reticulated",
+        "table": "cox-2017-table-6-8",
+        "name": "PU, fully reticulated",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 12. Viscous cell printed \"96, 200–450\": a value and a separate range with nothing to pair them to.",
+        "attributedTo": {
+          "row": "Doutres, Atalla and Dong, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "96, 200 to 450",
+            "kind": "reported",
+            "note": "the page lists 96, 200 to 450 and no single value"
+          },
+          {
+            "text": "280 to 600",
+            "kind": "range",
+            "note": "the page prints 280 to 600 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/pu_partially_reticulated",
+        "table": "cox-2017-table-6-8",
+        "name": "PU, partially reticulated",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscripts: 12, 47.",
+        "attributedTo": {
+          "row": "Doutres, Atalla and Dong, 2011; Lind-Nordgren and Göransson, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24 to 240",
+            "kind": "range",
+            "note": "the page prints 24 to 240 and no value"
+          },
+          {
+            "text": "140 to 320",
+            "kind": "range",
+            "note": "the page prints 140 to 320 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/lead_shot_2_1_mm",
+        "table": "cox-2017-table-6-8",
+        "name": "Lead shot",
+        "variant": "2.1 mm",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 55. The page prints this row as \"2.1 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"2.1 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "280",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "490",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/lead_shot_4_mm",
+        "table": "cox-2017-table-6-8",
+        "name": "Lead shot",
+        "variant": "4 mm",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 55. The page prints this row as \"4 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"4 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "500 to 550",
+            "kind": "range",
+            "note": "the page prints 500 to 550 and no value"
+          },
+          {
+            "text": "730 to 830",
+            "kind": "range",
+            "note": "the page prints 730 to 830 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/gravel_9_mm",
+        "table": "cox-2017-table-6-8",
+        "name": "9 mm gravel",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 55. Name kept as printed, since the page gives only this one gravel specimen. Viscous cell printed \"190, 290\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "190, 290",
+            "kind": "reported",
+            "note": "the page lists 190, 290 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/glass_beads_0_1_mm_diameter",
+        "table": "cox-2017-table-6-8",
+        "name": "Glass beads, 0.1 mm diameter",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "The only row in the table with no superscript, so no credit is given for it.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "180",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/perlite_expanded",
+        "table": "cox-2017-table-6-8",
+        "name": "Perlite (expanded)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured characteristic lengths; the credit is recorded as the page prints it.",
+        "attributedTo": {
+          "row": "Sepp, 2015"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/porous_aluminium",
+        "table": "cox-2017-table-6-8",
+        "name": "Porous aluminium",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 55. Viscous cell printed \"470, 770\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "470, 770",
+            "kind": "reported",
+            "note": "the page lists 470, 770 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/porous_ceramic",
+        "table": "cox-2017-table-6-8",
+        "name": "Porous ceramic",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 88.",
+        "attributedTo": {
+          "row": "Zielinski, 2012"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "273",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-8/snow",
+        "table": "cox-2017-table-6-8",
+        "name": "Snow",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        "note": "Page superscript: 81.",
+        "attributedTo": {
+          "row": "Datt et al., 2016"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "49 to 156",
+            "kind": "range",
+            "note": "the page prints 49 to 156 and no value"
+          },
+          {
+            "text": "131 to 582",
+            "kind": "range",
+            "note": "the page prints 131 to 582 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/felt",
+        "table": "cox-2017-table-6-9",
+        "name": "Felt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 41.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/common_fibrous_absorbents_rock_wool",
+        "table": "cox-2017-table-6-9",
+        "name": "Common fibrous absorbents, e.g., rock wool",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "No superscript on the page, so no credit is given for this row. The name wraps over two lines, \"wool\" alone on the second.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 to 1,06",
+            "kind": "range",
+            "note": "the page prints 1 to 1.06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/polyester",
+        "table": "cox-2017-table-6-9",
+        "name": "Polyester",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
+        "attributedTo": {
+          "row": "Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,03 to 1,05",
+            "kind": "range",
+            "note": "the page prints 1.03 to 1.05 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/hemp",
+        "table": "cox-2017-table-6-9",
+        "name": "Hemp",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 41.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,01 to 1,05",
+            "kind": "range",
+            "note": "the page prints 1.01 to 1.05 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/melamine_foam",
+        "table": "cox-2017-table-6-9",
+        "name": "Melamine foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscripts: 41, 45.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/metal_foam",
+        "table": "cox-2017-table-6-9",
+        "name": "Metal foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 46.",
+        "attributedTo": {
+          "row": "Panneton and Olny, 2006"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/plastic_foam",
+        "table": "cox-2017-table-6-9",
+        "name": "Plastic foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 65. Cell printed \"1.06 and 1.7\": two separate values with nothing to pair them to. Table 6.8 gives the Plastic foam characteristic lengths from reference 40 instead.",
+        "attributedTo": {
+          "row": "Hoang, Bonnet and Perrot, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,06, 1,7",
+            "kind": "reported",
+            "note": "the page lists 1.06, 1.7 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/poroelastic_foam",
+        "table": "cox-2017-table-6-9",
+        "name": "Poroelastic foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "No superscript on the page, so no credit is given for this row, although the Poroelastic foam row of Table 6.8 carries superscript 65.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,24 to 4,45",
+            "kind": "range",
+            "note": "the page prints 1.24 to 4.45 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/polyimide_foam",
+        "table": "cox-2017-table-6-9",
+        "name": "Polyimide foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 47.",
+        "attributedTo": {
+          "row": "Lind-Nordgren and Göransson, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/polylactide_and_polyethylene_glycol_foam",
+        "table": "cox-2017-table-6-9",
+        "name": "Polylactide and polyethylene glycol foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 48.",
+        "attributedTo": {
+          "row": "Mosanenzadeh et al., 2015"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,2 to 1,6",
+            "kind": "range",
+            "note": "the page prints 1.2 to 1.6 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/pu_foam",
+        "table": "cox-2017-table-6-9",
+        "name": "PU foam",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscripts: 41, 47.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013; Lind-Nordgren and Göransson, 2010"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,08 to 1,41",
+            "kind": "range",
+            "note": "the page prints 1.08 to 1.41 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/pu_foam_fully_reticulated",
+        "table": "cox-2017-table-6-9",
+        "name": "PU foam, fully reticulated",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 12. Table 6.8 prints the same specimen as \"PU, fully reticulated\".",
+        "attributedTo": {
+          "row": "Doutres, Atalla and Dong, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,04 to 1,06",
+            "kind": "range",
+            "note": "the page prints 1.04 to 1.06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/pu_foam_partially_reticulated",
+        "table": "cox-2017-table-6-9",
+        "name": "PU foam, partially reticulated",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 12. The upper bound is printed \"2.30\". Table 6.8 prints the same specimen as \"PU, partially reticulated\" and credits it to references 12 and 47.",
+        "attributedTo": {
+          "row": "Doutres, Atalla and Dong, 2011"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,25 to 2,3",
+            "kind": "range",
+            "note": "the page prints 1.25 to 2.3 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/cellular_rubber",
+        "table": "cox-2017-table-6-9",
+        "name": "Cellular rubber",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 87. Listed under Granular materials here and under Cellular material in Table 6.8.",
+        "attributedTo": {
+          "row": "Shravage, Bonfiglio and Pompoli, 2008"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/consolidated_foam_granulates",
+        "table": "cox-2017-table-6-9",
+        "name": "Consolidated foam granulates",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 50.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/coustone_quietstone",
+        "table": "cox-2017-table-6-9",
+        "name": "Coustone (Quietstone)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 50.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/fused_glass_bead_sample",
+        "table": "cox-2017-table-6-9",
+        "name": "Fused glass bead sample",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 91.",
+        "attributedTo": {
+          "row": "Johnson et al., 1982"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,75 to 3,84",
+            "kind": "range",
+            "note": "the page prints 1.75 to 3.84 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/lead_shot",
+        "table": "cox-2017-table-6-9",
+        "name": "Lead shot",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 55. Printed once here, where Table 6.8 splits the same material into a 2.1 mm and a 4 mm specimen.",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,46 to 1,54",
+            "kind": "range",
+            "note": "the page prints 1.46 to 1.54 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/loose_sand_or_dry_cultivated_soil",
+        "table": "cox-2017-table-6-9",
+        "name": "Loose sand or dry cultivated soil",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "No superscript on the page, so no credit is given for this row.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,27 to 3,32",
+            "kind": "range",
+            "note": "the page prints 1.27 to 3.32 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/glass_beads_0_1_0_68_and_1_64_mm_diameter",
+        "table": "cox-2017-table-6-9",
+        "name": "Glass beads, 0.1, 0.68, and 1.64 mm diameter",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 50. The name wraps over two lines and the superscript sits on the second line, after \"diameter\". The page gives one interval for the three bead sizes together, so no per-size variant can be split out.",
+        "attributedTo": {
+          "row": "Horoshenkov and Swift, 2001"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,46 to 1,87",
+            "kind": "range",
+            "note": "the page prints 1.46 to 1.87 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/granular_materials",
+        "table": "cox-2017-table-6-9",
+        "name": "Granular materials",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "No superscript on the page, so no credit is given for this row. The row name repeats the group heading.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,1 to 1,8",
+            "kind": "range",
+            "note": "the page prints 1.1 to 1.8 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/gravel",
+        "table": "cox-2017-table-6-9",
+        "name": "Gravel",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscripts: 52, 55. Printed without a size here, where Table 6.8 prints \"9 mm gravel\".",
+        "attributedTo": {
+          "row": "Wilson et al., 2007; Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,5 to 1,8",
+            "kind": "range",
+            "note": "the page prints 1.5 to 1.8 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/open_porous_asphalt",
+        "table": "cox-2017-table-6-9",
+        "name": "Open porous asphalt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscripts: 54, 67. Cell printed \"2–3.3\", the lower bound with no decimal.",
+        "attributedTo": {
+          "row": "Berengier et al., 1997; Sarradj, Lerch and Hubelt, 2006"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 to 3,3",
+            "kind": "range",
+            "note": "the page prints 2 to 3.3 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/perlite",
+        "table": "cox-2017-table-6-9",
+        "name": "Perlite",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured tortuosity; the credit is recorded as the page prints it. Table 6.8 prints the same material as \"Perlite (expanded)\".",
+        "attributedTo": {
+          "row": "Sepp, 2015"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/rubber_crumb",
+        "table": "cox-2017-table-6-9",
+        "name": "Rubber crumb",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 53. Cell printed \"1.13–1.26, 1.38–1.56\": two separate intervals with nothing to pair them to.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,13 to 1,26, 1,38 to 1,56",
+            "kind": "reported",
+            "note": "the page lists 1.13 to 1.26, 1.38 to 1.56 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/rubber_open_cell_synthetic",
+        "table": "cox-2017-table-6-9",
+        "name": "Rubber, open cell synthetic",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 41. Same value as the Cellular rubber row four lines above, which is credited to reference 87.",
+        "attributedTo": {
+          "row": "Bonfiglio and Pompoli, 2013"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/vermiculite",
+        "table": "cox-2017-table-6-9",
+        "name": "Vermiculite",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 53. Cell printed \"1.48–1.58, 1.8–2.46\": two separate intervals with nothing to pair them to.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,48 to 1,58, 1,8 to 2,46",
+            "kind": "reported",
+            "note": "the page lists 1.48 to 1.58, 1.8 to 2.46 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/asphalt",
+        "table": "cox-2017-table-6-9",
+        "name": "Asphalt",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 52.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/compacted_soil",
+        "table": "cox-2017-table-6-9",
+        "name": "Compacted soil",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 52.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/forest_floor_top_layer",
+        "table": "cox-2017-table-6-9",
+        "name": "Forest floor, top layer",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 52.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/nitrile_foam_granulate",
+        "table": "cox-2017-table-6-9",
+        "name": "Nitrile foam granulate",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 53. Cell printed \"1.31, 1.49\": two separate values with nothing to pair them to.",
+        "attributedTo": {
+          "row": "Voronina and Horoshenkov, 2003"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,31, 1,49",
+            "kind": "reported",
+            "note": "the page lists 1.31, 1.49 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/porous_ceramic",
+        "table": "cox-2017-table-6-9",
+        "name": "Porous ceramic",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 88.",
+        "attributedTo": {
+          "row": "Zielinski, 2012"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/porous_aluminium",
+        "table": "cox-2017-table-6-9",
+        "name": "Porous aluminium",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 55.",
+        "attributedTo": {
+          "row": "Umnova et al., 2005"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/soft_soil",
+        "table": "cox-2017-table-6-9",
+        "name": "Soft soil",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscript: 52.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/snow",
+        "table": "cox-2017-table-6-9",
+        "name": "Snow",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "Page superscripts: 52, 81. Cell printed \"1–1.6\", the lower bound with no decimal.",
+        "attributedTo": {
+          "row": "Wilson et al., 2007; Datt et al., 2016"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 to 1,6",
+            "kind": "range",
+            "note": "the page prints 1 to 1.6 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/snow_new",
+        "table": "cox-2017-table-6-9",
+        "name": "Snow (new)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "No superscript on the page, so no credit is given for this row. This row is missing from the PDF text layer and was read off the rendered page.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,5 to 2,7",
+            "kind": "range",
+            "note": "the page prints 1.5 to 2.7 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-9/snow_old_crusted",
+        "table": "cox-2017-table-6-9",
+        "name": "Snow (old crusted)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+        "note": "No superscript on the page, so no credit is given for this row. Printed as the bare integer \"4\". This row is missing from the PDF text layer and was read off the rendered page; it is the last row of the table.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/mineral_fibre_materials",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Mineral fibre materials",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,92 to 0,99",
+            "kind": "range",
+            "note": "the page prints 0.92 to 0.99 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/foams",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Foams",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,95 to 0,995",
+            "kind": "range",
+            "note": "the page prints 0.95 to 0.995 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/felts",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Felts",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,83 to 0,95",
+            "kind": "range",
+            "note": "the page prints 0.83 to 0.95 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/wood_fibre_board",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Wood-fibre board",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "Upper bound printed \"0.80\".",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65 to 0,8",
+            "kind": "range",
+            "note": "the page prints 0.65 to 0.8 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/wood_wool_board",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Wood-wool board",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "Lower bound printed \"0.50\".",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5 to 0,65",
+            "kind": "range",
+            "note": "the page prints 0.5 to 0.65 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/porous_render",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Porous render",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "Lower bound printed \"0.60\".",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6 to 0,65",
+            "kind": "range",
+            "note": "the page prints 0.6 to 0.65 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/pumice_concrete",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Pumice concrete",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "Upper bound printed \"0.50\".",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25 to 0,5",
+            "kind": "range",
+            "note": "the page prints 0.25 to 0.5 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/pumice_fill",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Pumice fill",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65 to 0,85",
+            "kind": "range",
+            "note": "the page prints 0.65 to 0.85 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/gravel_and_stone_chip_fill",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Gravel and stone chip fill",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25 to 0,45",
+            "kind": "range",
+            "note": "the page prints 0.25 to 0.45 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/ceramic_filtres",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Ceramic filtres",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "Spelled \"filtres\" on the page.",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,33 to 0,42",
+            "kind": "range",
+            "note": "the page prints 0.33 to 0.42 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/brick",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Brick",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "Upper bound printed \"0.30\".",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25 to 0,3",
+            "kind": "range",
+            "note": "the page prints 0.25 to 0.3 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/sinter_metal",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Sinter metal",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "Lower bound printed \"0.10\".",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1 to 0,25",
+            "kind": "range",
+            "note": "the page prints 0.1 to 0.25 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/fire_clay",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Fire-clay",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15 to 0,35",
+            "kind": "range",
+            "note": "the page prints 0.15 to 0.35 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/sand_stone",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Sand stone",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02 to 0,06",
+            "kind": "range",
+            "note": "the page prints 0.02 to 0.06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g1-table-1/marble",
+        "table": "mechel-2008-section-g1-table-1",
+        "name": "Marble",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+        "note": "The only row with no range: the \"σᵥ from\" cell is empty and the \"σᵥ to\" cell reads \"ca. 0.005\". Last row of the table.",
+        "attributedTo": {
+          "table": "Mechel, 1995"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,005",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g11-table-1/glass_fibre",
+        "table": "mechel-2008-section-g11-table-1",
+        "name": "Glass fibre",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
+        "note": "Shot content cell printed \"< 1\": an upper bound, so the low end 0.0 is a floor and not a value. The prose calls this product group \"glass fibre products\".",
+        "attributedTo": {
+          "table": "Mechel and Grundmann, 1982"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "< 1",
+            "kind": "bound",
+            "note": "the page prints an upper bound of 1 and no value"
+          },
+          {
+            "text": "4,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g11-table-1/basalt_wool",
+        "table": "mechel-2008-section-g11-table-1",
+        "name": "Basalt wool",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
+        "note": "The prose calls this product group \"basalt wool products\".",
+        "attributedTo": {
+          "table": "Mechel and Grundmann, 1982"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "mechel-2008-section-g11-table-1/mineral_fibre",
+        "table": "mechel-2008-section-g11-table-1",
+        "name": "Mineral fibre",
+        "variant": "",
+        "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
+        "note": "The prose calls this product group \"mineral fibre products (rockwool)\".",
+        "attributedTo": {
+          "table": "Mechel and Grundmann, 1982"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           }
         ]

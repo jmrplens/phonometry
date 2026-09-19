@@ -49,9 +49,26 @@ _ORACLE = dict(ref.ALLARD_POROUS_ROWS)
 # ---------------------------------------------------------------------------
 # The transcription
 # ---------------------------------------------------------------------------
-def test_every_row_of_every_table_is_in_the_oracle() -> None:
+#: The tables whose every cell the oracle re-reads. They are the specimen
+#: tables: each row of them is one measured sample whose numbers go into a
+#: model, so a wrong digit is a wrong impedance and the second reading pays
+#: for itself.
+#:
+#: The compiled tables are checked differently, because a second hand copy of
+#: a hundred and sixty-three intervals would be a copy of the transcription
+#: rather than a second reading of the page, which is worth nothing: their
+#: numbers are pinned by the rows two books print about the same material
+#: (:func:`test_the_two_books_agree_about_the_rows_cox_credits_to_mechel`), by
+#: the cells each transcription flagged as a judgement call, and by the row
+#: counts above.
+_SPECIMEN_TABLES = "allard-2009-"
+
+
+def test_every_specimen_row_is_in_the_oracle() -> None:
     """Both directions: no row unchecked, no oracle entry without a row."""
-    assert set(PUBLISHED_POROUS) == set(_ORACLE)
+    specimens = {key for key in PUBLISHED_POROUS if key.startswith(_SPECIMEN_TABLES)}
+
+    assert specimens == set(_ORACLE)
 
 
 @pytest.mark.parametrize(("key", "printed"), ref.ALLARD_POROUS_ROWS)
@@ -115,14 +132,25 @@ def test_every_table_holds_the_rows_its_page_prints() -> None:
         "allard-2009-table-12-5": 2,
         "allard-2009-table-13-1": 1,
         "allard-2009-table-13-2": 1,
+        "cox-2017-table-6-2": 29,
+        "cox-2017-table-6-3": 21,
+        "cox-2017-table-6-5": 37,
+        "cox-2017-table-6-8": 20,
+        "cox-2017-table-6-9": 37,
+        "mechel-2008-section-g1-table-1": 15,
+        "mechel-2008-section-g11-table-1": 3,
     }
+
+
+#: The books this catalogue reads, as each one's citation opens.
+_BOOKS = ("Allard & Atalla 2e ", "Cox & D'Antonio 3e ", "Mechel 2e ")
 
 
 def test_every_row_cites_a_document_a_page_and_a_folio() -> None:
     """Read the citations the way the provenance gate reads them."""
     for key, row in PUBLISHED_POROUS.items():
         for citation in _CITATION_JOINER.split(row.source):
-            assert citation.startswith("Allard & Atalla 2e "), key
+            assert citation.startswith(_BOOKS), key
             assert "PDF page " in citation, key
             assert "(printed p. " in citation, key
 
@@ -510,3 +538,108 @@ def test_arithmetic_never_fills_a_cell_the_row_can_speak_for(
     )
     assert "youngs_modulus_pa" not in filled
     assert not filled.get("derived")
+
+
+# ---------------------------------------------------------------------------
+# The compiled tables: one quantity each, over classes of material
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize(("cox", "mechel", "printed"), ref.COX_MECHEL_SHARED_POROSITY)
+def test_the_two_books_agree_about_the_rows_cox_credits_to_mechel(
+    cox: str, mechel: str, printed: tuple[float, float]
+) -> None:
+    """Cox takes eight porosity ranges from Mechel, and Mechel prints them.
+
+    This is the check a second hand copy of the same transcription cannot
+    give: two books, two pages, two readers, and the interval has to come out
+    the same. A digit misread on either page breaks the pair.
+    """
+    from_cox = PUBLISHED_POROUS[f"cox-2017-table-6-5/{cox}"]
+    from_mechel = PUBLISHED_POROUS[f"mechel-2008-section-g1-table-1/{mechel}"]
+
+    assert from_cox.ranges["porosity"] == pytest.approx(printed, rel=1e-12)
+    assert from_mechel.ranges["porosity"] == pytest.approx(printed, rel=1e-12)
+    assert "Mechel" in from_cox.attributed_to["row"]
+
+
+@pytest.mark.parametrize(("key", "field", "printed"), ref.COX_MECHEL_JUDGEMENT_CALLS)
+def test_the_cells_that_are_not_a_number_survive_the_reading(
+    key: str, field: str, printed: object
+) -> None:
+    """The cells a reader of the PDF text layer gets wrong.
+
+    Several readings separated by commas, two joined by the word "and", two
+    intervals in one cell, a bound, a tilde, and the two rows of Table 6.9
+    that the text layer does not contain at all.
+    """
+    row = PUBLISHED_POROUS[key]
+    held = row.reported.get(field) or row.ranges.get(field) or getattr(row, field)
+
+    # A cell that lists two intervals is a tuple of tuples, which
+    # `pytest.approx` declines to walk, so it is compared as it is stored.
+    assert held == printed
+
+
+def test_a_compiled_row_answers_none_where_it_holds_an_interval() -> None:
+    """Almost every cell of these tables is a range, and a range is not a value."""
+    row = PUBLISHED_POROUS["cox-2017-table-6-2/mineral_wool"]
+
+    assert row.flow_resistivity_pa_s_m2 is None
+    assert row.ranges["flow_resistivity_pa_s_m2"]
+    assert row.why_missing("flow_resistivity_pa_s_m2").startswith("the page prints")
+
+
+def test_a_lower_bound_keeps_the_printed_end_and_marks_the_other() -> None:
+    """Cox gives an aerogel ">0.75"; the 1 beside it is what a porosity is."""
+    row = PUBLISHED_POROUS["cox-2017-table-6-5/aerogel"]
+
+    assert "porosity" in row.bounded_below
+    assert row.ranges["porosity"] == pytest.approx((0.75, 1.0), rel=1e-12)
+    assert row.why_missing("porosity") == (
+        "the page prints a lower bound of 0.75 and no value"
+    )
+
+
+def test_the_group_each_table_files_a_row_under_is_kept() -> None:
+    """Cox prints its rows under four bold headings, and they are data."""
+    groups = {
+        row.group
+        for key, row in PUBLISHED_POROUS.items()
+        if key.startswith("cox-2017-table-6-9/")
+    }
+
+    assert groups == {
+        "Fibrous materials",
+        "Cellular materials",
+        "Granular materials",
+        "Other",
+    }
+
+
+def test_mechel_credits_its_chapter_and_cox_credits_its_row() -> None:
+    """Two books, two ways of crediting, and the row says which it is.
+
+    Cox prints a superscript on the material name, so the credit covers the
+    row; Mechel prints no marks at all and credits the whole chapter in prose,
+    which is a table-level credit and is recorded as one.
+    """
+    cox = PUBLISHED_POROUS["cox-2017-table-6-2/felt"]
+    mechel = PUBLISHED_POROUS["mechel-2008-section-g1-table-1/felts"]
+
+    assert set(cox.attributed_to) == {"row"}
+    assert mechel.attributed_to == {"table": "Mechel, 1995"}
+
+
+def test_a_pair_the_page_does_not_pair_is_not_paired() -> None:
+    """Cox prints two bead sizes and two resistivities on one line.
+
+    Nothing on the page says which belongs to which, and the two arguments
+    available point the other way: flow resistivity falls with the square of
+    the grain size, and Table 6.5 prints the same pair from the same study
+    with the sizes reversed. So the row keeps both readings and pairs
+    neither.
+    """
+    row = PUBLISHED_POROUS["cox-2017-table-6-2/glass_beads"]
+
+    assert row.flow_resistivity_pa_s_m2 is None
+    assert row.reported["flow_resistivity_pa_s_m2"] == (13_000.0, 43_200.0)
+    assert not row.variant

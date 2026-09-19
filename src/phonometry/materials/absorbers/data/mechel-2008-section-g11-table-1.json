@@ -1,0 +1,50 @@
+{
+  "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
+  "about": "Rendered PDF page 409, folio 394 (running head \"394 | G | Porous Absorbers\", the G set as a large grey drop letter); the page opens Section G.11 \"Empirical Relations for Characteristic Values of Fibre Absorbers\" and the table sits about two thirds down it, between the prose that introduces it and the sentence \"The following diagrams show (for three product groups) experimental points, thick full curves from a floating average and thin dashed lines from the Delany and Bazley formula (see below).\" Title as printed: \"Table 1 Average technical data of fibre absorber materials\" (the number is the running table number inside Section G.11). Five columns, the header row set white on grey and each heading stacked over up to three lines: \"Product group\", \"Average fibre diameter dμm\", \"Distribution parameter Λ(Δd = 1μm)\", \"Shot content % ( > 100μm)\" and \"Binder content %\". The three product group names are set in italic; there are no section headings, no footnotes and no superscripts, so no group and no per-row credit are given. The fibre diameter is printed in μm, which is the library unit, so it is carried over with factor 1; the shot and binder contents are printed in per cent and are carried over as they stand. The distribution parameter is dimensionless: the prose above the table says the table gives \"(2) the distribution parameter Λ of a Poisson distribution of the diameters, to which the empirical distribution can be best matched\", and the column heading adds \"(Δd = 1μm)\", which is the width of the diameter class the Poisson distribution is referred to, not a unit on Λ itself; the field is therefore named fibre_diameter_distribution_parameter with no unit in the name. Note that Λ here is a Poisson parameter and has nothing to do with the viscous characteristic length Λ of the Johnson-Allard models. The same prose sentence defines the other two columns: \"(3) the shot content (per weight, for shot with diameters > 100[μm] ), and (4) the content of an organic binder (per weight)\", so both percentages are by weight. The only cell that is not a plain number is the Glass fibre shot content, printed \"< 1\", which is recorded as a range from 0.0 to 1.0 flagged bounded_above, the lower end being a floor and not a measured value. Provenance, as the page gives it: the section head carries \"See also: Mechel (1995), Mechel/Grundmann (1982)\", and the opening paragraph says that for a great number of glass fibre and mineral fibre absorber materials from different producers and with a wide range of bulk densities the characteristic values and the flow resistivity \"were carefully measured in Mechel/Grundmann (1982)\", the materials being subdivided from an acoustical point of view into the same three product groups, \"glass fibre products, mineral fibre products (rockwool) and basalt wool products\"; that credit is recorded here rather than on the rows, because the page prints no per-row reference. The page prints the product groups in the order Glass fibre, Basalt wool, Mineral fibre, which is the order kept here, while the prose lists them as glass fibre, mineral fibre (rockwool) and basalt wool.",
+  "rows": [
+    {
+      "key": "glass_fibre",
+      "name": "Glass fibre",
+      "fibre_diameter_um": 5.2,
+      "fibre_diameter_distribution_parameter": 5.3,
+      "ranges": {
+        "shot_content_percent": [
+          0.0,
+          1.0
+        ]
+      },
+      "bounded_above": [
+        "shot_content_percent"
+      ],
+      "binder_content_percent": 4.8,
+      "note": "Shot content cell printed \"< 1\": an upper bound, so the low end 0.0 is a floor and not a value. The prose calls this product group \"glass fibre products\".",
+      "attributed_to": {
+        "table": "Mechel and Grundmann, 1982"
+      }
+    },
+    {
+      "key": "basalt_wool",
+      "name": "Basalt wool",
+      "fibre_diameter_um": 3.9,
+      "fibre_diameter_distribution_parameter": 4.0,
+      "shot_content_percent": 32.4,
+      "binder_content_percent": 1.0,
+      "note": "The prose calls this product group \"basalt wool products\".",
+      "attributed_to": {
+        "table": "Mechel and Grundmann, 1982"
+      }
+    },
+    {
+      "key": "mineral_fibre",
+      "name": "Mineral fibre",
+      "fibre_diameter_um": 4.0,
+      "fibre_diameter_distribution_parameter": 2.8,
+      "shot_content_percent": 27.1,
+      "binder_content_percent": 2.1,
+      "note": "The prose calls this product group \"mineral fibre products (rockwool)\".",
+      "attributed_to": {
+        "table": "Mechel and Grundmann, 1982"
+      }
+    }
+  ]
+}

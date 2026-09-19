@@ -132,6 +132,18 @@ ISO 9613-2 and NMPB-2008 each take.
 
 <Catalogues catalogue="ground" lang="en" />
 
+## Gases
+
+A gas table prints something a fluid table does not. Not a density and a speed
+of sound, which a gas only has once a temperature and a pressure are named, but
+the molar mass and the ratio of specific heats, which between them fix every
+state it can be in. `fluids.PUBLISHED_GASES` holds those two columns, and
+`Gas.ideal_state` walks from them to whichever state is asked for, carrying the
+page along with the number. Air is in both tables below, because both books
+print it, and they do not print quite the same pair for it.
+
+<Catalogues catalogue="gases" lang="en" />
+
 ## Fluids
 
 Every named fluid state this library carries. The three read from a page are in

@@ -188,6 +188,14 @@ SOURCED: dict[tuple[str, str], str] = {
         "PUBLISHED_FLUIDS",
     ): "Bies 5e Table C.1, the three fluids it prints before its solids",
     (
+        "fluids/catalogue.py",
+        "PUBLISHED_GASES",
+    ): (
+        "Bies 5e Table C.2, thirty-seven gases with a molar mass and a ratio "
+        "of specific heats; "
+        "Hopkins (2007) Table A1, the six gases it prints the same pair for"
+    ),
+    (
         "materials/absorbers/catalogue.py",
         "PUBLISHED_POROUS",
     ): (

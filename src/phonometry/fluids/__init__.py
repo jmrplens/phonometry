@@ -33,6 +33,9 @@ from .air import (
 )
 from .catalogue import (
     PUBLISHED_FLUIDS,
+    PUBLISHED_GASES,
+    Gas,
+    gases_named,
 )
 from .gas import (
     IDEAL_GAS_VALIDITY,
@@ -54,12 +57,15 @@ __all__ = [
     "IDEAL_GAS_VALIDITY",
     "MOLAR_GAS_CONSTANT",
     "PUBLISHED_FLUIDS",
+    "PUBLISHED_GASES",
     "Fluid",
     "FluidAssumptionWarning",
     "FluidPropertyUnavailable",
     "FluidWarning",
+    "Gas",
     "air",
     "characteristic_impedance",
+    "gases_named",
     "ideal_gas",
     "depth_to_absolute_pressure_pa",
     "depth_to_gauge_pressure_mpa",

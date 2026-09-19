@@ -37,6 +37,18 @@ documentation artefact, and it is built as one: the published-catalogues page
 of the site lists all of them side by side, gathered by a script that is free
 to see the whole tree.
 
+Gases are the other half, and they are not states
+-------------------------------------------------
+A book that prints a table of gases prints something different from a table of
+fluids: not a density and a speed of sound, which a gas only has once a
+temperature and a pressure are named, but the ratio of specific heats and the
+molar mass, which fix every state it can be in. So the gases live in a
+catalogue of their own, :data:`PUBLISHED_GASES`, and reach a state through
+:meth:`Gas.ideal_state`, which is :func:`~phonometry.fluids.ideal_gas` with the
+citation carried along. Air appears in both, and it should: Bies prints it once
+as a state at 20 degC and once as a pair of constants, and those are two
+different readings of the same gas.
+
 What it is not
 --------------
 It is not a table of fluid properties to look values up in. Air at 23 degC and
@@ -48,22 +60,32 @@ number.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from .._internal.catalogue import read_table
+from .._internal.catalogue import CatalogueRow, read_table, take
 from ._state import Fluid
+from .gas import ideal_gas
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
 __all__ = [
     "PUBLISHED_FLUIDS",
+    "PUBLISHED_GASES",
+    "Gas",
+    "gases_named",
 ]
 
 #: The table of fluid states this catalogue reads from a data file. One file
 #: per published table, in ``fluids/data``, each citing its own page.
-_TABLES = ("bies-2017-table-c1-fluids",)
+_FLUID_TABLES = ("bies-2017-table-c1-fluids",)
+
+#: The tables of gas constants, read from the same directory and the same
+#: way. A gas table prints what a gas is rather than what one sample of it
+#: was doing, so it is a catalogue of its own and not more states.
+_GAS_TABLES = ("bies-2017-table-c2", "hopkins-2007-table-a1")
 
 
 def _transcribed() -> dict[str, Fluid]:
@@ -76,7 +98,7 @@ def _transcribed() -> dict[str, Fluid]:
     the one atmosphere every such table assumes without printing it.
     """
     states: dict[str, Fluid] = {}
-    for table in _TABLES:
+    for table in _FLUID_TABLES:
         source, rows = read_table("phonometry.fluids", f"{table}.json")
         for row in rows:
             states[f"{table}/{row['key']}"] = Fluid(
@@ -116,3 +138,120 @@ _REPRESENTATIVE_ONLY = (
 #: docstring, and the published-catalogues page of the documentation, which
 #: lists them all side by side.
 PUBLISHED_FLUIDS: Mapping[str, Fluid] = MappingProxyType(_transcribed())
+
+
+@dataclass(frozen=True, kw_only=True)
+class Gas(CatalogueRow):
+    """One gas of a published table: the two numbers that close its state.
+
+    A table of gases does not print a density and a speed of sound, because a
+    gas does not have one: it has whichever the temperature and the pressure
+    give it. What it prints instead is the pair that fixes the whole family,
+    the ratio of specific heats and the molar mass, and
+    :meth:`ideal_state` walks from that pair to any state the caller asks for.
+    That is the difference between this catalogue and
+    :data:`PUBLISHED_FLUIDS`, which holds states: a row there is one condition
+    a book measured, a row here is every condition its two constants reach.
+
+    The hedges of :class:`~phonometry._internal.catalogue.CatalogueRow` apply
+    unchanged. A cell printed as an interval is a range and not a value, which
+    is what saturated steam is in the table this reads first.
+
+    :ivar molar_mass_kg_mol: Molar mass ``M``, in kg/mol, as the page prints
+        it. The gas tables print kg/mol rather than g/mol, so the number in
+        the cell is 0,028 97 for air.
+    :ivar heat_capacity_ratio: Ratio of specific heats ``gamma``, which is
+        ``c_p/c_v`` and therefore above 1 for every gas.
+    """
+
+    molar_mass_kg_mol: float | None = None
+    heat_capacity_ratio: float | None = None
+
+    def ideal_state(
+        self,
+        *,
+        temperature_c: float,
+        static_pressure_pa: float | None = None,
+    ) -> Fluid:
+        """The gas at one state, through the ideal-gas closure.
+
+        :param temperature_c: Temperature ``t``, in degrees Celsius.
+        :param static_pressure_pa: Static pressure ``p``, in pascals. Omitted
+            means one standard atmosphere, and
+            :func:`~phonometry.fluids.ideal_gas` says so with a warning.
+        :return: The :class:`~phonometry.fluids.Fluid` the two printed
+            constants give at that state, carrying this row's citation in its
+            model so the state can be traced back to the page.
+        :raises ValueError: when the page did not print both constants, naming
+            the one it left out and what the cell held instead.
+        """
+        state = ideal_gas(
+            temperature_c=temperature_c,
+            heat_capacity_ratio=self.printed(
+                "heat_capacity_ratio", wanted_by="the ideal-gas closure"
+            ),
+            molar_mass_kg_mol=self.printed(
+                "molar_mass_kg_mol", wanted_by="the ideal-gas closure"
+            ),
+            static_pressure_pa=static_pressure_pa,
+        )
+        return Fluid(
+            temperature_c=state.temperature_c,
+            static_pressure_pa=state.static_pressure_pa,
+            composition=state.composition,
+            model=f"{state.model}, for {self.name} as printed in {self.source}",
+            validity=state.validity,
+            properties=dict(state.properties),
+        )
+
+
+#: The hedges a gas table spells as a set rather than a mapping.
+_SETS = ("approximate", "bounded_above", "bounded_below")
+
+
+def _gases() -> dict[str, Gas]:
+    """Every row of every packaged gas table, keyed by table and row.
+
+    The key names the table for the same reason the other catalogues do: two
+    books print air, and they do not print the same molar mass for it.
+    """
+    rows: dict[str, Gas] = {}
+    for table in _GAS_TABLES:
+        source, records = read_table("phonometry.fluids", f"{table}.json")
+        for record in records:
+            rows[f"{table}/{record['key']}"] = Gas(
+                table=table, source=source, **take(record, frozen=_SETS)
+            )
+    return rows
+
+
+#: The gases this library has read from a published page, keyed
+#: ``"<table>/<row>"``. Each row carries the two constants that close the
+#: ideal-gas state, so ``PUBLISHED_GASES["bies-2017-table-c2/methane"]`` plus a
+#: temperature is a :class:`~phonometry.fluids.Fluid` for methane, cited.
+#: One file per published table in ``fluids/data/``.
+PUBLISHED_GASES: Mapping[str, Gas] = MappingProxyType(_gases())
+
+
+def gases_named(name: str) -> tuple[Gas, ...]:
+    """Every published row for a gas name, across the tables.
+
+    Two books printing one gas is worth having, because the pair they print is
+    not always the same pair: for carbon dioxide one of them gives 1,30 and
+    the other 1,33, which is a four per cent difference in the speed of sound
+    and a reader deserves to see both rather than whichever this library
+    happened to load first.
+
+    :param name: The gas as a table names it, matched without regard to case
+        and ignoring a parenthesis the page adds: ``"air"`` answers with the
+        row Hopkins prints as ``"Air (dry)"``.
+    :return: The rows whose :attr:`Gas.name` matches, in the order the tables
+        are read, which is empty when no page names it.
+    """
+    wanted = _plain(name)
+    return tuple(row for row in PUBLISHED_GASES.values() if _plain(row.name) == wanted)
+
+
+def _plain(name: str) -> str:
+    """A gas name with its case and its parenthetical qualifier dropped."""
+    return name.split("(")[0].strip().casefold()

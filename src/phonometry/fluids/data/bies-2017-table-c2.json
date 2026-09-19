@@ -1,0 +1,245 @@
+{
+  "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+  "about": "The thirty-seven gases Table C.2, \"Molecular weights and ratios of specific heats for some commonly used gases\", prints on the last page of Appendix C, after the five pages of Table C.1. Columns as printed: \"Gas or vapour\", \"Molecular weight, M kg/mole\" and \"Ratio of specific heats, gamma\". Every cell is filled, no cell carries a footnote marker, and the page prints no credit of any kind: the five references the appendix gives on printed page 717 are tied by name to Table C.1, and the only sentence about this table says what it is for, \"a table of properties of gases, which is particularly useful for calculating control valve noise\". Saturated steam is the only interval, 1.25 to 1.32, and is held as one. Six cells are not held at all: four molar masses that do not belong to the molecule their row names and two ratios of specific heats outside what the quantity can be. Each carries what the page prints and the argument is in docs/ERRATA.md, which also records why the other thirty-one rows with a formula mass are what makes those six a defect rather than a convention.",
+  "rows": [
+    {
+      "key": "acetylene",
+      "name": "Acetylene",
+      "molar_mass_kg_mol": 0.02604,
+      "heat_capacity_ratio": 1.3
+    },
+    {
+      "key": "air",
+      "name": "Air",
+      "molar_mass_kg_mol": 0.02897,
+      "heat_capacity_ratio": 1.4
+    },
+    {
+      "key": "ammonia",
+      "name": "Ammonia",
+      "heat_capacity_ratio": 1.32,
+      "misprinted": {
+        "molar_mass_kg_mol": "the page prints 0.01730 kg/mol, which is 17.30 g/mol where ammonia, NH3, is 17.031; a defect argued in docs/ERRATA.md"
+      }
+    },
+    {
+      "key": "argon",
+      "name": "Argon",
+      "molar_mass_kg_mol": 0.03995,
+      "heat_capacity_ratio": 1.67
+    },
+    {
+      "key": "benzene",
+      "name": "Benzene",
+      "molar_mass_kg_mol": 0.07811,
+      "heat_capacity_ratio": 1.12
+    },
+    {
+      "key": "isobutane",
+      "name": "Isobutane",
+      "molar_mass_kg_mol": 0.05812,
+      "heat_capacity_ratio": 1.1
+    },
+    {
+      "key": "n_butane",
+      "name": "n-Butane",
+      "molar_mass_kg_mol": 0.05812,
+      "heat_capacity_ratio": 1.11
+    },
+    {
+      "key": "isobutylene",
+      "name": "Isobutylene",
+      "molar_mass_kg_mol": 0.05611,
+      "heat_capacity_ratio": 1.11
+    },
+    {
+      "key": "carbon_dioxide",
+      "name": "Carbon dioxide",
+      "molar_mass_kg_mol": 0.04401,
+      "heat_capacity_ratio": 1.3
+    },
+    {
+      "key": "carbon_monoxide",
+      "name": "Carbon monoxide",
+      "molar_mass_kg_mol": 0.02801,
+      "heat_capacity_ratio": 1.4
+    },
+    {
+      "key": "chlorine",
+      "name": "Chlorine",
+      "molar_mass_kg_mol": 0.07091,
+      "heat_capacity_ratio": 1.31
+    },
+    {
+      "key": "ethane",
+      "name": "Ethane",
+      "molar_mass_kg_mol": 0.03007,
+      "heat_capacity_ratio": 1.22
+    },
+    {
+      "key": "ethylene",
+      "name": "Ethylene",
+      "molar_mass_kg_mol": 0.02805,
+      "heat_capacity_ratio": 1.22
+    },
+    {
+      "key": "fluorine",
+      "name": "Fluorine",
+      "heat_capacity_ratio": 1.36,
+      "misprinted": {
+        "molar_mass_kg_mol": "the page prints 0.01900 kg/mol, which is one fluorine atom and not the F2 of a fluorine gas at 37.996 g/mol; a defect argued in docs/ERRATA.md"
+      }
+    },
+    {
+      "key": "freon_11",
+      "name": "Freon 11",
+      "molar_mass_kg_mol": 0.13737,
+      "heat_capacity_ratio": 1.14
+    },
+    {
+      "key": "freon_12",
+      "name": "Freon 12",
+      "molar_mass_kg_mol": 0.12091,
+      "heat_capacity_ratio": 1.13
+    },
+    {
+      "key": "freon_13",
+      "name": "Freon 13",
+      "molar_mass_kg_mol": 0.10446,
+      "heat_capacity_ratio": 1.14
+    },
+    {
+      "key": "freon_22",
+      "name": "Freon 22",
+      "heat_capacity_ratio": 1.18,
+      "misprinted": {
+        "molar_mass_kg_mol": "the page prints 0.08047 kg/mol, where chlorodifluoromethane, CHClF2, is 86.465 g/mol; a defect argued in docs/ERRATA.md"
+      }
+    },
+    {
+      "key": "helium",
+      "name": "Helium",
+      "molar_mass_kg_mol": 0.004,
+      "heat_capacity_ratio": 1.66
+    },
+    {
+      "key": "n_heptane",
+      "name": "n-Heptane",
+      "molar_mass_kg_mol": 0.1002,
+      "heat_capacity_ratio": 1.05
+    },
+    {
+      "key": "hydrogen",
+      "name": "Hydrogen",
+      "molar_mass_kg_mol": 0.00202,
+      "heat_capacity_ratio": 1.41
+    },
+    {
+      "key": "hydrogen_chloride",
+      "name": "Hydrogen chloride",
+      "molar_mass_kg_mol": 0.03646,
+      "heat_capacity_ratio": 1.41
+    },
+    {
+      "key": "hydrogen_fluoride",
+      "name": "Hydrogen fluoride",
+      "molar_mass_kg_mol": 0.02001,
+      "misprinted": {
+        "heat_capacity_ratio": "the page prints 0.97, and a ratio of specific heats is above 1 for every gas because c_p exceeds c_v by R/M; a defect argued in docs/ERRATA.md"
+      }
+    },
+    {
+      "key": "methane",
+      "name": "Methane",
+      "molar_mass_kg_mol": 0.01604,
+      "heat_capacity_ratio": 1.32
+    },
+    {
+      "key": "methyl_chloride",
+      "name": "Methyl chloride",
+      "molar_mass_kg_mol": 0.05049,
+      "heat_capacity_ratio": 1.24
+    },
+    {
+      "key": "natural_gas_representative",
+      "name": "Natural gas (representative)",
+      "molar_mass_kg_mol": 0.01774,
+      "heat_capacity_ratio": 1.27
+    },
+    {
+      "key": "neon",
+      "name": "Neon",
+      "molar_mass_kg_mol": 0.02018,
+      "heat_capacity_ratio": 1.64
+    },
+    {
+      "key": "nitric_oxide",
+      "name": "Nitric oxide",
+      "heat_capacity_ratio": 1.4,
+      "misprinted": {
+        "molar_mass_kg_mol": "the page prints 0.06301 kg/mol, which is the molar mass of nitric acid, HNO3, where nitric oxide, NO, is 30.006 g/mol; a defect argued in docs/ERRATA.md"
+      }
+    },
+    {
+      "key": "nitrogen",
+      "name": "Nitrogen",
+      "molar_mass_kg_mol": 0.02801,
+      "heat_capacity_ratio": 1.4
+    },
+    {
+      "key": "octane",
+      "name": "Octane",
+      "molar_mass_kg_mol": 0.11423,
+      "misprinted": {
+        "heat_capacity_ratio": "the page prints 1.66, a monatomic value in an ideal-gas column where a twenty-six atom molecule cannot reach it; the same table gives 1.05 to n-heptane; a defect argued in docs/ERRATA.md"
+      }
+    },
+    {
+      "key": "oxygen",
+      "name": "Oxygen",
+      "molar_mass_kg_mol": 0.032,
+      "heat_capacity_ratio": 1.4
+    },
+    {
+      "key": "pentane",
+      "name": "Pentane",
+      "molar_mass_kg_mol": 0.07215,
+      "heat_capacity_ratio": 1.06
+    },
+    {
+      "key": "propane",
+      "name": "Propane",
+      "molar_mass_kg_mol": 0.0441,
+      "heat_capacity_ratio": 1.15
+    },
+    {
+      "key": "propylene",
+      "name": "Propylene",
+      "molar_mass_kg_mol": 0.04208,
+      "heat_capacity_ratio": 1.14
+    },
+    {
+      "key": "saturated_steam",
+      "name": "Saturated steam",
+      "molar_mass_kg_mol": 0.01802,
+      "ranges": {
+        "heat_capacity_ratio": [
+          1.25,
+          1.32
+        ]
+      }
+    },
+    {
+      "key": "sulphur_dioxide",
+      "name": "Sulphur dioxide",
+      "molar_mass_kg_mol": 0.06406,
+      "heat_capacity_ratio": 1.26
+    },
+    {
+      "key": "superheated_steam",
+      "name": "Superheated steam",
+      "molar_mass_kg_mol": 0.01802,
+      "heat_capacity_ratio": 1.315
+    }
+  ]
+}

@@ -42,6 +42,7 @@ _MAPPINGS = (
     "unquantified",
     "uncertainty",
     "not_derivable",
+    "misprinted",
     "attributed_to",
 )
 
@@ -176,6 +177,16 @@ class CatalogueRow:
         large as the value itself. What the interval means is not stated on
         the page, so it is not stated here either: it is the number the page
         prints beside the value and nothing more.
+    :ivar misprinted: Field to what the page prints there and why it cannot be
+        that, for a cell whose defect is confirmed and registered in
+        ``docs/ERRATA.md``. The number is not served, because a catalogue that
+        handed it over would put a value its own registry calls wrong behind
+        every calculation downstream; it is not dropped either, because a
+        reader reproducing the book needs to see what the book says. This is
+        the narrowest of the hedges and the one that costs most to claim: a
+        cell earns it only when the defect follows from the page itself or
+        from something as settled as the molar mass of a named molecule, and
+        never from one book disagreeing with another.
     :ivar not_derivable: Field to why this library leaves it empty although
         the arithmetic would reach it. Bies leaves the speed of his aluminium
         honeycomb panels blank, and the modulus and the density beside it are
@@ -208,6 +219,7 @@ class CatalogueRow:
     unquantified: Mapping[str, str] = field(default_factory=dict)
     uncertainty: Mapping[str, float] = field(default_factory=dict)
     not_derivable: Mapping[str, str] = field(default_factory=dict)
+    misprinted: Mapping[str, str] = field(default_factory=dict)
     attributed_to: Mapping[str, str] = field(default_factory=dict)
     group: str = ""
     note: str = ""
@@ -283,6 +295,8 @@ class CatalogueRow:
         """
         if getattr(self, field_name) is not None:
             return ""
+        if field_name in self.misprinted:
+            return self.misprinted[field_name]
         if field_name in self.unquantified:
             return (
                 f"the page prints “{self.unquantified[field_name]}” "

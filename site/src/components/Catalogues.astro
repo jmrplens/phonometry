@@ -43,7 +43,7 @@ import { catalogues } from '../generated/catalogues.mjs';
 
 interface Props {
 	/** Which catalogue to render. */
-	catalogue: 'solids' | 'porous' | 'ground' | 'fluids';
+	catalogue: 'solids' | 'porous' | 'ground' | 'gases' | 'fluids';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
 }
@@ -54,11 +54,13 @@ const copy = {
 		search: 'Filter by material',
 		searchPlaceholder: 'steel, foam, air',
 		groundPlaceholder: 'grass, snow, asphalt',
+		gasPlaceholder: 'methane, argon, steam',
 		table: 'Published table',
 		everyTable: 'Every table',
 		empty: 'No row matches that filter.',
 		material: 'Material',
 		surface: 'Surface',
+		gas: 'Gas',
 		state: 'State',
 		conditions: 'Conditions',
 		fixedBy: 'What fixes it',
@@ -81,11 +83,13 @@ const copy = {
 		search: 'Filtrar por material',
 		searchPlaceholder: 'acero, espuma, aire',
 		groundPlaceholder: 'hierba, nieve, asfalto',
+		gasPlaceholder: 'metano, argón, vapor',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',
 		material: 'Material',
 		surface: 'Superficie',
+		gas: 'Gas',
 		state: 'Estado',
 		conditions: 'Condiciones',
 		fixedBy: 'Qué lo fija',
@@ -108,11 +112,21 @@ const copy = {
 
 /** What to search for, which is not a material in the ground catalogue. */
 const placeholder =
-	section === 'ground' ? copy.groundPlaceholder : copy.searchPlaceholder;
+	section === 'ground'
+		? copy.groundPlaceholder
+		: section === 'gases'
+			? copy.gasPlaceholder
+			: copy.searchPlaceholder;
 
 /** What the first column holds, which is not a material in every catalogue. */
 const rowHeading =
-	section === 'fluids' ? copy.state : section === 'ground' ? copy.surface : copy.material;
+	section === 'fluids'
+		? copy.state
+		: section === 'ground'
+			? copy.surface
+			: section === 'gases'
+				? copy.gas
+				: copy.material;
 
 /** A column's heading in the language this page is published in. */
 const heading = (column: { heading: string; headingEs?: string }) =>

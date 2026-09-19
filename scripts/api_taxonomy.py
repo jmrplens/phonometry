@@ -473,6 +473,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "PUBLISHED_GROUND": "phonometry.environment.propagation.ground_surfaces",
     "PUBLISHED_POROUS": "phonometry.materials.absorbers.catalogue",
     "PUBLISHED_FLUIDS": "phonometry.fluids.catalogue",
+    "PUBLISHED_GASES": "phonometry.fluids.catalogue",
+    "Gas": "phonometry.fluids.catalogue",
+    "gases_named": "phonometry.fluids.catalogue",
     # The ideal-gas closure and its two published constants are owned by the
     # module that computes with them and re-exported by the package.
     "IDEAL_GAS_VALIDITY": "phonometry.fluids.gas",

@@ -6452,6 +6452,115 @@ in the same order.
   pins the eighty-four that do follow, which is what makes the three a defect.
 - **Status:** not reported.
 
+## Bies 5e (2017), Table C.2 (four molar masses that do not belong to the gas in the row)
+
+- **Location:** Table C.2, "Molecular weights and ratios of specific heats for
+  some commonly used gases", the rows "Ammonia", "Fluorine", "Freon 22" and
+  "Nitric oxide" on printed page 722 (PDF page 751). Non-normative source: a
+  textbook.
+- **The print:** the four rows give, in the column headed "Molecular weight,
+  $M$ kg/mole", 0.01730, 0.01900, 0.08047 and 0.06301.
+- **The problem:** the molar mass of a gas follows from the molecule the row
+  names, and none of these four does. Ammonia is NH$_3$ at 17.031 g/mol, not
+  17.30. Fluorine gas is F$_2$ at 37.996 g/mol, and 19.00 is the atomic mass of
+  one fluorine atom. Freon 22 is CHClF$_2$ at 86.465 g/mol, not 80.47. Nitric
+  oxide is NO at 30.006 g/mol, and 63.01 is the molar mass of nitric *acid*,
+  HNO$_3$.
+- **Evidence:** the rest of the table settles that these are misprints rather
+  than a looser convention. Thirty-five of the thirty-seven rows name a
+  molecule whose formula mass can be computed; the two that do not are the
+  mixtures, air and natural gas. Of those thirty-five, thirty-one reproduce
+  their formula mass to better than 0.05 per cent, and the two that are further
+  out are further out only because the page rounds: helium at 4.00 against
+  4.0026 is 0.07 per cent low and hydrogen at 2.02 against 2.016 is 0.20 per
+  cent high, both of them the last printed digit. So the table's own precision
+  is two parts in a thousand, against which the four exceptions are 1.6, 6.9,
+  50.0 and 110.0 per cent out. Two of them land exactly on a different
+  species, which is what a copying slip looks like: 19.00 is atomic fluorine to
+  0.01 per cent and 63.01 is HNO$_3$ to 0.003 per cent, the same accuracy the
+  correct rows have. The ratio of specific heats printed beside each of the
+  four points the same way: 1.36 for fluorine and 1.40 for nitric oxide are
+  diatomic values, so the rows mean F$_2$ and NO whatever their mass column
+  says. An independent table of the same genre agrees on both counts: the
+  Masoneilan *Control Valve Sizing Handbook* (Baker Hughes, BHMN-19540C, 2022),
+  which tabulates the same two quantities for the same purpose, prints
+  "Fluorine, F$_2$" with a ratio of specific heats of 1.36 on its page 19 and
+  "Ammonia, NH$_3$" with a molecular weight of 17.0 on its page 20. Verified
+  against the page as printed on PDF page 751 (printed p. 722) of Bies, Hansen
+  and Howard (2017), *Engineering Noise Control*, fifth edition, and on pages
+  19 and 20 of the Masoneilan handbook.
+- **Consequence for the book's own tables:** four cells. Nothing else in the
+  document computes with them; the table is offered for the control valve noise
+  of Section 10.8, where the gas is chosen by the reader. A reader who did take
+  one of the four would get a speed of sound 0.8 per cent low for ammonia, 3.7
+  per cent high for Freon 22, 41.4 per cent high for fluorine and 31.0 per cent
+  low for nitric oxide, since $c = \sqrt{\gamma R T / M}$.
+- **Library behaviour:** the catalogue holds the row and its ratio of specific
+  heats, and refuses the molar mass rather than serving it: reading it raises,
+  naming the cell, quoting what the page prints and pointing here. The tests
+  `test_a_cell_the_errata_names_is_not_served_as_a_value` and
+  `test_the_refusal_quotes_the_printed_number_and_points_at_the_registry` in
+  [`tests/fluids/test_gas_catalogue.py`](https://github.com/jmrplens/phonometry/blob/main/tests/fluids/test_gas_catalogue.py)
+  pin both halves, and `test_no_other_cell_of_either_table_is_called_wrong`
+  keeps the claim from spreading to a fifth row.
+- **Status:** not reported.
+
+## Bies 5e (2017), Table C.2 (two ratios of specific heats that no gas can have)
+
+- **Location:** Table C.2, "Molecular weights and ratios of specific heats for
+  some commonly used gases", the rows "Hydrogen fluoride" and "Octane" on
+  printed page 722 (PDF page 751). Non-normative source: a textbook.
+- **The print:** the column headed "Ratio of specific heats, $\gamma$" gives
+  0.97 for hydrogen fluoride and 1.66 for octane.
+- **The problem:** the column is the ratio of specific heats, which its own
+  heading names as such and which the table exists to feed into the control
+  valve procedure the appendix points at, "particularly useful for calculating
+  control valve noise (see Section 10.8)". For any substance in a stable single
+  phase $c_p \geq c_v$, so $\gamma \geq 1$ and a printed 0.97 is outside what
+  the quantity can be. That is a statement about $c_p/c_v$ and not about every
+  exponent an engineer might write as $k$: the real-gas isentropic exponent of
+  a strongly associating vapour, which is what hydrogen fluoride is, can fall
+  below 1, but it is a different quantity from the one this column names and
+  not the one the procedure downstream wants. The octane cell is outside the
+  column in the other direction: for an ideal gas $\gamma = 1 + 2/f$ where $f$
+  counts the active degrees of freedom, and $f \geq 3$ always, so
+  $\gamma \leq 5/3 \approx 1.667$ with equality only for a monatomic one.
+  Octane is C$_8$H$_{18}$, twenty-six atoms, with three rotational degrees of
+  freedom on top of the three translational ones before any vibration is
+  counted, which caps it at $\gamma \leq 4/3$ and puts it near 1.05 in
+  practice. That bound is an ideal-gas one, and a real fluid does pass 5/3 near
+  its critical point; what rules out reading the cell that way is that this is
+  an ideal-gas column, printed against ideal molar masses, giving one value per
+  gas rather than one per state.
+- **Evidence:** the column is otherwise a clean function of molecular
+  complexity, which is what makes the two exceptions visible. The three
+  monatomic gases print 1.64 to 1.67, the diatomic ones 1.31 to 1.41, and the
+  polyatomic ones fall away with size down to 1.05. Octane's two nearest
+  neighbours in that progression are in the same table and one carbon apart:
+  n-heptane prints 1.05 and pentane 1.06, so the table itself says what an
+  alkane of this size does. Hydrogen fluoride's neighbours are the other
+  diatomic rows, and hydrogen chloride, the next halide down, prints 1.41.
+  Outside the book, the Masoneilan *Control Valve Sizing Handbook* (Baker
+  Hughes, BHMN-19540C, 2022) prints 1.05 for octane in the same $c_p/c_v$
+  column on its page 19, between 1.66 for helium and 1.07 for pentane, so the
+  progression is not a habit of one author. Verified against the page as
+  printed on PDF page 751 (printed p. 722) of
+  Bies, Hansen and Howard (2017), *Engineering Noise Control*, fifth edition,
+  with both cells re-read at six times magnification: 0.97 and 1.66 are what
+  the page prints, with no digit in doubt.
+- **Consequence for the book's own tables:** two cells. A reader taking the
+  octane row would get a speed of sound 26.0 per cent high; the hydrogen
+  fluoride row cannot be used at all, because a speed of sound computed from a
+  $\gamma$ below 1 is not the speed of anything.
+- **Library behaviour:** the catalogue holds the row and its molar mass, and
+  refuses the ratio rather than serving it, the same way and with the same
+  message as the four molar masses above. The independent guard is
+  [`phonometry.fluids.ideal_gas`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/gas.py), which
+  refuses a ratio at or below 1 whoever passes it, and
+  `test_a_ratio_of_specific_heats_at_or_below_one_is_refused` in
+  [`tests/fluids/test_gas.py`](https://github.com/jmrplens/phonometry/blob/main/tests/fluids/test_gas.py) pins that.
+- **Status:** not reported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

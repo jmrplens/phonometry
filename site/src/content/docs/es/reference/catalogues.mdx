@@ -135,6 +135,19 @@ con el factor de suelo que toman ISO 9613-2 y NMPB-2008.
 
 <Catalogues catalogue="ground" lang="es" />
 
+## Gases
+
+Una tabla de gases imprime algo que una tabla de fluidos no. No una densidad y
+una velocidad del sonido, que un gas sólo tiene una vez que se nombran una
+temperatura y una presión, sino la masa molar y la relación de calores
+específicos, que entre las dos fijan todos los estados en los que puede estar.
+`fluids.PUBLISHED_GASES` guarda esas dos columnas, y `Gas.ideal_state` va de
+ellas al estado que se le pida, llevándose la página junto con el número. El
+aire está en las dos tablas de abajo, porque los dos libros lo imprimen, y no
+imprimen exactamente el mismo par.
+
+<Catalogues catalogue="gases" lang="es" />
+
 ## Fluidos
 
 Todos los estados de fluido con nombre que lleva esta biblioteca. Los tres que

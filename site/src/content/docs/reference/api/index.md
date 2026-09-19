@@ -223,6 +223,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`environment.propagation.outdoor_propagation`](/phonometry/reference/api/environment/outdoor-propagation/) | Outdoor sound propagation: ISO 9613-2:1996 general method of calculation. |
 | [`environment.sources.cnossos_road`](/phonometry/reference/api/environment/cnossos-road/) | CNOSSOS-EU road traffic source emission (Directive 2002/49/EC Annex II, 2.2). |
 | [`environment.propagation.ground_barriers`](/phonometry/reference/api/environment/ground-barriers/) | Spherical-wave ground effect and advanced barrier diffraction. |
+| [`environment.propagation.ground_surfaces`](/phonometry/reference/api/environment/ground-surfaces/) | Ground surfaces as the pages that print them print them. |
 | [`environment.propagation.noise_reducing_devices`](/phonometry/reference/api/environment/noise-reducing-devices/) | Single-number ratings of noise reducing devices (EN 1793, EN 16272). |
 | [`environment.propagation.barrier_in_situ`](/phonometry/reference/api/environment/barrier-in-situ/) | What a barrier by the road is worth, measured (ISO 10847:1997). |
 | [`environment.propagation.refraction`](/phonometry/reference/api/environment/refraction/) | Atmospheric refraction: ray tracing and the parabolic equation (PE). |

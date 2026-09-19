@@ -495,6 +495,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [environment/cnossos-rail](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-rail/)
 - [environment/cnossos-road](https://jmrplens.github.io/phonometry/reference/api/environment/cnossos-road/)
 - [environment/ground-barriers](https://jmrplens.github.io/phonometry/reference/api/environment/ground-barriers/)
+- [environment/ground-surfaces](https://jmrplens.github.io/phonometry/reference/api/environment/ground-surfaces/)
 - [environment/impulsive-sound](https://jmrplens.github.io/phonometry/reference/api/environment/impulsive-sound/)
 - [environment/measurement](https://jmrplens.github.io/phonometry/reference/api/environment/measurement/)
 - [environment/noise-reducing-devices](https://jmrplens.github.io/phonometry/reference/api/environment/noise-reducing-devices/)

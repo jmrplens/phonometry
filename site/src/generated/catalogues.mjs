@@ -36004,6 +36004,4563 @@ export const catalogues = {
       }
     ]
   },
+  "ground": {
+    "columns": [
+      {
+        "field": "flow_resistivity_pa_s_m2",
+        "heading": "Effective flow resistivity",
+        "headingEs": "Resistividad al flujo efectiva",
+        "unit": "kPa·s/m²"
+      },
+      {
+        "field": "porosity",
+        "heading": "Porosity",
+        "headingEs": "Porosidad",
+        "unit": ""
+      },
+      {
+        "field": "water_content_percent",
+        "heading": "Water content",
+        "headingEs": "Contenido de agua",
+        "unit": "%"
+      },
+      {
+        "field": "porosity_decay_rate_per_m",
+        "heading": "Porosity decay",
+        "headingEs": "Decaimiento de porosidad",
+        "unit": "1/m"
+      },
+      {
+        "field": "iso_9613_ground_factor",
+        "heading": "ISO 9613-2 ground factor",
+        "headingEs": "Factor de suelo ISO 9613-2",
+        "unit": ""
+      },
+      {
+        "field": "nmpb_ground_factor",
+        "heading": "NMPB-2008 ground factor",
+        "headingEs": "Factor de suelo NMPB-2008",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "bies-2017-table-5-1/dry_snow_newly_fallen",
+        "table": "bies-2017-table-5-1",
+        "name": "Dry snow, newly fallen 0.1 m over about 0.4 m older snow",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "10 to 30",
+            "kind": "range",
+            "note": "the page prints 10000 to 30000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/sugar_snow",
+        "table": "bies-2017-table-5-1",
+        "name": "Sugar snow",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "25 to 50",
+            "kind": "range",
+            "note": "the page prints 25000 to 50000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/soft_forest_floor_with_blueberry_greens_and_moss",
+        "table": "bies-2017-table-5-1",
+        "name": "Soft forest floor with blueberry greens and moss",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/forest_floor_covered_by_weeds",
+        "table": "bies-2017-table-5-1",
+        "name": "Forest floor covered by weeds",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "63 to 100",
+            "kind": "range",
+            "note": "the page prints 63000 to 100000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/pine_or_hemlock_forest_floor",
+        "table": "bies-2017-table-5-1",
+        "name": "Pine or hemlock forest floor",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "20 to 80",
+            "kind": "range",
+            "note": "the page prints 20000 to 80000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/soft_forest_floor_covered_with_pine_needles",
+        "table": "bies-2017-table-5-1",
+        "name": "Soft forest floor covered with pine needles",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "160",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/sandy_forest_floor",
+        "table": "bies-2017-table-5-1",
+        "name": "Sandy forest floor",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "630 to 2 000",
+            "kind": "range",
+            "note": "the page prints 630000 to 2e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/dense_shrubbery_20_cm_high",
+        "table": "bies-2017-table-5-1",
+        "name": "Dense shrubbery, 20 cm high",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/soil_and_bark_sparse_vegetation",
+        "table": "bies-2017-table-5-1",
+        "name": "Soil and bark, sparse vegetation",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/peat_or_turf_area_homogeneous_organic_material",
+        "table": "bies-2017-table-5-1",
+        "name": "Peat or turf area, homogeneous organic material",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/soil_covered_with_leaves_and_twigs",
+        "table": "bies-2017-table-5-1",
+        "name": "Soil covered with leaves and twigs",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "160 to 250",
+            "kind": "range",
+            "note": "the page prints 160000 to 250000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/soil_mixed_with_sawdust",
+        "table": "bies-2017-table-5-1",
+        "name": "Soil mixed with sawdust",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "250",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/relatively_dense_soil_sparsely_covered_by_grass_and_other_low_greens",
+        "table": "bies-2017-table-5-1",
+        "name": "Relatively dense soil sparsely covered by grass and other low greens",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "630",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/short_grass_green_moss_and_blueberry_greens",
+        "table": "bies-2017-table-5-1",
+        "name": "Short grass, green moss and blueberry greens",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/rough_grassland_and_pasture",
+        "table": "bies-2017-table-5-1",
+        "name": "Rough grassland and pasture",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "100 to 300",
+            "kind": "range",
+            "note": "the page prints 100000 to 300000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/grass_soccer_field",
+        "table": "bies-2017-table-5-1",
+        "name": "Grass, soccer field",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "630 to 2 000",
+            "kind": "range",
+            "note": "the page prints 630000 to 2e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/lawn_moderately_stepped_on",
+        "table": "bies-2017-table-5-1",
+        "name": "Lawn, moderately stepped on",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "160 to 250",
+            "kind": "range",
+            "note": "the page prints 160000 to 250000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/lawn_seldom_stepped_on",
+        "table": "bies-2017-table-5-1",
+        "name": "Lawn, seldom stepped on",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "250",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/lawn",
+        "table": "bies-2017-table-5-1",
+        "name": "Lawn",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "250 to 400",
+            "kind": "range",
+            "note": "the page prints 250000 to 400000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/agricultural_field",
+        "table": "bies-2017-table-5-1",
+        "name": "Agricultural field",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "160 to 250",
+            "kind": "range",
+            "note": "the page prints 160000 to 250000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/hard_soil",
+        "table": "bies-2017-table-5-1",
+        "name": "Hard soil",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "400 to 2 000",
+            "kind": "range",
+            "note": "the page prints 400000 to 2e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/soil_exposed_and_rain_packed",
+        "table": "bies-2017-table-5-1",
+        "name": "Soil, exposed and rain packed",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "4 000 to 8 000",
+            "kind": "range",
+            "note": "the page prints 4e+06 to 8e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/wet_sandy_loam",
+        "table": "bies-2017-table-5-1",
+        "name": "Wet, sandy loam",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "1 500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/moistened_sand",
+        "table": "bies-2017-table-5-1",
+        "name": "Moistened sand",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/bare_sandy_plain",
+        "table": "bies-2017-table-5-1",
+        "name": "Bare sandy plain",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "250 to 500",
+            "kind": "range",
+            "note": "the page prints 250000 to 500000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/dry_sand",
+        "table": "bies-2017-table-5-1",
+        "name": "Dry sand",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "60 to 140",
+            "kind": "range",
+            "note": "the page prints 60000 to 140000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/sandy_silt_hard_packed_by_vehicles",
+        "table": "bies-2017-table-5-1",
+        "name": "Sandy silt, hard packed by vehicles",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "800 to 2 500",
+            "kind": "range",
+            "note": "the page prints 800000 to 2.5e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/quarry_dust_hard_packed_by_vehicles",
+        "table": "bies-2017-table-5-1",
+        "name": "Quarry dust, hard packed by vehicles",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "5 000 to 20 000",
+            "kind": "range",
+            "note": "the page prints 5e+06 to 2e+07 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/mixed_paving_stones_and_grass",
+        "table": "bies-2017-table-5-1",
+        "name": "Mixed paving stones and grass",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "630 to 2 000",
+            "kind": "range",
+            "note": "the page prints 630000 to 2e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/old_gravel_field_with_sparse_vegetation",
+        "table": "bies-2017-table-5-1",
+        "name": "Old gravel field with sparse vegetation",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "2 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/gravel_road_stones_and_dust",
+        "table": "bies-2017-table-5-1",
+        "name": "Gravel road, stones and dust",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "2 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/gravel_parking_lot",
+        "table": "bies-2017-table-5-1",
+        "name": "Gravel parking lot",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "630 to 2 000",
+            "kind": "range",
+            "note": "the page prints 630000 to 2e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/asphalt_sealed_by_dust_and_light_use",
+        "table": "bies-2017-table-5-1",
+        "name": "Asphalt sealed by dust and light use",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "30 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-1/concrete",
+        "table": "bies-2017-table-5-1",
+        "name": "Concrete",
+        "variant": "",
+        "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+        "note": "",
+        "attributedTo": {
+          "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+        },
+        "cells": [
+          {
+            "text": "20 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/very_soft_snow_or_moss",
+        "table": "bies-2017-table-5-2",
+        "name": "Very soft (snow or moss)",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "12,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/soft_forest_floor",
+        "table": "bies-2017-table-5-2",
+        "name": "Soft forest floor",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "31,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/uncompacted_loose_ground",
+        "table": "bies-2017-table-5-2",
+        "name": "Uncompacted, loose ground",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/normal_uncompacted_ground",
+        "table": "bies-2017-table-5-2",
+        "name": "Normal uncompacted ground (pastures, forest floors)",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "Description wrapped over two printed lines: \"Normal uncompacted ground\" / \"(pastures, forest floors)\".",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/compacted_fields_lawns_and_gravel",
+        "table": "bies-2017-table-5-2",
+        "name": "Compacted fields, lawns and gravel",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/compacted_dense_ground",
+        "table": "bies-2017-table-5-2",
+        "name": "Compacted dense ground (gravel road, parking lot)",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "Description wrapped over two printed lines: \"Compacted dense ground\" / \"(gravel road, parking lot)\".",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "2 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/asphalt_concrete",
+        "table": "bies-2017-table-5-2",
+        "name": "Asphalt, concrete",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "20 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-5-2/water",
+        "table": "bies-2017-table-5-2",
+        "name": "Water",
+        "variant": "",
+        "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+        "note": "Class H is water, not a ground surface in the porous sense; the page still gives it a representative flow resistivity, 200000 kPa s/m2, which is an acoustically hard limit rather than a measured value.",
+        "attributedTo": {
+          "table": "Plovsing, 2006"
+        },
+        "cells": [
+          {
+            "text": "200 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/dry_snow_newly_fallen",
+        "table": "cox-2017-table-6-7",
+        "name": "Dry snow, newly fallen 0.1 m over about 0.4 m older snow",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "10 to 30",
+            "kind": "range",
+            "note": "the page prints 10000 to 30000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/snow",
+        "table": "cox-2017-table-6-7",
+        "name": "Snow",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "The water content and porosity decay cells are blank, not dashed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "5 to 16",
+            "kind": "range",
+            "note": "the page prints 5000 to 16000 and no value"
+          },
+          {
+            "text": "0,5 to 0,9",
+            "kind": "range",
+            "note": "the page prints 0.5 to 0.9 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/sugar_snow",
+        "table": "cox-2017-table-6-7",
+        "name": "Sugar snow",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "25 to 50",
+            "kind": "range",
+            "note": "the page prints 25000 to 50000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/snow_new",
+        "table": "cox-2017-table-6-7",
+        "name": "Snow (new)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "1 to 10",
+            "kind": "range",
+            "note": "the page prints 1000 to 10000 and no value"
+          },
+          {
+            "text": "0,64 to 0,88",
+            "kind": "range",
+            "note": "the page prints 0.64 to 0.88 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0 to 3",
+            "kind": "range",
+            "note": "the page prints 0 to 3 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/snow_old_crusted",
+        "table": "cox-2017-table-6-7",
+        "name": "Snow (old crusted)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "8 to 30",
+            "kind": "range",
+            "note": "the page prints 8000 to 30000 and no value"
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0 to 100",
+            "kind": "range",
+            "note": "the page prints 0 to 100 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/snow_great_himalaya_snowpack",
+        "table": "cox-2017-table-6-7",
+        "name": "Snow (Great Himalaya snowpack)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "The water content and porosity decay cells are blank, not dashed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "1 to 23",
+            "kind": "range",
+            "note": "the page prints 1000 to 23000 and no value"
+          },
+          {
+            "text": "0,52 to 0,89",
+            "kind": "range",
+            "note": "the page prints 0.52 to 0.89 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/in_forest_pine_or_hemlock",
+        "table": "cox-2017-table-6-7",
+        "name": "In forest, pine, or hemlock",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "20 to 80",
+            "kind": "range",
+            "note": "the page prints 20000 to 80000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/forest_floor",
+        "table": "cox-2017-table-6-7",
+        "name": "Forest floor",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"7 × 10^3–20 × 10^4\", the two ends written with different exponents. Water content cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "7 to 200",
+            "kind": "range",
+            "note": "the page prints 7000 to 200000 and no value"
+          },
+          {
+            "text": "0,4 to 0,8",
+            "kind": "range",
+            "note": "the page prints 0.4 to 0.8 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0 to 40",
+            "kind": "range",
+            "note": "the page prints 0 to 40 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/mineral_layer_beneath_mixed_deciduous_forest",
+        "table": "cox-2017-table-6-7",
+        "name": "Mineral layer beneath mixed deciduous forest",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "540",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/humus_on_pine_forest_floor",
+        "table": "cox-2017-table-6-7",
+        "name": "Humus on pine forest floor",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "230",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/litter_layer_on_mixed_deciduous_forest_floor",
+        "table": "cox-2017-table-6-7",
+        "name": "Litter layer on mixed deciduous forest floor (2–5 cm thick)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"(30 ± 30) × 10^3\"; the stated uncertainty equals the value. Name wrapped over two printed lines, the en dash of \"2–5 cm\" as printed. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/pine_forest_litter",
+        "table": "cox-2017-table-6-7",
+        "name": "Pine forest litter (6–7 cm thick)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/tall_crops",
+        "table": "cox-2017-table-6-7",
+        "name": "Tall crops",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content and porosity cells print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "40 to 50",
+            "kind": "range",
+            "note": "the page prints 40000 to 50000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/sports_field_delany_bazley",
+        "table": "cox-2017-table-6-7",
+        "name": "Sports field",
+        "variant": "Fitted using Delany and Bazley model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell, \"0.24\", and the porosity decay cell, \"−270\", are printed once for the surface, on this line, and carry no fit marker. The water content cell is blank.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "1 400",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "-270",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/sports_field_semi_phenomenological",
+        "table": "cox-2017-table-6-7",
+        "name": "Sports field",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "510",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/sports_field_variable_porosity",
+        "table": "cox-2017-table-6-7",
+        "name": "Sports field",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "990",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/lawn_delany_bazley",
+        "table": "cox-2017-table-6-7",
+        "name": "Lawn",
+        "variant": "Fitted using Delany and Bazley model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.34–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−76 to 47\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "120 to 750",
+            "kind": "range",
+            "note": "the page prints 120000 to 750000 and no value"
+          },
+          {
+            "text": "0,34 to 1",
+            "kind": "range",
+            "note": "the page prints 0.34 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "-76 to 47",
+            "kind": "range",
+            "note": "the page prints -76 to 47 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/lawn_semi_phenomenological",
+        "table": "cox-2017-table-6-7",
+        "name": "Lawn",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "120 to 310",
+            "kind": "range",
+            "note": "the page prints 120000 to 310000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/lawn_variable_porosity",
+        "table": "cox-2017-table-6-7",
+        "name": "Lawn",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "39 to 370",
+            "kind": "range",
+            "note": "the page prints 39000 to 370000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/long_grass_delany_bazley",
+        "table": "cox-2017-table-6-7",
+        "name": "Long grass",
+        "variant": "Fitted using Delany and Bazley model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.38–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−9 to 48\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "47 to 180",
+            "kind": "range",
+            "note": "the page prints 47000 to 180000 and no value"
+          },
+          {
+            "text": "0,38 to 1",
+            "kind": "range",
+            "note": "the page prints 0.38 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "-9 to 48",
+            "kind": "range",
+            "note": "the page prints -9 to 48 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/long_grass_semi_phenomenological",
+        "table": "cox-2017-table-6-7",
+        "name": "Long grass",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "37 to 85",
+            "kind": "range",
+            "note": "the page prints 37000 to 85000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/long_grass_variable_porosity",
+        "table": "cox-2017-table-6-7",
+        "name": "Long grass",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "140 to 800",
+            "kind": "range",
+            "note": "the page prints 140000 to 800000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/grassland",
+        "table": "cox-2017-table-6-7",
+        "name": "Grassland",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Two flow resistivity ranges are printed on two lines for this one surface, \"7 × 10^4–8.5 × 10^5\" and \"1 × 10^5–2.4 × 10^5\", with no fit markers and nothing to pair them with, so both go to reported. Water content cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "70 to 850, 100 to 240",
+            "kind": "reported",
+            "note": "the page lists 70000 to 850000, 100000 to 240000 and no single value"
+          },
+          {
+            "text": "0,3 to 0,7",
+            "kind": "range",
+            "note": "the page prints 0.3 to 0.7 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0 to 250",
+            "kind": "range",
+            "note": "the page prints 0 to 250 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/pasture_delany_bazley",
+        "table": "cox-2017-table-6-7",
+        "name": "Pasture",
+        "variant": "Fitted using Delany and Bazley model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.2–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−400 to 80\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "110 to 1 100",
+            "kind": "range",
+            "note": "the page prints 110000 to 1.1e+06 and no value"
+          },
+          {
+            "text": "0,2 to 1",
+            "kind": "range",
+            "note": "the page prints 0.2 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "-400 to 80",
+            "kind": "range",
+            "note": "the page prints -400 to 80 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/pasture_semi_phenomenological",
+        "table": "cox-2017-table-6-7",
+        "name": "Pasture",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "100 to 950",
+            "kind": "range",
+            "note": "the page prints 100000 to 950000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/pasture_variable_porosity",
+        "table": "cox-2017-table-6-7",
+        "name": "Pasture",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "25 to 820",
+            "kind": "range",
+            "note": "the page prints 25000 to 820000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/grass_rough_pasture_airport_public_buildings",
+        "table": "cox-2017-table-6-7",
+        "name": "Grass, rough pasture, airport, public buildings, etc.",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"15 × 10^4–30 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "150 to 300",
+            "kind": "range",
+            "note": "the page prints 150000 to 300000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/grass_root_layer_in_loamy_sand",
+        "table": "cox-2017-table-6-7",
+        "name": "Grass root layer in loamy sand",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/earth_exposed_and_rain_packed",
+        "table": "cox-2017-table-6-7",
+        "name": "Earth, exposed and rain-packed",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "4 000 to 8 000",
+            "kind": "range",
+            "note": "the page prints 4e+06 to 8e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/bare_earth_delany_bazley",
+        "table": "cox-2017-table-6-7",
+        "name": "Bare earth",
+        "variant": "Fitted using Delany and Bazley model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.4 [b]\": the value itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−49\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "670",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "-49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/bare_earth_semi_phenomenological",
+        "table": "cox-2017-table-6-7",
+        "name": "Bare earth",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "390",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/bare_earth_variable_porosity",
+        "table": "cox-2017-table-6-7",
+        "name": "Bare earth",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "370",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/loose_sand_or_dry_cultivated_soil",
+        "table": "cox-2017-table-6-7",
+        "name": "Loose sand or dry cultivated soil",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "30 to 310",
+            "kind": "range",
+            "note": "the page prints 30000 to 310000 and no value"
+          },
+          {
+            "text": "0,36 to 0,52",
+            "kind": "range",
+            "note": "the page prints 0.36 to 0.52 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0 to 10",
+            "kind": "range",
+            "note": "the page prints 0 to 10 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/sandy_silt_hard_packed_by_vehicles",
+        "table": "cox-2017-table-6-7",
+        "name": "Sandy silt, hard packed by vehicles",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Last row of the table on the first printed page (folio 200, which ends with \"(Continued)\"). Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "800 to 2 500",
+            "kind": "range",
+            "note": "the page prints 800000 to 2.5e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/arable_delany_bazley",
+        "table": "cox-2017-table-6-7",
+        "name": "Arable",
+        "variant": "Fitted using Delany and Bazley model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First row of the continuation page (folio 201); the group heading Earth is not repeated there, so the group is carried over from the first page. First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.15–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−490 to 81\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "93 to 1 900",
+            "kind": "range",
+            "note": "the page prints 93000 to 1.9e+06 and no value"
+          },
+          {
+            "text": "0,15 to 1",
+            "kind": "range",
+            "note": "the page prints 0.15 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "-490 to 81",
+            "kind": "range",
+            "note": "the page prints -490 to 81 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/arable_semi_phenomenological",
+        "table": "cox-2017-table-6-7",
+        "name": "Arable",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "75 to 1 600",
+            "kind": "range",
+            "note": "the page prints 75000 to 1.6e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/arable_variable_porosity",
+        "table": "cox-2017-table-6-7",
+        "name": "Arable",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "22 to 1 700",
+            "kind": "range",
+            "note": "the page prints 22000 to 1.7e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/cultivated_soil",
+        "table": "cox-2017-table-6-7",
+        "name": "Cultivated soil",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "The water content and porosity decay cells are blank, not dashed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "100 to 2 000",
+            "kind": "range",
+            "note": "the page prints 100000 to 2e+06 and no value"
+          },
+          {
+            "text": "0,4 to 0,6",
+            "kind": "range",
+            "note": "the page prints 0.4 to 0.6 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/wet_and_compacted_soil",
+        "table": "cox-2017-table-6-7",
+        "name": "Wet and compacted soil",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content and porosity cells print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "40 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "-200 to 0",
+            "kind": "range",
+            "note": "the page prints -200 to 0 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/heath_line_1_marked_b",
+        "table": "cox-2017-table-6-7",
+        "name": "Heath",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of three fitted values printed for this surface. TWO defects on the printed line, both transcribed as printed and neither repaired: (1) the low end of the range is printed \"1.7.3 × 10^5\", with two decimal points, which is not a readable number, so the whole flow resistivity cell goes to unquantified rather than being guessed at; (2) the fit marker is printed [b], not [a], although every other surface with three fitted lines in this table is marked [a], [b], [c] in that order and the line below is also marked [b]. The porosity cell is printed \"0.71–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"17–33\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "1.7.3 × 10⁵ – 3.2 × 10⁵",
+            "kind": "unquantified",
+            "note": "the page prints “1.7.3 × 10⁵ – 3.2 × 10⁵” where the number would be"
+          },
+          {
+            "text": "0,71 to 1",
+            "kind": "range",
+            "note": "the page prints 0.71 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17 to 33",
+            "kind": "range",
+            "note": "the page prints 17 to 33 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/heath_line_2_marked_b",
+        "table": "cox-2017-table-6-7",
+        "name": "Heath",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]. The line above is marked [b] as well; see that row. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "180 to 260",
+            "kind": "range",
+            "note": "the page prints 180000 to 260000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/heath_line_3_marked_c",
+        "table": "cox-2017-table-6-7",
+        "name": "Heath",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "51 to 110",
+            "kind": "range",
+            "note": "the page prints 51000 to 110000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/roadside_dirt_ill_defined_small_rocks",
+        "table": "cox-2017-table-6-7",
+        "name": "Roadside dirt, ill-defined, small rocks up to 0.1 m mesh",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"30 × 10^4–80 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "300 to 800",
+            "kind": "range",
+            "note": "the page prints 300000 to 800000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/clean_limestone_chops_thick_layer",
+        "table": "cox-2017-table-6-7",
+        "name": "Clean limestone chops, thick layer (1–2.5 cm mesh)",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "The word \"Clean\" is printed in italic, the rest of the name upright. Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "1 000 to 4 000",
+            "kind": "range",
+            "note": "the page prints 1e+06 to 4e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/old_dirt_roadway_fine_stones",
+        "table": "cox-2017-table-6-7",
+        "name": "Old dirt roadway, fine stones (5 cm mesh) interstices filled",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "2 000 to 4 000",
+            "kind": "range",
+            "note": "the page prints 2e+06 to 4e+06 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/gravel",
+        "table": "cox-2017-table-6-7",
+        "name": "Gravel",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"1.5 × 10^3–59 × 10^3\". Water content and porosity decay cells print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "1,5 to 59",
+            "kind": "range",
+            "note": "the page prints 1500 to 59000 and no value"
+          },
+          {
+            "text": "0,3 to 0,4",
+            "kind": "range",
+            "note": "the page prints 0.3 to 0.4 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/quarry_dust_fine_very_hard_packed_by_vehicles",
+        "table": "cox-2017-table-6-7",
+        "name": "Quarry dust fine, very hard-packed by vehicles",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"5 × 10^6–20 × 10^6\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "5 000 to 20 000",
+            "kind": "range",
+            "note": "the page prints 5e+06 to 2e+07 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/asphalt_sealed_by_dust_and_light_use",
+        "table": "cox-2017-table-6-7",
+        "name": "Asphalt, sealed by dust and light use",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"≈3 × 10^7\" with a printed approximately-equal sign, the only approximate cell in the table. Water content, porosity and porosity decay cells all print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "30 000",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/porous_asphalt_new",
+        "table": "cox-2017-table-6-7",
+        "name": "Porous asphalt, new",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"2 × 10^3–15 × 10^3\". Water content and porosity decay cells print a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "2 to 15",
+            "kind": "range",
+            "note": "the page prints 2000 to 15000 and no value"
+          },
+          {
+            "text": "0,15 to 0,3",
+            "kind": "range",
+            "note": "the page prints 0.15 to 0.3 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/urban_delany_bazley",
+        "table": "cox-2017-table-6-7",
+        "name": "Urban",
+        "variant": "Fitted using Delany and Bazley model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.61–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"0–25\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "41 to 67",
+            "kind": "range",
+            "note": "the page prints 41000 to 67000 and no value"
+          },
+          {
+            "text": "0,61 to 1",
+            "kind": "range",
+            "note": "the page prints 0.61 to 1 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0 to 25",
+            "kind": "range",
+            "note": "the page prints 0 to 25 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/urban_semi_phenomenological",
+        "table": "cox-2017-table-6-7",
+        "name": "Urban",
+        "variant": "Fitted using semi-phenomenological model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of three fitted values printed for this surface, marked [b]; it is a single value where the other two lines are ranges. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/urban_variable_porosity",
+        "table": "cox-2017-table-6-7",
+        "name": "Urban",
+        "variant": "Fitted using variable porosity model",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "21 to 67",
+            "kind": "range",
+            "note": "the page prints 21000 to 67000 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/coarse_sand_98um_water_0",
+        "table": "cox-2017-table-6-7",
+        "name": "Coarse sand, pore size 98 μm",
+        "variant": "water content 0 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/coarse_sand_98um_water_11",
+        "table": "cox-2017-table-6-7",
+        "name": "Coarse sand, pore size 98 μm",
+        "variant": "water content 11 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/coarse_sand_98um_water_51",
+        "table": "cox-2017-table-6-7",
+        "name": "Coarse sand, pore size 98 μm",
+        "variant": "water content 51 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "470",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-141",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/coarse_sand_98um_water_95",
+        "table": "cox-2017-table-6-7",
+        "name": "Coarse sand, pore size 98 μm",
+        "variant": "water content 95 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The flow resistivity falls back at the highest water content, below the 51 % and 11 % lines.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 290",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/fine_sand",
+        "table": "cox-2017-table-6-7",
+        "name": "Fine sand",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Water content and porosity decay cells print a dash. Printed name is \"Fine sand\" with no pore size, distinct from the \"Fine sand, pore size 65 μm\" block below it.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "310",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/fine_sand_65um_water_0",
+        "table": "cox-2017-table-6-7",
+        "name": "Fine sand, pore size 65 μm",
+        "variant": "water content 0 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/fine_sand_65um_water_15",
+        "table": "cox-2017-table-6-7",
+        "name": "Fine sand, pore size 65 μm",
+        "variant": "water content 15 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "140",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "130",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/fine_sand_65um_water_48",
+        "table": "cox-2017-table-6-7",
+        "name": "Fine sand, pore size 65 μm",
+        "variant": "water content 48 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "620",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/fine_sand_65um_water_95",
+        "table": "cox-2017-table-6-7",
+        "name": "Fine sand, pore size 65 μm",
+        "variant": "water content 95 %",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 130",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/loamy_sand",
+        "table": "cox-2017-table-6-7",
+        "name": "Loamy sand",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "420",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "11,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-table-6-7/bare_sandy_plain",
+        "table": "cox-2017-table-6-7",
+        "name": "Bare sandy plain",
+        "variant": "",
+        "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+        "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
+        "attributedTo": {
+          "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+        },
+        "cells": [
+          {
+            "text": "370",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "9,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
   "fluids": {
     "columns": [
       {

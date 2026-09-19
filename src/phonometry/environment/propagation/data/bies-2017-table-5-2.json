@@ -1,0 +1,97 @@
+{
+  "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
+  "about": "Rendered PDF page 257, folio 228 (running head \"228   Engineering Noise Control, Fifth Edition\"). The table sits at the top of the page, above Figure 5.1. Title as printed, running over two lines: \"TABLE 5.2 Flow resistivities for some common ground surface types (to be used with the ISO9613-2, NMPB-2008 and Harmonoise propagation models)\" (the line break falls inside \"ISO9613-2\", printed \"ISO9613-\" / \"2\"). Five columns, each heading stacked over two to four lines: \"Ground surface class\"; \"Value of ISO9613-2 parameter, G\" (G italic); \"Value of NMPB-2008 parameter, G\" (G italic); \"Representative flow resistivity R1 (kPa s/m2) (Harmonoise)\" (1 subscript, 2 superscript); \"Ground surface description\". Eight rows, classes A to H, in page order. No footnotes and no per-row superscripts. Field mapping: the class letter goes to harmonoise_class as a string, the two G columns to iso_9613_ground_factor and nmpb_ground_factor (dimensionless, carried over unchanged), the Harmonoise column to flow_resistivity_pa_s_m2 after multiplying the printed kPa s/m2 by 1000, and the description column to name (the two descriptions that wrap over two printed lines, classes D and F, are joined with a single space). Every cell is a single printed number: no ranges, no approximations, no empty cells. The class letters themselves are the only thing that could be read as a grouping, and they are carried in harmonoise_class, so no group field is given. Credit: the prose that introduces the table, on PDF page 255 (folio 226), Section 5.2.1 Porous Ground, reads \"As can be seen from Table 5.1, there are great variations in flow resistivity measured data from different sources. For this reason, some propagation models classify ground surfaces into 8 types labelled A-H, as listed in Table 5.2 (see Plovsing (2006)).\" That single citation is recorded in attributed_to under the key \"table\"; the book's reference list gives it as \"Plovsing, B. (2006). Comprehensive outdoor sound propagation model. Part 1: Propagation in an atmosphere without significant refraction\". The table is used again on PDF page 319 (folio 290), Section 5.7.1.2 Ground Effect with No Diffraction: \"The purpose of this section is to introduce the factor, G, which is used to characterise the flow resistivity of the ground surface in a similar way as done in the ISO9613-2 model. Values of G to be used in the NMPB-2008 model for various ground surfaces are listed in Table 5.2.\" Oddity: the last row, class H, is water, which is not a porous ground surface; its 200000 kPa s/m2 is an acoustically hard stand-in. Nothing on the page gives a measurement frequency, method or uncertainty.",
+  "rows": [
+    {
+      "key": "very_soft_snow_or_moss",
+      "name": "Very soft (snow or moss)",
+      "harmonoise_class": "A",
+      "iso_9613_ground_factor": 1.0,
+      "nmpb_ground_factor": 1.0,
+      "flow_resistivity_pa_s_m2": 12500.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      }
+    },
+    {
+      "key": "soft_forest_floor",
+      "name": "Soft forest floor",
+      "harmonoise_class": "B",
+      "iso_9613_ground_factor": 1.0,
+      "nmpb_ground_factor": 1.0,
+      "flow_resistivity_pa_s_m2": 31500.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      }
+    },
+    {
+      "key": "uncompacted_loose_ground",
+      "name": "Uncompacted, loose ground",
+      "harmonoise_class": "C",
+      "iso_9613_ground_factor": 1.0,
+      "nmpb_ground_factor": 1.0,
+      "flow_resistivity_pa_s_m2": 80000.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      }
+    },
+    {
+      "key": "normal_uncompacted_ground",
+      "name": "Normal uncompacted ground (pastures, forest floors)",
+      "harmonoise_class": "D",
+      "iso_9613_ground_factor": 1.0,
+      "nmpb_ground_factor": 1.0,
+      "flow_resistivity_pa_s_m2": 200000.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      },
+      "note": "Description wrapped over two printed lines: \"Normal uncompacted ground\" / \"(pastures, forest floors)\"."
+    },
+    {
+      "key": "compacted_fields_lawns_and_gravel",
+      "name": "Compacted fields, lawns and gravel",
+      "harmonoise_class": "E",
+      "iso_9613_ground_factor": 0.0,
+      "nmpb_ground_factor": 0.7,
+      "flow_resistivity_pa_s_m2": 500000.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      }
+    },
+    {
+      "key": "compacted_dense_ground",
+      "name": "Compacted dense ground (gravel road, parking lot)",
+      "harmonoise_class": "F",
+      "iso_9613_ground_factor": 0.0,
+      "nmpb_ground_factor": 0.3,
+      "flow_resistivity_pa_s_m2": 2000000.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      },
+      "note": "Description wrapped over two printed lines: \"Compacted dense ground\" / \"(gravel road, parking lot)\"."
+    },
+    {
+      "key": "asphalt_concrete",
+      "name": "Asphalt, concrete",
+      "harmonoise_class": "G",
+      "iso_9613_ground_factor": 0.0,
+      "nmpb_ground_factor": 0.0,
+      "flow_resistivity_pa_s_m2": 20000000.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      }
+    },
+    {
+      "key": "water",
+      "name": "Water",
+      "harmonoise_class": "H",
+      "iso_9613_ground_factor": 0.0,
+      "nmpb_ground_factor": 0.0,
+      "flow_resistivity_pa_s_m2": 200000000.0,
+      "attributed_to": {
+        "table": "Plovsing, 2006"
+      },
+      "note": "Class H is water, not a ground surface in the porous sense; the page still gives it a representative flow resistivity, 200000 kPa s/m2, which is an acoustically hard limit rather than a measured value."
+    }
+  ]
+}

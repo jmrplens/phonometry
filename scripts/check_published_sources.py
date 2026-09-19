@@ -174,6 +174,16 @@ SOURCED: dict[tuple[str, str], str] = {
         "MIKI_VALIDITY",
     ): "Miki (1990) Sect. 4.1, the lower limit of the fit range",
     (
+        "environment/propagation/ground_surfaces.py",
+        "PUBLISHED_GROUND",
+    ): (
+        "Bies 5e Table 5.1, thirty-four measured ground surfaces; "
+        "Bies 5e Table 5.2, the eight ground classes A to H with the ISO "
+        "9613-2 and NMPB-2008 ground factors; "
+        "Cox & D'Antonio 3e Table 6.7, sixty-three effective flow "
+        "resistivities over three model fits"
+    ),
+    (
         "fluids/catalogue.py",
         "PUBLISHED_FLUIDS",
     ): "Bies 5e Table C.1, the three fluids it prints before its solids",

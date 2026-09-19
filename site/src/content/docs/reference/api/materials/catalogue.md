@@ -1,11 +1,11 @@
 ---
 title: "materials.absorbers.catalogue"
-description: "Porous specimens as the pages that print them print them."
+description: "Porous specimens as the pages that print them have them."
 sidebar:
   label: "catalogue"
 ---
 
-Porous specimens as the pages that print them print them.
+Porous specimens as the pages that print them have them.
 
 The five-parameter models of [`porous`](/phonometry/reference/api/materials/porous/)
 take a flow resistivity, a porosity, a tortuosity and two characteristic
@@ -81,7 +81,7 @@ Every published row for a specimen name, across the tables.
 Comparing two printings of one specimen is the point of holding both, and
 it has to be a deliberate act: a lookup that returned one row for "Foam"
 would be choosing between published parameter sets on the caller's behalf,
-and one of these books prints four different foams under that name. Across
+and one of these books prints five different foams under that name. Across
 the books it also puts a measured specimen beside the range its class is
 compiled in: "Mineral wool" answers with Allard's specimen and with the
 two ranges Cox compiles for it.

@@ -1,0 +1,1034 @@
+{
+  "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
+  "about": "Rendered PDF pages 257 and 258, folios 200 and 201 (running heads \"200   Acoustic Absorbers and Diffusers\" and \"Porous sound absorption   201\"). Title as printed on the first page: \"Table 6.7 Effective flow resistivity values for ground surfaces and other parameters\" (\"Table 6.7\" italic); the continuation page repeats it as \"Table 6.7 (Continued) Effective flow resistivity values for ground surfaces and other parameters\". Five columns, headings in italic, repeated identically on both pages: \"Surface\"; \"Effective flow resistivity (rayl m-1)\" (the -1 a superscript); \"Water content (%)\"; \"Porosity\"; \"Porosity decay zeta (m-1)\" (the Greek zeta as printed). Seven bold group headings run down the Surface column: Snow, Forests and crops, Grass, Earth (first page), then Rock, Other, Sand (second page); the Earth group is split across the page break and its heading is NOT repeated on the continuation page, so the first rows of folio 201 (Arable, Cultivated soil, Wet and compacted soil, Heath) are carried under group Earth. Each heading is recorded as the group field on its rows and is not itself a row. 63 rows, in page order. Units: the printed unit rayl m-1 is the library unit Pa s/m2, so every flow resistivity is carried over with factor 1; the powers of ten are expanded (\"1 × 10^4–3 × 10^4\" becomes ranges [10000.0, 30000.0], \"(540 ± 92) × 10^3\" becomes 540000.0 with uncertainty 92000.0, \"≈3 × 10^7\" becomes 30000000.0 flagged approximate). Cell conventions on the page: an en-dashed interval is a range; \"−76 to 47\" and \"−400 to 80\" are ranges with a negative low end; a dash \"-\" is an empty cell, and so is a blank cell (both kinds occur, apparently at random, and both mean the quantity is absent from the row; each row's note says which it was). Footnote markers [a], [b] and [c] are printed in square brackets beside individual cells; the footnotes, verbatim, are \"a Fitted using Delany and Bazley model.\", \"b Fitted using semi-phenomenological model.\" and \"c Fitted using variable porosity model.\" Seven surfaces (Sports field, Lawn, Long grass, Pasture, Bare earth, Arable, Urban, and Heath with a defect noted below) print THREE flow resistivity lines under one name, one per fit; each becomes its own row with variant set to the footnote text as printed. For those surfaces the water content, porosity and porosity decay cells are printed ONCE, typographically on the line of the first fit, and they are recorded on that first row only, with a note on the other two pointing back to it; where such a porosity cell itself carries a marker (always [b] in this table, e.g. \"0.34–1 [b]\"), the marker text is quoted in that row's note rather than being made into a separate row. Two sand surfaces (Coarse sand, pore size 98 μm and Fine sand, pore size 65 um) print FOUR lines each, one per water content, and become four rows with variant \"water content 0 %\" and so on, the water content also going to its own field. Grassland prints two unmarked ranges on two lines with nothing to pair them with, so both go to reported. Printed defects, transcribed and not repaired: the first Heath line prints its low end as \"1.7.3 × 10^5\", with two decimal points, which is not a readable number (the cell is therefore unquantified), and that same line is marked [b] rather than [a], so Heath prints two [b] lines and no [a]. Oddity in the Porosity column: six rows (Mineral layer beneath mixed deciduous forest 36.5, Humus on pine forest floor 58.1, Pine forest litter 38.9, Grass root layer in loamy sand 48 ± 4, Loamy sand 37.5, Bare sandy plain 26.9) print values far above 1 in a column that everywhere else prints fractions; they are plainly percentages on the page and are transcribed exactly as printed. What the prose says: on folio 199 (PDF 256), \"The ground is often modelled as a porous absorber. The Delany and Bazley formulations have been used quite extensively to obtain the characteristic impedance and wavenumber, even though these equations were developed for use with glass fibre rather than loose granular materials. For this, flow resistivity values for typical ground surfaces are needed, and Table 6.7 gives the appropriate values. While the Delany and Bazley model\" - continuing on folio 202 (PDF 259) - \"works reasonably well above about 250 Hz, at lower frequencies, the characteristic impedance and wavenumber have significant errors, resulting in inaccurate predictions of excess attenuations. Modelling the porosity to vary with depth (see Section 6.6.3) or using a semi-phenomenological model (see Section 6.5.3) is usually more accurate.\" On folio 214 (PDF 271) the book defines what \"effective\" means, after Equation 6.45, sigma_e ≈ 4 s_p^2 sigma / phi: \"where sigma is the flow resistivity and s_p is a characteristic length, which can be taken to be 0.5 in many cases, meaning the effective flow resistivity is just the flow resistivity scaled by the porosity\", and what the last column is: \"The change in soil properties is modelled as an exponential decrease in porosity with depth. The rate of change in porosity with depth is given by zeta, and some values for this parameter are given in Table 6.7.\" Credit: the table carries no per-row superscripts into the chapter 6 reference list; instead a \"Sources:\" block under the continuation page credits the whole table, printed verbatim as \"Sources: Horoshenkov, K.V., Mohamed, M.H.A., J. Acoust. Soc. Am., 120, 1910–1921, 2006; Attenborough, L., Bashir, I., Taherzadeh, S., J. Acoust. Soc. Am., 129, 2806–2819, 2011; Attenborough, K., J. Acoust. Soc. Am., 81, 93–102, 1982; Attenborough, K., Acta Acust., 1, 213–226, 1993; Berryman, J.G., Appl. Phys. Lett., 37, 382–384, 1980; Embleton, T.F.W., Piercy, J.E., Daigle, G.A., J. Acoust. Soc. Am., 74, 1239–1244, 1983; Martens, M.J.M., van der Haijden, L.A.M., Walthaus, H.H.J., van Rens, W.J.J., J. Acoust. Soc. Am., 78, 970–980, 1985; Datt, P., Kapil, J.C., Kumar, A., Srivastava, P.K., Appl. Acoust., 101, 15–23, 2016.\" All eight are resolved into attributed_to under the key \"table\" on every row. Note that the 2011 entry is printed \"Attenborough, L.\" where the other two Attenborough entries are \"Attenborough, K.\"; the initial is transcribed as printed here and only the surname is used in attributed_to. Nothing on the page gives a measurement frequency or a measurement method for any row beyond the three fitting models of the footnotes.",
+  "rows": [
+    {
+      "key": "dry_snow_newly_fallen",
+      "name": "Dry snow, newly fallen 0.1 m over about 0.4 m older snow",
+      "group": "Snow",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          10000.0,
+          30000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "snow",
+      "name": "Snow",
+      "group": "Snow",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          5000.0,
+          16000.0
+        ],
+        "porosity": [
+          0.5,
+          0.9
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "The water content and porosity decay cells are blank, not dashed."
+    },
+    {
+      "key": "sugar_snow",
+      "name": "Sugar snow",
+      "group": "Snow",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          25000.0,
+          50000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "snow_new",
+      "name": "Snow (new)",
+      "group": "Snow",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          1000.0,
+          10000.0
+        ],
+        "porosity": [
+          0.64,
+          0.88
+        ],
+        "porosity_decay_rate_per_m": [
+          0.0,
+          3.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content cell prints a dash."
+    },
+    {
+      "key": "snow_old_crusted",
+      "name": "Snow (old crusted)",
+      "group": "Snow",
+      "porosity": 0.5,
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          8000.0,
+          30000.0
+        ],
+        "porosity_decay_rate_per_m": [
+          0.0,
+          100.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content cell prints a dash."
+    },
+    {
+      "key": "snow_great_himalaya_snowpack",
+      "name": "Snow (Great Himalaya snowpack)",
+      "group": "Snow",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          1000.0,
+          23000.0
+        ],
+        "porosity": [
+          0.52,
+          0.89
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "The water content and porosity decay cells are blank, not dashed."
+    },
+    {
+      "key": "in_forest_pine_or_hemlock",
+      "name": "In forest, pine, or hemlock",
+      "group": "Forests and crops",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          20000.0,
+          80000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "forest_floor",
+      "name": "Forest floor",
+      "group": "Forests and crops",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          7000.0,
+          200000.0
+        ],
+        "porosity": [
+          0.4,
+          0.8
+        ],
+        "porosity_decay_rate_per_m": [
+          0.0,
+          40.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"7 × 10^3–20 × 10^4\", the two ends written with different exponents. Water content cell prints a dash."
+    },
+    {
+      "key": "mineral_layer_beneath_mixed_deciduous_forest",
+      "name": "Mineral layer beneath mixed deciduous forest",
+      "group": "Forests and crops",
+      "flow_resistivity_pa_s_m2": 540000.0,
+      "porosity": 36.5,
+      "water_content_percent": 15.0,
+      "uncertainty": {
+        "flow_resistivity_pa_s_m2": 92000.0
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed."
+    },
+    {
+      "key": "humus_on_pine_forest_floor",
+      "name": "Humus on pine forest floor",
+      "group": "Forests and crops",
+      "flow_resistivity_pa_s_m2": 230000.0,
+      "porosity": 58.1,
+      "water_content_percent": 16.1,
+      "uncertainty": {
+        "flow_resistivity_pa_s_m2": 220000.0
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed."
+    },
+    {
+      "key": "litter_layer_on_mixed_deciduous_forest_floor",
+      "name": "Litter layer on mixed deciduous forest floor (2–5 cm thick)",
+      "group": "Forests and crops",
+      "flow_resistivity_pa_s_m2": 30000.0,
+      "uncertainty": {
+        "flow_resistivity_pa_s_m2": 30000.0
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"(30 ± 30) × 10^3\"; the stated uncertainty equals the value. Name wrapped over two printed lines, the en dash of \"2–5 cm\" as printed. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "pine_forest_litter",
+      "name": "Pine forest litter (6–7 cm thick)",
+      "group": "Forests and crops",
+      "flow_resistivity_pa_s_m2": 9000.0,
+      "porosity": 38.9,
+      "water_content_percent": 28.6,
+      "uncertainty": {
+        "flow_resistivity_pa_s_m2": 5000.0
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed."
+    },
+    {
+      "key": "tall_crops",
+      "name": "Tall crops",
+      "group": "Forests and crops",
+      "porosity_decay_rate_per_m": 0.0,
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          40000.0,
+          50000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content and porosity cells print a dash."
+    },
+    {
+      "key": "sports_field_delany_bazley",
+      "name": "Sports field",
+      "variant": "Fitted using Delany and Bazley model",
+      "group": "Grass",
+      "flow_resistivity_pa_s_m2": 1400000.0,
+      "porosity": 0.24,
+      "porosity_decay_rate_per_m": -270.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell, \"0.24\", and the porosity decay cell, \"−270\", are printed once for the surface, on this line, and carry no fit marker. The water content cell is blank."
+    },
+    {
+      "key": "sports_field_semi_phenomenological",
+      "name": "Sports field",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Grass",
+      "flow_resistivity_pa_s_m2": 510000.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "sports_field_variable_porosity",
+      "name": "Sports field",
+      "variant": "Fitted using variable porosity model",
+      "group": "Grass",
+      "flow_resistivity_pa_s_m2": 990000.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "lawn_delany_bazley",
+      "name": "Lawn",
+      "variant": "Fitted using Delany and Bazley model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          120000.0,
+          750000.0
+        ],
+        "porosity": [
+          0.34,
+          1.0
+        ],
+        "porosity_decay_rate_per_m": [
+          -76.0,
+          47.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.34–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−76 to 47\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank."
+    },
+    {
+      "key": "lawn_semi_phenomenological",
+      "name": "Lawn",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          120000.0,
+          310000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "lawn_variable_porosity",
+      "name": "Lawn",
+      "variant": "Fitted using variable porosity model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          39000.0,
+          370000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "long_grass_delany_bazley",
+      "name": "Long grass",
+      "variant": "Fitted using Delany and Bazley model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          47000.0,
+          180000.0
+        ],
+        "porosity": [
+          0.38,
+          1.0
+        ],
+        "porosity_decay_rate_per_m": [
+          -9.0,
+          48.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.38–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−9 to 48\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank."
+    },
+    {
+      "key": "long_grass_semi_phenomenological",
+      "name": "Long grass",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          37000.0,
+          85000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "long_grass_variable_porosity",
+      "name": "Long grass",
+      "variant": "Fitted using variable porosity model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          140000.0,
+          800000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "grassland",
+      "name": "Grassland",
+      "group": "Grass",
+      "ranges": {
+        "porosity": [
+          0.3,
+          0.7
+        ],
+        "porosity_decay_rate_per_m": [
+          0.0,
+          250.0
+        ]
+      },
+      "reported": {
+        "flow_resistivity_pa_s_m2": [
+          [
+            70000.0,
+            850000.0
+          ],
+          [
+            100000.0,
+            240000.0
+          ]
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Two flow resistivity ranges are printed on two lines for this one surface, \"7 × 10^4–8.5 × 10^5\" and \"1 × 10^5–2.4 × 10^5\", with no fit markers and nothing to pair them with, so both go to reported. Water content cell prints a dash."
+    },
+    {
+      "key": "pasture_delany_bazley",
+      "name": "Pasture",
+      "variant": "Fitted using Delany and Bazley model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          110000.0,
+          1100000.0
+        ],
+        "porosity": [
+          0.2,
+          1.0
+        ],
+        "porosity_decay_rate_per_m": [
+          -400.0,
+          80.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.2–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−400 to 80\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash."
+    },
+    {
+      "key": "pasture_semi_phenomenological",
+      "name": "Pasture",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          100000.0,
+          950000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "pasture_variable_porosity",
+      "name": "Pasture",
+      "variant": "Fitted using variable porosity model",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          25000.0,
+          820000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "grass_rough_pasture_airport_public_buildings",
+      "name": "Grass, rough pasture, airport, public buildings, etc.",
+      "group": "Grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          150000.0,
+          300000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"15 × 10^4–30 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "grass_root_layer_in_loamy_sand",
+      "name": "Grass root layer in loamy sand",
+      "group": "Grass",
+      "flow_resistivity_pa_s_m2": 150000.0,
+      "porosity": 48.0,
+      "uncertainty": {
+        "flow_resistivity_pa_s_m2": 90000.0,
+        "porosity": 4.0
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed."
+    },
+    {
+      "key": "earth_exposed_and_rain_packed",
+      "name": "Earth, exposed and rain-packed",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          4000000.0,
+          8000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "bare_earth_delany_bazley",
+      "name": "Bare earth",
+      "variant": "Fitted using Delany and Bazley model",
+      "group": "Earth",
+      "flow_resistivity_pa_s_m2": 670000.0,
+      "porosity": 0.4,
+      "porosity_decay_rate_per_m": -49.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.4 [b]\": the value itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−49\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank."
+    },
+    {
+      "key": "bare_earth_semi_phenomenological",
+      "name": "Bare earth",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Earth",
+      "flow_resistivity_pa_s_m2": 390000.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "bare_earth_variable_porosity",
+      "name": "Bare earth",
+      "variant": "Fitted using variable porosity model",
+      "group": "Earth",
+      "flow_resistivity_pa_s_m2": 370000.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "loose_sand_or_dry_cultivated_soil",
+      "name": "Loose sand or dry cultivated soil",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          30000.0,
+          310000.0
+        ],
+        "porosity": [
+          0.36,
+          0.52
+        ],
+        "porosity_decay_rate_per_m": [
+          0.0,
+          10.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content cell prints a dash."
+    },
+    {
+      "key": "sandy_silt_hard_packed_by_vehicles",
+      "name": "Sandy silt, hard packed by vehicles",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          800000.0,
+          2500000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Last row of the table on the first printed page (folio 200, which ends with \"(Continued)\"). Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "arable_delany_bazley",
+      "name": "Arable",
+      "variant": "Fitted using Delany and Bazley model",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          93000.0,
+          1900000.0
+        ],
+        "porosity": [
+          0.15,
+          1.0
+        ],
+        "porosity_decay_rate_per_m": [
+          -490.0,
+          81.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First row of the continuation page (folio 201); the group heading Earth is not repeated there, so the group is carried over from the first page. First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.15–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−490 to 81\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank."
+    },
+    {
+      "key": "arable_semi_phenomenological",
+      "name": "Arable",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          75000.0,
+          1600000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "arable_variable_porosity",
+      "name": "Arable",
+      "variant": "Fitted using variable porosity model",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          22000.0,
+          1700000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "cultivated_soil",
+      "name": "Cultivated soil",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          100000.0,
+          2000000.0
+        ],
+        "porosity": [
+          0.4,
+          0.6
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "The water content and porosity decay cells are blank, not dashed."
+    },
+    {
+      "key": "wet_and_compacted_soil",
+      "name": "Wet and compacted soil",
+      "group": "Earth",
+      "flow_resistivity_pa_s_m2": 40000000.0,
+      "ranges": {
+        "porosity_decay_rate_per_m": [
+          -200.0,
+          0.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content and porosity cells print a dash."
+    },
+    {
+      "key": "heath_line_1_marked_b",
+      "name": "Heath",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Earth",
+      "ranges": {
+        "porosity": [
+          0.71,
+          1.0
+        ],
+        "porosity_decay_rate_per_m": [
+          17.0,
+          33.0
+        ]
+      },
+      "unquantified": {
+        "flow_resistivity_pa_s_m2": "1.7.3 × 10⁵ – 3.2 × 10⁵"
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of three fitted values printed for this surface. TWO defects on the printed line, both transcribed as printed and neither repaired: (1) the low end of the range is printed \"1.7.3 × 10^5\", with two decimal points, which is not a readable number, so the whole flow resistivity cell goes to unquantified rather than being guessed at; (2) the fit marker is printed [b], not [a], although every other surface with three fitted lines in this table is marked [a], [b], [c] in that order and the line below is also marked [b]. The porosity cell is printed \"0.71–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"17–33\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank."
+    },
+    {
+      "key": "heath_line_2_marked_b",
+      "name": "Heath",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          180000.0,
+          260000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]. The line above is marked [b] as well; see that row. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "heath_line_3_marked_c",
+      "name": "Heath",
+      "variant": "Fitted using variable porosity model",
+      "group": "Earth",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          51000.0,
+          110000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "roadside_dirt_ill_defined_small_rocks",
+      "name": "Roadside dirt, ill-defined, small rocks up to 0.1 m mesh",
+      "group": "Rock",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          300000.0,
+          800000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"30 × 10^4–80 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "clean_limestone_chops_thick_layer",
+      "name": "Clean limestone chops, thick layer (1–2.5 cm mesh)",
+      "group": "Rock",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          1000000.0,
+          4000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "The word \"Clean\" is printed in italic, the rest of the name upright. Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "old_dirt_roadway_fine_stones",
+      "name": "Old dirt roadway, fine stones (5 cm mesh) interstices filled",
+      "group": "Rock",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          2000000.0,
+          4000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "gravel",
+      "name": "Gravel",
+      "group": "Rock",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          1500.0,
+          59000.0
+        ],
+        "porosity": [
+          0.3,
+          0.4
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"1.5 × 10^3–59 × 10^3\". Water content and porosity decay cells print a dash."
+    },
+    {
+      "key": "quarry_dust_fine_very_hard_packed_by_vehicles",
+      "name": "Quarry dust fine, very hard-packed by vehicles",
+      "group": "Other",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          5000000.0,
+          20000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"5 × 10^6–20 × 10^6\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "asphalt_sealed_by_dust_and_light_use",
+      "name": "Asphalt, sealed by dust and light use",
+      "group": "Other",
+      "flow_resistivity_pa_s_m2": 30000000.0,
+      "approximate": [
+        "flow_resistivity_pa_s_m2"
+      ],
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"≈3 × 10^7\" with a printed approximately-equal sign, the only approximate cell in the table. Water content, porosity and porosity decay cells all print a dash."
+    },
+    {
+      "key": "porous_asphalt_new",
+      "name": "Porous asphalt, new",
+      "group": "Other",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          2000.0,
+          15000.0
+        ],
+        "porosity": [
+          0.15,
+          0.3
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"2 × 10^3–15 × 10^3\". Water content and porosity decay cells print a dash."
+    },
+    {
+      "key": "urban_delany_bazley",
+      "name": "Urban",
+      "variant": "Fitted using Delany and Bazley model",
+      "group": "Other",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          41000.0,
+          67000.0
+        ],
+        "porosity": [
+          0.61,
+          1.0
+        ],
+        "porosity_decay_rate_per_m": [
+          0.0,
+          25.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.61–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"0–25\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash."
+    },
+    {
+      "key": "urban_semi_phenomenological",
+      "name": "Urban",
+      "variant": "Fitted using semi-phenomenological model",
+      "group": "Other",
+      "flow_resistivity_pa_s_m2": 35000.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of three fitted values printed for this surface, marked [b]; it is a single value where the other two lines are ranges. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "urban_variable_porosity",
+      "name": "Urban",
+      "variant": "Fitted using variable porosity model",
+      "group": "Other",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          21000.0,
+          67000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row."
+    },
+    {
+      "key": "coarse_sand_98um_water_0",
+      "name": "Coarse sand, pore size 98 μm",
+      "variant": "water content 0 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 50000.0,
+      "water_content_percent": 0.0,
+      "porosity_decay_rate_per_m": -14.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash."
+    },
+    {
+      "key": "coarse_sand_98um_water_11",
+      "name": "Coarse sand, pore size 98 μm",
+      "variant": "water content 11 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 100000.0,
+      "water_content_percent": 11.0,
+      "porosity_decay_rate_per_m": -82.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash."
+    },
+    {
+      "key": "coarse_sand_98um_water_51",
+      "name": "Coarse sand, pore size 98 μm",
+      "variant": "water content 51 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 470000.0,
+      "water_content_percent": 51.0,
+      "porosity_decay_rate_per_m": -141.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash."
+    },
+    {
+      "key": "coarse_sand_98um_water_95",
+      "name": "Coarse sand, pore size 98 μm",
+      "variant": "water content 95 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 90000.0,
+      "water_content_percent": 95.0,
+      "porosity_decay_rate_per_m": 1290.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The flow resistivity falls back at the highest water content, below the 51 % and 11 % lines."
+    },
+    {
+      "key": "fine_sand",
+      "name": "Fine sand",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 310000.0,
+      "porosity": 0.44,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Water content and porosity decay cells print a dash. Printed name is \"Fine sand\" with no pore size, distinct from the \"Fine sand, pore size 65 μm\" block below it."
+    },
+    {
+      "key": "fine_sand_65um_water_0",
+      "name": "Fine sand, pore size 65 μm",
+      "variant": "water content 0 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 150000.0,
+      "water_content_percent": 0.0,
+      "porosity_decay_rate_per_m": -28.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash."
+    },
+    {
+      "key": "fine_sand_65um_water_15",
+      "name": "Fine sand, pore size 65 μm",
+      "variant": "water content 15 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 140000.0,
+      "water_content_percent": 15.0,
+      "porosity_decay_rate_per_m": 130.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash."
+    },
+    {
+      "key": "fine_sand_65um_water_48",
+      "name": "Fine sand, pore size 65 μm",
+      "variant": "water content 48 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 150000.0,
+      "water_content_percent": 48.0,
+      "porosity_decay_rate_per_m": 620.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash."
+    },
+    {
+      "key": "fine_sand_65um_water_95",
+      "name": "Fine sand, pore size 65 μm",
+      "variant": "water content 95 %",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 41000.0,
+      "water_content_percent": 95.0,
+      "porosity_decay_rate_per_m": 1130.0,
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash."
+    },
+    {
+      "key": "loamy_sand",
+      "name": "Loamy sand",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 420000.0,
+      "porosity": 37.5,
+      "water_content_percent": 11.2,
+      "uncertainty": {
+        "flow_resistivity_pa_s_m2": 17000.0
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed."
+    },
+    {
+      "key": "bare_sandy_plain",
+      "name": "Bare sandy plain",
+      "group": "Sand",
+      "flow_resistivity_pa_s_m2": 370000.0,
+      "porosity": 26.9,
+      "water_content_percent": 9.3,
+      "uncertainty": {
+        "flow_resistivity_pa_s_m2": 110000.0
+      },
+      "attributed_to": {
+        "table": "Horoshenkov and Mohamed, 2006; Attenborough, Bashir and Taherzadeh, 2011; Attenborough, 1982; Attenborough, 1993; Berryman, 1980; Embleton, Piercy and Daigle, 1983; Martens, van der Haijden, Walthaus and van Rens, 1985; Datt, Kapil, Kumar and Srivastava, 2016"
+      },
+      "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed."
+    }
+  ]
+}

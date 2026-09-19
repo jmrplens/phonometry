@@ -43,7 +43,7 @@ import { catalogues } from '../generated/catalogues.mjs';
 
 interface Props {
 	/** Which catalogue to render. */
-	catalogue: 'solids' | 'porous' | 'fluids';
+	catalogue: 'solids' | 'porous' | 'ground' | 'fluids';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
 }
@@ -53,10 +53,12 @@ const copy = {
 	en: {
 		search: 'Filter by material',
 		searchPlaceholder: 'steel, foam, air',
+		groundPlaceholder: 'grass, snow, asphalt',
 		table: 'Published table',
 		everyTable: 'Every table',
 		empty: 'No row matches that filter.',
 		material: 'Material',
+		surface: 'Surface',
 		state: 'State',
 		conditions: 'Conditions',
 		fixedBy: 'What fixes it',
@@ -78,10 +80,12 @@ const copy = {
 	es: {
 		search: 'Filtrar por material',
 		searchPlaceholder: 'acero, espuma, aire',
+		groundPlaceholder: 'hierba, nieve, asfalto',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',
 		material: 'Material',
+		surface: 'Superficie',
 		state: 'Estado',
 		conditions: 'Condiciones',
 		fixedBy: 'Qué lo fija',
@@ -101,6 +105,14 @@ const copy = {
 		},
 	},
 }[lang];
+
+/** What to search for, which is not a material in the ground catalogue. */
+const placeholder =
+	section === 'ground' ? copy.groundPlaceholder : copy.searchPlaceholder;
+
+/** What the first column holds, which is not a material in every catalogue. */
+const rowHeading =
+	section === 'fluids' ? copy.state : section === 'ground' ? copy.surface : copy.material;
 
 /** A column's heading in the language this page is published in. */
 const heading = (column: { heading: string; headingEs?: string }) =>
@@ -124,7 +136,7 @@ const tables = tablesOf(data.rows);
 	<div class="controls" data-controls hidden>
 		<label>
 			<span>{copy.search}</span>
-			<input type="search" data-search placeholder={copy.searchPlaceholder} />
+			<input type="search" data-search placeholder={placeholder} />
 		</label>
 		<label>
 			<span>{copy.table}</span>
@@ -145,7 +157,7 @@ const tables = tablesOf(data.rows);
 		<table>
 			<thead>
 				<tr>
-					<th scope="col">{section === 'fluids' ? copy.state : copy.material}</th>
+					<th scope="col">{rowHeading}</th>
 					{section === 'fluids' && <th scope="col">{copy.conditions}</th>}
 					{
 						data.columns.map((column) => (

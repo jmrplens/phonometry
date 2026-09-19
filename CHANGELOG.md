@@ -52,6 +52,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   values up in: air at conditions that were measured is `fluids.air` and sea
   water is `fluids.sea_water`, both of which compute the state.
 
+- **The ground has a catalogue.** `environment.PUBLISHED_GROUND` holds the
+  hundred and five ground surfaces three published tables print: the
+  thirty-four Bies measures, the eight classes A to H the propagation models
+  define, with the ground factor ISO 9613-2 and NMPB-2008 each take, and the
+  sixty-three effective flow resistivities Cox tabulates. Every outdoor model
+  in this library asks the ground how resistive it is, and until now the
+  answer had to come from a book the caller held.
+
+  **An effective flow resistivity carries the model it was fitted with**, so
+  `GroundSurface` keeps the fit as a variant rather than averaging it away:
+  the same lawn fitted with the Delany and Bazley model, the
+  semi-phenomenological model and the variable-porosity model is three rows
+  and three numbers. The spread is the point. One grass is 100 to 300
+  kPa s/m2 in one book and 4 to 850 across the fits of the other.
+
+  **Two books and a third document check each other.** Seven surfaces that
+  Bies and Cox both take from Embleton, Piercy and Daigle (1983) come out to
+  the same digits through two different printed units, and the eight ground
+  classes match the table the rotorcraft model carries from ECAC Doc 32. Both
+  agreements are tests.
+
+  `CatalogueRow.uncertainty` is new, for the `(540 +/- 92) x 10^3` Cox prints,
+  including the two rows where the uncertainty is as large as the value.
+
 - **A hundred and sixty-two compiled rows, from two more books.**
   `materials.PUBLISHED_POROUS` now holds the five tables Cox & D'Antonio
   compile from the literature (flow resistivity, fibre diameter, porosity, the

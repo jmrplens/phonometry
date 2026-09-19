@@ -1,0 +1,373 @@
+{
+  "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
+  "about": "Rendered PDF page 256, folio 227 (running head \"Sound Propagation   227\"; printed folio = PDF page - 29, verified on this page and on PDF 255 = folio 226). The table occupies the top two thirds of the page and is followed by the prose of Section 5.2.2 Plane Wave Reflection and Transmission. Title as printed: \"TABLE 5.1 Flow resistivities measured for some common ground surfaces\". Two columns: \"Ground surface type\" and, over two lines, \"Flow resistivity, R1 (kPa s/m2)\" (the 2 of m2 is a superscript and the 1 of R1 a subscript). No footnotes, no section headings inside the table and no per-row superscripts, so no group field and no per-cell credit is given; the whole table is credited by the prose on the facing page. 34 rows, in page order. The prose that introduces it, on PDF page 255 (folio 226), Section 5.2.1 Porous Ground, reads: \"For the case of the ground, which is well modelled as a porous medium (here indicated by subscript, m), the characteristic impedance, Zm, and the propagation coefficient, km (both complex), may be calculated from a knowledge of the ground surface flow resistivity, R1, in MKS rayls/m as described in Appendix D. Values of flow resistivity, R1, for various ground surfaces are given in Table 5.1. The values were obtained from ANSI/ASA S1.18 (2010), Nordtest (1999), Embleton et al. (1983) and Attenborough et al. (2007).\" That list of four sources is the whole credit for the table and is recorded in attributed_to under the key \"table\", resolved from the book's reference list (PDF 44498, 45104, 45976, 44660 of the text dump): \"ANSI/ASA S1.18 (2010). American national standard method for determining the acoustic impedance of ground surfaces\"; \"Nordtest (1999). NT-ACOU-104: Ground surfaces: Determination of the acoustic impedance\"; \"Embleton, T., Piercy, J., and Daigle, G. (1983). Effective flow resistivity of ground surfaces\"; \"Attenborough, K., Li, K., and Horoshenkov, K. (2007). Predicting Outdoor Sound\". The same prose adds, two paragraphs later: \"As can be seen from Table 5.1, there are great variations in flow resistivity measured data from different sources. For this reason, some propagation models classify ground surfaces into 8 types labelled A-H, as listed in Table 5.2 (see Plovsing (2006)).\" Unit conversion: every printed value is in kPa s/m2 and is multiplied by 1000 to give the library unit Pa s/m2 (= MKS rayls/m), so a printed 10-30 becomes ranges [10000.0, 30000.0] and a printed 30000 becomes 30000000.0. Cells printed as an interval with an en dash go to ranges; no cell is approximate, bounded, multi-valued or non-numeric, and no cell is empty. Nothing on the page states a measurement frequency, a measurement method or an uncertainty for any row.",
+  "rows": [
+    {
+      "key": "dry_snow_newly_fallen",
+      "name": "Dry snow, newly fallen 0.1 m over about 0.4 m older snow",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          10000.0,
+          30000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "sugar_snow",
+      "name": "Sugar snow",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          25000.0,
+          50000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "soft_forest_floor_with_blueberry_greens_and_moss",
+      "name": "Soft forest floor with blueberry greens and moss",
+      "flow_resistivity_pa_s_m2": 40000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "forest_floor_covered_by_weeds",
+      "name": "Forest floor covered by weeds",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          63000.0,
+          100000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "pine_or_hemlock_forest_floor",
+      "name": "Pine or hemlock forest floor",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          20000.0,
+          80000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "soft_forest_floor_covered_with_pine_needles",
+      "name": "Soft forest floor covered with pine needles",
+      "flow_resistivity_pa_s_m2": 160000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "sandy_forest_floor",
+      "name": "Sandy forest floor",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          630000.0,
+          2000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "dense_shrubbery_20_cm_high",
+      "name": "Dense shrubbery, 20 cm high",
+      "flow_resistivity_pa_s_m2": 100000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "soil_and_bark_sparse_vegetation",
+      "name": "Soil and bark, sparse vegetation",
+      "flow_resistivity_pa_s_m2": 100000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "peat_or_turf_area_homogeneous_organic_material",
+      "name": "Peat or turf area, homogeneous organic material",
+      "flow_resistivity_pa_s_m2": 100000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "soil_covered_with_leaves_and_twigs",
+      "name": "Soil covered with leaves and twigs",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          160000.0,
+          250000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "soil_mixed_with_sawdust",
+      "name": "Soil mixed with sawdust",
+      "flow_resistivity_pa_s_m2": 250000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "relatively_dense_soil_sparsely_covered_by_grass_and_other_low_greens",
+      "name": "Relatively dense soil sparsely covered by grass and other low greens",
+      "flow_resistivity_pa_s_m2": 630000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "short_grass_green_moss_and_blueberry_greens",
+      "name": "Short grass, green moss and blueberry greens",
+      "flow_resistivity_pa_s_m2": 40000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "rough_grassland_and_pasture",
+      "name": "Rough grassland and pasture",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          100000.0,
+          300000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "grass_soccer_field",
+      "name": "Grass, soccer field",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          630000.0,
+          2000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "lawn_moderately_stepped_on",
+      "name": "Lawn, moderately stepped on",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          160000.0,
+          250000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "lawn_seldom_stepped_on",
+      "name": "Lawn, seldom stepped on",
+      "flow_resistivity_pa_s_m2": 250000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "lawn",
+      "name": "Lawn",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          250000.0,
+          400000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "agricultural_field",
+      "name": "Agricultural field",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          160000.0,
+          250000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "hard_soil",
+      "name": "Hard soil",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          400000.0,
+          2000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "soil_exposed_and_rain_packed",
+      "name": "Soil, exposed and rain packed",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          4000000.0,
+          8000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "wet_sandy_loam",
+      "name": "Wet, sandy loam",
+      "flow_resistivity_pa_s_m2": 1500000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "moistened_sand",
+      "name": "Moistened sand",
+      "flow_resistivity_pa_s_m2": 500000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "bare_sandy_plain",
+      "name": "Bare sandy plain",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          250000.0,
+          500000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "dry_sand",
+      "name": "Dry sand",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          60000.0,
+          140000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "sandy_silt_hard_packed_by_vehicles",
+      "name": "Sandy silt, hard packed by vehicles",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          800000.0,
+          2500000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "quarry_dust_hard_packed_by_vehicles",
+      "name": "Quarry dust, hard packed by vehicles",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          5000000.0,
+          20000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "mixed_paving_stones_and_grass",
+      "name": "Mixed paving stones and grass",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          630000.0,
+          2000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "old_gravel_field_with_sparse_vegetation",
+      "name": "Old gravel field with sparse vegetation",
+      "flow_resistivity_pa_s_m2": 2000000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "gravel_road_stones_and_dust",
+      "name": "Gravel road, stones and dust",
+      "flow_resistivity_pa_s_m2": 2000000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "gravel_parking_lot",
+      "name": "Gravel parking lot",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          630000.0,
+          2000000.0
+        ]
+      },
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "asphalt_sealed_by_dust_and_light_use",
+      "name": "Asphalt sealed by dust and light use",
+      "flow_resistivity_pa_s_m2": 30000000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    },
+    {
+      "key": "concrete",
+      "name": "Concrete",
+      "flow_resistivity_pa_s_m2": 20000000.0,
+      "attributed_to": {
+        "table": "ANSI/ASA S1.18, 2010; Nordtest, 1999; Embleton, Piercy and Daigle, 1983; Attenborough, Li and Horoshenkov, 2007"
+      }
+    }
+  ]
+}

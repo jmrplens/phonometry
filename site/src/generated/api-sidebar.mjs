@@ -229,6 +229,7 @@ export const apiSections = {
       'reference/api/environment/outdoor-propagation',
       'reference/api/environment/cnossos-road',
       'reference/api/environment/ground-barriers',
+      'reference/api/environment/ground-surfaces',
       'reference/api/environment/noise-reducing-devices',
       'reference/api/environment/barrier-in-situ',
       'reference/api/environment/refraction',

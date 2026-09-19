@@ -69,10 +69,12 @@ SolidMaterial(
     derived: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float, float]] = ...,
     bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
     reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
     unquantified: Mapping[str, str] = ...,
     not_derivable: Mapping[str, str] = ...,
     attributed_to: Mapping[str, str] = ...,
+    group: str = '',
     note: str = '',
     density_kg_m3: float | None = None,
     youngs_modulus_pa: float | None = None,
@@ -157,10 +159,12 @@ below.
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
 | `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
 | `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
 | `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
 ### SolidMaterial.is_estimate()

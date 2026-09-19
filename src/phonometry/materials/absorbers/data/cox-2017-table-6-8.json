@@ -1,0 +1,325 @@
+{
+  "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+  "about": "Rendered PDF page 261, folio 204 (running head \"204 Acoustic Absorbers and Diffusers\"); the table occupies the top two thirds of the page and is followed by Equation 6.18 (tortuosity of granular materials), the closing paragraph of Section 6.5.2.2 and the heading of Section 6.5.3 Semi-phenomenological models. Title as printed: \"Table 6.8 Various characteristic length values\". Three columns: \"Material\", and two numeric columns sitting under one spanning heading \"Characteristic length (μm)\" and themselves headed \"Viscous Λ\" and \"Thermal Λ′\"; all four headings are set in italic. The printed unit is micrometres, which is the library unit, so every number is carried over with factor 1. Four bold section headings divide the body, \"Fibrous material\", \"Cellular material\", \"Granular materials\" and \"Other\", and they are kept as the group field; thin horizontal rules are also drawn inside the groups (after Metal foam, after the Polylactide row, after 2.1 mm lead shot and after Perlite), a typographic aid only. There are no footnotes. A lone en dash \"–\" in a cell means the page gives no value: Metal foam, Polyimide foam, 9 mm gravel and Porous aluminium have no thermal length, and those quantities are simply absent from the row. Cells that list several values with nothing to pair them to go to reported: Plastic foam \"25, 207, 230\" and \"70 and 690\", PU, fully reticulated \"96, 200–450\" (a single value and a range), 9 mm gravel \"190, 290\" and Porous aluminium \"470, 770\"; every other multi-value cell is an en dash interval and goes to ranges. The page prints the two lead shot specimens as \"2.1 mm lead shot\" and \"4 mm lead shot\"; they are recorded here as one name \"Lead shot\" with variants \"2.1 mm\" and \"4 mm\", which is also how Table 6.9 prints \"Lead shot\", once. \"Glass beads, 0.1 mm diameter\" is the only row with no superscript and so has no attributed_to. The prose that introduces the table (PDF page 260, printed p. 203) reads \"Sections 4.5.6 and 4.5.7 detail the measurement of the characteristic lengths, and Table 6.8 shows some typical values. They can also be numerically calculated if the geometry is well described.86 Complications arise when the material is anisotropic, which is common in many materials. For instance, mineral wool is often laid down in layers, in these cases, the characteristic lengths depend on the incident angle of the sound wave.\", and the same section states that \"Cylindrical pores are a special case where Λ = Λ′. In general,85 Λ′ ≥ Λ, and to a first approximation, Λ′ = 2Λ and s = 1 can be used to derive simpler formulations for the sound propagation in rigid framed fibrous materials.72\". One oddity: the superscript on \"Perlite (expanded)\" is 5, and reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", commons.wikimedia.org, licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured characteristic lengths; the credit is recorded as the page prints it.",
+  "rows": [
+    {
+      "key": "felt",
+      "name": "Felt",
+      "group": "Fibrous material",
+      "ranges": {
+        "viscous_length_um": [
+          30.0,
+          57.0
+        ],
+        "thermal_length_um": [
+          60.0,
+          62.0
+        ]
+      },
+      "note": "Page superscripts: 40, 41.",
+      "attributed_to": {
+        "row": "Fohr et al., 2008; Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "fibreglass",
+      "name": "Fibreglass",
+      "group": "Fibrous material",
+      "ranges": {
+        "viscous_length_um": [
+          132.0,
+          182.0
+        ],
+        "thermal_length_um": [
+          237.0,
+          400.0
+        ]
+      },
+      "note": "Page superscripts: 41, 45.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "polyester_fibres",
+      "name": "Polyester fibres",
+      "group": "Fibrous material",
+      "ranges": {
+        "viscous_length_um": [
+          73.0,
+          86.0
+        ],
+        "thermal_length_um": [
+          133.0,
+          161.0
+        ]
+      },
+      "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
+      "attributed_to": {
+        "row": "Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "cellular_rubber",
+      "name": "Cellular rubber",
+      "group": "Cellular material",
+      "viscous_length_um": 9.0,
+      "thermal_length_um": 15.0,
+      "note": "Page superscript: 87. Cellular rubber is listed under Cellular material here and under Granular materials in Table 6.9.",
+      "attributed_to": {
+        "row": "Shravage, Bonfiglio and Pompoli, 2008"
+      }
+    },
+    {
+      "key": "melamine_foam",
+      "name": "Melamine foam",
+      "group": "Cellular material",
+      "ranges": {
+        "viscous_length_um": [
+          81.0,
+          240.0
+        ],
+        "thermal_length_um": [
+          255.0,
+          470.0
+        ]
+      },
+      "note": "Page superscripts: 41, 45.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "metal_foam",
+      "name": "Metal foam",
+      "group": "Cellular material",
+      "viscous_length_um": 20.0,
+      "note": "Page superscript: 46. The thermal length cell is a dash, so no thermal length is given.",
+      "attributed_to": {
+        "row": "Panneton and Olny, 2006"
+      }
+    },
+    {
+      "key": "plastic_foam",
+      "name": "Plastic foam",
+      "group": "Cellular material",
+      "reported": {
+        "viscous_length_um": [
+          25.0,
+          207.0,
+          230.0
+        ],
+        "thermal_length_um": [
+          70.0,
+          690.0
+        ]
+      },
+      "note": "Page superscript: 40. Cells printed \"25, 207, 230\" and \"70 and 690\": three and two separate values with nothing to pair them to.",
+      "attributed_to": {
+        "row": "Fohr et al., 2008"
+      }
+    },
+    {
+      "key": "poroelastic_foam",
+      "name": "Poroelastic foam",
+      "group": "Cellular material",
+      "ranges": {
+        "viscous_length_um": [
+          41.0,
+          48.0
+        ],
+        "thermal_length_um": [
+          103.0,
+          171.0
+        ]
+      },
+      "note": "Page superscript: 65. The Poroelastic foam row of Table 6.9 carries no superscript.",
+      "attributed_to": {
+        "row": "Hoang, Bonnet and Perrot, 2013"
+      }
+    },
+    {
+      "key": "polyimide_foam",
+      "name": "Polyimide foam",
+      "group": "Cellular material",
+      "viscous_length_um": 39.0,
+      "note": "Page superscript: 47. The thermal length cell is a dash, so no thermal length is given.",
+      "attributed_to": {
+        "row": "Lind-Nordgren and Göransson, 2010"
+      }
+    },
+    {
+      "key": "polylactide_and_polyethylene_glycol_foam",
+      "name": "Polylactide and polyethylene glycol foam",
+      "group": "Cellular material",
+      "ranges": {
+        "viscous_length_um": [
+          5.0,
+          12.0
+        ],
+        "thermal_length_um": [
+          75.0,
+          167.0
+        ]
+      },
+      "note": "Page superscript: 48. The name wraps over two lines and the superscript sits on the second line, after \"foam\".",
+      "attributed_to": {
+        "row": "Mosanenzadeh et al., 2015"
+      }
+    },
+    {
+      "key": "pu_fully_reticulated",
+      "name": "PU, fully reticulated",
+      "group": "Cellular material",
+      "reported": {
+        "viscous_length_um": [
+          96.0,
+          [
+            200.0,
+            450.0
+          ]
+        ]
+      },
+      "ranges": {
+        "thermal_length_um": [
+          280.0,
+          600.0
+        ]
+      },
+      "note": "Page superscript: 12. Viscous cell printed \"96, 200–450\": a value and a separate range with nothing to pair them to.",
+      "attributed_to": {
+        "row": "Doutres, Atalla and Dong, 2011"
+      }
+    },
+    {
+      "key": "pu_partially_reticulated",
+      "name": "PU, partially reticulated",
+      "group": "Cellular material",
+      "ranges": {
+        "viscous_length_um": [
+          24.0,
+          240.0
+        ],
+        "thermal_length_um": [
+          140.0,
+          320.0
+        ]
+      },
+      "note": "Page superscripts: 12, 47.",
+      "attributed_to": {
+        "row": "Doutres, Atalla and Dong, 2011; Lind-Nordgren and Göransson, 2010"
+      }
+    },
+    {
+      "key": "lead_shot_2_1_mm",
+      "name": "Lead shot",
+      "variant": "2.1 mm",
+      "group": "Granular materials",
+      "viscous_length_um": 280.0,
+      "thermal_length_um": 490.0,
+      "note": "Page superscript: 55. The page prints this row as \"2.1 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"2.1 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "lead_shot_4_mm",
+      "name": "Lead shot",
+      "variant": "4 mm",
+      "group": "Granular materials",
+      "ranges": {
+        "viscous_length_um": [
+          500.0,
+          550.0
+        ],
+        "thermal_length_um": [
+          730.0,
+          830.0
+        ]
+      },
+      "note": "Page superscript: 55. The page prints this row as \"4 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"4 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "gravel_9_mm",
+      "name": "9 mm gravel",
+      "group": "Granular materials",
+      "reported": {
+        "viscous_length_um": [
+          190.0,
+          290.0
+        ]
+      },
+      "note": "Page superscript: 55. Name kept as printed, since the page gives only this one gravel specimen. Viscous cell printed \"190, 290\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "glass_beads_0_1_mm_diameter",
+      "name": "Glass beads, 0.1 mm diameter",
+      "group": "Granular materials",
+      "viscous_length_um": 90.0,
+      "thermal_length_um": 180.0,
+      "note": "The only row in the table with no superscript, so no credit is given for it."
+    },
+    {
+      "key": "perlite_expanded",
+      "name": "Perlite (expanded)",
+      "group": "Granular materials",
+      "viscous_length_um": 5.1,
+      "thermal_length_um": 15.4,
+      "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured characteristic lengths; the credit is recorded as the page prints it.",
+      "attributed_to": {
+        "row": "Sepp, 2015"
+      }
+    },
+    {
+      "key": "porous_aluminium",
+      "name": "Porous aluminium",
+      "group": "Other",
+      "reported": {
+        "viscous_length_um": [
+          470.0,
+          770.0
+        ]
+      },
+      "note": "Page superscript: 55. Viscous cell printed \"470, 770\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "porous_ceramic",
+      "name": "Porous ceramic",
+      "group": "Other",
+      "viscous_length_um": 62.0,
+      "thermal_length_um": 273.0,
+      "note": "Page superscript: 88.",
+      "attributed_to": {
+        "row": "Zielinski, 2012"
+      }
+    },
+    {
+      "key": "snow",
+      "name": "Snow",
+      "group": "Other",
+      "ranges": {
+        "viscous_length_um": [
+          49.0,
+          156.0
+        ],
+        "thermal_length_um": [
+          131.0,
+          582.0
+        ]
+      },
+      "note": "Page superscript: 81.",
+      "attributed_to": {
+        "row": "Datt et al., 2016"
+      }
+    }
+  ]
+}

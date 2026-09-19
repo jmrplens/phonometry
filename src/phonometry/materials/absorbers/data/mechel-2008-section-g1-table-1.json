@@ -1,0 +1,207 @@
+{
+  "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
+  "about": "Rendered PDF page 363, folio 348 (running head \"348 | G | Porous Absorbers\", the G set as a large grey drop letter); the table sits at the top of the page and is followed by the open-cellular cubic-cell foam model, Equation (2) and its sketch. Title as printed: \"Table 1 Ranges of porosity σᵥ of some materials\" (the number is the running table number inside Section G.1, not a chapter-wide number). Three columns, the header row set white on grey: \"Material\", \"σᵥ from\" and \"σᵥ to\". Porosity is dimensionless and no unit is printed; the library field porosity takes the numbers unchanged. The table has no section headings, no footnotes and no superscripts, so no group and no per-row credit are given; the chapter opener (PDF page 362, printed p. 347) says only \"If no extra reference is given in the sections of this chapter, see Mechel (1995).\", a blanket chapter reference rather than a credit for this table, so it is recorded here and not in the rows. Every row but the last gives both a from and a to value and goes to ranges; the last row, Marble, leaves the \"σᵥ from\" cell empty and prints \"ca. 0.005\" in the \"σᵥ to\" cell, which is transcribed as the scalar 0.005 flagged approximate. Trailing zeros are printed on several bounds (0.80, 0.50, 0.60, 0.30, 0.10) and are lost in JSON, which does not change the value. \"Ceramic filtres\" is spelled that way on the page. The prose immediately before the table (PDF page 362, printed p. 347, under the italic side head \"Volume porosity σᵥ, massivity μ:\") defines the quantity: \"The volume porosity σᵥ is the ratio of air volume contained in the porous material to the total volume; it is given by σᵥ = 1 − ρa/ρm with ρa the bulk density of the porous absorber material and ρm the density of the (dense) matrix material. For glass or mineral fibre materials a value ρm ≈ 2250[kg/m3] may be used.\", then \"For some considerations it is advantageous to apply the massivity μ = 1 − σᵥ.\" and finally \"The following table gives ranges of σᵥ for some materials.\" The symbol is therefore volume porosity, with the subscript standing for volume, and Section G.1 goes on to distinguish it from the surface porosity σs of a cut through the material, which enters the structure factor χ = σᵥ/σs. Section G.1 also states that its structure parameters come from the theory of the \"quasi-homogeneous material\".",
+  "rows": [
+    {
+      "key": "mineral_fibre_materials",
+      "name": "Mineral fibre materials",
+      "ranges": {
+        "porosity": [
+          0.92,
+          0.99
+        ]
+      },
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "foams",
+      "name": "Foams",
+      "ranges": {
+        "porosity": [
+          0.95,
+          0.995
+        ]
+      },
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "felts",
+      "name": "Felts",
+      "ranges": {
+        "porosity": [
+          0.83,
+          0.95
+        ]
+      },
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "wood_fibre_board",
+      "name": "Wood-fibre board",
+      "ranges": {
+        "porosity": [
+          0.65,
+          0.8
+        ]
+      },
+      "note": "Upper bound printed \"0.80\".",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "wood_wool_board",
+      "name": "Wood-wool board",
+      "ranges": {
+        "porosity": [
+          0.5,
+          0.65
+        ]
+      },
+      "note": "Lower bound printed \"0.50\".",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "porous_render",
+      "name": "Porous render",
+      "ranges": {
+        "porosity": [
+          0.6,
+          0.65
+        ]
+      },
+      "note": "Lower bound printed \"0.60\".",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "pumice_concrete",
+      "name": "Pumice concrete",
+      "ranges": {
+        "porosity": [
+          0.25,
+          0.5
+        ]
+      },
+      "note": "Upper bound printed \"0.50\".",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "pumice_fill",
+      "name": "Pumice fill",
+      "ranges": {
+        "porosity": [
+          0.65,
+          0.85
+        ]
+      },
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "gravel_and_stone_chip_fill",
+      "name": "Gravel and stone chip fill",
+      "ranges": {
+        "porosity": [
+          0.25,
+          0.45
+        ]
+      },
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "ceramic_filtres",
+      "name": "Ceramic filtres",
+      "ranges": {
+        "porosity": [
+          0.33,
+          0.42
+        ]
+      },
+      "note": "Spelled \"filtres\" on the page.",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "brick",
+      "name": "Brick",
+      "ranges": {
+        "porosity": [
+          0.25,
+          0.3
+        ]
+      },
+      "note": "Upper bound printed \"0.30\".",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "sinter_metal",
+      "name": "Sinter metal",
+      "ranges": {
+        "porosity": [
+          0.1,
+          0.25
+        ]
+      },
+      "note": "Lower bound printed \"0.10\".",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "fire_clay",
+      "name": "Fire-clay",
+      "ranges": {
+        "porosity": [
+          0.15,
+          0.35
+        ]
+      },
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "sand_stone",
+      "name": "Sand stone",
+      "ranges": {
+        "porosity": [
+          0.02,
+          0.06
+        ]
+      },
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    },
+    {
+      "key": "marble",
+      "name": "Marble",
+      "porosity": 0.005,
+      "approximate": [
+        "porosity"
+      ],
+      "note": "The only row with no range: the \"σᵥ from\" cell is empty and the \"σᵥ to\" cell reads \"ca. 0.005\". Last row of the table.",
+      "attributed_to": {
+        "table": "Mechel, 1995"
+      }
+    }
+  ]
+}

@@ -1,11 +1,11 @@
 ---
 title: "materials.absorbers.catalogue"
-description: "Porous specimens as the pages that print them have them."
+description: "Porous specimens as the pages that print them print them."
 sidebar:
   label: "catalogue"
 ---
 
-Porous specimens as the pages that print them have them.
+Porous specimens as the pages that print them print them.
 
 The five-parameter models of [`porous`](/phonometry/reference/api/materials/porous/)
 take a flow resistivity, a porosity, a tortuosity and two characteristic
@@ -31,6 +31,26 @@ because `E / (2(1 + nu))` is the real part of the first. A row therefore
 stores the real modulus and the loss factor separately, which is the form the
 poroelastic models take them in, and [`PorousMaterial.frame_constants`](/phonometry/reference/api/materials/catalogue/#porousmaterialframe_constants)
 puts the complex number back together.
+
+Two kinds of row
+----------------
+A **specimen** row is one sample, with every parameter a model needs beside
+it: Allard and Atalla's tables are all of this kind, and a row of one of them
+reproduces the worked example it belongs to. A **compiled** row is one
+quantity over a class of material, gathered by its book from the literature:
+Cox and D'Antonio compile a flow resistivity, a fibre diameter, a porosity,
+two characteristic lengths and a tortuosity, and Mechel compiles a porosity
+and the fibre data of three product groups. Almost every compiled cell is an
+interval, because there is no such thing as the porosity of mineral wool,
+only the range the measurements fall in, and a row that answered with the
+midpoint of that range would be inventing a measurement.
+
+The two kinds sit in one catalogue because they answer one question between
+them: [`porous_materials_named`](/phonometry/reference/api/materials/catalogue/#porous_materials_named) asks a name of every book at once, and a
+specimen that falls outside the range its class is compiled in is worth
+knowing about. What tells them apart is what a row holds: a specimen carries
+several quantities, a compiled row carries one, and the compiled one carries
+it as a range.
 
 Where the rows live
 -------------------
@@ -61,7 +81,10 @@ Every published row for a specimen name, across the tables.
 Comparing two printings of one specimen is the point of holding both, and
 it has to be a deliberate act: a lookup that returned one row for "Foam"
 would be choosing between published parameter sets on the caller's behalf,
-and this book prints five different foams under that name.
+and one of these books prints four different foams under that name. Across
+the books it also puts a measured specimen beside the range its class is
+compiled in: "Mineral wool" answers with Allard's specimen and with the
+two ranges Cox compiles for it.
 
 **Parameters**
 
@@ -84,10 +107,12 @@ PorousMaterial(
     derived: Mapping[str, str] = ...,
     ranges: Mapping[str, tuple[float, float]] = ...,
     bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
     reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
     unquantified: Mapping[str, str] = ...,
     not_derivable: Mapping[str, str] = ...,
     attributed_to: Mapping[str, str] = ...,
+    group: str = '',
     note: str = '',
     flow_resistivity_pa_s_m2: float | None = None,
     porosity: float | None = None,
@@ -95,6 +120,10 @@ PorousMaterial(
     viscous_length_um: float | None = None,
     thermal_length_um: float | None = None,
     thermal_permeability_m2: float | None = None,
+    fibre_diameter_um: float | None = None,
+    fibre_diameter_distribution_parameter: float | None = None,
+    shot_content_percent: float | None = None,
+    binder_content_percent: float | None = None,
     frame_density_kg_m3: float | None = None,
     thickness_mm: float | None = None,
     youngs_modulus_pa: float | None = None,
@@ -128,6 +157,10 @@ instead of a number are the ones every catalogue row has.
 | `viscous_length_um` | Viscous characteristic length `Lambda`, in micrometres, the unit the tables print it in. The `viscous_length` parameter of [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) is in **metres**, so this field is not passed to it directly: `medium` makes the conversion, once, and a caller who assembles the argument list by hand divides by a million first. |
 | `thermal_length_um` | Thermal characteristic length `Lambda'`, in micrometres. Metres at the model's `thermal_length`, as above. |
 | `thermal_permeability_m2` | Static thermal permeability `q'_0`, in m2, which two of the tables print beside the thermal length. |
+| `fibre_diameter_um` | Fibre diameter `d`, in micrometres, for the materials a table describes by the fibre rather than by the pore. |
+| `fibre_diameter_distribution_parameter` | The parameter of the Poisson distribution Mechel fits to a measured spread of fibre diameters, referred to a diameter class one micrometre wide. Dimensionless: the micrometre in the column heading belongs to the class width, which is stated in the file's `about` because the value means nothing without it. |
+| `shot_content_percent` | Shot content, per cent **by weight**, of particles above the diameter the table's own heading names. |
+| `binder_content_percent` | Organic binder content, per cent by weight. |
 | `frame_density_kg_m3` | Frame density `rho_1`, in kg/m3, the mass of the skeleton per unit volume of material and not the density of the material the skeleton is made of. |
 | `thickness_mm` | Layer thickness `h` of the specimen as tabulated, in millimetres. It is the thickness of the layer the table describes and not a property of the material: the same material appears in other tables of the same book at other thicknesses. |
 | `youngs_modulus_pa` | In-vacuo Young's modulus `E` of the frame, in pascals. |
@@ -142,10 +175,12 @@ instead of a number are the ones every catalogue row has.
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
 | `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
 | `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
 | `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
 | `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
 | `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
 ### PorousMaterial.frame_constants()

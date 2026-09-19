@@ -153,6 +153,11 @@ class CatalogueRow:
     :ivar bounded_above: The subset of :attr:`ranges` the page prints as
         ``< x`` or ``<= x``, where the low end is a floor and not a
         measurement.
+    :ivar bounded_below: The subset of :attr:`ranges` the page prints as
+        ``> x`` or ``>= x``, where the high end is the ceiling the quantity
+        cannot pass and not a measurement: Cox gives an aerogel a porosity of
+        ``>0.75``, and the 1 beside it is what a porosity is, not what anybody
+        measured.
     :ivar reported: Field to the values the page lists for it, for a cell that
         prints several with no single one: ``"25, 207, 230"`` or ``"96,
         200-450"``, readings from as many studies. Each entry is a number or
@@ -173,6 +178,11 @@ class CatalogueRow:
     :ivar attributed_to: Credit for a cell the book takes from someone else.
         Keyed by field name, or by ``"row"`` or ``"table"`` when the credit
         covers all of one.
+    :ivar group: The heading of the block this row sits under, when the table
+        prints its rows in named groups: Cox files each material under
+        ``"Fibrous materials"``, ``"Cellular materials"``,
+        ``"Granular materials"`` or ``"Other"``. Empty for a table that prints
+        one list.
     :ivar note: What the page says about this row beyond its numbers.
     """
 
@@ -184,12 +194,14 @@ class CatalogueRow:
     derived: Mapping[str, str] = field(default_factory=dict)
     ranges: Mapping[str, tuple[float, float]] = field(default_factory=dict)
     bounded_above: frozenset[str] = frozenset()
+    bounded_below: frozenset[str] = frozenset()
     reported: Mapping[str, tuple[float | tuple[float, float], ...]] = field(
         default_factory=dict
     )
     unquantified: Mapping[str, str] = field(default_factory=dict)
     not_derivable: Mapping[str, str] = field(default_factory=dict)
     attributed_to: Mapping[str, str] = field(default_factory=dict)
+    group: str = ""
     note: str = ""
 
     def __post_init__(self) -> None:
@@ -274,6 +286,8 @@ class CatalogueRow:
             low, high = self.ranges[field_name]
             if field_name in self.bounded_above:
                 return f"the page prints an upper bound of {high:g} and no value"
+            if field_name in self.bounded_below:
+                return f"the page prints a lower bound of {low:g} and no value"
             return f"the page prints {low:g} to {high:g} and no value"
         if field_name in self.reported:
             listed = ", ".join(_spell(entry) for entry in self.reported[field_name])

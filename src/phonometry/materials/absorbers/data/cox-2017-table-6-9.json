@@ -1,0 +1,475 @@
+{
+  "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
+  "about": "Rendered PDF page 262, folio 205 (running head \"Porous sound absorption 205\"); the table fills the whole page and nothing else is printed on it. Title as printed: \"Table 6.9 Example tortuosity values from the literature\". Two columns, headings in italic: \"Material\" and \"Tortuosity\". Tortuosity is dimensionless and the page prints no unit, so every number is carried over as it stands. Four bold section headings divide the body, \"Fibrous materials\", \"Cellular materials\", \"Granular materials\" and \"Other\", and they are kept as the group field; the first two are plural here and singular in Table 6.8. Thin horizontal rules are also drawn inside the groups, a typographic aid only. There are no footnotes and no empty cells. Six rows carry no superscript and so have no attributed_to: \"Common fibrous absorbents, e.g., rock wool\", \"Poroelastic foam\", \"Loose sand or dry cultivated soil\", \"Granular materials\", \"Snow (new)\" and \"Snow (old crusted)\". Cells printed as a bare en dash interval go to ranges, including the two that start at a whole number, \"1–1.06\" and \"1–1.6\", and \"2–3.3\". Cells that list several values or several intervals separated by a comma go to reported and the scalar field is left out: Plastic foam \"1.06 and 1.7\", Rubber crumb \"1.13–1.26, 1.38–1.56\", Vermiculite \"1.48–1.58, 1.8–2.46\" and Nitrile foam granulate \"1.31, 1.49\". Only one lead shot row is printed here, \"Lead shot\", where Table 6.8 splits the same material into \"2.1 mm lead shot\" and \"4 mm lead shot\". Two things worth knowing about this page. First, the PDF text layer of the book ends the table at the \"Snow\" row, but the rendered page prints two further rows below it, \"Snow (new)\" 1.5–2.7 and \"Snow (old crusted)\" 4, and both are transcribed here; the table therefore has 37 rows. Second, \"Cellular rubber\" sits under Granular materials on this page while Table 6.8 lists it under Cellular material, and \"Poroelastic foam\" carries superscript 65 in Table 6.8 but no superscript at all here. The prose that introduces the table (PDF page 261, printed p. 204, just below Table 6.8) reads \"Real absorbents, however, are not normally that well ordered. Consequently, tortuosity needs to be measured. Techniques for doing this are discussed in Chapter 4. Some values are given in Table 6.9. Another approach is to calculate the tortuosity from the structure of the material at a microscopic scale.23,82,86,89\", and the preceding section defines tortuosity as the effect of pore orientation on sound propagation, denoted α∞, noting that \"Some older publications used the term structural form factor, and there were some differences in the definition.\" As in Table 6.8, the superscript on \"Perlite\" is 5, and reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured tortuosity; the credit is recorded as the page prints it.",
+  "rows": [
+    {
+      "key": "felt",
+      "name": "Felt",
+      "group": "Fibrous materials",
+      "tortuosity": 1.01,
+      "note": "Page superscript: 41.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "common_fibrous_absorbents_rock_wool",
+      "name": "Common fibrous absorbents, e.g., rock wool",
+      "group": "Fibrous materials",
+      "ranges": {
+        "tortuosity": [
+          1.0,
+          1.06
+        ]
+      },
+      "note": "No superscript on the page, so no credit is given for this row. The name wraps over two lines, \"wool\" alone on the second."
+    },
+    {
+      "key": "polyester",
+      "name": "Polyester",
+      "group": "Fibrous materials",
+      "ranges": {
+        "tortuosity": [
+          1.03,
+          1.05
+        ]
+      },
+      "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
+      "attributed_to": {
+        "row": "Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "hemp",
+      "name": "Hemp",
+      "group": "Fibrous materials",
+      "ranges": {
+        "tortuosity": [
+          1.01,
+          1.05
+        ]
+      },
+      "note": "Page superscript: 41.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "melamine_foam",
+      "name": "Melamine foam",
+      "group": "Cellular materials",
+      "tortuosity": 1.01,
+      "note": "Page superscripts: 41, 45.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "metal_foam",
+      "name": "Metal foam",
+      "group": "Cellular materials",
+      "tortuosity": 1.27,
+      "note": "Page superscript: 46.",
+      "attributed_to": {
+        "row": "Panneton and Olny, 2006"
+      }
+    },
+    {
+      "key": "plastic_foam",
+      "name": "Plastic foam",
+      "group": "Cellular materials",
+      "reported": {
+        "tortuosity": [
+          1.06,
+          1.7
+        ]
+      },
+      "note": "Page superscript: 65. Cell printed \"1.06 and 1.7\": two separate values with nothing to pair them to. Table 6.8 gives the Plastic foam characteristic lengths from reference 40 instead.",
+      "attributed_to": {
+        "row": "Hoang, Bonnet and Perrot, 2013"
+      }
+    },
+    {
+      "key": "poroelastic_foam",
+      "name": "Poroelastic foam",
+      "group": "Cellular materials",
+      "ranges": {
+        "tortuosity": [
+          1.24,
+          4.45
+        ]
+      },
+      "note": "No superscript on the page, so no credit is given for this row, although the Poroelastic foam row of Table 6.8 carries superscript 65."
+    },
+    {
+      "key": "polyimide_foam",
+      "name": "Polyimide foam",
+      "group": "Cellular materials",
+      "tortuosity": 1.17,
+      "note": "Page superscript: 47.",
+      "attributed_to": {
+        "row": "Lind-Nordgren and Göransson, 2010"
+      }
+    },
+    {
+      "key": "polylactide_and_polyethylene_glycol_foam",
+      "name": "Polylactide and polyethylene glycol foam",
+      "group": "Cellular materials",
+      "ranges": {
+        "tortuosity": [
+          1.2,
+          1.6
+        ]
+      },
+      "note": "Page superscript: 48.",
+      "attributed_to": {
+        "row": "Mosanenzadeh et al., 2015"
+      }
+    },
+    {
+      "key": "pu_foam",
+      "name": "PU foam",
+      "group": "Cellular materials",
+      "ranges": {
+        "tortuosity": [
+          1.08,
+          1.41
+        ]
+      },
+      "note": "Page superscripts: 41, 47.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013; Lind-Nordgren and Göransson, 2010"
+      }
+    },
+    {
+      "key": "pu_foam_fully_reticulated",
+      "name": "PU foam, fully reticulated",
+      "group": "Cellular materials",
+      "ranges": {
+        "tortuosity": [
+          1.04,
+          1.06
+        ]
+      },
+      "note": "Page superscript: 12. Table 6.8 prints the same specimen as \"PU, fully reticulated\".",
+      "attributed_to": {
+        "row": "Doutres, Atalla and Dong, 2011"
+      }
+    },
+    {
+      "key": "pu_foam_partially_reticulated",
+      "name": "PU foam, partially reticulated",
+      "group": "Cellular materials",
+      "ranges": {
+        "tortuosity": [
+          1.25,
+          2.3
+        ]
+      },
+      "note": "Page superscript: 12. The upper bound is printed \"2.30\". Table 6.8 prints the same specimen as \"PU, partially reticulated\" and credits it to references 12 and 47.",
+      "attributed_to": {
+        "row": "Doutres, Atalla and Dong, 2011"
+      }
+    },
+    {
+      "key": "cellular_rubber",
+      "name": "Cellular rubber",
+      "group": "Granular materials",
+      "tortuosity": 2.64,
+      "note": "Page superscript: 87. Listed under Granular materials here and under Cellular material in Table 6.8.",
+      "attributed_to": {
+        "row": "Shravage, Bonfiglio and Pompoli, 2008"
+      }
+    },
+    {
+      "key": "consolidated_foam_granulates",
+      "name": "Consolidated foam granulates",
+      "group": "Granular materials",
+      "tortuosity": 1.92,
+      "note": "Page superscript: 50.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "coustone_quietstone",
+      "name": "Coustone (Quietstone)",
+      "group": "Granular materials",
+      "tortuosity": 1.66,
+      "note": "Page superscript: 50.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "fused_glass_bead_sample",
+      "name": "Fused glass bead sample",
+      "group": "Granular materials",
+      "ranges": {
+        "tortuosity": [
+          1.75,
+          3.84
+        ]
+      },
+      "note": "Page superscript: 91.",
+      "attributed_to": {
+        "row": "Johnson et al., 1982"
+      }
+    },
+    {
+      "key": "lead_shot",
+      "name": "Lead shot",
+      "group": "Granular materials",
+      "ranges": {
+        "tortuosity": [
+          1.46,
+          1.54
+        ]
+      },
+      "note": "Page superscript: 55. Printed once here, where Table 6.8 splits the same material into a 2.1 mm and a 4 mm specimen.",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "loose_sand_or_dry_cultivated_soil",
+      "name": "Loose sand or dry cultivated soil",
+      "group": "Granular materials",
+      "ranges": {
+        "tortuosity": [
+          1.27,
+          3.32
+        ]
+      },
+      "note": "No superscript on the page, so no credit is given for this row."
+    },
+    {
+      "key": "glass_beads_0_1_0_68_and_1_64_mm_diameter",
+      "name": "Glass beads, 0.1, 0.68, and 1.64 mm diameter",
+      "group": "Granular materials",
+      "ranges": {
+        "tortuosity": [
+          1.46,
+          1.87
+        ]
+      },
+      "note": "Page superscript: 50. The name wraps over two lines and the superscript sits on the second line, after \"diameter\". The page gives one interval for the three bead sizes together, so no per-size variant can be split out.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "granular_materials",
+      "name": "Granular materials",
+      "group": "Granular materials",
+      "ranges": {
+        "tortuosity": [
+          1.1,
+          1.8
+        ]
+      },
+      "note": "No superscript on the page, so no credit is given for this row. The row name repeats the group heading."
+    },
+    {
+      "key": "gravel",
+      "name": "Gravel",
+      "group": "Granular materials",
+      "ranges": {
+        "tortuosity": [
+          1.5,
+          1.8
+        ]
+      },
+      "note": "Page superscripts: 52, 55. Printed without a size here, where Table 6.8 prints \"9 mm gravel\".",
+      "attributed_to": {
+        "row": "Wilson et al., 2007; Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "open_porous_asphalt",
+      "name": "Open porous asphalt",
+      "group": "Granular materials",
+      "ranges": {
+        "tortuosity": [
+          2.0,
+          3.3
+        ]
+      },
+      "note": "Page superscripts: 54, 67. Cell printed \"2–3.3\", the lower bound with no decimal.",
+      "attributed_to": {
+        "row": "Berengier et al., 1997; Sarradj, Lerch and Hubelt, 2006"
+      }
+    },
+    {
+      "key": "perlite",
+      "name": "Perlite",
+      "group": "Granular materials",
+      "tortuosity": 2.04,
+      "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured tortuosity; the credit is recorded as the page prints it. Table 6.8 prints the same material as \"Perlite (expanded)\".",
+      "attributed_to": {
+        "row": "Sepp, 2015"
+      }
+    },
+    {
+      "key": "rubber_crumb",
+      "name": "Rubber crumb",
+      "group": "Granular materials",
+      "reported": {
+        "tortuosity": [
+          [
+            1.13,
+            1.26
+          ],
+          [
+            1.38,
+            1.56
+          ]
+        ]
+      },
+      "note": "Page superscript: 53. Cell printed \"1.13–1.26, 1.38–1.56\": two separate intervals with nothing to pair them to.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "rubber_open_cell_synthetic",
+      "name": "Rubber, open cell synthetic",
+      "group": "Granular materials",
+      "tortuosity": 2.64,
+      "note": "Page superscript: 41. Same value as the Cellular rubber row four lines above, which is credited to reference 87.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "vermiculite",
+      "name": "Vermiculite",
+      "group": "Granular materials",
+      "reported": {
+        "tortuosity": [
+          [
+            1.48,
+            1.58
+          ],
+          [
+            1.8,
+            2.46
+          ]
+        ]
+      },
+      "note": "Page superscript: 53. Cell printed \"1.48–1.58, 1.8–2.46\": two separate intervals with nothing to pair them to.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "asphalt",
+      "name": "Asphalt",
+      "group": "Other",
+      "tortuosity": 1.8,
+      "note": "Page superscript: 52.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007"
+      }
+    },
+    {
+      "key": "compacted_soil",
+      "name": "Compacted soil",
+      "group": "Other",
+      "tortuosity": 1.4,
+      "note": "Page superscript: 52.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007"
+      }
+    },
+    {
+      "key": "forest_floor_top_layer",
+      "name": "Forest floor, top layer",
+      "group": "Other",
+      "tortuosity": 1.1,
+      "note": "Page superscript: 52.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007"
+      }
+    },
+    {
+      "key": "nitrile_foam_granulate",
+      "name": "Nitrile foam granulate",
+      "group": "Other",
+      "reported": {
+        "tortuosity": [
+          1.31,
+          1.49
+        ]
+      },
+      "note": "Page superscript: 53. Cell printed \"1.31, 1.49\": two separate values with nothing to pair them to.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "porous_ceramic",
+      "name": "Porous ceramic",
+      "group": "Other",
+      "tortuosity": 1.5,
+      "note": "Page superscript: 88.",
+      "attributed_to": {
+        "row": "Zielinski, 2012"
+      }
+    },
+    {
+      "key": "porous_aluminium",
+      "name": "Porous aluminium",
+      "group": "Other",
+      "tortuosity": 1.07,
+      "note": "Page superscript: 55.",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "soft_soil",
+      "name": "Soft soil",
+      "group": "Other",
+      "tortuosity": 1.3,
+      "note": "Page superscript: 52.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007"
+      }
+    },
+    {
+      "key": "snow",
+      "name": "Snow",
+      "group": "Other",
+      "ranges": {
+        "tortuosity": [
+          1.0,
+          1.6
+        ]
+      },
+      "note": "Page superscripts: 52, 81. Cell printed \"1–1.6\", the lower bound with no decimal.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007; Datt et al., 2016"
+      }
+    },
+    {
+      "key": "snow_new",
+      "name": "Snow (new)",
+      "group": "Other",
+      "ranges": {
+        "tortuosity": [
+          1.5,
+          2.7
+        ]
+      },
+      "note": "No superscript on the page, so no credit is given for this row. This row is missing from the PDF text layer and was read off the rendered page."
+    },
+    {
+      "key": "snow_old_crusted",
+      "name": "Snow (old crusted)",
+      "group": "Other",
+      "tortuosity": 4.0,
+      "note": "No superscript on the page, so no credit is given for this row. Printed as the bare integer \"4\". This row is missing from the PDF text layer and was read off the rendered page; it is the last row of the table."
+    }
+  ]
+}

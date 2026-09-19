@@ -39,6 +39,68 @@ rangos donde un rango es lo que se sabe. Usa una fila para reproducir un
 ejemplo resuelto, para contrastar una medida o para tener un orden de magnitud;
 para lo que tenga que estar bien, mide la probeta.
 
+## Leer un catálogo desde el código
+
+Cada catálogo es un diccionario de `'<tabla>/<fila>'` a una fila, y la fila
+devuelve lo que su página imprimió. Una magnitud que la página dio es un
+atributo; una que no dio responde `None`, y la fila dice por qué.
+
+```python
+from phonometry import materials
+
+foam = materials.PUBLISHED_POROUS["allard-2009-table-13-1/foam"]
+print(foam.source)
+print(foam.printed("flow_resistivity_pa_s_m2"), "Pa s/m2")
+
+screen = materials.PUBLISHED_POROUS["allard-2009-table-11-5/screen_2"]
+print(screen.tortuosity)
+print(screen.why_missing("tortuosity"))
+```
+
+`printed` es la lectura estricta: devuelve el número que imprimió la página o
+se niega, nombrando la página y lo que había en la celda. Úsalo allí donde un
+número equivocado sea peor que una excepción.
+
+Preguntar por un nombre da todos los libros a la vez, que es la comparación que
+ningún libro por separado puede hacer:
+
+```python
+for row in materials.porous_materials_named("Mineral wool"):
+    interval = row.ranges.get("porosity")
+    print(row.table, row.porosity if interval is None else interval)
+```
+
+El catálogo de suelos funciona igual, y alimenta a los modelos que piden una
+resistividad al flujo:
+
+```python
+from phonometry import environment
+
+pasture = environment.PUBLISHED_GROUND["bies-2017-table-5-2/normal_uncompacted_ground"]
+print(pasture.harmonoise_class, pasture.printed("flow_resistivity_pa_s_m2"))
+
+over_pasture = environment.ground_effect(
+    [125.0, 250.0, 500.0, 1000.0],
+    1.0,
+    1.5,
+    50.0,
+    flow_resistivity=pasture.printed("flow_resistivity_pa_s_m2"),
+)
+print(over_pasture.excess_attenuation.round(2), "dB")
+```
+
+Un estado de fluido es un `Fluid` como cualquier otro, así que entra en las
+mismas llamadas; lo que lo distingue es que su `model` nombra una tabla y no
+una forma cerrada.
+
+```python
+from phonometry import fluids
+
+sea = fluids.PUBLISHED_FLUIDS["bies-2017-table-c1-fluids/sea_water"]
+print(sea.model)
+print(sea.validity)
+```
+
 ## Sólidos
 
 Constantes elásticas, velocidades de onda y factores de pérdidas, leídos de las

@@ -1,0 +1,373 @@
+{
+  "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
+  "about": "Rendered PDF page 250, folio 193 (running head \"Porous sound absorption 193\"); the whole page is the table. Title as printed: \"Table 6.2 Examples of flow resistivities reported in various acoustic studies\". Two columns, headings in italic: \"Material\" and \"Flow resistivity (rayl m-1)\" (the -1 is a superscript). Rows sit under four bold section headings, \"Fibrous materials\", \"Cellular materials\", \"Granular materials\" and \"Other\", kept here as the group field. No footnotes. Material names carry superscript reference numbers into the chapter 6 reference list (PDF pages 276-281, printed pp. 219-224); \"Mineral wool\" carries none. Section 6.4.1 on the facing page (PDF 249, printed p. 192) introduces the table with \"Table 6.2 gives some example values (for ground, see Table 6.7)\", after stating that \"The unit of flow resistance in MKS units is N m−3 s, often referred to as 1 rayl, and should nowadays be used. Older texts may use CGS rayls. To convert a CGS rayl to a MKS rayl, multiply by 10.\" The printed unit rayl m-1 (MKS rayl per metre) is therefore N s m-4 = Pa s m-2, so every number is carried over with factor 1; thousands separators dropped. Ranges printed with an en dash go to ranges; the one cell printing two values joined by \"and\" (glass beads) keeps both readings in one row, unpaired, because the page does not say which value belongs to which bead size. The prose gives no per-material caveats; the title itself says the values are examples reported in studies, not specifications. Odd: pairing the two by printed order would give the larger glass bead (1.68 mm) the larger flow resistivity (43,200), the opposite of the usual trend with grain size, and Table 6.5 prints the same pair from the same study with the sizes reversed; neither is paired here.",
+  "rows": [
+    {
+      "key": "coir",
+      "name": "Coir",
+      "group": "Fibrous materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          1400.0,
+          1600.0
+        ]
+      },
+      "note": "Page superscript: 39.",
+      "attributed_to": {
+        "row": "Fouladi, Ayub and Nor, 2011"
+      }
+    },
+    {
+      "key": "felt",
+      "name": "Felt",
+      "group": "Fibrous materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          26000.0,
+          73300.0
+        ]
+      },
+      "note": "Page superscripts: 40, 41.",
+      "attributed_to": {
+        "row": "Fohr et al., 2008; Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "hemp_fibres",
+      "name": "Hemp fibres",
+      "group": "Fibrous materials",
+      "flow_resistivity_pa_s_m2": 6200.0,
+      "note": "Page superscript: 41.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "mineral_wool",
+      "name": "Mineral wool",
+      "group": "Fibrous materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          1000.0,
+          150000.0
+        ]
+      },
+      "note": "No superscript on the page."
+    },
+    {
+      "key": "polyester_fibres",
+      "name": "Polyester fibres",
+      "group": "Fibrous materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          880.0,
+          44400.0
+        ]
+      },
+      "note": "Page superscripts: 42, 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
+      "attributed_to": {
+        "row": "Garai and Pompoli, 2005; Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "wood_fibres",
+      "name": "Wood fibres",
+      "group": "Fibrous materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          11000.0,
+          180000.0
+        ]
+      },
+      "note": "Page superscript: 44.",
+      "attributed_to": {
+        "row": "Wassilieff, 1996"
+      }
+    },
+    {
+      "key": "melamine_foam",
+      "name": "Melamine foam",
+      "group": "Cellular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          10500.0,
+          17500.0
+        ]
+      },
+      "note": "Page superscripts: 41, 45. Superscript 45 is Kino and Ueno, Appl. Acoust. 69(4) (2008), not their 69(7) paper (ref. 43).",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013; Kino and Ueno, 2008"
+      }
+    },
+    {
+      "key": "metal_foam",
+      "name": "Metal foam",
+      "group": "Cellular materials",
+      "flow_resistivity_pa_s_m2": 50000.0,
+      "note": "Page superscript: 46.",
+      "attributed_to": {
+        "row": "Panneton and Olny, 2006"
+      }
+    },
+    {
+      "key": "plastic_foam",
+      "name": "Plastic foam",
+      "group": "Cellular materials",
+      "flow_resistivity_pa_s_m2": 3600.0,
+      "note": "Page superscript: 40.",
+      "attributed_to": {
+        "row": "Fohr et al., 2008"
+      }
+    },
+    {
+      "key": "polyimide_foam",
+      "name": "Polyimide foam",
+      "group": "Cellular materials",
+      "flow_resistivity_pa_s_m2": 1000.0,
+      "note": "Page superscript: 47.",
+      "attributed_to": {
+        "row": "Lind-Nordgren and Göransson, 2010"
+      }
+    },
+    {
+      "key": "polylactide_and_polyethylene_glycol_foam",
+      "name": "Polylactide and polyethylene glycol foam",
+      "group": "Cellular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          6700.0,
+          13000.0
+        ]
+      },
+      "note": "Page superscript: 48. Name wraps over two lines on the page (\"Polylactide and polyethylene\" / \"glycol foam\").",
+      "attributed_to": {
+        "row": "Mosanenzadeh et al., 2015"
+      }
+    },
+    {
+      "key": "pu_foam",
+      "name": "PU foam",
+      "group": "Cellular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          4500.0,
+          12900.0
+        ]
+      },
+      "note": "Page superscripts: 41, 47.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013; Lind-Nordgren and Göransson, 2010"
+      }
+    },
+    {
+      "key": "pu_foam_fully_reticulated",
+      "name": "PU foam, fully reticulated",
+      "group": "Cellular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          380.0,
+          3200.0
+        ]
+      },
+      "note": "Page superscripts: 12, 49.",
+      "attributed_to": {
+        "row": "Doutres, Atalla and Dong, 2011; Dunn and Davern, 1986"
+      }
+    },
+    {
+      "key": "pu_foam_partially_reticulated",
+      "name": "PU foam, partially reticulated",
+      "group": "Cellular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          3000.0,
+          42000.0
+        ]
+      },
+      "note": "Page superscript: 12.",
+      "attributed_to": {
+        "row": "Doutres, Atalla and Dong, 2011"
+      }
+    },
+    {
+      "key": "consolidated_foam_granulates",
+      "name": "Consolidated foam granulates",
+      "group": "Granular materials",
+      "flow_resistivity_pa_s_m2": 152000.0,
+      "note": "Page superscript: 50.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "coustone_quietstone",
+      "name": "Coustone (Quietstone)",
+      "group": "Granular materials",
+      "flow_resistivity_pa_s_m2": 31500.0,
+      "note": "Page superscript: 50.",
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      }
+    },
+    {
+      "key": "dry_sand",
+      "name": "Dry sand",
+      "group": "Granular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          85000.0,
+          314000.0
+        ]
+      },
+      "note": "Page superscript: 51.",
+      "attributed_to": {
+        "row": "Horoshenkov and Mohamed, 2006"
+      }
+    },
+    {
+      "key": "glass_beads",
+      "name": "Glass beads, 0.68 and 1.68 mm in diameter",
+      "group": "Granular materials",
+      "reported": {
+        "flow_resistivity_pa_s_m2": [
+          13000.0,
+          43200.0
+        ]
+      },
+      "attributed_to": {
+        "row": "Horoshenkov and Swift, 2001"
+      },
+      "note": "Page superscript: 50. The page prints both specimens on one line: the name “Glass beads, 0.68 and 1.68 mm in diameter” (wrapped after “mm”) against the cell “13,000 and 43,200”, and it does not say which resistivity belongs to which diameter. Pairing them by printed order would be a reading the page does not support, and two things argue against it: flow resistivity falls with the square of the grain size, so the larger bead should be the less resistive of the two, and Table 6.5 prints the same pair of beads from the same study with the sizes the other way round (“1.6 and 0.7 mm”). Both readings are kept, unpaired."
+    },
+    {
+      "key": "gravel",
+      "name": "Gravel",
+      "group": "Granular materials",
+      "flow_resistivity_pa_s_m2": 10000.0,
+      "note": "Page superscript: 52.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007"
+      }
+    },
+    {
+      "key": "lead_shot",
+      "name": "Lead shot",
+      "group": "Granular materials",
+      "flow_resistivity_pa_s_m2": 1373.0,
+      "note": "Page superscript: 36.",
+      "attributed_to": {
+        "row": "Umnova et al., 2003"
+      }
+    },
+    {
+      "key": "open_cell_synthetic_rubber",
+      "name": "Open cell synthetic rubber",
+      "group": "Granular materials",
+      "flow_resistivity_pa_s_m2": 123500.0,
+      "note": "Page superscript: 41.",
+      "attributed_to": {
+        "row": "Bonfiglio and Pompoli, 2013"
+      }
+    },
+    {
+      "key": "perlite",
+      "name": "Perlite",
+      "group": "Granular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          4300.0,
+          32800.0
+        ]
+      },
+      "note": "Page superscript: 53.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "porous_pavement",
+      "name": "Porous pavement",
+      "group": "Granular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          2000.0,
+          15000.0
+        ]
+      },
+      "note": "Page superscript: 54.",
+      "attributed_to": {
+        "row": "Berengier et al., 1997"
+      }
+    },
+    {
+      "key": "vermiculite",
+      "name": "Vermiculite",
+      "group": "Granular materials",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          7600.0,
+          135000.0
+        ]
+      },
+      "note": "Page superscript: 53.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "asphalt",
+      "name": "Asphalt",
+      "group": "Other",
+      "flow_resistivity_pa_s_m2": 30000000.0,
+      "note": "Page superscript: 52.",
+      "attributed_to": {
+        "row": "Wilson et al., 2007"
+      }
+    },
+    {
+      "key": "nitrile_foam_granulate",
+      "name": "Nitrile foam granulate",
+      "group": "Other",
+      "flow_resistivity_pa_s_m2": 2800.0,
+      "note": "Page superscript: 53.",
+      "attributed_to": {
+        "row": "Voronina and Horoshenkov, 2003"
+      }
+    },
+    {
+      "key": "porous_aluminium",
+      "name": "Porous aluminium",
+      "group": "Other",
+      "flow_resistivity_pa_s_m2": 205.0,
+      "note": "Page superscript: 55.",
+      "attributed_to": {
+        "row": "Umnova et al., 2005"
+      }
+    },
+    {
+      "key": "porous_ceramic",
+      "name": "Porous ceramic",
+      "group": "Other",
+      "flow_resistivity_pa_s_m2": 44500.0,
+      "note": "Page superscript: 56.",
+      "attributed_to": {
+        "row": "Champoux and Allard, 1991"
+      }
+    },
+    {
+      "key": "wood_shavings",
+      "name": "Wood shavings",
+      "group": "Other",
+      "ranges": {
+        "flow_resistivity_pa_s_m2": [
+          2500.0,
+          54000.0
+        ]
+      },
+      "note": "Page superscript: 44.",
+      "attributed_to": {
+        "row": "Wassilieff, 1996"
+      }
+    }
+  ]
+}

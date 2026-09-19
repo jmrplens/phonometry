@@ -1062,3 +1062,42 @@ ALLARD_POROUS_ROWS: tuple[tuple[str, dict[str, float]], ...] = (
         },
     ),
 )
+
+#: The rows Cox credits to Mechel, paired with the rows Mechel prints, as the
+#: two pages print them: Cox's name, Mechel's name, and the interval both
+#: books give. Two transcriptions of two books by two readers, so an interval
+#: that matches here matches the printed digits of both pages.
+#:
+#: Cox's foam row is not here. It reads 0,93 to 0,995 against Mechel's 0,95 to
+#: 0,995, and it credits four studies rather than Mechel alone, so it is a
+#: compilation of its own and not a copy.
+COX_MECHEL_SHARED_POROSITY: tuple[tuple[str, str, tuple[float, float]], ...] = (
+    ("mineral_wool", "mineral_fibre_materials", (0.92, 0.99)),
+    ("wood_fibre_board", "wood_fibre_board", (0.65, 0.80)),
+    ("wood_wool_board", "wood_wool_board", (0.50, 0.65)),
+    ("gravel_and_stone_chip_fill", "gravel_and_stone_chip_fill", (0.25, 0.45)),
+    ("pumice_concrete", "pumice_concrete", (0.25, 0.50)),
+    ("pumice_fill", "pumice_fill", (0.65, 0.85)),
+    ("sintered_metal", "sinter_metal", (0.10, 0.25)),
+)
+
+#: What the compiled tables print where a single number would go, keyed by
+#: row, as each transcription flagged it after reading the rendered page.
+#: These are the cells a reader of the text layer would get wrong.
+COX_MECHEL_JUDGEMENT_CALLS: tuple[tuple[str, str, object], ...] = (
+    # Table 6.8: three readings of a viscous length, comma separated, and two
+    # of a thermal length joined by the word "and".
+    ("cox-2017-table-6-8/plastic_foam", "viscous_length_um", (25.0, 207.0, 230.0)),
+    ("cox-2017-table-6-8/plastic_foam", "thermal_length_um", (70.0, 690.0)),
+    # Table 6.9: two intervals in one cell, comma separated.
+    ("cox-2017-table-6-9/rubber_crumb", "tortuosity", ((1.13, 1.26), (1.38, 1.56))),
+    ("cox-2017-table-6-9/vermiculite", "tortuosity", ((1.48, 1.58), (1.8, 2.46))),
+    # Table 6.9: the two rows the PDF text layer does not contain at all.
+    ("cox-2017-table-6-9/snow_new", "tortuosity", (1.5, 2.7)),
+    ("cox-2017-table-6-9/snow_old_crusted", "tortuosity", 4.0),
+    # Mechel G.11: a shot content printed as "< 1".
+    ("mechel-2008-section-g11-table-1/glass_fibre", "shot_content_percent", (0.0, 1.0)),
+    # Cox 6.5: a porosity printed as ">0.75", and one printed with a tilde.
+    ("cox-2017-table-6-5/aerogel", "porosity", (0.75, 1.0)),
+    ("cox-2017-table-6-5/marble", "porosity", 0.005),
+)

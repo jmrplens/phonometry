@@ -116,13 +116,26 @@ DIMENSIONLESS = (
     "_db_per_m",
 )
 
-#: Parameters that name a pressure and stay bare, with the reason. The one
-#: shape that qualifies is an acoustic pressure: a waveform or a field, always
-#: in pascals, and often a :class:`~phonometry.io.Signal` whose calibration
-#: says so itself. There is no second unit anyone passes it in, so a suffix
-#: would restate the type rather than resolve an ambiguity.
+#: Parameters that name a quantity and stay bare, with the reason. Two shapes
+#: qualify. One is an acoustic pressure: a waveform or a field, always in
+#: pascals, and often a :class:`~phonometry.io.Signal` whose calibration says
+#: so itself, so a suffix would restate the type rather than resolve an
+#: ambiguity. The other is a name that speaks of a quantity without holding
+#: one: the parameter of a distribution of diameters is a property of the fit
+#: and not a diameter, and giving it a length suffix would be a lie about what
+#: it is.
 _ACOUSTIC = "acoustic pressure, always in pascals; a Signal carries its own calibration"
+_OF_A_DISTRIBUTION = (
+    "the parameter of a Poisson distribution fitted to the diameters, not a "
+    "diameter: dimensionless, with the class width it is referred to stated in "
+    "the data file it is read from"
+)
 EXEMPT: dict[tuple[str, str, str], str] = {
+    (
+        "phonometry.materials.absorbers.catalogue",
+        "PorousMaterial",
+        "fibre_diameter_distribution_parameter",
+    ): _OF_A_DISTRIBUTION,
     ("phonometry.underwater.acoustics", "sound_pressure_level", "pressure"): _ACOUSTIC,
     ("phonometry.underwater.acoustics", "sound_exposure_level", "pressure"): _ACOUSTIC,
     (

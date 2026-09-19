@@ -1,0 +1,276 @@
+{
+  "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
+  "about": "Rendered PDF page 251, folio 194 (running head \"194 Acoustic Absorbers and Diffusers\"); the table occupies the top half, followed by the prose of Section 6.4.1 (temperature correction, Equations 6.7 and 6.8) and the start of Section 6.4.2 Open porosity. Title as printed: \"Table 6.3 Typical fibre diameters reported in various acoustic studies\". Two columns, headings in italic: \"Material\" and \"Diameter (μm)\". The table has NO section headings; the rows are alphabetical and thin horizontal rules are drawn after every fourth row (after Coir, Graphite, Kevlar and Ramie), a typographic aid only, so no group field is given. No footnotes. Every material name carries at least one superscript reference number into the chapter 6 reference list (PDF pages 276-281, printed pp. 219-224). The page before (PDF 249, printed p. 192) refers to the table twice: \"For mineral and glass fibre, see Table 6.3 for typical diameters\" (after Bies and Hansen's fibreglass relation, Equation 6.5, which needs the fibre radius a) and \"These formulations often require the radius of the fibres, and Table 6.3 gives some indicative values for different materials.\" Printed unit is micrometres, the library unit, so every number is carried over with factor 1. Ranges printed with an en dash go to ranges; the two cells that list a range and a separate value with a comma (Polypropylene \"5–25, 63\", Wool \"14, 37–63\") go to reported. Note that the table gives fibre DIAMETERS while Equation 6.5 and the Table 6.4 formulae use the fibre RADIUS.",
+  "rows": [
+    {
+      "key": "bagasse",
+      "name": "Bagasse",
+      "fibre_diameter_um": 20.0,
+      "note": "Page superscript: 19.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010"
+      }
+    },
+    {
+      "key": "bamboo",
+      "name": "Bamboo",
+      "fibre_diameter_um": 14.0,
+      "note": "Page superscript: 19.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010"
+      }
+    },
+    {
+      "key": "ceramic",
+      "name": "Ceramic",
+      "ranges": {
+        "fibre_diameter_um": [
+          2.0,
+          6.0
+        ]
+      },
+      "note": "Page superscript: 19.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010"
+      }
+    },
+    {
+      "key": "coir",
+      "name": "Coir",
+      "ranges": {
+        "fibre_diameter_um": [
+          156.0,
+          370.0
+        ]
+      },
+      "note": "Page superscript: 39.",
+      "attributed_to": {
+        "row": "Fouladi, Ayub and Nor, 2011"
+      }
+    },
+    {
+      "key": "cotton",
+      "name": "Cotton",
+      "ranges": {
+        "fibre_diameter_um": [
+          8.0,
+          33.0
+        ]
+      },
+      "note": "Page superscripts: 19, 20.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011"
+      }
+    },
+    {
+      "key": "flax",
+      "name": "Flax",
+      "ranges": {
+        "fibre_diameter_um": [
+          19.0,
+          22.0
+        ]
+      },
+      "note": "Page superscripts: 19, 20.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011"
+      }
+    },
+    {
+      "key": "glass_and_mineral_wools",
+      "name": "Glass and mineral wools",
+      "ranges": {
+        "fibre_diameter_um": [
+          3.0,
+          22.0
+        ]
+      },
+      "note": "Page superscripts: 19, 44, 57.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Wassilieff, 1996; Yilmaz et al., 2011"
+      }
+    },
+    {
+      "key": "graphite",
+      "name": "Graphite",
+      "ranges": {
+        "fibre_diameter_um": [
+          5.0,
+          10.0
+        ]
+      },
+      "note": "Page superscript: 19.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010"
+      }
+    },
+    {
+      "key": "hemp",
+      "name": "Hemp",
+      "ranges": {
+        "fibre_diameter_um": [
+          22.0,
+          94.0
+        ]
+      },
+      "note": "Page superscripts: 19, 20, 57.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011; Yilmaz et al., 2011"
+      }
+    },
+    {
+      "key": "jute",
+      "name": "Jute",
+      "ranges": {
+        "fibre_diameter_um": [
+          20.0,
+          81.0
+        ]
+      },
+      "note": "Page superscripts: 19, 20.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Oldham, Egan and Cookson, 2011"
+      }
+    },
+    {
+      "key": "kenaf",
+      "name": "Kenaf",
+      "ranges": {
+        "fibre_diameter_um": [
+          21.0,
+          78.0
+        ]
+      },
+      "note": "Page superscripts: 19, 58.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Alba et al., 2011"
+      }
+    },
+    {
+      "key": "kevlar",
+      "name": "Kevlar",
+      "fibre_diameter_um": 12.0,
+      "note": "Page superscript: 19.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010"
+      }
+    },
+    {
+      "key": "polyester",
+      "name": "Polyester",
+      "ranges": {
+        "fibre_diameter_um": [
+          3.0,
+          48.0
+        ]
+      },
+      "note": "Page superscripts: 19, 42, 58.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Garai and Pompoli, 2005; Alba et al., 2011"
+      }
+    },
+    {
+      "key": "poly_lactic_acid",
+      "name": "Poly(lactic acid)",
+      "fibre_diameter_um": 62.0,
+      "note": "Page superscript: 57.",
+      "attributed_to": {
+        "row": "Yilmaz et al., 2011"
+      }
+    },
+    {
+      "key": "polypropylene",
+      "name": "Polypropylene",
+      "reported": {
+        "fibre_diameter_um": [
+          [
+            5.0,
+            25.0
+          ],
+          63.0
+        ]
+      },
+      "note": "Page superscripts: 19, 57. Cell printed \"5–25, 63\": a range and a separate value with nothing to pair them to.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Yilmaz et al., 2011"
+      }
+    },
+    {
+      "key": "ramie",
+      "name": "Ramie",
+      "fibre_diameter_um": 37.0,
+      "note": "Page superscript: 20.",
+      "attributed_to": {
+        "row": "Oldham, Egan and Cookson, 2011"
+      }
+    },
+    {
+      "key": "rice_paddy",
+      "name": "Rice paddy",
+      "ranges": {
+        "fibre_diameter_um": [
+          8.0,
+          20.0
+        ]
+      },
+      "note": "Page superscript: 59. Superscript 59 is Putra et al., Adv. Acoust. Vib. 605932 (2013), the paddy-waste paper (ref. 60 is the same first authors' sugarcane paper).",
+      "attributed_to": {
+        "row": "Putra et al., 2013"
+      }
+    },
+    {
+      "key": "sisal",
+      "name": "Sisal",
+      "fibre_diameter_um": 213.0,
+      "note": "Page superscript: 20.",
+      "attributed_to": {
+        "row": "Oldham, Egan and Cookson, 2011"
+      }
+    },
+    {
+      "key": "sugar_cane",
+      "name": "Sugar cane",
+      "ranges": {
+        "fibre_diameter_um": [
+          11.0,
+          23.0
+        ]
+      },
+      "note": "Page superscript: 60. Superscript 60 is Putra et al., Procedia Eng. 53 (2013), the sugarcane paper (ref. 59 is the same first authors' paddy-waste paper).",
+      "attributed_to": {
+        "row": "Putra et al., 2013"
+      }
+    },
+    {
+      "key": "wood",
+      "name": "Wood",
+      "ranges": {
+        "fibre_diameter_um": [
+          16.0,
+          38.0
+        ]
+      },
+      "note": "Page superscripts: 19, 44.",
+      "attributed_to": {
+        "row": "Arenas and Crocker, 2010; Wassilieff, 1996"
+      }
+    },
+    {
+      "key": "wool",
+      "name": "Wool",
+      "reported": {
+        "fibre_diameter_um": [
+          14.0,
+          [
+            37.0,
+            63.0
+          ]
+        ]
+      },
+      "note": "Page superscript: 20. Cell printed \"14, 37–63\": a value and a separate range with nothing to pair them to.",
+      "attributed_to": {
+        "row": "Oldham, Egan and Cookson, 2011"
+      }
+    }
+  ]
+}

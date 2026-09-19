@@ -52,6 +52,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   values up in: air at conditions that were measured is `fluids.air` and sea
   water is `fluids.sea_water`, both of which compute the state.
 
+- **A hundred and sixty-two compiled rows, from two more books.**
+  `materials.PUBLISHED_POROUS` now holds the five tables Cox & D'Antonio
+  compile from the literature (flow resistivity, fibre diameter, porosity, the
+  two characteristic lengths and tortuosity) and the two Mechel prints (a
+  porosity by material and the fibre data of three product groups), beside the
+  specimens it already held. A compiled row is one quantity over a class of
+  material and almost always an interval, because there is no such thing as
+  the porosity of mineral wool, only the range the measurements fall in.
+  `porous_materials_named` therefore answers across the books: "Mineral wool"
+  gives Allard's measured specimen and the two ranges Cox compiles for it.
+
+  **The two books check each other.** Cox credits eight of its porosity ranges
+  to Mechel, and Mechel prints them: two books, two pages, two readings, and
+  seven of the eight come out to the same digits. The eighth is Cox's foam
+  row, which reads 0,93 to 0,995 against Mechel's 0,95 to 0,995 and credits
+  four studies rather than Mechel alone, so it is a compilation of its own.
+  The agreement is a test.
+
+  **`CatalogueRow` gained two fields.** `bounded_below` is the mirror of
+  `bounded_above`, for the aerogel Cox prints as a porosity of `>0.75`, and
+  `group` keeps the heading a table files a row under: Cox sorts every
+  material into fibrous, cellular, granular or other, and that is data about
+  the material.
+
 - **Thirty-two published porous specimens from nineteen parameter tables.**
   `materials.PUBLISHED_POROUS` is the porous rows of the nineteen tables
   Allard & Atalla print across eight chapters, each one the input to a worked

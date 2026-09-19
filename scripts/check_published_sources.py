@@ -174,9 +174,12 @@ SOURCED: dict[tuple[str, str], str] = {
         "MIKI_VALIDITY",
     ): "Miki (1990) Sect. 4.1, the lower limit of the fit range",
     (
-        "materials/absorbers/porous.py",
-        "PUBLISHED_POROUS_MATERIALS",
-    ): "Allard & Atalla 2e, two porous specimens",
+        "materials/absorbers/catalogue.py",
+        "PUBLISHED_POROUS",
+    ): (
+        "Allard & Atalla 2e, the porous rows of nineteen parameter tables "
+        "spread over eight chapters"
+    ),
     (
         "materials/absorbers/porous.py",
         "ROCK_WOOL_LATERAL_FIT",
@@ -527,8 +530,42 @@ def banner_above(lines: Sequence[str], index: int) -> str:
 
 #: A banner that says which packaged data file its table was read from, so the
 #: citation can live in the file with the rows instead of being copied into a
-#: comment that then drifts away from them.
+#: comment that then drifts away from them. A banner may instead name the
+#: **directory** the files live in, with the trailing slash, which means every
+#: ``.json`` in it: a catalogue that reads one file per published table names
+#: nineteen of them today and thirty when the next book lands, and a comment
+#: that lists them is a second copy of the contents to go stale, which is the
+#: thing this gate exists to prevent.
 DATA_FILE = re.compile(r"``([\w./-]+\.json)``")
+DATA_DIRECTORY = re.compile(r"``([\w./-]+/data)/``")
+
+#: Both references in one pass, so that a banner naming a file, then a
+#: directory, then another file keeps that order. Scanning for one kind and
+#: then the other put every named file before every expanded one, and the
+#: order is what the reader of the report sees beside each citation.
+_REFERENCE = re.compile(
+    r"``(?:(?P<file>[\w./-]+\.json)|(?P<directory>[\w./-]+/data)/)``"
+)
+
+
+def data_files(banner: str) -> list[str]:
+    """The packaged data files *banner* points at, named or by directory.
+
+    :param banner: The comment above the constant.
+    :return: Paths relative to the package, in the order the banner refers to
+        them, with each directory expanded in place to the ``.json`` files in
+        it, sorted among themselves.
+    """
+    names: list[str] = []
+    for match in _REFERENCE.finditer(banner):
+        named = match.group("file")
+        if named:
+            names.append(named)
+            continue
+        directory = match.group("directory")
+        found = sorted(path.name for path in (PACKAGE / directory).glob("*.json"))
+        names.extend(f"{directory}/{name}" for name in found)
+    return names
 
 
 def data_citation(banner: str) -> tuple[str, str | None]:
@@ -537,15 +574,15 @@ def data_citation(banner: str) -> tuple[str, str | None]:
     A table read out of a packaged file cites the page once, in the file, and
     the banner points at the file. Reading it back here is what lets the two
     stay one thing: there is no second copy of the citation to go stale. A
-    constant built from several files names them all, and every one of them
-    has to say where it came from: the one that did not would otherwise hide
-    behind the ones that did.
+    constant built from several files names them all, or names the directory
+    they live in, and every one of them has to say where it came from: the one
+    that did not would otherwise hide behind the ones that did.
 
     :return: The files the banner names joined by ``"; "``, empty when it
         names none, and their citations joined the same way, or ``None`` when
         any of them is missing, unreadable or says nothing about a page.
     """
-    names = DATA_FILE.findall(banner)
+    names = data_files(banner)
     if not names:
         return "", None
     cites: list[str] = []

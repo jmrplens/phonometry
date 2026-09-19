@@ -525,3 +525,68 @@ def test_plain_function_still_renders_one_form() -> None:
 
     rendered = gad.format_signature("leq", leq)
     assert "\n\n" not in rendered
+
+
+# ---------------------------------------------------------------------------
+# Inherited attributes
+# ---------------------------------------------------------------------------
+def test_a_subclass_publishes_the_attributes_it_inherits() -> None:
+    """Factoring a base out of two classes must not empty their tables.
+
+    A catalogue row holds its own quantities and inherits the hedges every
+    published row carries. Both appear in the signature the page prints, so
+    both have to appear in the attribute table under it; the alternative is a
+    reader who sees ``ranges`` in the constructor and nothing anywhere saying
+    what it is.
+    """
+    import dataclasses
+
+    from phonometry.solids import SolidMaterial
+
+    lines = gad.inherited_ivars(SolidMaterial)
+    documented = {name for name, _ in gad.parse_docstring(lines).ivars} | {
+        name
+        for name, _ in gad.parse_docstring(inspect.getdoc(SolidMaterial) or "").ivars
+    }
+    assert {field.name for field in dataclasses.fields(SolidMaterial)} <= documented
+
+
+def test_a_field_with_no_default_or_a_factory_is_still_carried() -> None:
+    """The membership test reads the dataclass, not the class attributes.
+
+    ``name`` has no default and ``ranges`` is built by a ``default_factory``,
+    so neither leaves an attribute on the class: reading membership with
+    ``hasattr`` drops exactly the fields a catalogue row cannot do without.
+    """
+    from phonometry.solids import SolidMaterial
+
+    assert not hasattr(SolidMaterial, "name")
+    assert not hasattr(SolidMaterial, "ranges")
+    inherited = dict(gad.parse_docstring(gad.inherited_ivars(SolidMaterial)).ivars)
+    assert "name" in inherited
+    assert "ranges" in inherited
+
+
+def test_an_attribute_the_subclass_documents_itself_is_not_repeated() -> None:
+    """The subclass wins, and the table has one row per name."""
+    from phonometry.solids import SolidMaterial
+
+    own = {
+        name
+        for name, _ in gad.parse_docstring(inspect.getdoc(SolidMaterial) or "").ivars
+    }
+    inherited = [
+        name
+        for name, _ in gad.parse_docstring(gad.inherited_ivars(SolidMaterial)).ivars
+    ]
+    assert own & set(inherited) == set()
+    assert len(inherited) == len(set(inherited))
+
+
+def test_a_class_with_no_documented_base_inherits_nothing() -> None:
+    """The helper is silent where there is nothing to carry."""
+
+    class Plain:
+        """No fields at all."""
+
+    assert gad.inherited_ivars(Plain) == ""

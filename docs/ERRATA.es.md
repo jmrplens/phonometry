@@ -3920,6 +3920,108 @@ dos ediciones con las mismas entradas y en el mismo orden.
 
 ---
 
+## Allard & Atalla 2e (2009), Tabla 11.7 (la figura que nombra su pie)
+
+*Libro, no una norma.*
+
+- **Ubicación:** Tabla 11.7, página 280 del PDF, p. 274 impresa, la tabla de
+  parámetros de la moqueta, la pantalla y la capa fibrosa de la sección
+  11.7.2.
+- **El impreso:** el pie dice «The parameters used to predict the surface
+  impedance of the material represented in Figure 11.6».
+- **El problema:** la Figura 11.6 está en la p. 266 impresa y es la espuma
+  plástica bajo una lámina de lana de vidrio, cuyos parámetros son la Tabla
+  11.3. La estructura que tabula la Tabla 11.7, una moqueta en dos capas sobre
+  una pantalla impermeable sobre una capa fibrosa, es la Figura 11.16,
+  impresa en la misma página que la tabla.
+- **Evidencia:** el texto junto a la Figura 11.16 dice que los parámetros del
+  material están en la Tabla 11.7, y los cuatro nombres de fila de la tabla
+  son las cuatro capas que etiqueta la Figura 11.16. Verificado en la página
+  280 del PDF (p. 274 impresa) y en la página 272 del PDF (p. 266 impresa) de
+  Allard & Atalla, Propagation of Sound in Porous Media 2e:2009.
+- **Comportamiento de la biblioteca:** las tres filas porosas se transcriben
+  tal como están impresas y el `about` del fichero de datos nombra la Figura
+  11.16 como la estructura, citando la redacción del pie.
+- **Estado:** sin notificar.
+
+---
+
+## Allard & Atalla 2e (2009), Tabla 11.8 (el espesor de la lana de vidrio)
+
+*Libro, no una norma.*
+
+- **Ubicación:** Tabla 11.8, página 281 del PDF, p. 275 impresa, la lana de
+  vidrio pegada a una placa de aluminio del ejemplo de transmisión a
+  incidencia normal de la sección 11.7.3.
+- **El impreso:** la tabla da a la lana de vidrio un espesor de 3,8 mm; el
+  texto de la sección 11.7.3, en el folio de al lado, dice «A layer of the
+  glass wool studied in Section 6.5.4, of thickness 5 cm, is bonded on to a
+  plate of aluminium, of thickness 1 mm».
+- **El problema:** los dos espesores difieren en más de un orden de magnitud y
+  no pueden describir los dos la capa de la Figura 11.18.
+- **Evidencia:** la placa sí concuerda entre ambos, 1 mm en los dos, que es lo
+  que sitúa la discrepancia en la celda de la lana de vidrio y no en una
+  columna leída fuera de orden. Verificado en la página 281 del PDF (p. 275
+  impresa) para la tabla y en la página 280 del PDF (p. 274 impresa) para la
+  frase, en Allard & Atalla, Propagation of Sound in Porous Media 2e:2009.
+- **Comportamiento de la biblioteca:** la fila lleva los 3,8 mm impresos y su
+  `note` registra la frase. Nada calcula con el espesor: el fluido equivalente
+  de esta probeta no lo usa.
+- **Estado:** sin notificar.
+
+---
+
+## Allard & Atalla 2e (2009), Tabla 11.9 (el espesor de la placa)
+
+*Libro, no una norma.*
+
+- **Ubicación:** Tabla 11.9, página 282 del PDF, p. 276 impresa, la espuma y
+  la placa del ejemplo de transmisión en campo difuso de la sección 11.7.4.
+- **El impreso:** la fila de la placa da un espesor de 1,6 mm; el texto de la
+  sección 11.7.4, en el folio de al lado, dice «The material is a foam of
+  thickness h = 2 . 54 cm bonded onto a 0.6 mm aluminium plate».
+- **El problema:** 1,6 frente a 0,6 mm para la misma placa.
+- **Evidencia:** la espuma sí concuerda entre ambos, los 25,4 mm de la tabla
+  son los 2,54 cm de la frase, lo que deja la discrepancia sólo en la fila de
+  la placa. Verificado en la página 282 del PDF (p. 276 impresa) para la tabla
+  y en la página 281 del PDF (p. 275 impresa) para la frase, en Allard &
+  Atalla, Propagation of Sound in Porous Media 2e:2009.
+- **Comportamiento de la biblioteca:** la placa no es un material poroso y no
+  está en el catálogo; la `note` de la fila de la espuma registra la
+  discrepancia para que quien reproduzca la figura sepa qué placa supone la
+  curva.
+- **Estado:** sin notificar.
+
+---
+
+## Allard & Atalla 2e (2009), Tabla 13.2 (el módulo de Young de la lana de roca)
+
+*Libro, no una norma.*
+
+- **Ubicación:** Tabla 13.2, página 341 del PDF, p. 337 impresa, la lana de
+  roca de 5,75 cm con una perforación central del ejemplo de doble porosidad.
+- **El impreso:** la columna encabezada E (Pa) lleva 4400 para un esqueleto de
+  130 kg/m3.
+- **El problema:** un módulo de esqueleto de 4,4 kPa a esa densidad da una
+  velocidad de onda en el esqueleto de $\sqrt{4400/130} = 5,8$ m/s, así que la
+  resonancia de cuarto de onda de una capa de 5,75 cm cae cerca de 25 Hz. El
+  texto de la página siguiente dice que el modelo numérico captura «the
+  skeleton resonance occurring around 1350 Hz», que el módulo impreso no puede
+  producir: 1350 Hz pedirían unos 12,7 MPa, tres órdenes de magnitud por
+  encima de la celda.
+- **Evidencia:** aritmética sobre las dos celdas de la propia página contra la
+  propia frase de la página. Nada en la página dice cuál debería ser el
+  módulo, así que esta entrada informa de la incoherencia y no la repara.
+  Verificado en la página 341 del PDF (p. 337 impresa) para la tabla y en la
+  página 342 del PDF (p. 338 impresa) para la frase, en Allard & Atalla,
+  Propagation of Sound in Porous Media 2e:2009.
+- **Comportamiento de la biblioteca:** la fila lleva los 4400 Pa impresos y su
+  `note` registra la resonancia que informa el texto. Ningún ejemplo de esta
+  biblioteca calcula una resonancia de esqueleto a partir de él.
+- **Estado:** sin notificar.
+
+---
+
 ## ECAC Doc 29, 5.ª ed., Volumen 2, Appendix B, Ec. (B-41) (deceleración en descenso)
 
 - **Ubicación:** Appendix B, sección B7.1.1, la deceleración $a$ definida

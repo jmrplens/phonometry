@@ -1,0 +1,48 @@
+{
+  "source": "Allard & Atalla 2e Table 11.7, PDF page 280 (printed p. 274)",
+  "about": "Table 11.7, printed with the caption \"The parameters used to predict the surface impedance of the material represented in Figure 11.6\" although the structure it describes, a carpet in two layers over an impervious screen over a fibrous layer, is Figure 11.16 on the same page and Figure 11.6 is the foam-and-sheet of Table 11.3; the prose beside the figure says the parameters are in Table 11.7, so the caption's figure number is the defect and it is registered. Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s. The carpet is modelled as two identical porous layers because its fibres are bundled at the lower face and spread at the upper one, and the page prints the two rows with the same numbers. The screen row prints only a thickness of 3 mm and a density of 2000 kg/m3: it is an impervious septum of 6 kg/m2 modelled as a thin plate of negligible stiffness, not a porous material, and it is not here.",
+  "rows": [
+    {
+      "key": "carpet_1",
+      "name": "Carpet (1)",
+      "flow_resistivity_pa_s_m2": 5000.0,
+      "porosity": 0.99,
+      "tortuosity": 1.0,
+      "viscous_length_um": 23.0,
+      "thermal_length_um": 28.0,
+      "frame_density_kg_m3": 60.0,
+      "thickness_mm": 3.5,
+      "youngs_modulus_pa": 20000.0,
+      "poisson_ratio": 0.0,
+      "structural_loss_factor": 0.5
+    },
+    {
+      "key": "carpet_2",
+      "name": "Carpet (2)",
+      "flow_resistivity_pa_s_m2": 5000.0,
+      "porosity": 0.99,
+      "tortuosity": 1.0,
+      "viscous_length_um": 23.0,
+      "thermal_length_um": 28.0,
+      "frame_density_kg_m3": 60.0,
+      "thickness_mm": 3.5,
+      "youngs_modulus_pa": 20000.0,
+      "poisson_ratio": 0.0,
+      "structural_loss_factor": 0.5
+    },
+    {
+      "key": "fibrous_layer",
+      "name": "Fibrous layer",
+      "flow_resistivity_pa_s_m2": 33000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.1,
+      "viscous_length_um": 50.0,
+      "thermal_length_um": 110.0,
+      "frame_density_kg_m3": 60.0,
+      "thickness_mm": 1.25,
+      "youngs_modulus_pa": 100000.0,
+      "poisson_ratio": 0.0,
+      "structural_loss_factor": 0.88
+    }
+  ]
+}

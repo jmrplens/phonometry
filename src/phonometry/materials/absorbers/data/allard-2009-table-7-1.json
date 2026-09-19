@@ -1,0 +1,24 @@
+{
+  "source": "Allard & Atalla 2e Table 7.1, PDF page 150 (printed p. 142)",
+  "about": "Table 7.1, \"Acoustic parameters for different materials\": two rigid-frame materials the chapter uses to compare the exact reflected field of a point source with the passage path method (Figures 7.3 and 7.4 use material 1). Columns as printed: tortuosity, flow resistivity sigma (N m-4 s), porosity, viscous dimension Lambda (um) and thermal dimension Lambda' (um). The page names them Material 1 and Material 2 and says nothing about what they are, so nothing here does either: they are parameter sets for a computed example, not characterised specimens.",
+  "rows": [
+    {
+      "key": "material_1",
+      "name": "Material 1",
+      "flow_resistivity_pa_s_m2": 20000.0,
+      "porosity": 0.96,
+      "tortuosity": 1.1,
+      "viscous_length_um": 100.0,
+      "thermal_length_um": 300.0
+    },
+    {
+      "key": "material_2",
+      "name": "Material 2",
+      "flow_resistivity_pa_s_m2": 5500.0,
+      "porosity": 0.98,
+      "tortuosity": 1.32,
+      "viscous_length_um": 120.0,
+      "thermal_length_um": 500.0
+    }
+  ]
+}

@@ -521,6 +521,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [io/io](https://jmrplens.github.io/phonometry/reference/api/io/io/)
 - [materials/airflow-resistance](https://jmrplens.github.io/phonometry/reference/api/materials/airflow-resistance/)
 - [materials/biot](https://jmrplens.github.io/phonometry/reference/api/materials/biot/)
+- [materials/catalogue](https://jmrplens.github.io/phonometry/reference/api/materials/catalogue/)
 - [materials/design](https://jmrplens.github.io/phonometry/reference/api/materials/design/)
 - [materials/dynamic-stiffness](https://jmrplens.github.io/phonometry/reference/api/materials/dynamic-stiffness/)
 - [materials/four-microphone](https://jmrplens.github.io/phonometry/reference/api/materials/four-microphone/)

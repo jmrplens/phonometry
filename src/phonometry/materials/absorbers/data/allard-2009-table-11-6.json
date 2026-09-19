@@ -1,0 +1,20 @@
+{
+  "source": "Allard & Atalla 2e Table 11.6, PDF page 279 (printed p. 273)",
+  "about": "Table 11.6, \"The parameters used to predict the surface impedance of the material represented in Figure 11.14\": the plastic foam under the impervious screen of Sect. 11.7.2 (screen 25 um thick, 0.02 kg m-2, modelled as a perfectly flexible membrane). Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s.",
+  "rows": [
+    {
+      "key": "foam",
+      "name": "Foam",
+      "flow_resistivity_pa_s_m2": 22000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.9,
+      "viscous_length_um": 87.0,
+      "thermal_length_um": 146.0,
+      "frame_density_kg_m3": 30.0,
+      "thickness_mm": 20.0,
+      "youngs_modulus_pa": 294000.0,
+      "poisson_ratio": 0.2,
+      "structural_loss_factor": 0.18
+    }
+  ]
+}

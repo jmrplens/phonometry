@@ -1,0 +1,41 @@
+{
+  "source": "Allard & Atalla 2e Table 11.5, PDF page 277 (printed p. 271)",
+  "about": "Table 11.5, \"The parameters used to predict the sound absorption of a felt-screen-foam system\": the three layers of the felt-screen-foam system whose predicted and measured absorption is Figure 11.13. Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um) and rho_1 (kg/m3). The screen row prints the word \"model\" in its tortuosity and both length cells and leaves the density empty: the prose on the facing page (printed p. 270) explains that the screen's lengths were derived from its measured flow resistance as Lambda = Lambda' = r = sqrt(8 eta / (phi sigma)) after Atalla and Sgard (2007), and its tortuosity taken as alpha_inf(omega) = 1 + (epsilon_e / d)(alpha_felt + alpha_foam), a frequency-dependent quantity no single number stands for; its stiffness and mass were ignored because of its small thickness. Those three cells are kept as the word the page prints. The foam of the third row is the one Tables 12.1, 12.4 and 12.5 print again.",
+  "rows": [
+    {
+      "key": "felt_1",
+      "name": "Felt (1)",
+      "flow_resistivity_pa_s_m2": 23000.0,
+      "porosity": 0.99,
+      "tortuosity": 1.4,
+      "viscous_length_um": 64.0,
+      "thermal_length_um": 131.0,
+      "frame_density_kg_m3": 66.0,
+      "thickness_mm": 19.0
+    },
+    {
+      "key": "screen_2",
+      "name": "Screen (2)",
+      "flow_resistivity_pa_s_m2": 137000.0,
+      "porosity": 0.08,
+      "thickness_mm": 0.08,
+      "unquantified": {
+        "tortuosity": "model",
+        "viscous_length_um": "model",
+        "thermal_length_um": "model"
+      },
+      "note": "Lengths from Lambda = Lambda' = sqrt(8 eta / (phi sigma)) and tortuosity from 1 + (epsilon_e / d)(alpha_felt + alpha_foam), per the prose of printed p. 270; density not printed."
+    },
+    {
+      "key": "foam_3",
+      "name": "Foam (3)",
+      "flow_resistivity_pa_s_m2": 10900.0,
+      "porosity": 0.99,
+      "tortuosity": 1.02,
+      "viscous_length_um": 100.0,
+      "thermal_length_um": 130.0,
+      "frame_density_kg_m3": 8.8,
+      "thickness_mm": 27.0
+    }
+  ]
+}

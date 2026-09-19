@@ -1,0 +1,32 @@
+{
+  "source": "Allard & Atalla 2e Table 10.1, PDF page 229 (printed p. 222)",
+  "about": "Table 10.1, \"Acoustical and mechanical parameters for a typical glass wool. The tortuosity is identical in directions x and z, and F = A = 0 (the Poisson coefficients are equal to 0)\": the transversally isotropic glass wool of Chapter 10. The page prints one flow resistivity and one viscous dimension per direction, sigma^x 4000 and sigma^z 8000 N m-4 s, Lambda^x 200 and Lambda^z 140 um, and one of everything else: porosity 0.98, tortuosity 1.1, thermal permeability q'_0 6.10^-9 m2, thermal dimension 500 um, density rho_1 32 kg/m3. The isotropic models of this library take one direction at a time, so the material is two rows, one per direction, sharing the cells the page prints once; a reader should not take them for two materials. The three rigidity parameters G, G' and C, printed as 260, 125 and 46 kPa each times (1 + 0.1j), are the transversally isotropic elastic constants of Sect. 10.2 and do not map onto the isotropic shear modulus and Poisson ratio the poroelastic models here take, so they stay in the note and out of the elastic fields.",
+  "rows": [
+    {
+      "key": "glass_wool_x",
+      "name": "Typical glass wool",
+      "variant": "direction x",
+      "flow_resistivity_pa_s_m2": 4000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.1,
+      "viscous_length_um": 200.0,
+      "thermal_length_um": 500.0,
+      "thermal_permeability_m2": 6e-09,
+      "frame_density_kg_m3": 32.0,
+      "note": "Rigidity parameters G 260(1+0.1j), G' 125(1+0.1j), C 46(1+0.1j) kPa; Poisson coefficients F = A = 0."
+    },
+    {
+      "key": "glass_wool_z",
+      "name": "Typical glass wool",
+      "variant": "direction z",
+      "flow_resistivity_pa_s_m2": 8000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.1,
+      "viscous_length_um": 140.0,
+      "thermal_length_um": 500.0,
+      "thermal_permeability_m2": 6e-09,
+      "frame_density_kg_m3": 32.0,
+      "note": "Rigidity parameters G 260(1+0.1j), G' 125(1+0.1j), C 46(1+0.1j) kPa; Poisson coefficients F = A = 0."
+    }
+  ]
+}

@@ -786,108 +786,6 @@ It closes on its own data: at the 2 600 kg/m3 fibre density and the 31 to
 
 Advisory for porous-model use outside the published fit range.
 
-## PorousMaterial
-
-```python
-PorousMaterial(
-    *,
-    name: str,
-    flow_resistivity_pa_s_m2: float,
-    porosity: float,
-    tortuosity: float,
-    viscous_length_um: float,
-    thermal_length_um: float,
-    frame_density_kg_m3: float,
-    thickness_mm: float,
-    source: str,
-    shear_modulus_pa: complex | None = None,
-    poisson_ratio: float | None = None,
-    attributed_to: str = '',
-)
-```
-
-A porous specimen as its source prints it, in library units.
-
-A published parameter set for the rigid-frame and poroelastic models, so a
-caller who has not characterised a specimen to ISO 9053 and ISO 10534-2 can
-still reproduce a printed example and cite the page it came from. The
-models take the parameters as arguments; nothing here is a default for any
-of them.
-
-**Attributes**
-
-| Name | Description |
-| :--- | :--- |
-| `name` | The specimen as the table names it. |
-| `flow_resistivity_pa_s_m2` | Airflow resistivity `sigma`, in Pa s/m2. |
-| `porosity` | Open porosity `phi`. |
-| `tortuosity` | Tortuosity $\alpha_\infty$. |
-| `viscous_length_um` | Viscous characteristic length `Lambda`, in micrometres, the unit the tables print it in. The `viscous_length` parameter of [`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) is in **metres**, so this field is not passed to it directly: `medium` makes the conversion, once, and a caller who assembles the argument list by hand divides by a million first. |
-| `thermal_length_um` | Thermal characteristic length `Lambda'`, in micrometres. Metres at the model's `thermal_length`, as above. |
-| `source` | Document, locator, PDF page and printed folio. A specimen whose columns come off several pages of one book names every one of them, separated by `"; "`. |
-| `frame_density_kg_m3` | Frame density `rho1`, in kg/m3. |
-| `thickness_mm` | Layer thickness `h` of the specimen as tabulated, in millimetres. It is the thickness of the layer the table describes and not a property of the material: a specimen whose columns come off several pages takes it from the one page that prints an `h`, and the worked examples of the same book use the same material at other thicknesses. |
-| `shear_modulus_pa` | Complex in-vacuo shear modulus `N`, in pascals, or `None` when the table prints no elastic constants. `None` together with `poisson_ratio`, because a table that prints one prints the other. |
-| `poisson_ratio` | Frame Poisson ratio `nu`, or `None`. |
-| `attributed_to` | The source the book itself credits, empty when the number is the book's own. |
-
-### PorousMaterial.frame_constants()
-
-```python
-PorousMaterial.frame_constants() -> tuple[complex, float]
-```
-
-The in-vacuo frame constants `(N, nu)` the source prints.
-
-The complex shear modulus and the Poisson ratio are what
-[`biot_waves`](/phonometry/reference/api/materials/biot/#biot_waves),
-[`frame_quarter_wave_resonance`](/phonometry/reference/api/materials/biot/#frame_quarter_wave_resonance) and
-[`PoroelasticLayer`](/phonometry/reference/api/materials/layered/#poroelasticlayer) take together, and a
-table that prints one prints the other, so they are asked for together
-and a specimen characterised as a rigid frame alone says so here rather
-than handing out a `None` that fails further down.
-
-**Returns:** `(shear_modulus_pa, poisson_ratio)`.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | when the source prints no elastic constants. |
-
-### PorousMaterial.medium()
-
-```python
-PorousMaterial.medium(
-    frequency: ArrayLike,
-    *,
-    model: str = 'johnson_champoux_allard',
-    fluid: Fluid = ...,
-) -> PorousMediumResult
-```
-
-The equivalent fluid of this specimen.
-
-The characteristic lengths are stored in the micrometres both tables
-print and converted, here and once, to the metres
-[`johnson_champoux_allard`](/phonometry/reference/api/materials/porous/#johnson_champoux_allard) takes.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `frequency` | Frequency vector `f`, in hertz. |
-| `model` | `"johnson_champoux_allard"` (Default), `"delany_bazley"` or `"miki"`. The last two read the flow resistivity alone, so they describe a coarser specimen than the one the other four parameters pin. |
-| `fluid` | The medium, a [`Fluid`](/phonometry/reference/api/fluids/fluids/#fluid) (Default: [`PUBLISHED_AIR`](/phonometry/reference/api/materials/porous/#published_air)). |
-
-**Returns:** A [`PorousMediumResult`](/phonometry/reference/api/materials/porous/#porousmediumresult).
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | for an unknown model name. |
-
 ## PorousMediumResult
 
 ```python
@@ -948,14 +846,6 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 ## PUBLISHED_AIR
 
 *Constant* (`phonometry.fluids.Fluid`).
-
-## PUBLISHED_POROUS_MATERIALS
-
-*Constant* (`dict`).
-
-```python
-PUBLISHED_POROUS_MATERIALS = {'glass_wool': PorousMaterial(name='Domisol Coffrage glass wool', flow_resistivity_pa_s_m2=40000.0, porosity=0.94, tortuosity=1.06, viscous_length_um=56.0, thermal_length_um=110.0, frame_density_kg_m3=130.0, thickness_mm=3.8, source='Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)', shear_modulus_pa=(2200000+220000j), poisson_ratio=0.0, attributed_to=''), 'soft_fibrous': PorousMaterial(name='Soft fibrous', flow_resistivity_pa_s_m2=25000.0, porosity=0.98, tortuosity=1.02, viscous_length_um=90.0, thermal_length_um=180.0, frame_density_kg_m3=30.0, thickness_mm=50.0, source='Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)', shear_modulus_pa=None, poisson_ratio=None, attributed_to='')}
-```
 
 ## ROCK_WOOL_FIBRE_DENSITY_KG_M3
 

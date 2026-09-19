@@ -601,3 +601,464 @@ HOPKINS_ROCK_WOOL_LATERAL_FIT = (353.0, 0.63, 31.0, 155.0)
 HOPKINS_ROCK_WOOL_LONGITUDINAL_FIT = (780.0, 0.59, 38.0, 162.0)
 #: The porosity range Hopkins prints for this wool, lowest bulk density first.
 HOPKINS_ROCK_WOOL_POROSITY_RANGE = (0.99, 0.94)
+
+
+# ---------------------------------------------------------------------------
+# Allard & Atalla 2e: the porous rows of the nineteen parameter tables the
+# catalogue holds, read a second time off the rendered pages.
+#
+# One entry per catalogue key, and the value is the cells that page prints, in
+# the units this library stores them in. Where the printed unit is not the
+# stored one the factor is written into the literal rather than applied in the
+# head, so the printed digit and the conversion are both visible here: the
+# book's N/cm2 becomes ``220.0 * 1.0e4`` and its millimetres ``0.12 * 1000.0``.
+#
+# The complex shear moduli the book prints as ``N(1 + j eta)`` or ``75 + j15``
+# are split the way the library stores them, into a real modulus and a
+# structural loss factor, and the split is arithmetic on the printed digits:
+# 15/75 is the 0,2 below, not a number read anywhere.
+#
+# Cells these pages print that are not porous parameters are not here, and
+# neither are the rows that are not porous materials: each data file's
+# ``about`` says which of its page's rows are absent and why.
+# ---------------------------------------------------------------------------
+ALLARD_POROUS_ROWS: tuple[tuple[str, dict[str, float]], ...] = (
+    (
+        "allard-2009-table-6-1/domisol_coffrage",
+        {
+            "flow_resistivity_pa_s_m2": 40_000.0,
+            "porosity": 0.94,
+            "tortuosity": 1.06,
+            # Sect. 6.5.4, printed p. 123, in metres.
+            "viscous_length_um": 0.56e-4 * 1.0e6,
+            "thermal_length_um": 1.1e-4 * 1.0e6,
+            "frame_density_kg_m3": 130.0,
+            # N = 220(1 + j0,1) N/cm2, and 1 N/cm2 is 1e4 Pa.
+            "shear_modulus_pa": 220.0 * 1.0e4,
+            "structural_loss_factor": 0.1,
+            "poisson_ratio": 0.0,
+        },
+    ),
+    (
+        "allard-2009-table-7-1/material_1",
+        {
+            "tortuosity": 1.1,
+            "flow_resistivity_pa_s_m2": 20_000.0,
+            "porosity": 0.96,
+            "viscous_length_um": 100.0,
+            "thermal_length_um": 300.0,
+        },
+    ),
+    (
+        "allard-2009-table-7-1/material_2",
+        {
+            "tortuosity": 1.32,
+            "flow_resistivity_pa_s_m2": 5500.0,
+            "porosity": 0.98,
+            "viscous_length_um": 120.0,
+            "thermal_length_um": 500.0,
+        },
+    ),
+    (
+        "allard-2009-table-8-1/material_1",
+        {
+            "frame_density_kg_m3": 25.0,
+            "poisson_ratio": 0.3,
+            # N = 75 + j15 kPa.
+            "shear_modulus_pa": 75.0 * 1.0e3,
+            "structural_loss_factor": 15.0 / 75.0,
+            "tortuosity": 1.4,
+            "porosity": 0.98,
+            "flow_resistivity_pa_s_m2": 50_000.0,
+            "viscous_length_um": 50.0,
+            "thermal_length_um": 150.0,
+        },
+    ),
+    (
+        "allard-2009-table-8-1/material_2",
+        {
+            "frame_density_kg_m3": 24.5,
+            "poisson_ratio": 0.44,
+            # N = 80 + j12 kPa.
+            "shear_modulus_pa": 80.0 * 1.0e3,
+            "structural_loss_factor": 12.0 / 80.0,
+            "tortuosity": 2.2,
+            "porosity": 0.97,
+            "flow_resistivity_pa_s_m2": 22_100.0,
+            "viscous_length_um": 39.0,
+            "thermal_length_um": 275.0,
+        },
+    ),
+    (
+        "allard-2009-table-9-1/m1",
+        {
+            "flow_resistivity_pa_s_m2": 5000.0,
+            # Lambda and Lambda' in millimetres, thickness in centimetres.
+            "viscous_length_um": 0.12 * 1000.0,
+            "thermal_length_um": 0.27 * 1000.0,
+            "tortuosity": 1.1,
+            "porosity": 0.99,
+            "thickness_mm": 0.1 * 10.0,
+        },
+    ),
+    (
+        "allard-2009-table-9-1/m2",
+        {
+            "flow_resistivity_pa_s_m2": 50_000.0,
+            "viscous_length_um": 0.034 * 1000.0,
+            "thermal_length_um": 0.13 * 1000.0,
+            "tortuosity": 1.5,
+            "porosity": 0.98,
+            "thickness_mm": 1.9 * 10.0,
+        },
+    ),
+    (
+        "allard-2009-table-10-1/glass_wool_x",
+        {
+            "flow_resistivity_pa_s_m2": 4000.0,
+            "porosity": 0.98,
+            "tortuosity": 1.1,
+            "thermal_permeability_m2": 6.0e-9,
+            "viscous_length_um": 200.0,
+            "thermal_length_um": 500.0,
+            "frame_density_kg_m3": 32.0,
+        },
+    ),
+    (
+        "allard-2009-table-10-1/glass_wool_z",
+        {
+            "flow_resistivity_pa_s_m2": 8000.0,
+            "porosity": 0.98,
+            "tortuosity": 1.1,
+            "thermal_permeability_m2": 6.0e-9,
+            "viscous_length_um": 140.0,
+            "thermal_length_um": 500.0,
+            "frame_density_kg_m3": 32.0,
+        },
+    ),
+    (
+        "allard-2009-table-11-2/soft_fibrous",
+        {
+            "thickness_mm": 50.0,
+            "porosity": 0.98,
+            "flow_resistivity_pa_s_m2": 25.0e3,
+            "tortuosity": 1.02,
+            "viscous_length_um": 90.0,
+            "thermal_length_um": 180.0,
+            "frame_density_kg_m3": 30.0,
+        },
+    ),
+    (
+        "allard-2009-table-11-3/foam",
+        {
+            "thickness_mm": 38.0,
+            "porosity": 0.98,
+            "flow_resistivity_pa_s_m2": 5.0e3,
+            "tortuosity": 1.1,
+            "viscous_length_um": 150.0,
+            "thermal_length_um": 216.0,
+            "frame_density_kg_m3": 33.0,
+            "youngs_modulus_pa": 130.0e3,
+            "poisson_ratio": 0.3,
+            "structural_loss_factor": 0.1,
+        },
+    ),
+    (
+        "allard-2009-table-11-3/glass_wool",
+        {
+            "thickness_mm": 0.45,
+            "porosity": 0.7,
+            "flow_resistivity_pa_s_m2": 1.1e6,
+            "tortuosity": 1.0,
+            "viscous_length_um": 10.0,
+            "thermal_length_um": 20.0,
+            "frame_density_kg_m3": 660.0,
+            "youngs_modulus_pa": 2.6e6,
+            "poisson_ratio": 0.3,
+            "structural_loss_factor": 0.1,
+        },
+    ),
+    (
+        "allard-2009-table-11-4/blanket_1",
+        {
+            "thickness_mm": 4.0,
+            "porosity": 0.98,
+            "flow_resistivity_pa_s_m2": 34.0e3,
+            "tortuosity": 1.18,
+            "viscous_length_um": 60.0,
+            "thermal_length_um": 86.0,
+            "frame_density_kg_m3": 41.0,
+            "youngs_modulus_pa": 286.0e3,
+            "poisson_ratio": 0.3,
+            "structural_loss_factor": 0.015,
+        },
+    ),
+    (
+        "allard-2009-table-11-4/screen_2",
+        {
+            "thickness_mm": 0.8,
+            "porosity": 0.8,
+            "flow_resistivity_pa_s_m2": 3.2e6,
+            "tortuosity": 2.56,
+            "viscous_length_um": 6.0,
+            "thermal_length_um": 24.0,
+            "frame_density_kg_m3": 125.0,
+            "youngs_modulus_pa": 2.6e6,
+            "poisson_ratio": 0.3,
+            "structural_loss_factor": 0.1,
+        },
+    ),
+    (
+        "allard-2009-table-11-4/foam_3",
+        {
+            "thickness_mm": 5.0,
+            "porosity": 0.97,
+            "flow_resistivity_pa_s_m2": 87.0e3,
+            "tortuosity": 2.52,
+            "viscous_length_um": 36.0,
+            "thermal_length_um": 118.0,
+            "frame_density_kg_m3": 31.0,
+            "youngs_modulus_pa": 143.0e6,
+            "poisson_ratio": 0.3,
+            "structural_loss_factor": 0.055,
+        },
+    ),
+    (
+        "allard-2009-table-11-4/foam_4",
+        {
+            "thickness_mm": 16.0,
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 65.0e3,
+            "tortuosity": 1.98,
+            "viscous_length_um": 37.0,
+            "thermal_length_um": 120.0,
+            "frame_density_kg_m3": 16.0,
+            "youngs_modulus_pa": 46.8e6,
+            "poisson_ratio": 0.3,
+            "structural_loss_factor": 0.1,
+        },
+    ),
+    (
+        "allard-2009-table-11-5/felt_1",
+        {
+            "thickness_mm": 19.0,
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 23.0e3,
+            "tortuosity": 1.4,
+            "viscous_length_um": 64.0,
+            "thermal_length_um": 131.0,
+            "frame_density_kg_m3": 66.0,
+        },
+    ),
+    (
+        "allard-2009-table-11-5/screen_2",
+        {
+            "thickness_mm": 0.08,
+            "porosity": 0.08,
+            "flow_resistivity_pa_s_m2": 137.0e3,
+        },
+    ),
+    (
+        "allard-2009-table-11-5/foam_3",
+        {
+            "thickness_mm": 27.0,
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 10.9e3,
+            "tortuosity": 1.02,
+            "viscous_length_um": 100.0,
+            "thermal_length_um": 130.0,
+            "frame_density_kg_m3": 8.8,
+        },
+    ),
+    (
+        "allard-2009-table-11-6/foam",
+        {
+            "thickness_mm": 20.0,
+            "porosity": 0.98,
+            "flow_resistivity_pa_s_m2": 22.0e3,
+            "tortuosity": 1.9,
+            "viscous_length_um": 87.0,
+            "thermal_length_um": 146.0,
+            "frame_density_kg_m3": 30.0,
+            "youngs_modulus_pa": 294.0e3,
+            "poisson_ratio": 0.2,
+            "structural_loss_factor": 0.18,
+        },
+    ),
+    (
+        "allard-2009-table-11-7/carpet_1",
+        {
+            "thickness_mm": 3.5,
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 5.0e3,
+            "tortuosity": 1.0,
+            "viscous_length_um": 23.0,
+            "thermal_length_um": 28.0,
+            "frame_density_kg_m3": 60.0,
+            "youngs_modulus_pa": 20.0e3,
+            "poisson_ratio": 0.0,
+            "structural_loss_factor": 0.5,
+        },
+    ),
+    (
+        "allard-2009-table-11-7/carpet_2",
+        {
+            "thickness_mm": 3.5,
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 5.0e3,
+            "tortuosity": 1.0,
+            "viscous_length_um": 23.0,
+            "thermal_length_um": 28.0,
+            "frame_density_kg_m3": 60.0,
+            "youngs_modulus_pa": 20.0e3,
+            "poisson_ratio": 0.0,
+            "structural_loss_factor": 0.5,
+        },
+    ),
+    (
+        "allard-2009-table-11-7/fibrous_layer",
+        {
+            "thickness_mm": 1.25,
+            "porosity": 0.98,
+            "flow_resistivity_pa_s_m2": 33.0e3,
+            "tortuosity": 1.1,
+            "viscous_length_um": 50.0,
+            "thermal_length_um": 110.0,
+            "frame_density_kg_m3": 60.0,
+            "youngs_modulus_pa": 100.0e3,
+            "poisson_ratio": 0.0,
+            "structural_loss_factor": 0.88,
+        },
+    ),
+    (
+        "allard-2009-table-11-8/glass_wool",
+        {
+            "thickness_mm": 3.8,
+            "porosity": 0.94,
+            "flow_resistivity_pa_s_m2": 40.0e3,
+            "tortuosity": 1.06,
+            "viscous_length_um": 56.0,
+            "thermal_length_um": 110.0,
+            "frame_density_kg_m3": 130.0,
+            "youngs_modulus_pa": 4.4e6,
+            "poisson_ratio": 0.0,
+            "structural_loss_factor": 0.1,
+        },
+    ),
+    (
+        "allard-2009-table-11-9/foam",
+        {
+            "thickness_mm": 25.4,
+            "porosity": 0.98,
+            "flow_resistivity_pa_s_m2": 6.6e3,
+            "tortuosity": 1.03,
+            "viscous_length_um": 200.0,
+            "thermal_length_um": 380.0,
+            "frame_density_kg_m3": 11.2,
+            "youngs_modulus_pa": 2.93e5,
+            "poisson_ratio": 0.2,
+            "structural_loss_factor": 0.06,
+        },
+    ),
+    (
+        "allard-2009-table-12-1/foam_1",
+        {
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 10.9e3,
+            "tortuosity": 1.02,
+            "viscous_length_um": 100.0,
+            "thermal_length_um": 130.0,
+            "frame_density_kg_m3": 8.8,
+            "youngs_modulus_pa": 80.0e3,
+            "poisson_ratio": 0.35,
+            "structural_loss_factor": 0.14,
+        },
+    ),
+    (
+        "allard-2009-table-12-2/mineral_wool",
+        {
+            "thickness_mm": 30.0,
+            "porosity": 0.95,
+            "flow_resistivity_pa_s_m2": 34.0e3,
+            "tortuosity": 1.0,
+            "viscous_length_um": 40.0,
+            "thermal_length_um": 80.0,
+            "frame_density_kg_m3": 90.0,
+            "youngs_modulus_pa": 40.0e3,
+            "poisson_ratio": 0.0,
+            "structural_loss_factor": 0.18,
+        },
+    ),
+    (
+        "allard-2009-table-12-4/limp_foam",
+        {
+            "thickness_mm": 30.0,
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 10.9e3,
+            "tortuosity": 1.02,
+            "viscous_length_um": 100.0,
+            "thermal_length_um": 130.0,
+            "frame_density_kg_m3": 8.8,
+        },
+    ),
+    (
+        "allard-2009-table-12-5/limp_foam",
+        {
+            "thickness_mm": 25.4,
+            "porosity": 0.9,
+            "flow_resistivity_pa_s_m2": 20_000.0,
+            "tortuosity": 1.6,
+            "viscous_length_um": 12.0,
+            "thermal_length_um": 24.0,
+            "frame_density_kg_m3": 30.0,
+            "youngs_modulus_pa": 1300.0,
+            "poisson_ratio": 0.0,
+            "structural_loss_factor": 0.4,
+        },
+    ),
+    (
+        "allard-2009-table-12-5/foam",
+        {
+            "thickness_mm": 25.4,
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 10.9e3,
+            "tortuosity": 1.02,
+            "viscous_length_um": 100.0,
+            "thermal_length_um": 130.0,
+            "frame_density_kg_m3": 8.8,
+            "youngs_modulus_pa": 80.0e3,
+            "poisson_ratio": 0.35,
+            "structural_loss_factor": 0.14,
+        },
+    ),
+    (
+        "allard-2009-table-13-1/foam",
+        {
+            "porosity": 0.99,
+            "flow_resistivity_pa_s_m2": 12_569.0,
+            "tortuosity": 1.02,
+            # Lambda and Lambda' printed in metres on this page alone.
+            "viscous_length_um": 0.000078 * 1.0e6,
+            "thermal_length_um": 0.000192 * 1.0e6,
+            "frame_density_kg_m3": 8.85,
+            "youngs_modulus_pa": 93_348.0,
+            "poisson_ratio": 0.44,
+            "structural_loss_factor": 0.064,
+        },
+    ),
+    (
+        "allard-2009-table-13-2/rockwool",
+        {
+            "porosity": 0.94,
+            "flow_resistivity_pa_s_m2": 135_000.0,
+            "tortuosity": 2.1,
+            "viscous_length_um": 49.0,
+            "thermal_length_um": 166.0,
+            "thermal_permeability_m2": 3.3e-9,
+            "frame_density_kg_m3": 130.0,
+            "youngs_modulus_pa": 4400.0,
+            "poisson_ratio": 0.0,
+            "structural_loss_factor": 0.1,
+        },
+    ),
+)

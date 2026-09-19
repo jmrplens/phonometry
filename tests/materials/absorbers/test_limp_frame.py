@@ -50,8 +50,8 @@ from phonometry import materials
 #: Both specimens are read from the published objects, which carry the pages
 #: they came off: the soft fibrous material of A&A Table 11.2 (printed p. 254),
 #: 50 mm thick, and the "Domisol Coffrage" glass wool of Sect. 6.5.4.
-_SOFT_FIBROUS = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
-_GLASS_WOOL = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+_SOFT_FIBROUS = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+_GLASS_WOOL = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
 
 TABLE_11_2: dict[str, float] = {
     "porosity": _SOFT_FIBROUS.porosity,

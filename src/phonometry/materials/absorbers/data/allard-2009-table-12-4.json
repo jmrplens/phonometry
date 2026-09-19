@@ -1,0 +1,17 @@
+{
+  "source": "Allard & Atalla 2e Table 12.4, PDF page 304 (printed p. 299)",
+  "about": "Table 12.4, \"The parameters of the plate-fibre system\": a 1 m x 1 m, 3 mm aluminium plate with an attached limp porous layer, excited by a point force (Figures 12.9 to 12.12). Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s. The limp foam is the foam of Tables 11.5 and 12.1 printed without elastic constants, because the example models it as limp. The panel row, 2742 kg/m3, E 6.9e10, nu 0.3, eta 0.01, is not a porous material and is not here.",
+  "rows": [
+    {
+      "key": "limp_foam",
+      "name": "Limp foam",
+      "flow_resistivity_pa_s_m2": 10900.0,
+      "porosity": 0.99,
+      "tortuosity": 1.02,
+      "viscous_length_um": 100.0,
+      "thermal_length_um": 130.0,
+      "frame_density_kg_m3": 8.8,
+      "thickness_mm": 30.0
+    }
+  ]
+}

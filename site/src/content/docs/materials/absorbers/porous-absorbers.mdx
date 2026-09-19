@@ -157,15 +157,28 @@ bulk modulus with the exact limits $j\omega\rho_\mathrm{e} \to \sigma$ at DC,
 $\rho_\mathrm{e} \to (\alpha_\infty \rho_0/\phi)(1 + (1-j)\,\delta_v/\Lambda)$ at high
 frequency, and the isothermal-to-adiabatic transition in $K_\mathrm{e}$.
 
-Five parameters is four more than a caller usually has, so the two specimens
-this guide computes with are published as `PUBLISHED_POROUS_MATERIALS`, each
-carrying the page it was read on in its `source`: the 'Domisol Coffrage' glass
-wool of Allard & Atalla Table 6.1 (printed p. 124), whose characteristic
-lengths are printed in the prose of their Sect. 6.5.4 on the facing folio, and
-the soft fibrous layer of their Table 11.2 (printed p. 254). That is a pair of
-worked examples and not a material catalogue: a real specimen is characterised
-to ISO 9053 and ISO 10534-2, and every model here keeps its parameters as
-explicit arguments.
+Five parameters is four more than a caller usually has, so the specimens this
+guide computes with are published as `PUBLISHED_POROUS`, keyed by the table
+they were read from and the row they are: `'allard-2009-table-6-1/domisol_coffrage'`
+is the glass wool of Allard & Atalla Table 6.1 (printed p. 124), whose
+characteristic lengths are printed in the prose of their Sect. 6.5.4 on the
+facing folio, and `'allard-2009-table-11-2/soft_fibrous'` is the soft fibrous
+layer of their Table 11.2 (printed p. 254). The key names the table because
+the book prints one foam in four chapters and one glass wool in two, sometimes
+with a column the other page leaves out, and picking silently between two
+published parameter sets is the thing a catalogue exists not to do.
+
+Every quantity of a row is optional, because the pages print different
+columns. `.why_missing(field)` answers in the page's own terms: Table 11.5
+prints the word `model` where a screen's tortuosity would go, because the
+quantity is frequency dependent there and no single number stands for it, and
+that is a different answer from a cell the book left empty. `.printed(field)`
+is the same reading for a caller who needs the number and would rather be
+refused than handed a `None`.
+
+These are parameter sets from worked examples and not a material database: a
+real specimen is characterised to ISO 9053 and ISO 10534-2, and every model
+here keeps its parameters as explicit arguments.
 
 ```python
 import numpy as np
@@ -487,7 +500,7 @@ from phonometry import materials
 
 # The soft fibrous layer of Allard & Atalla Table 11.2, 50 mm, published
 # once with the page it was read on.
-soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+soft = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
 print(soft.source)
 # Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)
 
@@ -543,7 +556,7 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([100, 125, 160, 200, 250, 315, 400, 500, 1000], dtype=float)
-soft = materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
+soft = materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
 rigid = soft.medium(bands)
 limp = materials.limp_frame(
     rigid, frame_density=soft.frame_density_kg_m3, porosity=soft.porosity
@@ -622,7 +635,7 @@ stay continuous across it.*
 ```python
 # The BiotWavesResult of the published glass wool. Its .plot() draws the
 # upper panel; the lower one is two of its fields.
-glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
 shear, poisson = glass_wool.frame_constants()
 f_biot = np.linspace(50.0, 1500.0, 1451)
 biot = materials.biot_waves(
@@ -675,7 +688,7 @@ import numpy as np
 from phonometry import materials
 
 # The published glass wool "Domisol Coffrage", 100 mm, glued.
-glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
 print(glass_wool.source)
 # Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123); Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)
 
@@ -739,7 +752,7 @@ import numpy as np
 from phonometry import materials
 
 bands = np.array([250, 315, 400, 500, 630, 800, 1000], dtype=float)
-glass_wool = materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+glass_wool = materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
 shear, poisson = glass_wool.frame_constants()
 med = glass_wool.medium(bands)
 poroelastic = materials.PoroelasticLayer(

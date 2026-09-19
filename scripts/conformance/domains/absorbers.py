@@ -240,9 +240,18 @@ def _chk_porous_maa_peak_closed_form() -> Outcome:
 #
 # Both specimens are read from the published objects, which carry the page they
 # came off; nothing here retypes a printed number.
-_SOFT_FIBROUS = ph.materials.PUBLISHED_POROUS_MATERIALS["soft_fibrous"]
-_GLASS_WOOL = ph.materials.PUBLISHED_POROUS_MATERIALS["glass_wool"]
+_SOFT_FIBROUS = ph.materials.PUBLISHED_POROUS["allard-2009-table-11-2/soft_fibrous"]
+_GLASS_WOOL = ph.materials.PUBLISHED_POROUS["allard-2009-table-6-1/domisol_coffrage"]
 _GLASS_WOOL_SHEAR, _GLASS_WOOL_POISSON = _GLASS_WOOL.frame_constants()
+# Every quantity of a catalogue row is optional, because the pages print
+# different columns, so the four these rows take part with are narrowed
+# once here rather than at each of the sixteen call sites below.
+_GLASS_WOOL_SIGMA = _GLASS_WOOL.printed("flow_resistivity_pa_s_m2")
+_GLASS_WOOL_POROSITY = _GLASS_WOOL.printed("porosity")
+_GLASS_WOOL_TORTUOSITY = _GLASS_WOOL.printed("tortuosity")
+_GLASS_WOOL_FRAME_DENSITY = _GLASS_WOOL.printed("frame_density_kg_m3")
+_SOFT_FIBROUS_POROSITY = _SOFT_FIBROUS.printed("porosity")
+_SOFT_FIBROUS_FRAME_DENSITY = _SOFT_FIBROUS.printed("frame_density_kg_m3")
 
 
 @register(
@@ -252,9 +261,9 @@ _GLASS_WOOL_SHEAR, _GLASS_WOOL_POISSON = _GLASS_WOOL.frame_constants()
 )
 def _chk_limp_decoupling_frequency() -> Outcome:
     fd = ph.materials.decoupling_frequency(
-        _GLASS_WOOL.flow_resistivity_pa_s_m2,
-        porosity=_GLASS_WOOL.porosity,
-        frame_density=_GLASS_WOOL.frame_density_kg_m3,
+        _GLASS_WOOL_SIGMA,
+        porosity=_GLASS_WOOL_POROSITY,
+        frame_density=_GLASS_WOOL_FRAME_DENSITY,
     )
     return numeric(43.27, fd, 0.005, unit="Hz", places=3)
 
@@ -266,9 +275,9 @@ def _chk_limp_decoupling_frequency() -> Outcome:
 )
 def _chk_limp_low_frequency_limit() -> Outcome:
     rigid = _SOFT_FIBROUS.medium(np.array([1.0e-4]))
-    rho1 = _SOFT_FIBROUS.frame_density_kg_m3
-    limp = ph.materials.limp_frame(rigid, rho1, porosity=_SOFT_FIBROUS.porosity)
-    expected = rho1 + _SOFT_FIBROUS.porosity * _PA_RHO0
+    rho1 = _SOFT_FIBROUS_FRAME_DENSITY
+    limp = ph.materials.limp_frame(rigid, rho1, porosity=_SOFT_FIBROUS_POROSITY)
+    expected = rho1 + _SOFT_FIBROUS_POROSITY * _PA_RHO0
     return numeric(
         expected,
         float(np.real(limp.effective_density[0])),
@@ -287,7 +296,7 @@ def _chk_limp_low_frequency_limit() -> Outcome:
 def _chk_limp_heavy_frame_limit() -> Outcome:
     f = np.array([50.0, 125.0, 500.0, 2000.0])
     rigid = _SOFT_FIBROUS.medium(f)
-    limp = ph.materials.limp_frame(rigid, 1.0e12, porosity=_SOFT_FIBROUS.porosity)
+    limp = ph.materials.limp_frame(rigid, 1.0e12, porosity=_SOFT_FIBROUS_POROSITY)
     deviation = float(
         np.max(
             np.abs(limp.characteristic_impedance / rigid.characteristic_impedance - 1.0)
@@ -330,9 +339,9 @@ def _chk_limp_frame_criterion_limit() -> Outcome:
 def _aa_glass_wool_waves(frequency: np.ndarray) -> BiotWavesResult:
     return ph.materials.biot_waves(
         _GLASS_WOOL.medium(frequency),
-        porosity=_GLASS_WOOL.porosity,
-        tortuosity=_GLASS_WOOL.tortuosity,
-        frame_density=_GLASS_WOOL.frame_density_kg_m3,
+        porosity=_GLASS_WOOL_POROSITY,
+        tortuosity=_GLASS_WOOL_TORTUOSITY,
+        frame_density=_GLASS_WOOL_FRAME_DENSITY,
         shear_modulus=_GLASS_WOOL_SHEAR,
     )
 
@@ -344,9 +353,9 @@ def _aa_glass_wool_layer(
     return ph.materials.PoroelasticLayer(
         thickness,
         medium,
-        _GLASS_WOOL.porosity,
-        _GLASS_WOOL.tortuosity,
-        _GLASS_WOOL.frame_density_kg_m3 * scale,
+        _GLASS_WOOL_POROSITY,
+        _GLASS_WOOL_TORTUOSITY,
+        _GLASS_WOOL_FRAME_DENSITY * scale,
         _GLASS_WOOL_SHEAR * scale,
     )
 
@@ -361,7 +370,7 @@ def _chk_biot_frame_resonance() -> Outcome:
         0.10,
         shear_modulus=_GLASS_WOOL_SHEAR,
         poisson_ratio=_GLASS_WOOL_POISSON,
-        frame_density=_GLASS_WOOL.frame_density_kg_m3,
+        frame_density=_GLASS_WOOL_FRAME_DENSITY,
     )
     return numeric(459.9, value, 0.05, unit="Hz", places=2)
 

@@ -1,0 +1,22 @@
+{
+  "source": "Allard & Atalla 2e Table 12.1, PDF page 297 (printed p. 292)",
+  "about": "Table 12.1, \"Parameters of the plate-foam system\": the foam bonded to the 1 mm aluminium panel of the finite-size transmission loss example of Figures 12.3 and 12.4. Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s. The foam's thickness cell prints the word \"variable\": the figures this table serves put it at 5.08 cm (printed p. 291) and the same foam comes back at two, three and four and a half inches later in the chapter (printed pp. 294-295), so no one number is the row's. The word is kept. It is the foam of Table 11.5, here with its elastic constants. The panel row, 2742 kg/m3, E 6.9e10, nu 0.3, eta 0.007, is not a porous material and is not here.",
+  "rows": [
+    {
+      "key": "foam_1",
+      "name": "Foam 1",
+      "flow_resistivity_pa_s_m2": 10900.0,
+      "porosity": 0.99,
+      "tortuosity": 1.02,
+      "viscous_length_um": 100.0,
+      "thermal_length_um": 130.0,
+      "frame_density_kg_m3": 8.8,
+      "youngs_modulus_pa": 80000.0,
+      "poisson_ratio": 0.35,
+      "structural_loss_factor": 0.14,
+      "unquantified": {
+        "thickness_mm": "variable"
+      }
+    }
+  ]
+}

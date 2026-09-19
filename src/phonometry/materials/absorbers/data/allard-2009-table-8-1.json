@@ -1,0 +1,34 @@
+{
+  "source": "Allard & Atalla 2e Table 8.1, PDF page 181 (printed p. 174)",
+  "about": "Table 8.1, \"Parameters for different materials\": the two poroelastic materials of Sect. 8.3, \"Semi-infinite layer - Rayleigh wave\", whose own examples use material 1; material 2 is the one Sect. 8.5.2 computes with. Columns as printed: frame density rho_1 (kg/m3), Poisson ratio, shear modulus N (kPa), tortuosity, porosity, flow resistivity sigma (N m-4 s) and characteristic dimensions Lambda, Lambda' (um) in one cell. The shear moduli are printed complex, 75 + j15 and 80 + j12 kPa, and are stored as their real parts in pascals with the ratio of the imaginary to the real part as the structural loss factor, 0.2 and 0.15, which is the N(1 + j eta) the poroelastic models take. The page names them 1 and 2 under the heading Material.",
+  "rows": [
+    {
+      "key": "material_1",
+      "name": "Material 1",
+      "flow_resistivity_pa_s_m2": 50000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.4,
+      "viscous_length_um": 50.0,
+      "thermal_length_um": 150.0,
+      "frame_density_kg_m3": 25.0,
+      "shear_modulus_pa": 75000.0,
+      "poisson_ratio": 0.3,
+      "structural_loss_factor": 0.2,
+      "note": "Shear modulus printed as 75 + j15 kPa."
+    },
+    {
+      "key": "material_2",
+      "name": "Material 2",
+      "flow_resistivity_pa_s_m2": 22100.0,
+      "porosity": 0.97,
+      "tortuosity": 2.2,
+      "viscous_length_um": 39.0,
+      "thermal_length_um": 275.0,
+      "frame_density_kg_m3": 24.5,
+      "shear_modulus_pa": 80000.0,
+      "poisson_ratio": 0.44,
+      "structural_loss_factor": 0.15,
+      "note": "Shear modulus printed as 80 + j12 kPa."
+    }
+  ]
+}

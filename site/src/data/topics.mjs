@@ -127,7 +127,7 @@ export const topics = [
   },
   {
     id: 'fluids',
-    label: { en: 'The medium', es: 'El medio' },
+    label: { en: 'Fluids', es: 'Fluidos' },
     link: '/fluids/',
     items: [
       { slug: 'fluids', label: 'Overview', translations: { es: 'Resumen' } },
@@ -540,6 +540,15 @@ export const topics = [
         slug: 'reference/determinism',
         label: 'Same bits on every machine',
         translations: { es: 'Los mismos bits en cualquier máquina' },
+      },
+      // The catalogues sit with the evidence pages rather than under any one
+      // area: the rows belong to three packages and the question they answer,
+      // which book does this number come from, is the same question the
+      // conformance report and the errata register answer about a formula.
+      {
+        slug: 'reference/catalogues',
+        label: 'Published catalogues',
+        translations: { es: 'Catálogos publicados' },
       },
       'reference/bibliography',
       'reference/glossary',

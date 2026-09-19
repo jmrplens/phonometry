@@ -1,0 +1,428 @@
+---
+/**
+ * One published catalogue, rendered from site/src/generated/catalogues.mjs.
+ *
+ * The rows are the library's own: `PUBLISHED_SOLIDS`, `PUBLISHED_POROUS` and
+ * `PUBLISHED_FLUIDS`, dumped by scripts/generate_catalogue_data.py so that
+ * what this page shows is what the package holds and not a second
+ * transcription of the same books. Until this page existed they could only be
+ * read by importing the library or by opening the JSON data files in the
+ * repository, which is a strange place to send someone who wants to know what
+ * density a book prints for lead.
+ *
+ * A table is the right shape here, which is the opposite of the conclusion the
+ * glossary reached: that page is sentences, and a sentence in a 135 px column
+ * is unreadable, while these are numbers, and a number wants its neighbours
+ * above and below it to compare against. So the tables stay tables and scroll
+ * horizontally inside their own box, with the material name frozen at the left
+ * edge so a reader who has scrolled to the transverse speed still knows whose
+ * it is.
+ *
+ * What a cell can be is the whole point of the catalogues, so it is the whole
+ * point of this rendering too. A page prints a density as an interval, a loss
+ * factor as an upper bound, a characteristic length as three readings from
+ * three studies, or a tortuosity as the word "model"; the library keeps each
+ * of those as what it is, and here each gets its own mark and its own
+ * explanation on hover and on focus. A number this library worked out from the
+ * cells a page did print is marked too, because a reader comparing two books
+ * needs to know which of the two numbers in front of them was ever published.
+ *
+ * Everything is rendered at build time and nothing is a framework island, the
+ * same arrangement Conformance.astro and Glossary.astro use: with JavaScript
+ * off the page is the whole catalogue and only the filters are missing, and
+ * Pagefind indexes every row.
+ *
+ * One catalogue per invocation, and the heading above it belongs to the page
+ * rather than to this component. A heading rendered inside a component never
+ * reaches Starlight's table of contents, so a page whose three sections came
+ * from here offered a reader one entry, "Overview", and no way to jump to the
+ * fluids. The prose that introduces each catalogue is in the page for the same
+ * reason it always is: it is prose, and it is translated as prose.
+ */
+import { catalogues } from '../generated/catalogues.mjs';
+
+interface Props {
+	/** Which catalogue to render. */
+	catalogue: 'solids' | 'porous' | 'fluids';
+	/** Locale of the page it is rendered on. */
+	lang?: 'en' | 'es';
+}
+const { catalogue: section, lang = 'en' } = Astro.props;
+
+const copy = {
+	en: {
+		search: 'Filter by material',
+		searchPlaceholder: 'steel, foam, air',
+		table: 'Published table',
+		everyTable: 'Every table',
+		empty: 'No row matches that filter.',
+		material: 'Material',
+		state: 'State',
+		conditions: 'Conditions',
+		fixedBy: 'What fixes it',
+		source: 'Source',
+		rows: (n: number) => `${n} rows`,
+		kinds: {
+			printed: 'as the page prints it',
+			derived: 'worked out by this library',
+			approximate: 'the page prints it with a tilde',
+			range: 'the page prints an interval',
+			bound: 'the page prints an upper bound',
+			reported: 'the page lists several readings',
+			unquantified: 'the page prints a word here',
+		},
+	},
+	es: {
+		search: 'Filtrar por material',
+		searchPlaceholder: 'acero, espuma, aire',
+		table: 'Tabla publicada',
+		everyTable: 'Todas las tablas',
+		empty: 'Ninguna fila coincide con ese filtro.',
+		material: 'Material',
+		state: 'Estado',
+		conditions: 'Condiciones',
+		fixedBy: 'Qué lo fija',
+		source: 'Fuente',
+		rows: (n: number) => `${n} filas`,
+		kinds: {
+			printed: 'tal como lo imprime la página',
+			derived: 'calculado por esta biblioteca',
+			approximate: 'la página lo imprime con una tilde',
+			range: 'la página imprime un intervalo',
+			bound: 'la página imprime una cota superior',
+			reported: 'la página enumera varias lecturas',
+			unquantified: 'la página imprime una palabra aquí',
+		},
+	},
+}[lang];
+
+/** The distinct published tables of a catalogue, for its filter. */
+const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => row.table))].sort();
+
+/** What the filter matches against: everything a reader might type. */
+const haystack = (row: Record<string, unknown>) =>
+	[row.name, row.variant, row.table, row.source, row.model]
+		.filter(Boolean)
+		.join(' ')
+		.toLowerCase();
+
+const data = catalogues[section];
+const tables = tablesOf(data.rows);
+---
+
+<section class="catalogue not-content" data-catalogue={section}>
+	<div class="controls" data-controls hidden>
+		<label>
+			<span>{copy.search}</span>
+			<input type="search" data-search placeholder={copy.searchPlaceholder} />
+		</label>
+		<label>
+			<span>{copy.table}</span>
+			<select data-table>
+				<option value="">{copy.everyTable}</option>
+				{tables.map((table) => <option value={table}>{table}</option>)}
+			</select>
+		</label>
+		<span class="count" data-count>{copy.rows(data.rows.length)}</span>
+	</div>
+
+	<div class="table-scroll">
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">{section === 'fluids' ? copy.state : copy.material}</th>
+					{section === 'fluids' && <th scope="col">{copy.conditions}</th>}
+					{
+						data.columns.map((column) => (
+							<th scope="col" class="numeric">
+								{column.heading}
+								{column.unit && <span class="unit">{column.unit}</span>}
+							</th>
+						))
+					}
+					<th scope="col">{section === 'fluids' ? copy.fixedBy : copy.source}</th>
+				</tr>
+			</thead>
+			<tbody>
+				{
+					data.rows.map((row) => (
+						<tr data-row data-table={row.table} data-text={haystack(row)}>
+							<th
+								scope="row"
+								class={row.note ? 'name annotated' : 'name'}
+								title={row.note || undefined}
+							>
+								<span class="wrap">
+									{row.name}
+									{row.variant && <span class="variant">{row.variant}</span>}
+								</span>
+							</th>
+							{section === 'fluids' && (
+								<td class="conditions">
+									<span class="wrap">
+										{row.temperature} °C, {row.pressure} Pa
+									</span>
+								</td>
+							)}
+							{row.cells.map((cell) => (
+								<td class="numeric">
+									{cell.text ? (
+										<span
+											class={`cell cell-${cell.kind}`}
+											title={cell.note || copy.kinds[cell.kind]}
+										>
+											{cell.text}
+										</span>
+									) : (
+										<span class="cell-absent" aria-hidden="true">
+											&nbsp;
+										</span>
+									)}
+								</td>
+							))}
+							<td class="source">
+								<span class="wrap">{section === 'fluids' ? row.model : row.source}</span>
+							</td>
+						</tr>
+					))
+				}
+			</tbody>
+		</table>
+	</div>
+	<p class="empty" data-empty hidden>{copy.empty}</p>
+</section>
+
+<script>
+	// Progressive enhancement only: every row is already in the document, so a
+	// reader without JavaScript, and Pagefind's crawler, both see the whole
+	// catalogue. The controls stay hidden until this runs, so nothing offers a
+	// filter that would not work.
+	for (const section of document.querySelectorAll('[data-catalogue]')) {
+		const controls = section.querySelector('[data-controls]') as HTMLElement | null;
+		const search = section.querySelector('[data-search]') as HTMLInputElement | null;
+		const table = section.querySelector('[data-table]') as HTMLSelectElement | null;
+		const count = section.querySelector('[data-count]') as HTMLElement | null;
+		const empty = section.querySelector('[data-empty]') as HTMLElement | null;
+		const rows = [...section.querySelectorAll('[data-row]')] as HTMLElement[];
+		const template = count?.textContent?.trim() ?? '';
+		controls?.removeAttribute('hidden');
+
+		const apply = () => {
+			const needle = (search?.value ?? '').trim().toLowerCase();
+			const wanted = table?.value ?? '';
+			let shown = 0;
+			for (const row of rows) {
+				const visible =
+					(!needle || (row.dataset.text ?? '').includes(needle)) &&
+					(!wanted || row.dataset.table === wanted);
+				row.hidden = !visible;
+				if (visible) shown += 1;
+			}
+			if (count) count.textContent = template.replace(/^\d+/, String(shown));
+			empty?.toggleAttribute('hidden', shown > 0);
+		};
+
+		search?.addEventListener('input', apply);
+		table?.addEventListener('change', apply);
+	}
+</script>
+
+<style>
+	.catalogue {
+		margin-block: 2.5rem;
+	}
+
+	.blurb {
+		color: var(--sl-color-gray-3);
+		max-width: 60ch;
+	}
+
+	.controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem 1.25rem;
+		align-items: end;
+		margin-block: 1rem;
+	}
+
+	.controls label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+
+	.controls input,
+	.controls select {
+		font: inherit;
+		padding: 0.3rem 0.5rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.25rem;
+		background: var(--sl-color-black);
+		color: var(--sl-color-white);
+	}
+
+	.count {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+		padding-block-end: 0.4rem;
+	}
+
+	/* `not-content` on the section above is Starlight's own opt-out from the
+	   styles it gives markdown tables, and this table needs it. One of them
+	   reads
+	   `table tr > th:first-child:nth-last-child(n+4) { white-space: nowrap }`,
+	   which is meant for a header row of four or more columns and catches a
+	   row header just as well, because a `<th scope="row">` is also the first
+	   child of its row. Measured: it beat every rule this component could
+	   write, at three classes and three elements of specificity, and it is
+	   why the name of a material rendered on one line and the sticky column
+	   printed itself over the densities on a narrow screen. Opting out means
+	   the table below is styled here and nowhere else, which is the point.
+
+	   The rule after it is the measured one Conformance.astro also carries:
+	   without an explicit min-width the container reports
+	   scrollWidth == clientWidth in Chromium and clips the last columns with
+	   no way to reach them. */
+	.table-scroll {
+		overflow-x: auto;
+		margin-block: 0.5rem 1rem;
+	}
+
+	.table-scroll table {
+		min-width: min-content;
+		border-collapse: collapse;
+		font-size: var(--sl-text-sm);
+	}
+
+	th,
+	td {
+		padding: 0.35rem 0.6rem;
+		border-block-end: 1px solid var(--sl-color-gray-5);
+		text-align: start;
+		vertical-align: top;
+	}
+
+	thead th {
+		white-space: nowrap;
+		font-weight: 600;
+	}
+
+	.unit {
+		display: block;
+		font-weight: 400;
+		font-size: 0.85em;
+		color: var(--sl-color-gray-3);
+	}
+
+	/* The name stays put while the numbers scroll: a transverse speed with no
+	   material beside it is not worth reading. */
+	/* Both text columns need a floor as well as a ceiling. The table is laid
+	   out at `min-width: min-content`, which resolves a column of prose to the
+	   width of its longest word: the citation column collapsed to about eight
+	   characters, wrapped "Hopkins (2007) Table A2, PDF pages 635-636 (no
+	   printed folio; between folios 607 and 610)" over fifteen lines, and made
+	   every row of the solids three hundred pixels tall while the numbers in
+	   it occupied one line. */
+	.name {
+		position: sticky;
+		inset-inline-start: 0;
+		background: var(--sl-color-black);
+		font-weight: 500;
+		min-width: 16ch;
+	}
+
+	/* A table cell ignores `max-width`: the automatic layout algorithm decides
+	   the column widths and treats it as a suggestion, so the ceiling has to
+	   sit on a block inside the cell. Without this the name column took its
+	   max-content width on a narrow screen, where the table is far wider than
+	   the viewport anyway, and the sticky first column then printed
+	   "Dense aggregate blocks (solid) connected with mortar" straight over the
+	   density beside it. `min-width` on the cell is honoured and stays there,
+	   because a floor is what stops a column of prose collapsing to its
+	   longest word. */
+	.wrap {
+		display: block;
+		max-width: 22ch;
+	}
+
+	.source .wrap,
+	.conditions .wrap {
+		max-width: 30ch;
+	}
+
+	.variant {
+		display: block;
+		font-weight: 400;
+		font-size: 0.9em;
+		color: var(--sl-color-gray-3);
+	}
+
+	.numeric {
+		text-align: end;
+		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
+	}
+
+	.source,
+	.conditions {
+		color: var(--sl-color-gray-3);
+		min-width: 24ch;
+		white-space: normal;
+	}
+
+	/* What a page says about a row beyond its numbers is a sentence, and a
+	   sentence in a table cell is what made a hundred and twelve rows of the
+	   solids three hundred pixels tall: the longest of them is 257 characters,
+	   and at the width this column can afford that is ten lines that push
+	   every number in the row away from its neighbours. It reads on the name
+	   instead, which is the cell that identifies the row, with a mark to say
+	   it is there. */
+	.annotated::after {
+		content: '*';
+		color: var(--sl-color-gray-3);
+		padding-inline-start: 0.15em;
+	}
+
+	.annotated {
+		cursor: help;
+	}
+
+	/* One mark per kind of cell, so the difference between a number a book
+	   printed and a number this library worked out survives the rendering. */
+	.cell {
+		border-block-end: 1px dotted transparent;
+		cursor: help;
+	}
+
+	.cell-printed {
+		cursor: auto;
+	}
+
+	.cell-derived {
+		font-style: italic;
+		border-block-end-color: var(--sl-color-gray-3);
+	}
+
+	.cell-approximate::before {
+		content: '~';
+		color: var(--sl-color-gray-3);
+	}
+
+	.cell-range,
+	.cell-bound,
+	.cell-reported {
+		border-block-end-color: var(--sl-color-gray-3);
+	}
+
+	.cell-unquantified {
+		font-style: italic;
+		color: var(--sl-color-gray-3);
+		border-block-end-color: var(--sl-color-gray-3);
+	}
+
+	.empty {
+		color: var(--sl-color-gray-3);
+	}
+</style>

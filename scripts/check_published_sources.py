@@ -174,6 +174,10 @@ SOURCED: dict[tuple[str, str], str] = {
         "MIKI_VALIDITY",
     ): "Miki (1990) Sect. 4.1, the lower limit of the fit range",
     (
+        "fluids/catalogue.py",
+        "PUBLISHED_FLUIDS",
+    ): "Bies 5e Table C.1, the three fluids it prints before its solids",
+    (
         "materials/absorbers/catalogue.py",
         "PUBLISHED_POROUS",
     ): (

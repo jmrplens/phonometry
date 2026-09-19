@@ -406,6 +406,15 @@ api-docs:
 site-reports:
 	$(PYTHON) scripts/generate_site_reports.py
 
+# Dump the published catalogues (solids, porous materials, fluids) into the
+# module the site imports at build time. The rows live in the package and the
+# loader adds what follows from them, so the page shows what the library holds
+# rather than a second reading of the same books. CI runs the --check form and
+# fails if the committed module drifts (see the `catalogue-data` step of the
+# quality job in python-app.yml).
+catalogue-data:
+	$(PYTHON) scripts/generate_catalogue_data.py
+
 # Lighthouse over a fixed sample of built pages, against a local preview
 # server (BASE_URL overrides for the live site; `-- --desktop` for desktop
 # throttling). Needs `pnpm build` in site/ first; summary on stdout, JSON

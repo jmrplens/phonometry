@@ -1,0 +1,66 @@
+---
+title: "Catálogos publicados"
+description: "Todo el material y todo el fluido que esta biblioteca lee de una página impresa: constantes elásticas, parámetros de porosos y estados de fluido, cada uno con su tabla y con lo que decía su celda."
+---
+
+import Catalogues from '../../../../components/Catalogues.astro';
+
+Una biblioteca que calcula con una densidad tiene que sacarla de algún sitio.
+Esta la saca de una página, y se queda con la página: cada fila de abajo nombra
+el libro, la tabla, la página del PDF y el folio impreso en los que se leyó, y
+dice lo que decía su celda de verdad. Una densidad impresa como intervalo aquí
+es un intervalo, un factor de pérdidas impreso como cota superior es una cota,
+y una tortuosidad que una página imprime como la palabra `model` es esa
+palabra, porque ahí la magnitud depende de la frecuencia y ningún número suelto
+la representa.
+
+De esa disciplina se siguen tres cosas, y las tres se ven en las tablas.
+
+**Los libros discrepan, y la clave dice cuál habla.** Cuatro de ellos imprimen
+un acero a 7 800 kg/m³ y no hay dos que coincidan en su módulo. Eso no es un
+defecto que haya que promediar: es la dispersión de la literatura, y un
+catálogo que eligiera uno la estaría escondiendo. Las filas llevan por clave la
+tabla de la que salieron, y las búsquedas de la biblioteca devuelven la lectura
+de cada libro en vez de elegir entre ellas.
+
+**Un número que ha calculado esta biblioteca va marcado.** Una página que
+imprime un módulo y una densidad ha impreso una velocidad de barra sin
+escribirla, así que la fila la lleva; pero se muestra en cursiva, y de qué se
+calculó está a un puntero de distancia. Ningún valor derivado se guarda como si
+se hubiera leído.
+
+Un material marcado con un asterisco lleva una nota que hizo su página sobre
+él, y la nota se lee sobre el nombre. Igual que el motivo de cualquier celda
+que no sea un número a secas.
+
+**Nada de esto es una especificación.** La densidad de un bloque varía con el
+fabricante, la de una espuma con el lote, y los libros lo dicen imprimiendo
+rangos donde un rango es lo que se sabe. Usa una fila para reproducir un
+ejemplo resuelto, para contrastar una medida o para tener un orden de magnitud;
+para lo que tenga que estar bien, mide la probeta.
+
+## Sólidos
+
+Constantes elásticas, velocidades de onda y factores de pérdidas, leídos de las
+tablas de seis libros. Cuatro de ellos imprimen un acero y no son el mismo
+acero, y por eso la clave nombra la tabla de la que salió.
+
+<Catalogues catalogue="solids" lang="es" />
+
+## Materiales porosos
+
+Los parámetros que toman los modelos de fluido equivalente y poroelásticos,
+leídos de las tablas de un libro, cada uno la entrada de un ejemplo resuelto de
+ese libro.
+
+<Catalogues catalogue="porous" lang="es" />
+
+## Fluidos
+
+Todos los estados de fluido con nombre que lleva esta biblioteca. Los tres que
+se leyeron de una página están en `fluids.PUBLISHED_FLUIDS`; los cuatro aires
+de debajo viven en otros puntos del árbol, cada uno junto al modelo o la norma
+que lo fija, y discrepan porque cada uno es el aire que supone su propio
+documento.
+
+<Catalogues catalogue="fluids" lang="es" />

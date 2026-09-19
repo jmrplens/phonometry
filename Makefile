@@ -238,6 +238,15 @@ published-sources:
 solid-agreement:
 	$(PYTHON) scripts/check_solid_agreement.py
 
+# The other half of the same idea, over every catalogue rather than the solids
+# alone: where two books print one material and credit one study for it, they
+# are two readings of one measurement and cannot exclude each other. Agreement
+# is an overlap and not an equality, because a book that prints an interval and
+# a book that prints a value inside it are saying the same thing at two
+# resolutions. Needs the package importable.
+shared-sources:
+	$(PYTHON) scripts/check_shared_sources.py
+
 # A conformance row that computes the expected value itself is comparing a
 # formula with a second copy of it, and reports Pass whatever the library does.
 # This resolves what each row reaches, through its helpers and whatever name
@@ -528,4 +537,4 @@ check: lint security test
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point figure-legends control-characters hazards dead-constants \
 	conformance-rows conformance-vocabulary parameter-units published-sources \
-	solid-agreement catalogue-data
+	solid-agreement shared-sources catalogue-data

@@ -52,6 +52,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   values up in: air at conditions that were measured is `fluids.air` and sea
   water is `fluids.sea_water`, both of which compute the state.
 
+- **The rows two books took from the same place are checked against each
+  other.** Where two of these books print one material and credit one study
+  for it, they are not two measurements: they are two readings of one, and a
+  disagreement is somebody misreading a page.
+  `scripts/check_shared_sources.py` pairs them by name and shared credit
+  across the solids, the porous materials and the ground, and fails when a
+  pair does not overlap. Agreement is an overlap and not an equality, because
+  a book printing 250 to 500 kPa s/m2 and a book printing 370 are saying the
+  same thing at two resolutions. It found four pairs nobody had listed.
+
 - **The ground has a catalogue.** `environment.PUBLISHED_GROUND` holds the
   hundred and five ground surfaces three published tables print: the
   thirty-four Bies measures, the eight classes A to H the propagation models

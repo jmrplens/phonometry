@@ -20,6 +20,7 @@ import sys
 import pytest
 
 from phonometry._internal.catalogue import CatalogueRow
+from phonometry.fluids import PUBLISHED_FLUIDS
 
 _SCRIPTS = str(pathlib.Path(__file__).resolve().parent.parent / "scripts")
 if _SCRIPTS not in sys.path:
@@ -307,10 +308,36 @@ def test_a_cell_the_page_never_had_says_nothing_at_all() -> None:
 # ---------------------------------------------------------------------------
 def test_two_runs_write_the_same_bytes() -> None:
     """The freshness gate in CI compares text; a wobble would fail it daily."""
-    assert gcd.render() == gcd.render()
+    first, second = gcd.render(), gcd.render()
+
+    assert first == second
 
 
 def test_the_committed_module_is_current(capsys: pytest.CaptureFixture[str]) -> None:
     """The same check CI runs, so a stale artefact fails here first."""
     assert gcd.main(["--check"]) == 0
     assert "is current" in capsys.readouterr().out
+
+
+def test_a_state_a_model_fixes_is_not_a_state_a_page_printed() -> None:
+    """Both are firm numbers; only one of them was read off a table.
+
+    The fluid rows gather the three states Bies prints with the four airs the
+    tree carries beside the model or the standard that fixes each, and a cell
+    marked "as the page prints it" on one of those four would say the wrong
+    thing about where the number came from.
+    """
+    columns, states = gcd.fluids()
+
+    printed = [row for row in states if row["key"] in PUBLISHED_FLUIDS]
+    fixed = [row for row in states if row["key"] in gcd.IN_TREE_FLUIDS]
+
+    assert printed
+    assert fixed
+    assert {
+        cell["kind"] for row in printed for cell in row["cells"] if cell["text"]
+    } == {"printed"}
+    assert {cell["kind"] for row in fixed for cell in row["cells"] if cell["text"]} == {
+        "fixed"
+    }
+    assert [column["field"] for column in columns][0] == "speed_of_sound"

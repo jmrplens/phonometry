@@ -20424,12 +20424,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "345,86652",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
             "text": "1,1860848",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
@@ -20439,7 +20439,7 @@ export const catalogues = {
           },
           {
             "text": "1,4007573",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           }
         ]
@@ -20455,12 +20455,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "340",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
             "text": "1,29",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
@@ -20486,22 +20486,22 @@ export const catalogues = {
         "cells": [
           {
             "text": "343",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
             "text": "1,205",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
             "text": "18,4",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
             "text": "1,4",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           }
         ]
@@ -20517,12 +20517,12 @@ export const catalogues = {
         "cells": [
           {
             "text": "343",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {
             "text": "1,2",
-            "kind": "printed",
+            "kind": "fixed",
             "note": ""
           },
           {

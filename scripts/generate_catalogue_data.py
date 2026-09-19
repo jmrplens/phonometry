@@ -502,6 +502,11 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     ]
     out: list[dict[str, Any]] = []
     for key, state in states.items():
+        # A state read from a table and a state a model fixes are different
+        # kinds of number, and the cell says which: 343 m/s is what Bies
+        # printed, where the 345,86652 m/s of the metrology annex is what its
+        # closed form returns at the conditions that annex assumes.
+        kind = "printed" if key in PUBLISHED_FLUIDS else "fixed"
         out.append(
             {
                 "key": key,
@@ -520,7 +525,7 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
                         )
                         if name in state.properties
                         else "",
-                        "kind": "printed" if name in state.properties else "absent",
+                        "kind": kind if name in state.properties else "absent",
                         "note": "",
                     }
                     for name, _, _, _ in quantities

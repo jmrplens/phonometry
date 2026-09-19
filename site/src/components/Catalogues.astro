@@ -64,6 +64,7 @@ const copy = {
 		rows: (n: number) => `${n} rows`,
 		kinds: {
 			printed: 'as the page prints it',
+			fixed: 'what the model or the standard beside it fixes',
 			derived: 'worked out by this library',
 			approximate: 'the page prints it with a tilde',
 			range: 'the page prints an interval',
@@ -86,6 +87,7 @@ const copy = {
 		rows: (n: number) => `${n} filas`,
 		kinds: {
 			printed: 'tal como lo imprime la página',
+			fixed: 'lo que fija el modelo o la norma que lleva al lado',
 			derived: 'calculado por esta biblioteca',
 			approximate: 'la página lo imprime con una tilde',
 			range: 'la página imprime un intervalo',
@@ -444,6 +446,14 @@ const tables = tablesOf(data.rows);
 
 	.cell-printed {
 		cursor: auto;
+	}
+
+	/* A state the tree carries beside a model or a standard rather than off a
+	   printed table: the number is as firm as a printed one and it did not
+	   come from a page, so it is marked like the other cells that need a word
+	   of explanation and unlike the ones a book printed. */
+	.cell-fixed {
+		border-block-end-color: var(--sl-color-gray-3);
 	}
 
 	.cell-derived {

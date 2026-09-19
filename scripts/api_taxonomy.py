@@ -96,13 +96,14 @@ _SECTION_LIST: tuple[Section, ...] = (
     ),
     Section(
         key="fluids",
-        label_en="The medium",
-        label_es="El medio",
+        label_en="Fluids",
+        label_es="Fluidos",
         modules=(
             "phonometry.fluids",
             "phonometry.fluids.air",
             "phonometry.fluids.gas",
             "phonometry.fluids.water",
+            "phonometry.fluids.catalogue",
         ),
     ),
     Section(
@@ -469,6 +470,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # module that builds it and in the package that re-exports it.
     "PUBLISHED_SOLIDS": "phonometry.solids.catalogue",
     "PUBLISHED_POROUS": "phonometry.materials.absorbers.catalogue",
+    "PUBLISHED_FLUIDS": "phonometry.fluids.catalogue",
     # The ideal-gas closure and its two published constants are owned by the
     # module that computes with them and re-exported by the package.
     "IDEAL_GAS_VALIDITY": "phonometry.fluids.gas",

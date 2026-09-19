@@ -23,6 +23,43 @@ rival sound-speed fits and carries the one it was asked for. Any other gas is
 that a gas table prints and returns the speed and density that follow, with
 how far that closure goes written into the result.
 
+## The airs of this library, and why there are four of them
+
+A density and a speed of sound stand behind every level the library computes,
+and they do not all come from the same place. Four states sit in the tree, one
+beside each model or standard that fixes it, and they disagree:
+
+| Key | c (m/s) | rho (kg/m3) | What fixes it |
+| --- | ---: | ---: | --- |
+| `iec-61094-2-annex-f/air` | 345,87 | 1,186 | IEC 61094-2 Annex F at the ISO 9053-2 Annex A.3 reference state |
+| `allard-2009-jca/air` | 343 | 1,205 | the constants the Johnson-Champoux-Allard model was published with |
+| `en-12354-annex-a/air` | 340 | 1,29 | EN/ISO 12354, the Annex A speed and the Annex B density |
+| `phonometry-solver/air` | 343 | 1,2 | this library's own default for the acoustic solver |
+
+None of them is wrong. Each is the air its own document assumes, and
+substituting one for another would change the number that document prints: the
+1,7 per cent between the metrology annex and the building standard is a real
+disagreement between two committees, not a rounding.
+
+Each one stays where it is, beside the clause that prints it. Gathering them
+into this package would invert the dependency it exists at the bottom of: any
+domain may import `fluids` without an architecture edge, and a catalogue here
+that reached into `materials`, `building` and `simulation` would make the
+medium depend on three of the domains that stand on it. The comparison is a
+documentation artefact instead, and the [published
+catalogues](/phonometry/reference/catalogues/) page lists all four side by
+side.
+
+What `fluids.PUBLISHED_FLUIDS` does hold is the states this library read from
+a printed page: the three fluids Bies prints at the head of his Table C.1, air,
+fresh water and sea water, each naming that page, with the printed folio, in
+its `model`, because for a state that was read rather than computed the table
+is what produced it.
+
+It is not a table to look values up in. Air at conditions that were measured is
+`fluids.air`, sea water is `fluids.sea_water`, and both compute the state
+rather than recall it.
+
 ## Why it is not a domain
 
 Sixteen of the twenty-one packages are domains of application: you go to

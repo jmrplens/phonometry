@@ -60,7 +60,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`metrology.uncertainty`](/phonometry/reference/api/metrology/uncertainty/) | Measurement uncertainty by the GUM and its Monte Carlo supplement. |
 | [`metrology.data_qualification`](/phonometry/reference/api/metrology/data-qualification/) | Random-data qualification: stationarity tests and Rice crossing statistics. |
 
-## The medium
+## Fluids
 
 | Module | Summary |
 | :--- | :--- |
@@ -68,6 +68,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`fluids.air`](/phonometry/reference/api/fluids/air/) | Humid air (IEC 61094-2:2009, Annex F). |
 | [`fluids.gas`](/phonometry/reference/api/fluids/gas/) | An ideal gas from the two numbers a gas table prints. |
 | [`fluids.water`](/phonometry/reference/api/fluids/water/) | Sea water: its speed of sound, and its density. |
+| [`fluids.catalogue`](/phonometry/reference/api/fluids/catalogue/) | Fluid states read from a printed page. |
 
 ## Elastic solids
 

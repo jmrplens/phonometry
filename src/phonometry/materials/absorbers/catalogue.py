@@ -260,7 +260,11 @@ def _complete(fields: dict[str, Any]) -> dict[str, Any]:
     nu = fields.get("poisson_ratio")
     modulus = fields.get("youngs_modulus_pa")
     shear = fields.get("shear_modulus_pa")
-    spoken = set(fields.get("ranges", {})) | set(fields.get("unquantified", {}))
+    spoken = (
+        set(fields.get("ranges", {}))
+        | set(fields.get("unquantified", {}))
+        | set(fields.get("not_derivable", {}))
+    )
     spoken |= set(fields.get("reported", {}))
     if nu is None or "poisson_ratio" in spoken:
         return fields

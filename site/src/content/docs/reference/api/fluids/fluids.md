@@ -84,7 +84,7 @@ One fluid at one state, and the properties its model fixed there.
 | `temperature_c` | Temperature, in degrees Celsius. |
 | `static_pressure_pa` | Absolute static pressure, in pascals. |
 | `composition` | What distinguishes this fluid from another at the same temperature and pressure: the relative humidity of air, the salinity and depth of sea water. Read it to know what was assumed. |
-| `model` | The model that produced the properties, named so a result can cite it. |
+| `model` | What produced the properties, named so a result can cite it. Usually a closed form, an annex or a fit. For a state that was read off a printed table rather than computed, it is that table, written as document, table, PDF page and printed folio: the table is what produced the state, and a reader who wants to check the number needs the page rather than the name of an equation that was never used. |
 | `validity` | The domain the model states for itself, in words, or the empty string where it states none. Prose, because sources state these in prose and reducing them to a box loses the conditions attached to them. |
 | `properties` | The quantities the model determined, in SI. Reached through the named accessors, which raise [`FluidPropertyUnavailable`](/phonometry/reference/api/fluids/fluids/#fluidpropertyunavailable) for a quantity that is absent. |
 

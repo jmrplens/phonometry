@@ -9,6 +9,49 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **The published catalogues have a page of their own.**
+  `/reference/catalogues/` renders the two hundred and nineteen solids, the
+  thirty-two porous specimens and the seven named fluid states this library
+  carries, filterable by material and by book, each row naming the table it
+  was read from. Until now they could be read only by importing the library or
+  by opening the data files in the repository. The rows come from the library
+  itself, dumped by `scripts/generate_catalogue_data.py`, so the page shows
+  what the package holds rather than a second reading of the same books, and
+  CI fails if the two drift apart. What a cell was survives the rendering: a
+  derived number is marked as derived, an interval is an interval, and the
+  word a page prints where a number would go is that word.
+
+  **The four airs of this library are on it, and they disagree.** The absorber
+  models propagate through 343 m/s at 1,205 kg/m3, the airflow-resistance
+  annex through 345,87 at 1,186, EN/ISO 12354 through 340 at 1,29 and the
+  acoustic solver defaults to 343 at 1,2. None of them is wrong: each is the
+  air its own document assumes. They stay where they are, beside the clause
+  that prints each one, and the comparison is made by the page rather than by
+  a catalogue in `fluids` that would have had to import three of the domains
+  that stand on it.
+
+- **A cell the library will not fill says so, and a cell that printed a word
+  keeps the word.** `CatalogueRow.not_derivable` names a quantity this library
+  leaves empty although the arithmetic would reach it, with the reason: Bies
+  leaves the speed of his aluminium honeycomb panels blank, and the modulus
+  and density beside it are effective ones, so `sqrt(E/rho)` would put a
+  one-dimensional speed of 4 265 m/s on a panel that has none. `unquantified`
+  now holds only what the page printed in place of a number, and
+  `why_missing` composes the sentence around it, so the same field answers the
+  same way in every catalogue and a published table shows the cell as it reads
+  on the page. The modulus of Bies's carbon brick is 8,2 GPa, which is what
+  the page prints; it was stored as a number that reads back as
+  8 199 999 999,999999.
+
+- **Fluid states read from a printed page.** `fluids.PUBLISHED_FLUIDS` holds
+  the three fluids Bies prints at the head of Table C.1, air, fresh water and
+  sea water, which the solids catalogue left out because they are not solids.
+  Each names that page, with the printed folio, in its `model`, the field a
+  state already used to say what produced it: for a state that was read rather
+  than computed, the table is what produced it. It is not a table to look
+  values up in: air at conditions that were measured is `fluids.air` and sea
+  water is `fluids.sea_water`, both of which compute the state.
+
 - **Thirty-two published porous specimens from nineteen parameter tables.**
   `materials.PUBLISHED_POROUS` is the porous rows of the nineteen tables
   Allard & Atalla print across eight chapters, each one the input to a worked
@@ -531,6 +574,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   hides it.
 
 ### Changed
+
+- **The medium's entry in the navigation now says what it holds.** The
+  sidebar and the API reference call it "Fluids", beside "Elastic solids",
+  where it used to read "The medium". The page keeps that title, because the
+  argument it makes is that you never go there to measure a fluid but because
+  whatever you are measuring happens in one; a label in a list of areas has to
+  answer a different question, which is what is inside.
 
 - **`PUBLISHED_POROUS_MATERIALS` is now `PUBLISHED_POROUS`, and its keys name
   the table.** The two specimens it held are

@@ -31,6 +31,9 @@ from .air import (
     DEFAULT_STATIC_PRESSURE_PA,
     air,
 )
+from .catalogue import (
+    PUBLISHED_FLUIDS,
+)
 from .gas import (
     IDEAL_GAS_VALIDITY,
     MOLAR_GAS_CONSTANT,
@@ -50,6 +53,7 @@ __all__ = [
     "DEFAULT_STATIC_PRESSURE_PA",
     "IDEAL_GAS_VALIDITY",
     "MOLAR_GAS_CONSTANT",
+    "PUBLISHED_FLUIDS",
     "Fluid",
     "FluidAssumptionWarning",
     "FluidPropertyUnavailable",

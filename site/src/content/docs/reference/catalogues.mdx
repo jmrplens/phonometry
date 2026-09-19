@@ -1,0 +1,62 @@
+---
+title: "Published catalogues"
+description: "Every material and fluid this library reads from a printed page: elastic constants, porous parameters and fluid states, each with the table it came from and what its cell said."
+---
+
+import Catalogues from '../../../components/Catalogues.astro';
+
+A library that computes with a density has to get it from somewhere. This one
+gets it from a page, and keeps the page: every row below names the book, the
+table, the PDF page and the printed folio it was read on, and says what its
+cell actually said. A density printed as an interval is an interval here, a
+loss factor printed as an upper bound is a bound, and a tortuosity a page
+prints as the word `model` is that word, because the quantity is frequency
+dependent there and no single number stands for it.
+
+Three things follow from that discipline and are visible in the tables.
+
+**The books disagree, and the key says which one is speaking.** Four of them
+print a steel at 7 800 kg/m³ and no two agree on its modulus. That is not a
+defect to be averaged away: it is the spread of the literature, and a
+catalogue that picked one would be hiding it. Rows are keyed by the table they
+came off, and the library's lookups return every book's reading of a name
+rather than choosing between them.
+
+**A number this library worked out is marked as such.** A page that prints a
+modulus and a density has printed a bar speed without writing it down, so the
+row carries it; but it is shown in italics, and what it was computed from is
+one hover away. No derived value is ever stored as if it had been read.
+
+A material marked with an asterisk carries a note its page made about it, and
+the note reads on the name. So does the reason behind any cell that is not a
+plain number.
+
+**Nothing here is a specification.** Block densities vary by manufacturer,
+foams vary by batch, and the books say so by printing ranges where a range is
+what is known. Use a row to reproduce a worked example, to sanity-check a
+measurement or to get an order of magnitude; measure the specimen for anything
+that has to be right.
+
+## Solids
+
+Elastic constants, wave speeds and loss factors, read from the tables of six
+books. Four of them print a steel and they are not the same steel, which is why
+a key names the table it came from.
+
+<Catalogues catalogue="solids" lang="en" />
+
+## Porous materials
+
+The parameters the equivalent-fluid and poroelastic models take, read from the
+tables of one book, each of them the input to a worked example of that book.
+
+<Catalogues catalogue="porous" lang="en" />
+
+## Fluids
+
+Every named fluid state this library carries. The three read from a page are in
+`fluids.PUBLISHED_FLUIDS`; the four airs below them sit elsewhere in the tree,
+each beside the model or the standard that fixes it, and they disagree because
+each is the air its own document assumes.
+
+<Catalogues catalogue="fluids" lang="en" />

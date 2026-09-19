@@ -300,6 +300,82 @@ class TestTheCensus:
         assert data_file == "solids/data/probe.json", why
         assert cited is None, why
 
+    def test_a_banner_naming_a_directory_reads_every_file_in_it(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """One file per published table means a banner cannot list them all.
+
+        A catalogue that reads nineteen tables today reads thirty when the
+        next book lands, and a comment enumerating them is a second copy of
+        the contents to go stale, which is what this gate exists to prevent.
+        The directory form reads them in name order, so a file added without a
+        citation cannot hide behind the ones that have one.
+        """
+        package = tmp_path / "package"
+        data = package / "materials" / "absorbers" / "data"
+        data.mkdir(parents=True)
+        for name, page in (("b-table.json", 22), ("a-table.json", 11)):
+            (data / name).write_text(
+                f'{{"source": "Book Table X, PDF page {page} (printed p. {page})", '
+                f'"about": "x", "rows": []}}',
+                encoding="utf-8",
+            )
+        monkeypatch.setattr(gate, "PACKAGE", package)
+        module = tmp_path / "sample.py"
+        module.write_text(
+            "#: One file per table in ``materials/absorbers/data/``.\n"
+            "FROM_DIR = {row['key']: row for row in _ROWS}\n",
+            encoding="utf-8",
+        )
+        ((_, _, data_file, cited),) = gate.module_tables(module)
+        assert data_file == (
+            "materials/absorbers/data/a-table.json; "
+            "materials/absorbers/data/b-table.json"
+        )
+        assert cited == (
+            "Book Table X, PDF page 11 (printed p. 11); "
+            "Book Table X, PDF page 22 (printed p. 22)"
+        )
+
+    def test_one_uncited_file_in_the_directory_sinks_the_whole_banner(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """The defect the directory form could hide, proved to be caught.
+
+        Naming a directory is only safe if a file dropped into it without a
+        citation turns the constant red, rather than being averaged away by
+        the files that do cite a page.
+        """
+        package = tmp_path / "package"
+        data = package / "materials" / "absorbers" / "data"
+        data.mkdir(parents=True)
+        (data / "cited.json").write_text(
+            '{"source": "Book Table X, PDF page 11 (printed p. 11)", '
+            '"about": "x", "rows": []}',
+            encoding="utf-8",
+        )
+        (data / "uncited.json").write_text(
+            '{"about": "x", "rows": []}', encoding="utf-8"
+        )
+        monkeypatch.setattr(gate, "PACKAGE", package)
+        module = tmp_path / "sample.py"
+        module.write_text(
+            "#: One file per table in ``materials/absorbers/data/``.\n"
+            "FROM_DIR = {row['key']: row for row in _ROWS}\n",
+            encoding="utf-8",
+        )
+        ((_, _, _, cited),) = gate.module_tables(module)
+        assert cited is None
+
+    def test_a_banner_naming_an_empty_directory_names_no_file(
+        self, tmp_path: pathlib.Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """An empty directory is a banner that points at nothing, not a pass."""
+        package = tmp_path / "package"
+        (package / "materials" / "absorbers" / "data").mkdir(parents=True)
+        monkeypatch.setattr(gate, "PACKAGE", package)
+        assert gate.data_files("``materials/absorbers/data/``") == []
+
     def test_a_banner_naming_a_file_that_is_not_there_says_so(
         self, tmp_path: pathlib.Path
     ) -> None:

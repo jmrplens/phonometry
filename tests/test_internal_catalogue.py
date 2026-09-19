@@ -20,7 +20,12 @@ import json
 
 import pytest
 
-from phonometry._internal.catalogue import CatalogueError, read_table, take
+from phonometry._internal.catalogue import (
+    CatalogueError,
+    CatalogueRow,
+    read_table,
+    take,
+)
 
 
 def _packaged(monkeypatch: pytest.MonkeyPatch, document: dict[str, object]) -> None:
@@ -161,3 +166,85 @@ def test_a_field_name_the_dataclass_does_not_have_fails_at_construction() -> Non
     )
     with pytest.raises(TypeError, match="densty_kg_m3"):
         SolidMaterial(**fields)
+
+
+# ---------------------------------------------------------------------------
+# The shared row: the hedges every catalogue needs, and reading them back
+# ---------------------------------------------------------------------------
+def test_take_turns_each_reported_list_into_a_tuple_of_values_and_pairs() -> None:
+    """A page that lists several readings lists numbers and intervals mixed.
+
+    Cox prints "96, 200-450" in one cell of his characteristic-length table:
+    one study measured 96 um and another a band. Both have to survive into one
+    field, so an entry is a float or a pair and the pair is a tuple like every
+    other interval in this reader.
+    """
+    fields = take(
+        {"key": "x", "reported": {"viscous_length_um": [96.0, [200.0, 450.0]]}}
+    )
+    assert fields["reported"] == {"viscous_length_um": (96.0, (200.0, 450.0))}
+
+
+def test_a_row_says_a_listed_cell_is_listed_and_not_empty() -> None:
+    """``None`` with three published readings behind it is not a blank cell.
+
+    Read through a subclass, because the shared row carries the hedges and a
+    subclass carries the quantities they hedge.
+    """
+    from phonometry.materials.absorbers import PorousMaterial
+
+    row = PorousMaterial(
+        name="Plastic foam",
+        source="Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        reported={"viscous_length_um": (25.0, 207.0, 230.0)},
+    )
+    assert row.why_missing("viscous_length_um") == (
+        "the page lists 25, 207, 230 and no single value"
+    )
+
+
+def test_a_listed_cell_that_holds_an_interval_reads_it_out_as_one() -> None:
+    from phonometry.materials.absorbers import PorousMaterial
+
+    row = PorousMaterial(
+        name="PU foam, fully reticulated",
+        source="Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
+        reported={"viscous_length_um": (96.0, (200.0, 450.0))},
+    )
+    assert row.why_missing("viscous_length_um") == (
+        "the page lists 96, 200 to 450 and no single value"
+    )
+
+
+def test_the_hedges_of_a_shared_row_cannot_be_edited_in_place() -> None:
+    """Every mapping a row holds is frozen, including the new one."""
+    row = CatalogueRow(
+        name="x",
+        source="y",
+        reported={"viscous_length_um": (1.0,)},
+        unquantified={"tortuosity": "model"},
+        derived={"youngs_modulus_pa": "from the shear modulus"},
+        ranges={"porosity": (0.9, 0.99)},
+        attributed_to={"row": "Someone, 1990"},
+    )
+    for mapping in (
+        row.reported,
+        row.unquantified,
+        row.derived,
+        row.ranges,
+        row.attributed_to,
+    ):
+        with pytest.raises(TypeError):
+            mapping["porosity"] = "edited"  # type: ignore[index]
+
+
+def test_why_missing_refuses_a_field_the_row_does_not_have() -> None:
+    """A misspelt field would otherwise answer as if the cell were empty."""
+    row = CatalogueRow(name="x", source="y")
+    with pytest.raises(AttributeError):
+        row.why_missing("porsity")
+
+
+def test_a_field_the_row_does_have_has_no_reason_to_be_missing() -> None:
+    row = CatalogueRow(name="x", source="y")
+    assert row.why_missing("name") == ""

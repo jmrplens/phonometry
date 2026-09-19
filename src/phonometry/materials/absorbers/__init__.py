@@ -26,6 +26,11 @@ from .biot import (
     frame_quarter_wave_resonance,
     poroelastic_transfer_matrix,
 )
+from .catalogue import (
+    PUBLISHED_POROUS,
+    PorousMaterial,
+    porous_materials_named,
+)
 from .four_microphone import (
     TransferMatrix,
     air_density_astm,
@@ -74,14 +79,12 @@ from .porous import (
     LIMP_FRAME_CRITERIA,
     MIKI_VALIDITY,
     PUBLISHED_AIR,
-    PUBLISHED_POROUS_MATERIALS,
     ROCK_WOOL_FIBRE_DENSITY_KG_M3,
     ROCK_WOOL_LATERAL_FIT,
     ROCK_WOOL_LONGITUDINAL_FIT,
     FibreCharacteristicLengths,
     FibreResistivityFit,
     PorousAbsorberWarning,
-    PorousMaterial,
     PorousMediumResult,
     airflow_resistivity_from_bulk_density,
     decoupling_frequency,
@@ -204,7 +207,7 @@ __all__ = [
     "MicroperforatedPlateLayer",
     "OCTAVE_BANDS",
     "PUBLISHED_AIR",
-    "PUBLISHED_POROUS_MATERIALS",
+    "PUBLISHED_POROUS",
     "PerforatedPlateLayer",
     "PoroelasticLayer",
     "PorousAbsorberWarning",
@@ -282,6 +285,7 @@ __all__ = [
     "plane_wave_frequency_range_astm",
     "poroelastic_transfer_matrix",
     "porosity_from_bulk_density",
+    "porous_materials_named",
     "practical_absorption_coefficient",
     "practical_coefficient_uncertainty",
     "rectangular_duct_properties",

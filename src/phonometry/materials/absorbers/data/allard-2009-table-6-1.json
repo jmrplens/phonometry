@@ -1,0 +1,20 @@
+{
+  "source": "Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)",
+  "about": "The one row of Table 6.1, \"Values of parameters alpha_inf, rho_1, sigma, phi, N and nu for the glass wool 'Domisol Coffrage'\", the specimen the worked example of Sect. 6.5.4 is built on. Columns as printed: tortuosity, density of frame rho_1 (kg m-3), flow resistivity sigma (N m-4 s), porosity, shear modulus N (N cm-2) and Poisson coefficient. The shear modulus is printed as 220(1 + j0.1) N cm-2 and is stored as its real part in pascals, 2.2e6, with the 0.1 in the structural loss factor, which is the form the poroelastic models take it in. The page prints neither characteristic length; the two the equivalent fluid needs are printed in the prose of Sect. 6.5.4 on the facing folio (PDF page 132, printed p. 123), where a fibre diameter of 12 um gives, through Eqs. (5.29) and (5.30), Lambda = 0.56e-4 m and Lambda' = 2 Lambda = 1.1e-4 m, the book's own rounding of 1.12; Table 11.8 prints the same specimen's lengths independently as 56 and 110 um. The row therefore names both pages in its own source. No thickness: the worked example of Sect. 6.6.3 (printed p. 129) puts the same material at 10 cm and at 5.6 cm, and neither Table 6.1 nor Sect. 6.5.4 prints an h of its own.",
+  "rows": [
+    {
+      "key": "domisol_coffrage",
+      "name": "Domisol Coffrage glass wool",
+      "flow_resistivity_pa_s_m2": 40000.0,
+      "porosity": 0.94,
+      "tortuosity": 1.06,
+      "viscous_length_um": 56.0,
+      "thermal_length_um": 110.0,
+      "frame_density_kg_m3": 130.0,
+      "shear_modulus_pa": 2200000.0,
+      "poisson_ratio": 0.0,
+      "structural_loss_factor": 0.1,
+      "note": "Shear modulus printed as 220(1 + j0.1) N cm-2. Characteristic lengths from the prose of Sect. 6.5.4, not from the table."
+    }
+  ]
+}

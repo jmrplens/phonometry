@@ -1,0 +1,62 @@
+{
+  "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
+  "about": "Table 11.4, \"The parameters used to predict the surface impedance of the material represented in Figure 11.10\": a four-layer package of blanket, porous screen and two foams whose measured impedance, from Allard et al. (1987), is compared with the transfer matrix prediction in Figures 11.11 and 11.12. Columns as printed: thickness h (mm), phi, sigma (N s/m4), alpha_inf, Lambda (um), Lambda' (um), rho_1 (kg/m3), E (Pa), nu and eta_s, all ten filled on every row. The page numbers the layers (1) to (4) in the material names and the numbers are kept.",
+  "rows": [
+    {
+      "key": "blanket_1",
+      "name": "Blanket (1)",
+      "flow_resistivity_pa_s_m2": 34000.0,
+      "porosity": 0.98,
+      "tortuosity": 1.18,
+      "viscous_length_um": 60.0,
+      "thermal_length_um": 86.0,
+      "frame_density_kg_m3": 41.0,
+      "thickness_mm": 4.0,
+      "youngs_modulus_pa": 286000.0,
+      "poisson_ratio": 0.3,
+      "structural_loss_factor": 0.015
+    },
+    {
+      "key": "screen_2",
+      "name": "Screen (2)",
+      "flow_resistivity_pa_s_m2": 3200000.0,
+      "porosity": 0.8,
+      "tortuosity": 2.56,
+      "viscous_length_um": 6.0,
+      "thermal_length_um": 24.0,
+      "frame_density_kg_m3": 125.0,
+      "thickness_mm": 0.8,
+      "youngs_modulus_pa": 2600000.0,
+      "poisson_ratio": 0.3,
+      "structural_loss_factor": 0.1
+    },
+    {
+      "key": "foam_3",
+      "name": "Foam (3)",
+      "flow_resistivity_pa_s_m2": 87000.0,
+      "porosity": 0.97,
+      "tortuosity": 2.52,
+      "viscous_length_um": 36.0,
+      "thermal_length_um": 118.0,
+      "frame_density_kg_m3": 31.0,
+      "thickness_mm": 5.0,
+      "youngs_modulus_pa": 143000000.0,
+      "poisson_ratio": 0.3,
+      "structural_loss_factor": 0.055
+    },
+    {
+      "key": "foam_4",
+      "name": "Foam (4)",
+      "flow_resistivity_pa_s_m2": 65000.0,
+      "porosity": 0.99,
+      "tortuosity": 1.98,
+      "viscous_length_um": 37.0,
+      "thermal_length_um": 120.0,
+      "frame_density_kg_m3": 16.0,
+      "thickness_mm": 16.0,
+      "youngs_modulus_pa": 46800000.0,
+      "poisson_ratio": 0.3,
+      "structural_loss_factor": 0.1
+    }
+  ]
+}

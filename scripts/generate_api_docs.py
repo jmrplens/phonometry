@@ -529,6 +529,55 @@ def _is_public_module(module: str) -> bool:
     return not any(part.startswith("_") for part in module.split(".")[1:])
 
 
+def inherited_ivars(obj: type) -> str:
+    """The ``:ivar:`` lines a class inherits and does not restate.
+
+    A catalogue row holds its quantities and inherits the hedges every
+    published row carries, and a reader of the subclass needs both: the
+    signature shows ``ranges`` whether or not the subclass wrote the line
+    describing it. Without this, factoring a shared base out of two classes
+    silently strips half the published attribute table, which is the kind of
+    regression a documentation build should not be able to make.
+
+    A base whose own description the subclass rewrote keeps its field lines
+    all the same: the prose above and the attribute table below are separate
+    things, and only the table is completed here. A name the subclass
+    documents itself wins, and a name it does not carry at all is skipped,
+    so a base can document more than any one subclass has.
+
+    Membership is read from the dataclass fields rather than from
+    ``hasattr``, because a field with no default and a field built by a
+    ``default_factory`` both leave the class without an attribute of that
+    name: reading it the obvious way published eleven of the eighteen
+    inherited rows and dropped ``name``, ``source`` and every mapping.
+
+    :param obj: The class being rendered.
+    :return: The extra field lines, ready to append to its docstring, empty
+        when it inherits nothing undocumented.
+    """
+    own = {name for name, _ in parse_docstring(inspect.getdoc(obj) or "").ivars}
+    carried = (
+        {declared.name for declared in dataclasses.fields(obj)}
+        if dataclasses.is_dataclass(obj)
+        else {name for name in dir(obj) if not name.startswith("__")}
+    )
+    lines: list[str] = []
+    for base in obj.__mro__[1:]:
+        base_doc = base.__doc__
+        if not base_doc:
+            continue
+        parsed = parse_docstring(inspect.cleandoc(base_doc))
+        for name, text in parsed.ivars:
+            if name in own or name not in carried:
+                continue
+            own.add(name)
+            lines.append(f":ivar {name}: {text}")
+            vartype = parsed.vartypes.get(name)
+            if vartype:
+                lines.append(f":vartype {name}: {vartype}")
+    return "\n".join(lines)
+
+
 def attribute_module(name: str, obj: object) -> str:
     """Return the full public module that documents public name ``name``."""
     override = OBJECT_MODULE_OVERRIDES.get(name)
@@ -889,7 +938,11 @@ def _build_page(
                     kind="class",
                     anchor=anchor,
                     signature=signature,
-                    doc=inspect.getdoc(obj) or "",
+                    doc="\n".join(
+                        part
+                        for part in (inspect.getdoc(obj) or "", inherited_ivars(obj))
+                        if part
+                    ),
                     init_doc=init_doc,
                     methods=_class_methods(name, obj, slugger, issues),
                 )

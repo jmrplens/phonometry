@@ -176,6 +176,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`materials.absorbers.four_microphone`](/phonometry/reference/api/materials/four-microphone/) | Four-microphone transfer-matrix method for the transmission of a specimen. |
 | [`materials.absorbers.standing_wave`](/phonometry/reference/api/materials/standing-wave/) | Standing-wave-ratio method for normal-incidence absorption and impedance. |
 | [`materials.absorbers.porous`](/phonometry/reference/api/materials/porous/) | Porous-material models and resonant sheet impedances. |
+| [`materials.absorbers.catalogue`](/phonometry/reference/api/materials/catalogue/) | Porous specimens as the pages that print them print them. |
 | [`materials.absorbers.layered`](/phonometry/reference/api/materials/layered/) | Declarative layer stacks and the transfer-matrix absorber solver. |
 | [`materials.absorbers.biot`](/phonometry/reference/api/materials/biot/) | Biot poroelastic layers: the three waves and the 6x6 transfer matrix. |
 | [`materials.absorbers.slow_sound`](/phonometry/reference/api/materials/slow-sound/) | Slow-sound slit panels loaded with Helmholtz resonators (perfect absorbers). |

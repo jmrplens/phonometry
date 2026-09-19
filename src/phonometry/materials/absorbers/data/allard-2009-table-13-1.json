@@ -1,0 +1,20 @@
+{
+  "source": "Allard & Atalla 2e Table 13.1, PDF page 332 (printed p. 328)",
+  "about": "Table 13.1, \"The parameters of the foam\": the 2-in-thick, 0.5 x 0.5 m foam slab of the finite element absorption example of Figures 13.5 and 13.6 (Atalla et al. 2006). Columns as printed: porosity, flow resistivity sigma (N m-4 s), tortuosity, viscous charact. dim. (m), thermal charact. dim. (m), density of frame rho_1 (kg m-3), Young's modulus (Pa), Poisson coefficient and structural damping eta. The lengths are the one table that prints them in metres, 0.000078 and 0.000192, converted here to the micrometres of the rest of the catalogue; the prose of Sect. 6.5.4 writes the Table 6.1 specimen's lengths in metres too. The page gives the row no name beyond the caption's \"the foam\".",
+  "rows": [
+    {
+      "key": "foam",
+      "name": "Foam",
+      "flow_resistivity_pa_s_m2": 12569.0,
+      "porosity": 0.99,
+      "tortuosity": 1.02,
+      "viscous_length_um": 78.0,
+      "thermal_length_um": 192.0,
+      "frame_density_kg_m3": 8.85,
+      "youngs_modulus_pa": 93348.0,
+      "poisson_ratio": 0.44,
+      "structural_loss_factor": 0.064,
+      "note": "Lengths printed 0.000078 m and 0.000192 m."
+    }
+  ]
+}

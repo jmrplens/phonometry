@@ -34,7 +34,7 @@ import matplotlib as mpl
 mpl.use("Agg")
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Iterator
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "scripts"))
 
@@ -42,6 +42,22 @@ from figures import i18n, registry, theme  # noqa: E402
 
 #: The four variants every clip is rendered in.
 EXPECTED = (("en", False), ("en", True), ("es", False), ("es", True))
+
+
+@pytest.fixture(autouse=True)
+def _restore_language_and_theme() -> Iterator[None]:
+    """Put the process back the way it was found.
+
+    ``_render_anim_variant`` sets the language and the theme and never puts
+    them back, which is right for it: the generator gives each variant a
+    process, or ends the run. Called here it would leave the Spanish labels
+    and the dark stylesheet in place for whatever test the worker picks up
+    next, and the one that notices is a figure check measuring ink against a
+    background that is suddenly black.
+    """
+    yield
+    i18n.set_lang("en")
+    theme.set_theme(dark=False)
 
 
 def test_the_four_variants_are_the_ones_the_registry_lists() -> None:

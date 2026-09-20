@@ -2563,7 +2563,7 @@ _ES_EXACT = {
     "probe pressure, 7.5 m below the source": "presión en la sonda, 7,5 m bajo la fuente",
     "incident\n1.02 ms": "incidente\n1,02 ms",
     "echo off the steel\n3.04 ms": "eco en el acero\n3,04 ms",
-    "echo / incident = 0.938\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0.938": "eco / incidente = 0,938\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0,938",
+    "echo / incident = 0.939\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0.939": "eco / incidente = 0,939\n$(Z_2 - Z_1)/(Z_2 + Z_1)$ = 0,939",
     "Number of strikes $N$": "Número de golpes $N$",
     "Cumulative SEL [dB re 1 µPa²·s]": "SEL acumulado [dB re 1 µPa²·s]",
     "ICAO Aircraft Flyover: Effective Perceived Noise Level (Annex 16)": "Sobrevuelo de aeronave ICAO: Nivel efectivo de ruido percibido (Anexo 16)",

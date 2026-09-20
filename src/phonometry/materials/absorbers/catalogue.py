@@ -299,6 +299,7 @@ def _complete(fields: dict[str, Any]) -> dict[str, Any]:
         set(fields.get("ranges", {}))
         | set(fields.get("unquantified", {}))
         | set(fields.get("not_derivable", {}))
+        | set(fields.get("misprinted", {}))
     )
     spoken |= set(fields.get("reported", {}))
     if nu is None or "poisson_ratio" in spoken:

@@ -41,7 +41,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
 from phonometry.building.prediction.detailed_model import EN_12354_AIR  # noqa: E402
 from phonometry.environment.propagation import PUBLISHED_GROUND  # noqa: E402
-from phonometry.fluids import PUBLISHED_FLUIDS  # noqa: E402
+from phonometry.fluids import PUBLISHED_FLUIDS, PUBLISHED_GASES  # noqa: E402
 from phonometry.materials.absorbers import PUBLISHED_POROUS  # noqa: E402
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
 from phonometry.materials.absorbers.porous import PUBLISHED_AIR  # noqa: E402
@@ -127,6 +127,16 @@ POROUS_COLUMNS = (
         "structural_loss_factor",
         "Structural loss factor",
         "Factor de pérdidas estructural",
+        "",
+    ),
+)
+
+GAS_COLUMNS = (
+    ("molar_mass_kg_mol", "Molar mass", "Masa molar", "kg/mol"),
+    (
+        "heat_capacity_ratio",
+        "Ratio of specific heats",
+        "Relación de calores específicos",
         "",
     ),
 )
@@ -420,8 +430,11 @@ def cell(
         }
     # A cell this library will not fill although the arithmetic would reach it
     # reads as empty, because the page is empty there; why it stays empty is
-    # what the note says.
-    if field in row.not_derivable:
+    # what the note says. A cell the page did fill and got wrong reads the same
+    # way, and for the same reason: the table publishes what this library will
+    # stand behind, and the note carries the printed number for a reader who is
+    # checking the book rather than using it.
+    if field in row.not_derivable or field in row.misprinted:
         return {"text": "", "kind": "absent", "note": row.why_missing(field)}
     return {"text": "", "kind": "absent", "note": ""}
 
@@ -584,6 +597,7 @@ def render() -> str:
     solid_styles = styles(PUBLISHED_SOLIDS, SOLID_COLUMNS)
     porous_styles = styles(PUBLISHED_POROUS, POROUS_COLUMNS)
     ground_styles = styles(PUBLISHED_GROUND, GROUND_COLUMNS)
+    gas_styles = styles(PUBLISHED_GASES, GAS_COLUMNS)
     fluid_columns, fluid_rows = fluids()
     document = {
         "solids": {
@@ -621,6 +635,18 @@ def render() -> str:
                 for field, heading, spanish, _ in GROUND_COLUMNS
             ],
             "rows": list(rows(PUBLISHED_GROUND, GROUND_COLUMNS)),
+        },
+        "gases": {
+            "columns": [
+                {
+                    "field": field,
+                    "heading": heading,
+                    "headingEs": spanish,
+                    "unit": gas_styles[field].unit,
+                }
+                for field, heading, spanish, _ in GAS_COLUMNS
+            ],
+            "rows": list(rows(PUBLISHED_GASES, GAS_COLUMNS)),
         },
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
@@ -663,6 +689,7 @@ def main(argv: list[str] | None = None) -> int:
         "solids": len(PUBLISHED_SOLIDS),
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
+        "gases": len(PUBLISHED_GASES),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }
     print(f"{OUTPUT.name}: " + ", ".join(f"{n} {k}" for k, n in counts.items()))

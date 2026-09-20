@@ -332,6 +332,33 @@ def test_a_not_derivable_cell_says_why_in_words(path: pathlib.Path) -> None:
 
 
 @pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
+def test_a_misprinted_cell_says_what_the_page_printed_and_why_it_cannot_be(
+    path: pathlib.Path,
+) -> None:
+    """The heaviest claim a row can make, so it has to carry its own argument.
+
+    A reader who meets an empty cell here is being told the book is wrong, and
+    a sentence that does not quote the printed number leaves them no way to
+    check that for themselves.
+    """
+    document = json.loads(path.read_text(encoding="utf-8"))
+    for row in document["rows"]:
+        for field, reason in (row.get("misprinted") or {}).items():
+            assert len(reason) > _LONGEST_PRINTED_CELL, (
+                f"{path.name}: {row['key']}.{field} says {reason!r}, which does not "
+                f"say why the printed value cannot be right"
+            )
+            assert "prints" in reason, (
+                f"{path.name}: {row['key']}.{field} does not quote what the page "
+                f"prints, so a reader cannot check the claim against it"
+            )
+            assert "ERRATA" in reason, (
+                f"{path.name}: {row['key']}.{field} calls a printed value wrong "
+                f"without pointing at the registry entry that argues it"
+            )
+
+
+@pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
 def test_no_number_carries_more_digits_than_a_page_prints(path: pathlib.Path) -> None:
     """``0.82e10`` read back is ``8199999999.999999``, and the table shows it.
 

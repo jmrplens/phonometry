@@ -1,0 +1,42 @@
+{
+  "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
+  "about": "The six gases Table A1, \"Properties of gases\", prints at the head of the appendix \"Material properties\". Columns as printed: the ratio of specific heats gamma, the molar mass M in kg/mol, the phase velocity at NTP in m/s and the density at NTP in kg/m3, where the footnote fixes NTP as 20 degC and 1,013 x 10^5 Pa. Only the first two columns are held here, because they are what a gas is: the ratio of specific heats and the molar mass close the ideal-gas state and let any temperature and pressure be reached, while the velocity and the density are that state evaluated at one condition. Those two columns are not lost: they are the printed oracle the test suite compares the ideal-gas closure against, which is how the shortfall on the heavy molecules was measured and written into the validity note of phonometry.fluids.ideal_gas. The molar masses are printed to the precision shown, two significant figures for the five gases other than air, so a row here is as coarse as the page and not rounder than it. The appendix opens by calling its contents \"indicative material properties for use with the equations in the main text\", and the caveat that follows about variation between manufacturers is aimed at Tables A2, A3 and A4 by name, not at this one.",
+  "rows": [
+    {
+      "key": "air_dry",
+      "name": "Air (dry)",
+      "molar_mass_kg_mol": 0.02895,
+      "heat_capacity_ratio": 1.41
+    },
+    {
+      "key": "argon",
+      "name": "Argon",
+      "molar_mass_kg_mol": 0.04,
+      "heat_capacity_ratio": 1.67
+    },
+    {
+      "key": "carbon_dioxide",
+      "name": "Carbon dioxide",
+      "molar_mass_kg_mol": 0.044,
+      "heat_capacity_ratio": 1.33
+    },
+    {
+      "key": "nitrogen",
+      "name": "Nitrogen",
+      "molar_mass_kg_mol": 0.028,
+      "heat_capacity_ratio": 1.41
+    },
+    {
+      "key": "oxygen",
+      "name": "Oxygen",
+      "molar_mass_kg_mol": 0.032,
+      "heat_capacity_ratio": 1.41
+    },
+    {
+      "key": "sulphur_hexafluoride",
+      "name": "Sulphur hexafluoride",
+      "molar_mass_kg_mol": 0.146,
+      "heat_capacity_ratio": 1.33
+    }
+  ]
+}

@@ -43,22 +43,31 @@ import { catalogues } from '../generated/catalogues.mjs';
 
 interface Props {
 	/** Which catalogue to render. */
-	catalogue: 'solids' | 'porous' | 'ground' | 'fluids';
+	catalogue: 'solids' | 'porous' | 'ground' | 'gases' | 'fluids';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
 }
 const { catalogue: section, lang = 'en' } = Astro.props;
 
+// The three search placeholders are the same in both languages on purpose, and
+// translating them would break the filter. It matches what the row carries,
+// which is the material name as its book prints it, and every book behind these
+// tables prints English. "hierba" and "metano" found nothing; "grass" and
+// "methane" find eleven rows and one. The rest of this object is prose and is
+// translated as prose.
 const copy = {
 	en: {
 		search: 'Filter by material',
-		searchPlaceholder: 'steel, foam, air',
+		searchGas: 'Filter by gas',
+		searchPlaceholder: 'steel, foam, glass',
 		groundPlaceholder: 'grass, snow, asphalt',
+		gasPlaceholder: 'methane, argon, steam',
 		table: 'Published table',
 		everyTable: 'Every table',
 		empty: 'No row matches that filter.',
 		material: 'Material',
 		surface: 'Surface',
+		gas: 'Gas',
 		state: 'State',
 		conditions: 'Conditions',
 		fixedBy: 'What fixes it',
@@ -79,13 +88,16 @@ const copy = {
 	},
 	es: {
 		search: 'Filtrar por material',
-		searchPlaceholder: 'acero, espuma, aire',
-		groundPlaceholder: 'hierba, nieve, asfalto',
+		searchGas: 'Filtrar por gas',
+		searchPlaceholder: 'steel, foam, glass',
+		groundPlaceholder: 'grass, snow, asphalt',
+		gasPlaceholder: 'methane, argon, steam',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',
 		material: 'Material',
 		surface: 'Superficie',
+		gas: 'Gas',
 		state: 'Estado',
 		conditions: 'Condiciones',
 		fixedBy: 'Qué lo fija',
@@ -106,13 +118,26 @@ const copy = {
 	},
 }[lang];
 
+/** What the filter is called, which is not a material in every catalogue. */
+const searchLabel = section === 'gases' ? copy.searchGas : copy.search;
+
 /** What to search for, which is not a material in the ground catalogue. */
 const placeholder =
-	section === 'ground' ? copy.groundPlaceholder : copy.searchPlaceholder;
+	section === 'ground'
+		? copy.groundPlaceholder
+		: section === 'gases'
+			? copy.gasPlaceholder
+			: copy.searchPlaceholder;
 
 /** What the first column holds, which is not a material in every catalogue. */
 const rowHeading =
-	section === 'fluids' ? copy.state : section === 'ground' ? copy.surface : copy.material;
+	section === 'fluids'
+		? copy.state
+		: section === 'ground'
+			? copy.surface
+			: section === 'gases'
+				? copy.gas
+				: copy.material;
 
 /** A column's heading in the language this page is published in. */
 const heading = (column: { heading: string; headingEs?: string }) =>
@@ -135,7 +160,7 @@ const tables = tablesOf(data.rows);
 <section class="catalogue not-content" data-catalogue={section}>
 	<div class="controls" data-controls hidden>
 		<label>
-			<span>{copy.search}</span>
+			<span>{searchLabel}</span>
 			<input type="search" data-search placeholder={placeholder} />
 		</label>
 		<label>

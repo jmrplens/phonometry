@@ -9,6 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Thirty-seven gases and six, from two books, with the two numbers that
+  close a state.** `fluids.PUBLISHED_GASES` holds the molar mass and the ratio
+  of specific heats of every row of Bies 5e Table C.2 and of Hopkins Table A1,
+  and `Gas.ideal_state` walks from that pair to a `Fluid` at whichever
+  temperature and pressure are asked for, carrying the page along with the
+  number. A gas table is not a fluid table: a fluid row is one condition a book
+  measured, a gas row is every condition its two constants reach, which is why
+  these did not go into `PUBLISHED_FLUIDS`. `fluids.gases_named` answers with
+  both books' readings of a name rather than choosing between them, and for
+  carbon dioxide they differ by more than a rounding digit.
+
+- **Six cells of a printed gas table are not served, and the refusal says
+  why.** Four molar masses in Bies Table C.2 do not belong to the molecule
+  their row names, and two ratios of specific heats are outside what the
+  quantity can be. `CatalogueRow.misprinted` is the hedge for that case:
+  reading such a cell raises, naming it, quoting what the page prints and
+  pointing at the registry entry that argues it, and the derivations of every
+  catalogue treat it the way they treat a cell the page left empty, so nothing
+  fills it by the side door. It is the narrowest hedge in the set and the one
+  that costs most to claim: a cell earns it only when the defect follows from
+  the page itself or from something as settled as the molar mass of a named
+  molecule, never from one book disagreeing with another.
+
 - **The published catalogues have a page of their own.**
   `/reference/catalogues/` renders the two hundred and nineteen solids, the
   thirty-two porous specimens and the seven named fluid states this library

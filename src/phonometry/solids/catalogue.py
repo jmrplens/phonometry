@@ -207,12 +207,15 @@ def _fill(fields: dict[str, Any], name: str, value: float, how: str) -> None:
     effective ones; deriving 4 265 m/s from them would be arithmetic standing
     in for a quantity that does not exist. So is a field whose cell held
     something that is not a number, because the page has already answered
-    there. Wherever :attr:`SolidMaterial.not_derivable` or
+    there, and so is a field whose printed value is registered as a defect,
+    because deriving around it would put the book's mistake back into the
+    arithmetic through the side door. Wherever
+    :attr:`SolidMaterial.not_derivable`, :attr:`SolidMaterial.misprinted` or
     :attr:`SolidMaterial.unquantified` speaks, it wins.
     """
     if any(
         name in fields.get(where, {})
-        for where in ("ranges", "unquantified", "not_derivable")
+        for where in ("ranges", "unquantified", "not_derivable", "misprinted")
     ):
         return
     fields[name] = value

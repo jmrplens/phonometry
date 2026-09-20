@@ -40561,6 +40561,927 @@ export const catalogues = {
       }
     ]
   },
+  "gases": {
+    "columns": [
+      {
+        "field": "molar_mass_kg_mol",
+        "heading": "Molar mass",
+        "headingEs": "Masa molar",
+        "unit": "kg/mol"
+      },
+      {
+        "field": "heat_capacity_ratio",
+        "heading": "Ratio of specific heats",
+        "headingEs": "Relación de calores específicos",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "bies-2017-table-c2/acetylene",
+        "table": "bies-2017-table-c2",
+        "name": "Acetylene",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02604",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/air",
+        "table": "bies-2017-table-c2",
+        "name": "Air",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02897",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/ammonia",
+        "table": "bies-2017-table-c2",
+        "name": "Ammonia",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 0.01730 kg/mol, which is 17.30 g/mol where ammonia, NH3, is 17.031; a defect argued in docs/ERRATA.md"
+          },
+          {
+            "text": "1,32",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/argon",
+        "table": "bies-2017-table-c2",
+        "name": "Argon",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,03995",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,67",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/benzene",
+        "table": "bies-2017-table-c2",
+        "name": "Benzene",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,07811",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/isobutane",
+        "table": "bies-2017-table-c2",
+        "name": "Isobutane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,05812",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/n_butane",
+        "table": "bies-2017-table-c2",
+        "name": "n-Butane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,05812",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/isobutylene",
+        "table": "bies-2017-table-c2",
+        "name": "Isobutylene",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,05611",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/carbon_dioxide",
+        "table": "bies-2017-table-c2",
+        "name": "Carbon dioxide",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,04401",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/carbon_monoxide",
+        "table": "bies-2017-table-c2",
+        "name": "Carbon monoxide",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02801",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/chlorine",
+        "table": "bies-2017-table-c2",
+        "name": "Chlorine",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,07091",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,31",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/ethane",
+        "table": "bies-2017-table-c2",
+        "name": "Ethane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,03007",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,22",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/ethylene",
+        "table": "bies-2017-table-c2",
+        "name": "Ethylene",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02805",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,22",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/fluorine",
+        "table": "bies-2017-table-c2",
+        "name": "Fluorine",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 0.01900 kg/mol, which is one fluorine atom and not the F2 of a fluorine gas at 37.996 g/mol; a defect argued in docs/ERRATA.md"
+          },
+          {
+            "text": "1,36",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/freon_11",
+        "table": "bies-2017-table-c2",
+        "name": "Freon 11",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,13737",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/freon_12",
+        "table": "bies-2017-table-c2",
+        "name": "Freon 12",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,12091",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,13",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/freon_13",
+        "table": "bies-2017-table-c2",
+        "name": "Freon 13",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,10446",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/freon_22",
+        "table": "bies-2017-table-c2",
+        "name": "Freon 22",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 0.08047 kg/mol, where chlorodifluoromethane, CHClF2, is 86.465 g/mol; a defect argued in docs/ERRATA.md"
+          },
+          {
+            "text": "1,18",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/helium",
+        "table": "bies-2017-table-c2",
+        "name": "Helium",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,004",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,66",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/n_heptane",
+        "table": "bies-2017-table-c2",
+        "name": "n-Heptane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,1002",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/hydrogen",
+        "table": "bies-2017-table-c2",
+        "name": "Hydrogen",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,00202",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/hydrogen_chloride",
+        "table": "bies-2017-table-c2",
+        "name": "Hydrogen chloride",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,03646",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/hydrogen_fluoride",
+        "table": "bies-2017-table-c2",
+        "name": "Hydrogen fluoride",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02001",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 0.97, and a ratio of specific heats is above 1 for every gas because c_p exceeds c_v by R/M; a defect argued in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/methane",
+        "table": "bies-2017-table-c2",
+        "name": "Methane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,01604",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,32",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/methyl_chloride",
+        "table": "bies-2017-table-c2",
+        "name": "Methyl chloride",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,05049",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,24",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/natural_gas_representative",
+        "table": "bies-2017-table-c2",
+        "name": "Natural gas (representative)",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,01774",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,27",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/neon",
+        "table": "bies-2017-table-c2",
+        "name": "Neon",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02018",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,64",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/nitric_oxide",
+        "table": "bies-2017-table-c2",
+        "name": "Nitric oxide",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 0.06301 kg/mol, which is the molar mass of nitric acid, HNO3, where nitric oxide, NO, is 30.006 g/mol; a defect argued in docs/ERRATA.md"
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/nitrogen",
+        "table": "bies-2017-table-c2",
+        "name": "Nitrogen",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02801",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/octane",
+        "table": "bies-2017-table-c2",
+        "name": "Octane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,11423",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 1.66, a monatomic value in an ideal-gas column where a twenty-six atom molecule cannot reach it; the same table gives 1.05 to n-heptane; a defect argued in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/oxygen",
+        "table": "bies-2017-table-c2",
+        "name": "Oxygen",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,032",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/pentane",
+        "table": "bies-2017-table-c2",
+        "name": "Pentane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,07215",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/propane",
+        "table": "bies-2017-table-c2",
+        "name": "Propane",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,0441",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,15",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/propylene",
+        "table": "bies-2017-table-c2",
+        "name": "Propylene",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,04208",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/saturated_steam",
+        "table": "bies-2017-table-c2",
+        "name": "Saturated steam",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,01802",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,25 to 1,32",
+            "kind": "range",
+            "note": "the page prints 1.25 to 1.32 and no value"
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/sulphur_dioxide",
+        "table": "bies-2017-table-c2",
+        "name": "Sulphur dioxide",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,06406",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,26",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-c2/superheated_steam",
+        "table": "bies-2017-table-c2",
+        "name": "Superheated steam",
+        "variant": "",
+        "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,01802",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,315",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a1/air_dry",
+        "table": "hopkins-2007-table-a1",
+        "name": "Air (dry)",
+        "variant": "",
+        "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,02895",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a1/argon",
+        "table": "hopkins-2007-table-a1",
+        "name": "Argon",
+        "variant": "",
+        "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,67",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a1/carbon_dioxide",
+        "table": "hopkins-2007-table-a1",
+        "name": "Carbon dioxide",
+        "variant": "",
+        "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,044",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,33",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a1/nitrogen",
+        "table": "hopkins-2007-table-a1",
+        "name": "Nitrogen",
+        "variant": "",
+        "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,028",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a1/oxygen",
+        "table": "hopkins-2007-table-a1",
+        "name": "Oxygen",
+        "variant": "",
+        "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,032",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "hopkins-2007-table-a1/sulphur_hexafluoride",
+        "table": "hopkins-2007-table-a1",
+        "name": "Sulphur hexafluoride",
+        "variant": "",
+        "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,146",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,33",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
   "fluids": {
     "columns": [
       {

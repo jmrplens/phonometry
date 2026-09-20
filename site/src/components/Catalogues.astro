@@ -52,6 +52,7 @@ const { catalogue: section, lang = 'en' } = Astro.props;
 const copy = {
 	en: {
 		search: 'Filter by material',
+		searchGas: 'Filter by gas',
 		searchPlaceholder: 'steel, foam, air',
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
@@ -81,6 +82,7 @@ const copy = {
 	},
 	es: {
 		search: 'Filtrar por material',
+		searchGas: 'Filtrar por gas',
 		searchPlaceholder: 'acero, espuma, aire',
 		groundPlaceholder: 'hierba, nieve, asfalto',
 		gasPlaceholder: 'metano, argón, vapor',
@@ -109,6 +111,9 @@ const copy = {
 		},
 	},
 }[lang];
+
+/** What the filter is called, which is not a material in every catalogue. */
+const searchLabel = section === 'gases' ? copy.searchGas : copy.search;
 
 /** What to search for, which is not a material in the ground catalogue. */
 const placeholder =
@@ -149,7 +154,7 @@ const tables = tablesOf(data.rows);
 <section class="catalogue not-content" data-catalogue={section}>
 	<div class="controls" data-controls hidden>
 		<label>
-			<span>{copy.search}</span>
+			<span>{searchLabel}</span>
 			<input type="search" data-search placeholder={placeholder} />
 		</label>
 		<label>

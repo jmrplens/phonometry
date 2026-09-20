@@ -42,7 +42,8 @@ Gases are the other half, and they are not states
 A book that prints a table of gases prints something different from a table of
 fluids: not a density and a speed of sound, which a gas only has once a
 temperature and a pressure are named, but the ratio of specific heats and the
-molar mass, which fix every state it can be in. So the gases live in a
+molar mass, which close the ideal-gas state at any temperature and pressure.
+So the gases live in a
 catalogue of their own, :data:`PUBLISHED_GASES`, and reach a state through
 :meth:`Gas.ideal_state`, which is :func:`~phonometry.fluids.ideal_gas` with the
 citation carried along. Air appears in both, and it should: Bies prints it once
@@ -148,10 +149,12 @@ class Gas(CatalogueRow):
     gas does not have one: it has whichever the temperature and the pressure
     give it. What it prints instead is the pair that fixes the whole family,
     the ratio of specific heats and the molar mass, and
-    :meth:`ideal_state` walks from that pair to any state the caller asks for.
+    :meth:`ideal_state` walks from that pair to the ideal-gas state at
+    whichever temperature and pressure the caller asks for.
     That is the difference between this catalogue and
     :data:`PUBLISHED_FLUIDS`, which holds states: a row there is one condition
-    a book measured, a row here is every condition its two constants reach.
+    a book measured, a row here is every condition its two constants close under
+    the ideal-gas relations.
 
     The hedges of :class:`~phonometry._internal.catalogue.CatalogueRow` apply
     unchanged. A cell printed as an interval is a range and not a value, which
@@ -238,9 +241,10 @@ def gases_named(name: str) -> tuple[Gas, ...]:
 
     Two books printing one gas is worth having, because the pair they print is
     not always the same pair: for carbon dioxide one of them gives 1,30 and
-    the other 1,33, which is a four per cent difference in the speed of sound
-    and a reader deserves to see both rather than whichever this library
-    happened to load first.
+    the other 1,33. That is 2,3 per cent on the ratio and, since the speed of
+    sound goes as its square root, 1,2 per cent on the speed, which a reader
+    deserves to see both sides of rather than whichever this library happened
+    to load first.
 
     :param name: The gas as a table names it, matched without regard to case
         and ignoring a parenthesis the page adds: ``"air"`` answers with the

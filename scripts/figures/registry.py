@@ -1465,7 +1465,11 @@ def _render_anim_variants(clip: str, output_dir: str) -> None:
     builder()
     ctx = mp.get_context("fork")
     procs = [
-        ctx.Process(target=_render_anim_variant, args=(clip, output_dir, lang, dark))
+        ctx.Process(
+            target=_render_anim_variant,
+            args=(clip, output_dir, lang),
+            kwargs={"dark": dark},
+        )
         for lang, dark in _VARIANTS
     ]
     for proc in procs:

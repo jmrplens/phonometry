@@ -11,6 +11,8 @@ from typing import Any
 
 import numpy as np
 
+from phonometry.simulation import STEEL
+
 from ..i18n import _fmt_minus
 from ..media import (
     _ANIM_HOLD,
@@ -31,11 +33,13 @@ from ._core import _fit_text_x, _gain_note, _weak_field_gain
 
 # --- Elastic FDTD clips: plate junction and coincidence --------------------
 # Both clips run the library's 2D P-SV solver (phonometry.simulation
-# .elastic_fdtd) on the same 10 mm steel plate: body-wave speeds and density
-# below give the plane-strain plate modulus E' = 4 mu (lambda + mu) /
+# .elastic_fdtd) on the same 10 mm steel plate, and they take the steel from
+# the solver rather than copying it: the body-wave speeds and density below
+# give the plane-strain plate modulus E' = 4 mu (lambda + mu) /
 # (lambda + 2 mu) that the solver itself propagates, so every derived number
-# (bending speed, coincidence frequency) matches the simulated field.
-_EL_CP, _EL_CS, _EL_RHO = 5900.0, 3200.0, 7850.0
+# (bending speed, coincidence frequency) matches the simulated field, and a
+# second steel cannot appear here the day the first one is re-sourced.
+_EL_CP, _EL_CS, _EL_RHO = STEEL.c_p, STEEL.c_s, STEEL.rho
 _EL_H = 0.010
 # Mesh rule: dx = min(smallest geometric dimension / 4, shortest relevant
 # wavelength / 8). The 10 mm plate thickness governs both clips

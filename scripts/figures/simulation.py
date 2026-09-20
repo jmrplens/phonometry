@@ -169,12 +169,13 @@ def generate_elastic_halfspace_waves(output_dir: str) -> None:
     """Elastic FDTD: P, S and Rayleigh waves in an aluminium half-space."""
     print("Generating elastic_halfspace_waves...")
     from phonometry import simulation
+    from phonometry.simulation import ALUMINIUM
 
     # A 0.6 x 0.3 m aluminium block with a free upper surface, struck by a
     # short vertical force at the middle of that surface (Lamb's problem):
     # one snapshot shows the three wave types at their own speeds, the
     # Rayleigh wave hugging the surface just behind the S front.
-    c_p, c_s, rho, dx = 6320.0, 3130.0, 2700.0, 0.001
+    c_p, c_s, rho, dx = ALUMINIUM.c_p, ALUMINIUM.c_s, ALUMINIUM.rho, 0.001
     width = 8e-6
     duration = 7.3e-5
     cfl = 0.6

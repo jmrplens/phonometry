@@ -6,6 +6,8 @@ from typing import Any
 
 import numpy as np
 
+from phonometry.simulation import ALUMINIUM
+
 from ..media import _ANIM_PILL_BOX, _anim_figure, _render_clip, _translate_str
 from ..theme import (
     CMAP_FIELD,
@@ -18,8 +20,9 @@ from ..theme import (
 
 # Aluminium half-space, the material of the still figure this clip promotes
 # (simulation/elastic-waves.mdx section 3) and of the solver's own Rayleigh
-# test: c_P = 6320, c_S = 3130 m/s, rho = 2700 kg/m3.
-_HS_CP, _HS_CS, _HS_RHO = 6320.0, 3130.0, 2700.0
+# test. Taken from the solver rather than copied, so the clip cannot end up
+# propagating a different aluminium from the one the library publishes.
+_HS_CP, _HS_CS, _HS_RHO = ALUMINIUM.c_p, ALUMINIUM.c_s, ALUMINIUM.rho
 # Mesh rule dx = min(smallest geometric dimension / 4, shortest wavelength
 # / 8). The block has no feature smaller than itself; the source is a
 # Gaussian of width 8 us, whose spectrum is 20 dB down at 60.4 kHz, and the
@@ -36,7 +39,7 @@ _HS_SRC_W = 8e-6  # Gaussian source width [s]
 # screen. That corner is the one place this solver is weak -- the page says
 # so -- because a sponge absorbs a grazing surface wave far less well than
 # a body wave. Here the Rayleigh train first reaches a sponge at 148 us of
-# the 163 us captured, 0.13 m outside the frame, and anything it sends back
+# the 164 us captured, 0.13 m outside the frame, and anything it sends back
 # would need another 45 us to re-enter the view.
 _HS_NY, _HS_NX = 450, 1100
 _HS_SPONGE = 120
@@ -83,12 +86,12 @@ def _halfspace_fields() -> tuple[Any, Any, Any, Any, Any, float]:
 
     Timeline per the animation norms. Flight: the farthest visible point is
     a bottom corner of the view at sqrt(0.30^2 + 0.30^2) = 0.424 m, reached
-    by the slowest body wave of interest (S at 3130 m/s) in 135 us, so
-    1.2 x 135 = 163 us is captured -- 2.2 times the 73 us of the still
+    by the slowest body wave of interest (S at 3098.7 m/s) in 137 us, so
+    1.2 x 137 = 164 us is captured -- 2.2 times the 73 us of the still
     figure, which stops before the surface train has separated. Sampling:
-    dt = 0.6 dx / (c_P sqrt(2)) = 67.13 ns, a stride of 5 gives a frame
-    every 0.336 us, i.e. 49.4 frames per period of the 60.4 kHz upper edge
-    of the source spectrum (>= the 48 the clips keep), and 484 frames.
+    dt = 0.6 dx / (c_P sqrt(2)) = 65.77 ns, a stride of 5 gives a frame
+    every 0.329 us, i.e. 50.3 frames per period of the 60.4 kHz upper edge
+    of the source spectrum (>= the 48 the clips keep), and 500 frames.
 
     Returns the two decimated ``vy`` stacks, the two surface-probe
     histories, the frame times and the Rayleigh speed measured off the free
@@ -164,9 +167,9 @@ def animate_elastic_halfspace_waves(output_dir: str) -> None:
     """Lamb's problem in motion, with and without a free surface.
 
     A vertical hit on the top of an aluminium half-space sends out three
-    waves: the compressional front at 6320 m/s, the shear front at
-    3130 m/s behind it, and -- only where the surface is free -- a Rayleigh
-    train that stays on the surface at 2921 m/s, the root of the exact
+    waves: the compressional front at 6450.5 m/s, the shear front at
+    3098.7 m/s behind it, and -- only where the surface is free -- a Rayleigh
+    train that stays on the surface at 2897.3 m/s, the root of the exact
     characteristic equation. The still figure this clip sits beside already
     measures the two body speeds, because its dotted arcs are drawn at the
     exact c_P t and c_S t radii; what one frame cannot show is the third

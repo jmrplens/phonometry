@@ -161,14 +161,18 @@ def test_reflection_coefficient_limiting_cases() -> None:
 
 
 def test_scholte_speed_matches_characteristic_roots() -> None:
-    # Roots of B&G Eq. 4.4.20 resolved independently (sign sweep + Brent
-    # on the transcribed characteristic, float64): water/steel 1479.6013,
-    # water/aluminium 1476.7649 and the van Vossen pair 1435.9734 m/s. The
-    # root always lies below both the fluid speed and the solid shear
+    # Roots of B&G Eq. 4.4.20 resolved independently (sign sweep plus
+    # bisection on a second transcription of the characteristic, float64):
+    # water/steel 1479.6020, water/aluminium 1476.7331 and the van Vossen
+    # pair 1435.9734 m/s. The first two moved by 0,0007 and 0,032 m/s when
+    # the two solids were re-sourced from the page that prints their
+    # modulus; the same sweep reproduces the earlier pair from the earlier
+    # speeds, which is what says the move is the input and not the solver.
+    # The root always lies below both the fluid speed and the solid shear
     # speed (a true interface wave, B&G Section 4.4.3).
     cases = [
-        (WATER, STEEL, 1479.6013),
-        (WATER, ALUMINIUM, 1476.7649),
+        (WATER, STEEL, 1479.6020),
+        (WATER, ALUMINIUM, 1476.7331),
         (VV_FLUID, VV_SOLID, 1435.9734),
     ]
     for fluid, solid, expected in cases:
@@ -435,7 +439,7 @@ def test_immersed_plate_transmission_and_thickness_resonance() -> None:
     band = (freqs >= 250e3) & (freqs <= 340e3)
     f_dip = float(freqs[band][np.argmin(tl[band])])
     f_resonance = STEEL.c_p / (2.0 * h)
-    assert f_resonance == 295e3
+    assert f_resonance == 297.9e3
     assert f_dip == pytest.approx(f_resonance, rel=0.03)
     assert float(np.min(tl[band])) == pytest.approx(0.0, abs=1.0)
 

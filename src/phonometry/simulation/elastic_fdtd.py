@@ -244,29 +244,43 @@ AIR = Material(c_p=343.0, c_s=0.0, rho=1.2)
 #: Fresh water at room temperature (fluid).
 WATER = Material(c_p=1480.0, c_s=0.0, rho=1000.0)
 
-# The three solids below carry representative **bulk** wave speeds, the
-# quantities this solver integrates: c_p from (lambda + 2 mu) / rho and c_s from
-# mu / rho, both in an unbounded medium. Each is consistent to a per cent or two
-# with the textbook Young's modulus, Poisson's ratio and density of its material,
-# and none is transcribed from a standard, which is why they are called nominal.
+# The three solids below carry **bulk** wave speeds, the quantities this solver
+# integrates: c_p from (lambda + 2 mu) / rho and c_s from mu / rho, both in an
+# unbounded medium. All three come from one page, Bies 5e Table C.1: the density
+# is what it prints, and the two speeds follow from the modulus and the Poisson
+# ratio printed beside that density, through the closed forms printed at the end
+# of the same table. So the citation covers the values and the arithmetic that
+# produced them, and no number here is a remembered one.
 #
-# They are demonstration defaults, not a sourced table. What a sourced table
-# would have to avoid is worth writing down, because the obvious candidate is
-# the wrong one: EN 12354-1 Table B.3 tabulates the quasi-longitudinal phase
-# velocity of a *plate*, sqrt(E / (rho (1 - nu^2))), which is a different
-# quantity from the bulk c_p, sqrt(E (1 - nu) / (rho (1 + nu) (1 - 2 nu))). For
-# steel the two are 5 291 and 5 856 m/s, an eleven per cent gap that grows to
-# fifteen for aluminium; the table also lists neither steel nor aluminium at
-# all. Reading c_L into c_p would put the wrong physics behind a citation.
+# They were nominal until that page was read, and their three densities were
+# already the ones it prints, which is what made these rows the right ones to
+# finish the job with. `test_each_material_is_the_row_it_cites` recomputes all
+# six speeds from the catalogue on every run, so a constant here cannot drift
+# away from the page it names.
+#
+# What the citation has to avoid is worth keeping written down, because the
+# obvious candidate is the wrong one: EN 12354-1 Table B.3 tabulates the
+# quasi-longitudinal phase velocity of a *plate*, sqrt(E / (rho (1 - nu^2))),
+# which is a different quantity from the bulk c_p,
+# sqrt(E (1 - nu) / (rho (1 + nu) (1 - 2 nu))). For steel the two are 5 291 and
+# 5 856 m/s, an eleven per cent gap that grows to fifteen for aluminium; the
+# table also lists neither steel nor aluminium at all. Reading c_L into c_p
+# would put the wrong physics behind a citation.
 
-#: Structural steel (nominal bulk wave speeds; see the note above).
-STEEL = Material(c_p=5900.0, c_s=3200.0, rho=7850.0)
+#: Structural steel, from Bies 5e Table C.1 row "Steel (mild)", PDF page 747
+#: (printed p. 718): rho = 7850 kg/m3 as printed, with the two speeds from the
+#: E = 207 GPa and nu = 0,30 printed beside it.
+STEEL = Material(c_p=5958.0, c_s=3184.7, rho=7850.0)
 
-#: Aluminium (nominal bulk wave speeds; see the note above).
-ALUMINIUM = Material(c_p=6320.0, c_s=3130.0, rho=2700.0)
+#: Aluminium, from Bies 5e Table C.1 row "Aluminum sheet", PDF page 747
+#: (printed p. 718): rho = 2700 kg/m3 as printed, with the two speeds from the
+#: E = 70 GPa and nu = 0,35 printed beside it.
+ALUMINIUM = Material(c_p=6450.5, c_s=3098.7, rho=2700.0)
 
-#: Dense concrete (nominal bulk wave speeds; see the note above).
-CONCRETE = Material(c_p=3800.0, c_s=2250.0, rho=2400.0)
+#: Dense concrete, from Bies 5e Table C.1 row "Concrete (high strength)", PDF
+#: page 748 (printed p. 719): rho = 2400 kg/m3 as printed, with the two speeds
+#: from the E = 30 GPa and nu = 0,20 printed beside it.
+CONCRETE = Material(c_p=3726.8, c_s=2282.2, rho=2400.0)
 
 
 def _as_material(name: str, value: object) -> Material:

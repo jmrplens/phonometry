@@ -42561,9 +42561,9 @@ documents, one page per module.
 | `ElasticBoundaries` | `dataclass` | **How the four edges of the elastic domain end.**<br>• `sides`: `"rigid"` (Default) \| `"absorbing"` \| `"free"` (stress-imaging surface) \| per-side mapping<br>• `absorbing_layer_cells` (Default: 20) | `ElasticBoundaries({'top': 'free'}, absorbing_layer_cells=40)` |
 | `ElasticFDTD2D` | `class` | **Elastic P-SV stepping engine (frame-by-frame access).**<br>• `c_p` / `c_s` [m/s] / `dx` [m] / `rho` [kg/m³] / `cfl` / `shape`<br>• `free_sides`: traction-free surfaces (stress imaging)<br>• `sponge_width` / `sponge_sides` / `sponge_reflection` / `damping` / `obstacle_mask` | `sim = simulation.ElasticFDTD2D(6320, 3130, 0.001, rho=2700, shape=(300, 600), free_sides='top')`<br>`sim.add_source(src); sim.step(); sim.run(400, record_every=10)`<br>• `sim.txx` / `sim.tyy` / `sim.txy` / `sim.vx` / `sim.vy` / `sim.p` / `sim.lam` / `sim.mu` / `sim.dt` / `sim.time` / `sim.energy()`<br>• `sim.collocated(field)`: one field interpolated to cell centres |
 | `ElasticFDTD2D.from_regions` | `classmethod` | **Layered/embedded set-ups from named materials (no manual maps).**<br>• `shape`: `(ny, nx)` / `dx` [m]<br>• `background`: `Material` or `(c_p, c_s, rho)` filling the grid<br>• `regions`: `(where, material)` pairs painted in order (`where`: boolean mask or numpy index)<br>• remaining kwargs forwarded to the constructor | `sim = ElasticFDTD2D.from_regions((300, 600), 0.001, background=WATER, regions=[(np.s_[150:, :], STEEL)])` |
-| `Material` | `dataclass` | **Isotropic medium as wave speeds and density (frozen).**<br>• `c_p` [m/s] / `c_s` [m/s] (`0` marks a fluid) / `rho` [kg/m³]<br>• `is_fluid`: `c_s == 0`<br>Must satisfy `c_p² ≥ 2 c_s²` (non-negative λ) | `Material(c_p=5900, c_s=3200, rho=7850)` |
+| `Material` | `dataclass` | **Isotropic medium as wave speeds and density (frozen).**<br>• `c_p` [m/s] / `c_s` [m/s] (`0` marks a fluid) / `rho` [kg/m³]<br>• `is_fluid`: `c_s == 0`<br>Must satisfy `c_p² ≥ 2 c_s²` (non-negative λ) | `Material(c_p=5958, c_s=3184.7, rho=7850)` |
 | `SIMULATION_AIR` | `Fluid` | **The air the acoustic solvers run in.**<br>343.0 m/s, 1.2 kg/m³, the `AIR` `Material` written as a fluid<br>• the `fluid` default of `far_field_from_contour`<br>• a `phonometry.fluids.Fluid`: pass a computed one, or a water, to transform out of the medium the run actually used | `simulation.SIMULATION_AIR.density  # 1.2` |
-| `AIR` / `WATER` / `STEEL` / `ALUMINIUM` / `CONCRETE` | `Material` | **Named media with the nominal properties of the docs and tests.**<br>air 343/0/1.2, water 1480/0/1000, steel 5900/3200/7850, aluminium 6320/3130/2700, concrete 3800/2250/2400 (c_p/c_s/ρ) | `ElasticFDTD2D.from_regions((240, 480), 0.005, background=WATER, regions=[(np.s_[120:, :], STEEL)])` |
+| `AIR` / `WATER` / `STEEL` / `ALUMINIUM` / `CONCRETE` | `Material` | **Named media, the three solids read off Bies 5e Table C.1.**<br>air 343/0/1.2, water 1480/0/1000, steel 5958/3184.7/7850, aluminium 6450.5/3098.7/2700, concrete 3726.8/2282.2/2400 (c_p/c_s/ρ)<br>• each solid's density is printed and its two speeds follow from the modulus and Poisson ratio beside it | `ElasticFDTD2D.from_regions((240, 480), 0.005, background=WATER, regions=[(np.s_[120:, :], STEEL)])` |
 | `scholte_speed` | `function` | **Exact Scholte interface-wave speed of a fluid over an elastic half-space.**<br>• `fluid`: `Material` with `c_s = 0` (or triple)<br>• `solid`: `Material` with `c_s > 0`<br>Root of the exact characteristic equation (Brekhovskikh & Godin Eq. 4.4.20); non-dispersive, below both the fluid speed and the solid shear speed | `scholte_speed(WATER, STEEL)  # 1479.6`<br><br>• v [m/s] |
 | `ExplosionSource` | `dataclass` | **Isotropic (explosive) stress source for the elastic solver.**<br>• `ix` / `iy`: source cell<br>• `waveform`: callable t → injected pressure [Pa] (reuse a point source's `.value`)<br>• `amplitude` (Default: 1.0)<br>Pressure-like sign: equal `-s(t)` increments on both normal stresses | `ExplosionSource(ix=250, iy=250, waveform=simulation.GaussianPulse(0, 0, half_width_s=8e-6).value)` |
 | `ForceSource` | `dataclass` | **Directional body-force source for the elastic solver.**<br>• `ix` / `iy`: staggered velocity node<br>• `direction`: `'x'` \| `'y'`<br>• `waveform`: callable t → line force [N/m] / `amplitude`<br>A vertical force under a free surface reproduces Lamb's problem | `ForceSource(ix=300, iy=0, direction='y', amplitude=1e6, waveform=simulation.GaussianPulse(0, 0, half_width_s=8e-6).value)` |
@@ -55369,12 +55369,14 @@ in water at 1480 m/s over a 2000 m/s-shear sediment).
 ```python
 import numpy as np
 from phonometry import simulation
+from phonometry.simulation import ALUMINIUM
 
 # An aluminium block hit by a tiny explosion: the P front reaches two
 # probes 100 and 220 cells away; c_P falls out of the differential delay.
 w = 8e-6
 res = simulation.elastic_fdtd_simulation(
-    6320.0, 3130.0, 0.002, 1.1e-4, rho=2700.0, shape=(501, 501),
+    ALUMINIUM.c_p, ALUMINIUM.c_s, 0.002, 1.1e-4, rho=ALUMINIUM.rho,
+    shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
         waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
@@ -55383,7 +55385,7 @@ res = simulation.elastic_fdtd_simulation(
 )
 t = res.times[1:]
 t1, t2 = (t[np.abs(res.signals[k, 0, 1:]).argmax()] for k in range(2))
-print(round(0.24 / (t2 - t1)))    # 6316  c_P = sqrt((lambda+2mu)/rho) = 6320
+print(round(0.24 / (t2 - t1)))    # 6424  c_P = sqrt((lambda+2mu)/rho) = 6450.5
 ```
 
 ## 2. Fluids inside the elastic solver
@@ -55435,10 +55437,11 @@ from phonometry import simulation
 
 # A 0.6 x 0.3 m aluminium block, struck vertically at its free surface.
 dx, w = 0.001, 8e-6
-dt = 0.6 * dx / (6320.0 * np.sqrt(2.0))
+dt = 0.6 * dx / (ALUMINIUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
 res = simulation.elastic_fdtd_simulation(
-    6320.0, 3130.0, dx, 7.3e-5, rho=2700.0, shape=(300, 600),
+    ALUMINIUM.c_p, ALUMINIUM.c_s, dx, 7.3e-5, rho=ALUMINIUM.rho,
+    shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
         waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],

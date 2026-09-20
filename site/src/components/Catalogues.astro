@@ -49,11 +49,17 @@ interface Props {
 }
 const { catalogue: section, lang = 'en' } = Astro.props;
 
+// The three search placeholders are the same in both languages on purpose, and
+// translating them would break the filter. It matches what the row carries,
+// which is the material name as its book prints it, and every book behind these
+// tables prints English. "hierba" and "metano" found nothing; "grass" and
+// "methane" find eleven rows and one. The rest of this object is prose and is
+// translated as prose.
 const copy = {
 	en: {
 		search: 'Filter by material',
 		searchGas: 'Filter by gas',
-		searchPlaceholder: 'steel, foam, air',
+		searchPlaceholder: 'steel, foam, glass',
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
 		table: 'Published table',
@@ -83,9 +89,9 @@ const copy = {
 	es: {
 		search: 'Filtrar por material',
 		searchGas: 'Filtrar por gas',
-		searchPlaceholder: 'acero, espuma, aire',
-		groundPlaceholder: 'hierba, nieve, asfalto',
-		gasPlaceholder: 'metano, argón, vapor',
+		searchPlaceholder: 'steel, foam, glass',
+		groundPlaceholder: 'grass, snow, asphalt',
+		gasPlaceholder: 'methane, argon, steam',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',

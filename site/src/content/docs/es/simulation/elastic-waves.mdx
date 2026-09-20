@@ -131,7 +131,7 @@ Esos dos extremos son lo que cuesta un dominio de contraste alto. Δx lo fija
 el medio más lento y Δt el más rápido, así que el número de pasos que hacen
 falta para cubrir un tiempo físico dado crece con la *razón* entre las dos
 velocidades: un dominio de agua sobre acero resuelto para la longitud de
-onda del agua sigue teniendo que avanzar a los 5900 m/s del acero,
+onda del agua sigue teniendo que avanzar a los 5958 m/s del acero,
 aproximadamente cuatro veces más pasos que ese mismo dominio lleno solo de
 agua. Las regiones lentas trabajan entonces a un número de Courant local
 mucho menor, donde el error de dispersión del esquema está más cerca de su
@@ -145,12 +145,14 @@ mucho más barato que mallar los dos.
 ```python
 import numpy as np
 from phonometry import simulation
+from phonometry.simulation import ALUMINIUM
 
 # Un bloque de aluminio golpeado por una pequeña explosión: el frente P
 # alcanza dos sondas a 100 y 220 celdas; c_P sale del retardo diferencial.
 w = 8e-6
 res = simulation.elastic_fdtd_simulation(
-    6320.0, 3130.0, 0.002, 1.1e-4, rho=2700.0, shape=(501, 501),
+    ALUMINIUM.c_p, ALUMINIUM.c_s, 0.002, 1.1e-4, rho=ALUMINIUM.rho,
+    shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
         waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
@@ -159,7 +161,7 @@ res = simulation.elastic_fdtd_simulation(
 )
 t = res.times[1:]
 t1, t2 = (t[np.abs(res.signals[k, 0, 1:]).argmax()] for k in range(2))
-print(round(0.24 / (t2 - t1)))    # 6316  c_P = sqrt((lambda+2mu)/rho) = 6320
+print(round(0.24 / (t2 - t1)))    # 6424  c_P = sqrt((lambda+2mu)/rho) = 6450.5
 ```
 
 ## 2. Fluidos dentro del esquema elástico
@@ -277,10 +279,11 @@ from phonometry import simulation
 
 # Un bloque de aluminio de 0,6 x 0,3 m, golpeado en su superficie libre.
 dx, w = 0.001, 8e-6
-dt = 0.6 * dx / (6320.0 * np.sqrt(2.0))
+dt = 0.6 * dx / (ALUMINIUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
 res = simulation.elastic_fdtd_simulation(
-    6320.0, 3130.0, dx, 7.3e-5, rho=2700.0, shape=(300, 600),
+    ALUMINIUM.c_p, ALUMINIUM.c_s, dx, 7.3e-5, rho=ALUMINIUM.rho,
+    shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
         waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
@@ -380,14 +383,18 @@ número de esta página:
 |---|---|---|---|
 | `AIR` | 343 | 0 | 1,2 |
 | `WATER` | 1480 | 0 | 1000 |
-| `CONCRETE` | 3800 | 2250 | 2400 |
-| `STEEL` | 5900 | 3200 | 7850 |
-| `ALUMINIUM` | 6320 | 3130 | 2700 |
+| `CONCRETE` | 3726,8 | 2282,2 | 2400 |
+| `STEEL` | 5958 | 3184,7 | 7850 |
+| `ALUMINIUM` | 6450,5 | 3098,7 | 2700 |
 
-Son cifras redondas nominales, para documentación y validación, no datos
-certificados, así que una probeta real hay que introducirla a mano: por eso
-la sección 1 escribe los 6320 / 3130 / 2700 del bloque de aluminio en vez de
-importar `ALUMINIUM`. El constructor impone una sola cota,
+Cada uno sale de una página, la Tabla C.1 de Bies 5e: la densidad es la que
+imprime y las dos velocidades se siguen del módulo y del coeficiente de
+Poisson que imprime al lado, por las formas cerradas que la propia tabla
+imprime al final. Son valores representativos para documentación y
+validación, que es lo que el libro dice de ellos, no datos certificados, así
+que una probeta real hay que seguir introduciéndola a mano. La sección 1
+importa `ALUMINIUM` en vez de escribir sus números, porque una copia aquí
+quedaría libre de alejarse de la página. El constructor impone una sola cota,
 $c_\mathrm{P}^2 \ge 2\,c_\mathrm{S}^2$, que es la afirmación de que el primer parámetro de
 Lamé no es negativo o, equivalentemente, de que el coeficiente de Poisson no
 es negativo. Un trío rechazado suele significar una velocidad de cizalla

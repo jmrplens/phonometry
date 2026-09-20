@@ -188,6 +188,27 @@ SOURCED: dict[tuple[str, str], str] = {
         "PUBLISHED_FLUIDS",
     ): "Bies 5e Table C.1, the three fluids it prints before its solids",
     (
+        "simulation/elastic_fdtd.py",
+        "ALUMINIUM",
+    ): (
+        "Bies 5e Table C.1, the density of its aluminium sheet and the two "
+        "bulk speeds its modulus and Poisson ratio give"
+    ),
+    (
+        "simulation/elastic_fdtd.py",
+        "CONCRETE",
+    ): (
+        "Bies 5e Table C.1, the density of its high-strength concrete and the "
+        "two bulk speeds its modulus and Poisson ratio give"
+    ),
+    (
+        "simulation/elastic_fdtd.py",
+        "STEEL",
+    ): (
+        "Bies 5e Table C.1, the density of its mild steel and the two bulk "
+        "speeds its modulus and Poisson ratio give"
+    ),
+    (
         "fluids/catalogue.py",
         "PUBLISHED_GASES",
     ): (

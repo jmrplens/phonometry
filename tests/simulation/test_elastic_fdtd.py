@@ -17,6 +17,7 @@ and the exact (bit-for-bit) reduction to the acoustic solver when
 
 from __future__ import annotations
 
+import math
 from dataclasses import replace
 
 import matplotlib as mpl
@@ -39,9 +40,11 @@ from phonometry.simulation.elastic_fdtd import (
     ElasticRecording,
     ExplosionSource,
     ForceSource,
+    Material,
     elastic_fdtd_simulation,
 )
 from phonometry.simulation.fdtd import FDTD2D, GaussianPulse
+from phonometry.solids import PUBLISHED_SOLIDS
 
 # Aluminium (Rayleigh / body waves), steel (plate) and water (fluid).
 CP_AL, CS_AL, RHO_AL = 6320.0, 3130.0, 2700.0
@@ -60,38 +63,65 @@ WATER_FLUID = Fluid(
 )
 
 
-def test_the_nominal_solids_are_bulk_speeds_not_plate_speeds() -> None:
-    """The three defaults follow the bulk speeds, not the plate ones.
+#: Each solver material and the catalogue row its banner cites.
+CITED_ROWS = (
+    (STEEL, "bies-2017-table-c1/steel_mild"),
+    (ALUMINIUM, "bies-2017-table-c1/aluminum_sheet"),
+    (CONCRETE, "bies-2017-table-c1/concrete_high_strength"),
+)
 
-    Their comment says so, and the claim is worth a test because the obvious
-    source for a citation would contradict it: EN 12354-1 Table B.3 tabulates
-    the quasi-longitudinal phase velocity of a plate, which is a different
-    quantity and is roughly a tenth lower. Anyone re-sourcing these constants
-    from that table would change the physics the solver integrates while
-    appearing to add provenance.
+
+def _plate(e: float, nu: float, rho: float) -> float:
+    """Quasi-longitudinal phase velocity along a plate."""
+    return math.sqrt(e / (rho * (1.0 - nu**2)))
+
+
+def _bulk(e: float, nu: float, rho: float) -> float:
+    """Dilatational wave speed in an unbounded medium."""
+    return math.sqrt(e * (1.0 - nu) / (rho * (1.0 + nu) * (1.0 - 2.0 * nu)))
+
+
+def _shear(e: float, nu: float, rho: float) -> float:
+    """Shear wave speed in an unbounded medium."""
+    return math.sqrt(e / (2.0 * rho * (1.0 + nu)))
+
+
+@pytest.mark.parametrize(("material", "key"), CITED_ROWS, ids=lambda x: str(x)[:24])
+def test_each_material_is_the_row_it_cites(material: Material, key: str) -> None:
+    """The constants are the page, recomputed, and not a remembered number.
+
+    Each banner names a row of Bies 5e Table C.1 and says the density is
+    printed there while the two speeds follow from the modulus and the Poisson
+    ratio beside it. This is that sentence, executed: the density has to match
+    the row, and both speeds have to come back from the closed forms the same
+    page prints at the end of the table. A constant edited by hand, or a row
+    re-read differently, fails here rather than drifting quietly.
     """
-    import math
+    row = PUBLISHED_SOLIDS[key]
+    e = row.printed("youngs_modulus_pa", wanted_by="this test")
+    nu = row.printed("poisson_ratio", wanted_by="this test")
+    rho = row.printed("density_kg_m3", wanted_by="this test")
+    assert material.rho == rho
+    assert material.c_p == pytest.approx(_bulk(e, nu, rho), abs=0.05)
+    assert material.c_s == pytest.approx(_shear(e, nu, rho), abs=0.05)
 
-    def plate(e: float, nu: float, rho: float) -> float:
-        return math.sqrt(e / (rho * (1.0 - nu**2)))
 
-    def bulk(e: float, nu: float, rho: float) -> float:
-        return math.sqrt(e * (1.0 - nu) / (rho * (1.0 + nu) * (1.0 - 2.0 * nu)))
+@pytest.mark.parametrize(("material", "key"), CITED_ROWS, ids=lambda x: str(x)[:24])
+def test_the_cited_solids_are_bulk_speeds_not_plate_speeds(
+    material: Material, key: str
+) -> None:
+    """And the citation is to the right quantity, which is the whole risk.
 
-    def shear(e: float, nu: float, rho: float) -> float:
-        return math.sqrt(e / (2.0 * rho * (1.0 + nu)))
-
-    # Textbook Young's modulus and Poisson's ratio for each material.
-    for material, youngs, poisson in (
-        (STEEL, 200.0e9, 0.30),
-        (ALUMINIUM, 70.0e9, 0.33),
-        (CONCRETE, 30.0e9, 0.20),
-    ):
-        rho = material.rho
-        assert material.c_p == pytest.approx(bulk(youngs, poisson, rho), rel=0.03)
-        assert material.c_s == pytest.approx(shear(youngs, poisson, rho), rel=0.03)
-        # And distinctly not the plate speed: the gap is the point.
-        assert material.c_p > plate(youngs, poisson, rho)
+    The obvious source for a citation would contradict the physics: EN 12354-1
+    Table B.3 tabulates the quasi-longitudinal phase velocity of a plate, a
+    different quantity roughly a tenth lower. Anyone re-sourcing these
+    constants from that table would change what the solver integrates while
+    appearing to add provenance, so the gap is asserted rather than assumed.
+    """
+    row = PUBLISHED_SOLIDS[key]
+    e = row.printed("youngs_modulus_pa", wanted_by="this test")
+    nu = row.printed("poisson_ratio", wanted_by="this test")
+    assert material.c_p > _plate(e, nu, material.rho)
 
 
 def _rayleigh_speed(c_p: float, c_s: float) -> float:

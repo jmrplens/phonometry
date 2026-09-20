@@ -124,7 +124,7 @@ Those two ends are what a high-contrast domain costs. Δx is fixed by the
 slowest medium and Δt by the fastest, so the number of steps needed to cover
 a given physical time grows with the *ratio* of the two speeds: a
 water-over-steel domain resolved for the water wavelength still has to step
-at the steel's 5900 m/s, roughly four times more steps than the same domain
+at the steel's 5958 m/s, roughly four times more steps than the same domain
 filled with water alone. The slow regions then run at a much lower local
 Courant number, where the dispersion error of the scheme is nearest its
 worst-case bound, so their effective resolution is poorer than the cell
@@ -136,12 +136,14 @@ or a sponge) is usually far cheaper than meshing both.
 ```python
 import numpy as np
 from phonometry import simulation
+from phonometry.simulation import ALUMINIUM
 
 # An aluminium block hit by a tiny explosion: the P front reaches two
 # probes 100 and 220 cells away; c_P falls out of the differential delay.
 w = 8e-6
 res = simulation.elastic_fdtd_simulation(
-    6320.0, 3130.0, 0.002, 1.1e-4, rho=2700.0, shape=(501, 501),
+    ALUMINIUM.c_p, ALUMINIUM.c_s, 0.002, 1.1e-4, rho=ALUMINIUM.rho,
+    shape=(501, 501),
     sources=[simulation.ExplosionSource(
         ix=250, iy=250,
         waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
@@ -150,7 +152,7 @@ res = simulation.elastic_fdtd_simulation(
 )
 t = res.times[1:]
 t1, t2 = (t[np.abs(res.signals[k, 0, 1:]).argmax()] for k in range(2))
-print(round(0.24 / (t2 - t1)))    # 6316  c_P = sqrt((lambda+2mu)/rho) = 6320
+print(round(0.24 / (t2 - t1)))    # 6424  c_P = sqrt((lambda+2mu)/rho) = 6450.5
 ```
 
 ## 2. Fluids inside the elastic solver
@@ -255,10 +257,11 @@ from phonometry import simulation
 
 # A 0.6 x 0.3 m aluminium block, struck vertically at its free surface.
 dx, w = 0.001, 8e-6
-dt = 0.6 * dx / (6320.0 * np.sqrt(2.0))
+dt = 0.6 * dx / (ALUMINIUM.c_p * np.sqrt(2.0))
 steps = round(7.3e-5 / dt)
 res = simulation.elastic_fdtd_simulation(
-    6320.0, 3130.0, dx, 7.3e-5, rho=2700.0, shape=(300, 600),
+    ALUMINIUM.c_p, ALUMINIUM.c_s, dx, 7.3e-5, rho=ALUMINIUM.rho,
+    shape=(300, 600),
     sources=[simulation.ForceSource(
         ix=300, iy=0, direction="y", amplitude=1e6,
         waveform=simulation.GaussianPulse(0, 0, half_width_s=w).value)],
@@ -350,14 +353,18 @@ constants ship, and every number elsewhere on this page comes out of them:
 |---|---|---|---|
 | `AIR` | 343 | 0 | 1.2 |
 | `WATER` | 1480 | 0 | 1000 |
-| `CONCRETE` | 3800 | 2250 | 2400 |
-| `STEEL` | 5900 | 3200 | 7850 |
-| `ALUMINIUM` | 6320 | 3130 | 2700 |
+| `CONCRETE` | 3726.8 | 2282.2 | 2400 |
+| `STEEL` | 5958 | 3184.7 | 7850 |
+| `ALUMINIUM` | 6450.5 | 3098.7 | 2700 |
 
-They are nominal round figures for documentation and validation, not
-certified data, so a real specimen should be entered by hand. This is why
-section 1 writes the aluminium block's 6320 / 3130 / 2700 out rather than
-importing `ALUMINIUM`. The constructor enforces one bound,
+Each comes off one page, Bies 5e Table C.1: the density is what it prints
+and the two speeds follow from the modulus and the Poisson ratio printed
+beside it, through the closed forms the same table prints at its end. They
+are representative values for documentation and validation, which the book
+itself says of them, not certified data, so a real specimen should still be
+entered by hand. Section 1 imports `ALUMINIUM` rather than writing its
+numbers out, because a copy of them here would be free to drift away from
+the page. The constructor enforces one bound,
 $c_\mathrm{P}^2 \ge 2\,c_\mathrm{S}^2$: that is the statement that the first Lamé parameter is
 non-negative, equivalently that Poisson's ratio is not negative. A rejected
 triple usually means a shear speed entered too high, or a compressional

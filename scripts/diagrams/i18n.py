@@ -3256,7 +3256,7 @@ _ES: dict[str, str] = {
     "0.12 m up": "0,12 m por encima",
     "shot, 10 m up": "disparo, 10 m arriba",
     "water 1480": "agua 1480",
-    "steel 5900 / 3200": "acero 5900 / 3200",
+    "steel 5958 / 3185": "acero 5958 / 3185",
     "water 1500": "agua 1500",
     "sediment 3500 / 2000": "sedimento 3500 / 2000",
     "evanescent both sides": "evanescente a ambos lados",

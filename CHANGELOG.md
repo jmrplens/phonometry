@@ -7,7 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Rendering a clip with a registered field builder failed outright.**
+  `scripts/figures/registry.py` renders the four language and theme variants
+  of such a clip in forked children, and it was passing the `dark` flag
+  positionally to a function that takes it keyword-only, the way every boolean
+  in this repository is taken. Every child raised `TypeError` inside
+  `multiprocessing`, the parent reported "4 variant(s) failed" with four exit
+  codes and no reason, and the clip left on disk was the one already there.
+  The other branch, one variant after another in this process, was correct and
+  is what everything else uses, which is why nothing had noticed.
+  `tests/test_animation_variant_dispatch.py` now runs both branches over a
+  stubbed clip, so the two cannot disagree again without saying so in a second
+  rather than after a several-minute simulation.
+
 ### Added
+
+- **The solver's three solids come off a page now, and the numbers moved.**
+  `simulation.STEEL`, `ALUMINIUM` and `CONCRETE` called themselves nominal and
+  cited nothing. Each is now one row of Bies 5e Table C.1: the density is what
+  the page prints, which is what it already was, and the two bulk speeds
+  follow from the modulus and the Poisson ratio printed beside it through the
+  closed forms the same table prints at its end. Steel goes from 5900 to 5958
+  m/s and from 3200 to 3184,7; aluminium from 6320 to 6450,5 and from 3130 to
+  3098,7; concrete from 3800 to 3726,8 and from 2250 to 2282,2. Nothing in the
+  library depends on these except the demonstrations that name them, but a
+  script that used one gets a number between half a per cent and two per cent
+  away from the old one. `test_each_material_is_the_row_it_cites` recomputes
+  all six speeds from the catalogue on every run, so they cannot drift again,
+  and the figure and clip scenes that used to carry a second copy of steel and
+  aluminium now read the constants instead.
 
 - **Thirty-seven gases and six, from two books, with the two numbers that
   close a state.** `fluids.PUBLISHED_GASES` holds the molar mass and the ratio

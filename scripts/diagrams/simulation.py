@@ -386,7 +386,7 @@ def _d_elastic_fluid_solid(s: SVG, th: Theme) -> None:
     # --- (a) normal incidence ---------------------------------------------
     ax = 180.0
     s.text(48, top + 18, "water 1480", 11, th.muted, "start")
-    s.text(48, y_if + 20, "steel 5900 / 3200", 11, th.muted, "start")
+    s.text(48, y_if + 20, "steel 5958 / 3185", 11, th.muted, "start")
     s.arrow(ax - 26, top + 30, ax - 26, y_if - 8, th.fg, 2.2)
     s.arrow(ax + 26, y_if - 8, ax + 26, top + 30, th.accent, 2.2)
     s.text(ax - 34, top + 74, "incident", 12, th.fg, "end")

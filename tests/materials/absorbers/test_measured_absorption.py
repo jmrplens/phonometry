@@ -424,10 +424,12 @@ def test_the_two_books_agree_about_a_finish_except_where_they_do_not(
     left = PUBLISHED_ABSORPTION[f"{BIES}/{bies}"].spectrum()
     right = PUBLISHED_ABSORPTION[f"{LONG}/{long}"].spectrum()
     for band in sorted(set(left) & set(right)):
-        if band in apart:
-            assert (left[band], right[band]) == apart[band]
-        else:
+        if band not in apart:
             assert left[band] == right[band], f"{band} Hz: {left[band]}, {right[band]}"
+            continue
+        in_bies, in_long = apart[band]
+        assert left[band] == in_bies
+        assert right[band] == in_long
 
 
 def test_the_pair_that_differs_most_is_the_carpet_at_one_kilohertz() -> None:

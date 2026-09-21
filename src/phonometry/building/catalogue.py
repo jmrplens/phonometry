@@ -14,9 +14,10 @@ The mass law gives a straight line. A real partition departs from it at the
 critical frequency, at the mass-air-mass resonance of a double leaf and
 wherever a stud shorts the two leaves together, and the size of those
 departures is what a table like this shows and no formula in the book
-reproduces. Two rows of the same brick wall with different wall ties differ by
-20 dB at 2 kHz, which is the whole argument for resilient connections, and it
-is in the table rather than in the theory.
+reproduces. Two rows of the same brick wall, same mass and same thickness,
+differ by 15 dB at 500 Hz and by 9 at 4 kHz because one is tied with strips
+and the other with expanded metal, which is the whole argument for resilient
+connections and is in the table rather than in the theory.
 
 What the row carries
 --------------------

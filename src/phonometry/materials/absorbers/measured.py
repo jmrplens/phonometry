@@ -226,6 +226,7 @@ _TABLES = (
     "long-2014-table-7-1",
     "cox-2017-appendix-a",
     "arau-1999-table-6-1",
+    "everest-2001-appendix",
 )
 
 #: A square foot in square metres, exact since the 1959 definition of the

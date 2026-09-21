@@ -1,0 +1,598 @@
+{
+  "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+  "about": "The forty-one rows of the appendix \"SELECTED ABSORPTION COEFFICIENTS\", printed over three pages in three bold groups: porous type, miscellaneous building materials and resonant absorbers, the last of which straddles a page break and has its heading printed twice. Columns as printed: \"Material\", then \"125 Hz\", \"250 Hz\", \"500 Hz\", \"1 kHz\", \"2 kHz\", \"4 kHz\" with the unit on every column, and \"Reference (Chapter)\". That last column is the credit, printed as a name and the number of that source in a chapter's reference list, \"Mankovsky, ref 9-4\", and the row holds it exactly as printed; the appendix never explains the form and this catalogue does not expand it. Thirty-nine rows carry one; the two acoustical tiles carry an em dash instead, and nothing on the page says what the dash means, so those two rows carry no credit. Eleven rows of the printed table carry no numbers: seven are a label whose variants follow underneath, a drape, a perforated panel or an airspace, and four are underlined sub-headings. Their text is the name of the rows under them and the printed row is the variant, because \"draped to 1/2 area\" appears three times on one page under three different drapes and \"Perf: 0.18%\" twice under two different panels. A trailing colon on such a heading is dropped, as it is on the other tables of this catalogue. The appendix has no prose, no note and no footnote: no units statement, no mounting convention, no measurement standard, and no definition of the \"ave\" in the two acoustical tile rows. One coefficient is above 1, the 1.09 at 250 Hz of the wideband perforated panel. The page prints three decimals in three cells where the rest of the table prints two, and one decimal in a run of rows credited to Mankovsky. Two rows print the same construction with different punctuation, \"Plaster, gypsum or lime\" and \"Plaster: gypsum or lime\", and one prints \"Perf:. 8.7%\" with both marks; all are kept as printed. The descriptive row of the wideband panel prints \"9-10 16 cu ft/lb density\" where the parallel row below it prints \"9-10 lb/cu ft density\": the stray 16 and the inverted unit are the page's, and are kept.",
+  "rows": [
+    {
+      "key": "drapes_cotton_14_oz_sq_yd_draped_to_7_8_area",
+      "name": "Drapes: cotton 14 oz/sq yd",
+      "variant": "draped to 7/8 area",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.15,
+      "absorption_coefficient_1000": 0.27,
+      "absorption_coefficient_2000": 0.37,
+      "absorption_coefficient_4000": 0.42,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "drapes_cotton_14_oz_sq_yd_draped_to_3_4_area",
+      "name": "Drapes: cotton 14 oz/sq yd",
+      "variant": "draped to 3/4 area",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.23,
+      "absorption_coefficient_500": 0.4,
+      "absorption_coefficient_1000": 0.57,
+      "absorption_coefficient_2000": 0.53,
+      "absorption_coefficient_4000": 0.4,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "drapes_cotton_14_oz_sq_yd_draped_to_1_2_area",
+      "name": "Drapes: cotton 14 oz/sq yd",
+      "variant": "draped to 1/2 area",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.37,
+      "absorption_coefficient_500": 0.49,
+      "absorption_coefficient_1000": 0.81,
+      "absorption_coefficient_2000": 0.65,
+      "absorption_coefficient_4000": 0.54,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "drapes_medium_velour_14_oz_sq_yd_draped_to_1_2_area",
+      "name": "Drapes: medium velour, 14 oz/sq yd",
+      "variant": "draped to 1/2 area",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.31,
+      "absorption_coefficient_500": 0.49,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.6,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "drapes_heavy_velour_18_oz_sq_yd_draped_to_1_2_area",
+      "name": "Drapes: heavy velour, 18 oz/sq yd",
+      "variant": "draped to 1/2 area",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.35,
+      "absorption_coefficient_500": 0.55,
+      "absorption_coefficient_1000": 0.72,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "carpet_heavy_on_concrete",
+      "name": "Carpet: heavy on concrete",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.14,
+      "absorption_coefficient_1000": 0.37,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "carpet_heavy_on_40_oz_hair_felt",
+      "name": "Carpet: heavy on 40 oz hair felt",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.24,
+      "absorption_coefficient_500": 0.57,
+      "absorption_coefficient_1000": 0.69,
+      "absorption_coefficient_2000": 0.71,
+      "absorption_coefficient_4000": 0.73,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "carpet_heavy_with_latex_backing_on_foam_or_40_oz_hai",
+      "name": "Carpet: heavy with latex backing on foam or 40 oz hair felt",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.27,
+      "absorption_coefficient_500": 0.39,
+      "absorption_coefficient_1000": 0.34,
+      "absorption_coefficient_2000": 0.48,
+      "absorption_coefficient_4000": 0.63,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "carpet_indoor_outdoor",
+      "name": "Carpet: indoor/ outdoor",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.2,
+      "absorption_coefficient_2000": 0.45,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Seikman, ref 9-17"
+      }
+    },
+    {
+      "key": "acoustical_tile_ave_1_2in_thick",
+      "name": "Acoustical tile, ave, 1/2” thick",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.21,
+      "absorption_coefficient_500": 0.66,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.62,
+      "absorption_coefficient_4000": 0.49
+    },
+    {
+      "key": "acoustical_tile_ave_3_4in_thick",
+      "name": "Acoustical tile, ave, 3/4” thick",
+      "group": "POROUS TYPE",
+      "absorption_coefficient_125": 0.09,
+      "absorption_coefficient_250": 0.28,
+      "absorption_coefficient_500": 0.78,
+      "absorption_coefficient_1000": 0.84,
+      "absorption_coefficient_2000": 0.73,
+      "absorption_coefficient_4000": 0.64
+    },
+    {
+      "key": "concrete_block_coarse",
+      "name": "Concrete block, coarse",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.36,
+      "absorption_coefficient_250": 0.44,
+      "absorption_coefficient_500": 0.31,
+      "absorption_coefficient_1000": 0.29,
+      "absorption_coefficient_2000": 0.39,
+      "absorption_coefficient_4000": 0.25,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "concrete_block_painted",
+      "name": "Concrete block, painted",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.09,
+      "absorption_coefficient_4000": 0.08,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "concrete_floor",
+      "name": "Concrete floor",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.015,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "floor_linoleum_asphalt_tile_or_cork_tile_on_concrete",
+      "name": "Floor: linoleum, Asphalt-tile, or cork tile on concrete",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "floor_wood",
+      "name": "Floor: wood",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.11,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.06,
+      "absorption_coefficient_4000": 0.07,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "glass_large_panes_heavy_glass",
+      "name": "Glass: large panes, heavy glass",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.18,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "glass_ordinary_window",
+      "name": "Glass, ordinary window",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.18,
+      "absorption_coefficient_1000": 0.12,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.04,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "drop_ceiling_owens_corning_frescor_painted_5",
+      "name": "Drop Ceiling",
+      "variant": "Owens-Corning Frescor, painted, 5/8” thick, Mounting 7",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.69,
+      "absorption_coefficient_250": 0.86,
+      "absorption_coefficient_500": 0.68,
+      "absorption_coefficient_1000": 0.87,
+      "absorption_coefficient_2000": 0.9,
+      "absorption_coefficient_4000": 0.81,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "plaster_gypsum_or_lime_smooth_finish_on_tile_or_bric",
+      "name": "Plaster, gypsum or lime, smooth finish on tile or brick",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.013,
+      "absorption_coefficient_250": 0.015,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "plaster_gypsum_or_lime_smooth_finish_on_lath",
+      "name": "Plaster: gypsum or lime, smooth finish on lath",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.03,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "gypsum_board_1_2in_on_2_x_4s_16in_on_centers",
+      "name": "Gypsum board: 1/2” on 2 x 4s, 16” on centers",
+      "group": "MISC. BUILDING MATERIALS",
+      "absorption_coefficient_125": 0.29,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.09,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "plywood_panel_3_8in_thick",
+      "name": "Plywood panel: 3/8” thick",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.28,
+      "absorption_coefficient_250": 0.22,
+      "absorption_coefficient_500": 0.17,
+      "absorption_coefficient_1000": 0.09,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.11,
+      "attributed_to": {
+        "row": "Compendium, ref 9-1"
+      }
+    },
+    {
+      "key": "polycylindrical_chord_45in_height_16in_empty",
+      "name": "Polycylindrical",
+      "variant": "chord 45” height 16” empty",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.41,
+      "absorption_coefficient_250": 0.4,
+      "absorption_coefficient_500": 0.33,
+      "absorption_coefficient_1000": 0.25,
+      "absorption_coefficient_2000": 0.2,
+      "absorption_coefficient_4000": 0.22,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "polycylindrical_chord_35in_height_12in_empty",
+      "name": "Polycylindrical",
+      "variant": "chord 35” height 12” empty",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.37,
+      "absorption_coefficient_250": 0.35,
+      "absorption_coefficient_500": 0.32,
+      "absorption_coefficient_1000": 0.28,
+      "absorption_coefficient_2000": 0.22,
+      "absorption_coefficient_4000": 0.22,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "polycylindrical_chord_28in_height_10inempty",
+      "name": "Polycylindrical",
+      "variant": "chord 28” height 10”empty",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.32,
+      "absorption_coefficient_250": 0.35,
+      "absorption_coefficient_500": 0.3,
+      "absorption_coefficient_1000": 0.25,
+      "absorption_coefficient_2000": 0.2,
+      "absorption_coefficient_4000": 0.23,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "polycylindrical_chord_28in_height_10in_filled",
+      "name": "Polycylindrical",
+      "variant": "chord 28” height 10” filled",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.5,
+      "absorption_coefficient_500": 0.38,
+      "absorption_coefficient_1000": 0.3,
+      "absorption_coefficient_2000": 0.22,
+      "absorption_coefficient_4000": 0.18,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "polycylindrical_continued_chord_20in_height_8in_empty",
+      "name": "Polycylindrical (Continued)",
+      "variant": "chord 20” height 8” empty",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.25,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.33,
+      "absorption_coefficient_1000": 0.22,
+      "absorption_coefficient_2000": 0.2,
+      "absorption_coefficient_4000": 0.21,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "polycylindrical_continued_chord_20in_height_8in_filled",
+      "name": "Polycylindrical (Continued)",
+      "variant": "chord 20” height 8” filled",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.42,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.23,
+      "absorption_coefficient_2000": 0.19,
+      "absorption_coefficient_4000": 0.2,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_0_18percent",
+      "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+      "variant": "Perf: 0.18%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.4,
+      "absorption_coefficient_250": 0.7,
+      "absorption_coefficient_500": 0.3,
+      "absorption_coefficient_1000": 0.12,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_0_79percent",
+      "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+      "variant": "Perf: 0.79%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.4,
+      "absorption_coefficient_250": 0.84,
+      "absorption_coefficient_500": 0.4,
+      "absorption_coefficient_1000": 0.16,
+      "absorption_coefficient_2000": 0.14,
+      "absorption_coefficient_4000": 0.12,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_1_4percent",
+      "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+      "variant": "Perf. 1.4%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.25,
+      "absorption_coefficient_250": 0.96,
+      "absorption_coefficient_500": 0.66,
+      "absorption_coefficient_1000": 0.26,
+      "absorption_coefficient_2000": 0.16,
+      "absorption_coefficient_4000": 0.1,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_8_7percent",
+      "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+      "variant": "Perf:. 8.7%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.27,
+      "absorption_coefficient_250": 0.84,
+      "absorption_coefficient_500": 0.96,
+      "absorption_coefficient_1000": 0.36,
+      "absorption_coefficient_2000": 0.32,
+      "absorption_coefficient_4000": 0.26,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_8in_depth_4in_glass_fiber_perf_0_18percent",
+      "name": "Perforated Panel 8” depth, 4” glass fiber",
+      "variant": "Perf: 0.18%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.8,
+      "absorption_coefficient_250": 0.58,
+      "absorption_coefficient_500": 0.27,
+      "absorption_coefficient_1000": 0.14,
+      "absorption_coefficient_2000": 0.12,
+      "absorption_coefficient_4000": 0.1,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_8in_depth_4in_glass_fiber_perf_0_79percent",
+      "name": "Perforated Panel 8” depth, 4” glass fiber",
+      "variant": "Perf: 0.79%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.98,
+      "absorption_coefficient_250": 0.88,
+      "absorption_coefficient_500": 0.52,
+      "absorption_coefficient_1000": 0.21,
+      "absorption_coefficient_2000": 0.16,
+      "absorption_coefficient_4000": 0.14,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_8in_depth_4in_glass_fiber_perf_1_4percent",
+      "name": "Perforated Panel 8” depth, 4” glass fiber",
+      "variant": "Perf: 1.4%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.78,
+      "absorption_coefficient_250": 0.98,
+      "absorption_coefficient_500": 0.68,
+      "absorption_coefficient_1000": 0.27,
+      "absorption_coefficient_2000": 0.16,
+      "absorption_coefficient_4000": 0.12,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "perforated_panel_8in_depth_4in_glass_fiber_perf_8_7percent",
+      "name": "Perforated Panel 8” depth, 4” glass fiber",
+      "variant": "Perf: 8.7%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.78,
+      "absorption_coefficient_250": 0.98,
+      "absorption_coefficient_500": 0.95,
+      "absorption_coefficient_1000": 0.53,
+      "absorption_coefficient_2000": 0.32,
+      "absorption_coefficient_4000": 0.27,
+      "attributed_to": {
+        "row": "Mankovsky, ref 9-4"
+      }
+    },
+    {
+      "key": "with_7in_air_space_plus_1in_mineral_fiber_of_9_10_16_wideband_25percent_perf_or_more",
+      "name": "With 7” air space plus 1” mineral fiber of 9-10 16 cu ft/lb density, 1/4” cover",
+      "variant": "Wideband, 25% perf or more",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.67,
+      "absorption_coefficient_250": 1.09,
+      "absorption_coefficient_500": 0.98,
+      "absorption_coefficient_1000": 0.93,
+      "absorption_coefficient_2000": 0.98,
+      "absorption_coefficient_4000": 0.96,
+      "attributed_to": {
+        "row": "BBC, ref 9-18"
+      }
+    },
+    {
+      "key": "with_7in_air_space_plus_1in_mineral_fiber_of_9_10_16_midpeak_5percent_perf",
+      "name": "With 7” air space plus 1” mineral fiber of 9-10 16 cu ft/lb density, 1/4” cover",
+      "variant": "Midpeak, 5% perf",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.6,
+      "absorption_coefficient_250": 0.98,
+      "absorption_coefficient_500": 0.82,
+      "absorption_coefficient_1000": 0.9,
+      "absorption_coefficient_2000": 0.49,
+      "absorption_coefficient_4000": 0.3,
+      "attributed_to": {
+        "row": "BBC, ref 9-18"
+      }
+    },
+    {
+      "key": "with_7in_air_space_plus_1in_mineral_fiber_of_9_10_16_lo_peak_0_5percent_perf",
+      "name": "With 7” air space plus 1” mineral fiber of 9-10 16 cu ft/lb density, 1/4” cover",
+      "variant": "Lo-peak, 0.5% perf",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.74,
+      "absorption_coefficient_250": 0.53,
+      "absorption_coefficient_500": 0.4,
+      "absorption_coefficient_1000": 0.3,
+      "absorption_coefficient_2000": 0.14,
+      "absorption_coefficient_4000": 0.16,
+      "attributed_to": {
+        "row": "BBC, ref 9-18"
+      }
+    },
+    {
+      "key": "with_2in_air_space_filled_with_mineral_fiber_9_10_lb_perf_0_5percent",
+      "name": "With 2” air space filled with mineral fiber, 9-10 lb/cu ft density",
+      "variant": "Perf: 0.5%",
+      "group": "RESONANT ABSORBERS",
+      "absorption_coefficient_125": 0.48,
+      "absorption_coefficient_250": 0.78,
+      "absorption_coefficient_500": 0.6,
+      "absorption_coefficient_1000": 0.38,
+      "absorption_coefficient_2000": 0.32,
+      "absorption_coefficient_4000": 0.16,
+      "attributed_to": {
+        "row": "BBC, ref 9-18"
+      }
+    }
+  ]
+}

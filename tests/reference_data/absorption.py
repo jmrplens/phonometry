@@ -2093,3 +2093,264 @@ ARAU_6_1_ABSORPTION: tuple[tuple[int, str, tuple[object, ...]], ...] = (
     (98, "Suelo áspero", (0.21, 0.52, 0.64, 0.64, 0.60, 0.62)),
     (99, "Hierba 5 cm de altura", (0.11, 0.26, 0.60, 0.69, 0.82, 0.99)),
 )
+
+
+#: The octave bands Everest's appendix prints, in the order of the value
+#: tuples below. The page prints the unit on every column, the first three in
+#: hertz and the last three in kilohertz.
+EVEREST_BANDS_HZ = (125, 250, 500, 1000, 2000, 4000)
+
+#: ``(group heading, name as printed, values per band, credit as printed)``,
+#: every numbered row of the Everest appendix in the order printed. A row the
+#: page prints as a label with no numbers is left out, because it is a name
+#: for the rows under it rather than a measurement. The credit is the page's
+#: own "Reference (Chapter)" cell, and the empty string is the em dash two
+#: rows carry there.
+EVEREST_ABSORPTION: tuple[tuple[str, str, tuple[float, ...], str], ...] = (
+    (
+        "POROUS TYPE",
+        "draped to 7/8 area",
+        (0.03, 0.12, 0.15, 0.27, 0.37, 0.42),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "POROUS TYPE",
+        "draped to 3/4 area",
+        (0.04, 0.23, 0.4, 0.57, 0.53, 0.4),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "POROUS TYPE",
+        "draped to 1/2 area",
+        (0.07, 0.37, 0.49, 0.81, 0.65, 0.54),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "POROUS TYPE",
+        "draped to 1/2 area",
+        (0.07, 0.31, 0.49, 0.75, 0.7, 0.6),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "POROUS TYPE",
+        "draped to 1/2 area",
+        (0.14, 0.35, 0.55, 0.72, 0.7, 0.65),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "POROUS TYPE",
+        "Carpet: heavy on concrete",
+        (0.02, 0.06, 0.14, 0.37, 0.6, 0.65),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "POROUS TYPE",
+        "Carpet: heavy on 40 oz hair felt",
+        (0.08, 0.24, 0.57, 0.69, 0.71, 0.73),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "POROUS TYPE",
+        "Carpet: heavy with latex backing on foam or 40 oz hair felt",
+        (0.08, 0.27, 0.39, 0.34, 0.48, 0.63),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "POROUS TYPE",
+        "Carpet: indoor/ outdoor",
+        (0.01, 0.05, 0.1, 0.2, 0.45, 0.65),
+        "Seikman, ref 9-17",
+    ),
+    (
+        "POROUS TYPE",
+        'Acoustical tile, ave, 1/2" thick',
+        (0.07, 0.21, 0.66, 0.75, 0.62, 0.49),
+        "",
+    ),
+    (
+        "POROUS TYPE",
+        'Acoustical tile, ave, 3/4" thick',
+        (0.09, 0.28, 0.78, 0.84, 0.73, 0.64),
+        "",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Concrete block, coarse",
+        (0.36, 0.44, 0.31, 0.29, 0.39, 0.25),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Concrete block, painted",
+        (0.1, 0.05, 0.06, 0.07, 0.09, 0.08),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Concrete floor",
+        (0.01, 0.01, 0.015, 0.02, 0.02, 0.02),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Floor: linoleum, Asphalt-tile, or cork tile on concrete",
+        (0.02, 0.03, 0.03, 0.03, 0.03, 0.02),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Floor: wood",
+        (0.15, 0.11, 0.1, 0.07, 0.06, 0.07),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Glass: large panes, heavy glass",
+        (0.18, 0.06, 0.04, 0.03, 0.02, 0.02),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Glass, ordinary window",
+        (0.35, 0.25, 0.18, 0.12, 0.07, 0.04),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        'Owens-Corning Frescor, painted, 5/8" thick, Mounting 7',
+        (0.69, 0.86, 0.68, 0.87, 0.9, 0.81),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Plaster, gypsum or lime, smooth finish on tile or brick",
+        (0.013, 0.015, 0.02, 0.03, 0.04, 0.05),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        "Plaster: gypsum or lime, smooth finish on lath",
+        (0.14, 0.1, 0.06, 0.05, 0.04, 0.03),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "MISC. BUILDING MATERIALS",
+        'Gypsum board: 1/2" on 2 x 4s, 16" on centers',
+        (0.29, 0.1, 0.05, 0.04, 0.07, 0.09),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        'Plywood panel: 3/8" thick',
+        (0.28, 0.22, 0.17, 0.09, 0.1, 0.11),
+        "Compendium, ref 9-1",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        'chord 45" height 16" empty',
+        (0.41, 0.4, 0.33, 0.25, 0.2, 0.22),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        'chord 35" height 12" empty',
+        (0.37, 0.35, 0.32, 0.28, 0.22, 0.22),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        'chord 28" height 10"empty',
+        (0.32, 0.35, 0.3, 0.25, 0.2, 0.23),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        'chord 28" height 10" filled',
+        (0.35, 0.5, 0.38, 0.3, 0.22, 0.18),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        'chord 20" height 8" empty',
+        (0.25, 0.3, 0.33, 0.22, 0.2, 0.21),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        'chord 20" height 8" filled',
+        (0.3, 0.42, 0.35, 0.23, 0.19, 0.2),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf: 0.18%",
+        (0.4, 0.7, 0.3, 0.12, 0.1, 0.05),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf: 0.79%",
+        (0.4, 0.84, 0.4, 0.16, 0.14, 0.12),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf. 1.4%",
+        (0.25, 0.96, 0.66, 0.26, 0.16, 0.1),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf:. 8.7%",
+        (0.27, 0.84, 0.96, 0.36, 0.32, 0.26),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf: 0.18%",
+        (0.8, 0.58, 0.27, 0.14, 0.12, 0.1),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf: 0.79%",
+        (0.98, 0.88, 0.52, 0.21, 0.16, 0.14),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf: 1.4%",
+        (0.78, 0.98, 0.68, 0.27, 0.16, 0.12),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf: 8.7%",
+        (0.78, 0.98, 0.95, 0.53, 0.32, 0.27),
+        "Mankovsky, ref 9-4",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Wideband, 25% perf or more",
+        (0.67, 1.09, 0.98, 0.93, 0.98, 0.96),
+        "BBC, ref 9-18",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Midpeak, 5% perf",
+        (0.6, 0.98, 0.82, 0.9, 0.49, 0.3),
+        "BBC, ref 9-18",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Lo-peak, 0.5% perf",
+        (0.74, 0.53, 0.4, 0.3, 0.14, 0.16),
+        "BBC, ref 9-18",
+    ),
+    (
+        "RESONANT ABSORBERS",
+        "Perf: 0.5%",
+        (0.48, 0.78, 0.6, 0.38, 0.32, 0.16),
+        "BBC, ref 9-18",
+    ),
+)

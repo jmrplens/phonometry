@@ -1,6 +1,6 @@
 ---
 title: "Difusores y sus coeficientes"
-description: "Cómo se mide y se diseña un difusor: el coeficiente de dispersión (scattering) de incidencia aleatoria en cámara reverberante (ISO 17497-1), el coeficiente de difusión por autocorrelación de un goniómetro en campo libre (ISO 17497-2) y el diseño de Schroeder de residuo cuadrático con su predicción en campo lejano."
+description: "Cómo se mide y se diseña un difusor: el coeficiente de dispersión (scattering) de incidencia aleatoria en cámara reverberante (ISO 17497-1), el coeficiente de difusión por autocorrelación de un goniómetro en campo libre (ISO 17497-2) el diseño de Schroeder de residuo cuadrático con su predicción en campo lejano y las tablas medidas y calculadas publicadas para superficies que no puedes medir tú."
 references:
   - type: book
     authors: ["Cox, T. J.", "D'Antonio, P."]
@@ -69,7 +69,8 @@ reflejada abandona la dirección especular. El **coeficiente de difusión** $d$
 espacial: cuán uniformemente cubre la energía reflejada un arco polar de
 receptores. Esta guía cubre ambas mediciones, la predicción del coeficiente
 de difusión a partir del diseño de un difusor de Schroeder antes de fabricar
-una muestra, y la confusión recurrente entre los dos coeficientes.
+una muestra, las tablas publicadas a las que acudir cuando no hay cámara, y
+la confusión recurrente entre los dos coeficientes.
 
 Los dos coeficientes responden a preguntas distintas y no son
 intercambiables: la dispersión es *cuánta* energía abandona la dirección
@@ -1169,13 +1170,13 @@ superficie que ya está construida. Cox y D'Antonio imprimen cuatro apéndices
 de valores justo para eso, y esta biblioteca los guarda fila a fila, con la
 página de la que se leyó cada una.
 
-<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_diffusion_arrays.svg" alt="Dos paneles apilados del coeficiente de difusión normalizado frente a la banda de tercio de octava de 100 Hz a 5 kHz, los dos a incidencia aleatoria. Arriba, el mismo semicilindro en baterías de uno, dos, seis y doce periodos: el dispositivo suelto sube hasta 0,87 mientras que doce de él sólo llegan a 0,70, y las baterías de seis y doce periodos se quedan cerca de cero por debajo de 200 Hz. Abajo, seis semielipses de una misma anchura a cuatro profundidades de 1 cm a 30 cm: la más somera se queda plana cerca de cero en todo el rango y la más profunda sube a 0,65 en 5 kHz" width="88%" />
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_diffusion_arrays.svg" alt="Dos paneles apilados del coeficiente de difusión normalizado frente a la banda de tercio de octava de 100 Hz a 5 kHz, los dos a incidencia aleatoria. Arriba, el mismo semicilindro en arrays de uno, dos, seis y doce periodos: el dispositivo suelto sube hasta 0,87 mientras que doce de él sólo llegan a 0,70, y los arrays de seis y doce periodos se quedan cerca de cero por debajo de 200 Hz. Abajo, seis semielipses de una misma anchura a cuatro profundidades de 1 cm a 30 cm: la más somera se queda plana cerca de cero en todo el rango y la más profunda sube a 0,65 en 5 kHz" width="88%" />
 
 El panel de arriba es el argumento para el que existe la primera sección del
 Apéndice B, y ninguna fórmula del libro lo da: un semicilindro puntúa 0,77 en
 1 kHz a incidencia aleatoria, y doce del mismo semicilindro puntúan 0,22. Un
 objeto solo dispersa en todas las direcciones porque no tiene con qué
-interferir; una batería periódica de ese mismo objeto concentra la energía en
+interferir; un array periódico de ese mismo objeto concentra la energía en
 lóbulos de difracción, y el coeficiente de difusión cae en consecuencia. Leer
 la respuesta polar de un dispositivo suelto y escalarla se equivoca por un
 factor de tres. El panel de abajo es el otro eje del mismo apéndice: seis

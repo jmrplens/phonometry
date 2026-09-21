@@ -4461,10 +4461,10 @@ def generate_published_diffusion_arrays(output_dir: str) -> None:
     # scatters in every direction; the array scores low because it is periodic,
     # and periodicity concentrates the energy into grating lobes.
     for name, colour, marker, label in (
-        ("1 period, 0.61 cm wide", COLOR_PRIMARY, "o", "1 period"),
-        ("2 periods, 1.22 m wide", COLOR_SECONDARY, "s", "2 periods"),
-        ("6 periods, 3.66 m wide", COLOR_TERTIARY, "^", "6 periods"),
-        ("12 periods, 7.32 m wide", COLOR_MUTED, "d", "12 periods"),
+        ("1 period, 0.61 cm wide", COLOR_PRIMARY, "o", "1 semicylinder"),
+        ("2 periods, 1.22 m wide", COLOR_SECONDARY, "s", "2 semicylinders"),
+        ("6 periods, 3.66 m wide", COLOR_TERTIARY, "^", "6 semicylinders"),
+        ("12 periods, 7.32 m wide", COLOR_MUTED, "d", "12 semicylinders"),
     ):
         spectrum = _random(name)
         ax_n.semilogx(

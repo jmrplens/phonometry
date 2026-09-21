@@ -40,6 +40,9 @@ LONG = "long-2014-table-7-1"
 #: Cox & D'Antonio 3e Appendix A keyed the way the catalogue keys it.
 COX = "cox-2017-appendix-a"
 
+#: Arau-Puchades (1999) Table 6.1 keyed the way the catalogue keys it.
+ARAU = "arau-1999-table-6-1"
+
 #: A square foot in square metres, which is what a sabin is in a table set in
 #: inches, and a thousand cubic feet in cubic metres. Both exact, and both
 #: written here again rather than imported so that the test does not check the
@@ -473,6 +476,24 @@ def _cox_prints_as(row: AbsorptionSpectrum, printed: str) -> bool:
     return printed in {_plain_cox(text) for text in candidates if text}
 
 
+def _ascii(text: str) -> str:
+    """A name with the characters two readers spell differently written out.
+
+    One reading typed the superscript the page prints and the other its ASCII
+    stand-in, and neither is wrong about the paper: "kg/m²" and "kg/m2" are
+    the same square metre. The catalogue keeps the character the page uses;
+    this is only for comparing the two readings.
+    """
+    return (
+        text.replace("²", "2")
+        .replace("³", "3")
+        .replace("⁻¹", "-1")
+        .replace("×", "x")
+        .replace("–", "-")
+        .replace("—", "-")
+    )
+
+
 def _plain_cox(text: str) -> str:
     """A name reduced to what the two readings can be compared on.
 
@@ -601,3 +622,106 @@ def test_the_same_name_twice_is_two_rows_keyed_by_who_measured_it() -> None:
         "Harris (1991)",
     }
     assert {row.spectrum()[125] for row in pools} == {0.01, 0.008}
+
+
+# ---------------------------------------------------------------------------
+# Arau's numbered list, in Spanish, with its intervals and its dashes
+# ---------------------------------------------------------------------------
+#: The rows of Arau's table that are the air attenuation coefficient m, in
+#: reciprocal metres, rather than an absorption coefficient. The page prints
+#: them inside the same table; the catalogue does not serve them.
+ARAU_AIR_ROWS = (63, 64, 65)
+
+
+def _arau_key(number: int) -> str:
+    """The catalogue key of one printed row number, whatever its name is."""
+    prefix = f"{ARAU}/{number:02d}_"
+    keys = [key for key in PUBLISHED_ABSORPTION if key.startswith(prefix)]
+    assert len(keys) == 1, f"row {number} matched {keys}"
+    return keys[0]
+
+
+def test_the_catalogue_holds_every_row_but_the_three_that_are_not_coefficients() -> (
+    None
+):
+    """Ninety-nine printed rows, ninety-six served.
+
+    The three the page prints as the air attenuation coefficient m are in the
+    oracle, because the page prints them in this table, and out of the
+    catalogue, because a value in reciprocal metres behind a dimensionless
+    field is a unit error waiting to happen.
+    """
+    served = [k for k in PUBLISHED_ABSORPTION if k.startswith(f"{ARAU}/")]
+    assert len(ref.ARAU_6_1_ABSORPTION) == 99
+    assert len(served) == 99 - len(ARAU_AIR_ROWS)
+    for number in ARAU_AIR_ROWS:
+        assert not [k for k in served if k.startswith(f"{ARAU}/{number:02d}_")]
+
+
+@pytest.mark.parametrize(
+    ("number", "name", "values"),
+    [row for row in ref.ARAU_6_1_ABSORPTION if row[0] not in ARAU_AIR_ROWS],
+    ids=[
+        f"{number:02d}"
+        for number, _, _ in ref.ARAU_6_1_ABSORPTION
+        if number not in ARAU_AIR_ROWS
+    ],
+)
+def test_each_arau_row_holds_what_the_second_reader_read(
+    number: int, name: str, values: tuple[object, ...]
+) -> None:
+    """Cell by cell, with an interval an interval and a dash an empty cell.
+
+    Arau writes an interval as two lines with the word "a" between them, and
+    the catalogue holds it in ``ranges`` with the field empty, which is what
+    every other catalogue of this library does with a printed interval. A dash
+    is a cell the page does not fill.
+    """
+    row = PUBLISHED_ABSORPTION[_arau_key(number)]
+    printed = row.variant or row.name
+    assert _ascii(printed) == _ascii(name)
+    for band, value in zip(ref.ARAU_6_1_BANDS_HZ, values, strict=True):
+        field = f"absorption_coefficient_{band}"
+        if value is None:
+            assert getattr(row, field) is None
+        elif value == ref.RANGE_ACROSS_COLUMNS:
+            assert getattr(row, field) is None
+            assert row.unquantified[field] == ref.RANGE_ACROSS_COLUMNS
+        elif isinstance(value, tuple):
+            assert getattr(row, field) is None
+            assert row.ranges[field] == value
+        else:
+            assert getattr(row, field) == value
+
+
+def test_an_interval_says_so_rather_than_answering_with_a_midpoint() -> None:
+    """Two rows print "0.01 a 0.02"; neither answers 0.015."""
+    row = PUBLISHED_ABSORPTION[_arau_key(6)]
+    assert row.absorption_coefficient_125 is None
+    assert row.ranges["absorption_coefficient_125"] == (0.01, 0.02)
+    assert "0.01 to 0.02" in row.why_missing("absorption_coefficient_125")
+    with pytest.raises(ValueError, match="125 Hz band"):
+        row.absorption_coefficient(125)
+
+
+def test_the_grilles_say_what_the_page_prints_and_fill_no_band() -> None:
+    """One interval, printed once, lying across the first two columns.
+
+    Nothing on the page says which bands it is for, so no band gets it and
+    all six say what is printed there instead.
+    """
+    row = PUBLISHED_ABSORPTION[_arau_key(96)]
+    assert row.bands() == ()
+    for band in ref.ARAU_6_1_BANDS_HZ:
+        assert row.unquantified[f"absorption_coefficient_{band}"] == "0.15 – 0.50"
+    assert "a caballo" in row.note
+
+
+def test_a_row_that_says_idem_keeps_the_material_of_the_row_above() -> None:
+    """ "Ídem 50 mm" is not a material, so the name is the one it refers to."""
+    row = PUBLISHED_ABSORPTION[_arau_key(60)]
+    assert row.name == "Fibra de vidrio 22 kg/m² 30 mm"
+    assert row.variant == "Ídem 50 mm"
+    assert PUBLISHED_ABSORPTION[_arau_key(20)].variant == (
+        "Igual que 19, pero sin material absorbente"
+    )

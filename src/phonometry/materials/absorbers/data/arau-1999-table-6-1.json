@@ -1,0 +1,1017 @@
+{
+  "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+  "about": "Las noventa y nueve filas numeradas que la Tabla 6.1, sin título más allá del número, imprime a lo largo de tres páginas. Columnas tal como se imprimen: «Material» y, bajo «Absorción acústica(en bandas de octavas)», 125, 250, 500, 1000, 2000 y 4000, sin la unidad Hz en ninguna parte. No hay cabeceras de grupo: es una lista corrida, y el libro se refiere a sus filas por el número, de manera que la clave de cada fila lo conserva. Once filas se escriben como referencia a una anterior, «Ídem 50 mm» o «Igual que 19, pero sin material absorbente»; el texto impreso se guarda como variante y el material al que remite pasa a ser el nombre, para que quien busque fibra de vidrio encuentre los cuatro espesores y no sólo el primero. Tres filas de la tabla no son coeficientes de absorción sino el coeficiente de atenuación del aire m, en metros a la menos uno, y sólo a 2000 y 4000 Hz: las filas 63, 64 y 65, para 30, 50 y 70 % de humedad relativa. No se sirven aquí, porque un número en m⁻¹ detrás de un campo adimensional sería un error de unidades esperando a ocurrir, y la biblioteca calcula esa atenuación desde la norma en otro sitio. Dos filas imprimen intervalos: la 6 y la 11 escriben dos cifras separadas por la palabra «a» en una línea intermedia, y se guardan como intervalo en las seis bandas. La fila 96, las rejillas del aire acondicionado, imprime «0.15 – 0.50» una sola vez, a caballo de las dos primeras columnas y sin decir a qué bandas se aplica, de modo que ninguna banda recibe número y las seis dicen lo que la página pone. Quince celdas llevan una raya y quedan vacías. El libro no dice de dónde salen estas cifras: no cita norma de ensayo, ni tipo de incidencia, ni fuente, ni tolerancia. Lo único que dice, en la página anterior a la tabla (PDF 193, folio 190), es que el coeficiente depende de la frecuencia, que en los materiales porosos crece con ella, y que «a continuación, presentamos un listado del coeficiente de absorción acústica por frecuencias de distintos materiales». El escaneo degrada las comas hasta parecer puntos, incluso en la prosa, así que los nombres se transcriben con la puntuación que la gramática española exige y que la ampliación confirma; la excepción es la fila 55, «fruncida al 187,5 %», donde la coma decimal es la que imprime la página. Dos filas imprimen kg/m² donde el contexto pide kg/m³, la 59 y la 74, y se dejan como están porque es lo que hay impreso.",
+  "rows": [
+    {
+      "key": "01_pared_de_ladrillo",
+      "name": "Pared de ladrillo",
+      "absorption_coefficient_125": 0.025,
+      "absorption_coefficient_250": 0.025,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.07
+    },
+    {
+      "key": "02_pared_de_ladrillo_pintado",
+      "name": "Pared de ladrillo pintado",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "03_pared_de_ladrillo_encalada",
+      "name": "Pared de ladrillo encalada",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.03
+    },
+    {
+      "key": "04_bloque_de_hormigon_aspero",
+      "name": "Bloque de hormigón áspero",
+      "absorption_coefficient_125": 0.36,
+      "absorption_coefficient_250": 0.44,
+      "absorption_coefficient_500": 0.31,
+      "absorption_coefficient_1000": 0.29,
+      "absorption_coefficient_2000": 0.39,
+      "absorption_coefficient_4000": 0.25
+    },
+    {
+      "key": "05_bloque_de_hormigon_pintado",
+      "name": "Bloque de hormigón pintado",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.09,
+      "absorption_coefficient_4000": 0.08
+    },
+    {
+      "key": "06_hormigon_de_obra_fino",
+      "name": "Hormigón de obra fino",
+      "ranges": {
+        "absorption_coefficient_125": [
+          0.01,
+          0.02
+        ],
+        "absorption_coefficient_250": [
+          0.01,
+          0.02
+        ],
+        "absorption_coefficient_500": [
+          0.02,
+          0.04
+        ],
+        "absorption_coefficient_1000": [
+          0.02,
+          0.06
+        ],
+        "absorption_coefficient_2000": [
+          0.02,
+          0.08
+        ],
+        "absorption_coefficient_4000": [
+          0.03,
+          0.1
+        ]
+      }
+    },
+    {
+      "key": "07_hormigon_de_obra_pintado_al_esmalte",
+      "name": "Hormigón de obra pintado al esmalte",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "08_hormigon_enfoscado_muy_fino",
+      "name": "Hormigón enfoscado muy fino",
+      "absorption_coefficient_125": 0.004,
+      "absorption_coefficient_250": 0.004,
+      "absorption_coefficient_500": 0.005,
+      "absorption_coefficient_1000": 0.006,
+      "absorption_coefficient_2000": 0.008,
+      "absorption_coefficient_4000": 0.015
+    },
+    {
+      "key": "09_yeso_escayola_5_cm",
+      "name": "Yeso, escayola, 5 cm",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.04
+    },
+    {
+      "key": "10_yeso_escayola_fibrosa_5_cm",
+      "name": "Yeso, escayola fibrosa, 5 cm",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.55,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.04
+    },
+    {
+      "key": "11_enlucido_de_paredes",
+      "name": "Enlucido de paredes",
+      "ranges": {
+        "absorption_coefficient_125": [
+          0.01,
+          0.04
+        ],
+        "absorption_coefficient_250": [
+          0.01,
+          0.04
+        ],
+        "absorption_coefficient_500": [
+          0.02,
+          0.04
+        ],
+        "absorption_coefficient_1000": [
+          0.03,
+          0.06
+        ],
+        "absorption_coefficient_2000": [
+          0.04,
+          0.06
+        ],
+        "absorption_coefficient_4000": [
+          0.03,
+          0.06
+        ]
+      }
+    },
+    {
+      "key": "12_yeso_escayola_con_acabado_aspero",
+      "name": "Yeso, escayola, con acabado áspero",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.03
+    },
+    {
+      "key": "13_yeso_escayola_con_acabado_fino",
+      "name": "Yeso, escayola, con acabado fino",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.03
+    },
+    {
+      "key": "14_yeso_25_mm_con_camara_aire_en_el_dorso",
+      "name": "Yeso 25 mm con cámara aire en el dorso",
+      "absorption_coefficient_125": 0.16,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.04
+    },
+    {
+      "key": "15_tablero_de_carton_yeso_de_13_mm_con_camara_aire_en_el_dorso_",
+      "name": "Tablero de cartón yeso de 13 mm con cámara aire en el dorso sujeto por perfiles 5 × 10 cm interdistanciados 40 cm",
+      "absorption_coefficient_125": 0.29,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.09
+    },
+    {
+      "key": "16_tablero_de_yeso_de_15_mm_montado_en_identicas_condiciones_qu",
+      "name": "Tablero de yeso de 15 mm montado en idénticas condiciones que 15",
+      "absorption_coefficient_125": 0.2,
+      "absorption_coefficient_250": 0.08,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05
+    },
+    {
+      "key": "17_marmol_o_baldosa_pulida",
+      "name": "Mármol o baldosa pulida",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.01,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "18_contrachapado_de_madera_de_10_mm_formando_pequenas_cavidades",
+      "name": "Contrachapado de madera de 10 mm formando pequeñas cavidades máx. 25 mm en dorso",
+      "absorption_coefficient_125": 0.28,
+      "absorption_coefficient_250": 0.22,
+      "absorption_coefficient_500": 0.17,
+      "absorption_coefficient_1000": 0.09,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.08
+    },
+    {
+      "key": "19_contrachapado_de_madera_de_6_mm_con_80_mm_cavidad_de_aire_re",
+      "name": "Contrachapado de madera de 6 mm con 80 mm cavidad de aire rellenada parcialmente con material absorbente",
+      "absorption_coefficient_125": 0.6,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.09,
+      "absorption_coefficient_2000": 0.09,
+      "absorption_coefficient_4000": 0.09
+    },
+    {
+      "key": "20_igual_que_19_pero_sin_material_absorbente",
+      "name": "Contrachapado de madera de 6 mm con 80 mm cavidad de aire rellenada parcialmente con material absorbente",
+      "variant": "Igual que 19, pero sin material absorbente",
+      "absorption_coefficient_125": 0.4,
+      "absorption_coefficient_250": 0.18,
+      "absorption_coefficient_500": 0.08,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.03
+    },
+    {
+      "key": "21_contrachapado_de_madera_de_3_mm_con_cavidad_de_aire_en_el_do",
+      "name": "Contrachapado de madera de 3 mm con cavidad de aire en el dorso",
+      "absorption_coefficient_125": 0.11,
+      "absorption_coefficient_250": 0.21,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "22_madera_fijada_solidamente_a_una_pared_o_a_un_solido",
+      "name": "Madera fijada sólidamente a una pared o a un sólido",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "23_plafon_de_madera_de_pino_de_20_mm_y_50_mm_de_camara_de_aire",
+      "name": "Plafón de madera de pino de 20 mm y 50 mm de cámara de aire",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.11,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.08,
+      "absorption_coefficient_2000": 0.08,
+      "absorption_coefficient_4000": 0.05
+    },
+    {
+      "key": "24_plafon_de_madera_de_cedro_con_camara_en_el_dorso",
+      "name": "Plafón de madera de cedro con cámara en el dorso",
+      "absorption_coefficient_125": 0.2,
+      "absorption_coefficient_250": 0.15,
+      "absorption_coefficient_500": 0.15,
+      "absorption_coefficient_1000": 0.1,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.1
+    },
+    {
+      "key": "25_madera_delgada_5_a_10_mm_formando_camara_de_aire_en_el_dorso",
+      "name": "Madera delgada (5 a 10 mm) formando cámara de aire en el dorso",
+      "absorption_coefficient_125": 0.42,
+      "absorption_coefficient_250": 0.21,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.04
+    },
+    {
+      "key": "26_madera_10_a_13_mm_formando_camara_de_aire_50_a_100_mm_en_el_",
+      "name": "Madera (10 a 13 mm) formando cámara de aire 50 a 100 mm en el dorso",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.17,
+      "absorption_coefficient_2000": 0.15,
+      "absorption_coefficient_4000": 0.1
+    },
+    {
+      "key": "27_madera_solida_5_cm_de_espesor",
+      "name": "Madera sólida, 5 cm de espesor",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.04
+    },
+    {
+      "key": "28_vidrios_de_6_mm_area_pequena",
+      "name": "Vidrios de 6 mm área pequeña",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "29_vidrios_de_6_mm_area_grande",
+      "name": "Vidrios de 6 mm área grande",
+      "absorption_coefficient_125": 0.18,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.018
+    },
+    {
+      "key": "30_vidrio_de_3_mm_ventana",
+      "name": "Vidrio de 3 mm ventana",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.18,
+      "absorption_coefficient_1000": 0.12,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.04
+    },
+    {
+      "key": "31_vitrinas_emplomadas_3_mm",
+      "name": "Vitrinas emplomadas 3 mm",
+      "absorption_coefficient_125": 0.64,
+      "absorption_coefficient_250": 0.4,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.13,
+      "absorption_coefficient_2000": 0.17,
+      "absorption_coefficient_4000": 0.05
+    },
+    {
+      "key": "32_vidrios_pesados_luna_grande",
+      "name": "Vidrios pesados luna grande",
+      "absorption_coefficient_125": 0.18,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "33_pavimento_ceramico",
+      "name": "Pavimento cerámico",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "34_baldosa_de_tierra_sobre_hormigon",
+      "name": "Baldosa de tierra sobre hormigón",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "35_loseta_de_caucho_sobre_hormigon",
+      "name": "Loseta de caucho sobre hormigón",
+      "absorption_coefficient_125": 0.019,
+      "absorption_coefficient_250": 0.033,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.036,
+      "absorption_coefficient_2000": 0.018,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "36_loseta_de_linoleo_sobre_hormigon",
+      "name": "Loseta de linóleo sobre hormigón",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "37_loseta_de_plastico_vinilico_sobre_hormigon",
+      "name": "Loseta de plástico vinílico sobre hormigón",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "38_losa_de_corcho_de_2_cm_encerada_y_pulida",
+      "name": "Losa de corcho de 2 cm encerada y pulida",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.11,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "39_parque_sobre_rastreles",
+      "name": "Parqué sobre rastreles",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.09,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.2
+    },
+    {
+      "key": "40_parque_encima_de_hormigon",
+      "name": "Parqué encima de hormigón",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.07,
+      "absorption_coefficient_1000": 0.06,
+      "absorption_coefficient_2000": 0.06,
+      "absorption_coefficient_4000": 0.07
+    },
+    {
+      "key": "41_madera_barnizada_sobre_vigas",
+      "name": "Madera barnizada sobre vigas",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.11,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.06,
+      "absorption_coefficient_4000": 0.07
+    },
+    {
+      "key": "42_plataformas_de_madera_con_gran_profundidad_de_aire",
+      "name": "Plataformas de madera con gran profundidad de aire",
+      "absorption_coefficient_125": 0.4,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.17,
+      "absorption_coefficient_2000": 0.15,
+      "absorption_coefficient_4000": 0.1
+    },
+    {
+      "key": "43_alfombra_gruesa_encima_de_hormigon",
+      "name": "Alfombra gruesa encima de hormigón",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.14,
+      "absorption_coefficient_1000": 0.37,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.65
+    },
+    {
+      "key": "44_alfombra_gruesa_encima_de_fieltro_o_caucho_espumado",
+      "name": "Alfombra gruesa encima de fieltro o caucho espumado",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.24,
+      "absorption_coefficient_500": 0.57,
+      "absorption_coefficient_1000": 0.69,
+      "absorption_coefficient_2000": 0.71,
+      "absorption_coefficient_4000": 0.73
+    },
+    {
+      "key": "45_alfombra_pesada_con_latex_impermeable_encima_de_fieltro_o_ca",
+      "name": "Alfombra pesada con látex impermeable encima de fieltro o caucho espumado",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.27,
+      "absorption_coefficient_500": 0.39,
+      "absorption_coefficient_1000": 0.34,
+      "absorption_coefficient_2000": 0.48,
+      "absorption_coefficient_4000": 0.63
+    },
+    {
+      "key": "46_moqueta_de_10_mm_sobre_pared",
+      "name": "Moqueta de 10 mm sobre pared",
+      "absorption_coefficient_125": 0.09,
+      "absorption_coefficient_250": 0.08,
+      "absorption_coefficient_500": 0.21,
+      "absorption_coefficient_1000": 0.27,
+      "absorption_coefficient_2000": 0.27,
+      "absorption_coefficient_4000": 0.37
+    },
+    {
+      "key": "47_moqueta_de_3_mm_sobre_fieltro_encima_de_hormigon",
+      "name": "Moqueta de 3 mm sobre fieltro encima de hormigón",
+      "absorption_coefficient_125": 0.11,
+      "absorption_coefficient_250": 0.14,
+      "absorption_coefficient_500": 0.37,
+      "absorption_coefficient_1000": 0.43,
+      "absorption_coefficient_2000": 0.27,
+      "absorption_coefficient_4000": 0.25
+    },
+    {
+      "key": "48_moqueta_de_goma_de_5_mm",
+      "name": "Moqueta de goma de 5 mm",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.08,
+      "absorption_coefficient_1000": 0.12,
+      "absorption_coefficient_2000": 0.13,
+      "absorption_coefficient_4000": 0.1
+    },
+    {
+      "key": "49_cortina_ligera_de_algodon_de_340_g_m2_de_gramaje_plana_a_la_",
+      "name": "Cortina ligera de algodón de 340 g/m² de gramaje, plana a la pared",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.11,
+      "absorption_coefficient_1000": 0.17,
+      "absorption_coefficient_2000": 0.24,
+      "absorption_coefficient_4000": 0.35
+    },
+    {
+      "key": "50_cortina_de_algodon_de_480_g_m2_plana_a_la_pared",
+      "name": "Cortina de algodón de 480 g/m² plana a la pared",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.07,
+      "absorption_coefficient_500": 0.13,
+      "absorption_coefficient_1000": 0.22,
+      "absorption_coefficient_2000": 0.32,
+      "absorption_coefficient_4000": 0.35
+    },
+    {
+      "key": "51_cortina_de_terciopelo_de_620_g_m2_plana_a_la_pared",
+      "name": "Cortina de terciopelo de 620 g/m² plana a la pared",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.45,
+      "absorption_coefficient_2000": 0.38,
+      "absorption_coefficient_4000": 0.36
+    },
+    {
+      "key": "52_cortina_de_algodon_de_340_g_m2_fruncida_al_150_percent",
+      "name": "Cortina de algodón de 340 g/m² fruncida al 150 %",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.31,
+      "absorption_coefficient_500": 0.49,
+      "absorption_coefficient_1000": 0.81,
+      "absorption_coefficient_2000": 0.66,
+      "absorption_coefficient_4000": 0.54
+    },
+    {
+      "key": "53_cortina_de_algodon_de_480_g_m2_fruncida_al_150_percent",
+      "name": "Cortina de algodón de 480 g/m² fruncida al 150 %",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.31,
+      "absorption_coefficient_500": 0.49,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.6
+    },
+    {
+      "key": "54_cortina_de_algodon_de_620_g_m2_fruncida_al_150_percent",
+      "name": "Cortina de algodón de 620 g/m² fruncida al 150 %",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.35,
+      "absorption_coefficient_500": 0.55,
+      "absorption_coefficient_1000": 0.72,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.65
+    },
+    {
+      "key": "55_cortina_de_algodon_de_340_g_m2_fruncida_al_187_5_percent",
+      "name": "Cortina de algodón de 340 g/m² fruncida al 187,5 %",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.15,
+      "absorption_coefficient_1000": 0.27,
+      "absorption_coefficient_2000": 0.37,
+      "absorption_coefficient_4000": 0.42
+    },
+    {
+      "key": "56_cortina_de_algodon_de_340_g_m2_fruncida_al_175_percent",
+      "name": "Cortina de algodón de 340 g/m² fruncida al 175 %",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.23,
+      "absorption_coefficient_500": 0.4,
+      "absorption_coefficient_1000": 0.57,
+      "absorption_coefficient_2000": 0.53,
+      "absorption_coefficient_4000": 0.4
+    },
+    {
+      "key": "57_fieltro_de_25_mm",
+      "name": "Fieltro de 25 mm",
+      "absorption_coefficient_125": 0.18,
+      "absorption_coefficient_250": 0.36,
+      "absorption_coefficient_500": 0.71,
+      "absorption_coefficient_1000": 0.79,
+      "absorption_coefficient_2000": 0.82,
+      "absorption_coefficient_4000": 0.85
+    },
+    {
+      "key": "58_fieltro_de_25_mm_con_intervalos_de_aire_a_50_mm",
+      "name": "Fieltro de 25 mm con intervalos de aire a 50 mm",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.62,
+      "absorption_coefficient_500": 0.88,
+      "absorption_coefficient_1000": 0.92,
+      "absorption_coefficient_2000": 0.78,
+      "absorption_coefficient_4000": 0.84
+    },
+    {
+      "key": "59_fibra_de_vidrio_22_kg_m2_30_mm",
+      "name": "Fibra de vidrio 22 kg/m² 30 mm",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.32,
+      "absorption_coefficient_500": 0.55,
+      "absorption_coefficient_1000": 0.66,
+      "absorption_coefficient_2000": 0.79,
+      "absorption_coefficient_4000": 0.77
+    },
+    {
+      "key": "60_idem_50_mm",
+      "name": "Fibra de vidrio 22 kg/m² 30 mm",
+      "variant": "Ídem 50 mm",
+      "absorption_coefficient_125": 0.19,
+      "absorption_coefficient_250": 0.43,
+      "absorption_coefficient_500": 0.77,
+      "absorption_coefficient_1000": 0.82,
+      "absorption_coefficient_2000": 0.94,
+      "absorption_coefficient_4000": 0.83
+    },
+    {
+      "key": "61_idem_70_mm",
+      "name": "Fibra de vidrio 22 kg/m² 30 mm",
+      "variant": "Ídem 70 mm",
+      "absorption_coefficient_125": 0.33,
+      "absorption_coefficient_250": 0.65,
+      "absorption_coefficient_500": 0.88,
+      "absorption_coefficient_1000": 0.91,
+      "absorption_coefficient_2000": 0.97,
+      "absorption_coefficient_4000": 0.94
+    },
+    {
+      "key": "62_idem_100_mm",
+      "name": "Fibra de vidrio 22 kg/m² 30 mm",
+      "variant": "Ídem 100 mm",
+      "absorption_coefficient_125": 0.54,
+      "absorption_coefficient_250": 0.87,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.96,
+      "absorption_coefficient_2000": 0.97,
+      "absorption_coefficient_4000": 0.93
+    },
+    {
+      "key": "66_agua_piscinas",
+      "name": "Agua (piscinas)",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.01,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02
+    },
+    {
+      "key": "67_abertura_de_escenario",
+      "name": "Abertura de escenario",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.4,
+      "absorption_coefficient_500": 0.5,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.5
+    },
+    {
+      "key": "68_audiencia_ocupando_butacas_bien_tapizadas",
+      "name": "Audiencia ocupando butacas bien tapizadas",
+      "absorption_coefficient_125": 0.52,
+      "absorption_coefficient_250": 0.68,
+      "absorption_coefficient_500": 0.85,
+      "absorption_coefficient_1000": 0.97,
+      "absorption_coefficient_2000": 0.93,
+      "absorption_coefficient_4000": 0.85
+    },
+    {
+      "key": "69_butacas_bien_tapizadas",
+      "name": "Butacas bien tapizadas",
+      "absorption_coefficient_125": 0.49,
+      "absorption_coefficient_250": 0.66,
+      "absorption_coefficient_500": 0.8,
+      "absorption_coefficient_1000": 0.88,
+      "absorption_coefficient_2000": 0.82,
+      "absorption_coefficient_4000": 0.7
+    },
+    {
+      "key": "70_butacas_tapizadas_de_cuero",
+      "name": "Butacas tapizadas de cuero",
+      "absorption_coefficient_125": 0.44,
+      "absorption_coefficient_250": 0.54,
+      "absorption_coefficient_500": 0.6,
+      "absorption_coefficient_1000": 0.62,
+      "absorption_coefficient_2000": 0.58,
+      "absorption_coefficient_4000": 0.5
+    },
+    {
+      "key": "71_bancos_de_iglesia_de_madera_100_percent_ocupados",
+      "name": "Bancos de iglesia de madera 100 % ocupados",
+      "absorption_coefficient_125": 0.57,
+      "absorption_coefficient_250": 0.61,
+      "absorption_coefficient_500": 0.75,
+      "absorption_coefficient_1000": 0.86,
+      "absorption_coefficient_2000": 0.91,
+      "absorption_coefficient_4000": 0.86
+    },
+    {
+      "key": "72_asientos_de_madera_100_percent_ocupados",
+      "name": "Asientos de madera 100 % ocupados",
+      "absorption_coefficient_125": 0.6,
+      "absorption_coefficient_250": 0.74,
+      "absorption_coefficient_500": 0.88,
+      "absorption_coefficient_1000": 0.96,
+      "absorption_coefficient_2000": 0.93,
+      "absorption_coefficient_4000": 0.85
+    },
+    {
+      "key": "73_asientos_de_madera_75_percent_ocupados",
+      "name": "Asientos de madera 75 % ocupados",
+      "absorption_coefficient_125": 0.46,
+      "absorption_coefficient_250": 0.56,
+      "absorption_coefficient_500": 0.65,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.72,
+      "absorption_coefficient_4000": 0.65
+    },
+    {
+      "key": "74_lana_de_roca_100_kg_m2_30_mm",
+      "name": "Lana de roca 100 kg/m² 30 mm",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.4,
+      "absorption_coefficient_500": 0.88,
+      "absorption_coefficient_1000": 0.92,
+      "absorption_coefficient_2000": 0.96,
+      "absorption_coefficient_4000": 1.05
+    },
+    {
+      "key": "75_idem_50_mm",
+      "name": "Lana de roca 100 kg/m² 30 mm",
+      "variant": "Ídem 50 mm",
+      "absorption_coefficient_125": 0.19,
+      "absorption_coefficient_250": 0.74,
+      "absorption_coefficient_500": 0.95,
+      "absorption_coefficient_1000": 0.98,
+      "absorption_coefficient_2000": 0.96,
+      "absorption_coefficient_4000": 1.04
+    },
+    {
+      "key": "76_idem_80_mm",
+      "name": "Lana de roca 100 kg/m² 30 mm",
+      "variant": "Ídem 80 mm",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.86,
+      "absorption_coefficient_500": 0.92,
+      "absorption_coefficient_1000": 0.99,
+      "absorption_coefficient_2000": 1.02,
+      "absorption_coefficient_4000": 1.03
+    },
+    {
+      "key": "77_espuma_de_poliuretano_de_15_mm_con_forro_de_plastico_ligero",
+      "name": "Espuma de poliuretano de 15 mm con forro de plástico ligero",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.08,
+      "absorption_coefficient_500": 0.24,
+      "absorption_coefficient_1000": 0.48,
+      "absorption_coefficient_2000": 0.72,
+      "absorption_coefficient_4000": 0.7
+    },
+    {
+      "key": "78_idem_30_mm",
+      "name": "Espuma de poliuretano de 15 mm con forro de plástico ligero",
+      "variant": "Ídem 30 mm",
+      "absorption_coefficient_125": 0.13,
+      "absorption_coefficient_250": 0.75,
+      "absorption_coefficient_500": 0.7,
+      "absorption_coefficient_1000": 1.02,
+      "absorption_coefficient_2000": 1.0,
+      "absorption_coefficient_4000": 0.95
+    },
+    {
+      "key": "79_espuma_de_poliuretano_con_forro_film_de_plastico",
+      "name": "Espuma de poliuretano con forro film de plástico",
+      "absorption_coefficient_125": 0.21,
+      "absorption_coefficient_250": 0.52,
+      "absorption_coefficient_500": 0.64,
+      "absorption_coefficient_1000": 0.64,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.62
+    },
+    {
+      "key": "80_panel_metalico_perforado_diam_20_mm_p_14_9_percent_cavidad_d",
+      "name": "Panel metálico perforado Ø 20 mm p = 14.9 % Cavidad de aire 100 mm. Espesor fibra interior 30 mm. Espesor del plafón perforado 0.95 mm",
+      "absorption_coefficient_125": 0.27,
+      "absorption_coefficient_250": 0.78,
+      "absorption_coefficient_500": 0.93,
+      "absorption_coefficient_1000": 0.71,
+      "absorption_coefficient_2000": 0.55,
+      "absorption_coefficient_4000": 0.51
+    },
+    {
+      "key": "81_igual_que_80_con_cavidad_de_aire_200_mm",
+      "name": "Panel metálico perforado Ø 20 mm p = 14.9 % Cavidad de aire 100 mm. Espesor fibra interior 30 mm. Espesor del plafón perforado 0.95 mm",
+      "variant": "Igual que 80 con cavidad de aire 200 mm",
+      "absorption_coefficient_250": 0.88,
+      "absorption_coefficient_500": 0.88,
+      "absorption_coefficient_1000": 0.63,
+      "absorption_coefficient_2000": 0.54,
+      "absorption_coefficient_4000": 0.47
+    },
+    {
+      "key": "82_igual_que_80_con_cavidad_de_aire_400_mm",
+      "name": "Panel metálico perforado Ø 20 mm p = 14.9 % Cavidad de aire 100 mm. Espesor fibra interior 30 mm. Espesor del plafón perforado 0.95 mm",
+      "variant": "Igual que 80 con cavidad de aire 400 mm",
+      "absorption_coefficient_250": 0.78,
+      "absorption_coefficient_500": 0.66,
+      "absorption_coefficient_1000": 0.73,
+      "absorption_coefficient_2000": 0.61,
+      "absorption_coefficient_4000": 0.48
+    },
+    {
+      "key": "83_resonador_del_tipo_figura_6_9_y_f_6_7_de_ranuras_en_bloques_",
+      "name": "Resonador del tipo figura 6.9 y F.6.7 de ranuras en bloques de hormigón de 200 × 200 × 500 mm con fibra de vidrio en los alveolos",
+      "absorption_coefficient_125": 0.72,
+      "absorption_coefficient_250": 0.58,
+      "absorption_coefficient_500": 0.77,
+      "absorption_coefficient_1000": 0.72,
+      "absorption_coefficient_2000": 0.49,
+      "absorption_coefficient_4000": 0.45
+    },
+    {
+      "key": "84_igual_que_83_pero_con_alveolos_vacios",
+      "name": "Resonador del tipo figura 6.9 y F.6.7 de ranuras en bloques de hormigón de 200 × 200 × 500 mm con fibra de vidrio en los alveolos",
+      "variant": "Igual que 83, pero con alveolos vacíos",
+      "absorption_coefficient_125": 0.69,
+      "absorption_coefficient_250": 0.13,
+      "absorption_coefficient_500": 0.07,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.14,
+      "absorption_coefficient_4000": 0.15
+    },
+    {
+      "key": "85_revestimiento_textil_de_muros_100_percent_poliamida_masa_sup",
+      "name": "Revestimiento textil de muros 100 % poliamida, masa superficial 0.640, 1.8 mm grueso y reverso de fibras minerales",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.09,
+      "absorption_coefficient_1000": 0.14,
+      "absorption_coefficient_2000": 0.29,
+      "absorption_coefficient_4000": 0.57
+    },
+    {
+      "key": "86_velo_rizado_100_percent_pl_va_1_75_kg_m2_de_6_mm_parte_dorsa",
+      "name": "Velo rizado 100 % PL VA 1.75 kg/m² de 6 mm, parte dorsal yute o algodón",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.17,
+      "absorption_coefficient_1000": 0.25,
+      "absorption_coefficient_2000": 0.45,
+      "absorption_coefficient_4000": 0.88
+    },
+    {
+      "key": "87_tejido_de_napa_mas_film_pe_3_mm",
+      "name": "Tejido de napa + film PE 3 mm",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.14,
+      "absorption_coefficient_2000": 0.22,
+      "absorption_coefficient_4000": 0.24
+    },
+    {
+      "key": "88_tejido_53_percent_algodon_33_percent_fibra_14_percent_lino_0",
+      "name": "Tejido 53 % algodón 33 % fibra 14 % lino 0.24 kg/m²",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.07,
+      "absorption_coefficient_1000": 0.26,
+      "absorption_coefficient_2000": 0.3,
+      "absorption_coefficient_4000": 0.15
+    },
+    {
+      "key": "89_tela_de_lino_y_en_el_dorso_papel_0_48_kg_m2_de_1_2_mm",
+      "name": "Tela de lino y en el dorso papel 0.48 kg/m² de 1.2 mm",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.07,
+      "absorption_coefficient_1000": 0.1,
+      "absorption_coefficient_2000": 0.14,
+      "absorption_coefficient_4000": 0.16
+    },
+    {
+      "key": "90_revestimiento_textura_alveolar_textil_con_fibras_y_en_el_dor",
+      "name": "Revestimiento textura alveolar textil con fibras y en el dorso espuma de poliuretano 0.650 kg/m² de 7 mm",
+      "absorption_coefficient_125": 0.06,
+      "absorption_coefficient_250": 0.09,
+      "absorption_coefficient_500": 0.14,
+      "absorption_coefficient_1000": 0.19,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.88
+    },
+    {
+      "key": "91_idem_pero_0_940_kg_m2_de_17_mm",
+      "name": "Revestimiento textura alveolar textil con fibras y en el dorso espuma de poliuretano 0.650 kg/m² de 7 mm",
+      "variant": "Ídem, pero 0.940 kg/m² de 17 mm",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.19,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.84,
+      "absorption_coefficient_2000": 0.98,
+      "absorption_coefficient_4000": 0.89
+    },
+    {
+      "key": "92_revestimiento_textil_de_suelo_o_moqueta_de_terciopelo_trenza",
+      "name": "Revestimiento textil de suelo o moqueta de terciopelo trenzado 100 % de 1.2 kg/m² espuma SBR en zona dorsal",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.09,
+      "absorption_coefficient_1000": 0.015,
+      "absorption_coefficient_2000": 0.3,
+      "absorption_coefficient_4000": 0.38
+    },
+    {
+      "key": "93_moqueta_con_espuma_sbr_en_zona_dorsal_2_235_kg_m2_10_mm",
+      "name": "Moqueta con espuma SBR en zona dorsal 2.235 kg/m², 10 mm",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.08,
+      "absorption_coefficient_500": 0.28,
+      "absorption_coefficient_1000": 0.33,
+      "absorption_coefficient_2000": 0.38,
+      "absorption_coefficient_4000": 0.42
+    },
+    {
+      "key": "94_moqueta_tapiz_trenzado_1_575_kg_m2_5_5_mm",
+      "name": "Moqueta tapiz trenzado 1.575 kg/m², 5.5 mm",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.07,
+      "absorption_coefficient_1000": 0.18,
+      "absorption_coefficient_2000": 0.39,
+      "absorption_coefficient_4000": 0.42
+    },
+    {
+      "key": "95_pared_de_baldosa_perforada_con_lana_mineral_5_cm_mas_50_cm_d",
+      "name": "Pared de baldosa perforada, con lana mineral 5 cm + 50 cm de cámara de aire",
+      "absorption_coefficient_125": 0.5,
+      "absorption_coefficient_250": 0.41,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.39,
+      "absorption_coefficient_2000": 0.26,
+      "absorption_coefficient_4000": 0.32
+    },
+    {
+      "key": "96_rejillas_del_sistema_de_aire_acondicionado",
+      "name": "Rejillas del sistema de aire acondicionado",
+      "note": "La página imprime un solo intervalo, 0.15 – 0.50, a caballo de las columnas de 125 y 250 Hz, y no dice a qué bandas se aplica.",
+      "unquantified": {
+        "absorption_coefficient_125": "0.15 – 0.50",
+        "absorption_coefficient_250": "0.15 – 0.50",
+        "absorption_coefficient_500": "0.15 – 0.50",
+        "absorption_coefficient_1000": "0.15 – 0.50",
+        "absorption_coefficient_2000": "0.15 – 0.50",
+        "absorption_coefficient_4000": "0.15 – 0.50"
+      }
+    },
+    {
+      "key": "97_grava_suelta_y_humeda_de_20_cm_de_grosor",
+      "name": "Grava suelta y húmeda de 20 cm de grosor",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.4,
+      "absorption_coefficient_1000": 0.55,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.6
+    },
+    {
+      "key": "98_suelo_aspero",
+      "name": "Suelo áspero",
+      "absorption_coefficient_125": 0.21,
+      "absorption_coefficient_250": 0.52,
+      "absorption_coefficient_500": 0.64,
+      "absorption_coefficient_1000": 0.64,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.62
+    },
+    {
+      "key": "99_hierba_5_cm_de_altura",
+      "name": "Hierba 5 cm de altura",
+      "absorption_coefficient_125": 0.11,
+      "absorption_coefficient_250": 0.26,
+      "absorption_coefficient_500": 0.6,
+      "absorption_coefficient_1000": 0.69,
+      "absorption_coefficient_2000": 0.82,
+      "absorption_coefficient_4000": 0.99
+    }
+  ]
+}

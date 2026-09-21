@@ -1765,3 +1765,331 @@ COX_A_REFERENCES: dict[str, str] = {
     "28": "Wong et al. (2010)",
     "29": "Yang, Kang and Cheal (2013)",
 }
+
+
+#: What Arau prints where a number would be on the row of air-conditioning
+#: grilles: one interval, written once, lying across the first two columns.
+RANGE_ACROSS_COLUMNS = "0.15 – 0.50"
+
+#: The octave bands Arau's Table 6.1 prints, in the order of the value tuples
+#: below. The page prints the frequencies bare, with no unit anywhere.
+ARAU_6_1_BANDS_HZ = (125, 250, 500, 1000, 2000, 4000)
+
+#: ``(printed row number, name as printed, values per band)``, every row of
+#: Arau-Puchades (1999) Table 6.1 in the order printed, Spanish and all. A
+#: ``(low, high)`` pair is an interval the page writes with the word "a" on a
+#: line of its own; ``None`` is a cell the page fills with a dash. Rows 63 to
+#: 65 are the air attenuation coefficient m in reciprocal metres rather than an
+#: absorption coefficient, and are here because the page prints them in this
+#: table; the catalogue does not serve them and the tests say so.
+ARAU_6_1_ABSORPTION: tuple[tuple[int, str, tuple[object, ...]], ...] = (
+    (1, "Pared de ladrillo", (0.025, 0.025, 0.03, 0.04, 0.05, 0.07)),
+    (2, "Pared de ladrillo pintado", (0.01, 0.01, 0.02, 0.02, 0.02, 0.02)),
+    (3, "Pared de ladrillo encalada", (0.02, 0.02, 0.02, 0.03, 0.03, None)),
+    (4, "Bloque de hormigón áspero", (0.36, 0.44, 0.31, 0.29, 0.39, 0.25)),
+    (5, "Bloque de hormigón pintado", (0.10, 0.05, 0.06, 0.07, 0.09, 0.08)),
+    (
+        6,
+        "Hormigón de obra fino",
+        (
+            (0.01, 0.02),
+            (0.01, 0.02),
+            (0.02, 0.04),
+            (0.02, 0.06),
+            (0.02, 0.08),
+            (0.03, 0.10),
+        ),
+    ),
+    (7, "Hormigón de obra pintado al esmalte", (0.01, 0.01, 0.01, 0.02, 0.02, 0.02)),
+    (8, "Hormigón enfoscado muy fino", (0.004, 0.004, 0.005, 0.006, 0.008, 0.015)),
+    (9, "Yeso, escayola, 5 cm", (0.08, 0.06, 0.05, 0.04, 0.04, 0.04)),
+    (10, "Yeso, escayola fibrosa, 5 cm", (0.35, 0.30, 0.20, 0.55, 0.10, 0.04)),
+    (
+        11,
+        "Enlucido de paredes",
+        (
+            (0.01, 0.04),
+            (0.01, 0.04),
+            (0.02, 0.04),
+            (0.03, 0.06),
+            (0.04, 0.06),
+            (0.03, 0.06),
+        ),
+    ),
+    (12, "Yeso, escayola, con acabado áspero", (0.14, 0.10, 0.06, 0.05, 0.04, 0.03)),
+    (13, "Yeso, escayola, con acabado fino", (0.14, 0.10, 0.06, 0.04, 0.04, 0.03)),
+    (
+        14,
+        "Yeso 25 mm con cámara aire en el dorso",
+        (0.16, 0.10, 0.06, 0.04, 0.04, 0.04),
+    ),
+    (
+        15,
+        "Tablero de cartón yeso de 13 mm con cámara aire en el dorso sujeto por perfiles 5 x 10 cm interdistanciados 40 cm",
+        (0.29, 0.10, 0.05, 0.04, 0.07, 0.09),
+    ),
+    (
+        16,
+        "Tablero de yeso de 15 mm montado en idénticas condiciones que 15",
+        (0.20, 0.08, 0.05, 0.05, 0.05, 0.05),
+    ),
+    (17, "Mármol o baldosa pulida", (0.01, 0.01, 0.01, 0.01, 0.02, 0.02)),
+    (
+        18,
+        "Contrachapado de madera de 10 mm formando pequeñas cavidades máx. 25 mm en dorso",
+        (0.28, 0.22, 0.17, 0.09, 0.10, 0.08),
+    ),
+    (
+        19,
+        "Contrachapado de madera de 6 mm con 80 mm cavidad de aire rellenada parcialmente con material absorbente",
+        (0.60, 0.30, 0.10, 0.09, 0.09, 0.09),
+    ),
+    (
+        20,
+        "Igual que 19, pero sin material absorbente",
+        (0.40, 0.18, 0.08, 0.05, 0.04, 0.03),
+    ),
+    (
+        21,
+        "Contrachapado de madera de 3 mm con cavidad de aire en el dorso",
+        (0.11, 0.21, 0.10, 0.05, 0.03, 0.02),
+    ),
+    (
+        22,
+        "Madera fijada sólidamente a una pared o a un sólido",
+        (0.04, 0.04, 0.03, 0.03, 0.03, 0.02),
+    ),
+    (
+        23,
+        "Plafón de madera de pino de 20 mm y 50 mm de cámara de aire",
+        (0.10, 0.11, 0.10, 0.08, 0.08, 0.05),
+    ),
+    (
+        24,
+        "Plafón de madera de cedro con cámara en el dorso",
+        (0.20, 0.15, 0.15, 0.10, 0.10, 0.10),
+    ),
+    (
+        25,
+        "Madera delgada (5 a 10 mm) formando cámara de aire en el dorso",
+        (0.42, 0.21, 0.06, 0.05, 0.04, 0.04),
+    ),
+    (
+        26,
+        "Madera (10 a 13 mm) formando cámara de aire 50 a 100 mm en el dorso",
+        (0.30, 0.25, 0.20, 0.17, 0.15, 0.10),
+    ),
+    (27, "Madera sólida, 5 cm de espesor", (0.01, 0.05, 0.05, 0.04, 0.04, 0.04)),
+    (28, "Vidrios de 6 mm área pequeña", (0.04, 0.04, 0.03, 0.03, 0.02, 0.02)),
+    (29, "Vidrios de 6 mm área grande", (0.18, 0.06, 0.04, 0.03, 0.02, 0.018)),
+    (30, "Vidrio de 3 mm ventana", (0.35, 0.25, 0.18, 0.12, 0.07, 0.04)),
+    (31, "Vitrinas emplomadas 3 mm", (0.64, 0.40, 0.20, 0.13, 0.17, 0.05)),
+    (32, "Vidrios pesados luna grande", (0.18, 0.06, 0.04, 0.03, 0.02, 0.02)),
+    (33, "Pavimento cerámico", (0.01, 0.01, 0.01, 0.02, 0.02, 0.02)),
+    (34, "Baldosa de tierra sobre hormigón", (0.02, 0.03, 0.03, 0.03, 0.03, 0.02)),
+    (35, "Loseta de caucho sobre hormigón", (0.019, 0.033, 0.04, 0.036, 0.018, 0.02)),
+    (36, "Loseta de linóleo sobre hormigón", (0.04, 0.03, 0.04, 0.04, 0.03, 0.02)),
+    (
+        37,
+        "Loseta de plástico vinílico sobre hormigón",
+        (0.04, 0.03, 0.04, 0.04, 0.03, 0.02),
+    ),
+    (
+        38,
+        "Losa de corcho de 2 cm encerada y pulida",
+        (0.04, 0.03, 0.05, 0.11, 0.07, 0.02),
+    ),
+    (39, "Parqué sobre rastreles", (0.05, 0.03, 0.06, 0.09, 0.10, 0.20)),
+    (40, "Parqué encima de hormigón", (0.04, 0.04, 0.07, 0.06, 0.06, 0.07)),
+    (41, "Madera barnizada sobre vigas", (0.15, 0.11, 0.10, 0.07, 0.06, 0.07)),
+    (
+        42,
+        "Plataformas de madera con gran profundidad de aire",
+        (0.40, 0.30, 0.20, 0.17, 0.15, 0.10),
+    ),
+    (43, "Alfombra gruesa encima de hormigón", (0.02, 0.06, 0.14, 0.37, 0.60, 0.65)),
+    (
+        44,
+        "Alfombra gruesa encima de fieltro o caucho espumado",
+        (0.08, 0.24, 0.57, 0.69, 0.71, 0.73),
+    ),
+    (
+        45,
+        "Alfombra pesada con látex impermeable encima de fieltro o caucho espumado",
+        (0.08, 0.27, 0.39, 0.34, 0.48, 0.63),
+    ),
+    (46, "Moqueta de 10 mm sobre pared", (0.09, 0.08, 0.21, 0.27, 0.27, 0.37)),
+    (
+        47,
+        "Moqueta de 3 mm sobre fieltro encima de hormigón",
+        (0.11, 0.14, 0.37, 0.43, 0.27, 0.25),
+    ),
+    (48, "Moqueta de goma de 5 mm", (0.04, 0.04, 0.08, 0.12, 0.13, 0.10)),
+    (
+        49,
+        "Cortina ligera de algodón de 340 g/m2 de gramaje, plana a la pared",
+        (0.03, 0.04, 0.11, 0.17, 0.24, 0.35),
+    ),
+    (
+        50,
+        "Cortina de algodón de 480 g/m2 plana a la pared",
+        (0.05, 0.07, 0.13, 0.22, 0.32, 0.35),
+    ),
+    (
+        51,
+        "Cortina de terciopelo de 620 g/m2 plana a la pared",
+        (0.05, 0.12, 0.35, 0.45, 0.38, 0.36),
+    ),
+    (
+        52,
+        "Cortina de algodón de 340 g/m2 fruncida al 150 %",
+        (0.07, 0.31, 0.49, 0.81, 0.66, 0.54),
+    ),
+    (
+        53,
+        "Cortina de algodón de 480 g/m2 fruncida al 150 %",
+        (0.07, 0.31, 0.49, 0.75, 0.70, 0.60),
+    ),
+    (
+        54,
+        "Cortina de algodón de 620 g/m2 fruncida al 150 %",
+        (0.14, 0.35, 0.55, 0.72, 0.70, 0.65),
+    ),
+    (
+        55,
+        "Cortina de algodón de 340 g/m2 fruncida al 187,5 %",
+        (0.03, 0.12, 0.15, 0.27, 0.37, 0.42),
+    ),
+    (
+        56,
+        "Cortina de algodón de 340 g/m2 fruncida al 175 %",
+        (0.04, 0.23, 0.40, 0.57, 0.53, 0.40),
+    ),
+    (57, "Fieltro de 25 mm", (0.18, 0.36, 0.71, 0.79, 0.82, 0.85)),
+    (
+        58,
+        "Fieltro de 25 mm con intervalos de aire a 50 mm",
+        (0.35, 0.62, 0.88, 0.92, 0.78, 0.84),
+    ),
+    (59, "Fibra de vidrio 22 kg/m2 30 mm", (0.10, 0.32, 0.55, 0.66, 0.79, 0.77)),
+    (60, "Ídem 50 mm", (0.19, 0.43, 0.77, 0.82, 0.94, 0.83)),
+    (61, "Ídem 70 mm", (0.33, 0.65, 0.88, 0.91, 0.97, 0.94)),
+    (62, "Ídem 100 mm", (0.54, 0.87, 0.1, 0.96, 0.97, 0.93)),
+    (63, "m: Aire (30 % HR) m-1", (None, None, None, None, 0.00327, 0.011)),
+    (64, "m: Aire (50 % HR) m-1", (None, None, None, None, 0.0026, 0.0075)),
+    (65, "m: Aire (70 % HR) m-1", (None, None, None, None, 0.00196, 0.0065)),
+    (66, "Agua (piscinas)", (0.01, 0.01, 0.01, 0.01, 0.02, 0.02)),
+    (67, "Abertura de escenario", (0.30, 0.40, 0.50, 0.60, 0.60, 0.50)),
+    (
+        68,
+        "Audiencia ocupando butacas bien tapizadas",
+        (0.52, 0.68, 0.85, 0.97, 0.93, 0.85),
+    ),
+    (69, "Butacas bien tapizadas", (0.49, 0.66, 0.80, 0.88, 0.82, 0.70)),
+    (70, "Butacas tapizadas de cuero", (0.44, 0.54, 0.60, 0.62, 0.58, 0.50)),
+    (
+        71,
+        "Bancos de iglesia de madera 100 % ocupados",
+        (0.57, 0.61, 0.75, 0.86, 0.91, 0.86),
+    ),
+    (72, "Asientos de madera 100 % ocupados", (0.60, 0.74, 0.88, 0.96, 0.93, 0.85)),
+    (73, "Asientos de madera 75 % ocupados", (0.46, 0.56, 0.65, 0.75, 0.72, 0.65)),
+    (74, "Lana de roca 100 kg/m2 30 mm", (0.07, 0.40, 0.88, 0.92, 0.96, 1.05)),
+    (75, "Ídem 50 mm", (0.19, 0.74, 0.95, 0.98, 0.96, 1.04)),
+    (76, "Ídem 80 mm", (0.35, 0.86, 0.92, 0.99, 1.02, 1.03)),
+    (
+        77,
+        "Espuma de poliuretano de 15 mm con forro de plástico ligero",
+        (0.02, 0.08, 0.24, 0.48, 0.72, 0.70),
+    ),
+    (78, "Ídem 30 mm", (0.13, 0.75, 0.70, 1.02, 1.00, 0.95)),
+    (
+        79,
+        "Espuma de poliuretano con forro film de plástico",
+        (0.21, 0.52, 0.64, 0.64, 0.60, 0.62),
+    ),
+    (
+        80,
+        "Panel metálico perforado Ø 20 mm p = 14.9 % Cavidad de aire 100 mm. Espesor fibra interior 30 mm. Espesor del plafón perforado 0.95 mm",
+        (0.27, 0.78, 0.93, 0.71, 0.55, 0.51),
+    ),
+    (
+        81,
+        "Igual que 80 con cavidad de aire 200 mm",
+        (None, 0.88, 0.88, 0.63, 0.54, 0.47),
+    ),
+    (
+        82,
+        "Igual que 80 con cavidad de aire 400 mm",
+        (None, 0.78, 0.66, 0.73, 0.61, 0.48),
+    ),
+    (
+        83,
+        "Resonador del tipo figura 6.9 y F.6.7 de ranuras en bloques de hormigón de 200 x 200 x 500 mm con fibra de vidrio en los alveolos",
+        (0.72, 0.58, 0.77, 0.72, 0.49, 0.45),
+    ),
+    (
+        84,
+        "Igual que 83, pero con alveolos vacíos",
+        (0.69, 0.13, 0.07, 0.07, 0.14, 0.15),
+    ),
+    (
+        85,
+        "Revestimiento textil de muros 100 % poliamida, masa superficial 0.640, 1.8 mm grueso y reverso de fibras minerales",
+        (0.02, 0.03, 0.09, 0.14, 0.29, 0.57),
+    ),
+    (
+        86,
+        "Velo rizado 100 % PL VA 1.75 kg/m2 de 6 mm, parte dorsal yute o algodón",
+        (0.05, 0.12, 0.17, 0.25, 0.45, 0.88),
+    ),
+    (87, "Tejido de napa + film PE 3 mm", (0.02, 0.05, 0.10, 0.14, 0.22, 0.24)),
+    (
+        88,
+        "Tejido 53 % algodón 33 % fibra 14 % lino 0.24 kg/m2",
+        (0.02, 0.04, 0.07, 0.26, 0.30, 0.15),
+    ),
+    (
+        89,
+        "Tela de lino y en el dorso papel 0.48 kg/m2 de 1.2 mm",
+        (0.02, 0.03, 0.07, 0.10, 0.14, 0.16),
+    ),
+    (
+        90,
+        "Revestimiento textura alveolar textil con fibras y en el dorso espuma de poliuretano 0.650 kg/m2 de 7 mm",
+        (0.06, 0.09, 0.14, 0.19, 0.60, 0.88),
+    ),
+    (91, "Ídem, pero 0.940 kg/m2 de 17 mm", (0.05, 0.19, 0.35, 0.84, 0.98, 0.89)),
+    (
+        92,
+        "Revestimiento textil de suelo o moqueta de terciopelo trenzado 100 % de 1.2 kg/m2 espuma SBR en zona dorsal",
+        (0.01, 0.04, 0.09, 0.015, 0.30, 0.38),
+    ),
+    (
+        93,
+        "Moqueta con espuma SBR en zona dorsal 2.235 kg/m2, 10 mm",
+        (0.03, 0.08, 0.28, 0.33, 0.38, 0.42),
+    ),
+    (
+        94,
+        "Moqueta tapiz trenzado 1.575 kg/m2, 5.5 mm",
+        (0.01, 0.04, 0.07, 0.18, 0.39, 0.42),
+    ),
+    (
+        95,
+        "Pared de baldosa perforada, con lana mineral 5 cm + 50 cm de cámara de aire",
+        (0.5, 0.41, 0.35, 0.39, 0.26, 0.32),
+    ),
+    (
+        96,
+        "Rejillas del sistema de aire acondicionado",
+        (RANGE_ACROSS_COLUMNS, None, None, None, None, None),
+    ),
+    (
+        97,
+        "Grava suelta y húmeda de 20 cm de grosor",
+        (0.15, 0.25, 0.40, 0.55, 0.60, 0.60),
+    ),
+    (98, "Suelo áspero", (0.21, 0.52, 0.64, 0.64, 0.60, 0.62)),
+    (99, "Hierba 5 cm de altura", (0.11, 0.26, 0.60, 0.69, 0.82, 0.99)),
+)

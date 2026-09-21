@@ -58229,6 +58229,4614 @@ export const catalogues = {
             "note": ""
           }
         ]
+      },
+      {
+        "key": "arau-1999-table-6-1/01_pared_de_ladrillo",
+        "table": "arau-1999-table-6-1",
+        "name": "Pared de ladrillo",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,025",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,025",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/02_pared_de_ladrillo_pintado",
+        "table": "arau-1999-table-6-1",
+        "name": "Pared de ladrillo pintado",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/03_pared_de_ladrillo_encalada",
+        "table": "arau-1999-table-6-1",
+        "name": "Pared de ladrillo encalada",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/04_bloque_de_hormigon_aspero",
+        "table": "arau-1999-table-6-1",
+        "name": "Bloque de hormigón áspero",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/05_bloque_de_hormigon_pintado",
+        "table": "arau-1999-table-6-1",
+        "name": "Bloque de hormigón pintado",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/06_hormigon_de_obra_fino",
+        "table": "arau-1999-table-6-1",
+        "name": "Hormigón de obra fino",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01 to 0,02",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.02 and no value"
+          },
+          {
+            "text": "0,01 to 0,02",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.02 and no value"
+          },
+          {
+            "text": "0,02 to 0,04",
+            "kind": "range",
+            "note": "the page prints 0.02 to 0.04 and no value"
+          },
+          {
+            "text": "0,02 to 0,06",
+            "kind": "range",
+            "note": "the page prints 0.02 to 0.06 and no value"
+          },
+          {
+            "text": "0,02 to 0,08",
+            "kind": "range",
+            "note": "the page prints 0.02 to 0.08 and no value"
+          },
+          {
+            "text": "0,03 to 0,1",
+            "kind": "range",
+            "note": "the page prints 0.03 to 0.1 and no value"
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/07_hormigon_de_obra_pintado_al_esmalte",
+        "table": "arau-1999-table-6-1",
+        "name": "Hormigón de obra pintado al esmalte",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/08_hormigon_enfoscado_muy_fino",
+        "table": "arau-1999-table-6-1",
+        "name": "Hormigón enfoscado muy fino",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,004",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,004",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,005",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,006",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,008",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/09_yeso_escayola_5_cm",
+        "table": "arau-1999-table-6-1",
+        "name": "Yeso, escayola, 5 cm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/10_yeso_escayola_fibrosa_5_cm",
+        "table": "arau-1999-table-6-1",
+        "name": "Yeso, escayola fibrosa, 5 cm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/11_enlucido_de_paredes",
+        "table": "arau-1999-table-6-1",
+        "name": "Enlucido de paredes",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01 to 0,04",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.04 and no value"
+          },
+          {
+            "text": "0,01 to 0,04",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.04 and no value"
+          },
+          {
+            "text": "0,02 to 0,04",
+            "kind": "range",
+            "note": "the page prints 0.02 to 0.04 and no value"
+          },
+          {
+            "text": "0,03 to 0,06",
+            "kind": "range",
+            "note": "the page prints 0.03 to 0.06 and no value"
+          },
+          {
+            "text": "0,04 to 0,06",
+            "kind": "range",
+            "note": "the page prints 0.04 to 0.06 and no value"
+          },
+          {
+            "text": "0,03 to 0,06",
+            "kind": "range",
+            "note": "the page prints 0.03 to 0.06 and no value"
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/12_yeso_escayola_con_acabado_aspero",
+        "table": "arau-1999-table-6-1",
+        "name": "Yeso, escayola, con acabado áspero",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/13_yeso_escayola_con_acabado_fino",
+        "table": "arau-1999-table-6-1",
+        "name": "Yeso, escayola, con acabado fino",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/14_yeso_25_mm_con_camara_aire_en_el_dorso",
+        "table": "arau-1999-table-6-1",
+        "name": "Yeso 25 mm con cámara aire en el dorso",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/15_tablero_de_carton_yeso_de_13_mm_con_camara_aire_en_el_dorso_",
+        "table": "arau-1999-table-6-1",
+        "name": "Tablero de cartón yeso de 13 mm con cámara aire en el dorso sujeto por perfiles 5 × 10 cm interdistanciados 40 cm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/16_tablero_de_yeso_de_15_mm_montado_en_identicas_condiciones_qu",
+        "table": "arau-1999-table-6-1",
+        "name": "Tablero de yeso de 15 mm montado en idénticas condiciones que 15",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/17_marmol_o_baldosa_pulida",
+        "table": "arau-1999-table-6-1",
+        "name": "Mármol o baldosa pulida",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/18_contrachapado_de_madera_de_10_mm_formando_pequenas_cavidades",
+        "table": "arau-1999-table-6-1",
+        "name": "Contrachapado de madera de 10 mm formando pequeñas cavidades máx. 25 mm en dorso",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/19_contrachapado_de_madera_de_6_mm_con_80_mm_cavidad_de_aire_re",
+        "table": "arau-1999-table-6-1",
+        "name": "Contrachapado de madera de 6 mm con 80 mm cavidad de aire rellenada parcialmente con material absorbente",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/20_igual_que_19_pero_sin_material_absorbente",
+        "table": "arau-1999-table-6-1",
+        "name": "Contrachapado de madera de 6 mm con 80 mm cavidad de aire rellenada parcialmente con material absorbente",
+        "variant": "Igual que 19, pero sin material absorbente",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/21_contrachapado_de_madera_de_3_mm_con_cavidad_de_aire_en_el_do",
+        "table": "arau-1999-table-6-1",
+        "name": "Contrachapado de madera de 3 mm con cavidad de aire en el dorso",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/22_madera_fijada_solidamente_a_una_pared_o_a_un_solido",
+        "table": "arau-1999-table-6-1",
+        "name": "Madera fijada sólidamente a una pared o a un sólido",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/23_plafon_de_madera_de_pino_de_20_mm_y_50_mm_de_camara_de_aire",
+        "table": "arau-1999-table-6-1",
+        "name": "Plafón de madera de pino de 20 mm y 50 mm de cámara de aire",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/24_plafon_de_madera_de_cedro_con_camara_en_el_dorso",
+        "table": "arau-1999-table-6-1",
+        "name": "Plafón de madera de cedro con cámara en el dorso",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/25_madera_delgada_5_a_10_mm_formando_camara_de_aire_en_el_dorso",
+        "table": "arau-1999-table-6-1",
+        "name": "Madera delgada (5 a 10 mm) formando cámara de aire en el dorso",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/26_madera_10_a_13_mm_formando_camara_de_aire_50_a_100_mm_en_el_",
+        "table": "arau-1999-table-6-1",
+        "name": "Madera (10 a 13 mm) formando cámara de aire 50 a 100 mm en el dorso",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/27_madera_solida_5_cm_de_espesor",
+        "table": "arau-1999-table-6-1",
+        "name": "Madera sólida, 5 cm de espesor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/28_vidrios_de_6_mm_area_pequena",
+        "table": "arau-1999-table-6-1",
+        "name": "Vidrios de 6 mm área pequeña",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/29_vidrios_de_6_mm_area_grande",
+        "table": "arau-1999-table-6-1",
+        "name": "Vidrios de 6 mm área grande",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,018",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/30_vidrio_de_3_mm_ventana",
+        "table": "arau-1999-table-6-1",
+        "name": "Vidrio de 3 mm ventana",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/31_vitrinas_emplomadas_3_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Vitrinas emplomadas 3 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/32_vidrios_pesados_luna_grande",
+        "table": "arau-1999-table-6-1",
+        "name": "Vidrios pesados luna grande",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/33_pavimento_ceramico",
+        "table": "arau-1999-table-6-1",
+        "name": "Pavimento cerámico",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/34_baldosa_de_tierra_sobre_hormigon",
+        "table": "arau-1999-table-6-1",
+        "name": "Baldosa de tierra sobre hormigón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/35_loseta_de_caucho_sobre_hormigon",
+        "table": "arau-1999-table-6-1",
+        "name": "Loseta de caucho sobre hormigón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,019",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,033",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,036",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,018",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/36_loseta_de_linoleo_sobre_hormigon",
+        "table": "arau-1999-table-6-1",
+        "name": "Loseta de linóleo sobre hormigón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/37_loseta_de_plastico_vinilico_sobre_hormigon",
+        "table": "arau-1999-table-6-1",
+        "name": "Loseta de plástico vinílico sobre hormigón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/38_losa_de_corcho_de_2_cm_encerada_y_pulida",
+        "table": "arau-1999-table-6-1",
+        "name": "Losa de corcho de 2 cm encerada y pulida",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/39_parque_sobre_rastreles",
+        "table": "arau-1999-table-6-1",
+        "name": "Parqué sobre rastreles",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/40_parque_encima_de_hormigon",
+        "table": "arau-1999-table-6-1",
+        "name": "Parqué encima de hormigón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/41_madera_barnizada_sobre_vigas",
+        "table": "arau-1999-table-6-1",
+        "name": "Madera barnizada sobre vigas",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/42_plataformas_de_madera_con_gran_profundidad_de_aire",
+        "table": "arau-1999-table-6-1",
+        "name": "Plataformas de madera con gran profundidad de aire",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/43_alfombra_gruesa_encima_de_hormigon",
+        "table": "arau-1999-table-6-1",
+        "name": "Alfombra gruesa encima de hormigón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/44_alfombra_gruesa_encima_de_fieltro_o_caucho_espumado",
+        "table": "arau-1999-table-6-1",
+        "name": "Alfombra gruesa encima de fieltro o caucho espumado",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/45_alfombra_pesada_con_latex_impermeable_encima_de_fieltro_o_ca",
+        "table": "arau-1999-table-6-1",
+        "name": "Alfombra pesada con látex impermeable encima de fieltro o caucho espumado",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/46_moqueta_de_10_mm_sobre_pared",
+        "table": "arau-1999-table-6-1",
+        "name": "Moqueta de 10 mm sobre pared",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/47_moqueta_de_3_mm_sobre_fieltro_encima_de_hormigon",
+        "table": "arau-1999-table-6-1",
+        "name": "Moqueta de 3 mm sobre fieltro encima de hormigón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/48_moqueta_de_goma_de_5_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Moqueta de goma de 5 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/49_cortina_ligera_de_algodon_de_340_g_m2_de_gramaje_plana_a_la_",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina ligera de algodón de 340 g/m² de gramaje, plana a la pared",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/50_cortina_de_algodon_de_480_g_m2_plana_a_la_pared",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina de algodón de 480 g/m² plana a la pared",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/51_cortina_de_terciopelo_de_620_g_m2_plana_a_la_pared",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina de terciopelo de 620 g/m² plana a la pared",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/52_cortina_de_algodon_de_340_g_m2_fruncida_al_150_percent",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina de algodón de 340 g/m² fruncida al 150 %",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/53_cortina_de_algodon_de_480_g_m2_fruncida_al_150_percent",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina de algodón de 480 g/m² fruncida al 150 %",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/54_cortina_de_algodon_de_620_g_m2_fruncida_al_150_percent",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina de algodón de 620 g/m² fruncida al 150 %",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/55_cortina_de_algodon_de_340_g_m2_fruncida_al_187_5_percent",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina de algodón de 340 g/m² fruncida al 187,5 %",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/56_cortina_de_algodon_de_340_g_m2_fruncida_al_175_percent",
+        "table": "arau-1999-table-6-1",
+        "name": "Cortina de algodón de 340 g/m² fruncida al 175 %",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/57_fieltro_de_25_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Fieltro de 25 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/58_fieltro_de_25_mm_con_intervalos_de_aire_a_50_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Fieltro de 25 mm con intervalos de aire a 50 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/59_fibra_de_vidrio_22_kg_m2_30_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Fibra de vidrio 22 kg/m² 30 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/60_idem_50_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Fibra de vidrio 22 kg/m² 30 mm",
+        "variant": "Ídem 50 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/61_idem_70_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Fibra de vidrio 22 kg/m² 30 mm",
+        "variant": "Ídem 70 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/62_idem_100_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Fibra de vidrio 22 kg/m² 30 mm",
+        "variant": "Ídem 100 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/66_agua_piscinas",
+        "table": "arau-1999-table-6-1",
+        "name": "Agua (piscinas)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/67_abertura_de_escenario",
+        "table": "arau-1999-table-6-1",
+        "name": "Abertura de escenario",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/68_audiencia_ocupando_butacas_bien_tapizadas",
+        "table": "arau-1999-table-6-1",
+        "name": "Audiencia ocupando butacas bien tapizadas",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/69_butacas_bien_tapizadas",
+        "table": "arau-1999-table-6-1",
+        "name": "Butacas bien tapizadas",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/70_butacas_tapizadas_de_cuero",
+        "table": "arau-1999-table-6-1",
+        "name": "Butacas tapizadas de cuero",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/71_bancos_de_iglesia_de_madera_100_percent_ocupados",
+        "table": "arau-1999-table-6-1",
+        "name": "Bancos de iglesia de madera 100 % ocupados",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/72_asientos_de_madera_100_percent_ocupados",
+        "table": "arau-1999-table-6-1",
+        "name": "Asientos de madera 100 % ocupados",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/73_asientos_de_madera_75_percent_ocupados",
+        "table": "arau-1999-table-6-1",
+        "name": "Asientos de madera 75 % ocupados",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/74_lana_de_roca_100_kg_m2_30_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Lana de roca 100 kg/m² 30 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/75_idem_50_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Lana de roca 100 kg/m² 30 mm",
+        "variant": "Ídem 50 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/76_idem_80_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Lana de roca 100 kg/m² 30 mm",
+        "variant": "Ídem 80 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/77_espuma_de_poliuretano_de_15_mm_con_forro_de_plastico_ligero",
+        "table": "arau-1999-table-6-1",
+        "name": "Espuma de poliuretano de 15 mm con forro de plástico ligero",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/78_idem_30_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Espuma de poliuretano de 15 mm con forro de plástico ligero",
+        "variant": "Ídem 30 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/79_espuma_de_poliuretano_con_forro_film_de_plastico",
+        "table": "arau-1999-table-6-1",
+        "name": "Espuma de poliuretano con forro film de plástico",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/80_panel_metalico_perforado_diam_20_mm_p_14_9_percent_cavidad_d",
+        "table": "arau-1999-table-6-1",
+        "name": "Panel metálico perforado Ø 20 mm p = 14.9 % Cavidad de aire 100 mm. Espesor fibra interior 30 mm. Espesor del plafón perforado 0.95 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/81_igual_que_80_con_cavidad_de_aire_200_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Panel metálico perforado Ø 20 mm p = 14.9 % Cavidad de aire 100 mm. Espesor fibra interior 30 mm. Espesor del plafón perforado 0.95 mm",
+        "variant": "Igual que 80 con cavidad de aire 200 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/82_igual_que_80_con_cavidad_de_aire_400_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Panel metálico perforado Ø 20 mm p = 14.9 % Cavidad de aire 100 mm. Espesor fibra interior 30 mm. Espesor del plafón perforado 0.95 mm",
+        "variant": "Igual que 80 con cavidad de aire 400 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/83_resonador_del_tipo_figura_6_9_y_f_6_7_de_ranuras_en_bloques_",
+        "table": "arau-1999-table-6-1",
+        "name": "Resonador del tipo figura 6.9 y F.6.7 de ranuras en bloques de hormigón de 200 × 200 × 500 mm con fibra de vidrio en los alveolos",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/84_igual_que_83_pero_con_alveolos_vacios",
+        "table": "arau-1999-table-6-1",
+        "name": "Resonador del tipo figura 6.9 y F.6.7 de ranuras en bloques de hormigón de 200 × 200 × 500 mm con fibra de vidrio en los alveolos",
+        "variant": "Igual que 83, pero con alveolos vacíos",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/85_revestimiento_textil_de_muros_100_percent_poliamida_masa_sup",
+        "table": "arau-1999-table-6-1",
+        "name": "Revestimiento textil de muros 100 % poliamida, masa superficial 0.640, 1.8 mm grueso y reverso de fibras minerales",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/86_velo_rizado_100_percent_pl_va_1_75_kg_m2_de_6_mm_parte_dorsa",
+        "table": "arau-1999-table-6-1",
+        "name": "Velo rizado 100 % PL VA 1.75 kg/m² de 6 mm, parte dorsal yute o algodón",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/87_tejido_de_napa_mas_film_pe_3_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Tejido de napa + film PE 3 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/88_tejido_53_percent_algodon_33_percent_fibra_14_percent_lino_0",
+        "table": "arau-1999-table-6-1",
+        "name": "Tejido 53 % algodón 33 % fibra 14 % lino 0.24 kg/m²",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/89_tela_de_lino_y_en_el_dorso_papel_0_48_kg_m2_de_1_2_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Tela de lino y en el dorso papel 0.48 kg/m² de 1.2 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/90_revestimiento_textura_alveolar_textil_con_fibras_y_en_el_dor",
+        "table": "arau-1999-table-6-1",
+        "name": "Revestimiento textura alveolar textil con fibras y en el dorso espuma de poliuretano 0.650 kg/m² de 7 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/91_idem_pero_0_940_kg_m2_de_17_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Revestimiento textura alveolar textil con fibras y en el dorso espuma de poliuretano 0.650 kg/m² de 7 mm",
+        "variant": "Ídem, pero 0.940 kg/m² de 17 mm",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/92_revestimiento_textil_de_suelo_o_moqueta_de_terciopelo_trenza",
+        "table": "arau-1999-table-6-1",
+        "name": "Revestimiento textil de suelo o moqueta de terciopelo trenzado 100 % de 1.2 kg/m² espuma SBR en zona dorsal",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/93_moqueta_con_espuma_sbr_en_zona_dorsal_2_235_kg_m2_10_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Moqueta con espuma SBR en zona dorsal 2.235 kg/m², 10 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/94_moqueta_tapiz_trenzado_1_575_kg_m2_5_5_mm",
+        "table": "arau-1999-table-6-1",
+        "name": "Moqueta tapiz trenzado 1.575 kg/m², 5.5 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/95_pared_de_baldosa_perforada_con_lana_mineral_5_cm_mas_50_cm_d",
+        "table": "arau-1999-table-6-1",
+        "name": "Pared de baldosa perforada, con lana mineral 5 cm + 50 cm de cámara de aire",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/96_rejillas_del_sistema_de_aire_acondicionado",
+        "table": "arau-1999-table-6-1",
+        "name": "Rejillas del sistema de aire acondicionado",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "La página imprime un solo intervalo, 0.15 – 0.50, a caballo de las columnas de 125 y 250 Hz, y no dice a qué bandas se aplica.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0.15 – 0.50",
+            "kind": "unquantified",
+            "note": "the page prints “0.15 – 0.50” where the number would be"
+          },
+          {
+            "text": "0.15 – 0.50",
+            "kind": "unquantified",
+            "note": "the page prints “0.15 – 0.50” where the number would be"
+          },
+          {
+            "text": "0.15 – 0.50",
+            "kind": "unquantified",
+            "note": "the page prints “0.15 – 0.50” where the number would be"
+          },
+          {
+            "text": "0.15 – 0.50",
+            "kind": "unquantified",
+            "note": "the page prints “0.15 – 0.50” where the number would be"
+          },
+          {
+            "text": "0.15 – 0.50",
+            "kind": "unquantified",
+            "note": "the page prints “0.15 – 0.50” where the number would be"
+          },
+          {
+            "text": "0.15 – 0.50",
+            "kind": "unquantified",
+            "note": "the page prints “0.15 – 0.50” where the number would be"
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/97_grava_suelta_y_humeda_de_20_cm_de_grosor",
+        "table": "arau-1999-table-6-1",
+        "name": "Grava suelta y húmeda de 20 cm de grosor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/98_suelo_aspero",
+        "table": "arau-1999-table-6-1",
+        "name": "Suelo áspero",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "arau-1999-table-6-1/99_hierba_5_cm_de_altura",
+        "table": "arau-1999-table-6-1",
+        "name": "Hierba 5 cm de altura",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Arau-Puchades (1999) Tabla 6.1, PDF pages 193-195 (printed pp. 190-192)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
       }
     ]
   },

@@ -1,0 +1,222 @@
+---
+title: "materials.diffusers.measured_scattering"
+description: "Scattering coefficients as the books print them, one row per surface."
+sidebar:
+  label: "measured_scattering"
+---
+
+Scattering coefficients as the books print them, one row per surface.
+
+A geometric room acoustics model asks for one number per surface per band,
+the scattering coefficient, and has no way of working it out. The rest of
+this subpackage computes it: `.reverberation_room_scattering` runs the
+ISO 17497-1 procedure on four reverberation times, and `.design`
+predicts a polar response from a well sequence. This module holds what other
+people measured, so that a modeller who has neither a turntable nor a
+boundary element solver has somewhere to start, and so that a measurement
+made here has published values to sit beside.
+
+Scattering is not diffusion, and both live here
+------------------------------------------------
+ISO 17497 is two documents and two quantities. Part 1 measures the
+*scattering coefficient*, the fraction of reflected energy that leaves the
+specular direction, from four reverberation times in a room with a turning
+table; it says nothing about where that energy goes. Part 2 measures the
+*diffusion coefficient*, how even the polar response is, and a surface can
+score high on one and low on the other. A catalogue that put them in one
+field would let a caller pass a diffusion coefficient to a model that wants
+a scattering coefficient, which is a silent error, so they are two classes
+and two catalogues: [`PUBLISHED_SCATTERING`](/phonometry/reference/api/materials/measured-scattering/#published_scattering) here, and the diffusion
+coefficients of ISO 17497-2 where they belong.
+
+The band is the field
+---------------------
+These tables are set in one-third octave bands, so each band is a field of
+its own, `scattering_coefficient_1000` and so on, with the band's centre
+frequency in hertz as the suffix and no unit because the quantity has none.
+Every hedge of `CatalogueRow` is keyed
+by field name, so a band the page leaves empty says so through
+`why_missing` rather than
+answering zero, and a zero here would read as a perfectly specular surface.
+[`ScatteringCoefficientSpectrum.bands`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumbands) and
+[`spectrum`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumspectrum) hand the row back as a
+spectrum for the caller who wants one.
+
+What the numbers are worth
+--------------------------
+A row is a surface of that description, measured once, by one team, in one
+room. Cox prints no uncertainty and no laboratory, and the spread between
+teams is not small: the same battens, 10 cm high and 10 cm wide on a 20 cm
+period, appear twice in Appendix D, credited to two different papers, and
+read 0.28 and 0.44 at 630 Hz. Nothing is wrong with either; that is how wide
+the method is. A coefficient above one is likewise not an error but what the
+formula gave, since ISO 17497-1 derives it from a ratio of reverberation
+times and puts no ceiling on the result.
+
+The surfaces are described, not named. A row reads `"h = w = 10 cm,
+L = 2h"` and means nothing without the group heading above it, so
+`group` carries that
+heading and [`scattering_named`](/phonometry/reference/api/materials/measured-scattering/#scattering_named) matches on either.
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+## PUBLISHED_SCATTERING
+
+*Constant* (`mappingproxy`).
+
+## SCATTERING_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+SCATTERING_BANDS_HZ = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
+```
+
+## scattering_named
+
+```python
+scattering_named(name: str) -> tuple[ScatteringCoefficientSpectrum, ...]
+```
+
+Every published row whose description or group contains *name*.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | A fragment of the printed description or of the group heading above it, matched without case. The headings are where the useful words are: `"pyramid"`, `"vegetation"`, `"batten"`, since a row of its own reads `"h = w = 10 cm, L = 2h"`. |
+
+**Returns:** The rows that match, in the order the tables are read, which is empty when no page has one.
+
+## ScatteringCoefficientSpectrum
+
+```python
+ScatteringCoefficientSpectrum(
+    *,
+    name: str,
+    source: str,
+    table: str = '',
+    variant: str = '',
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    ranges: Mapping[str, tuple[float, float]] = ...,
+    bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
+    reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
+    unquantified: Mapping[str, str] = ...,
+    uncertainty: Mapping[str, float] = ...,
+    not_derivable: Mapping[str, str] = ...,
+    misprinted: Mapping[str, str] = ...,
+    attributed_to: Mapping[str, str] = ...,
+    group: str = '',
+    note: str = '',
+    scattering_coefficient_100: float | None = None,
+    scattering_coefficient_125: float | None = None,
+    scattering_coefficient_160: float | None = None,
+    scattering_coefficient_200: float | None = None,
+    scattering_coefficient_250: float | None = None,
+    scattering_coefficient_315: float | None = None,
+    scattering_coefficient_400: float | None = None,
+    scattering_coefficient_500: float | None = None,
+    scattering_coefficient_630: float | None = None,
+    scattering_coefficient_800: float | None = None,
+    scattering_coefficient_1000: float | None = None,
+    scattering_coefficient_1250: float | None = None,
+    scattering_coefficient_1600: float | None = None,
+    scattering_coefficient_2000: float | None = None,
+    scattering_coefficient_2500: float | None = None,
+    scattering_coefficient_3150: float | None = None,
+    scattering_coefficient_4000: float | None = None,
+    scattering_coefficient_5000: float | None = None,
+)
+```
+
+One surface of a published table, with its coefficient in each band.
+
+The geometry is part of `name`, as the page prints
+it, and the family it belongs to is
+`group`: pulling `h` and `L` into fields would
+mean deciding what the height of a randomly arranged array of blocks is,
+and the pages do not agree on which letters they use.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `scattering_coefficient_100` | Random incidence scattering coefficient in the 100 Hz one-third octave band, dimensionless, as printed. |
+| `scattering_coefficient_125` | The same in the 125 Hz band. |
+| `scattering_coefficient_160` | The same in the 160 Hz band. |
+| `scattering_coefficient_200` | The same in the 200 Hz band. |
+| `scattering_coefficient_250` | The same in the 250 Hz band. |
+| `scattering_coefficient_315` | The same in the 315 Hz band. |
+| `scattering_coefficient_400` | The same in the 400 Hz band. |
+| `scattering_coefficient_500` | The same in the 500 Hz band. |
+| `scattering_coefficient_630` | The same in the 630 Hz band. |
+| `scattering_coefficient_800` | The same in the 800 Hz band. |
+| `scattering_coefficient_1000` | The same in the 1 kHz band. |
+| `scattering_coefficient_1250` | The same in the 1.25 kHz band. |
+| `scattering_coefficient_1600` | The same in the 1.6 kHz band. |
+| `scattering_coefficient_2000` | The same in the 2 kHz band. |
+| `scattering_coefficient_2500` | The same in the 2.5 kHz band. |
+| `scattering_coefficient_3150` | The same in the 3.15 kHz band. |
+| `scattering_coefficient_4000` | The same in the 4 kHz band. |
+| `scattering_coefficient_5000` | The same in the 5 kHz band. |
+| `name` | The material as the table names it, attribution stripped. |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
+| `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
+| `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
+| `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |
+| `misprinted` | Field to what the page prints there and why it cannot be that, for a cell whose defect is confirmed and registered in `docs/ERRATA.md`. The number is not served, because a catalogue that handed it over would put a value its own registry calls wrong behind every calculation downstream; it is not dropped either, because a reader reproducing the book needs to see what the book says. This is the narrowest of the hedges and the one that costs most to claim: a cell earns it only when the defect follows from the page itself or from something as settled as the molar mass of a named molecule, and never from one book disagreeing with another. |
+| `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
+| `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
+| `note` | What the page says about this row beyond its numbers. |
+
+### ScatteringCoefficientSpectrum.bands()
+
+```python
+ScatteringCoefficientSpectrum.bands() -> tuple[int, ...]
+```
+
+The one-third octave bands this row prints a coefficient for, in hertz.
+
+### ScatteringCoefficientSpectrum.scattering_coefficient()
+
+```python
+ScatteringCoefficientSpectrum.scattering_coefficient(band_hz: int) -> float
+```
+
+The coefficient in one band, or a refusal that says what the page had.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `band_hz` | A one-third octave centre frequency from [`SCATTERING_BANDS_HZ`](/phonometry/reference/api/materials/measured-scattering/#scattering_bands_hz). |
+
+**Returns:** The printed scattering coefficient, dimensionless.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
+
+### ScatteringCoefficientSpectrum.spectrum()
+
+```python
+ScatteringCoefficientSpectrum.spectrum() -> dict[int, float]
+```
+
+The row as `{band_hz: scattering_coefficient}` over the bands it prints.
+
+A band the page left empty is left out rather than filled with a
+zero, which would read as a surface that reflects every ray back
+along the specular direction.

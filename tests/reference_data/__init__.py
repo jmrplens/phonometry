@@ -890,6 +890,9 @@ from .room import EVEREST_EX1_RT as EVEREST_EX1_RT
 from .room import EVEREST_EX1_SHELL_ALPHA as EVEREST_EX1_SHELL_ALPHA
 from .room import EVEREST_EX1_SHELL_AREA as EVEREST_EX1_SHELL_AREA
 from .room import EVEREST_EX1_VOLUME as EVEREST_EX1_VOLUME
+from .scattering import COX_D_BANDS_HZ as COX_D_BANDS_HZ
+from .scattering import COX_D_FIRST_AUTHORS as COX_D_FIRST_AUTHORS
+from .scattering import COX_D_SCATTERING as COX_D_SCATTERING
 from .solids import ARAU_4_1_PRODUCTS as ARAU_4_1_PRODUCTS
 from .solids import ARAU_AGAINST_HOPKINS as ARAU_AGAINST_HOPKINS
 from .solids import (

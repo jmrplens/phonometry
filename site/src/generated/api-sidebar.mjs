@@ -190,6 +190,7 @@ export const apiSections = {
       'reference/api/materials/reverberation-room-scattering',
       'reference/api/materials/design',
       'reference/api/materials/metadiffuser',
+      'reference/api/materials/measured-scattering',
       'reference/api/materials/road-absorption',
     ],
   },

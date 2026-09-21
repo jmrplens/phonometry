@@ -6994,6 +6994,47 @@ dos ediciones con las mismas entradas y en el mismo orden.
   [`tests/fluids/test_gas.py`](https://github.com/jmrplens/phonometry/blob/main/tests/fluids/test_gas.py) lo fija.
 - **Estado:** no reportado.
 
+## Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Apéndice D (dos filas que la tabla no sabe distinguir)
+
+- **Localización:** Apéndice D, «Random incidence scattering coefficient
+  table», el grupo «Pyramids [6]», en las páginas impresas 499 y 500 (PDF 556
+  y 557). Fuente no normativa: un libro de texto.
+- **Lo impreso:** el grupo tiene cuatro filas. La página impresa 499 trae
+  «$h = 30.5$ cm, $L = b = 2h$» y a continuación la misma descripción otra vez,
+  con la línea de continuación «One in four pyramid corners raised from
+  baseplate» debajo. La página impresa 500 trae «$h = 30.5$ cm, $L = b = h$» y
+  después, de nuevo, «$h = 30.5$ cm, $L = b = 2h$» con la misma línea de
+  continuación debajo.
+- **El problema:** la segunda fila y la cuarta se imprimen con la misma
+  descripción, la misma línea de continuación y números distintos: 0,38 frente
+  a 0,44 en 1 kHz, 0,74 frente a 0,76 en 2 kHz, y 1,00 frente a una raya en
+  5 kHz. Nada de lo impreso junto a una de ellas la distingue de la otra, así
+  que quien busque «las pirámides de 30,5 cm con una esquina de cada cuatro
+  levantada» encuentra dos respuestas y ninguna forma de elegir. Una tabla de
+  valores medidos tiene que identificar sus filas, y esta no lo hace.
+- **Evidencia:** las dos páginas leídas a seis aumentos. Las etiquetas son
+  carácter por carácter la misma, las líneas de continuación también, y los
+  valores difieren en trece de las dieciocho bandas, y sólo coinciden en 100,
+  125, 160, 200 y 4000 Hz. La estructura del propio
+  bloque es lo que hace evidente la lectura: la tabla empareja una superficie
+  sin modificar con su versión modificada, y la página impresa 499 empareja
+  $L = b = 2h$ con la suya. La página impresa 500 abre con $L = b = h$, así que
+  su segunda fila es donde le toca a la modificada de $L = b = h$, con lo que
+  el «2h» impreso sería el defecto. Eso es una lectura del patrón y no algo que
+  la página afirme, y la fuente a la que se acredita el grupo, Sharma y
+  Bradley, *J. Acoust. Soc. Am.* 134(5), 4095 (2013), es un resumen de congreso
+  de una página que esta biblioteca no ha leído, así que el registro anota lo
+  que la página hace y no lo que debería haber dicho. Verificado en la página
+  PDF 556 (página impresa 499) y en la página PDF 557 (página impresa 500) de
+  Cox y D'Antonio (2017), *Acoustic Absorbers and Diffusers*, tercera edición.
+- **Comportamiento de la biblioteca:** se guardan las dos filas, con la
+  descripción y la línea de continuación tal como se imprimen. Sus claves
+  llevan la página impresa, que es lo único que las separa, y
+  `test_two_pyramid_rows_are_told_apart_only_by_the_page_they_sit_on` de
+  [`tests/materials/diffusers/test_scattering_catalogue.py`](https://github.com/jmrplens/phonometry/blob/main/tests/materials/diffusers/test_scattering_catalogue.py)
+  fija que sigan siendo dos filas con dos espectros.
+- **Estado:** no reportado.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

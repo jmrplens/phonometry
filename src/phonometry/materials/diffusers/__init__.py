@@ -11,6 +11,12 @@ from .design import (
     qrd_well_depths,
     quadratic_residue_sequence,
 )
+from .measured_scattering import (
+    PUBLISHED_SCATTERING,
+    SCATTERING_BANDS_HZ,
+    ScatteringCoefficientSpectrum,
+    scattering_named,
+)
 from .metadiffuser import (
     MetadiffuserResult,
     MetadiffuserWell,
@@ -52,6 +58,8 @@ __all__ = [
     "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
     "DEFAULT_POLAR_ANGLES",
+    "PUBLISHED_SCATTERING",
+    "SCATTERING_BANDS_HZ",
     "TWO_DIMENSIONAL_SOURCE_WEIGHTS",
     "DiffuserPolarResponse",
     "DiffusionResult",
@@ -59,6 +67,7 @@ __all__ = [
     "MetadiffuserResult",
     "MetadiffuserWell",
     "ScatteringDiffusionWarning",
+    "ScatteringCoefficientSpectrum",
     "ScatteringResult",
     "ScatteringUncertainty",
     "absorption_coefficient_uncertainty",
@@ -83,6 +92,7 @@ __all__ = [
     "scattering_coefficient",
     "scattering_coefficient_spectrum",
     "scattering_coefficient_uncertainty",
+    "scattering_named",
     "specular_absorption_coefficient",
     "speed_of_sound_iso17497",
 ]

@@ -187,6 +187,26 @@ No formula in the book gives that difference; the measurement does.
 
 <Catalogues catalogue="transmissionLoss" lang="en" />
 
+## Scattering coefficients
+
+How much of a reflection leaves the specular direction, band by band, for a
+surface with something on it. The room models of this library take one number
+per surface per band and have no way of working it out, and a measurement
+needs a reverberation room with a turntable in it, so these are the values a
+modeller starts from. Cox measured or collected them under ISO 17497-1 and
+credits each row to the paper it came from; they are the only appendix of his
+four whose numbers were measured rather than computed.
+
+The table is worth reading for how wide the method is. The same battens,
+10 cm high and 10 cm wide on a 20 cm period, appear twice under one heading
+because two teams measured them, and they read 0.28 and 0.44 at 630 Hz. One
+cell is above one, which is what ISO 17497-1 gives when the reflected energy
+is compared against a base plate and nothing caps the ratio. A row is
+described rather than named, so the heading it sits under is part of the
+description and the filter matches both.
+
+<Catalogues catalogue="scattering" lang="en" />
+
 ## Ground surfaces
 
 The effective flow resistivity every outdoor propagation model asks the ground

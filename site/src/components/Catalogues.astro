@@ -51,6 +51,7 @@ interface Props {
 		| 'absorption'
 		| 'absorptionAreas'
 		| 'transmissionLoss'
+		| 'scattering'
 		| 'fluids';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
@@ -72,6 +73,7 @@ const copy = {
 		gasPlaceholder: 'methane, argon, steam',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
+		scatteringPlaceholder: 'pyramid, batten, hedge',
 		table: 'Published table',
 		everyTable: 'Every table',
 		empty: 'No row matches that filter.',
@@ -108,6 +110,7 @@ const copy = {
 		gasPlaceholder: 'methane, argon, steam',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
+		scatteringPlaceholder: 'pyramid, batten, hedge',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',
@@ -151,7 +154,9 @@ const placeholder =
 				? copy.absorptionPlaceholder
 				: section === 'transmissionLoss'
 					? copy.partitionPlaceholder
-					: copy.searchPlaceholder;
+					: section === 'scattering'
+						? copy.scatteringPlaceholder
+						: copy.searchPlaceholder;
 
 /** What the first column holds, which is not a material in every catalogue. */
 const rowHeading =
@@ -165,7 +170,9 @@ const rowHeading =
 					? copy.finish
 					: section === 'transmissionLoss'
 						? copy.partition
-						: copy.material;
+						: section === 'scattering'
+							? copy.surface
+							: copy.material;
 
 /** A column's heading in the language this page is published in. */
 const heading = (column: { heading: string; headingEs?: string }) =>
@@ -176,7 +183,7 @@ const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => ro
 
 /** What the filter matches against: everything a reader might type. */
 const haystack = (row: Record<string, unknown>) =>
-	[row.name, row.variant, row.mounting, row.table, row.source, row.model]
+	[row.name, row.variant, row.group, row.mounting, row.table, row.source, row.model]
 		.filter(Boolean)
 		.join(' ')
 		.toLowerCase();
@@ -248,6 +255,7 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 								title={row.note || undefined}
 							>
 								<span class="wrap">
+									{row.group && <span class="group">{row.group}</span>}
 									{row.name}
 									{row.variant && <span class="variant">{row.variant}</span>}
 								</span>
@@ -496,6 +504,18 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		display: block;
 		font-weight: 400;
 		font-size: 0.9em;
+		color: var(--sl-color-gray-3);
+	}
+
+	/* The heading the book prints above a block of rows. It goes above the
+	   name rather than beside it because it is what the name is short for:
+	   "h = w = 10 cm, L = 2h" is a batten only under "Periodic 1D battens". */
+	.group {
+		display: block;
+		font-weight: 400;
+		font-size: 0.82em;
+		letter-spacing: 0.02em;
+		text-transform: uppercase;
 		color: var(--sl-color-gray-3);
 	}
 

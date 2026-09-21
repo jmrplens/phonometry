@@ -6561,6 +6561,47 @@ in the same order.
   [`tests/fluids/test_gas.py`](https://github.com/jmrplens/phonometry/blob/main/tests/fluids/test_gas.py) pins that.
 - **Status:** not reported.
 
+## Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Appendix D (two rows the table cannot tell apart)
+
+- **Location:** Appendix D, "Random incidence scattering coefficient table",
+  the group "Pyramids [6]", on printed pages 499 and 500 (PDF pages 556 and
+  557). Non-normative source: a textbook.
+- **The print:** the group holds four rows. Printed page 499 carries
+  "$h = 30.5$ cm, $L = b = 2h$" and then the same description again with the
+  continuation line "One in four pyramid corners raised from baseplate" under
+  it. Printed page 500 carries "$h = 30.5$ cm, $L = b = h$" and then, once
+  more, "$h = 30.5$ cm, $L = b = 2h$" with the same continuation line under
+  it.
+- **The problem:** the second and the fourth rows are printed with the same
+  description, the same continuation line and different numbers: 0.38 against
+  0.44 at 1 kHz, 0.74 against 0.76 at 2 kHz, and 1.00 against an en dash at
+  5 kHz. Nothing printed beside either row distinguishes it from the other, so
+  a reader who looks up "the 30.5 cm pyramids with one corner in four raised"
+  finds two answers and no way to choose. A table of measured values has to
+  identify its rows; this one does not.
+- **Evidence:** both pages read at six times magnification. The labels are
+  character for character the same, the continuation lines are the same, and
+  the values differ in thirteen of the eighteen bands, agreeing only at 100,
+  125, 160, 200 and 4000 Hz. The block's own
+  structure is what makes the reading plain: the table pairs a plain surface
+  with a modified one, and printed page 499 pairs $L = b = 2h$ with its
+  modified version. Printed page 500 opens with $L = b = h$, so its second row
+  is where the modified $L = b = h$ belongs, which would make the printed "2h"
+  the defect. That is a reading of the pattern rather than something the page
+  states, and the source the group is credited to, Sharma and Bradley,
+  *J. Acoust. Soc. Am.* 134(5), 4095 (2013), is a one-page meeting abstract
+  that this library has not read, so the errata records what the page does and
+  not what it should have said. Verified on PDF page 556 (printed p. 499) and
+  PDF page 557 (printed p. 500) of Cox and D'Antonio (2017), Acoustic Absorbers
+  and Diffusers, third edition.
+- **Library behaviour:** both rows are kept, with the description and the
+  continuation line as printed. Their keys carry the printed folio, which is
+  the only thing that separates them, and
+  `test_two_pyramid_rows_are_told_apart_only_by_the_page_they_sit_on` in
+  [`tests/materials/diffusers/test_scattering_catalogue.py`](https://github.com/jmrplens/phonometry/blob/main/tests/materials/diffusers/test_scattering_catalogue.py)
+  pins that they stay two rows with two spectra.
+- **Status:** not reported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

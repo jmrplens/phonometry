@@ -48,6 +48,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   cells is a number: this is the one table of the three with no empty cell.
   With it, `absorption_named('carpet')` answers with twenty-one carpets from
   three books.
+- **A fourth absorption table, in Spanish, with intervals and dashes.**
+  Arau-Puchades (1999) Tabla 6.1 adds ninety-six rows whose names are kept in
+  the language the book prints them in, so `absorption_named('moqueta')`
+  answers where `'carpet'` does not. Two rows print an interval rather than a
+  value and are held as one, so neither hands out a midpoint nobody published;
+  a row of air-conditioning grilles prints a single interval across two
+  columns without saying which bands it is for, so no band takes it and all
+  six say what the page has there. Three rows of that table are the air
+  attenuation coefficient m, in reciprocal metres, printed inside the same
+  table: they are not served, because a value in m⁻¹ behind a dimensionless
+  field is a unit error waiting to happen, and the tests say so by number.
 
 ### Fixed
 

@@ -27,6 +27,8 @@ imported in the ``pr-comment`` CI job, which installs the runtime
 requirements but not ``pytest``.
 """
 
+from .absorption import ARAU_6_1_ABSORPTION as ARAU_6_1_ABSORPTION
+from .absorption import ARAU_6_1_BANDS_HZ as ARAU_6_1_BANDS_HZ
 from .absorption import AREA as AREA
 from .absorption import BIES_6_2_ABSORPTION as BIES_6_2_ABSORPTION
 from .absorption import BIES_6_2_BANDS_HZ as BIES_6_2_BANDS_HZ
@@ -36,6 +38,7 @@ from .absorption import COX_A_BANDS_HZ as COX_A_BANDS_HZ
 from .absorption import COX_A_REFERENCES as COX_A_REFERENCES
 from .absorption import LONG_7_1_ABSORPTION as LONG_7_1_ABSORPTION
 from .absorption import LONG_7_1_BANDS_HZ as LONG_7_1_BANDS_HZ
+from .absorption import RANGE_ACROSS_COLUMNS as RANGE_ACROSS_COLUMNS
 from .broadcast import BS468_BURST_HZ as BS468_BURST_HZ
 from .broadcast import BS468_CALIBRATION_V as BS468_CALIBRATION_V
 from .broadcast import BS468_OVERLOAD_BURST_MS as BS468_OVERLOAD_BURST_MS

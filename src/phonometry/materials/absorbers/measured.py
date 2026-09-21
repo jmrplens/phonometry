@@ -221,7 +221,12 @@ _SETS = ("approximate", "bounded_above", "bounded_below")
 
 #: The published tables this catalogue reads, in the order the books print
 #: them, one data file per table.
-_TABLES = ("bies-2017-table-6-2", "long-2014-table-7-1", "cox-2017-appendix-a")
+_TABLES = (
+    "bies-2017-table-6-2",
+    "long-2014-table-7-1",
+    "cox-2017-appendix-a",
+    "arau-1999-table-6-1",
+)
 
 #: A square foot in square metres, exact since the 1959 definition of the
 #: yard. Long prints his two absorption areas in sabins, which in a table set

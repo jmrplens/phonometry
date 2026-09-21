@@ -59,6 +59,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   attenuation coefficient m, in reciprocal metres, printed inside the same
   table: they are not served, because a value in m⁻¹ behind a dimensionless
   field is a unit error waiting to happen, and the tests say so by number.
+- **A fifth absorption table, whose credits are a column.**
+  Everest 4e's appendix adds forty-one rows in three groups, and prints the
+  source of each one beside it: "Mankovsky, ref 9-4", "Compendium, ref 9-1",
+  "BBC, ref 9-18". Those go into `attributed_to` exactly as printed. Two rows
+  carry an em dash there instead, and the page never says what the dash
+  means, so those two carry no credit rather than borrowing the one above.
+  Seven of the printed rows are a label whose variants follow underneath, so
+  "draped to 1/2 area" is three rows under three different drapes rather than
+  one row that overwrites two.
 
 ### Fixed
 

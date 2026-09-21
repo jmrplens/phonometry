@@ -43,6 +43,9 @@ COX = "cox-2017-appendix-a"
 #: Arau-Puchades (1999) Table 6.1 keyed the way the catalogue keys it.
 ARAU = "arau-1999-table-6-1"
 
+#: Everest 4e's appendix keyed the way the catalogue keys it.
+EVEREST = "everest-2001-appendix"
+
 #: A square foot in square metres, which is what a sabin is in a table set in
 #: inches, and a thousand cubic feet in cubic metres. Both exact, and both
 #: written here again rather than imported so that the test does not check the
@@ -491,6 +494,8 @@ def _ascii(text: str) -> str:
         .replace("×", "x")
         .replace("–", "-")
         .replace("—", "-")
+        .replace("”", '"')
+        .replace("“", '"')
     )
 
 
@@ -725,3 +730,77 @@ def test_a_row_that_says_idem_keeps_the_material_of_the_row_above() -> None:
     assert PUBLISHED_ABSORPTION[_arau_key(20)].variant == (
         "Igual que 19, pero sin material absorbente"
     )
+
+
+# ---------------------------------------------------------------------------
+# Everest's appendix, where the credit is a column
+# ---------------------------------------------------------------------------
+@pytest.mark.parametrize(
+    ("group", "name", "values", "credit"),
+    ref.EVEREST_ABSORPTION,
+    ids=[f"{name[:34]}" for _, name, _, _ in ref.EVEREST_ABSORPTION],
+)
+def test_each_everest_row_holds_what_the_second_reader_read(
+    group: str, name: str, values: tuple[float, ...], credit: str
+) -> None:
+    """Cell by cell, the credit column included.
+
+    The page prints a label row and its variants underneath, so a row prints
+    as its variant, as its name, or as the two joined; the catalogue holds the
+    label as the name because "draped to 1/2 area" is three different drapes
+    on one page.
+    """
+    printed = _ascii(name)
+    matches = [
+        row
+        for row in _rows_of(EVEREST)
+        if isinstance(row, AbsorptionSpectrum)
+        and printed
+        in {
+            _ascii(row.name),
+            _ascii(row.variant),
+            _ascii(f"{row.name} {row.variant}".strip()),
+            _ascii(f"{row.name}: {row.variant}".strip()),
+        }
+    ]
+    held = [
+        [getattr(row, f"absorption_coefficient_{b}") for b in ref.EVEREST_BANDS_HZ]
+        for row in matches
+    ]
+    assert list(values) in held, f"{printed!r}: {values} not among {held}"
+    row = matches[held.index(list(values))]
+    assert row.group == group
+    assert row.attributed_to.get("row", "") == credit
+
+
+def test_the_two_rows_the_page_marks_with_a_dash_carry_no_credit() -> None:
+    """Thirty-nine rows name a source; two print an em dash and nothing else.
+
+    The page never says what the dash means, so the row says nothing either
+    rather than inventing a source or borrowing the one above it.
+    """
+    uncredited = sorted(
+        row.name
+        for row in PUBLISHED_ABSORPTION.values()
+        if row.table == EVEREST and not row.attributed_to
+    )
+    assert uncredited == [
+        "Acoustical tile, ave, 1/2” thick",
+        "Acoustical tile, ave, 3/4” thick",
+    ]
+
+
+def test_the_same_variant_under_three_drapes_is_three_rows() -> None:
+    """ "draped to 1/2 area" is printed three times on one page, for three drapes."""
+    halves = [
+        row
+        for row in PUBLISHED_ABSORPTION.values()
+        if row.table == EVEREST and row.variant == "draped to 1/2 area"
+    ]
+    assert len(halves) == 3
+    assert sorted(row.name for row in halves) == [
+        "Drapes: cotton 14 oz/sq yd",
+        "Drapes: heavy velour, 18 oz/sq yd",
+        "Drapes: medium velour, 14 oz/sq yd",
+    ]
+    assert {row.spectrum()[125] for row in halves} == {0.07, 0.14}

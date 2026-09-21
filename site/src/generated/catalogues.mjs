@@ -62837,6 +62837,2052 @@ export const catalogues = {
             "note": ""
           }
         ]
+      },
+      {
+        "key": "everest-2001-appendix/drapes_cotton_14_oz_sq_yd_draped_to_7_8_area",
+        "table": "everest-2001-appendix",
+        "name": "Drapes: cotton 14 oz/sq yd",
+        "variant": "draped to 7/8 area",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/drapes_cotton_14_oz_sq_yd_draped_to_3_4_area",
+        "table": "everest-2001-appendix",
+        "name": "Drapes: cotton 14 oz/sq yd",
+        "variant": "draped to 3/4 area",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/drapes_cotton_14_oz_sq_yd_draped_to_1_2_area",
+        "table": "everest-2001-appendix",
+        "name": "Drapes: cotton 14 oz/sq yd",
+        "variant": "draped to 1/2 area",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/drapes_medium_velour_14_oz_sq_yd_draped_to_1_2_area",
+        "table": "everest-2001-appendix",
+        "name": "Drapes: medium velour, 14 oz/sq yd",
+        "variant": "draped to 1/2 area",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/drapes_heavy_velour_18_oz_sq_yd_draped_to_1_2_area",
+        "table": "everest-2001-appendix",
+        "name": "Drapes: heavy velour, 18 oz/sq yd",
+        "variant": "draped to 1/2 area",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/carpet_heavy_on_concrete",
+        "table": "everest-2001-appendix",
+        "name": "Carpet: heavy on concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/carpet_heavy_on_40_oz_hair_felt",
+        "table": "everest-2001-appendix",
+        "name": "Carpet: heavy on 40 oz hair felt",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/carpet_heavy_with_latex_backing_on_foam_or_40_oz_hai",
+        "table": "everest-2001-appendix",
+        "name": "Carpet: heavy with latex backing on foam or 40 oz hair felt",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/carpet_indoor_outdoor",
+        "table": "everest-2001-appendix",
+        "name": "Carpet: indoor/ outdoor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Seikman, ref 9-17"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/acoustical_tile_ave_1_2in_thick",
+        "table": "everest-2001-appendix",
+        "name": "Acoustical tile, ave, 1/2” thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/acoustical_tile_ave_3_4in_thick",
+        "table": "everest-2001-appendix",
+        "name": "Acoustical tile, ave, 3/4” thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/concrete_block_coarse",
+        "table": "everest-2001-appendix",
+        "name": "Concrete block, coarse",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/concrete_block_painted",
+        "table": "everest-2001-appendix",
+        "name": "Concrete block, painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/concrete_floor",
+        "table": "everest-2001-appendix",
+        "name": "Concrete floor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/floor_linoleum_asphalt_tile_or_cork_tile_on_concrete",
+        "table": "everest-2001-appendix",
+        "name": "Floor: linoleum, Asphalt-tile, or cork tile on concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/floor_wood",
+        "table": "everest-2001-appendix",
+        "name": "Floor: wood",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/glass_large_panes_heavy_glass",
+        "table": "everest-2001-appendix",
+        "name": "Glass: large panes, heavy glass",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/glass_ordinary_window",
+        "table": "everest-2001-appendix",
+        "name": "Glass, ordinary window",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/drop_ceiling_owens_corning_frescor_painted_5",
+        "table": "everest-2001-appendix",
+        "name": "Drop Ceiling",
+        "variant": "Owens-Corning Frescor, painted, 5/8” thick, Mounting 7",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/plaster_gypsum_or_lime_smooth_finish_on_tile_or_bric",
+        "table": "everest-2001-appendix",
+        "name": "Plaster, gypsum or lime, smooth finish on tile or brick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,013",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/plaster_gypsum_or_lime_smooth_finish_on_lath",
+        "table": "everest-2001-appendix",
+        "name": "Plaster: gypsum or lime, smooth finish on lath",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/gypsum_board_1_2in_on_2_x_4s_16in_on_centers",
+        "table": "everest-2001-appendix",
+        "name": "Gypsum board: 1/2” on 2 x 4s, 16” on centers",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/plywood_panel_3_8in_thick",
+        "table": "everest-2001-appendix",
+        "name": "Plywood panel: 3/8” thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Compendium, ref 9-1"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/polycylindrical_chord_45in_height_16in_empty",
+        "table": "everest-2001-appendix",
+        "name": "Polycylindrical",
+        "variant": "chord 45” height 16” empty",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/polycylindrical_chord_35in_height_12in_empty",
+        "table": "everest-2001-appendix",
+        "name": "Polycylindrical",
+        "variant": "chord 35” height 12” empty",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/polycylindrical_chord_28in_height_10inempty",
+        "table": "everest-2001-appendix",
+        "name": "Polycylindrical",
+        "variant": "chord 28” height 10”empty",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/polycylindrical_chord_28in_height_10in_filled",
+        "table": "everest-2001-appendix",
+        "name": "Polycylindrical",
+        "variant": "chord 28” height 10” filled",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/polycylindrical_continued_chord_20in_height_8in_empty",
+        "table": "everest-2001-appendix",
+        "name": "Polycylindrical (Continued)",
+        "variant": "chord 20” height 8” empty",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/polycylindrical_continued_chord_20in_height_8in_filled",
+        "table": "everest-2001-appendix",
+        "name": "Polycylindrical (Continued)",
+        "variant": "chord 20” height 8” filled",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_0_18percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+        "variant": "Perf: 0.18%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_0_79percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+        "variant": "Perf: 0.79%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_1_4percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+        "variant": "Perf. 1.4%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_5_32in_thick_4in_depth_2in_glass_fi_perf_8_7percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 5/32” thick, 4” depth, 2” glass fiber",
+        "variant": "Perf:. 8.7%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_8in_depth_4in_glass_fiber_perf_0_18percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 8” depth, 4” glass fiber",
+        "variant": "Perf: 0.18%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_8in_depth_4in_glass_fiber_perf_0_79percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 8” depth, 4” glass fiber",
+        "variant": "Perf: 0.79%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_8in_depth_4in_glass_fiber_perf_1_4percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 8” depth, 4” glass fiber",
+        "variant": "Perf: 1.4%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/perforated_panel_8in_depth_4in_glass_fiber_perf_8_7percent",
+        "table": "everest-2001-appendix",
+        "name": "Perforated Panel 8” depth, 4” glass fiber",
+        "variant": "Perf: 8.7%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky, ref 9-4"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/with_7in_air_space_plus_1in_mineral_fiber_of_9_10_16_wideband_25percent_perf_or_more",
+        "table": "everest-2001-appendix",
+        "name": "With 7” air space plus 1” mineral fiber of 9-10 16 cu ft/lb density, 1/4” cover",
+        "variant": "Wideband, 25% perf or more",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "BBC, ref 9-18"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/with_7in_air_space_plus_1in_mineral_fiber_of_9_10_16_midpeak_5percent_perf",
+        "table": "everest-2001-appendix",
+        "name": "With 7” air space plus 1” mineral fiber of 9-10 16 cu ft/lb density, 1/4” cover",
+        "variant": "Midpeak, 5% perf",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "BBC, ref 9-18"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/with_7in_air_space_plus_1in_mineral_fiber_of_9_10_16_lo_peak_0_5percent_perf",
+        "table": "everest-2001-appendix",
+        "name": "With 7” air space plus 1” mineral fiber of 9-10 16 cu ft/lb density, 1/4” cover",
+        "variant": "Lo-peak, 0.5% perf",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "BBC, ref 9-18"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "everest-2001-appendix/with_2in_air_space_filled_with_mineral_fiber_9_10_lb_perf_0_5percent",
+        "table": "everest-2001-appendix",
+        "name": "With 2” air space filled with mineral fiber, 9-10 lb/cu ft density",
+        "variant": "Perf: 0.5%",
+        "mounting": "",
+        "per": "",
+        "source": "Everest 4e Appendix, PDF pages 610-612 (printed pp. 585-587)",
+        "note": "",
+        "attributedTo": {
+          "row": "BBC, ref 9-18"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
       }
     ]
   },

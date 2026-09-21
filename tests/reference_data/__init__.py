@@ -36,6 +36,8 @@ from .absorption import COEF as COEF
 from .absorption import COX_A_ABSORPTION as COX_A_ABSORPTION
 from .absorption import COX_A_BANDS_HZ as COX_A_BANDS_HZ
 from .absorption import COX_A_REFERENCES as COX_A_REFERENCES
+from .absorption import EVEREST_ABSORPTION as EVEREST_ABSORPTION
+from .absorption import EVEREST_BANDS_HZ as EVEREST_BANDS_HZ
 from .absorption import LONG_7_1_ABSORPTION as LONG_7_1_ABSORPTION
 from .absorption import LONG_7_1_BANDS_HZ as LONG_7_1_BANDS_HZ
 from .absorption import RANGE_ACROSS_COLUMNS as RANGE_ACROSS_COLUMNS

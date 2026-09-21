@@ -91,7 +91,7 @@ const copy = {
 		fixedBy: 'What fixes it',
 		source: 'Source',
 		regionLabel: 'Published values, scrollable sideways',
-		legend: 'Italic is a value this library worked out; a dotted underline is a cell that is not a plain number, and what it is reads on the cell; an asterisk is a note the page made about the row.',
+		legend: 'Italic is a value this library worked out; a dotted underline is a cell that is not a plain number, and what it is reads on the cell; an asterisk is a note the page made about the row. Click a mark to read it, or give the table focus and press Enter to walk the marks with the arrow keys.',
 		kinds: {
 			printed: 'as the page prints it',
 			fixed: 'what the model or the standard beside it fixes',
@@ -127,7 +127,7 @@ const copy = {
 		fixedBy: 'Qué lo fija',
 		source: 'Fuente',
 		regionLabel: 'Valores publicados, con desplazamiento lateral',
-		legend: 'La cursiva es un valor calculado por esta biblioteca; el subrayado punteado es una celda que no es un número a secas, y lo que es se lee en la propia celda; el asterisco es una nota que la página hace sobre la fila.',
+		legend: 'La cursiva es un valor calculado por esta biblioteca; el subrayado punteado es una celda que no es un número a secas, y lo que es se lee en la propia celda; el asterisco es una nota que la página hace sobre la fila. Haz clic en una marca para leerla, o pon el foco en la tabla y pulsa Intro para recorrerlas con las flechas.',
 		kinds: {
 			printed: 'tal como lo imprime la página',
 			fixed: 'lo que fija el modelo o la norma que lleva al lado',
@@ -339,7 +339,7 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 			</tbody>
 		</table>
 	</div>
-	<p class="empty" data-empty hidden>{copy.empty}</p>
+	<p class="empty" data-empty-message hidden>{copy.empty}</p>
 </section>
 
 <script>
@@ -362,6 +362,7 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 
 		const tip = document.createElement('div');
 		tip.className = 'catalogue-tip';
+		tip.id = 'catalogue-tip';
 		tip.setAttribute('role', 'tooltip');
 		tip.hidden = true;
 		document.body.append(tip);
@@ -381,6 +382,7 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		const hide = () => {
 			clearTimeout(timer);
 			tip.hidden = true;
+			current?.removeAttribute('aria-describedby');
 			restore(current);
 			current = null;
 			pinned = false;
@@ -402,6 +404,10 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		};
 
 		const open = (element, { pin }) => {
+			/* A click can land inside the hover delay. Without this the pending
+			   timer fires a moment later with `pin: false`, and the pointer
+			   leaving then closes what the click had pinned open. */
+			clearTimeout(timer);
 			if (current && current !== element) restore(current);
 			const text = element.getAttribute('title') ?? element.dataset.tip;
 			if (!text) return;
@@ -409,9 +415,11 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 				element.dataset.tip = text;
 				element.removeAttribute('title');
 			}
+			current?.removeAttribute('aria-describedby');
 			current = element;
 			pinned = pin;
 			tip.textContent = text;
+			element.setAttribute('aria-describedby', tip.id);
 			place(element);
 		};
 
@@ -449,13 +457,75 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 			});
 		}
 
+		/* The keyboard path to the same sentences.
+		   Making every marked cell focusable was the obvious idea and it is the
+		   wrong one: the solids table alone carries 766 of them, which is 766
+		   tab stops between this table and whatever follows it on the page. So
+		   the scroll box keeps the single tab stop it already had, and holds a
+		   cursor of its own: Enter starts it at the first mark, the arrow keys
+		   walk the marks in reading order, and Escape gives the box back to the
+		   browser, where the arrows scroll it sideways as they always did. The
+		   cursor skips the rows the filter is hiding, because a reader stepping
+		   through six carpets should not be walked through the four hundred
+		   rows they filtered out. */
+		const marksOf = (region) =>
+			[...region.querySelectorAll('[title], [data-tip]')].filter((element) => {
+				const row = element.closest('tr');
+				return !row || !row.hidden;
+			});
+
+		let cursor = null;
+		let cursorRegion = null;
+
+		const leaveCursor = () => {
+			cursor?.classList.remove('cell-cursor');
+			cursor = null;
+			cursorRegion = null;
+		};
+
+		const moveCursor = (region, step) => {
+			const marks = marksOf(region);
+			if (marks.length === 0) return;
+			const from = cursor ? marks.indexOf(cursor) : -1;
+			const next = marks[Math.min(Math.max(from + step, 0), marks.length - 1)] ?? marks[0];
+			cursor?.classList.remove('cell-cursor');
+			cursor = next;
+			cursorRegion = region;
+			cursor.classList.add('cell-cursor');
+			cursor.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+			open(cursor, { pin: true });
+		};
+
+		for (const region of document.querySelectorAll('[data-catalogue] .table-scroll')) {
+			region.addEventListener('keydown', (event) => {
+				if (event.key === 'Enter' || event.key === ' ') {
+					event.preventDefault();
+					moveCursor(region, cursorRegion === region ? 0 : 1);
+					return;
+				}
+				if (cursorRegion !== region) return;
+				const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+				if (step === undefined) return;
+				event.preventDefault();
+				moveCursor(region, step);
+			});
+			region.addEventListener('focusout', (event) => {
+				if (cursorRegion !== region) return;
+				if (event.relatedTarget && region.contains(event.relatedTarget)) return;
+				leaveCursor();
+				hide();
+			});
+		}
+
 		document.addEventListener('click', (event) => {
 			if (!pinned) return;
 			const element = event.target instanceof Element ? event.target.closest('[data-catalogue]') : null;
 			if (!element) hide();
 		});
 		document.addEventListener('keydown', (event) => {
-			if (event.key === 'Escape') hide();
+			if (event.key !== 'Escape') return;
+			leaveCursor();
+			hide();
 		});
 		/* Scrolling must not close it: the table scrolls sideways inside its own
 		   box, a phone scrolls the page under your thumb, and the browser
@@ -468,7 +538,12 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		const follow = () => {
 			if (!current || tip.hidden) return;
 			const box = current.getBoundingClientRect();
-			if (box.bottom < 0 || box.top > window.innerHeight) hide();
+			const gone =
+				box.bottom < 0 ||
+				box.top > window.innerHeight ||
+				box.right < 0 ||
+				box.left > window.innerWidth;
+			if (gone) hide();
 			else place(current);
 		};
 		window.addEventListener('scroll', follow, { passive: true, capture: true });
@@ -740,6 +815,15 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		font-style: italic;
 		color: var(--sl-color-gray-3);
 		border-block-end-color: var(--sl-color-gray-3);
+	}
+
+	/* Where the keyboard cursor is. It is not `:focus-visible`, because the
+	   element under the cursor never takes focus: the scroll box keeps it, so
+	   that the table stays one tab stop, and the ring has to be drawn by hand. */
+	.cell-cursor {
+		outline: 2px solid var(--sl-color-text-accent);
+		outline-offset: 2px;
+		border-radius: 2px;
 	}
 
 	.empty {

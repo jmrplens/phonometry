@@ -36,6 +36,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `PUBLISHED_ABSORPTION_AREAS` converted to square metres and marked derived,
   with the printed figure in the wording. Read twice from the pages like every
   other table, cell by cell, mount included.
+- **A compilation of twenty-nine sources, credited row by row.**
+  Cox & D'Antonio 3e Appendix A adds a hundred and sixty-one rows in
+  twenty-two groups, from curtains and carpet through green wall systems to
+  top soil at six moisture contents, and it is not one measurement campaign:
+  almost every row carries a superscript pointing into a list of twenty-nine
+  references, which the catalogue holds as the reference itself rather than as
+  a number that means nothing away from the page. Two rows cite in words, the
+  twelve top soil rows take the credit their group heading prints once, and
+  four carry none, which the tests state row by row. Every one of its 966
+  cells is a number: this is the one table of the three with no empty cell.
+  With it, `absorption_named('carpet')` answers with twenty-one carpets from
+  three books.
 
 ### Fixed
 

@@ -223,7 +223,9 @@ SOURCED: dict[tuple[str, str], str] = {
         "Bies 5e Table 6.2, the fifty-seven finishes it prints a Sabine "
         "absorption coefficient for, band by band; "
         "Long 2e Table 7.1, the hundred finishes it prints a coefficient and "
-        "an ASTM C423 mounting for"
+        "an ASTM C423 mounting for; "
+        "Cox & D'Antonio 3e Appendix A, a hundred and sixty-one rows compiled "
+        "from twenty-nine sources and credited row by row"
     ),
     (
         "materials/absorbers/measured.py",

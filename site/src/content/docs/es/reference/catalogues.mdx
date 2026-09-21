@@ -131,19 +131,28 @@ un montaje y una sala, que es por lo que la misma moqueta es un número
 distinto en cada libro y por lo que un coeficiente mayor que 1 es corriente y
 no un error. Bies dice de su tabla que los valores están tomados de la
 literatura, que los tiempos de reverberación calculados con ellos son sólo
-aproximados, y que es mejor usar los datos del fabricante o medir. Las filas
-están en `materials.absorbers.PUBLISHED_ABSORPTION`, con la clave de la tabla
-de la que salieron, y `absorption_named` devuelve todas las moquetas de todas
-las tablas en vez de elegir una.
+aproximados, y que es mejor usar los datos del fabricante o medir. Long dice
+de la suya que la lista no pretende ser completa, e imprime junto a cada fila
+el montaje de ASTM C423 con el que se midió, porque la cámara de aire que
+queda detrás cambia lo que hace el material: el mismo panel de fibra de
+vidrio apoyado en el suelo y colgado sobre un hueco de 400 mm son dos filas
+aquí, y a 125 Hz es 0,03 en una y 0,65 en la otra. Las filas están en
+`materials.absorbers.PUBLISHED_ABSORPTION`, con la clave de la tabla de la
+que salieron, y `absorption_named` devuelve todas las moquetas de todas las
+tablas en vez de elegir una.
 
 <Catalogues catalogue="absorption" lang="es" />
 
 Las mismas páginas imprimen unas pocas filas que no son coeficientes: un
-público por persona, una silla, tasados en metros cuadrados de absorción
-equivalente porque no tienen superficie por la que multiplicar un
-coeficiente. Esas van aparte, en
+público por persona, un músico con su instrumento, el propio aire, tasados en
+área de absorción equivalente porque no tienen superficie por la que
+multiplicar un coeficiente. Esas van aparte, en
 `materials.absorbers.PUBLISHED_ABSORPTION_AREAS`, con la unidad en el nombre
 del campo para que un número de ahí no pueda confundirse con un coeficiente.
+Long tasa las suyas en sabines, pies cuadrados, en una tabla escrita en
+pulgadas y libras; el campo guarda metros cuadrados, como todos los campos de
+esta biblioteca, y en la propia celda dice lo que imprimió la página y de qué
+se convirtió.
 
 <Catalogues catalogue="absorptionAreas" lang="es" />
 

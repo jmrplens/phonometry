@@ -24,6 +24,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   and compared cell by cell before either was kept; the second reading is the
   oracle the test suite holds the catalogue against. The published catalogues
   page gains both tables, and a column no row fills is no longer shown.
+- **A second absorption table, with the mounting each row was measured on.**
+  Long 2e Table 7.1 adds a hundred coefficient rows in eleven groups, from
+  walls and floors to duct liners and fiberglass board, each with the
+  ASTM C423 mounting the page prints beside it in `AbsorptionSpectrum.mounting`.
+  Fifteen finishes are printed on two mounts and are two rows here: the same
+  board laid on the test-room floor and hung over a 400 mm airspace is 0,03
+  and 0,65 at 125 Hz, and a catalogue that kept one of them would be hiding
+  the mounting's effect rather than showing it. The two rows the page prints
+  in sabins, a musician with his instrument and the air itself, join
+  `PUBLISHED_ABSORPTION_AREAS` converted to square metres and marked derived,
+  with the printed figure in the wording. Read twice from the pages like every
+  other table, cell by cell, mount included.
 
 ### Fixed
 

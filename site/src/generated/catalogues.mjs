@@ -94,6 +94,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Aircrete/Autoclaved Aerated Concrete (AAC) blocks (solid) connected with mortar or thin joint compound",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "the table prints the speed as 1900 with a typical range of 1600 to 2300 m/s, and the density only as a range",
         "attributedTo": {
@@ -177,6 +179,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Aluminium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -260,6 +264,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Bricks (solid) connected with mortar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -343,6 +349,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Calcium-silicate blocks (solid) connected with thin joint compound",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -426,6 +434,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Chipboard",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -509,6 +519,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Clinker concrete blocks (solid) connected with mortar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -592,6 +604,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Clinker concrete blocks (solid) connected with mortar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -675,6 +689,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Clinker concrete slabs",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -758,6 +774,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Concrete, cast in situ",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -841,6 +859,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Dense aggregate blocks (solid) connected with mortar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -924,6 +944,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Expanded clay blocks (solid) connected with mortar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1007,6 +1029,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Glass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1090,6 +1114,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Lightweight aggregate blocks (solid) connected with mortar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1173,6 +1199,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Medium Density Fibreboard (MDF)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1256,6 +1284,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Mortar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1339,6 +1369,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Oriented Strand Board (OSB)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "usually orthotropic, with 2200 to 3500 m/s depending on the direction; the quoted speed is the effective one",
         "attributedTo": {
@@ -1422,6 +1454,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Perspex, plexiglass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1505,6 +1539,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Plaster, gypsum based",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1588,6 +1624,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Plasterboard, natural gypsum",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1671,6 +1709,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Plasterboard, combination of flue gas gypsum and natural gypsum",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1754,6 +1794,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Plasterboard, gypsum with glass fibre and other additives",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1837,6 +1879,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Plywood (Birch)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -1920,6 +1964,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Sand-cement screed",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -2003,6 +2049,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Steel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -2088,6 +2136,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a2",
         "name": "Timber (soft wood) used for joists, studs or battens",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A2, PDF pages 635-636 (no printed folio; between folios 607 and 610)",
         "note": "",
         "attributedTo": {
@@ -2171,6 +2221,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Aluminium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2254,6 +2306,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Lead",
         "variant": "chemically pure",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2337,6 +2391,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Lead",
         "variant": "antimonial",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2420,6 +2476,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Iron",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2503,6 +2561,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Steel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {},
@@ -2584,6 +2644,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Gold",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2667,6 +2729,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Copper",
         "variant": "polycrystal",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {},
@@ -2748,6 +2812,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Copper",
         "variant": "single crystal",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {},
@@ -2829,6 +2895,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Magnesium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2912,6 +2980,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Brass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -2995,6 +3065,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Nickel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3078,6 +3150,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Silver",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3161,6 +3235,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Bismuth",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3244,6 +3320,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Zinc",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3327,6 +3405,8 @@ export const catalogues = {
         "table": "cremer-2005-table-4-3",
         "name": "Tin",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cremer 3e Table 4.3, PDF page 201 (printed p. 191)",
         "note": "",
         "attributedTo": {
@@ -3410,6 +3490,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3491,6 +3573,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Lean concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3572,6 +3656,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Light concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3653,6 +3739,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Porous concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3734,6 +3822,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Cement floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3815,6 +3905,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Xylolith floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3896,6 +3988,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Asphalt floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -3977,6 +4071,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Plaster floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4058,6 +4154,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Gypsum panel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4139,6 +4237,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Plaster board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4220,6 +4320,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Fibre cement board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4301,6 +4403,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Brick wall",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4382,6 +4486,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Glass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4463,6 +4569,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Chip board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4544,6 +4652,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Plywood",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4625,6 +4735,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Oak wood",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4706,6 +4818,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Pine wood",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4787,6 +4901,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Hard board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4868,6 +4984,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Acryl glass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -4949,6 +5067,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Polypropylene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5030,6 +5150,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Polyester",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5111,6 +5233,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "PVC, hard",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5192,6 +5316,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "PVC, 30% softener",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "the table prints no modulus and no loss factor, and its Z_m of 1220 is 8.4 times what its own Eq. (11) gives for this row",
         "attributedTo": {},
@@ -5273,6 +5399,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Polyethylene, hard",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5354,6 +5482,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Polyethylene, soft",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5435,6 +5565,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Polystyrene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5516,6 +5648,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Polystyrene + 30% glass fibre",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5597,6 +5731,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Polyester + glass fibre",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5678,6 +5814,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Aluminium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5759,6 +5897,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Lead",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5840,6 +5980,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Copper",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -5921,6 +6063,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Brass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6002,6 +6146,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Steel, cast steel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6083,6 +6229,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Malleable iron",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6164,6 +6312,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Cast iron with spheroidal graphite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6245,6 +6395,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Cast iron with lamellar graphite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6326,6 +6478,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Zinc",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6407,6 +6561,8 @@ export const catalogues = {
         "table": "mechel-2008-table-3",
         "name": "Tin",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel (2008) Table 3, PDF pages 544-545 (printed pp. 529-530)",
         "note": "",
         "attributedTo": {},
@@ -6488,6 +6644,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Aluminum sheet",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6569,6 +6727,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Brass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6650,6 +6810,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Brass",
         "variant": "70%Zn 30%Cu",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6731,6 +6893,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Carbon brick",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6812,6 +6976,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Carbon nanotubes",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6893,6 +7059,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Graphite mouldings",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -6974,6 +7142,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Chromium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7055,6 +7225,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Copper",
         "variant": "annealed",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7136,6 +7308,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Copper",
         "variant": "rolled",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7217,6 +7391,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Gold",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7298,6 +7474,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Iron",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7379,6 +7557,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Iron",
         "variant": "white",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7460,6 +7640,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Iron",
         "variant": "nodular",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7541,6 +7723,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Iron",
         "variant": "wrought",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7622,6 +7806,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Iron",
         "variant": "gray (1)",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7703,6 +7889,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Iron",
         "variant": "gray (2)",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7784,6 +7972,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Iron",
         "variant": "malleable",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7865,6 +8055,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Lead",
         "variant": "annealed",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -7946,6 +8138,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Lead",
         "variant": "rolled",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8027,6 +8221,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Lead sheet",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8108,6 +8304,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Magnesium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8189,6 +8387,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Molybdenum",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8270,6 +8470,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Monel metal",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8351,6 +8553,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Neodymium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8432,6 +8636,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Nickel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8513,6 +8719,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Nickel-iron alloy (Invar)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8594,6 +8802,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Platinum",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8675,6 +8885,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Silver",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8756,6 +8968,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Steel",
         "variant": "mild",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8837,6 +9051,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Steel",
         "variant": "1% carbon",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8918,6 +9134,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Stainless steel",
         "variant": "302",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -8999,6 +9217,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Stainless steel",
         "variant": "316",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9080,6 +9300,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Stainless steel",
         "variant": "347",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9161,6 +9383,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Stainless steel",
         "variant": "430",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9242,6 +9466,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Tin",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9323,6 +9549,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Titanium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9404,6 +9632,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Tungsten",
         "variant": "drawn",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9485,6 +9715,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Tungsten",
         "variant": "annealed",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9566,6 +9798,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Tungsten carbide",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9647,6 +9881,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Zinc sheet",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under metals",
         "attributedTo": {},
@@ -9728,6 +9964,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Brick",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials; the printed speed is +5 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md",
         "attributedTo": {},
@@ -9809,6 +10047,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Concrete",
         "variant": "normal",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -9890,6 +10130,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Concrete",
         "variant": "aerated",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials; the loss factor column prints one number here where it prints two elsewhere, so only the internal one is held",
         "attributedTo": {},
@@ -9971,6 +10213,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Concrete",
         "variant": "high strength",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10052,6 +10296,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Masonry block",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10133,6 +10379,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Cork",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials; the printed speed is -21 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md",
         "attributedTo": {},
@@ -10214,6 +10462,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Fibre board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10295,6 +10545,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Gypsum board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10376,6 +10628,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Glass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10457,6 +10711,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Glass",
         "variant": "Pyrex",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under building materials",
         "attributedTo": {},
@@ -10538,6 +10794,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Ash",
         "variant": "black",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -10619,6 +10877,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Ash",
         "variant": "white",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -10700,6 +10960,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Aspen",
         "variant": "quaking",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -10781,6 +11043,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Balsa wood",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -10862,6 +11126,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Baltic whitewood",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -10943,6 +11209,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Baltic redwood",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11024,6 +11292,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Beech",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11105,6 +11375,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Birch",
         "variant": "yellow",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11186,6 +11458,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Cedar",
         "variant": "white-northern",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11267,6 +11541,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Cedar",
         "variant": "red-western",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11348,6 +11624,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Compressed hardboard composite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11429,6 +11707,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Douglas fir",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11510,6 +11790,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Douglas fir",
         "variant": "coastal",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11591,6 +11873,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Douglas fir",
         "variant": "interior",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11672,6 +11956,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Mahogany",
         "variant": "African",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11753,6 +12039,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Mahogany",
         "variant": "Honduras",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11834,6 +12122,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Maple",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11915,6 +12205,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "MDF",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -11996,6 +12288,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Meranti",
         "variant": "light red",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12077,6 +12371,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Meranti",
         "variant": "dark red",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12158,6 +12454,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Oak",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12239,6 +12537,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Pine",
         "variant": "radiata",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12320,6 +12620,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Pine",
         "variant": "other",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12401,6 +12703,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Plywood",
         "variant": "fir",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood; the printed speed is +22 per cent from sqrt(E/rho) on this row's own two columns, which the page says it was calculated from; see docs/ERRATA.md",
         "attributedTo": {},
@@ -12482,6 +12786,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Poplar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12563,6 +12869,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Redwood",
         "variant": "old",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12644,6 +12952,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Redwood",
         "variant": "2nd growth",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12725,6 +13035,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Scots pine",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12806,6 +13118,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Spruce",
         "variant": "Sitka",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12887,6 +13201,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Spruce",
         "variant": "Engelmann",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -12968,6 +13284,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Teak",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13049,6 +13367,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Walnut",
         "variant": "black",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13130,6 +13450,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Wood chipboard",
         "variant": "floor",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13211,6 +13533,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Wood chipboard",
         "variant": "std",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under wood",
         "attributedTo": {},
@@ -13292,6 +13616,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Lucite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13373,6 +13699,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Plexiglass (acrylic)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13454,6 +13782,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polycarbonate",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13535,6 +13865,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polyester (thermo)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13616,6 +13948,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polyethylene",
         "variant": "high density",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13697,6 +14031,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polyethylene",
         "variant": "low density",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13778,6 +14114,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polypropylene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13859,6 +14197,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polystyrene",
         "variant": "moulded",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -13940,6 +14280,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polystyrene",
         "variant": "expanded foam",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14021,6 +14363,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Polyurethane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14102,6 +14446,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "PVC",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14183,6 +14529,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "PVDF",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14264,6 +14612,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Nylon 6",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14345,6 +14695,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Nylon 66",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14426,6 +14778,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Nylon 12",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14507,6 +14861,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Rubber-neoprene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other",
         "attributedTo": {},
@@ -14588,6 +14944,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Kevlar 49 cloth",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under plastics and other; the loss factor column prints one number here where it prints two elsewhere, so only the internal one is held",
         "attributedTo": {},
@@ -14669,6 +15027,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Aluminum honeycomb",
         "variant": "6,4 mm cell, 0,05 mm foil",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -14750,6 +15110,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Aluminum honeycomb",
         "variant": "6,4 mm cell, 0,08 mm foil",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -14831,6 +15193,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Aluminum honeycomb",
         "variant": "9,5 mm cell, 0,05 mm foil",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -14912,6 +15276,8 @@ export const catalogues = {
         "table": "bies-2017-table-c1",
         "name": "Aluminum honeycomb",
         "variant": "9,5 mm cell, 0,13 mm foil",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.1, PDF pages 747-750 (printed pp. 718-721)",
         "note": "the page groups this row under aluminium honeycomb; a honeycomb panel and not a solid: the modulus and the density are effective, the geometry is in the variant, and the page leaves the speed blank because a one-dimensional speed does not mean anything here",
         "attributedTo": {},
@@ -14993,6 +15359,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Aluminum",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15076,6 +15444,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Brick",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15159,6 +15529,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Concrete, poured",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15242,6 +15614,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Masonry block, hollow cinder",
         "variant": "nominal 6 in thick",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15325,6 +15699,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Masonry block, hollow cinder with 5/8 in sand plaster each side",
         "variant": "nominal 6 in thick",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15408,6 +15784,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Masonry block, hollow dense concrete, sand-filled",
         "variant": "6 in thick",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15491,6 +15869,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Masonry block, hollow dense concrete",
         "variant": "nominal 6 in thick",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15574,6 +15954,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Masonry block, solid dense concrete",
         "variant": "4 in thick",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15657,6 +16039,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Fir timber",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15740,6 +16124,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Glass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "the loss factor carries the table's second footnote, which says it is very sensitive to construction techniques and edge conditions",
         "attributedTo": {
@@ -15823,6 +16209,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Lead",
         "variant": "chemical or tellurium",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15906,6 +16294,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Lead",
         "variant": "antimonial, hard",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -15989,6 +16379,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Plaster, solid, on metal or gypsum lath",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16072,6 +16464,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Plexiglas or Lucite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16155,6 +16549,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Steel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16238,6 +16634,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Gypboard",
         "variant": "0,5 to 2 in",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16321,6 +16719,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Plywood",
         "variant": "0,25 to 1,25 in",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16404,6 +16804,8 @@ export const catalogues = {
         "table": "long-2014-table-12-1",
         "name": "Wood chip board",
         "variant": "5 lb/ft2",
+        "mounting": "",
+        "per": "",
         "source": "Long 2e Table 12.1, PDF page 487 (printed p. 485)",
         "note": "",
         "attributedTo": {
@@ -16487,6 +16889,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Ladrillo macizo",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -16568,6 +16972,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Hormigón denso",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "the page prints the damping factor as 1 to 5 times 10^-3",
         "attributedTo": {},
@@ -16649,6 +17055,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Yeso",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -16730,6 +17138,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Acero",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "the page prints the damping factor as 1 to 6 times 10^-4",
         "attributedTo": {},
@@ -16811,6 +17221,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Aluminio",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -16892,6 +17304,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Plomo",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "the page prints the damping factor as 0,5 to 2 times 10^-3",
         "attributedTo": {},
@@ -16973,6 +17387,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Fibrocemento",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17054,6 +17470,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Madera-cemento",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17135,6 +17553,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Cartón-yeso",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17216,6 +17636,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Vidrio",
         "variant": "monolítico",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17297,6 +17719,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Vidrio",
         "variant": "laminar",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17378,6 +17802,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Madera aglomerada",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17459,6 +17885,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Madera pino",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17540,6 +17968,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Madera contrachapada",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17621,6 +18051,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Madera Flandes",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17702,6 +18134,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Caucho espumado",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17783,6 +18217,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Caucho normal",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -17864,6 +18300,8 @@ export const catalogues = {
         "table": "arau-1999-table-4-1",
         "name": "Poliestireno extrusionado",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Arau-Puchades (1999) Table 4.1, PDF page 129 (printed p. 126)",
         "note": "",
         "attributedTo": {},
@@ -18047,6 +18485,8 @@ export const catalogues = {
         "table": "allard-2009-table-6-1",
         "name": "Domisol Coffrage glass wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 6.1, PDF page 133 (printed p. 124); Allard & Atalla 2e Sect. 6.5.4, PDF page 132 (printed p. 123)",
         "note": "Shear modulus printed as 220(1 + j0.1) N cm-2. Characteristic lengths from the prose of Sect. 6.5.4, not from the table.",
         "attributedTo": {},
@@ -18138,6 +18578,8 @@ export const catalogues = {
         "table": "allard-2009-table-7-1",
         "name": "Material 1",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 7.1, PDF page 150 (printed p. 142)",
         "note": "",
         "attributedTo": {},
@@ -18229,6 +18671,8 @@ export const catalogues = {
         "table": "allard-2009-table-7-1",
         "name": "Material 2",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 7.1, PDF page 150 (printed p. 142)",
         "note": "",
         "attributedTo": {},
@@ -18320,6 +18764,8 @@ export const catalogues = {
         "table": "allard-2009-table-8-1",
         "name": "Material 1",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 8.1, PDF page 181 (printed p. 174)",
         "note": "Shear modulus printed as 75 + j15 kPa.",
         "attributedTo": {},
@@ -18411,6 +18857,8 @@ export const catalogues = {
         "table": "allard-2009-table-8-1",
         "name": "Material 2",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 8.1, PDF page 181 (printed p. 174)",
         "note": "Shear modulus printed as 80 + j12 kPa.",
         "attributedTo": {},
@@ -18502,6 +18950,8 @@ export const catalogues = {
         "table": "allard-2009-table-9-1",
         "name": "M1",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 9.1, PDF page 210 (printed p. 203)",
         "note": "Printed Lambda 0.12 mm, Lambda' 0.27 mm, thickness 0.1 cm.",
         "attributedTo": {},
@@ -18593,6 +19043,8 @@ export const catalogues = {
         "table": "allard-2009-table-9-1",
         "name": "M2",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 9.1, PDF page 210 (printed p. 203)",
         "note": "Printed Lambda 0.034 mm, Lambda' 0.13 mm, thickness 1.9 cm.",
         "attributedTo": {},
@@ -18684,6 +19136,8 @@ export const catalogues = {
         "table": "allard-2009-table-10-1",
         "name": "Typical glass wool",
         "variant": "direction x",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 10.1, PDF page 229 (printed p. 222)",
         "note": "Rigidity parameters G 260(1+0.1j), G' 125(1+0.1j), C 46(1+0.1j) kPa; Poisson coefficients F = A = 0.",
         "attributedTo": {},
@@ -18775,6 +19229,8 @@ export const catalogues = {
         "table": "allard-2009-table-10-1",
         "name": "Typical glass wool",
         "variant": "direction z",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 10.1, PDF page 229 (printed p. 222)",
         "note": "Rigidity parameters G 260(1+0.1j), G' 125(1+0.1j), C 46(1+0.1j) kPa; Poisson coefficients F = A = 0.",
         "attributedTo": {},
@@ -18866,6 +19322,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-2",
         "name": "Soft fibrous",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.2, PDF page 260 (printed p. 254)",
         "note": "",
         "attributedTo": {},
@@ -18957,6 +19415,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-3",
         "name": "Foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.3, PDF page 272 (printed p. 266)",
         "note": "",
         "attributedTo": {},
@@ -19048,6 +19508,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-3",
         "name": "Glass wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.3, PDF page 272 (printed p. 266)",
         "note": "The porous screen of Figure 11.6, a sheet of glass wool bonded onto the foam.",
         "attributedTo": {},
@@ -19139,6 +19601,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-4",
         "name": "Blanket (1)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -19230,6 +19694,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-4",
         "name": "Screen (2)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -19321,6 +19787,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-4",
         "name": "Foam (3)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -19412,6 +19880,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-4",
         "name": "Foam (4)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.4, PDF page 276 (printed p. 270)",
         "note": "",
         "attributedTo": {},
@@ -19503,6 +19973,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-5",
         "name": "Felt (1)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.5, PDF page 277 (printed p. 271)",
         "note": "",
         "attributedTo": {},
@@ -19594,6 +20066,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-5",
         "name": "Screen (2)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.5, PDF page 277 (printed p. 271)",
         "note": "Lengths from Lambda = Lambda' = sqrt(8 eta / (phi sigma)) and tortuosity from 1 + (epsilon_e / d)(alpha_felt + alpha_foam), per the prose of printed p. 270; density not printed.",
         "attributedTo": {},
@@ -19685,6 +20159,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-5",
         "name": "Foam (3)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.5, PDF page 277 (printed p. 271)",
         "note": "",
         "attributedTo": {},
@@ -19776,6 +20252,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-6",
         "name": "Foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.6, PDF page 279 (printed p. 273)",
         "note": "",
         "attributedTo": {},
@@ -19867,6 +20345,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-7",
         "name": "Carpet (1)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.7, PDF page 280 (printed p. 274)",
         "note": "",
         "attributedTo": {},
@@ -19958,6 +20438,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-7",
         "name": "Carpet (2)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.7, PDF page 280 (printed p. 274)",
         "note": "",
         "attributedTo": {},
@@ -20049,6 +20531,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-7",
         "name": "Fibrous layer",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.7, PDF page 280 (printed p. 274)",
         "note": "",
         "attributedTo": {},
@@ -20140,6 +20624,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-8",
         "name": "Glass wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.8, PDF page 281 (printed p. 275)",
         "note": "The Domisol Coffrage glass wool of Table 6.1. Thickness printed 3.8 mm; the text of Sect. 11.7.3 says 5 cm.",
         "attributedTo": {},
@@ -20231,6 +20717,8 @@ export const catalogues = {
         "table": "allard-2009-table-11-9",
         "name": "Foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 11.9, PDF page 282 (printed p. 276)",
         "note": "",
         "attributedTo": {},
@@ -20322,6 +20810,8 @@ export const catalogues = {
         "table": "allard-2009-table-12-1",
         "name": "Foam 1",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 12.1, PDF page 297 (printed p. 292)",
         "note": "",
         "attributedTo": {},
@@ -20413,6 +20903,8 @@ export const catalogues = {
         "table": "allard-2009-table-12-2",
         "name": "Mineral wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 12.2, PDF page 298 (printed p. 293)",
         "note": "",
         "attributedTo": {},
@@ -20504,6 +20996,8 @@ export const catalogues = {
         "table": "allard-2009-table-12-4",
         "name": "Limp foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 12.4, PDF page 304 (printed p. 299)",
         "note": "",
         "attributedTo": {},
@@ -20595,6 +21089,8 @@ export const catalogues = {
         "table": "allard-2009-table-12-5",
         "name": "Limp foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 12.5, PDF page 306 (printed p. 301)",
         "note": "",
         "attributedTo": {},
@@ -20686,6 +21182,8 @@ export const catalogues = {
         "table": "allard-2009-table-12-5",
         "name": "Foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 12.5, PDF page 306 (printed p. 301)",
         "note": "",
         "attributedTo": {},
@@ -20777,6 +21275,8 @@ export const catalogues = {
         "table": "allard-2009-table-13-1",
         "name": "Foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 13.1, PDF page 332 (printed p. 328)",
         "note": "Lengths printed 0.000078 m and 0.000192 m.",
         "attributedTo": {},
@@ -20868,6 +21368,8 @@ export const catalogues = {
         "table": "allard-2009-table-13-2",
         "name": "Rockwool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Allard & Atalla 2e Table 13.2, PDF page 341 (printed p. 337)",
         "note": "Young's modulus printed 4400 Pa; the text reports a skeleton resonance near 1350 Hz that this value cannot give.",
         "attributedTo": {},
@@ -20959,6 +21461,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Coir",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 39.",
         "attributedTo": {
@@ -21052,6 +21556,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Felt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 40, 41.",
         "attributedTo": {
@@ -21145,6 +21651,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Hemp fibres",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -21238,6 +21746,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Mineral wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "No superscript on the page.",
         "attributedTo": {},
@@ -21329,6 +21839,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Polyester fibres",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 42, 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
         "attributedTo": {
@@ -21422,6 +21934,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Wood fibres",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 44.",
         "attributedTo": {
@@ -21515,6 +22029,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Melamine foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 41, 45. Superscript 45 is Kino and Ueno, Appl. Acoust. 69(4) (2008), not their 69(7) paper (ref. 43).",
         "attributedTo": {
@@ -21608,6 +22124,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Metal foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 46.",
         "attributedTo": {
@@ -21701,6 +22219,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Plastic foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 40.",
         "attributedTo": {
@@ -21794,6 +22314,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Polyimide foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 47.",
         "attributedTo": {
@@ -21887,6 +22409,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Polylactide and polyethylene glycol foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 48. Name wraps over two lines on the page (\"Polylactide and polyethylene\" / \"glycol foam\").",
         "attributedTo": {
@@ -21980,6 +22504,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "PU foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 41, 47.",
         "attributedTo": {
@@ -22073,6 +22599,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "PU foam, fully reticulated",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscripts: 12, 49.",
         "attributedTo": {
@@ -22166,6 +22694,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "PU foam, partially reticulated",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 12.",
         "attributedTo": {
@@ -22259,6 +22789,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Consolidated foam granulates",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -22352,6 +22884,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Coustone (Quietstone)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -22445,6 +22979,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Dry sand",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 51.",
         "attributedTo": {
@@ -22538,6 +23074,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Glass beads, 0.68 and 1.68 mm in diameter",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 50. The page prints both specimens on one line: the name “Glass beads, 0.68 and 1.68 mm in diameter” (wrapped after “mm”) against the cell “13,000 and 43,200”, and it does not say which resistivity belongs to which diameter. Pairing them by printed order would be a reading the page does not support, and two things argue against it: flow resistivity falls with the square of the grain size, so the larger bead should be the less resistive of the two, and Table 6.5 prints the same pair of beads from the same study with the sizes the other way round (“1.6 and 0.7 mm”). Both readings are kept, unpaired.",
         "attributedTo": {
@@ -22631,6 +23169,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Gravel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -22724,6 +23264,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Lead shot",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 36.",
         "attributedTo": {
@@ -22817,6 +23359,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Open cell synthetic rubber",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -22910,6 +23454,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Perlite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -23003,6 +23549,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Porous pavement",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 54.",
         "attributedTo": {
@@ -23096,6 +23644,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Vermiculite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -23189,6 +23739,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Asphalt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -23282,6 +23834,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Nitrile foam granulate",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -23375,6 +23929,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Porous aluminium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 55.",
         "attributedTo": {
@@ -23468,6 +24024,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Porous ceramic",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 56.",
         "attributedTo": {
@@ -23561,6 +24119,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-2",
         "name": "Wood shavings",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.2, PDF page 250 (printed p. 193)",
         "note": "Page superscript: 44.",
         "attributedTo": {
@@ -23654,6 +24214,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Bagasse",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -23747,6 +24309,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Bamboo",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -23840,6 +24404,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Ceramic",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -23933,6 +24499,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Coir",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 39.",
         "attributedTo": {
@@ -24026,6 +24594,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Cotton",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20.",
         "attributedTo": {
@@ -24119,6 +24689,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Flax",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20.",
         "attributedTo": {
@@ -24212,6 +24784,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Glass and mineral wools",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 44, 57.",
         "attributedTo": {
@@ -24305,6 +24879,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Graphite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -24398,6 +24974,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Hemp",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20, 57.",
         "attributedTo": {
@@ -24491,6 +25069,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Jute",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 20.",
         "attributedTo": {
@@ -24584,6 +25164,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Kenaf",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 58.",
         "attributedTo": {
@@ -24677,6 +25259,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Kevlar",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -24770,6 +25354,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Polyester",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 42, 58.",
         "attributedTo": {
@@ -24863,6 +25449,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Poly(lactic acid)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 57.",
         "attributedTo": {
@@ -24956,6 +25544,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Polypropylene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 57. Cell printed \"5–25, 63\": a range and a separate value with nothing to pair them to.",
         "attributedTo": {
@@ -25049,6 +25639,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Ramie",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 20.",
         "attributedTo": {
@@ -25142,6 +25734,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Rice paddy",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 59. Superscript 59 is Putra et al., Adv. Acoust. Vib. 605932 (2013), the paddy-waste paper (ref. 60 is the same first authors' sugarcane paper).",
         "attributedTo": {
@@ -25235,6 +25829,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Sisal",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 20.",
         "attributedTo": {
@@ -25328,6 +25924,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Sugar cane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 60. Superscript 60 is Putra et al., Procedia Eng. 53 (2013), the sugarcane paper (ref. 59 is the same first authors' paddy-waste paper).",
         "attributedTo": {
@@ -25421,6 +26019,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Wood",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscripts: 19, 44.",
         "attributedTo": {
@@ -25514,6 +26114,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-3",
         "name": "Wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.3, PDF page 251 (printed p. 194)",
         "note": "Page superscript: 20. Cell printed \"14, 37–63\": a value and a separate range with nothing to pair them to.",
         "attributedTo": {
@@ -25607,6 +26209,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Felts",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 1, 41.",
         "attributedTo": {
@@ -25700,6 +26304,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Hemp",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -25793,6 +26399,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Mineral wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 1, 7, 41.",
         "attributedTo": {
@@ -25886,6 +26494,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Polyester",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 43. Superscript 43 is Kino and Ueno, Appl. Acoust. 69(7) (2008), not their 69(4) paper (ref. 45).",
         "attributedTo": {
@@ -25979,6 +26589,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Wood fibre board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -26072,6 +26684,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Wood wool board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -26165,6 +26779,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Open cell acoustic foams (e.g., PU)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 7, 12, 41, 65. Name wraps over two lines on the page (\"Open cell acoustic foams\" / \"(e.g., PU)\"); the superscripts sit after the closing parenthesis.",
         "attributedTo": {
@@ -26258,6 +26874,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Open cell ceramic foams",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 19.",
         "attributedTo": {
@@ -26351,6 +26969,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Open cell metal foams",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 19, 46.",
         "attributedTo": {
@@ -26444,6 +27064,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Open cell synthetic rubber",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -26537,6 +27159,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Polylactide foams",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 48.",
         "attributedTo": {
@@ -26630,6 +27254,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Partially reticulated foams",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 12.",
         "attributedTo": {
@@ -26723,6 +27349,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Reticulated vitreous carbon",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 66.",
         "attributedTo": {
@@ -26816,6 +27444,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Consolidated foam granulates",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -26909,6 +27539,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Coustone",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -27002,6 +27634,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Expanded perlite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "No superscript on the page.",
         "attributedTo": {},
@@ -27093,6 +27727,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Glass beads (1.6 and 0.7 mm)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 50. Cell printed \"0.34, 0.38\" against the name \"Glass beads (1.6 and 0.7 mm)\". The page does not make the pairing explicit (the sizes are joined by \"and\", the values by a comma, and the sizes are listed largest first, unlike Table 6.2), so both values are kept as reported rather than split into variants.",
         "attributedTo": {
@@ -27186,6 +27822,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Gravel and stone chip fill",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -27279,6 +27917,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Lead shot, random loose packing",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 55. Name wraps over two lines on the page (\"Lead shot, random loose\" / \"packing\").",
         "attributedTo": {
@@ -27372,6 +28012,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Nitrile foam granulate",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -27465,6 +28107,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Open porous asphalt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscripts: 54, 67.",
         "attributedTo": {
@@ -27558,6 +28202,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Perlite (granular)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -27651,6 +28297,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Porous render",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -27744,6 +28392,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Pumice concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -27837,6 +28487,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Pumice fill",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -27930,6 +28582,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Rubber crumb",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53.",
         "attributedTo": {
@@ -28023,6 +28677,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Sand",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 51.",
         "attributedTo": {
@@ -28116,6 +28772,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Sintered metal",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 7.",
         "attributedTo": {
@@ -28209,6 +28867,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Vermiculite (granular)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 53. Cell printed \"≈0.65–0.68\": the approximately-equals sign precedes the whole range.",
         "attributedTo": {
@@ -28302,6 +28962,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Aerogel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 19. Cell printed \">0.75\". The schema has bounded_above for \"< x\" cells only; by analogy this row uses ranges with the printed value as the low end and the physical ceiling of porosity (1.0, NOT a printed number) as the high end, flagged with bounded_below.",
         "attributedTo": {
@@ -28395,6 +29057,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Asphalt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -28488,6 +29152,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Brick",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -28581,6 +29247,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Ceramic filters",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -28674,6 +29342,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Firebrick",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -28767,6 +29437,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Marble",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1. Cell printed \"≈0.005\".",
         "attributedTo": {
@@ -28860,6 +29532,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Porous ceramic",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 56.",
         "attributedTo": {
@@ -28953,6 +29627,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-5",
         "name": "Sandstone",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.5, PDF page 253 (printed p. 196)",
         "note": "Page superscript: 1.",
         "attributedTo": {
@@ -29046,6 +29722,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Felt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 40, 41.",
         "attributedTo": {
@@ -29139,6 +29817,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Fibreglass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 41, 45.",
         "attributedTo": {
@@ -29232,6 +29912,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Polyester fibres",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
         "attributedTo": {
@@ -29325,6 +30007,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Cellular rubber",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 87. Cellular rubber is listed under Cellular material here and under Granular materials in Table 6.9.",
         "attributedTo": {
@@ -29418,6 +30102,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Melamine foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 41, 45.",
         "attributedTo": {
@@ -29511,6 +30197,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Metal foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 46. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -29604,6 +30292,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Plastic foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 40. Cells printed \"25, 207, 230\" and \"70 and 690\": three and two separate values with nothing to pair them to.",
         "attributedTo": {
@@ -29697,6 +30387,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Poroelastic foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 65. The Poroelastic foam row of Table 6.9 carries no superscript.",
         "attributedTo": {
@@ -29790,6 +30482,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Polyimide foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 47. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -29883,6 +30577,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Polylactide and polyethylene glycol foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 48. The name wraps over two lines and the superscript sits on the second line, after \"foam\".",
         "attributedTo": {
@@ -29976,6 +30672,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "PU, fully reticulated",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 12. Viscous cell printed \"96, 200–450\": a value and a separate range with nothing to pair them to.",
         "attributedTo": {
@@ -30069,6 +30767,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "PU, partially reticulated",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscripts: 12, 47.",
         "attributedTo": {
@@ -30162,6 +30862,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Lead shot",
         "variant": "2.1 mm",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. The page prints this row as \"2.1 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"2.1 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
         "attributedTo": {
@@ -30255,6 +30957,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Lead shot",
         "variant": "4 mm",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. The page prints this row as \"4 mm lead shot\"; it is one of two lead shot specimens, recorded here as the name \"Lead shot\" with the variant \"4 mm\", which is also how Table 6.9 prints \"Lead shot\", once.",
         "attributedTo": {
@@ -30348,6 +31052,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "9 mm gravel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. Name kept as printed, since the page gives only this one gravel specimen. Viscous cell printed \"190, 290\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -30441,6 +31147,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Glass beads, 0.1 mm diameter",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "The only row in the table with no superscript, so no credit is given for it.",
         "attributedTo": {},
@@ -30532,6 +31240,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Perlite (expanded)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured characteristic lengths; the credit is recorded as the page prints it.",
         "attributedTo": {
@@ -30625,6 +31335,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Porous aluminium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 55. Viscous cell printed \"470, 770\": two separate values with nothing to pair them to. The thermal length cell is a dash, so no thermal length is given.",
         "attributedTo": {
@@ -30718,6 +31430,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Porous ceramic",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 88.",
         "attributedTo": {
@@ -30811,6 +31525,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-8",
         "name": "Snow",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.8, PDF page 261 (printed p. 204)",
         "note": "Page superscript: 81.",
         "attributedTo": {
@@ -30904,6 +31620,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Felt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -30997,6 +31715,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Common fibrous absorbents, e.g., rock wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. The name wraps over two lines, \"wool\" alone on the second.",
         "attributedTo": {},
@@ -31088,6 +31808,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Polyester",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 43. References 43 and 45 are two different Kino and Ueno papers of 2008; 43 is the polyester fibre paper.",
         "attributedTo": {
@@ -31181,6 +31903,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Hemp",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 41.",
         "attributedTo": {
@@ -31274,6 +31998,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Melamine foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 41, 45.",
         "attributedTo": {
@@ -31367,6 +32093,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Metal foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 46.",
         "attributedTo": {
@@ -31460,6 +32188,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Plastic foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 65. Cell printed \"1.06 and 1.7\": two separate values with nothing to pair them to. Table 6.8 gives the Plastic foam characteristic lengths from reference 40 instead.",
         "attributedTo": {
@@ -31553,6 +32283,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Poroelastic foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row, although the Poroelastic foam row of Table 6.8 carries superscript 65.",
         "attributedTo": {},
@@ -31644,6 +32376,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Polyimide foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 47.",
         "attributedTo": {
@@ -31737,6 +32471,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Polylactide and polyethylene glycol foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 48.",
         "attributedTo": {
@@ -31830,6 +32566,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "PU foam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 41, 47.",
         "attributedTo": {
@@ -31923,6 +32661,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "PU foam, fully reticulated",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 12. Table 6.8 prints the same specimen as \"PU, fully reticulated\".",
         "attributedTo": {
@@ -32016,6 +32756,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "PU foam, partially reticulated",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 12. The upper bound is printed \"2.30\". Table 6.8 prints the same specimen as \"PU, partially reticulated\" and credits it to references 12 and 47.",
         "attributedTo": {
@@ -32109,6 +32851,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Cellular rubber",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 87. Listed under Granular materials here and under Cellular material in Table 6.8.",
         "attributedTo": {
@@ -32202,6 +32946,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Consolidated foam granulates",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -32295,6 +33041,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Coustone (Quietstone)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 50.",
         "attributedTo": {
@@ -32388,6 +33136,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Fused glass bead sample",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 91.",
         "attributedTo": {
@@ -32481,6 +33231,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Lead shot",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 55. Printed once here, where Table 6.8 splits the same material into a 2.1 mm and a 4 mm specimen.",
         "attributedTo": {
@@ -32574,6 +33326,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Loose sand or dry cultivated soil",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row.",
         "attributedTo": {},
@@ -32665,6 +33419,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Glass beads, 0.1, 0.68, and 1.64 mm diameter",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 50. The name wraps over two lines and the superscript sits on the second line, after \"diameter\". The page gives one interval for the three bead sizes together, so no per-size variant can be split out.",
         "attributedTo": {
@@ -32758,6 +33514,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Granular materials",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. The row name repeats the group heading.",
         "attributedTo": {},
@@ -32849,6 +33607,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Gravel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 52, 55. Printed without a size here, where Table 6.8 prints \"9 mm gravel\".",
         "attributedTo": {
@@ -32942,6 +33702,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Open porous asphalt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 54, 67. Cell printed \"2–3.3\", the lower bound with no decimal.",
         "attributedTo": {
@@ -33035,6 +33797,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Perlite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 5. Reference 5 of chapter 6 is a Wikimedia Commons photograph credit (Siim Sepp, \"Sand from Gobi Desert\", licensed CC BY-SA 3.0, accessed 3 May 2015), not a source of measured tortuosity; the credit is recorded as the page prints it. Table 6.8 prints the same material as \"Perlite (expanded)\".",
         "attributedTo": {
@@ -33128,6 +33892,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Rubber crumb",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 53. Cell printed \"1.13–1.26, 1.38–1.56\": two separate intervals with nothing to pair them to.",
         "attributedTo": {
@@ -33221,6 +33987,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Rubber, open cell synthetic",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 41. Same value as the Cellular rubber row four lines above, which is credited to reference 87.",
         "attributedTo": {
@@ -33314,6 +34082,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Vermiculite",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 53. Cell printed \"1.48–1.58, 1.8–2.46\": two separate intervals with nothing to pair them to.",
         "attributedTo": {
@@ -33407,6 +34177,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Asphalt",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -33500,6 +34272,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Compacted soil",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -33593,6 +34367,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Forest floor, top layer",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -33686,6 +34462,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Nitrile foam granulate",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 53. Cell printed \"1.31, 1.49\": two separate values with nothing to pair them to.",
         "attributedTo": {
@@ -33779,6 +34557,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Porous ceramic",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 88.",
         "attributedTo": {
@@ -33872,6 +34652,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Porous aluminium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 55.",
         "attributedTo": {
@@ -33965,6 +34747,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Soft soil",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscript: 52.",
         "attributedTo": {
@@ -34058,6 +34842,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Snow",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "Page superscripts: 52, 81. Cell printed \"1–1.6\", the lower bound with no decimal.",
         "attributedTo": {
@@ -34151,6 +34937,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Snow (new)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. This row is missing from the PDF text layer and was read off the rendered page.",
         "attributedTo": {},
@@ -34242,6 +35030,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-9",
         "name": "Snow (old crusted)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.9, PDF page 262 (printed p. 205)",
         "note": "No superscript on the page, so no credit is given for this row. Printed as the bare integer \"4\". This row is missing from the PDF text layer and was read off the rendered page; it is the last row of the table.",
         "attributedTo": {},
@@ -34333,6 +35123,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Mineral fibre materials",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -34426,6 +35218,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Foams",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -34519,6 +35313,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Felts",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -34612,6 +35408,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Wood-fibre board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Upper bound printed \"0.80\".",
         "attributedTo": {
@@ -34705,6 +35503,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Wood-wool board",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Lower bound printed \"0.50\".",
         "attributedTo": {
@@ -34798,6 +35598,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Porous render",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Lower bound printed \"0.60\".",
         "attributedTo": {
@@ -34891,6 +35693,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Pumice concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Upper bound printed \"0.50\".",
         "attributedTo": {
@@ -34984,6 +35788,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Pumice fill",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -35077,6 +35883,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Gravel and stone chip fill",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -35170,6 +35978,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Ceramic filtres",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Spelled \"filtres\" on the page.",
         "attributedTo": {
@@ -35263,6 +36073,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Brick",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Upper bound printed \"0.30\".",
         "attributedTo": {
@@ -35356,6 +36168,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Sinter metal",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "Lower bound printed \"0.10\".",
         "attributedTo": {
@@ -35449,6 +36263,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Fire-clay",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -35542,6 +36358,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Sand stone",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "",
         "attributedTo": {
@@ -35635,6 +36453,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g1-table-1",
         "name": "Marble",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.1 Table 1, PDF page 363 (printed p. 348)",
         "note": "The only row with no range: the \"σᵥ from\" cell is empty and the \"σᵥ to\" cell reads \"ca. 0.005\". Last row of the table.",
         "attributedTo": {
@@ -35728,6 +36548,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g11-table-1",
         "name": "Glass fibre",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
         "note": "Shot content cell printed \"< 1\": an upper bound, so the low end 0.0 is a floor and not a value. The prose calls this product group \"glass fibre products\".",
         "attributedTo": {
@@ -35821,6 +36643,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g11-table-1",
         "name": "Basalt wool",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
         "note": "The prose calls this product group \"basalt wool products\".",
         "attributedTo": {
@@ -35914,6 +36738,8 @@ export const catalogues = {
         "table": "mechel-2008-section-g11-table-1",
         "name": "Mineral fibre",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Mechel 2e Sect. G.11 Table 1, PDF page 409 (printed p. 394)",
         "note": "The prose calls this product group \"mineral fibre products (rockwool)\".",
         "attributedTo": {
@@ -36049,6 +36875,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Dry snow, newly fallen 0.1 m over about 0.4 m older snow",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36092,6 +36920,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Sugar snow",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36135,6 +36965,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Soft forest floor with blueberry greens and moss",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36178,6 +37010,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Forest floor covered by weeds",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36221,6 +37055,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Pine or hemlock forest floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36264,6 +37100,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Soft forest floor covered with pine needles",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36307,6 +37145,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Sandy forest floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36350,6 +37190,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Dense shrubbery, 20 cm high",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36393,6 +37235,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Soil and bark, sparse vegetation",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36436,6 +37280,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Peat or turf area, homogeneous organic material",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36479,6 +37325,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Soil covered with leaves and twigs",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36522,6 +37370,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Soil mixed with sawdust",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36565,6 +37415,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Relatively dense soil sparsely covered by grass and other low greens",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36608,6 +37460,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Short grass, green moss and blueberry greens",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36651,6 +37505,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Rough grassland and pasture",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36694,6 +37550,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Grass, soccer field",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36737,6 +37595,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Lawn, moderately stepped on",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36780,6 +37640,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Lawn, seldom stepped on",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36823,6 +37685,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Lawn",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36866,6 +37730,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Agricultural field",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36909,6 +37775,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Hard soil",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36952,6 +37820,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Soil, exposed and rain packed",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -36995,6 +37865,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Wet, sandy loam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37038,6 +37910,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Moistened sand",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37081,6 +37955,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Bare sandy plain",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37124,6 +38000,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Dry sand",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37167,6 +38045,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Sandy silt, hard packed by vehicles",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37210,6 +38090,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Quarry dust, hard packed by vehicles",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37253,6 +38135,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Mixed paving stones and grass",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37296,6 +38180,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Old gravel field with sparse vegetation",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37339,6 +38225,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Gravel road, stones and dust",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37382,6 +38270,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Gravel parking lot",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37425,6 +38315,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Asphalt sealed by dust and light use",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37468,6 +38360,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-1",
         "name": "Concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.1, PDF page 256 (printed p. 227)",
         "note": "",
         "attributedTo": {
@@ -37511,6 +38405,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Very soft (snow or moss)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -37554,6 +38450,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Soft forest floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -37597,6 +38495,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Uncompacted, loose ground",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -37640,6 +38540,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Normal uncompacted ground (pastures, forest floors)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "Description wrapped over two printed lines: \"Normal uncompacted ground\" / \"(pastures, forest floors)\".",
         "attributedTo": {
@@ -37683,6 +38585,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Compacted fields, lawns and gravel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -37726,6 +38630,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Compacted dense ground (gravel road, parking lot)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "Description wrapped over two printed lines: \"Compacted dense ground\" / \"(gravel road, parking lot)\".",
         "attributedTo": {
@@ -37769,6 +38675,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Asphalt, concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "",
         "attributedTo": {
@@ -37812,6 +38720,8 @@ export const catalogues = {
         "table": "bies-2017-table-5-2",
         "name": "Water",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 5.2, PDF page 257 (printed p. 228)",
         "note": "Class H is water, not a ground surface in the porous sense; the page still gives it a representative flow resistivity, 200000 kPa s/m2, which is an acoustically hard limit rather than a measured value.",
         "attributedTo": {
@@ -37855,6 +38765,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Dry snow, newly fallen 0.1 m over about 0.4 m older snow",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -37898,6 +38810,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Snow",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The water content and porosity decay cells are blank, not dashed.",
         "attributedTo": {
@@ -37941,6 +38855,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Sugar snow",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -37984,6 +38900,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Snow (new)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content cell prints a dash.",
         "attributedTo": {
@@ -38027,6 +38945,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Snow (old crusted)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content cell prints a dash.",
         "attributedTo": {
@@ -38070,6 +38990,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Snow (Great Himalaya snowpack)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The water content and porosity decay cells are blank, not dashed.",
         "attributedTo": {
@@ -38113,6 +39035,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "In forest, pine, or hemlock",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -38156,6 +39080,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Forest floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"7 × 10^3–20 × 10^4\", the two ends written with different exponents. Water content cell prints a dash.",
         "attributedTo": {
@@ -38199,6 +39125,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Mineral layer beneath mixed deciduous forest",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(540 ± 92) × 10^3\". Name wrapped over two printed lines. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -38242,6 +39170,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Humus on pine forest floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(230 ± 220) × 10^3\"; the stated uncertainty is almost as large as the value. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -38285,6 +39215,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Litter layer on mixed deciduous forest floor (2–5 cm thick)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(30 ± 30) × 10^3\"; the stated uncertainty equals the value. Name wrapped over two printed lines, the en dash of \"2–5 cm\" as printed. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -38328,6 +39260,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Pine forest litter (6–7 cm thick)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(9 ± 5) × 10^3\"; the en dash of \"6–7 cm\" as printed. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -38371,6 +39305,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Tall crops",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content and porosity cells print a dash.",
         "attributedTo": {
@@ -38414,6 +39350,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Sports field",
         "variant": "Fitted using Delany and Bazley model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell, \"0.24\", and the porosity decay cell, \"−270\", are printed once for the surface, on this line, and carry no fit marker. The water content cell is blank.",
         "attributedTo": {
@@ -38457,6 +39395,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Sports field",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38500,6 +39440,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Sports field",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38543,6 +39485,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Lawn",
         "variant": "Fitted using Delany and Bazley model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.34–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−76 to 47\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -38586,6 +39530,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Lawn",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38629,6 +39575,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Lawn",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38672,6 +39620,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Long grass",
         "variant": "Fitted using Delany and Bazley model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.38–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−9 to 48\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -38715,6 +39665,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Long grass",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38758,6 +39710,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Long grass",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38801,6 +39755,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Grassland",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Two flow resistivity ranges are printed on two lines for this one surface, \"7 × 10^4–8.5 × 10^5\" and \"1 × 10^5–2.4 × 10^5\", with no fit markers and nothing to pair them with, so both go to reported. Water content cell prints a dash.",
         "attributedTo": {
@@ -38844,6 +39800,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Pasture",
         "variant": "Fitted using Delany and Bazley model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.2–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−400 to 80\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash.",
         "attributedTo": {
@@ -38887,6 +39845,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Pasture",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38930,6 +39890,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Pasture",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -38973,6 +39935,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Grass, rough pasture, airport, public buildings, etc.",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"15 × 10^4–30 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39016,6 +39980,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Grass root layer in loamy sand",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(150 ± 90) × 10^3\" and porosity printed \"48 ± 4\", the only porosity cell in the table with a stated uncertainty. Water content and porosity decay cells print a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -39059,6 +40025,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Earth, exposed and rain-packed",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39102,6 +40070,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Bare earth",
         "variant": "Fitted using Delany and Bazley model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.4 [b]\": the value itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−49\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -39145,6 +40115,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Bare earth",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -39188,6 +40160,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Bare earth",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -39231,6 +40205,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Loose sand or dry cultivated soil",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content cell prints a dash.",
         "attributedTo": {
@@ -39274,6 +40250,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Sandy silt, hard packed by vehicles",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Last row of the table on the first printed page (folio 200, which ends with \"(Continued)\"). Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39317,6 +40295,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Arable",
         "variant": "Fitted using Delany and Bazley model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First row of the continuation page (folio 201); the group heading Earth is not repeated there, so the group is carried over from the first page. First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.15–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"−490 to 81\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -39360,6 +40340,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Arable",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -39403,6 +40385,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Arable",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -39446,6 +40430,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Cultivated soil",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The water content and porosity decay cells are blank, not dashed.",
         "attributedTo": {
@@ -39489,6 +40475,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Wet and compacted soil",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content and porosity cells print a dash.",
         "attributedTo": {
@@ -39532,6 +40520,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Heath",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface. TWO defects on the printed line, both transcribed as printed and neither repaired: (1) the low end of the range is printed \"1.7.3 × 10^5\", with two decimal points, which is not a readable number, so the whole flow resistivity cell goes to unquantified rather than being guessed at; (2) the fit marker is printed [b], not [a], although every other surface with three fitted lines in this table is marked [a], [b], [c] in that order and the line below is also marked [b]. The porosity cell is printed \"0.71–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"17–33\", carries no marker. Both are printed once for the surface, on this line. The water content cell is blank.",
         "attributedTo": {
@@ -39575,6 +40565,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Heath",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]. The line above is marked [b] as well; see that row. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -39618,6 +40610,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Heath",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -39661,6 +40655,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Roadside dirt, ill-defined, small rocks up to 0.1 m mesh",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"30 × 10^4–80 × 10^4\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39704,6 +40700,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Clean limestone chops, thick layer (1–2.5 cm mesh)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "The word \"Clean\" is printed in italic, the rest of the name upright. Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39747,6 +40745,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Old dirt roadway, fine stones (5 cm mesh) interstices filled",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39790,6 +40790,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Gravel",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"1.5 × 10^3–59 × 10^3\". Water content and porosity decay cells print a dash.",
         "attributedTo": {
@@ -39833,6 +40835,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Quarry dust fine, very hard-packed by vehicles",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"5 × 10^6–20 × 10^6\". Name wrapped over two printed lines. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39876,6 +40880,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Asphalt, sealed by dust and light use",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"≈3 × 10^7\" with a printed approximately-equal sign, the only approximate cell in the table. Water content, porosity and porosity decay cells all print a dash.",
         "attributedTo": {
@@ -39919,6 +40925,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Porous asphalt, new",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"2 × 10^3–15 × 10^3\". Water content and porosity decay cells print a dash.",
         "attributedTo": {
@@ -39962,6 +40970,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Urban",
         "variant": "Fitted using Delany and Bazley model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of three fitted values printed for this surface, marked [a]. The porosity cell is printed \"0.61–1 [b]\": the range itself carries the marker [b] = Fitted using semi-phenomenological model. The porosity decay cell, printed \"0–25\", carries no marker. Both are printed once for the surface, on this line. The water content cell prints a dash.",
         "attributedTo": {
@@ -40005,6 +41015,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Urban",
         "variant": "Fitted using semi-phenomenological model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of three fitted values printed for this surface, marked [b]; it is a single value where the other two lines are ranges. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40048,6 +41060,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Urban",
         "variant": "Fitted using variable porosity model",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of three fitted values printed for this surface, marked [c]. Water content, porosity and porosity decay are printed once for this surface, on the line of the first fitted value; see that row.",
         "attributedTo": {
@@ -40091,6 +41105,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Coarse sand, pore size 98 μm",
         "variant": "water content 0 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -40134,6 +41150,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Coarse sand, pore size 98 μm",
         "variant": "water content 11 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -40177,6 +41195,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Coarse sand, pore size 98 μm",
         "variant": "water content 51 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -40220,6 +41240,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Coarse sand, pore size 98 μm",
         "variant": "water content 95 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash. The flow resistivity falls back at the highest water content, below the 51 % and 11 % lines.",
         "attributedTo": {
@@ -40263,6 +41285,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Fine sand",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Water content and porosity decay cells print a dash. Printed name is \"Fine sand\" with no pore size, distinct from the \"Fine sand, pore size 65 μm\" block below it.",
         "attributedTo": {
@@ -40306,6 +41330,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Fine sand, pore size 65 μm",
         "variant": "water content 0 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "First of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -40349,6 +41375,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Fine sand, pore size 65 μm",
         "variant": "water content 15 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Second of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -40392,6 +41420,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Fine sand, pore size 65 μm",
         "variant": "water content 48 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Third of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -40435,6 +41465,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Fine sand, pore size 65 μm",
         "variant": "water content 95 %",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Fourth of four. One of four lines printed under this one surface name, one per water content; the water content is the only thing that distinguishes them. Porosity cell prints a dash.",
         "attributedTo": {
@@ -40478,6 +41510,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Loamy sand",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(420 ± 17) × 10^3\". Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -40521,6 +41555,8 @@ export const catalogues = {
         "table": "cox-2017-table-6-7",
         "name": "Bare sandy plain",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Cox & D'Antonio 3e Table 6.7, PDF pages 257-258 (printed pp. 200-201)",
         "note": "Flow resistivity printed \"(370 ± 110) × 10^3\". Last row of the table. Porosity decay cell prints a dash. The Porosity column prints this value as a number far above 1 while every other row of the column prints a fraction; on the page it is plainly a percentage, but it is transcribed exactly as printed.",
         "attributedTo": {
@@ -40582,6 +41618,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Acetylene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40603,6 +41641,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Air",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40624,6 +41664,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Ammonia",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40645,6 +41687,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Argon",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40666,6 +41710,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Benzene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40687,6 +41733,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Isobutane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40708,6 +41756,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "n-Butane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40729,6 +41779,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Isobutylene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40750,6 +41802,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Carbon dioxide",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40771,6 +41825,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Carbon monoxide",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40792,6 +41848,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Chlorine",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40813,6 +41871,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Ethane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40834,6 +41894,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Ethylene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40855,6 +41917,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Fluorine",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40876,6 +41940,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Freon 11",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40897,6 +41963,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Freon 12",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40918,6 +41986,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Freon 13",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40939,6 +42009,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Freon 22",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40960,6 +42032,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Helium",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -40981,6 +42055,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "n-Heptane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41002,6 +42078,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Hydrogen",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41023,6 +42101,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Hydrogen chloride",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41044,6 +42124,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Hydrogen fluoride",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41065,6 +42147,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Methane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41086,6 +42170,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Methyl chloride",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41107,6 +42193,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Natural gas (representative)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41128,6 +42216,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Neon",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41149,6 +42239,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Nitric oxide",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41170,6 +42262,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Nitrogen",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41191,6 +42285,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Octane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41212,6 +42308,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Oxygen",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41233,6 +42331,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Pentane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41254,6 +42354,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Propane",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41275,6 +42377,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Propylene",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41296,6 +42400,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Saturated steam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41317,6 +42423,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Sulphur dioxide",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41338,6 +42446,8 @@ export const catalogues = {
         "table": "bies-2017-table-c2",
         "name": "Superheated steam",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table C.2, PDF page 751 (printed p. 722)",
         "note": "",
         "attributedTo": {},
@@ -41359,6 +42469,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a1",
         "name": "Air (dry)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -41380,6 +42492,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a1",
         "name": "Argon",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -41401,6 +42515,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a1",
         "name": "Carbon dioxide",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -41422,6 +42538,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a1",
         "name": "Nitrogen",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -41443,6 +42561,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a1",
         "name": "Oxygen",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -41464,6 +42584,8 @@ export const catalogues = {
         "table": "hopkins-2007-table-a1",
         "name": "Sulphur hexafluoride",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Hopkins (2007) Table A1, PDF page 634 (printed p. 607)",
         "note": "",
         "attributedTo": {},
@@ -41533,6 +42655,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – heavily upholstered seats",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {
@@ -41581,6 +42705,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – medium upholstered seats",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41627,6 +42753,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – light upholstered seats",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41673,6 +42801,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – very light upholstered seats",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41719,6 +42849,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – average well-upholstered seating areas",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41765,6 +42897,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – leather-covered upholstered seating areas",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41811,6 +42945,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – metal or wood seats",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41857,6 +42993,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – concert hall, no seats",
         "variant": "halls lined with thin wood or other materials <3 cm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41903,6 +43041,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Unoccupied – concert hall, no seats",
         "variant": "Halls lined with heavy materials",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41949,6 +43089,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "100% occupied audience (orchestra and chorus areas) – upholstered seats",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -41995,6 +43137,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Wooden pews – 100% occupied",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42041,6 +43185,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Wooden chairs – 100% occupied",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42087,6 +43233,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Wooden chairs – 75% occupied",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42133,6 +43281,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Acoustic plaster, 10 mm thick sprayed on solid wall",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42179,6 +43329,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Hard surfaces (brick walls, plaster, hard floors, etc.)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42225,6 +43377,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Gypsum board on 50 × 100 mm studs",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42271,6 +43425,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Plaster, gypsum or lime, smooth finish",
         "variant": "on brick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42317,6 +43473,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Plaster, gypsum or lime, smooth finish",
         "variant": "on concrete block",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42363,6 +43521,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Plaster, gypsum or lime, smooth finish",
         "variant": "on lath",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42409,6 +43569,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Solid timber door",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42455,6 +43617,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "16 kg/m³, 25 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42501,6 +43665,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "16 kg/m³, 50 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42547,6 +43713,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "16 kg/m³, 75 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42593,6 +43761,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "16 kg/m³, 100 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42639,6 +43809,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "24 kg/m³, 25 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42685,6 +43857,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "24 kg/m³, 50 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42731,6 +43905,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "24 kg/m³, 75 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42777,6 +43953,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "24 kg/m³, 100 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42823,6 +44001,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "48 kg/m³, 50 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42869,6 +44049,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "48 kg/m³, 75 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42915,6 +44097,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "48 kg/m³, 100 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -42961,6 +44145,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "60 kg/m³, 25 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43007,6 +44193,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Fibreglass or rockwool blanket",
         "variant": "60 kg/m³, 50 mm thick",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43053,6 +44241,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Polyurethane foam, 27 kg/m³ 15 mm thick",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43099,6 +44289,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Wood platform with large space beneath",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43145,6 +44337,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Wood floor on joists",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43191,6 +44385,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Concrete or terrazzo",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43237,6 +44433,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Concrete block painted",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43283,6 +44481,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Linoleum, asphalt, rubber or cork tile on concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43329,6 +44529,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Varnished wood joist floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43375,6 +44577,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Carpet, heavy, on concrete",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43421,6 +44625,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Carpet, heavy, on 1.35 kg/m² hair felt or foam rubber",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43467,6 +44673,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Carpet, 5 mm thick, on hard floor",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43513,6 +44721,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Carpet, 6 mm thick, on underlay",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43559,6 +44769,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Cork floor tiles (3-4 inch thick) – glued down",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "The page prints the thickness as \"3-4 inch\". A cork floor tile between 75 and 100 mm thick is not a thing, and the classic compilations describe this specimen as three-quarters of an inch, about 19 mm; the name is held as printed and the reading is left to the reader.",
         "attributedTo": {},
@@ -43605,6 +44817,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Glazed tile/marble",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43651,6 +44865,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "13 mm mineral tile direct fixed to floor slab",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43697,6 +44913,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "13 mm mineral tile suspended 500 mm below ceiling",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43743,6 +44961,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Light velour, 338 g/m²",
         "variant": "hung flat on wall",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43789,6 +45009,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Light velour, 338 g/m²",
         "variant": "hung in folds on wall",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43835,6 +45057,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Medium velour, 475 g/m² draped to half area",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43881,6 +45105,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Heavy velour, 610 g/m² draped to half area",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43927,6 +45153,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Glass, heavy plate",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -43973,6 +45201,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Ordinary window",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44019,6 +45249,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Stage openings",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44065,6 +45297,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Water (surface of pool)",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44111,6 +45345,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Orchestra with instruments on podium, 1.5 m² per person",
         "variant": "",
+        "mounting": "",
+        "per": "",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "",
         "attributedTo": {},
@@ -44147,6 +45383,4806 @@ export const catalogues = {
           },
           {
             "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/glass_1_4in_heavy_plate",
+        "table": "long-2014-table-7-1",
+        "name": "Glass, 1/4″, heavy plate",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/glass_3_32in_ordinary_window",
+        "table": "long-2014-table-7-1",
+        "name": "Glass, 3/32″, ordinary window",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/gypsum_board_1_2in_on_2_x_4_studs",
+        "table": "long-2014-table-7-1",
+        "name": "Gypsum board, 1/2″, on 2 × 4 studs",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/plaster_7_8in_gypsum_or_lime_on_brick",
+        "table": "long-2014-table-7-1",
+        "name": "Plaster, 7/8″, gypsum or lime, on brick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,013",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/plaster_on_concrete_block",
+        "table": "long-2014-table-7-1",
+        "name": "Plaster, on concrete block",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/plaster_7_8in_on_lath",
+        "table": "long-2014-table-7-1",
+        "name": "Plaster, 7/8″, on lath",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/plaster_7_8in_lath_on_studs",
+        "table": "long-2014-table-7-1",
+        "name": "Plaster, 7/8″, lath on studs",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/plywood_1_4in_3in_air_space_1in_batt",
+        "table": "long-2014-table-7-1",
+        "name": "Plywood, 1/4″, 3″ air space, 1″ batt,",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/soundblox_type_b_painted",
+        "table": "long-2014-table-7-1",
+        "name": "Soundblox, type B, painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/wood_panel_3_8in_3_4in_air_space",
+        "table": "long-2014-table-7-1",
+        "name": "Wood panel, 3/8″, 3-4″ air space",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/concrete_block_unpainted",
+        "table": "long-2014-table-7-1",
+        "name": "Concrete block, unpainted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/concrete_block_painted",
+        "table": "long-2014-table-7-1",
+        "name": "Concrete block, painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/concrete_poured_unpainted",
+        "table": "long-2014-table-7-1",
+        "name": "Concrete poured, unpainted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/brick_unglazed_unpainted",
+        "table": "long-2014-table-7-1",
+        "name": "Brick, unglazed, unpainted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/wood_paneling_1_4in_with_airspace_behind",
+        "table": "long-2014-table-7-1",
+        "name": "Wood paneling, 1/4″, with airspace behind",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/wood_paneling_1in_with_airspace_behind",
+        "table": "long-2014-table-7-1",
+        "name": "Wood, paneling, 1″, with airspace behind",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/shredded_wood_fiberboard_2in_on_concrete",
+        "table": "long-2014-table-7-1",
+        "name": "Shredded-wood fiberboard, 2″, on concrete",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/carpet_heavy_on_5_8_in_perforated_mineral_fiberboard",
+        "table": "long-2014-table-7-1",
+        "name": "Carpet, heavy, on 5/8-in perforated mineral fiberboard",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/brick_unglazed_painted",
+        "table": "long-2014-table-7-1",
+        "name": "Brick, unglazed, painted",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/light_velour_10_oz_per_sq_yd_hung_straight_in_contact_with_wall",
+        "table": "long-2014-table-7-1",
+        "name": "Light velour, 10 oz per sq yd, hung straight, in contact with wall",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/medium_velour_14_oz_per_sq_yd_draped_to_half_area",
+        "table": "long-2014-table-7-1",
+        "name": "Medium velour, 14 oz per sq yd, draped to half area",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/heavy_velour_18_oz_per_sq_yd_draped_to_half_area",
+        "table": "long-2014-table-7-1",
+        "name": "Heavy velour, 18 oz per sq yd, draped to half area",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/floors_concrete_or_terrazzo",
+        "table": "long-2014-table-7-1",
+        "name": "Floors, concrete or terrazzo",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/floors_linoleum_vinyl_on_concrete",
+        "table": "long-2014-table-7-1",
+        "name": "Floors, linoleum, vinyl on concrete",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/floors_linoleum_vinyl_on_subfloor",
+        "table": "long-2014-table-7-1",
+        "name": "Floors, linoleum, vinyl on subfloor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/floors_wooden",
+        "table": "long-2014-table-7-1",
+        "name": "Floors, wooden",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/floors_wooden_platform_w_airspace",
+        "table": "long-2014-table-7-1",
+        "name": "Floors, wooden platform w/airspace",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/carpet_heavy_on_concrete",
+        "table": "long-2014-table-7-1",
+        "name": "Carpet, heavy on concrete",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/carpet_on_40_oz_1_35_kg_m2_pad",
+        "table": "long-2014-table-7-1",
+        "name": "Carpet, on 40 oz (1.35 kg / m²) pad",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/indoor_outdoor_carpet",
+        "table": "long-2014-table-7-1",
+        "name": "Indoor-outdoor carpet",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/wood_parquet_in_asphalt_on_concrete",
+        "table": "long-2014-table-7-1",
+        "name": "Wood parquet in asphalt on concrete",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/acoustical_coating_k_13_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Acoustical coating K-13",
+        "variant": "1″",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/acoustical_coating_k_13_1_5in",
+        "table": "long-2014-table-7-1",
+        "name": "Acoustical coating K-13",
+        "variant": "1.5″",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/acoustical_coating_k_13_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Acoustical coating K-13",
+        "variant": "2″",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/acoustical_coating_k_13_fc_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Acoustical coating K-13 “fc” 1″",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/glass_fiber_roof_fabric_12_oz_yd",
+        "table": "long-2014-table-7-1",
+        "name": "Glass-fiber roof fabric, 12 oz/yd",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/glass_fiber_roof_fabric_37_5_oz_yd",
+        "table": "long-2014-table-7-1",
+        "name": "Glass-fiber roof fabric, 37.5 oz/yd",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/standard_mineral_fiber_5_8in",
+        "table": "long-2014-table-7-1",
+        "name": "Standard mineral fiber, 5/8″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/standard_mineral_fiber_3_4in",
+        "table": "long-2014-table-7-1",
+        "name": "Standard mineral fiber, 3/4″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/standard_mineral_fiber_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Standard mineral fiber, 1″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/energy_mineral_fiber_5_8in",
+        "table": "long-2014-table-7-1",
+        "name": "Energy mineral fiber, 5/8″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/energy_mineral_fiber_3_4in",
+        "table": "long-2014-table-7-1",
+        "name": "Energy mineral fiber, 3/4″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/energy_mineral_fiber_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Energy mineral fiber, 1″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/film_faced_fiberglass_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Film faced fiberglass, 1″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/film_faced_fiberglass_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Film faced fiberglass, 2″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/film_faced_fiberglass_3in",
+        "table": "long-2014-table-7-1",
+        "name": "Film faced fiberglass, 3″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fiberglass_tile_3_4in",
+        "table": "long-2014-table-7-1",
+        "name": "Fiberglass tile, 3/4″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fiberglass_tile_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Fiberglass tile, 1″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fiberglass_tile_1_1_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Fiberglass tile, 1 1/2″",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/unoccupied_well_upholstered_seats",
+        "table": "long-2014-table-7-1",
+        "name": "Unoccupied well-upholstered seats",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/unoccupied_leather_covered_seats",
+        "table": "long-2014-table-7-1",
+        "name": "Unoccupied leather-covered seats",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/wooden_pews_occupied",
+        "table": "long-2014-table-7-1",
+        "name": "Wooden pews, occupied",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fabric_well_upholstered_seats_with_perforated_seat_pans_unoccupied",
+        "table": "long-2014-table-7-1",
+        "name": "Fabric well-upholstered seats, with perforated seat pans, unoccupied",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/leather_covered_upholstered_seats_unoccupied",
+        "table": "long-2014-table-7-1",
+        "name": "Leather-covered upholstered seats, unoccupied",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/audience_seated_in_upholstered_seats",
+        "table": "long-2014-table-7-1",
+        "name": "Audience, seated in upholstered seats",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/congregation_seated_in_wooden_pews",
+        "table": "long-2014-table-7-1",
+        "name": "Congregation, seated in wooden pews",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/chair_metal_or_wood_seat_unoccupied",
+        "table": "long-2014-table-7-1",
+        "name": "Chair, metal or wood seat, unoccupied",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/students_informally_dressed_seated_in_tablet_arm_chairs",
+        "table": "long-2014-table-7-1",
+        "name": "Students, informally dressed, seated in tablet-arm chairs",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/duct_liners_1_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Duct Liners",
+        "variant": "1/2″",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/duct_liners_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Duct Liners",
+        "variant": "1″",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/duct_liners_1_1_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Duct Liners",
+        "variant": "1 1/2″",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/duct_liners_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Duct Liners",
+        "variant": "2″",
+        "mounting": "",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_150_1in_f",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 150, 1″",
+        "variant": "",
+        "mounting": "F",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_150_2in_f",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 150, 2″",
+        "variant": "",
+        "mounting": "F",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_200_1_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 200, 1/2″",
+        "variant": "",
+        "mounting": "F",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_200_1in",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 200, 1″",
+        "variant": "",
+        "mounting": "F",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_200_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 200, 2″",
+        "variant": "",
+        "mounting": "F",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_300_1_2in",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 300, 1/2″",
+        "variant": "",
+        "mounting": "F",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_300_1in_f",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 300, 1″",
+        "variant": "",
+        "mounting": "F",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_150_1in_a",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 150, 1″",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_150_2in_a",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 150, 2″",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/aeroflex_type_300_1in_a",
+        "table": "long-2014-table-7-1",
+        "name": "Aeroflex Type 300, 1″",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/building_insulation_fiberglass_3_5in_r_11_insulation_exposed_to_sound",
+        "table": "long-2014-table-7-1",
+        "name": "Building Insulation - Fiberglass",
+        "variant": "3.5″ (R-11) (insulation exposed to sound)",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/building_insulation_fiberglass_6_0in_r_19_insulation_exposed_to_sound",
+        "table": "long-2014-table-7-1",
+        "name": "Building Insulation - Fiberglass",
+        "variant": "6.0″ (R-19) (insulation exposed to sound)",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,21",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/building_insulation_fiberglass_3_5in_r_11_frk_facing_exposed_to_sound",
+        "table": "long-2014-table-7-1",
+        "name": "Building Insulation - Fiberglass",
+        "variant": "3.5″ (R-11) (FRK facing exposed to sound)",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/building_insulation_fiberglass_6_0in_r_19_frk_facing_exposed_to_sound",
+        "table": "long-2014-table-7-1",
+        "name": "Building Insulation - Fiberglass",
+        "variant": "6.0″ (R-19) (FRK facing exposed to sound)",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_1in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 1″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_2in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 2″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_3in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 3″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_4in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 4″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_1in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 1″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_2in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 2″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,18",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_3in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 3″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_3lb_ft3_4in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 3lb/ft³, 4″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,16",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_1in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 1″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_2in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 2″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_3in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 3″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_4in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 4″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_1in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 1″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,18",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_2in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 2″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,22",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_3in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 3″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,19",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_6lb_ft3_4in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, 6lb/ft³, 4″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,19",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_1in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 1″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_2in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 2″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_3in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 3″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_4in_thick_a",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 4″ thick",
+        "variant": "",
+        "mounting": "A",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_1in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 1″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_2in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 2″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_3in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 3″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/fb_frk_faced_4in_thick_e400",
+        "table": "long-2014-table-7-1",
+        "name": "FB, FRK faced, 4″ thick",
+        "variant": "",
+        "mounting": "E400",
+        "per": "",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
             "kind": "printed",
             "note": ""
           }
@@ -44199,6 +50235,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Audience, per person seated",
         "variant": "",
+        "mounting": "",
+        "per": "person",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "The page prints the quantity as S alpha-bar (m2) beside the name: an absorption area per person, not a coefficient.",
         "attributedTo": {},
@@ -44240,6 +50278,8 @@ export const catalogues = {
         "table": "bies-2017-table-6-2",
         "name": "Audience, per person standing",
         "variant": "",
+        "mounting": "",
+        "per": "person",
         "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
         "note": "The page prints the quantity as S alpha-bar (m2) beside the name: an absorption area per person, not a coefficient.",
         "attributedTo": {},
@@ -44273,6 +50313,92 @@ export const catalogues = {
             "text": "0,43",
             "kind": "printed",
             "note": ""
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/musician_per_person_with_instrument",
+        "table": "long-2014-table-7-1",
+        "name": "Musician (per person), with instrument",
+        "variant": "",
+        "mounting": "",
+        "per": "person",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,3716",
+            "kind": "derived",
+            "note": "from the 4.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+          },
+          {
+            "text": "0,7897",
+            "kind": "derived",
+            "note": "from the 8.5 sabins the page prints, at 0.092 903 04 m² to the square foot"
+          },
+          {
+            "text": "1,068",
+            "kind": "derived",
+            "note": "from the 11.5 sabins the page prints, at 0.092 903 04 m² to the square foot"
+          },
+          {
+            "text": "1,301",
+            "kind": "derived",
+            "note": "from the 14.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+          },
+          {
+            "text": "1,394",
+            "kind": "derived",
+            "note": "from the 15.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+          },
+          {
+            "text": "1,115",
+            "kind": "derived",
+            "note": "from the 12.0 sabins the page prints, at 0.092 903 04 m² to the square foot"
+          }
+        ]
+      },
+      {
+        "key": "long-2014-table-7-1/air_sabins_per_1000_cubic_feet_at_50percent_rh",
+        "table": "long-2014-table-7-1",
+        "name": "Air, Sabins per 1000 cubic feet @ 50% RH",
+        "variant": "",
+        "mounting": "",
+        "per": "cubic metre of air at 50% RH",
+        "source": "Long 2e Table 7.1, PDF pages 287-290 (printed pp. 283-286)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,002953",
+            "kind": "derived",
+            "note": "from the 0.9 sabins per 1000 cubic feet the page prints, at 0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the thousand cubic feet"
+          },
+          {
+            "text": "0,007546",
+            "kind": "derived",
+            "note": "from the 2.3 sabins per 1000 cubic feet the page prints, at 0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the thousand cubic feet"
+          },
+          {
+            "text": "0,02362",
+            "kind": "derived",
+            "note": "from the 7.2 sabins per 1000 cubic feet the page prints, at 0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the thousand cubic feet"
           }
         ]
       }

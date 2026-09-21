@@ -52,6 +52,7 @@ interface Props {
 		| 'absorptionAreas'
 		| 'transmissionLoss'
 		| 'scattering'
+		| 'diffusion'
 		| 'fluids';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
@@ -74,6 +75,7 @@ const copy = {
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
+		diffusionPlaceholder: 'semiellipse, triangle, QRD',
 		table: 'Published table',
 		everyTable: 'Every table',
 		empty: 'No row matches that filter.',
@@ -111,6 +113,7 @@ const copy = {
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
+		diffusionPlaceholder: 'semiellipse, triangle, QRD',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',
@@ -156,7 +159,9 @@ const placeholder =
 					? copy.partitionPlaceholder
 					: section === 'scattering'
 						? copy.scatteringPlaceholder
-						: copy.searchPlaceholder;
+						: section === 'diffusion'
+							? copy.diffusionPlaceholder
+							: copy.searchPlaceholder;
 
 /** What the first column holds, which is not a material in every catalogue. */
 const rowHeading =
@@ -170,7 +175,7 @@ const rowHeading =
 					? copy.finish
 					: section === 'transmissionLoss'
 						? copy.partition
-						: section === 'scattering'
+						: section === 'scattering' || section === 'diffusion'
 							? copy.surface
 							: copy.material;
 
@@ -514,8 +519,6 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		display: block;
 		font-weight: 400;
 		font-size: 0.82em;
-		letter-spacing: 0.02em;
-		text-transform: uppercase;
 		color: var(--sl-color-gray-3);
 	}
 

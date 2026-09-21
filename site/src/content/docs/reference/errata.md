@@ -6602,6 +6602,45 @@ in the same order.
   pins that they stay two rows with two spectra.
 - **Status:** not reported.
 
+## Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Appendix B (a width in centimetres that its own geometry makes metres)
+
+- **Location:** Appendix B, "Normalized diffusion coefficient table", section 1,
+  the first surface of the width series, on printed page 482 (PDF page 539).
+  Non-normative source: a textbook.
+- **The print:** the section is headed "Effect of changing diffuser periodicity
+  and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat
+  section between each period)", and its five surfaces are listed as "1 period,
+  0.61 cm wide", "2 periods, 1.22 m wide", "4 cylinders, 2.44 m wide",
+  "6 periods, 3.66 m wide" and "12 periods, 7.32 m wide".
+- **The problem:** the first width is in centimetres and the other four are in
+  metres, and the series doubles: 0.61, 1.22, 2.44, and then 3.66 and 7.32,
+  which are six and twelve of the first. One period of the surface the heading
+  describes is a semicylinder of radius $0.3$ m plus the $1$ cm flat section,
+  so $2 \times 0.3 + 0.01 = 0.61$ m. A width of 0.61 cm is six millimetres, a
+  hundredth of what the heading's own geometry gives and a hundredth of what
+  the rest of the series requires.
+- **Evidence:** the same surface is listed in Table C.3 of the next appendix,
+  under a heading with the same geometry, and there it reads "1 period, 0.61 m
+  wide". The book therefore prints both spellings of one surface twelve pages
+  apart, and the metric one is the one its arithmetic supports. Verified on PDF
+  page 539 (printed p. 482) and PDF page 549 (printed p. 492) of Cox and
+  D'Antonio (2017), *Acoustic Absorbers and Diffusers*, third edition, with the
+  unit re-read at six times magnification on both pages: the appendix really
+  prints "cm" and Table C.3 really prints "m".
+- **Consequence for the book's own tables:** the description of one surface,
+  and of the three rows that carry it. The numbers beside it are unaffected,
+  which is what makes the defect easy to miss and worth recording: a reader
+  comparing a measured semicylinder against this row would be comparing against
+  a 0.61 m device whatever the label says.
+- **Library behaviour:** the row keeps the width as printed, because a
+  catalogue that silently corrected it would be claiming a reading the page
+  does not make. The three rows of the surface are keyed on it and
+  `test_every_section_heading_is_kept_whole` in
+  [`tests/materials/diffusers/test_diffusion_catalogue.py`](https://github.com/jmrplens/phonometry/blob/main/tests/materials/diffusers/test_diffusion_catalogue.py)
+  pins that the heading with the geometry travels with them, which is what
+  lets a reader see the contradiction.
+- **Status:** not reported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

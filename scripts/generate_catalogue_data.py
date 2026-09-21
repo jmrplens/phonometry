@@ -55,6 +55,8 @@ from phonometry.materials.absorbers import (  # noqa: E402
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
 from phonometry.materials.absorbers.porous import PUBLISHED_AIR  # noqa: E402
 from phonometry.materials.diffusers import (  # noqa: E402
+    DIFFUSION_BANDS_HZ,
+    PUBLISHED_DIFFUSION,
     PUBLISHED_SCATTERING,
     SCATTERING_BANDS_HZ,
 )
@@ -211,6 +213,21 @@ SCATTERING_COLUMNS = tuple(
         "",
     )
     for band in SCATTERING_BANDS_HZ
+)
+
+#: One column per one-third octave band, and one for the angle the row was
+#: computed at, which is what tells three rows of one surface apart.
+DIFFUSION_COLUMNS = (
+    ("angle_of_incidence_deg", "Angle of incidence", "Ángulo de incidencia", "°"),
+    *(
+        (
+            f"diffusion_coefficient_{band}",
+            _band_heading(band),
+            _band_heading(band, spanish=True),
+            "",
+        )
+        for band in DIFFUSION_BANDS_HZ
+    ),
 )
 
 GAS_COLUMNS = (
@@ -804,6 +821,7 @@ def render() -> str:
             PUBLISHED_TRANSMISSION_LOSS, TRANSMISSION_LOSS_COLUMNS
         ),
         "scattering": section(PUBLISHED_SCATTERING, SCATTERING_COLUMNS),
+        "diffusion": section(PUBLISHED_DIFFUSION, DIFFUSION_COLUMNS),
         "absorptionAreas": section(PUBLISHED_ABSORPTION_AREAS, ABSORPTION_AREA_COLUMNS),
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
@@ -850,6 +868,7 @@ def main(argv: list[str] | None = None) -> int:
         "absorption": len(PUBLISHED_ABSORPTION),
         "transmission loss": len(PUBLISHED_TRANSMISSION_LOSS),
         "scattering": len(PUBLISHED_SCATTERING),
+        "diffusion": len(PUBLISHED_DIFFUSION),
         "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }

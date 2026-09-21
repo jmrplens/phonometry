@@ -359,6 +359,8 @@ from .building import ISO16283_LF_DEFAULT_LEVELS as ISO16283_LF_DEFAULT_LEVELS
 from .building import ISO16283_LF_T63_OCTAVE_S as ISO16283_LF_T63_OCTAVE_S
 from .building import ISO16283_LF_TRIGGER_CASES as ISO16283_LF_TRIGGER_CASES
 from .building import ISO16283_LF_VOLUME_LIMIT_M3 as ISO16283_LF_VOLUME_LIMIT_M3
+from .diffusion import COX_B_BANDS_HZ as COX_B_BANDS_HZ
+from .diffusion import COX_B_DIFFUSION as COX_B_DIFFUSION
 from .electroacoustics import CLIPPED_SINE_B1 as CLIPPED_SINE_B1
 from .electroacoustics import CLIPPED_SINE_B3 as CLIPPED_SINE_B3
 from .electroacoustics import CLIPPED_SINE_B5 as CLIPPED_SINE_B5

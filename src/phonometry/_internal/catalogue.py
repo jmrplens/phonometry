@@ -27,7 +27,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -315,3 +315,79 @@ class CatalogueRow:
             listed = ", ".join(_spell(entry) for entry in self.reported[field_name])
             return f"the page lists {listed} and no single value"
         return "the page does not give it, and it does not follow from the cells that it does"
+
+
+@dataclass(frozen=True, kw_only=True)
+class BandedRow(CatalogueRow):
+    """One row of a table that prints its quantity once per frequency band.
+
+    Five catalogues of this library hold a spectrum read off a page, and each
+    of them keeps one field per band rather than an array, because every hedge
+    of :class:`CatalogueRow` is keyed by field name and a cell the page left
+    empty has to say so the way any other cell does. What they then need is
+    the same three things: which bands this row filled, the row as a spectrum,
+    and a lookup that refuses rather than answering zero for a band the page
+    did not print. That is what this holds.
+
+    A subclass declares the bands its tables can print and how its band fields
+    are spelled, and defines the reading method under the name its own domain
+    uses, because ``row.transmission_loss_db(500)`` reads better than a generic
+    verb and says what comes back.
+    """
+
+    #: The band centre frequencies a table of this quantity can print, in
+    #: hertz. A table prints a subset.
+    _bands_hz: ClassVar[tuple[int, ...]] = ()
+    #: The band field for a centre frequency is this, the frequency, and
+    #: :attr:`_band_suffix`: ``"absorption_coefficient_"`` and ``""`` give
+    #: ``absorption_coefficient_500``.
+    _band_prefix: ClassVar[str] = ""
+    _band_suffix: ClassVar[str] = ""
+    #: What these tables call their bands, for the wording of a refusal.
+    _band_kind: ClassVar[str] = "octave"
+    #: What the tables are of, for the wording of a refusal.
+    _table_kind: ClassVar[str] = "published"
+
+    @classmethod
+    def _band_field(cls, band_hz: int) -> str:
+        """The field name that holds one band of this row."""
+        return f"{cls._band_prefix}{band_hz}{cls._band_suffix}"
+
+    def bands(self) -> tuple[int, ...]:
+        """The bands this row prints a value for, in hertz."""
+        return tuple(
+            band
+            for band in self._bands_hz
+            if getattr(self, self._band_field(band)) is not None
+        )
+
+    def spectrum(self) -> dict[int, float]:
+        """The row as ``{band_hz: value}`` over the bands it prints.
+
+        A band the page left empty, or printed as something other than a
+        number, is left out rather than filled with a zero;
+        :meth:`~CatalogueRow.why_missing` on that band's field says which it
+        was.
+        """
+        return {
+            band: float(getattr(self, self._band_field(band))) for band in self.bands()
+        }
+
+    def _in_band(self, band_hz: int) -> float:
+        """One band of this row, or a refusal that says what the page had.
+
+        :param band_hz: A centre frequency from the bands this class declares.
+        :return: The printed value, as a float.
+        :raises ValueError: when the page has no number in that band, naming
+            the row, the band and what the cell held instead; or when
+            *band_hz* is not a band these tables print.
+        """
+        if band_hz not in self._bands_hz:
+            msg = (
+                f"{band_hz} Hz is not {self._band_kind} band a "
+                f"{self._table_kind} table prints; the bands are {self._bands_hz}"
+            )
+            raise ValueError(msg)
+        return self.printed(
+            self._band_field(band_hz), wanted_by=f"the {band_hz} Hz band"
+        )

@@ -176,7 +176,73 @@ that a number from here cannot be mistaken for a coefficient.
 AbsorptionAreaSpectrum.bands() -> tuple[int, ...]
 ```
 
-The octave bands this row prints an area for, in hertz.
+The bands this row prints a value for, in hertz.
+
+### AbsorptionAreaSpectrum.is_approximate()
+
+```python
+AbsorptionAreaSpectrum.is_approximate(field_name: str) -> bool
+```
+
+Whether the page prints this field with a `~`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page rounded the cell on purpose.
+
+### AbsorptionAreaSpectrum.is_derived()
+
+```python
+AbsorptionAreaSpectrum.is_derived(field_name: str) -> bool
+```
+
+Whether this library computed this field instead of reading it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+
+### AbsorptionAreaSpectrum.printed()
+
+```python
+AbsorptionAreaSpectrum.printed(
+    field_name: str,
+    *,
+    wanted_by: str = 'the caller',
+) -> float
+```
+
+One quantity this page prints, or a refusal that says what it had.
+
+Every quantity of a row is optional, because the pages print different
+columns, so a caller passing one into a function that requires a float
+has to narrow it. Doing it here beats an assertion at each call site:
+the refusal names the field, who wanted it and what the page had in
+that cell, which is the difference between a cell the book left empty
+and a cell holding the word "model".
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | The quantity wanted. |
+| `wanted_by` | What wants it, named in the message. |
+
+**Returns:** The value, as a float.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page did not print a number there. |
 
 ### AbsorptionAreaSpectrum.spectrum()
 
@@ -184,7 +250,39 @@ The octave bands this row prints an area for, in hertz.
 AbsorptionAreaSpectrum.spectrum() -> dict[int, float]
 ```
 
-The row as `{band_hz: area_m2}` over the bands it prints.
+The row as `{band_hz: value}` over the bands it prints.
+
+A band the page left empty, or printed as something other than a
+number, is left out rather than filled with a zero;
+`why_missing` on that band's field says which it
+was.
+
+### AbsorptionAreaSpectrum.why_missing()
+
+```python
+AbsorptionAreaSpectrum.why_missing(field_name: str) -> str
+```
+
+Why this field is `None`, in the page's own terms.
+
+A catalogue that answers `None` and stops is asking the caller to
+guess whether the material has no such property, whether the book
+measured it and printed a dash, or whether the cell holds something
+that is not a number. Each of those is a different answer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** What the page had in that cell, or the empty string when the field is not missing at all. A field the page has no column for and this library cannot derive, because the cells it would need are themselves a range, answers that it does not follow.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
 ## AbsorptionSpectrum
 
@@ -287,7 +385,73 @@ The coefficient in one band, or a refusal that says what the page had.
 AbsorptionSpectrum.bands() -> tuple[int, ...]
 ```
 
-The octave bands this row prints a coefficient for, in hertz.
+The bands this row prints a value for, in hertz.
+
+### AbsorptionSpectrum.is_approximate()
+
+```python
+AbsorptionSpectrum.is_approximate(field_name: str) -> bool
+```
+
+Whether the page prints this field with a `~`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page rounded the cell on purpose.
+
+### AbsorptionSpectrum.is_derived()
+
+```python
+AbsorptionSpectrum.is_derived(field_name: str) -> bool
+```
+
+Whether this library computed this field instead of reading it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+
+### AbsorptionSpectrum.printed()
+
+```python
+AbsorptionSpectrum.printed(
+    field_name: str,
+    *,
+    wanted_by: str = 'the caller',
+) -> float
+```
+
+One quantity this page prints, or a refusal that says what it had.
+
+Every quantity of a row is optional, because the pages print different
+columns, so a caller passing one into a function that requires a float
+has to narrow it. Doing it here beats an assertion at each call site:
+the refusal names the field, who wanted it and what the page had in
+that cell, which is the difference between a cell the book left empty
+and a cell holding the word "model".
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | The quantity wanted. |
+| `wanted_by` | What wants it, named in the message. |
+
+**Returns:** The value, as a float.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page did not print a number there. |
 
 ### AbsorptionSpectrum.spectrum()
 
@@ -295,11 +459,39 @@ The octave bands this row prints a coefficient for, in hertz.
 AbsorptionSpectrum.spectrum() -> dict[int, float]
 ```
 
-The row as `{band_hz: coefficient}` over the bands it prints.
+The row as `{band_hz: value}` over the bands it prints.
 
 A band the page left empty, or printed as something other than a
-number, is left out rather than filled; `why_missing` on the
-band's field says which it was.
+number, is left out rather than filled with a zero;
+`why_missing` on that band's field says which it
+was.
+
+### AbsorptionSpectrum.why_missing()
+
+```python
+AbsorptionSpectrum.why_missing(field_name: str) -> str
+```
+
+Why this field is `None`, in the page's own terms.
+
+A catalogue that answers `None` and stops is asking the caller to
+guess whether the material has no such property, whether the book
+measured it and printed a dash, or whether the cell holds something
+that is not a number. Each of those is a different answer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** What the page had in that cell, or the empty string when the field is not missing at all. A field the page has no column for and this library cannot derive, because the cells it would need are themselves a range, answers that it does not follow.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
 ## PUBLISHED_ABSORPTION
 

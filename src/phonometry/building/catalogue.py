@@ -48,9 +48,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from .._internal.catalogue import CatalogueRow, read_table, take
+from .._internal.catalogue import BandedRow, read_table, take
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -78,7 +78,7 @@ TRANSMISSION_LOSS_BANDS_HZ: tuple[int, ...] = (
 
 
 @dataclass(frozen=True, kw_only=True)
-class TransmissionLossSpectrum(CatalogueRow):
+class TransmissionLossSpectrum(BandedRow):
     """One construction of a published table, with its loss in each band.
 
     :ivar transmission_loss_63_db: Airborne sound transmission loss in the
@@ -110,25 +110,11 @@ class TransmissionLossSpectrum(CatalogueRow):
     thickness_mm: float | None = None
     surface_density_kg_m2: float | None = None
 
-    def bands(self) -> tuple[int, ...]:
-        """The octave bands this row prints a transmission loss for, in hertz."""
-        return tuple(
-            band
-            for band in TRANSMISSION_LOSS_BANDS_HZ
-            if getattr(self, f"transmission_loss_{band}_db") is not None
-        )
-
-    def spectrum(self) -> dict[int, float]:
-        """The row as ``{band_hz: transmission_loss_db}`` over the bands it prints.
-
-        A band the page left empty is left out rather than filled with a
-        zero, which in decibels would read as a partition that transmits
-        everything.
-        """
-        return {
-            band: float(getattr(self, f"transmission_loss_{band}_db"))
-            for band in self.bands()
-        }
+    _bands_hz: ClassVar[tuple[int, ...]] = TRANSMISSION_LOSS_BANDS_HZ
+    _band_prefix: ClassVar[str] = "transmission_loss_"
+    _band_suffix: ClassVar[str] = "_db"
+    _band_kind: ClassVar[str] = "an octave"
+    _table_kind: ClassVar[str] = "transmission loss"
 
     def transmission_loss_db(self, band_hz: int) -> float:
         """The loss in one band, or a refusal that says what the page had.
@@ -140,15 +126,7 @@ class TransmissionLossSpectrum(CatalogueRow):
             the row, the band and what the cell held instead; or when
             *band_hz* is not a band these tables print.
         """
-        if band_hz not in TRANSMISSION_LOSS_BANDS_HZ:
-            msg = (
-                f"{band_hz} Hz is not an octave band a transmission loss table "
-                f"prints; the bands are {TRANSMISSION_LOSS_BANDS_HZ}"
-            )
-            raise ValueError(msg)
-        return self.printed(
-            f"transmission_loss_{band_hz}_db", wanted_by=f"the {band_hz} Hz band"
-        )
+        return self._in_band(band_hz)
 
 
 #: The hedges these tables spell as a set rather than a mapping.

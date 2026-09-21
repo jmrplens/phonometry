@@ -1,88 +1,80 @@
 ---
-title: "building.catalogue"
-description: "Transmission loss as the books print it, one row per construction."
+title: "materials.diffusers.predicted_diffusion"
+description: "Normalized diffusion coefficients as a book computes them, one row per angle."
 sidebar:
-  label: "catalogue"
+  label: "predicted_diffusion"
 ---
 
-Transmission loss as the books print it, one row per construction.
+Normalized diffusion coefficients as a book computes them, one row per angle.
 
-A partition's transmission loss is not a property of a material. It is what
-one wall, built one way and mounted one way, did in one laboratory, and the
-number changes with the studs, the ties, the sealing of the joints and the
-size of the specimen. The models of `phonometry.building.prediction`
-compute it from mass, stiffness and geometry; this module holds what was
-measured, so that a prediction has something published to sit beside.
+A diffusion coefficient says how even a surface's polar response is, and a
+scattering coefficient says how much energy left the specular direction. A
+surface can score high on one and low on the other, which is why ISO 17497 is
+two documents and why this subpackage keeps two catalogues.
+`.measured_scattering` holds what a turntable measured; this holds what a
+boundary element model computed, and the difference is not a detail of
+provenance. Nobody built these surfaces.
 
-Why a catalogue of measurements is worth keeping
-------------------------------------------------
-The mass law gives a straight line. A real partition departs from it at the
-critical frequency, at the mass-air-mass resonance of a double leaf and
-wherever a stud shorts the two leaves together, and the size of those
-departures is what a table like this shows and no formula in the book
-reproduces. Two rows of the same brick wall, same mass and same thickness,
-differ by 15 dB at 500 Hz and by 9 at 4 kHz because one is tied with strips
-and the other with expanded metal, which is the whole argument for resilient
-connections and is in the table rather than in the theory.
+Why keep a table of predictions at all
+---------------------------------------
+Because the table is a designer's argument, and the argument is in the
+numbers. It walks one semicylinder up to twelve, and the diffusion coefficient
+at 1 kHz goes from 0.93 to 0.22: a single device and an array of the same
+device are not the same surface, however identical the cross-section. It walks
+a set of semiellipses from 1 cm deep to 30 cm, and at 5 kHz the coefficient
+goes from 0.02 to 0.65. Neither of those follows from a formula in the book,
+and a reader with a measurement of one diffuser has nothing to compare it
+against without something like this.
 
-What the row carries
---------------------
-Each octave band is a field of its own, `transmission_loss_500_db` and so
-on, with the band's centre frequency in hertz and the unit in the name. Every
-hedge of `CatalogueRow` works on a band
-the way it works on any other field, so a band the page leaves empty says so
-through `why_missing`
-rather than answering zero. The thickness and the surface density the page
-prints beside the description are fields of their own, because they are what a
-reader compares two constructions by, and because the mass law needs the
-second one.
+The angle is a row, not a column
+---------------------------------
+The page prints three lines per surface, headed 0, 57 and Random, so a surface
+is three rows here and `variant`
+says which. The first two carry [`NormalizedDiffusionSpectrum.angle_of_incidence_deg`](/phonometry/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum);
+the random one has none to carry, because it is an arithmetic mean over ten
+angles and belongs to no single one, and asking it for the field gets that
+sentence rather than a number.
 
 What the numbers are worth
 --------------------------
-Bies calls his values "representative" and says only that they come from tests
-published "by manufacturers and testing laboratories", without naming a
-measurement standard, a mounting or a source for any row; that sentence is
-quoted in full in the `about` of the data file. The qualifier the book does
-give is "field incidence", which is the transmission loss of a diffuse field
-over the range of angles a laboratory measures, and is what its own theory
-computes. So a row here is a published measurement of a construction of that
-description, useful for a sanity check and for an order of magnitude, and it
-is not a specification of any wall anybody will build.
+They are a two-dimensional prediction of a thin panel with an open back, as
+the book's own Section 5.2.5 says, so they stand for single-plane devices such
+as semicircular arcs and not for a two-dimensional array of anything. The
+random incidence row is an arithmetic average over ten angles without Paris's
+formulation, which a measurement to ISO 17497-2 would apply, so it is not the
+same average a laboratory would report. Both facts are quoted in the `about`
+of the data file, in the book's words.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## PUBLISHED_TRANSMISSION_LOSS
-
-*Constant* (`mappingproxy`).
-
-## TRANSMISSION_LOSS_BANDS_HZ
+## DIFFUSION_BANDS_HZ
 
 *Constant* (`tuple`).
 
 ```python
-TRANSMISSION_LOSS_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
+DIFFUSION_BANDS_HZ = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
 ```
 
-## transmission_loss_named
+## diffusion_named
 
 ```python
-transmission_loss_named(name: str) -> tuple[TransmissionLossSpectrum, ...]
+diffusion_named(name: str) -> tuple[NormalizedDiffusionSpectrum, ...]
 ```
 
-Every published row whose printed description contains *name*.
+Every published row whose description or section heading contains *name*.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `name` | A fragment of the printed description, matched without case. |
+| `name` | A fragment of the printed description or of the numbered heading above it, matched without case. The heading is where the geometry is, so `"semiellipse"` and `"Schroeder"` find their sections and `"6 periods"` finds the rows that say so. |
 
-**Returns:** The rows whose description contains it, in the order the tables are read, which is empty when no page has one. It matches the printed description and nothing else: `"door"` answers with the ten rows that carry the word, and not with the hollow flush panel or the solid hardwood, which the page describes without it. The caller reads the thickness and the surface density to pick the row they mean.
+**Returns:** The rows that match, in the order the tables are read, which is empty when no page has one. A surface answers with its three angles.
 
-## TransmissionLossSpectrum
+## NormalizedDiffusionSpectrum
 
 ```python
-TransmissionLossSpectrum(
+NormalizedDiffusionSpectrum(
     *,
     name: str,
     source: str,
@@ -101,35 +93,53 @@ TransmissionLossSpectrum(
     attributed_to: Mapping[str, str] = ...,
     group: str = '',
     note: str = '',
-    transmission_loss_63_db: float | None = None,
-    transmission_loss_125_db: float | None = None,
-    transmission_loss_250_db: float | None = None,
-    transmission_loss_500_db: float | None = None,
-    transmission_loss_1000_db: float | None = None,
-    transmission_loss_2000_db: float | None = None,
-    transmission_loss_4000_db: float | None = None,
-    transmission_loss_8000_db: float | None = None,
-    thickness_mm: float | None = None,
-    surface_density_kg_m2: float | None = None,
+    diffusion_coefficient_100: float | None = None,
+    diffusion_coefficient_125: float | None = None,
+    diffusion_coefficient_160: float | None = None,
+    diffusion_coefficient_200: float | None = None,
+    diffusion_coefficient_250: float | None = None,
+    diffusion_coefficient_315: float | None = None,
+    diffusion_coefficient_400: float | None = None,
+    diffusion_coefficient_500: float | None = None,
+    diffusion_coefficient_630: float | None = None,
+    diffusion_coefficient_800: float | None = None,
+    diffusion_coefficient_1000: float | None = None,
+    diffusion_coefficient_1250: float | None = None,
+    diffusion_coefficient_1600: float | None = None,
+    diffusion_coefficient_2000: float | None = None,
+    diffusion_coefficient_2500: float | None = None,
+    diffusion_coefficient_3150: float | None = None,
+    diffusion_coefficient_4000: float | None = None,
+    diffusion_coefficient_5000: float | None = None,
+    angle_of_incidence_deg: float | None = None,
 )
 ```
 
-One construction of a published table, with its loss in each band.
+One surface at one angle of incidence, with its coefficient in each band.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `transmission_loss_63_db` | Airborne sound transmission loss in the 63 Hz octave band, in decibels, as printed. |
-| `transmission_loss_125_db` | The same in the 125 Hz band. |
-| `transmission_loss_250_db` | The same in the 250 Hz band. |
-| `transmission_loss_500_db` | The same in the 500 Hz band. |
-| `transmission_loss_1000_db` | The same in the 1 kHz band. |
-| `transmission_loss_2000_db` | The same in the 2 kHz band. |
-| `transmission_loss_4000_db` | The same in the 4 kHz band. |
-| `transmission_loss_8000_db` | The same in the 8 kHz band. |
-| `thickness_mm` | The overall thickness of the construction, in millimetres, as the page prints it beside the description. It is the assembly's thickness and not a leaf's: a double wall prints the pair and the cavity together. |
-| `surface_density_kg_m2` | The mass per unit area, in kilograms per square metre, as printed. This is what the mass law takes, and what two rows of the same description are told apart by. |
+| `diffusion_coefficient_100` | Normalized diffusion coefficient in the 100 Hz one-third octave band, dimensionless, as printed. |
+| `diffusion_coefficient_125` | The same in the 125 Hz band. |
+| `diffusion_coefficient_160` | The same in the 160 Hz band. |
+| `diffusion_coefficient_200` | The same in the 200 Hz band. |
+| `diffusion_coefficient_250` | The same in the 250 Hz band. |
+| `diffusion_coefficient_315` | The same in the 315 Hz band. |
+| `diffusion_coefficient_400` | The same in the 400 Hz band. |
+| `diffusion_coefficient_500` | The same in the 500 Hz band. |
+| `diffusion_coefficient_630` | The same in the 630 Hz band. |
+| `diffusion_coefficient_800` | The same in the 800 Hz band. |
+| `diffusion_coefficient_1000` | The same in the 1 kHz band. |
+| `diffusion_coefficient_1250` | The same in the 1.25 kHz band. |
+| `diffusion_coefficient_1600` | The same in the 1.6 kHz band. |
+| `diffusion_coefficient_2000` | The same in the 2 kHz band. |
+| `diffusion_coefficient_2500` | The same in the 2.5 kHz band. |
+| `diffusion_coefficient_3150` | The same in the 3.15 kHz band. |
+| `diffusion_coefficient_4000` | The same in the 4 kHz band. |
+| `diffusion_coefficient_5000` | The same in the 5 kHz band. |
+| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal, as the page heads its line. `None` on a random incidence row, which is a mean over ten angles and is not one of them; `why_missing` says so rather than leaving the caller to guess at a zero. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
@@ -148,18 +158,40 @@ One construction of a published table, with its loss in each band.
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
-### TransmissionLossSpectrum.bands()
+### NormalizedDiffusionSpectrum.bands()
 
 ```python
-TransmissionLossSpectrum.bands() -> tuple[int, ...]
+NormalizedDiffusionSpectrum.bands() -> tuple[int, ...]
 ```
 
 The bands this row prints a value for, in hertz.
 
-### TransmissionLossSpectrum.is_approximate()
+### NormalizedDiffusionSpectrum.diffusion_coefficient()
 
 ```python
-TransmissionLossSpectrum.is_approximate(field_name: str) -> bool
+NormalizedDiffusionSpectrum.diffusion_coefficient(band_hz: int) -> float
+```
+
+The coefficient in one band, or a refusal that says what the page had.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `band_hz` | A one-third octave centre frequency from [`DIFFUSION_BANDS_HZ`](/phonometry/reference/api/materials/predicted-diffusion/#diffusion_bands_hz). |
+
+**Returns:** The printed normalized diffusion coefficient, dimensionless.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
+
+### NormalizedDiffusionSpectrum.is_approximate()
+
+```python
+NormalizedDiffusionSpectrum.is_approximate(field_name: str) -> bool
 ```
 
 Whether the page prints this field with a `~`.
@@ -172,10 +204,10 @@ Whether the page prints this field with a `~`.
 
 **Returns:** `True` when the page rounded the cell on purpose.
 
-### TransmissionLossSpectrum.is_derived()
+### NormalizedDiffusionSpectrum.is_derived()
 
 ```python
-TransmissionLossSpectrum.is_derived(field_name: str) -> bool
+NormalizedDiffusionSpectrum.is_derived(field_name: str) -> bool
 ```
 
 Whether this library computed this field instead of reading it.
@@ -188,10 +220,10 @@ Whether this library computed this field instead of reading it.
 
 **Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
 
-### TransmissionLossSpectrum.printed()
+### NormalizedDiffusionSpectrum.printed()
 
 ```python
-TransmissionLossSpectrum.printed(
+NormalizedDiffusionSpectrum.printed(
     field_name: str,
     *,
     wanted_by: str = 'the caller',
@@ -222,10 +254,10 @@ and a cell holding the word "model".
 | :--- | :--- |
 | ValueError | when the page did not print a number there. |
 
-### TransmissionLossSpectrum.spectrum()
+### NormalizedDiffusionSpectrum.spectrum()
 
 ```python
-TransmissionLossSpectrum.spectrum() -> dict[int, float]
+NormalizedDiffusionSpectrum.spectrum() -> dict[int, float]
 ```
 
 The row as `{band_hz: value}` over the bands it prints.
@@ -235,32 +267,10 @@ number, is left out rather than filled with a zero;
 `why_missing` on that band's field says which it
 was.
 
-### TransmissionLossSpectrum.transmission_loss_db()
+### NormalizedDiffusionSpectrum.why_missing()
 
 ```python
-TransmissionLossSpectrum.transmission_loss_db(band_hz: int) -> float
-```
-
-The loss in one band, or a refusal that says what the page had.
-
-**Parameters**
-
-| Name | Description |
-| :--- | :--- |
-| `band_hz` | An octave-band centre frequency from [`TRANSMISSION_LOSS_BANDS_HZ`](/phonometry/reference/api/building/catalogue/#transmission_loss_bands_hz). |
-
-**Returns:** The printed transmission loss, in decibels.
-
-**Raises**
-
-| Exception | When |
-| :--- | :--- |
-| ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
-
-### TransmissionLossSpectrum.why_missing()
-
-```python
-TransmissionLossSpectrum.why_missing(field_name: str) -> str
+NormalizedDiffusionSpectrum.why_missing(field_name: str) -> str
 ```
 
 Why this field is `None`, in the page's own terms.
@@ -283,3 +293,7 @@ that is not a number. Each of those is a different answer.
 | Exception | When |
 | :--- | :--- |
 | AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
+
+## PUBLISHED_DIFFUSION
+
+*Constant* (`mappingproxy`).

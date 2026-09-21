@@ -57,9 +57,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
-from ..._internal.catalogue import CatalogueRow, read_table, take
+from ..._internal.catalogue import BandedRow, read_table, take
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -97,7 +97,7 @@ SCATTERING_BANDS_HZ: tuple[int, ...] = (
 
 
 @dataclass(frozen=True, kw_only=True)
-class ScatteringCoefficientSpectrum(CatalogueRow):
+class ScatteringCoefficientSpectrum(BandedRow):
     """One surface of a published table, with its coefficient in each band.
 
     The geometry is part of :attr:`~CatalogueRow.name`, as the page prints
@@ -147,25 +147,10 @@ class ScatteringCoefficientSpectrum(CatalogueRow):
     scattering_coefficient_4000: float | None = None
     scattering_coefficient_5000: float | None = None
 
-    def bands(self) -> tuple[int, ...]:
-        """The one-third octave bands this row prints a coefficient for, in hertz."""
-        return tuple(
-            band
-            for band in SCATTERING_BANDS_HZ
-            if getattr(self, f"scattering_coefficient_{band}") is not None
-        )
-
-    def spectrum(self) -> dict[int, float]:
-        """The row as ``{band_hz: scattering_coefficient}`` over the bands it prints.
-
-        A band the page left empty is left out rather than filled with a
-        zero, which would read as a surface that reflects every ray back
-        along the specular direction.
-        """
-        return {
-            band: float(getattr(self, f"scattering_coefficient_{band}"))
-            for band in self.bands()
-        }
+    _bands_hz: ClassVar[tuple[int, ...]] = SCATTERING_BANDS_HZ
+    _band_prefix: ClassVar[str] = "scattering_coefficient_"
+    _band_kind: ClassVar[str] = "a one-third octave"
+    _table_kind: ClassVar[str] = "scattering"
 
     def scattering_coefficient(self, band_hz: int) -> float:
         """The coefficient in one band, or a refusal that says what the page had.
@@ -177,15 +162,7 @@ class ScatteringCoefficientSpectrum(CatalogueRow):
             the row, the band and what the cell held instead; or when
             *band_hz* is not a band these tables print.
         """
-        if band_hz not in SCATTERING_BANDS_HZ:
-            msg = (
-                f"{band_hz} Hz is not a one-third octave band a scattering "
-                f"table prints; the bands are {SCATTERING_BANDS_HZ}"
-            )
-            raise ValueError(msg)
-        return self.printed(
-            f"scattering_coefficient_{band_hz}", wanted_by=f"the {band_hz} Hz band"
-        )
+        return self._in_band(band_hz)
 
 
 #: The hedges these tables spell as a set rather than a mapping.

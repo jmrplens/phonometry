@@ -76974,6 +76974,9609 @@ export const catalogues = {
       }
     ]
   },
+  "diffusion": {
+    "columns": [
+      {
+        "field": "angle_of_incidence_deg",
+        "heading": "Angle of incidence",
+        "headingEs": "Ángulo de incidencia",
+        "unit": "°"
+      },
+      {
+        "field": "diffusion_coefficient_100",
+        "heading": "100 Hz",
+        "headingEs": "100 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_125",
+        "heading": "125 Hz",
+        "headingEs": "125 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_160",
+        "heading": "160 Hz",
+        "headingEs": "160 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_200",
+        "heading": "200 Hz",
+        "headingEs": "200 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_250",
+        "heading": "250 Hz",
+        "headingEs": "250 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_315",
+        "heading": "315 Hz",
+        "headingEs": "315 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_400",
+        "heading": "400 Hz",
+        "headingEs": "400 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_500",
+        "heading": "500 Hz",
+        "headingEs": "500 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_630",
+        "heading": "630 Hz",
+        "headingEs": "630 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_800",
+        "heading": "800 Hz",
+        "headingEs": "800 Hz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_1000",
+        "heading": "1 kHz",
+        "headingEs": "1 kHz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_1250",
+        "heading": "1.25 kHz",
+        "headingEs": "1,25 kHz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_1600",
+        "heading": "1.6 kHz",
+        "headingEs": "1,6 kHz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_2000",
+        "heading": "2 kHz",
+        "headingEs": "2 kHz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_2500",
+        "heading": "2.5 kHz",
+        "headingEs": "2,5 kHz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_3150",
+        "heading": "3.15 kHz",
+        "headingEs": "3,15 kHz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_4000",
+        "heading": "4 kHz",
+        "headingEs": "4 kHz",
+        "unit": ""
+      },
+      {
+        "field": "diffusion_coefficient_5000",
+        "heading": "5 kHz",
+        "headingEs": "5 kHz",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "cox-2017-appendix-b/1_1_period_0_61_cm_wide_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "1 period, 0.61 cm wide",
+        "variant": "normal",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_1_period_0_61_cm_wide_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "1 period, 0.61 cm wide",
+        "variant": "57 degrees",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_1_period_0_61_cm_wide_random",
+        "table": "cox-2017-appendix-b",
+        "name": "1 period, 0.61 cm wide",
+        "variant": "random",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_2_periods_1_22_m_wide_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "2 periods, 1.22 m wide",
+        "variant": "normal",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_2_periods_1_22_m_wide_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "2 periods, 1.22 m wide",
+        "variant": "57 degrees",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_2_periods_1_22_m_wide_random",
+        "table": "cox-2017-appendix-b",
+        "name": "2 periods, 1.22 m wide",
+        "variant": "random",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_4_cylinders_2_44_m_wide_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "4 cylinders, 2.44 m wide",
+        "variant": "normal",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_4_cylinders_2_44_m_wide_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "4 cylinders, 2.44 m wide",
+        "variant": "57 degrees",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_4_cylinders_2_44_m_wide_random",
+        "table": "cox-2017-appendix-b",
+        "name": "4 cylinders, 2.44 m wide",
+        "variant": "random",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_6_periods_3_66_m_wide_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 3.66 m wide",
+        "variant": "normal",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_6_periods_3_66_m_wide_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 3.66 m wide",
+        "variant": "57 degrees",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_6_periods_3_66_m_wide_random",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 3.66 m wide",
+        "variant": "random",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_12_periods_7_32_m_wide_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "12 periods, 7.32 m wide",
+        "variant": "normal",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_12_periods_7_32_m_wide_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "12 periods, 7.32 m wide",
+        "variant": "57 degrees",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/1_12_periods_7_32_m_wide_random",
+        "table": "cox-2017-appendix-b",
+        "name": "12 periods, 7.32 m wide",
+        "variant": "random",
+        "group": "1. Effect of changing diffuser periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m (1 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_1_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "1 cm deep",
+        "variant": "normal",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_1_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "1 cm deep",
+        "variant": "57 degrees",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_1_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "1 cm deep",
+        "variant": "random",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_2_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "2 cm deep",
+        "variant": "normal",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_2_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "2 cm deep",
+        "variant": "57 degrees",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_2_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "2 cm deep",
+        "variant": "random",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_5_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "5 cm deep",
+        "variant": "normal",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_5_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "5 cm deep",
+        "variant": "57 degrees",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_5_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "5 cm deep",
+        "variant": "random",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_10_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "10 cm deep",
+        "variant": "normal",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_10_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "10 cm deep",
+        "variant": "57 degrees",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_10_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "10 cm deep",
+        "variant": "random",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_20_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "20 cm deep",
+        "variant": "normal",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_20_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "20 cm deep",
+        "variant": "57 degrees",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_20_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "20 cm deep",
+        "variant": "random",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_30_cm_deep_semicylinders_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "30 cm deep (semicylinders)",
+        "variant": "normal",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_30_cm_deep_semicylinders_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "30 cm deep (semicylinders)",
+        "variant": "57 degrees",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/2_30_cm_deep_semicylinders_random",
+        "table": "cox-2017-appendix-b",
+        "name": "30 cm deep (semicylinders)",
+        "variant": "random",
+        "group": "2. Effect of surface depth, six semiellipses, non-absorbing, each width 0.6 m, total with 3.66 m (1 cm flat section between semiellipses)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_15_periods_60_angle_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "15 periods, 60° angle",
+        "variant": "normal",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_15_periods_60_angle_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "15 periods, 60° angle",
+        "variant": "57 degrees",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_15_periods_60_angle_random",
+        "table": "cox-2017-appendix-b",
+        "name": "15 periods, 60° angle",
+        "variant": "random",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_9_periods_45_angle_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "9 periods, 45° angle",
+        "variant": "normal",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_9_periods_45_angle_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "9 periods, 45° angle",
+        "variant": "57 degrees",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_9_periods_45_angle_random",
+        "table": "cox-2017-appendix-b",
+        "name": "9 periods, 45° angle",
+        "variant": "random",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_6_periods_30_angle_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 30° angle",
+        "variant": "normal",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_6_periods_30_angle_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 30° angle",
+        "variant": "57 degrees",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_6_periods_30_angle_random",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 30° angle",
+        "variant": "random",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_3_periods_18_angle_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, 18° angle",
+        "variant": "normal",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_3_periods_18_angle_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, 18° angle",
+        "variant": "57 degrees",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/3_3_periods_18_angle_random",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, 18° angle",
+        "variant": "random",
+        "group": "3. Triangles, non-absorbing, 3.66 m wide (0.01 cm flat section between each period)",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/4_one_semiellipse_in_middle_of_baffle_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "One semiellipse in middle of baffle",
+        "variant": "normal",
+        "group": "4. Semiellipses mounted on 3.63 m wide flat baffle, non-absorbing, each semiellipse 0.6 m wide, 0.2 m deep",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/4_one_semiellipse_in_middle_of_baffle_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "One semiellipse in middle of baffle",
+        "variant": "57 degrees",
+        "group": "4. Semiellipses mounted on 3.63 m wide flat baffle, non-absorbing, each semiellipse 0.6 m wide, 0.2 m deep",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/4_one_semiellipse_in_middle_of_baffle_random",
+        "table": "cox-2017-appendix-b",
+        "name": "One semiellipse in middle of baffle",
+        "variant": "random",
+        "group": "4. Semiellipses mounted on 3.63 m wide flat baffle, non-absorbing, each semiellipse 0.6 m wide, 0.2 m deep",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/4_three_semiellipses_with_0_6_m_flat_section_b_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "Three semiellipses with 0.6 m flat section between",
+        "variant": "normal",
+        "group": "4. Semiellipses mounted on 3.63 m wide flat baffle, non-absorbing, each semiellipse 0.6 m wide, 0.2 m deep",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/4_three_semiellipses_with_0_6_m_flat_section_b_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "Three semiellipses with 0.6 m flat section between",
+        "variant": "57 degrees",
+        "group": "4. Semiellipses mounted on 3.63 m wide flat baffle, non-absorbing, each semiellipse 0.6 m wide, 0.2 m deep",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/4_three_semiellipses_with_0_6_m_flat_section_b_random",
+        "table": "cox-2017-appendix-b",
+        "name": "Three semiellipses with 0.6 m flat section between",
+        "variant": "random",
+        "group": "4. Semiellipses mounted on 3.63 m wide flat baffle, non-absorbing, each semiellipse 0.6 m wide, 0.2 m deep",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_3_periods_30_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, 30 cm deep",
+        "variant": "normal",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_3_periods_30_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, 30 cm deep",
+        "variant": "57 degrees",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_3_periods_30_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, 30 cm deep",
+        "variant": "random",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_20_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 20 cm deep",
+        "variant": "normal",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_20_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 20 cm deep",
+        "variant": "57 degrees",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_20_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 20 cm deep",
+        "variant": "random",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_10_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 10 cm deep",
+        "variant": "normal",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_10_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 10 cm deep",
+        "variant": "57 degrees",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_10_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 10 cm deep",
+        "variant": "random",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_5_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 5 cm deep",
+        "variant": "normal",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_5_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 5 cm deep",
+        "variant": "57 degrees",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/5_6_periods_5_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "6 periods, 5 cm deep",
+        "variant": "random",
+        "group": "5. Optimized curved surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_flat_hybrid_surface_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, flat hybrid surface",
+        "variant": "normal",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_flat_hybrid_surface_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, flat hybrid surface",
+        "variant": "57 degrees",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_flat_hybrid_surface_random",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, flat hybrid surface",
+        "variant": "random",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_curved_2_5_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, curved, 2.5 cm deep",
+        "variant": "normal",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_curved_2_5_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, curved, 2.5 cm deep",
+        "variant": "57 degrees",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_curved_2_5_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, curved, 2.5 cm deep",
+        "variant": "random",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_curved_7_5_cm_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, curved, 7.5 cm deep",
+        "variant": "normal",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_curved_7_5_cm_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, curved, 7.5 cm deep",
+        "variant": "57 degrees",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/6_3_periods_curved_7_5_cm_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "3 periods, curved, 7.5 cm deep",
+        "variant": "random",
+        "group": "6. Hybrid surfaces, 3.6 m wide, modulated arrays",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_n_7_qrd_6_periods_0_2_m_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "N = 7 QRD, 6 periods, 0.2 m deep",
+        "variant": "normal",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_n_7_qrd_6_periods_0_2_m_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "N = 7 QRD, 6 periods, 0.2 m deep",
+        "variant": "57 degrees",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_n_7_qrd_6_periods_0_2_m_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "N = 7 QRD, 6 periods, 0.2 m deep",
+        "variant": "random",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_optimized_profiled_diffuser_modulated_array__normal",
+        "table": "cox-2017-appendix-b",
+        "name": "Optimized profiled diffuser, modulated array, 6 periods, 8 wells/period, 0.17 m deep",
+        "variant": "normal",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_optimized_profiled_diffuser_modulated_array__57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "Optimized profiled diffuser, modulated array, 6 periods, 8 wells/period, 0.17 m deep",
+        "variant": "57 degrees",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_optimized_profiled_diffuser_modulated_array__random",
+        "table": "cox-2017-appendix-b",
+        "name": "Optimized profiled diffuser, modulated array, 6 periods, 8 wells/period, 0.17 m deep",
+        "variant": "random",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_n_7_prd_6_periods_6_wells_period_0_2_m_deep_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "N = 7 PRD, 6 periods, 6 wells/period, 0.2 m deep",
+        "variant": "normal",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_n_7_prd_6_periods_6_wells_period_0_2_m_deep_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "N = 7 PRD, 6 periods, 6 wells/period, 0.2 m deep",
+        "variant": "57 degrees",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_n_7_prd_6_periods_6_wells_period_0_2_m_deep_random",
+        "table": "cox-2017-appendix-b",
+        "name": "N = 7 PRD, 6 periods, 6 wells/period, 0.2 m deep",
+        "variant": "random",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_diffractal_1_period_three_orders_of_size_n_7_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "Diffractal, 1 period, three orders of size, N = 7 (largest order only 6 wells), 0.5 m deep",
+        "variant": "normal",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_diffractal_1_period_three_orders_of_size_n_7_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "Diffractal, 1 period, three orders of size, N = 7 (largest order only 6 wells), 0.5 m deep",
+        "variant": "57 degrees",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_diffractal_1_period_three_orders_of_size_n_7_random",
+        "table": "cox-2017-appendix-b",
+        "name": "Diffractal, 1 period, three orders of size, N = 7 (largest order only 6 wells), 0.5 m deep",
+        "variant": "random",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_optimized_diffuser_modulated_array_6_periods_normal",
+        "table": "cox-2017-appendix-b",
+        "name": "Optimized diffuser, modulated array, 6 periods, 12 wells/period, 0.17 m deep",
+        "variant": "normal",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_optimized_diffuser_modulated_array_6_periods_57_degrees",
+        "table": "cox-2017-appendix-b",
+        "name": "Optimized diffuser, modulated array, 6 periods, 12 wells/period, 0.17 m deep",
+        "variant": "57 degrees",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-b/7_optimized_diffuser_modulated_array_6_periods_random",
+        "table": "cox-2017-appendix-b",
+        "name": "Optimized diffuser, modulated array, 6 periods, 12 wells/period, 0.17 m deep",
+        "variant": "random",
+        "group": "7. Schroeder diffusers, 3.6 m wide",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix B, PDF pages 538-543 (printed pp. 481-486)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “Random” in that column: the row is an arithmetic average over ten angles of incidence and belongs to no single one"
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
   "absorptionAreas": {
     "columns": [
       {

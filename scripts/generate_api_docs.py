@@ -748,11 +748,56 @@ def _format_parameter(parameter: inspect.Parameter) -> str:
     return text
 
 
+def _is_published(cls: type) -> bool:
+    """Whether this class gets a page of its own in the reference.
+
+    A base whose module is private has no page, so a reader who follows an
+    inherited method has nowhere to land: the method has to be documented on
+    the public class that carries it. A base that is published does have one,
+    and repeating its methods on every subclass would be noise.
+
+    :param cls: The base class.
+    :return: ``True`` when the class lives in a module a reader can open.
+    """
+    module = getattr(cls, "__module__", "")
+    return not any(part.startswith("_") for part in module.split("."))
+
+
+def _method_names(cls: type) -> list[str]:
+    """The methods a class's page documents, its own and the ones it carries.
+
+    A class that inherits from a private base carries that base's methods into
+    the public API without giving the reader anywhere else to read about them.
+    The catalogue rows are the case that matters: ``bands()``, ``spectrum()``
+    and ``why_missing()`` are the shape of every published table in this
+    library, and they live on private bases so that five classes do not each
+    keep their own copy.
+
+    :param cls: The class being documented.
+    :return: The attribute names to document on its page, its own first.
+    """
+    names = [n for n in vars(cls) if not n.startswith("_")]
+    seen = set(names)
+    for base in cls.__mro__[1:]:
+        if base is object or _is_published(base):
+            continue
+        for attr_name in vars(base):
+            if attr_name.startswith("_") or attr_name in seen:
+                continue
+            raw = inspect.getattr_static(cls, attr_name, None)
+            if isinstance(
+                raw, (staticmethod, classmethod, property)
+            ) or inspect.isfunction(raw):
+                seen.add(attr_name)
+                names.append(attr_name)
+    return names
+
+
 def _class_methods(
     name: str, cls: type, slugger: _Slugger, issues: list[str]
 ) -> tuple[MethodDoc, ...]:
     methods: list[MethodDoc] = []
-    for attr_name in _sorted_names([n for n in vars(cls) if not n.startswith("_")]):
+    for attr_name in _sorted_names(_method_names(cls)):
         raw = inspect.getattr_static(cls, attr_name)
         qualified = f"{name}.{attr_name}"
         kind: str

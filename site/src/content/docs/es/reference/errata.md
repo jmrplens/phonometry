@@ -7035,6 +7035,48 @@ dos ediciones con las mismas entradas y en el mismo orden.
   fija que sigan siendo dos filas con dos espectros.
 - **Estado:** no reportado.
 
+## Cox & D'Antonio, Acoustic Absorbers and Diffusers 3e (2017), Apéndice B (una anchura en centímetros que su propia geometría hace metros)
+
+- **Localización:** Apéndice B, «Normalized diffusion coefficient table»,
+  sección 1, la primera superficie de la serie de anchuras, en la página
+  impresa 482 (PDF 539). Fuente no normativa: un libro de texto.
+- **Lo impreso:** la sección se encabeza «Effect of changing diffuser
+  periodicity and width. Semicylinder(s) non-absorbing surfaces, radius 0.3 m
+  (1 cm flat section between each period)», y sus cinco superficies se listan
+  como «1 period, 0.61 cm wide», «2 periods, 1.22 m wide», «4 cylinders,
+  2.44 m wide», «6 periods, 3.66 m wide» y «12 periods, 7.32 m wide».
+- **El problema:** la primera anchura está en centímetros y las otras cuatro en
+  metros, y la serie se duplica: 0,61, 1,22, 2,44, y después 3,66 y 7,32, que
+  son seis y doce veces la primera. Un periodo de la superficie que describe el
+  encabezado es un semicilindro de radio $0,3$ m más la sección plana de $1$ cm,
+  así que $2 \times 0,3 + 0,01 = 0,61$ m. Una anchura de 0,61 cm son seis
+  milímetros, la centésima parte de lo que da la geometría del propio
+  encabezado y la centésima parte de lo que pide el resto de la serie.
+- **Evidencia:** la misma superficie se lista en la Tabla C.3 del apéndice
+  siguiente, bajo un encabezado con la misma geometría, y allí dice «1 period,
+  0.61 m wide». O sea que el libro imprime las dos grafías de una misma
+  superficie con doce páginas de diferencia, y la métrica es la que sostiene su
+  aritmética. Verificado en la página PDF 539 (página impresa 482) y en la
+  página PDF 549 (página impresa 492) de Cox y D'Antonio (2017), *Acoustic
+  Absorbers and Diffusers*, tercera edición, releyendo la unidad a seis
+  aumentos en las dos páginas: el apéndice imprime «cm» y la Tabla C.3 imprime
+  «m».
+- **Consecuencia para las tablas del propio libro:** la descripción de una
+  superficie y la de las tres filas que la llevan. Los números de al lado no
+  se ven afectados, que es lo que hace el defecto fácil de pasar por alto y
+  digno de registrarse: quien compare un semicilindro medido con esta fila
+  estará comparando contra un dispositivo de 0,61 m diga lo que diga la
+  etiqueta.
+- **Comportamiento de la biblioteca:** la fila conserva la anchura tal como se
+  imprime, porque un catálogo que la corrigiera por su cuenta estaría
+  afirmando una lectura que la página no hace. Las tres filas de la superficie
+  la llevan en su clave y
+  `test_every_section_heading_is_kept_whole` de
+  [`tests/materials/diffusers/test_diffusion_catalogue.py`](https://github.com/jmrplens/phonometry/blob/main/tests/materials/diffusers/test_diffusion_catalogue.py)
+  fija que el encabezado con la geometría viaje con ellas, que es lo que
+  permite a quien lea ver la contradicción.
+- **Estado:** no reportado.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

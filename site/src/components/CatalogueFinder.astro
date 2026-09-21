@@ -172,7 +172,7 @@ const copy = {
 			for (const table of active.tables) {
 				const empty = table.querySelector('[data-empty-message]');
 				const left = [...table.querySelectorAll('[data-row]')].some((row) => !row.hidden);
-				if (empty) empty.toggleAttribute('hidden', left);
+				if (empty) empty.textContent = left ? '' : (empty.dataset.message ?? '');
 			}
 		};
 

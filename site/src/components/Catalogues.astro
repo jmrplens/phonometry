@@ -339,7 +339,14 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 			</tbody>
 		</table>
 	</div>
-	<p class="empty" data-empty-message hidden>{copy.empty}</p>
+	<!-- The zero-result message is a live region, and a live region has to be
+	     in the document from the start: a screen reader announces a change to
+	     one it was already watching, and one that appears by losing `hidden` it
+	     may not have been watching at all. So the paragraph is always here and
+	     always empty, and the filter writes the sentence into it. The message
+	     travels on the element because the script that fills it is shared and
+	     this component is the only thing that knows which language it is in. -->
+	<p class="empty" data-empty-message role="status" data-message={copy.empty}></p>
 </section>
 
 <script>
@@ -828,6 +835,11 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 
 	.empty {
 		color: var(--sl-color-gray-3);
+	}
+
+	/* Nothing to say, and an empty paragraph still takes a line. */
+	.empty:empty {
+		display: none;
 	}
 
 	/* What the marks in the table mean, beside the table. The prose above the

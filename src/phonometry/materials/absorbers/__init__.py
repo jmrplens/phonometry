@@ -73,6 +73,14 @@ from .layered import (
     layered_absorber,
     statistical_absorption,
 )
+from .measured import (
+    ABSORPTION_BANDS_HZ,
+    PUBLISHED_ABSORPTION,
+    PUBLISHED_ABSORPTION_AREAS,
+    AbsorptionAreaSpectrum,
+    AbsorptionSpectrum,
+    absorption_named,
+)
 from .porous import (
     DELANY_BAZLEY_COEFFICIENTS,
     DELANY_BAZLEY_VALIDITY,
@@ -174,9 +182,12 @@ from .uncertainty import (
 )
 
 __all__ = [
+    "ABSORPTION_BANDS_HZ",
     "AIR_CORRECTION_LIMIT",
     "ANNEX_A_AIR",
+    "AbsorptionAreaSpectrum",
     "AbsorptionRatingResult",
+    "AbsorptionSpectrum",
     "AbsorptionUncertaintyResult",
     "AbsorptionWarning",
     "AirLayer",
@@ -206,6 +217,8 @@ __all__ = [
     "MembraneLayer",
     "MicroperforatedPlateLayer",
     "OCTAVE_BANDS",
+    "PUBLISHED_ABSORPTION",
+    "PUBLISHED_ABSORPTION_AREAS",
     "PUBLISHED_AIR",
     "PUBLISHED_POROUS",
     "PerforatedPlateLayer",
@@ -237,6 +250,7 @@ __all__ = [
     "absorption_coefficient",
     "absorption_coverage_factor",
     "absorption_from_reflection",
+    "absorption_named",
     "air_absorption_correction",
     "air_density_astm",
     "air_density_iso10534",

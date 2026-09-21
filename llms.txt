@@ -529,6 +529,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [materials/four-microphone](https://jmrplens.github.io/phonometry/reference/api/materials/four-microphone/)
 - [materials/impedance-tube](https://jmrplens.github.io/phonometry/reference/api/materials/impedance-tube/)
 - [materials/layered](https://jmrplens.github.io/phonometry/reference/api/materials/layered/)
+- [materials/measured](https://jmrplens.github.io/phonometry/reference/api/materials/measured/)
 - [materials/metadiffuser](https://jmrplens.github.io/phonometry/reference/api/materials/metadiffuser/)
 - [materials/porous](https://jmrplens.github.io/phonometry/reference/api/materials/porous/)
 - [materials/rating](https://jmrplens.github.io/phonometry/reference/api/materials/rating/)

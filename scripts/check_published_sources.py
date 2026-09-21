@@ -217,6 +217,20 @@ SOURCED: dict[tuple[str, str], str] = {
         "Hopkins (2007) Table A1, the six gases it prints the same pair for"
     ),
     (
+        "materials/absorbers/measured.py",
+        "PUBLISHED_ABSORPTION",
+    ): (
+        "Bies 5e Table 6.2, the fifty-seven finishes it prints a Sabine "
+        "absorption coefficient for, band by band"
+    ),
+    (
+        "materials/absorbers/measured.py",
+        "PUBLISHED_ABSORPTION_AREAS",
+    ): (
+        "Bies 5e Table 6.2, the two audience rows it prints as an absorption "
+        "area per person"
+    ),
+    (
         "materials/absorbers/catalogue.py",
         "PUBLISHED_POROUS",
     ): (

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- **Absorption coefficients as the books print them, one row per finish.**
+  `materials.absorbers.PUBLISHED_ABSORPTION` holds the fifty-seven rows of
+  Bies 5e Table 6.2 band by band, with each octave band a field of its own so
+  that the hedges of every catalogue row apply to a band the way they apply to
+  a modulus, and `AbsorptionSpectrum.spectrum()` gives the row back as
+  `{band_hz: coefficient}`. The two rows the same page prints as an audience
+  per person, in square metres, are a catalogue of their own,
+  `PUBLISHED_ABSORPTION_AREAS`, because an area is added to a room and a
+  coefficient is multiplied by a surface and a field named coefficient must
+  not hold square metres. `absorption_named('carpet')` answers with every
+  carpet of every table rather than choosing one. The transcription was made
+  twice, from the rendered pages, by readers who never saw each other's work,
+  and compared cell by cell before either was kept; the second reading is the
+  oracle the test suite holds the catalogue against. The published catalogues
+  page gains both tables, and a column no row fills is no longer shown.
+
 ### Fixed
 
 - **Rendering a clip with a registered field builder failed outright.**

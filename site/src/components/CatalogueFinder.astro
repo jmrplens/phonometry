@@ -207,7 +207,19 @@ const copy = {
 		   stable id, the same word in both languages, which nothing publishes
 		   but which is the obvious thing to try by hand. */
 		const fromHash = () => {
-			const hash = decodeURIComponent(location.hash.replace('#', ''));
+			/* Decoded because the Spanish headings are `#sólidos` and
+			   `#coeficientes-de-absorción`, which a browser hands back
+			   percent-encoded. Anything can be typed after a `#`, though, and a
+			   fragment like `%zz` makes `decodeURIComponent` throw: unguarded
+			   that exception left the panel revealed and uninitialised, with all
+			   eleven catalogues on the page and no options in its table filter.
+			   A fragment nobody can decode names no catalogue. */
+			let hash;
+			try {
+				hash = decodeURIComponent(location.hash.replace('#', ''));
+			} catch {
+				return null;
+			}
 			if (!hash) return null;
 			return (
 				catalogues.find((group) => group.tables.some((table) => table.id === hash)) ??

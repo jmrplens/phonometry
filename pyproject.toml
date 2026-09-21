@@ -124,6 +124,7 @@ phonometry = [
     "py.typed",
     "aircraft/data/anp/*.csv",
     "aircraft/data/anp/*.md",
+    "building/data/*.json",
     "environment/propagation/data/*.json",
     "fluids/data/*.json",
     "materials/absorbers/data/*.json",

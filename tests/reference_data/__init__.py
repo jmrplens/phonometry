@@ -1079,6 +1079,10 @@ from .speech import (
 )
 from .speech import IEC60268_16_ANNEX_M_SOURCE_MTF as IEC60268_16_ANNEX_M_SOURCE_MTF
 from .speech import IEC60268_16_ANNEX_M_STI as IEC60268_16_ANNEX_M_STI
+from .transmission_loss import BIES_7_6_BANDS_HZ as BIES_7_6_BANDS_HZ
+from .transmission_loss import (
+    BIES_7_6_TRANSMISSION_LOSS as BIES_7_6_TRANSMISSION_LOSS,
+)
 from .underwater import UW_REFERENCE_OFFSET_DB as UW_REFERENCE_OFFSET_DB
 from .vibration import DIRECTIVE_2002_44_HAV_EAV as DIRECTIVE_2002_44_HAV_EAV
 from .vibration import DIRECTIVE_2002_44_HAV_ELV as DIRECTIVE_2002_44_HAV_ELV

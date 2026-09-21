@@ -68,6 +68,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Seven of the printed rows are a label whose variants follow underneath, so
   "draped to 1/2 area" is three rows under three different drapes rather than
   one row that overwrites two.
+- **Transmission loss as a catalogue, not a formula.**
+  `building.PUBLISHED_TRANSMISSION_LOSS` holds the ninety-four constructions
+  of Bies 5e Table 7.6, from sheet panels and sandwich panels through masonry
+  walls, stud partitions, glazing and doors to floors, each with the thickness
+  and the surface density the page prints beside it and its loss in eight
+  octave bands. The two columns matter: the page prints six windows called
+  "Single glass in heavy frame", and the thickness is what tells them apart.
+  It is the table that shows what the mass law does not: the same 280 mm brick
+  wall, same mass, is 40 dB at 500 Hz on strip ties and 55 dB on expanded
+  metal ties. `TransmissionLossSpectrum.transmission_loss_db(band)` refuses
+  rather than answering zero for a band the page leaves empty, because zero
+  decibels is a partition that transmits everything. Read twice from the
+  pages, like every other table here.
 
 ### Fixed
 

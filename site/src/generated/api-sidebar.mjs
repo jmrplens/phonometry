@@ -144,6 +144,7 @@ export const apiSections = {
       'reference/api/building/insulation',
       'reference/api/building/low-frequency',
       'reference/api/building/ratings',
+      'reference/api/building/catalogue',
       'reference/api/building/panel-transmission',
       'reference/api/building/masonry-cavity-wall',
       'reference/api/building/heavy-impact',

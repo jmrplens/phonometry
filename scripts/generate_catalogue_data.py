@@ -39,6 +39,10 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
+from phonometry.building import (  # noqa: E402
+    PUBLISHED_TRANSMISSION_LOSS,
+    TRANSMISSION_LOSS_BANDS_HZ,
+)
 from phonometry.building.prediction.detailed_model import EN_12354_AIR  # noqa: E402
 from phonometry.environment.propagation import PUBLISHED_GROUND  # noqa: E402
 from phonometry.fluids import PUBLISHED_FLUIDS, PUBLISHED_GASES  # noqa: E402
@@ -162,6 +166,23 @@ ABSORPTION_AREA_COLUMNS = tuple(
         "m²",
     )
     for band in ABSORPTION_BANDS_HZ
+)
+
+#: The transmission loss table prints a thickness and a surface density
+#: beside the description, and those two are what tell six windows of the same
+#: name apart, so they lead the table rather than trailing the bands.
+TRANSMISSION_LOSS_COLUMNS = (
+    ("thickness_mm", "Thickness", "Espesor", "mm"),
+    ("surface_density_kg_m2", "Surface density", "Masa superficial", "kg/m²"),
+    *(
+        (
+            f"transmission_loss_{band}_db",
+            _band_heading(band),
+            _band_heading(band),
+            "dB",
+        )
+        for band in TRANSMISSION_LOSS_BANDS_HZ
+    ),
 )
 
 GAS_COLUMNS = (
@@ -746,6 +767,9 @@ def render() -> str:
             "rows": list(rows(PUBLISHED_GASES, GAS_COLUMNS)),
         },
         "absorption": section(PUBLISHED_ABSORPTION, ABSORPTION_COLUMNS),
+        "transmissionLoss": section(
+            PUBLISHED_TRANSMISSION_LOSS, TRANSMISSION_LOSS_COLUMNS
+        ),
         "absorptionAreas": section(PUBLISHED_ABSORPTION_AREAS, ABSORPTION_AREA_COLUMNS),
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
@@ -790,6 +814,7 @@ def main(argv: list[str] | None = None) -> int:
         "porous": len(PUBLISHED_POROUS),
         "gases": len(PUBLISHED_GASES),
         "absorption": len(PUBLISHED_ABSORPTION),
+        "transmission loss": len(PUBLISHED_TRANSMISSION_LOSS),
         "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }

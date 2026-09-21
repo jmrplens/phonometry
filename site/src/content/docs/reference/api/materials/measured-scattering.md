@@ -38,8 +38,8 @@ Every hedge of `CatalogueRow` is keyed
 by field name, so a band the page leaves empty says so through
 `why_missing` rather than
 answering zero, and a zero here would read as a perfectly specular surface.
-[`ScatteringCoefficientSpectrum.bands`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumbands) and
-[`spectrum`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumspectrum) hand the row back as a
+[`ScatteringCoefficientSpectrum.bands`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrum) and
+[`spectrum`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrum) hand the row back as a
 spectrum for the caller who wants one.
 
 What the numbers are worth
@@ -179,14 +179,6 @@ and the pages do not agree on which letters they use.
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
-### ScatteringCoefficientSpectrum.bands()
-
-```python
-ScatteringCoefficientSpectrum.bands() -> tuple[int, ...]
-```
-
-The one-third octave bands this row prints a coefficient for, in hertz.
-
 ### ScatteringCoefficientSpectrum.scattering_coefficient()
 
 ```python
@@ -208,15 +200,3 @@ The coefficient in one band, or a refusal that says what the page had.
 | Exception | When |
 | :--- | :--- |
 | ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
-
-### ScatteringCoefficientSpectrum.spectrum()
-
-```python
-ScatteringCoefficientSpectrum.spectrum() -> dict[int, float]
-```
-
-The row as `{band_hz: scattering_coefficient}` over the bands it prints.
-
-A band the page left empty is left out rather than filled with a
-zero, which would read as a surface that reflects every ray back
-along the specular direction.

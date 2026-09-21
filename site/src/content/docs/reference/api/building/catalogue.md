@@ -148,26 +148,6 @@ One construction of a published table, with its loss in each band.
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
-### TransmissionLossSpectrum.bands()
-
-```python
-TransmissionLossSpectrum.bands() -> tuple[int, ...]
-```
-
-The octave bands this row prints a transmission loss for, in hertz.
-
-### TransmissionLossSpectrum.spectrum()
-
-```python
-TransmissionLossSpectrum.spectrum() -> dict[int, float]
-```
-
-The row as `{band_hz: transmission_loss_db}` over the bands it prints.
-
-A band the page left empty is left out rather than filled with a
-zero, which in decibels would read as a partition that transmits
-everything.
-
 ### TransmissionLossSpectrum.transmission_loss_db()
 
 ```python

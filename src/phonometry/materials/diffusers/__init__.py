@@ -24,6 +24,12 @@ from .metadiffuser import (
     metadiffuser_polar_response,
     metadiffuser_reflection,
 )
+from .predicted_diffusion import (
+    DIFFUSION_BANDS_HZ,
+    PUBLISHED_DIFFUSION,
+    NormalizedDiffusionSpectrum,
+    diffusion_named,
+)
 from .reverberation_room_scattering import (
     BASE_PLATE_BANDS,
     BASE_PLATE_MAX_SCATTERING,
@@ -58,6 +64,8 @@ __all__ = [
     "BASE_PLATE_BANDS",
     "BASE_PLATE_MAX_SCATTERING",
     "DEFAULT_POLAR_ANGLES",
+    "DIFFUSION_BANDS_HZ",
+    "PUBLISHED_DIFFUSION",
     "PUBLISHED_SCATTERING",
     "SCATTERING_BANDS_HZ",
     "TWO_DIMENSIONAL_SOURCE_WEIGHTS",
@@ -66,6 +74,7 @@ __all__ = [
     "DiffusionSpectrum",
     "MetadiffuserResult",
     "MetadiffuserWell",
+    "NormalizedDiffusionSpectrum",
     "ScatteringDiffusionWarning",
     "ScatteringCoefficientSpectrum",
     "ScatteringResult",
@@ -75,6 +84,7 @@ __all__ = [
     "area_factors",
     "base_plate_scattering",
     "check_base_plate_scattering",
+    "diffusion_named",
     "diffusion_spectrum",
     "directional_diffusion",
     "directional_diffusion_coefficient",

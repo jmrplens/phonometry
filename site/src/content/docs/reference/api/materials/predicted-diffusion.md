@@ -1,0 +1,185 @@
+---
+title: "materials.diffusers.predicted_diffusion"
+description: "Normalized diffusion coefficients as a book computes them, one row per angle."
+sidebar:
+  label: "predicted_diffusion"
+---
+
+Normalized diffusion coefficients as a book computes them, one row per angle.
+
+A diffusion coefficient says how even a surface's polar response is, and a
+scattering coefficient says how much energy left the specular direction. A
+surface can score high on one and low on the other, which is why ISO 17497 is
+two documents and why this subpackage keeps two catalogues.
+`.measured_scattering` holds what a turntable measured; this holds what a
+boundary element model computed, and the difference is not a detail of
+provenance. Nobody built these surfaces.
+
+Why keep a table of predictions at all
+---------------------------------------
+Because the table is a designer's argument, and the argument is in the
+numbers. It walks one semicylinder up to twelve, and the diffusion coefficient
+at 1 kHz goes from 0.93 to 0.22: a single device and an array of the same
+device are not the same surface, however identical the cross-section. It walks
+a set of semiellipses from 1 cm deep to 30 cm, and at 5 kHz the coefficient
+goes from 0.02 to 0.65. Neither of those follows from a formula in the book,
+and a reader with a measurement of one diffuser has nothing to compare it
+against without something like this.
+
+The angle is a row, not a column
+---------------------------------
+The page prints three lines per surface, headed 0, 57 and Random, so a surface
+is three rows here and `variant`
+says which. The first two carry [`NormalizedDiffusionSpectrum.angle_of_incidence_deg`](/phonometry/reference/api/materials/predicted-diffusion/#normalizeddiffusionspectrum);
+the random one has none to carry, because it is an arithmetic mean over ten
+angles and belongs to no single one, and asking it for the field gets that
+sentence rather than a number.
+
+What the numbers are worth
+--------------------------
+They are a two-dimensional prediction of a thin panel with an open back, as
+the book's own Section 5.2.5 says, so they stand for single-plane devices such
+as semicircular arcs and not for a two-dimensional array of anything. The
+random incidence row is an arithmetic average over ten angles without Paris's
+formulation, which a measurement to ISO 17497-2 would apply, so it is not the
+same average a laboratory would report. Both facts are quoted in the `about`
+of the data file, in the book's words.
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+## DIFFUSION_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+DIFFUSION_BANDS_HZ = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
+```
+
+## diffusion_named
+
+```python
+diffusion_named(name: str) -> tuple[NormalizedDiffusionSpectrum, ...]
+```
+
+Every published row whose description or section heading contains *name*.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | A fragment of the printed description or of the numbered heading above it, matched without case. The heading is where the geometry is, so `"semiellipse"` and `"Schroeder"` find their sections and `"6 periods"` finds the rows that say so. |
+
+**Returns:** The rows that match, in the order the tables are read, which is empty when no page has one. A surface answers with its three angles.
+
+## NormalizedDiffusionSpectrum
+
+```python
+NormalizedDiffusionSpectrum(
+    *,
+    name: str,
+    source: str,
+    table: str = '',
+    variant: str = '',
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    ranges: Mapping[str, tuple[float, float]] = ...,
+    bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
+    reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
+    unquantified: Mapping[str, str] = ...,
+    uncertainty: Mapping[str, float] = ...,
+    not_derivable: Mapping[str, str] = ...,
+    misprinted: Mapping[str, str] = ...,
+    attributed_to: Mapping[str, str] = ...,
+    group: str = '',
+    note: str = '',
+    diffusion_coefficient_100: float | None = None,
+    diffusion_coefficient_125: float | None = None,
+    diffusion_coefficient_160: float | None = None,
+    diffusion_coefficient_200: float | None = None,
+    diffusion_coefficient_250: float | None = None,
+    diffusion_coefficient_315: float | None = None,
+    diffusion_coefficient_400: float | None = None,
+    diffusion_coefficient_500: float | None = None,
+    diffusion_coefficient_630: float | None = None,
+    diffusion_coefficient_800: float | None = None,
+    diffusion_coefficient_1000: float | None = None,
+    diffusion_coefficient_1250: float | None = None,
+    diffusion_coefficient_1600: float | None = None,
+    diffusion_coefficient_2000: float | None = None,
+    diffusion_coefficient_2500: float | None = None,
+    diffusion_coefficient_3150: float | None = None,
+    diffusion_coefficient_4000: float | None = None,
+    diffusion_coefficient_5000: float | None = None,
+    angle_of_incidence_deg: float | None = None,
+)
+```
+
+One surface at one angle of incidence, with its coefficient in each band.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `diffusion_coefficient_100` | Normalized diffusion coefficient in the 100 Hz one-third octave band, dimensionless, as printed. |
+| `diffusion_coefficient_125` | The same in the 125 Hz band. |
+| `diffusion_coefficient_160` | The same in the 160 Hz band. |
+| `diffusion_coefficient_200` | The same in the 200 Hz band. |
+| `diffusion_coefficient_250` | The same in the 250 Hz band. |
+| `diffusion_coefficient_315` | The same in the 315 Hz band. |
+| `diffusion_coefficient_400` | The same in the 400 Hz band. |
+| `diffusion_coefficient_500` | The same in the 500 Hz band. |
+| `diffusion_coefficient_630` | The same in the 630 Hz band. |
+| `diffusion_coefficient_800` | The same in the 800 Hz band. |
+| `diffusion_coefficient_1000` | The same in the 1 kHz band. |
+| `diffusion_coefficient_1250` | The same in the 1.25 kHz band. |
+| `diffusion_coefficient_1600` | The same in the 1.6 kHz band. |
+| `diffusion_coefficient_2000` | The same in the 2 kHz band. |
+| `diffusion_coefficient_2500` | The same in the 2.5 kHz band. |
+| `diffusion_coefficient_3150` | The same in the 3.15 kHz band. |
+| `diffusion_coefficient_4000` | The same in the 4 kHz band. |
+| `diffusion_coefficient_5000` | The same in the 5 kHz band. |
+| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal, as the page heads its line. `None` on a random incidence row, which is a mean over ten angles and is not one of them; `why_missing` says so rather than leaving the caller to guess at a zero. |
+| `name` | The material as the table names it, attribution stripped. |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
+| `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
+| `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
+| `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |
+| `misprinted` | Field to what the page prints there and why it cannot be that, for a cell whose defect is confirmed and registered in `docs/ERRATA.md`. The number is not served, because a catalogue that handed it over would put a value its own registry calls wrong behind every calculation downstream; it is not dropped either, because a reader reproducing the book needs to see what the book says. This is the narrowest of the hedges and the one that costs most to claim: a cell earns it only when the defect follows from the page itself or from something as settled as the molar mass of a named molecule, and never from one book disagreeing with another. |
+| `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
+| `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
+| `note` | What the page says about this row beyond its numbers. |
+
+### NormalizedDiffusionSpectrum.diffusion_coefficient()
+
+```python
+NormalizedDiffusionSpectrum.diffusion_coefficient(band_hz: int) -> float
+```
+
+The coefficient in one band, or a refusal that says what the page had.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `band_hz` | A one-third octave centre frequency from [`DIFFUSION_BANDS_HZ`](/phonometry/reference/api/materials/predicted-diffusion/#diffusion_bands_hz). |
+
+**Returns:** The printed normalized diffusion coefficient, dimensionless.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
+
+## PUBLISHED_DIFFUSION
+
+*Constant* (`mappingproxy`).

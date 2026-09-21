@@ -40,8 +40,8 @@ hedge of `CatalogueRow` is keyed by
 field name, so a cell the page prints as a range, or leaves empty, or prints
 wrong, is handled the way the same cell is handled in every other catalogue,
 and `why_missing` answers
-for a band the way it answers for a modulus. [`AbsorptionSpectrum.bands`](/phonometry/reference/api/materials/measured/#absorptionspectrumbands)
-and [`AbsorptionSpectrum.spectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrumspectrum) give the row back as a spectrum for
+for a band the way it answers for a modulus. [`AbsorptionSpectrum.bands`](/phonometry/reference/api/materials/measured/#absorptionspectrum)
+and [`AbsorptionSpectrum.spectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrum) give the row back as a spectrum for
 the caller who wants one.
 
 What the numbers are worth
@@ -170,22 +170,6 @@ that a number from here cannot be mistaken for a coefficient.
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
-### AbsorptionAreaSpectrum.bands()
-
-```python
-AbsorptionAreaSpectrum.bands() -> tuple[int, ...]
-```
-
-The octave bands this row prints an area for, in hertz.
-
-### AbsorptionAreaSpectrum.spectrum()
-
-```python
-AbsorptionAreaSpectrum.spectrum() -> dict[int, float]
-```
-
-The row as `{band_hz: area_m2}` over the bands it prints.
-
 ## AbsorptionSpectrum
 
 ```python
@@ -280,26 +264,6 @@ The coefficient in one band, or a refusal that says what the page had.
 | Exception | When |
 | :--- | :--- |
 | ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band any absorption table prints. |
-
-### AbsorptionSpectrum.bands()
-
-```python
-AbsorptionSpectrum.bands() -> tuple[int, ...]
-```
-
-The octave bands this row prints a coefficient for, in hertz.
-
-### AbsorptionSpectrum.spectrum()
-
-```python
-AbsorptionSpectrum.spectrum() -> dict[int, float]
-```
-
-The row as `{band_hz: coefficient}` over the bands it prints.
-
-A band the page left empty, or printed as something other than a
-number, is left out rather than filled; `why_missing` on the
-band's field says which it was.
 
 ## PUBLISHED_ABSORPTION
 

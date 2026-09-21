@@ -255,6 +255,15 @@ SOURCED: dict[tuple[str, str], str] = {
         "ISO 17497-1, each credited to the paper it comes from"
     ),
     (
+        "materials/diffusers/predicted_diffusion.py",
+        "PUBLISHED_DIFFUSION",
+    ): (
+        "Cox & D'Antonio 3e Appendix B, twenty-nine surfaces at three angles "
+        "of incidence each, whose normalized diffusion coefficient was "
+        "computed with a two-dimensional boundary element model following "
+        "ISO 17497-2"
+    ),
+    (
         "materials/absorbers/catalogue.py",
         "PUBLISHED_POROUS",
     ): (

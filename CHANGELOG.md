@@ -68,6 +68,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Seven of the printed rows are a label whose variants follow underneath, so
   "draped to 1/2 area" is three rows under three different drapes rather than
   one row that overwrites two.
+- **Diffusion coefficients, which are not scattering coefficients.**
+  `materials.diffusers.PUBLISHED_DIFFUSION` holds the twenty-nine surfaces of
+  Cox & D'Antonio 3e Appendix B at the three angles of incidence the page
+  prints for each, which is eighty-seven rows of eighteen one-third octave
+  bands. ISO 17497 is two documents and two quantities, and a surface can
+  score high on one and low on the other, so these are a catalogue of their
+  own rather than more rows of `PUBLISHED_SCATTERING`. They were computed with
+  a two-dimensional boundary element model and not measured, which the
+  ``about`` of the data file says in the book's own words along with what that
+  model was: a thin panel with an open back, source and receiver 100 and 50 m
+  away, and a random incidence value that is an arithmetic mean over ten
+  angles without the weighting a measurement standard would apply. That row
+  therefore carries no `angle_of_incidence_deg` at all, because zero degrees
+  is the normal incidence row this table also prints. What the table is for is
+  in its numbers: one semicylinder scores 0.77 at 1 kHz at random incidence
+  and twelve of the same semicylinder score 0.22, and six semiellipses go from
+  0.02 to 0.65 at 5 kHz as they deepen from 1 cm to 30 cm. One surface is
+  listed twice, in two sections and with identical values, and stays two rows.
+  Read twice from the pages like every other table here: 1566 cells, no
+  difference.
+- **The five catalogues that hold a spectrum now share one base.**
+  `AbsorptionSpectrum`, `AbsorptionAreaSpectrum`, `TransmissionLossSpectrum`,
+  `ScatteringCoefficientSpectrum` and `NormalizedDiffusionSpectrum` each kept
+  their own copy of the same three methods, and a sixth catalogue would have
+  been a sixth copy. They now declare which bands their tables can print and
+  how their band fields are spelled, and inherit `bands()`, `spectrum()` and
+  the lookup that refuses rather than answering zero. Nothing about any of
+  them changed from the outside.
 - **Scattering coefficients somebody actually measured.**
   `materials.diffusers.PUBLISHED_SCATTERING` holds the forty-six surfaces of
   Cox & D'Antonio 3e Appendix D, from sinusoidal corrugation and battens

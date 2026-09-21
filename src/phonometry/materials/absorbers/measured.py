@@ -63,9 +63,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from ..._internal.catalogue import CatalogueRow, read_table, take
+from ..._internal.catalogue import BandedRow, read_table, take
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -86,7 +86,7 @@ ABSORPTION_BANDS_HZ: tuple[int, ...] = (63, 125, 250, 500, 1000, 2000, 4000, 800
 
 
 @dataclass(frozen=True, kw_only=True)
-class AbsorptionSpectrum(CatalogueRow):
+class AbsorptionSpectrum(BandedRow):
     """One finish of a published table, with its coefficient in each band.
 
     The hedges of :class:`~phonometry._internal.catalogue.CatalogueRow` apply
@@ -125,25 +125,10 @@ class AbsorptionSpectrum(CatalogueRow):
     absorption_coefficient_8000: float | None = None
     mounting: str = ""
 
-    def bands(self) -> tuple[int, ...]:
-        """The octave bands this row prints a coefficient for, in hertz."""
-        return tuple(
-            band
-            for band in ABSORPTION_BANDS_HZ
-            if getattr(self, f"absorption_coefficient_{band}") is not None
-        )
-
-    def spectrum(self) -> dict[int, float]:
-        """The row as ``{band_hz: coefficient}`` over the bands it prints.
-
-        A band the page left empty, or printed as something other than a
-        number, is left out rather than filled; :meth:`why_missing` on the
-        band's field says which it was.
-        """
-        return {
-            band: float(getattr(self, f"absorption_coefficient_{band}"))
-            for band in self.bands()
-        }
+    _bands_hz: ClassVar[tuple[int, ...]] = ABSORPTION_BANDS_HZ
+    _band_prefix: ClassVar[str] = "absorption_coefficient_"
+    _band_kind: ClassVar[str] = "an octave"
+    _table_kind: ClassVar[str] = "absorption"
 
     def absorption_coefficient(self, band_hz: int) -> float:
         """The coefficient in one band, or a refusal that says what the page had.
@@ -155,19 +140,11 @@ class AbsorptionSpectrum(CatalogueRow):
             the row, the band and what the cell held instead; or when
             *band_hz* is not a band any absorption table prints.
         """
-        if band_hz not in ABSORPTION_BANDS_HZ:
-            msg = (
-                f"{band_hz} Hz is not an octave band an absorption table prints; "
-                f"the bands are {ABSORPTION_BANDS_HZ}"
-            )
-            raise ValueError(msg)
-        return self.printed(
-            f"absorption_coefficient_{band_hz}", wanted_by=f"the {band_hz} Hz band"
-        )
+        return self._in_band(band_hz)
 
 
 @dataclass(frozen=True, kw_only=True)
-class AbsorptionAreaSpectrum(CatalogueRow):
+class AbsorptionAreaSpectrum(BandedRow):
     """One row a table prints as an absorption area rather than a coefficient.
 
     An audience, a chair, a person standing: things a book prices per unit in
@@ -200,20 +177,11 @@ class AbsorptionAreaSpectrum(CatalogueRow):
     absorption_area_8000_m2: float | None = None
     per: str = "person"
 
-    def bands(self) -> tuple[int, ...]:
-        """The octave bands this row prints an area for, in hertz."""
-        return tuple(
-            band
-            for band in ABSORPTION_BANDS_HZ
-            if getattr(self, f"absorption_area_{band}_m2") is not None
-        )
-
-    def spectrum(self) -> dict[int, float]:
-        """The row as ``{band_hz: area_m2}`` over the bands it prints."""
-        return {
-            band: float(getattr(self, f"absorption_area_{band}_m2"))
-            for band in self.bands()
-        }
+    _bands_hz: ClassVar[tuple[int, ...]] = ABSORPTION_BANDS_HZ
+    _band_prefix: ClassVar[str] = "absorption_area_"
+    _band_suffix: ClassVar[str] = "_m2"
+    _band_kind: ClassVar[str] = "an octave"
+    _table_kind: ClassVar[str] = "absorption"
 
 
 #: The hedges these tables spell as a set rather than a mapping.

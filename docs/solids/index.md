@@ -81,3 +81,6 @@ so in its own entry.
   speeds and their inverses, which one a printed table holds, and the
   thickness-critical-frequency product that lets two books be checked against
   each other for free.
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#solids):
+  the two hundred and nineteen rows six books print, filterable by material
+  and by table, each naming the page it was read on.

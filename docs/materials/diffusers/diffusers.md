@@ -636,7 +636,7 @@ print(row.why_missing("scattering_coefficient_5000"))
 ```
 
 The whole of all three tables is on the
-[published catalogues page](https://jmrplens.github.io/phonometry/reference/catalogues/),
+[published catalogues page](https://jmrplens.github.io/phonometry/reference/catalogues/#scattering-coefficients),
 filterable and with the source of every row.
 
 ## Scattering or diffusion? Two coefficients, two jobs

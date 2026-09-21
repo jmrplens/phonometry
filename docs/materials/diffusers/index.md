@@ -53,6 +53,9 @@ Pages elsewhere on the site that this section leans on:
 - [Surfaces measured in place](../surfaces/index.md) and its guide
   [In-situ Road-Surface Absorption](../surfaces/road-absorption.md):
   the ISO 13472-1 subtraction technique and the ISO 13472-2 spot method.
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#scattering-coefficients): the
+  measured and the computed scattering and diffusion coefficients of the
+  appendices, surface by surface.
 
 ## What this section does not cover
 

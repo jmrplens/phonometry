@@ -60,6 +60,9 @@ Pages elsewhere on the site that this section leans on:
 - [Surfaces measured in place](https://jmrplens.github.io/phonometry/materials/surfaces/) and its guide
   [In-situ Road-Surface Absorption](https://jmrplens.github.io/phonometry/materials/surfaces/road-absorption/):
   the ISO 13472-1 subtraction technique and the ISO 13472-2 spot method.
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#scattering-coefficients): the
+  measured and the computed scattering and diffusion coefficients of the
+  appendices, surface by surface.
 
 ## What this section does not cover
 
@@ -720,7 +723,7 @@ print(row.why_missing("scattering_coefficient_5000"))
 ```
 
 The whole of all three tables is on the
-[published catalogues page](https://jmrplens.github.io/phonometry/reference/catalogues/),
+[published catalogues page](https://jmrplens.github.io/phonometry/reference/catalogues/#scattering-coefficients),
 filterable and with the source of every row.
 
 ## Scattering or diffusion? Two coefficients, two jobs

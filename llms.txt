@@ -460,6 +460,7 @@ The generated API reference, one page per module. Fetch these only when a specif
 - [broadcast/program-loudness](https://jmrplens.github.io/phonometry/reference/api/broadcast/program-loudness/)
 - [broadcast/quasi-peak](https://jmrplens.github.io/phonometry/reference/api/broadcast/quasi-peak/)
 - [building/aperture-transmission](https://jmrplens.github.io/phonometry/reference/api/building/aperture-transmission/)
+- [building/catalogue](https://jmrplens.github.io/phonometry/reference/api/building/catalogue/)
 - [building/ceiling-plenum](https://jmrplens.github.io/phonometry/reference/api/building/ceiling-plenum/)
 - [building/detailed-model](https://jmrplens.github.io/phonometry/reference/api/building/detailed-model/)
 - [building/facade](https://jmrplens.github.io/phonometry/reference/api/building/facade/)

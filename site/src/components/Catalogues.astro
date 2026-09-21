@@ -43,7 +43,15 @@ import { catalogues } from '../generated/catalogues.mjs';
 
 interface Props {
 	/** Which catalogue to render. */
-	catalogue: 'solids' | 'porous' | 'ground' | 'gases' | 'absorption' | 'absorptionAreas' | 'fluids';
+	catalogue:
+		| 'solids'
+		| 'porous'
+		| 'ground'
+		| 'gases'
+		| 'absorption'
+		| 'absorptionAreas'
+		| 'transmissionLoss'
+		| 'fluids';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
 }
@@ -63,6 +71,7 @@ const copy = {
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
 		absorptionPlaceholder: 'carpet, plaster, velour',
+		partitionPlaceholder: 'brick, door, glass',
 		table: 'Published table',
 		everyTable: 'Every table',
 		empty: 'No row matches that filter.',
@@ -70,6 +79,7 @@ const copy = {
 		surface: 'Surface',
 		gas: 'Gas',
 		finish: 'Finish',
+		partition: 'Construction',
 		state: 'State',
 		conditions: 'Conditions',
 		mounting: 'Mount',
@@ -97,6 +107,7 @@ const copy = {
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
 		absorptionPlaceholder: 'carpet, plaster, velour',
+		partitionPlaceholder: 'brick, door, glass',
 		table: 'Tabla publicada',
 		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',
@@ -104,6 +115,7 @@ const copy = {
 		surface: 'Superficie',
 		gas: 'Gas',
 		finish: 'Acabado',
+		partition: 'Construcción',
 		state: 'Estado',
 		conditions: 'Condiciones',
 		mounting: 'Montaje',
@@ -137,7 +149,9 @@ const placeholder =
 			? copy.gasPlaceholder
 			: section === 'absorption' || section === 'absorptionAreas'
 				? copy.absorptionPlaceholder
-				: copy.searchPlaceholder;
+				: section === 'transmissionLoss'
+					? copy.partitionPlaceholder
+					: copy.searchPlaceholder;
 
 /** What the first column holds, which is not a material in every catalogue. */
 const rowHeading =
@@ -149,7 +163,9 @@ const rowHeading =
 				? copy.gas
 				: section === 'absorption' || section === 'absorptionAreas'
 					? copy.finish
-					: copy.material;
+					: section === 'transmissionLoss'
+						? copy.partition
+						: copy.material;
 
 /** A column's heading in the language this page is published in. */
 const heading = (column: { heading: string; headingEs?: string }) =>

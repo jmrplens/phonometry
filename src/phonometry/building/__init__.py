@@ -19,6 +19,12 @@ from .._plot.geometry import (
     plot_facade_elements,
     plot_junction_geometry,
 )
+from .catalogue import (
+    PUBLISHED_TRANSMISSION_LOSS,
+    TRANSMISSION_LOSS_BANDS_HZ,
+    TransmissionLossSpectrum,
+    transmission_loss_named,
+)
 from .measurement import (
     COVERAGE_FACTORS,
     HEAVY_IMPACT_A_WEIGHTING,
@@ -298,6 +304,10 @@ from .regulation import (
 )
 
 __all__ = [
+    "PUBLISHED_TRANSMISSION_LOSS",
+    "TRANSMISSION_LOSS_BANDS_HZ",
+    "TransmissionLossSpectrum",
+    "transmission_loss_named",
     "CEILING_ATTENUATION_CONTOUR",
     "COVERAGE_FACTORS",
     "DB_HR_FREQUENCIES",

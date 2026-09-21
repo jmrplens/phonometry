@@ -240,6 +240,13 @@ SOURCED: dict[tuple[str, str], str] = {
         "Long 2e Table 7.1, the musician and the air it prints in sabins"
     ),
     (
+        "building/catalogue.py",
+        "PUBLISHED_TRANSMISSION_LOSS",
+    ): (
+        "Bies 5e Table 7.6, ninety-four constructions with a thickness, a "
+        "surface density and eight octave bands of transmission loss"
+    ),
+    (
         "materials/absorbers/catalogue.py",
         "PUBLISHED_POROUS",
     ): (

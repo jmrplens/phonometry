@@ -64886,6 +64886,5994 @@ export const catalogues = {
       }
     ]
   },
+  "transmissionLoss": {
+    "columns": [
+      {
+        "field": "thickness_mm",
+        "heading": "Thickness",
+        "headingEs": "Espesor",
+        "unit": "mm"
+      },
+      {
+        "field": "surface_density_kg_m2",
+        "heading": "Surface density",
+        "headingEs": "Masa superficial",
+        "unit": "kg/m²"
+      },
+      {
+        "field": "transmission_loss_63_db",
+        "heading": "63 Hz",
+        "headingEs": "63 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_125_db",
+        "heading": "125 Hz",
+        "headingEs": "125 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_250_db",
+        "heading": "250 Hz",
+        "headingEs": "250 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_500_db",
+        "heading": "500 Hz",
+        "headingEs": "500 Hz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_1000_db",
+        "heading": "1 kHz",
+        "headingEs": "1 kHz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_2000_db",
+        "heading": "2 kHz",
+        "headingEs": "2 kHz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_4000_db",
+        "heading": "4 kHz",
+        "headingEs": "4 kHz",
+        "unit": "dB"
+      },
+      {
+        "field": "transmission_loss_8000_db",
+        "heading": "8 kHz",
+        "headingEs": "8 kHz",
+        "unit": "dB"
+      }
+    ],
+    "rows": [
+      {
+        "key": "bies-2017-table-7-6/1_5_mm_lead_sheet_1.5mm",
+        "table": "bies-2017-table-7-6",
+        "name": "1.5 mm lead sheet",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/3_mm_lead_sheet_3mm",
+        "table": "bies-2017-table-7-6",
+        "name": "3 mm lead sheet",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/20_g_aluminium_sheet_stiffened_0.9mm",
+        "table": "bies-2017-table-7-6",
+        "name": "20 g aluminium sheet, stiffened",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_steel_plate_6mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm steel plate",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/22_g_galvanized_steel_sheet_0.55mm",
+        "table": "bies-2017-table-7-6",
+        "name": "22 g galvanized steel sheet",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/20_g_galvanized_steel_sheet_0.9mm",
+        "table": "bies-2017-table-7-6",
+        "name": "20 g galvanized steel sheet",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/18_g_galvanized_steel_sheet_1.2mm",
+        "table": "bies-2017-table-7-6",
+        "name": "18 g galvanized steel sheet",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/16_g_galvanized_steel_sheet_1.6mm",
+        "table": "bies-2017-table-7-6",
+        "name": "16 g galvanized steel sheet",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/18_g_fluted_steel_panels_stiffened_at_edges_joints_scale_1.2mm",
+        "table": "bies-2017-table-7-6",
+        "name": "18 g fluted steel panels stiffened at edges, joints scaled",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/corrugated_asbestos_sheet_stiffened_and_sealed_6mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Corrugated asbestos sheet, stiffened and sealed",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/chipboard_sheets_on_wood_framework_19mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Chipboard sheets on wood framework",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/fibreboard_on_wood_framework_12mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Fibreboard on wood framework",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plasterboard_sheets_on_wood_framework_9mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plasterboard sheets on wood framework",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/2_layers_13_mm_plaster_board_26mm",
+        "table": "bies-2017-table-7-6",
+        "name": "2 layers 13 mm plaster board",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plywood_sheets_on_wood_framework_6mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plywood sheets on wood framework",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plywood_sheets_on_wood_framework_12mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plywood sheets on wood framework",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/hardwood_mahogany_panels_50mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Hardwood (mahogany) panels",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/woodwork_slabs_unplastered_25mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Woodwork slabs, unplastered",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/woodwork_slabs_plastered_12_mm_on_each_face_50mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Woodwork slabs, plastered (12 mm on each face)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plywood_6mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plywood",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plywood_9mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plywood",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plywood_18mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plywood",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/lead_vinyl_curtains_3mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Lead vinyl curtains",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "7,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/lead_vinyl_curtains_2mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Lead vinyl curtains",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/16_g_steel_plus_damping_with_100_mm_of_glass_fibre_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "16 g steel + damping with 100 mm of glass-fibre",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/as_above_but_covered_by_22_g_perforated_steel_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "As above, but covered by 22 g perforated steel",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/as_above_but_16_g_steel_replaced_with_5_mm_steel_plate_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "As above, but 16 g steel replaced with 5 mm steel plate",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "68",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/1_5_mm_lead_between_two_sheets_of_5_mm_plywood_11.5mm",
+        "table": "bies-2017-table-7-6",
+        "name": "1.5 mm lead between two sheets of 5 mm plywood",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "11,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/9_mm_asbestos_board_between_two_sheets_of_18_g_steel_12mm",
+        "table": "bies-2017-table-7-6",
+        "name": "9 mm asbestos board between two sheets of 18 g steel",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/compressed_straw_between_two_sheets_of_3_mm_hardboard_56mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Compressed straw between two sheets of 3 mm hardboard",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_leaf_brick_plastered_on_both_sides_125mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single leaf brick, plastered on both sides",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "125",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "240",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_leaf_brick_plastered_on_both_sides_255mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single leaf brick, plastered on both sides",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "255",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "480",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_leaf_brick_plastered_on_both_sides_360mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single leaf brick, plastered on both sides",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "360",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "720",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/solid_breeze_or_clinker_plastered_12_mm_both_sides_125mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Solid breeze or clinker, plastered (12 mm both sides)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "125",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "145",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/solid_breeze_or_clinker_blocks_unplastered_75mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Solid breeze or clinker blocks, unplastered",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/hollow_cinder_concrete_blocks_painted_cement_base_paint_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Hollow cinder concrete blocks, painted (cement base paint)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/hollow_cinder_concrete_blocks_unpainted_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Hollow cinder concrete blocks, unpainted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/thermalite_blocks_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Thermalite blocks",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "125",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/glass_bricks_200mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Glass bricks",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "510",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plain_brick_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plain brick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/aerated_concrete_blocks_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Aerated concrete blocks",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/aerated_concrete_blocks_150mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Aerated concrete blocks",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/280_mm_brick_56_mm_cavity_strip_ties_outer_faces_plaster_300mm",
+        "table": "bies-2017-table-7-6",
+        "name": "280 mm brick, 56 mm cavity, strip ties, outer faces plastered to thickness of 12 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "380",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "78",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/280_mm_brick_56_mm_cavity_expanded_metal_ties_outer_face_300mm",
+        "table": "bies-2017-table-7-6",
+        "name": "280 mm brick, 56 mm cavity, expanded metal ties, outer faces plastered to thickness of 12 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "380",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/50_mm_x_100_mm_studs_12_mm_insulating_board_both_sides_125mm",
+        "table": "bies-2017-table-7-6",
+        "name": "50 mm × 100 mm studs, 12 mm insulating board both sides",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "125",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/50_mm_x_100_mm_studs_9_mm_plasterboard_and_12_mm_plaster_142mm",
+        "table": "bies-2017-table-7-6",
+        "name": "50 mm × 100 mm studs, 9 mm plasterboard and 12 mm plaster coat both sides",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "142",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/empty_cavity_45_mm_wide_75mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Empty cavity, 45 mm wide",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/cavity_45_mm_wide_filled_with_fibreglass_75mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Cavity, 45 mm wide, filled with fibreglass",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/empty_cavity_86_mm_wide_117mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Empty cavity, 86 mm wide",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "117",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/cavity_86_mm_wide_filled_with_fibreglass_117mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Cavity, 86 mm wide, filled with fibreglass",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "117",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/gypsum_wall_16_mm_leaves_200_mm_cavity_with_no_sound_abs_240mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Gypsum wall, 16 mm leaves, 200 mm cavity with no sound-absorbing material and no studs",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "240",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/as_above_with_88_mm_sound_absorbing_material_240mm",
+        "table": "bies-2017-table-7-6",
+        "name": "As above with 88 mm sound-absorbing material",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "240",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/as_above_but_staggered_4_inch_studs_240mm",
+        "table": "bies-2017-table-7-6",
+        "name": "As above but staggered 4-inch studs",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "240",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/gypsum_wall_16_mm_leaves_100_mm_cavity_56_mm_thick_sound_140mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Gypsum wall, 16 mm leaves, 100 mm cavity, 56 mm thick sound-absorbing material, single 4-inch studs with resilient metal channels on one side to attach the panel to the studs",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "140",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_glass_in_heavy_frame_4mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single glass in heavy frame",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_glass_in_heavy_frame_6mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single glass in heavy frame",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_glass_in_heavy_frame_8mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single glass in heavy frame",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_glass_in_heavy_frame_9mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single glass in heavy frame",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_glass_in_heavy_frame_16mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single glass in heavy frame",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/single_glass_in_heavy_frame_25mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Single glass in heavy frame",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/laminated_glass_13mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Laminated glass",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/2_44_mm_panes_7_mm_cavity_12mm",
+        "table": "bies-2017-table-7-6",
+        "name": "2.44 mm panes, 7 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/9_mm_panes_in_separate_frames_50_mm_cavity_62mm",
+        "table": "bies-2017-table-7-6",
+        "name": "9 mm panes in separate frames, 50 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_glass_panes_in_separate_frames_100_mm_cavity_112mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm glass panes in separate frames, 100 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "112",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_glass_panes_in_separate_frames_188_mm_cavity_200mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm glass panes in separate frames, 188 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_glass_panes_in_separate_frames_188_mm_cavity_with_a_200mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm glass panes in separate frames, 188 mm cavity with absorbent blanket in reveals",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_and_9_mm_panes_in_separate_frames_200_mm_cavity_abs_215mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm and 9 mm panes in separate frames, 200 mm cavity, absorbent blanket in reveals",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "215",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/3_mm_plate_glass_55_mm_cavity_63mm",
+        "table": "bies-2017-table-7-6",
+        "name": "3 mm plate glass, 55 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_plate_glass_55_mm_cavity_70mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm plate glass, 55 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_and_5_mm_glass_100_mm_cavity_112mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm and 5 mm glass, 100 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "112",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/6_mm_and_8_mm_glass_100_mm_cavity_115mm",
+        "table": "bies-2017-table-7-6",
+        "name": "6 mm and 8 mm glass, 100 mm cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "115",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/flush_panel_hollow_core_normal_cracks_as_usually_hung_43mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Flush panel, hollow core, normal cracks as usually hung",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/solid_hardwood_normal_cracks_as_usually_hung_43mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Solid hardwood, normal cracks as usually hung",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/typical_proprietary_acoustic_door_double_heavy_sheet_ste_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Typical proprietary ‘acoustic’ door, double heavy sheet steel skin, absorbent in air space, and seals in heavy steel frame",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/2_skin_metal_door_35mm",
+        "table": "bies-2017-table-7-6",
+        "name": "2-skin metal door",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/plastic_laminated_flush_wood_door_44mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Plastic laminated flush wood door",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/veneered_surface_flush_wood_door_44mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Veneered surface, flush wood door",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/metal_door_damped_skins_absorbent_core_gasketing_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Metal door; damped skins, absorbent core, gasketing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/metal_door_damped_skins_absorbent_core_gasketing_180mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Metal door; damped skins, absorbent core, gasketing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "180",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "140",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/metal_door_damped_skins_absorbent_core_gasketing_250mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Metal door; damped skins, absorbent core, gasketing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "250",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "181",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/two_16_g_steel_doors_with_25_mm_sound_absorbing_material_270mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Two 16 g steel doors with 25 mm sound-absorbing material on each, and separated by 180 mm air gap",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "270",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/hardwood_door_54mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Hardwood door",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/hardwood_door_66mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Hardwood door",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/t_and_g_boards_joints_scaled_21mm",
+        "table": "bies-2017-table-7-6",
+        "name": "T & G boards, joints scaled",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/t_and_g_boards_12_mm_plasterboard_ceiling_under_with_3_m_235mm",
+        "table": "bies-2017-table-7-6",
+        "name": "T & G boards, 12 mm plasterboard ceiling under, with 3 mm plaster skin coat",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "235",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/as_above_with_boards_floating_on_glass_wool_mat_240mm",
+        "table": "bies-2017-table-7-6",
+        "name": "As above, with boards ‘floating’ on glass-wool mat",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "240",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/concrete_reinforced_100mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Concrete, reinforced",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "230",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/concrete_reinforced_200mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Concrete, reinforced",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "460",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/concrete_reinforced_300mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Concrete, reinforced",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "690",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/126_mm_reinforced_concrete_with_floating_screed_190mm",
+        "table": "bies-2017-table-7-6",
+        "name": "126 mm reinforced concrete with ‘floating’ screed",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "190",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "420",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/200_mm_concrete_slabs_200mm",
+        "table": "bies-2017-table-7-6",
+        "name": "200 mm concrete slabs",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "280",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/as_above_but_oak_surface_212mm",
+        "table": "bies-2017-table-7-6",
+        "name": "As above, but oak surface",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "212",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "282",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/as_above_but_carpet_plus_hair_felt_underlay_no_of_oak_su_200mm",
+        "table": "bies-2017-table-7-6",
+        "name": "As above, but carpet + hair felt underlay, no of oak surface",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "281",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-7-6/gypsum_ceiling_mounted_resiliently_and_vinyl_finished_wo_318mm",
+        "table": "bies-2017-table-7-6",
+        "name": "Gypsum ceiling, mounted resiliently, and vinyl finished wood joist floor with glass-fibre insulation and 75 mm plywood",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Bies 5e Table 7.6, PDF pages 428-433 (printed pp. 399-404)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "318",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
   "absorptionAreas": {
     "columns": [
       {

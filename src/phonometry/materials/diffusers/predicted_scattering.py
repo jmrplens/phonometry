@@ -46,10 +46,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import BandedRow, read_table, take
-from .measured_scattering import SCATTERING_BANDS_HZ
+from ..._internal.catalogue import read_table, take
+from ._scattering import ScatteringBands
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -62,35 +62,26 @@ __all__ = [
 
 
 @dataclass(frozen=True, kw_only=True)
-class PredictedScatteringSpectrum(BandedRow):
-    """One predicted surface at one angle, with its coefficient in each band.
+class PredictedScatteringSpectrum(ScatteringBands):
+    """One computed surface at one angle, band by band.
 
-    :ivar scattering_coefficient_100: Correlation scattering coefficient in
-        the 100 Hz one-third octave band, dimensionless, as printed. The two
-        three-dimensional tables start at 250 Hz and this field is ``None`` on
-        every row of them, because the book says the coefficient below that
-        "should be taken to be 0" and does not print one.
-    :ivar scattering_coefficient_125: The same in the 125 Hz band.
-    :ivar scattering_coefficient_160: The same in the 160 Hz band.
-    :ivar scattering_coefficient_200: The same in the 200 Hz band.
-    :ivar scattering_coefficient_250: The same in the 250 Hz band.
-    :ivar scattering_coefficient_315: The same in the 315 Hz band.
-    :ivar scattering_coefficient_400: The same in the 400 Hz band.
-    :ivar scattering_coefficient_500: The same in the 500 Hz band.
-    :ivar scattering_coefficient_630: The same in the 630 Hz band.
-    :ivar scattering_coefficient_800: The same in the 800 Hz band.
-    :ivar scattering_coefficient_1000: The same in the 1 kHz band.
-    :ivar scattering_coefficient_1250: The same in the 1.25 kHz band.
-    :ivar scattering_coefficient_1600: The same in the 1.6 kHz band.
-    :ivar scattering_coefficient_2000: The same in the 2 kHz band.
-    :ivar scattering_coefficient_2500: The same in the 2.5 kHz band.
-    :ivar scattering_coefficient_3150: The same in the 3.15 kHz band.
-    :ivar scattering_coefficient_4000: The same in the 4 kHz band.
-    :ivar scattering_coefficient_5000: The same in the 5 kHz band.
+    The band fields and the reading method come from
+    :class:`~phonometry.materials.diffusers._scattering.ScatteringBands`,
+    which a measured row carries too, and the two classes are siblings rather
+    than one inheriting from the other, so a caller narrowing on the type
+    learns which kind of number they hold. The two fields below are what a
+    prediction has and a measurement does not.
+
+    The two three-dimensional tables start at 250 Hz, so their four lowest
+    band fields are ``None`` on every row: the book says the coefficient
+    below that "should be taken to be 0" and prints nothing, and filling
+    those cells with zeros would put the book's advice into the data where
+    nobody could tell it from a computed value.
+
     :ivar angle_of_incidence_deg: The angle the row was computed at, in
-        degrees from the normal. ``None`` where the page prints a word instead
-        of a number: "Random" on an average over angles, "All/any" on the
-        plane surface that scatters nothing at any of them, and
+        degrees from the normal. ``None`` where the page prints a word
+        instead of a number: "Random" on an average over angles, "All/any" on
+        the plane surface that scatters nothing at any of them, and
         :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` says
         which.
     :ivar model: The solver behind the row, as the table's own title and the
@@ -99,43 +90,8 @@ class PredictedScatteringSpectrum(BandedRow):
         not a note: it is what separates these rows from the measured ones.
     """
 
-    scattering_coefficient_100: float | None = None
-    scattering_coefficient_125: float | None = None
-    scattering_coefficient_160: float | None = None
-    scattering_coefficient_200: float | None = None
-    scattering_coefficient_250: float | None = None
-    scattering_coefficient_315: float | None = None
-    scattering_coefficient_400: float | None = None
-    scattering_coefficient_500: float | None = None
-    scattering_coefficient_630: float | None = None
-    scattering_coefficient_800: float | None = None
-    scattering_coefficient_1000: float | None = None
-    scattering_coefficient_1250: float | None = None
-    scattering_coefficient_1600: float | None = None
-    scattering_coefficient_2000: float | None = None
-    scattering_coefficient_2500: float | None = None
-    scattering_coefficient_3150: float | None = None
-    scattering_coefficient_4000: float | None = None
-    scattering_coefficient_5000: float | None = None
     angle_of_incidence_deg: float | None = None
     model: str = ""
-
-    _bands_hz: ClassVar[tuple[int, ...]] = SCATTERING_BANDS_HZ
-    _band_prefix: ClassVar[str] = "scattering_coefficient_"
-    _band_kind: ClassVar[str] = "a one-third octave"
-    _table_kind: ClassVar[str] = "scattering"
-
-    def scattering_coefficient(self, band_hz: int) -> float:
-        """The coefficient in one band, or a refusal that says what the page had.
-
-        :param band_hz: A one-third octave centre frequency from
-            :data:`~phonometry.materials.diffusers.SCATTERING_BANDS_HZ`.
-        :return: The predicted scattering coefficient, dimensionless.
-        :raises ValueError: when the table has no number in that band, naming
-            the row and the band; or when *band_hz* is not a band these tables
-            print.
-        """
-        return self._in_band(band_hz)
 
 
 #: The hedges these tables spell as a set rather than a mapping.

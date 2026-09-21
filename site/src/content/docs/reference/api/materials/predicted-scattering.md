@@ -112,13 +112,28 @@ PredictedScatteringSpectrum(
 )
 ```
 
-One predicted surface at one angle, with its coefficient in each band.
+One computed surface at one angle, band by band.
+
+The band fields and the reading method come from
+`ScatteringBands`,
+which a measured row carries too, and the two classes are siblings rather
+than one inheriting from the other, so a caller narrowing on the type
+learns which kind of number they hold. The two fields below are what a
+prediction has and a measurement does not.
+
+The two three-dimensional tables start at 250 Hz, so their four lowest
+band fields are `None` on every row: the book says the coefficient
+below that "should be taken to be 0" and prints nothing, and filling
+those cells with zeros would put the book's advice into the data where
+nobody could tell it from a computed value.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `scattering_coefficient_100` | Correlation scattering coefficient in the 100 Hz one-third octave band, dimensionless, as printed. The two three-dimensional tables start at 250 Hz and this field is `None` on every row of them, because the book says the coefficient below that "should be taken to be 0" and does not print one. |
+| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal. `None` where the page prints a word instead of a number: "Random" on an average over angles, "All/any" on the plane surface that scatters nothing at any of them, and `why_missing` says which. |
+| `model` | The solver behind the row, as the table's own title and the section that describes it give it: a two-dimensional or a three-dimensional boundary element prediction. It is not a hedge and not a note: it is what separates these rows from the measured ones. |
+| `scattering_coefficient_100` | Scattering coefficient in the 100 Hz one-third octave band, dimensionless, as printed. `None` where the table prints nothing there, which is not the same as zero: a zero is a surface that sends every ray back along the specular direction. |
 | `scattering_coefficient_125` | The same in the 125 Hz band. |
 | `scattering_coefficient_160` | The same in the 160 Hz band. |
 | `scattering_coefficient_200` | The same in the 200 Hz band. |
@@ -136,8 +151,6 @@ One predicted surface at one angle, with its coefficient in each band.
 | `scattering_coefficient_3150` | The same in the 3.15 kHz band. |
 | `scattering_coefficient_4000` | The same in the 4 kHz band. |
 | `scattering_coefficient_5000` | The same in the 5 kHz band. |
-| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal. `None` where the page prints a word instead of a number: "Random" on an average over angles, "All/any" on the plane surface that scatters nothing at any of them, and `why_missing` says which. |
-| `model` | The solver behind the row, as the table's own title and the section that describes it give it: a two-dimensional or a three-dimensional boundary element prediction. It is not a hedge and not a note: it is what separates these rows from the measured ones. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
@@ -156,6 +169,80 @@ One predicted surface at one angle, with its coefficient in each band.
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
+### PredictedScatteringSpectrum.bands()
+
+```python
+PredictedScatteringSpectrum.bands() -> tuple[int, ...]
+```
+
+The bands this row prints a value for, in hertz.
+
+### PredictedScatteringSpectrum.is_approximate()
+
+```python
+PredictedScatteringSpectrum.is_approximate(field_name: str) -> bool
+```
+
+Whether the page prints this field with a `~`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page rounded the cell on purpose.
+
+### PredictedScatteringSpectrum.is_derived()
+
+```python
+PredictedScatteringSpectrum.is_derived(field_name: str) -> bool
+```
+
+Whether this library computed this field instead of reading it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+
+### PredictedScatteringSpectrum.printed()
+
+```python
+PredictedScatteringSpectrum.printed(
+    field_name: str,
+    *,
+    wanted_by: str = 'the caller',
+) -> float
+```
+
+One quantity this page prints, or a refusal that says what it had.
+
+Every quantity of a row is optional, because the pages print different
+columns, so a caller passing one into a function that requires a float
+has to narrow it. Doing it here beats an assertion at each call site:
+the refusal names the field, who wanted it and what the page had in
+that cell, which is the difference between a cell the book left empty
+and a cell holding the word "model".
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | The quantity wanted. |
+| `wanted_by` | What wants it, named in the message. |
+
+**Returns:** The value, as a float.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page did not print a number there. |
+
 ### PredictedScatteringSpectrum.scattering_coefficient()
 
 ```python
@@ -170,13 +257,53 @@ The coefficient in one band, or a refusal that says what the page had.
 | :--- | :--- |
 | `band_hz` | A one-third octave centre frequency from [`SCATTERING_BANDS_HZ`](/phonometry/reference/api/materials/measured-scattering/#scattering_bands_hz). |
 
-**Returns:** The predicted scattering coefficient, dimensionless.
+**Returns:** The scattering coefficient, dimensionless.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | when the table has no number in that band, naming the row and the band; or when *band_hz* is not a band these tables print. |
+| ValueError | when the table has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
+
+### PredictedScatteringSpectrum.spectrum()
+
+```python
+PredictedScatteringSpectrum.spectrum() -> dict[int, float]
+```
+
+The row as `{band_hz: value}` over the bands it prints.
+
+A band the page left empty, or printed as something other than a
+number, is left out rather than filled with a zero;
+`why_missing` on that band's field says which it
+was.
+
+### PredictedScatteringSpectrum.why_missing()
+
+```python
+PredictedScatteringSpectrum.why_missing(field_name: str) -> str
+```
+
+Why this field is `None`, in the page's own terms.
+
+A catalogue that answers `None` and stops is asking the caller to
+guess whether the material has no such property, whether the book
+measured it and printed a dash, or whether the cell holds something
+that is not a number. Each of those is a different answer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** What the page had in that cell, or the empty string when the field is not missing at all. A field the page has no column for and this library cannot derive, because the cells it would need are themselves a range, answers that it does not follow.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
 ## PUBLISHED_PREDICTED_SCATTERING
 

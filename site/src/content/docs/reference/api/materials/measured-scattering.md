@@ -131,19 +131,26 @@ ScatteringCoefficientSpectrum(
 )
 ```
 
-One surface of a published table, with its coefficient in each band.
+One measured surface of a published table, band by band.
 
 The geometry is part of `name`, as the page prints
-it, and the family it belongs to is
-`group`: pulling `h` and `L` into fields would
-mean deciding what the height of a randomly arranged array of blocks is,
-and the pages do not agree on which letters they use.
+it, and the family it belongs to is `group`: pulling
+`h` and `L` into fields would mean deciding what the height of a
+randomly arranged array of blocks is, and the pages do not agree on which
+letters they use.
+
+The band fields and the reading method come from
+`ScatteringBands`,
+which a computed row carries too. What this class says, and what its name
+is for, is that the numbers were measured. It does not inherit from the
+predicted class and the predicted class does not inherit from it, so a
+caller narrowing on the type gets a straight answer.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
-| `scattering_coefficient_100` | Random incidence scattering coefficient in the 100 Hz one-third octave band, dimensionless, as printed. |
+| `scattering_coefficient_100` | Scattering coefficient in the 100 Hz one-third octave band, dimensionless, as printed. `None` where the table prints nothing there, which is not the same as zero: a zero is a surface that sends every ray back along the specular direction. |
 | `scattering_coefficient_125` | The same in the 125 Hz band. |
 | `scattering_coefficient_160` | The same in the 160 Hz band. |
 | `scattering_coefficient_200` | The same in the 200 Hz band. |
@@ -267,13 +274,13 @@ The coefficient in one band, or a refusal that says what the page had.
 | :--- | :--- |
 | `band_hz` | A one-third octave centre frequency from [`SCATTERING_BANDS_HZ`](/phonometry/reference/api/materials/measured-scattering/#scattering_bands_hz). |
 
-**Returns:** The printed scattering coefficient, dimensionless.
+**Returns:** The scattering coefficient, dimensionless.
 
 **Raises**
 
 | Exception | When |
 | :--- | :--- |
-| ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
+| ValueError | when the table has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
 
 ### ScatteringCoefficientSpectrum.spectrum()
 

@@ -462,7 +462,8 @@
    "scattering_coefficient_2000": 0.82,
    "scattering_coefficient_2500": 0.74,
    "scattering_coefficient_3150": 0.65,
-   "scattering_coefficient_4000": 0.48
+   "scattering_coefficient_4000": 0.48,
+   "note": "The page prints this surface twice on one page: it closes the height series of the group and opens the spacing series, with the same thirteen values both times, because it is the reference of both comparisons."
   },
   {
    "key": "rectangular_cross_section_batt_h_4_cm_l_20_cm_w_15_cm",

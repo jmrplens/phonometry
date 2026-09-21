@@ -630,6 +630,13 @@ def rows(
             # say it, so the row carries it and the component gives it a
             # column of its own.
             "per": getattr(row, "per", ""),
+            # Which solver produced a predicted row, or which model a fluid
+            # state was closed with. It is text and not a quantity, so it
+            # never goes through the cell formatter, and it has a column of
+            # its own because a reader has to see it before using the number:
+            # a coefficient a boundary element model computed and one a
+            # reverberation room measured are not the same evidence.
+            "model": getattr(row, "model", ""),
             "source": row.source,
             "note": row.note,
             "attributedTo": dict(row.attributed_to),

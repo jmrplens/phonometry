@@ -89,6 +89,7 @@ const copy = {
 		conditions: 'Conditions',
 		mounting: 'Mount',
 		per: 'Per',
+		solver: 'Computed with',
 		fixedBy: 'What fixes it',
 		source: 'Source',
 		rows: (n: number) => `${n} rows`,
@@ -127,6 +128,7 @@ const copy = {
 		conditions: 'Condiciones',
 		mounting: 'Montaje',
 		per: 'Por',
+		solver: 'Calculado con',
 		fixedBy: 'Qué lo fija',
 		source: 'Fuente',
 		rows: (n: number) => `${n} filas`,
@@ -208,6 +210,11 @@ const showsMounting = data.rows.some((row: { mounting?: string }) => row.mountin
    and the air is per cubic metre of air, and both are printed in the same
    column of square metres, so the heading alone would read as if a cubic
    metre of air absorbed 0,003 m² of nothing in particular. */
+/* Which solver produced a row, where a catalogue has rows that were
+   computed. It is not decoration: a coefficient a boundary element model
+   produced and one a reverberation room measured are the same number and
+   not the same evidence, and the reader has to see which before using it. */
+const showsModel = section !== 'fluids' && data.rows.some((row) => row.model);
 const showsPer = data.rows.some((row: { per?: string }) => row.per);
 ---
 
@@ -239,6 +246,7 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 					<th scope="col">{rowHeading}</th>
 					{showsMounting && <th scope="col">{copy.mounting}</th>}
 					{showsPer && <th scope="col">{copy.per}</th>}
+					{showsModel && <th scope="col">{copy.solver}</th>}
 					{section === 'fluids' && <th scope="col">{copy.conditions}</th>}
 					{
 						data.columns.map((column) => (
@@ -275,6 +283,11 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 							{showsPer && (
 								<td class="per" data-label={copy.per} data-empty={row.per ? undefined : true}>
 									<span class="wrap">{row.per}</span>
+								</td>
+							)}
+							{showsModel && (
+								<td class="model" data-label={copy.solver} data-empty={row.model ? undefined : true}>
+									<span class="wrap">{row.model}</span>
 								</td>
 							)}
 							{section === 'fluids' && (
@@ -553,6 +566,16 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 
 	.per .wrap {
 		max-width: 22ch;
+	}
+
+	/* Long enough for "three-dimensional boundary element prediction" to
+	   wrap onto two lines rather than stretch the table. */
+	.model {
+		min-width: 16ch;
+	}
+
+	.model .wrap {
+		max-width: 24ch;
 	}
 
 	.conditions {

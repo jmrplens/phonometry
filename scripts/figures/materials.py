@@ -4375,3 +4375,140 @@ def generate_graded_slit_absorber(output_dir: str) -> None:
     plt.tight_layout()
     save_figure(output_dir, "graded_slit_absorber.svg")
     plt.close()
+
+
+def generate_published_scattering_agreement(output_dir: str) -> None:
+    """The same battens measured by two teams and computed by a solver."""
+    print("Generating published_scattering_agreement.png...")
+    from phonometry import materials
+
+    # One geometry, three published numbers. Cox's Appendix D prints battens
+    # 10 cm high and 10 cm wide on a 20 cm period twice, measured to
+    # ISO 17497-1 by two different teams, and his Table C.2 computes the same
+    # geometry with a three-dimensional boundary element model. Nothing here
+    # is fitted or chosen: the three rows are read straight out of the
+    # catalogues, which is the point of the figure.
+    measured = [
+        row
+        for key, row in materials.PUBLISHED_SCATTERING.items()
+        if "periodic_1d_battens_h_w_10_cm" in key
+    ]
+    computed = next(
+        row
+        for row in materials.PUBLISHED_PREDICTED_SCATTERING.values()
+        if row.table == "cox-2017-table-c2"
+        and row.name == "h = 10 cm, L = 20 cm, w = 10 cm"
+    )
+
+    fig, ax = plt.subplots(figsize=(10, 5.6))
+    styles = (
+        (COLOR_PRIMARY, "o", "Measured, team 1 (ISO 17497-1)"),
+        (COLOR_SECONDARY, "s", "Measured, team 2 (ISO 17497-1)"),
+    )
+    for row, (colour, marker, label) in zip(measured, styles, strict=True):
+        spectrum = row.spectrum()
+        ax.semilogx(
+            list(spectrum),
+            list(spectrum.values()),
+            color=colour,
+            linewidth=1.9,
+            marker=marker,
+            markersize=5,
+            zorder=3,
+            label=label,
+        )
+    predicted = computed.spectrum()
+    ax.semilogx(
+        list(predicted),
+        list(predicted.values()),
+        color=COLOR_TERTIARY,
+        linewidth=1.9,
+        linestyle="--",
+        marker="^",
+        markersize=5,
+        zorder=3,
+        label="Computed, 3D boundary element model",
+    )
+
+    ax.set_xlabel(LABEL_FREQ_HZ)
+    ax.set_ylabel("Scattering coefficient")
+    ax.set_title("One surface, two laboratories and a solver", pad=12)
+    ax.set_ylim(0.0, 1.0)
+    format_frequency_axis(ax, 100.0, 5000.0, language=_LANG)
+    ax.legend(loc="upper left", fontsize=9)
+    ax.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax.set_axisbelow(True)
+    save_figure(output_dir, "published_scattering_agreement.png")
+
+
+def generate_published_diffusion_arrays(output_dir: str) -> None:
+    """What an array does that one device does not, and what depth does."""
+    print("Generating published_diffusion_arrays.png...")
+    from phonometry import materials
+
+    def _random(name: str) -> dict[int, float]:
+        row = next(
+            row
+            for row in materials.PUBLISHED_DIFFUSION.values()
+            if row.name == name and row.variant == "random"
+        )
+        return row.spectrum()
+
+    fig, (ax_n, ax_d) = plt.subplots(2, 1, figsize=(10, 8.2), sharex=True)
+
+    # Cox's Appendix B walks one semicylinder up to twelve of the same
+    # semicylinder. The single device scores high because a lone object
+    # scatters in every direction; the array scores low because it is periodic,
+    # and periodicity concentrates the energy into grating lobes.
+    for name, colour, marker, label in (
+        ("1 period, 0.61 cm wide", COLOR_PRIMARY, "o", "1 semicylinder"),
+        ("2 periods, 1.22 m wide", COLOR_SECONDARY, "s", "2 semicylinders"),
+        ("6 periods, 3.66 m wide", COLOR_TERTIARY, "^", "6 semicylinders"),
+        ("12 periods, 7.32 m wide", COLOR_MUTED, "d", "12 semicylinders"),
+    ):
+        spectrum = _random(name)
+        ax_n.semilogx(
+            list(spectrum),
+            list(spectrum.values()),
+            color=colour,
+            linewidth=1.9,
+            marker=marker,
+            markersize=5,
+            zorder=3,
+            label=label,
+        )
+    ax_n.set_ylabel("Normalised diffusion coefficient")
+    ax_n.set_title("An array is not one device repeated", pad=12)
+    ax_n.set_ylim(0.0, 1.0)
+    ax_n.legend(loc="upper left", fontsize=9, ncol=2)
+    ax_n.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_n.set_axisbelow(True)
+
+    # And six semiellipses of one width, deepened from 1 cm to 30 cm: the
+    # coefficient climbs and the climb starts lower as the relief grows.
+    for name, colour, marker, label in (
+        ("1 cm deep", COLOR_PRIMARY, "o", "1 cm deep"),
+        ("5 cm deep", COLOR_SECONDARY, "s", "5 cm deep"),
+        ("10 cm deep", COLOR_TERTIARY, "^", "10 cm deep"),
+        ("30 cm deep (semicylinders)", COLOR_MUTED, "d", "30 cm deep"),
+    ):
+        spectrum = _random(name)
+        ax_d.semilogx(
+            list(spectrum),
+            list(spectrum.values()),
+            color=colour,
+            linewidth=1.9,
+            marker=marker,
+            markersize=5,
+            zorder=3,
+            label=label,
+        )
+    ax_d.set_xlabel(LABEL_FREQ_HZ)
+    ax_d.set_ylabel("Normalised diffusion coefficient")
+    ax_d.set_title("Six semiellipses, one width, four depths", pad=12)
+    ax_d.set_ylim(0.0, 1.0)
+    format_frequency_axis(ax_d, 100.0, 5000.0, language=_LANG)
+    ax_d.legend(loc="upper left", fontsize=9, ncol=2)
+    ax_d.grid(axis="y", color=COLOR_GRID, linestyle="--", alpha=0.5)
+    ax_d.set_axisbelow(True)
+    save_figure(output_dir, "published_diffusion_arrays.png")

@@ -10,8 +10,9 @@ the specular direction. The **diffusion coefficient** $d$ (ISO 17497-2) is
 measured on a free-field goniometer and grades spatial quality: how evenly the
 reflected energy covers a polar arc of receivers. This guide covers both
 measurements, the prediction of the diffusion coefficient from a Schroeder
-diffuser design before a sample is built, and the recurring confusion between
-the two coefficients.
+diffuser design before a sample is built, the published tables to reach for
+when no room is available, and the recurring confusion between the two
+coefficients.
 
 The two coefficients answer different questions and are not interchangeable:
 scattering is *how much* energy leaves the specular direction; diffusion is
@@ -551,6 +552,92 @@ plt.show()
 ```
 
 </details>
+
+## 4. Published values, when the room is not yours
+
+Sections 1 and 2 assume you can measure, and section 3 assumes the surface is a
+Schroeder diffuser you are designing yourself. Neither holds in the usual case:
+the reverberation room with a turntable in it belongs to somebody else, the
+goniometer arc even more so, and the number is needed this afternoon for a
+surface that already exists and is not a Schroeder diffuser. Cox & D'Antonio
+print three appendices of diffuser values for exactly that, B, C and D, and
+this library holds them row by row, with the page each one was read from.
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_diffusion_arrays_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_diffusion_arrays.svg" alt="Two stacked panels of normalised diffusion coefficient against one-third octave band from 100 Hz to 5 kHz, both at random incidence. Above, the same semicylinder in arrays of one, two, six and twelve periods: the single device climbs to 0.87 while twelve of it reach only 0.70, and the six and twelve period arrays stay near zero below 200 Hz. Below, six semiellipses of one width at four depths from 1 cm to 30 cm: the shallowest stays flat near zero across the whole range and the deepest climbs to 0.65 at 5 kHz" width="88%"></picture>
+
+The upper panel is the argument the first section of Appendix B exists to
+make, and no formula in the book makes it: one semicylinder scores 0.77 at
+1 kHz at random incidence, and twelve of the same semicylinder score 0.22. A
+lone object scatters into every direction because it has nothing to interfere
+with; a periodic array of it concentrates the energy into grating lobes, and
+the diffusion coefficient falls accordingly. Reading a single device's polar
+response and scaling it up gets this wrong by a factor of three. The lower
+panel is the other axis of the same appendix: six semiellipses of one width,
+deepened from 1 cm to 30 cm, where the shallowest is acoustically flat as far
+as 5 kHz is concerned and the deepest is diffusing over most of the range.
+
+### What a published value is worth
+
+<picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_scattering_agreement_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_scattering_agreement.svg" alt="Scattering coefficient against one-third octave band from 100 Hz to 5 kHz for one geometry, battens 10 cm high and 10 cm wide on a 20 cm period: two measured curves from different laboratories and one computed with a three-dimensional boundary element model. The three agree below 250 Hz and above 2 kHz, and between 400 Hz and 1 kHz the two measurements differ from each other by up to 0.2 while the computed curve runs below both" width="88%"></picture>
+
+One geometry, three published numbers, and nothing chosen to make a point:
+Appendix D prints battens 10 cm high and 10 cm wide on a 20 cm period twice,
+measured to ISO 17497-1 by two different teams, and Table C.2 computes the
+same geometry with a boundary element model. Between 400 Hz and 1 kHz the two
+*measurements* differ from each other by up to 0.2, which is the width of the
+method and not anybody's mistake, and the computed curve runs below both.
+Above 2 kHz all three converge.
+
+That is what a row from these tables is: a value of the right order with a
+spread of its own, useful to start a simulation, to sanity-check a
+measurement, or to choose between two surface families. It is not a
+specification, and a project that turns on the difference between 0.25 and
+0.45 at 1 kHz needs its own measurement.
+
+### Measured and computed are two catalogues
+
+The library keeps them apart, with a class each and no key in common, because
+a coefficient a solver produced and one a reverberation room produced are the
+same number and not the same evidence:
+
+```python
+from phonometry import materials
+
+# Measured under ISO 17497-1: forty-six surfaces, each credited to its paper.
+battens = materials.scattering_named("Periodic 1D battens")
+for row in battens:
+    print(row.name, row.spectrum()[1000], row.attributed_to["row"][:24])
+
+# Computed: a hundred and nineteen rows, each naming its solver.
+predicted = materials.PUBLISHED_PREDICTED_SCATTERING[
+    "cox-2017-table-c2/rectangular_cross_section_batt_h_10_cm_l_20_cm_w_10_cm"
+]
+print(predicted.model)
+print(predicted.scattering_coefficient(1000))
+```
+
+`PUBLISHED_DIFFUSION` holds the diffusion coefficients of Appendix B the same
+way, three rows per surface because the page prints one line per angle of
+incidence. Its random incidence row carries no angle at all: it is an
+arithmetic mean over ten angles, without the weighting a measurement to
+ISO 17497-2 would apply, and asking it for the angle says so rather than
+answering zero, which is what the normal incidence row of the same surface
+means.
+
+Every row refuses rather than inventing. A band the page left empty is not a
+zero, and for a scattering coefficient a zero is a surface that sends every
+ray back along the specular direction:
+
+```python
+row = materials.PUBLISHED_SCATTERING[
+    "cox-2017-appendix-d/periodic_1d_battens_h_w_10_cm_l_2h_sakuma"
+]
+print(row.why_missing("scattering_coefficient_5000"))
+```
+
+The whole of all three tables is on the
+[published catalogues page](https://jmrplens.github.io/phonometry/reference/catalogues/),
+filterable and with the source of every row.
 
 ## Scattering or diffusion? Two coefficients, two jobs
 

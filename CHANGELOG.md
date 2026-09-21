@@ -68,6 +68,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Seven of the printed rows are a label whose variants follow underneath, so
   "draped to 1/2 area" is three rows under three different drapes rather than
   one row that overwrites two.
+- **The diffusers guide says what to do when the room is not yours.**
+  The three scattering and diffusion catalogues went in without a line of
+  prose to say when a published table beats a measurement, which for a reader
+  is the same as not having them. The guide now has a fourth section, after
+  the two it spends teaching how to measure, and two figures drawn from the
+  catalogues themselves. One is the argument Cox's Appendix B exists to make
+  and no formula in the book makes: a single semicylinder scores 0.77 at 1 kHz
+  at random incidence and twelve of the same semicylinder score 0.22, because
+  a lone object has nothing to interfere with and a periodic array sends the
+  energy into grating lobes. The other is the one geometry that appears both
+  measured and computed, battens 10 cm high on a 20 cm period: between 400 Hz
+  and 1 kHz the two laboratories differ from each other by up to 0.2 and the
+  boundary element curve runs below both, and above 2 kHz all three converge.
+  That is what a row of these tables is worth, and it says it better than a
+  paragraph about representative values.
 - **The same coefficient computed rather than measured, in a catalogue of its own.**
   `materials.diffusers.PUBLISHED_PREDICTED_SCATTERING` holds the three tables
   of Cox & D'Antonio 3e Appendix C: a hundred and nineteen rows of correlation

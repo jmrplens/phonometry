@@ -6555,7 +6555,8 @@ in the same order.
   identify its rows; this one does not.
 - **Evidence:** both pages read at six times magnification. The labels are
   character for character the same, the continuation lines are the same, and
-  the values differ in fourteen of the eighteen bands. The block's own
+  the values differ in thirteen of the eighteen bands, agreeing only at 100,
+  125, 160, 200 and 4000 Hz. The block's own
   structure is what makes the reading plain: the table pairs a plain surface
   with a modified one, and printed page 499 pairs $L = b = 2h$ with its
   modified version. Printed page 500 opens with $L = b = h$, so its second row

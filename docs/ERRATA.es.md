@@ -6975,7 +6975,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
   valores medidos tiene que identificar sus filas, y esta no lo hace.
 - **Evidencia:** las dos páginas leídas a seis aumentos. Las etiquetas son
   carácter por carácter la misma, las líneas de continuación también, y los
-  valores difieren en catorce de las dieciocho bandas. La estructura del propio
+  valores difieren en trece de las dieciocho bandas, y sólo coinciden en 100,
+  125, 160, 200 y 4000 Hz. La estructura del propio
   bloque es lo que hace evidente la lectura: la tabla empareja una superficie
   sin modificar con su versión modificada, y la página impresa 499 empareja
   $L = b = 2h$ con la suya. La página impresa 500 abre con $L = b = h$, así que

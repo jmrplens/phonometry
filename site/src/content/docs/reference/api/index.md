@@ -190,6 +190,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`materials.diffusers.metadiffuser`](/phonometry/reference/api/materials/metadiffuser/) | Metadiffusers: deep-subwavelength Schroeder-like sound diffusers. |
 | [`materials.diffusers.measured_scattering`](/phonometry/reference/api/materials/measured-scattering/) | Scattering coefficients as the books print them, one row per surface. |
 | [`materials.diffusers.predicted_diffusion`](/phonometry/reference/api/materials/predicted-diffusion/) | Normalized diffusion coefficients as a book computes them, one row per angle. |
+| [`materials.diffusers.predicted_scattering`](/phonometry/reference/api/materials/predicted-scattering/) | Scattering coefficients a book computed, kept apart from the ones measured. |
 | [`materials.surfaces.road_absorption`](/phonometry/reference/api/materials/road-absorption/) | In-situ sound absorption of road surfaces (ISO 13472-1 / ISO 13472-2). |
 
 ## Vibration and structure-borne sound

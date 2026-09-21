@@ -68,6 +68,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Seven of the printed rows are a label whose variants follow underneath, so
   "draped to 1/2 area" is three rows under three different drapes rather than
   one row that overwrites two.
+- **The same coefficient computed rather than measured, in a catalogue of its own.**
+  `materials.diffusers.PUBLISHED_PREDICTED_SCATTERING` holds the three tables
+  of Cox & D'Antonio 3e Appendix C: a hundred and nineteen rows of correlation
+  scattering coefficients from boundary element predictions. Two of them are
+  three-dimensional, at normal and at random incidence, over the bands from
+  250 Hz upward because the book says the coefficient below that should be
+  taken as zero and prints nothing there; the third is two-dimensional, covers
+  100 Hz to 5 kHz, and prints three lines per surface at 0, 56.9 and random
+  incidence. They are kept apart from the measured `PUBLISHED_SCATTERING`
+  rather than merged into it, with a class of their own and no key in common,
+  because a number a solver produced and a number a reverberation room
+  produced are not interchangeable and a caller who mixed them would have no
+  way of finding out. `PredictedScatteringSpectrum.model` says which solver,
+  row by row. The two three-dimensional tables carry the source line the
+  appendix prints under each, resolved to Lee and Sakuma (2015), and the
+  book's own warnings, that the coefficient reads absorption as scattering and
+  a redirection as a dispersion, are quoted in the `about` of the table they
+  belong to. Read twice from the pages: 1942 cells, no difference.
 - **Diffusion coefficients, which are not scattering coefficients.**
   `materials.diffusers.PUBLISHED_DIFFUSION` holds the twenty-nine surfaces of
   Cox & D'Antonio 3e Appendix B at the three angles of incidence the page

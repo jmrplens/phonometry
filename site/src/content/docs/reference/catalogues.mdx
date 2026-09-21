@@ -231,6 +231,28 @@ the normal incidence row's meaning.
 
 <Catalogues catalogue="diffusion" lang="en" />
 
+## Predicted scattering coefficients
+
+The same quantity as the table above and not the same kind of number: these
+were computed with a boundary element model, and the two are separate
+catalogues so that a row cannot travel from one to the other unnoticed.
+
+Cox prints three of them. Two are three-dimensional predictions of 3 m by 3 m
+single-plane diffusers, at normal and at random incidence, over the bands from
+250 Hz upward, because the book says the coefficient below that should be
+taken as zero and prints nothing there. The third is two-dimensional, runs the
+whole range, and prints three lines per surface at 0, 56.9 and random
+incidence. Each row says which solver produced it.
+
+The book is unusually frank about what they are worth, and the notes on each
+table quote it: the coefficient reads absorption as scattering, so the
+formulation needs revising for a surface that absorbs; the random incidence
+values of the two-dimensional table run high at low frequencies; and the
+coefficient reads a redirection as a dispersion, so a 45 degree triangle that
+sends a strong reflection straight back scores as if it had scattered.
+
+<Catalogues catalogue="predictedScattering" lang="en" />
+
 ## Ground surfaces
 
 The effective flow resistivity every outdoor propagation model asks the ground

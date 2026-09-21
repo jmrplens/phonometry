@@ -57,6 +57,7 @@ from phonometry.materials.absorbers.porous import PUBLISHED_AIR  # noqa: E402
 from phonometry.materials.diffusers import (  # noqa: E402
     DIFFUSION_BANDS_HZ,
     PUBLISHED_DIFFUSION,
+    PUBLISHED_PREDICTED_SCATTERING,
     PUBLISHED_SCATTERING,
     SCATTERING_BANDS_HZ,
 )
@@ -228,6 +229,13 @@ DIFFUSION_COLUMNS = (
         )
         for band in DIFFUSION_BANDS_HZ
     ),
+)
+
+#: The predicted tables add the angle they were computed at and the solver
+#: that computed them, which is what a reader has to see before using a row.
+PREDICTED_SCATTERING_COLUMNS = (
+    ("angle_of_incidence_deg", "Angle of incidence", "Ángulo de incidencia", "°"),
+    *SCATTERING_COLUMNS,
 )
 
 GAS_COLUMNS = (
@@ -822,6 +830,9 @@ def render() -> str:
         ),
         "scattering": section(PUBLISHED_SCATTERING, SCATTERING_COLUMNS),
         "diffusion": section(PUBLISHED_DIFFUSION, DIFFUSION_COLUMNS),
+        "predictedScattering": section(
+            PUBLISHED_PREDICTED_SCATTERING, PREDICTED_SCATTERING_COLUMNS
+        ),
         "absorptionAreas": section(PUBLISHED_ABSORPTION_AREAS, ABSORPTION_AREA_COLUMNS),
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
@@ -869,6 +880,7 @@ def main(argv: list[str] | None = None) -> int:
         "transmission loss": len(PUBLISHED_TRANSMISSION_LOSS),
         "scattering": len(PUBLISHED_SCATTERING),
         "diffusion": len(PUBLISHED_DIFFUSION),
+        "predicted scattering": len(PUBLISHED_PREDICTED_SCATTERING),
         "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }

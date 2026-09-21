@@ -192,6 +192,7 @@ export const apiSections = {
       'reference/api/materials/metadiffuser',
       'reference/api/materials/measured-scattering',
       'reference/api/materials/predicted-diffusion',
+      'reference/api/materials/predicted-scattering',
       'reference/api/materials/road-absorption',
     ],
   },

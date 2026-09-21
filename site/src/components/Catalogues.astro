@@ -53,6 +53,7 @@ interface Props {
 		| 'transmissionLoss'
 		| 'scattering'
 		| 'diffusion'
+		| 'predictedScattering'
 		| 'fluids';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
@@ -175,7 +176,7 @@ const rowHeading =
 					? copy.finish
 					: section === 'transmissionLoss'
 						? copy.partition
-						: section === 'scattering' || section === 'diffusion'
+						: ['scattering', 'diffusion', 'predictedScattering'].includes(section)
 							? copy.surface
 							: copy.material;
 

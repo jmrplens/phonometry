@@ -237,6 +237,29 @@ devolvería el significado de la fila de incidencia normal.
 
 <Catalogues catalogue="diffusion" lang="es" />
 
+## Coeficientes de dispersión calculados
+
+La misma magnitud que la tabla de arriba y no la misma clase de número: estos
+se calcularon con un modelo de elementos de contorno, y son dos catálogos
+separados para que una fila no pueda pasar de uno a otro sin que se note.
+
+Cox imprime tres. Dos son predicciones en tres dimensiones de difusores de un
+solo plano de 3 m por 3 m, a incidencia normal y aleatoria, desde la banda de
+250 Hz hacia arriba, porque el libro dice que por debajo el coeficiente se
+tome como cero y no imprime nada ahí. La tercera es en dos dimensiones, cubre
+todo el rango e imprime tres líneas por superficie, a 0, 56,9 y aleatoria.
+Cada fila dice con qué solver se obtuvo.
+
+El libro es inusualmente franco sobre lo que valen, y las notas de cada tabla
+lo citan: el coeficiente lee la absorción como dispersión, así que la
+formulación hay que revisarla para una superficie que absorbe; los valores de
+incidencia aleatoria de la tabla en dos dimensiones salen altos a baja
+frecuencia; y el coeficiente lee una redirección como una dispersión, así que
+un triángulo de 45 grados que devuelve una reflexión fuerte hacia la fuente
+puntúa como si hubiera dispersado.
+
+<Catalogues catalogue="predictedScattering" lang="es" />
+
 ## Superficies de suelo
 
 La resistividad al flujo efectiva que todo modelo de propagación exterior le

@@ -46,6 +46,21 @@ _LANG = "en"
 _LANG_SUFFIX = ""
 
 _ES_EXACT = {
+    "One surface, two laboratories and a solver": "Una superficie, dos laboratorios y un solver",
+    "Measured, team 1 (ISO 17497-1)": "Medido, equipo 1 (ISO 17497-1)",
+    "Measured, team 2 (ISO 17497-1)": "Medido, equipo 2 (ISO 17497-1)",
+    "Computed, 3D boundary element model": "Calculado, modelo de elementos de contorno 3D",
+    "Scattering coefficient": "Coeficiente de dispersión",
+    "An array is not one device repeated": "Una batería no es un dispositivo repetido",
+    "Six semiellipses, one width, four depths": "Seis semielipses, una anchura, cuatro profundidades",
+    "1 period": "1 periodo",
+    "2 periods": "2 periodos",
+    "6 periods": "6 periodos",
+    "12 periods": "12 periodos",
+    "1 cm deep": "1 cm de profundidad",
+    "5 cm deep": "5 cm de profundidad",
+    "10 cm deep": "10 cm de profundidad",
+    "30 cm deep": "30 cm de profundidad",
     # VDI 2081 Section 6.3, the sudden change of duct section (Figure 26).
     "Symmetric in the Ratio, and Capped at 5 dB": "Simétrica en la razón, y topada en 5 dB",
     "Reflection loss (dB)": "Pérdida por reflexión (dB)",

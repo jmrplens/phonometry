@@ -1160,6 +1160,94 @@ plt.show()
 
 <span id="dispersion-o-difusion"></span>
 
+## 4. Valores publicados, cuando la cámara no es tuya
+
+Las tres secciones de arriba dan por hecho que puedes medir. Casi nunca
+puedes: la cámara reverberante con un plato giratorio dentro es de otro, el
+arco del goniómetro más todavía, y el número hace falta esta tarde para una
+superficie que ya está construida. Cox y D'Antonio imprimen cuatro apéndices
+de valores justo para eso, y esta biblioteca los guarda fila a fila, con la
+página de la que se leyó cada una.
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_diffusion_arrays.svg" alt="Dos paneles apilados del coeficiente de difusión normalizado frente a la banda de tercio de octava de 100 Hz a 5 kHz, los dos a incidencia aleatoria. Arriba, el mismo semicilindro en baterías de uno, dos, seis y doce periodos: el dispositivo suelto sube hasta 0,87 mientras que doce de él sólo llegan a 0,70, y las baterías de seis y doce periodos se quedan cerca de cero por debajo de 200 Hz. Abajo, seis semielipses de una misma anchura a cuatro profundidades de 1 cm a 30 cm: la más somera se queda plana cerca de cero en todo el rango y la más profunda sube a 0,65 en 5 kHz" width="88%" />
+
+El panel de arriba es el argumento para el que existe la primera sección del
+Apéndice B, y ninguna fórmula del libro lo da: un semicilindro puntúa 0,77 en
+1 kHz a incidencia aleatoria, y doce del mismo semicilindro puntúan 0,22. Un
+objeto solo dispersa en todas las direcciones porque no tiene con qué
+interferir; una batería periódica de ese mismo objeto concentra la energía en
+lóbulos de difracción, y el coeficiente de difusión cae en consecuencia. Leer
+la respuesta polar de un dispositivo suelto y escalarla se equivoca por un
+factor de tres. El panel de abajo es el otro eje del mismo apéndice: seis
+semielipses de una anchura, ahondadas de 1 cm a 30 cm, donde la más somera es
+acústicamente plana hasta 5 kHz y la más profunda difunde en casi todo el
+rango.
+
+### Lo que vale un valor publicado
+
+<ThemeImage src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_scattering_agreement.svg" alt="Coeficiente de dispersión frente a la banda de tercio de octava de 100 Hz a 5 kHz para una sola geometría, listones de 10 cm de alto y 10 cm de ancho sobre un periodo de 20 cm: dos curvas medidas en laboratorios distintos y una calculada con un modelo de elementos de contorno en tres dimensiones. Las tres coinciden por debajo de 250 Hz y por encima de 2 kHz, y entre 400 Hz y 1 kHz las dos medidas difieren entre sí hasta en 0,2 mientras la curva calculada va por debajo de las dos" width="88%" />
+
+Una geometría, tres números publicados, y nada elegido para que cuadre: el
+Apéndice D imprime dos veces unos listones de 10 cm de alto y 10 cm de ancho
+sobre un periodo de 20 cm, medidos según la ISO 17497-1 por dos equipos
+distintos, y la Tabla C.2 calcula esa misma geometría con un modelo de
+elementos de contorno. Entre 400 Hz y 1 kHz las dos *medidas* difieren entre
+sí hasta en 0,2, que es lo ancho que es el método y no el error de nadie, y la
+curva calculada va por debajo de las dos. Por encima de 2 kHz las tres
+convergen.
+
+Eso es lo que es una fila de estas tablas: un valor del orden correcto con su
+propia dispersión, útil para arrancar una simulación, para contrastar una
+medida o para elegir entre dos familias de superficie. No es una
+especificación, y un proyecto que dependa de la diferencia entre 0,25 y 0,45
+en 1 kHz necesita su propia medida.
+
+### Medido y calculado son dos catálogos
+
+La biblioteca los mantiene separados, con una clase cada uno y sin ninguna
+clave en común, porque un coeficiente que produjo un solver y uno que produjo
+una cámara reverberante son el mismo número y no la misma evidencia:
+
+```python
+from phonometry import materials
+
+# Medido según la ISO 17497-1: cuarenta y seis superficies, cada una
+# acreditada a su artículo.
+battens = materials.scattering_named("Periodic 1D battens")
+for row in battens:
+    print(row.name, row.spectrum()[1000], row.attributed_to["row"][:24])
+
+# Calculado: ciento diecinueve filas, cada una nombrando su solver.
+predicted = materials.PUBLISHED_PREDICTED_SCATTERING[
+    "cox-2017-table-c2/rectangular_cross_section_batt_h_10_cm_l_20_cm_w_10_cm"
+]
+print(predicted.model)
+print(predicted.scattering_coefficient(1000))
+```
+
+`PUBLISHED_DIFFUSION` guarda igual los coeficientes de difusión del Apéndice
+B, tres filas por superficie porque la página imprime una línea por ángulo de
+incidencia. Su fila de incidencia aleatoria no lleva ángulo ninguno: es una
+media aritmética sobre diez ángulos, sin la ponderación que aplicaría una
+medida según la ISO 17497-2, y preguntarle por el ángulo lo dice en vez de
+responder cero, que es lo que significa la fila de incidencia normal de esa
+misma superficie.
+
+Cada fila se niega antes que inventar. Una banda que la página dejó vacía no
+es un cero, y para un coeficiente de dispersión un cero es una superficie que
+devuelve todos los rayos por la dirección especular:
+
+```python
+row = materials.PUBLISHED_SCATTERING[
+    "cox-2017-appendix-d/periodic_1d_battens_h_w_10_cm_l_2h_sakuma"
+]
+print(row.why_missing("scattering_coefficient_5000"))
+```
+
+Las tres tablas enteras están en la
+[página de catálogos publicados](/phonometry/es/reference/catalogues/), con
+filtro y con la fuente de cada fila.
+
 ## ¿Dispersión o difusión? Dos coeficientes, dos trabajos
 
 Los dos coeficientes anteriores se tratan de forma rutinaria como
@@ -1226,7 +1314,7 @@ direccional y de incidencia aleatoria de la ISO 17497-2:2012 (Fórmulas (5) a
 (`materials.quadratic_residue_sequence`, `materials.qrd_well_depths`) con el
 modelo de predicción de difusor de Fraunhofer de Cox y D'Antonio
 (`materials.predict_diffuser_polar_response`,
-`materials.predicted_diffusion_spectrum`).
+`materials.predicted_diffusion_spectrum`). Los valores publicados de la sección 4 salen de los Apéndices B y D y de las Tablas C.1 a C.3 de Cox y D'Antonio 3e, leídos fila a fila en `materials.PUBLISHED_SCATTERING` (medidos según la ISO 17497-1), `materials.PUBLISHED_DIFFUSION` (calculados siguiendo la ISO 17497-2) y `materials.PUBLISHED_PREDICTED_SCATTERING` (calculados), con `materials.scattering_named`, `materials.diffusion_named` y `materials.predicted_scattering_named` para buscarlos.
 </ScopeClaim>
 
 <ScopeClaim status="not-covered" label="No cubierto">
@@ -1241,6 +1329,8 @@ perfiles entran por los argumentos explícitos `depths` o `reflection`. Los
 paneles en sublongitud de onda profunda cargados con resonadores son el tema
 de la [guía de
 metadifusores](/phonometry/es/materials/diffusers/metadiffusers/).
+
+Las tablas publicadas de la sección 4 son valores representativos con su propia dispersión, no especificaciones: los mismos listones medidos por dos equipos difieren hasta en 0,2, y las filas de elementos de contorno del Apéndice C no se construyeron nunca. Ninguno de los dos conjuntos sustituye a una medida de la superficie que un proyecto use de verdad.
 </ScopeClaim>
 </Scope>
 

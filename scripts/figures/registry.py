@@ -331,6 +331,8 @@ from .materials import (
     generate_porous_absorber_designs,
     generate_porous_medium_model,
     generate_porous_model_comparison,
+    generate_published_diffusion_arrays,
+    generate_published_scattering_agreement,
     generate_qrd_geometry,
     generate_qrd_working_band,
     generate_scattering_coefficient,
@@ -847,6 +849,8 @@ _FIGURE_FUNCS: tuple[Callable[[str], None], ...] = (
     # Scattering/diffusion, in-situ road absorption, precision sound power
     # (ISO 17497-1/-2, ISO 13472-1, ISO 3745 / ISO 9614-3)
     generate_scattering_coefficient,
+    generate_published_scattering_agreement,
+    generate_published_diffusion_arrays,
     generate_diffusion_measurement_chain,
     generate_diffusion_polar,
     generate_diffuser_prediction,

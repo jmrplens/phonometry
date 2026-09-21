@@ -30,6 +30,11 @@ from .predicted_diffusion import (
     NormalizedDiffusionSpectrum,
     diffusion_named,
 )
+from .predicted_scattering import (
+    PUBLISHED_PREDICTED_SCATTERING,
+    PredictedScatteringSpectrum,
+    predicted_scattering_named,
+)
 from .reverberation_room_scattering import (
     BASE_PLATE_BANDS,
     BASE_PLATE_MAX_SCATTERING,
@@ -66,6 +71,7 @@ __all__ = [
     "DEFAULT_POLAR_ANGLES",
     "DIFFUSION_BANDS_HZ",
     "PUBLISHED_DIFFUSION",
+    "PUBLISHED_PREDICTED_SCATTERING",
     "PUBLISHED_SCATTERING",
     "SCATTERING_BANDS_HZ",
     "TWO_DIMENSIONAL_SOURCE_WEIGHTS",
@@ -75,6 +81,7 @@ __all__ = [
     "MetadiffuserResult",
     "MetadiffuserWell",
     "NormalizedDiffusionSpectrum",
+    "PredictedScatteringSpectrum",
     "ScatteringDiffusionWarning",
     "ScatteringCoefficientSpectrum",
     "ScatteringResult",
@@ -93,6 +100,7 @@ __all__ = [
     "metadiffuser_reflection",
     "normalized_diffusion_coefficient",
     "predict_diffuser_polar_response",
+    "predicted_scattering_named",
     "predicted_diffusion_spectrum",
     "qrd_well_depths",
     "quadratic_residue_sequence",

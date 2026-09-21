@@ -57,9 +57,10 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING, ClassVar
+from typing import TYPE_CHECKING
 
-from ..._internal.catalogue import BandedRow, read_table, take
+from ..._internal.catalogue import read_table, take
+from ._scattering import SCATTERING_BANDS_HZ, ScatteringBands
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -71,98 +72,24 @@ __all__ = [
     "scattering_named",
 ]
 
-#: The one-third octave centre frequencies a published scattering table can
-#: print, in hertz. A table prints a subset; the field for a band it does not
-#: print stays ``None`` on every row of it.
-SCATTERING_BANDS_HZ: tuple[int, ...] = (
-    100,
-    125,
-    160,
-    200,
-    250,
-    315,
-    400,
-    500,
-    630,
-    800,
-    1000,
-    1250,
-    1600,
-    2000,
-    2500,
-    3150,
-    4000,
-    5000,
-)
-
 
 @dataclass(frozen=True, kw_only=True)
-class ScatteringCoefficientSpectrum(BandedRow):
-    """One surface of a published table, with its coefficient in each band.
+class ScatteringCoefficientSpectrum(ScatteringBands):
+    """One measured surface of a published table, band by band.
 
     The geometry is part of :attr:`~CatalogueRow.name`, as the page prints
-    it, and the family it belongs to is
-    :attr:`~CatalogueRow.group`: pulling ``h`` and ``L`` into fields would
-    mean deciding what the height of a randomly arranged array of blocks is,
-    and the pages do not agree on which letters they use.
+    it, and the family it belongs to is :attr:`~CatalogueRow.group`: pulling
+    ``h`` and ``L`` into fields would mean deciding what the height of a
+    randomly arranged array of blocks is, and the pages do not agree on which
+    letters they use.
 
-    :ivar scattering_coefficient_100: Random incidence scattering
-        coefficient in the 100 Hz one-third octave band, dimensionless, as
-        printed.
-    :ivar scattering_coefficient_125: The same in the 125 Hz band.
-    :ivar scattering_coefficient_160: The same in the 160 Hz band.
-    :ivar scattering_coefficient_200: The same in the 200 Hz band.
-    :ivar scattering_coefficient_250: The same in the 250 Hz band.
-    :ivar scattering_coefficient_315: The same in the 315 Hz band.
-    :ivar scattering_coefficient_400: The same in the 400 Hz band.
-    :ivar scattering_coefficient_500: The same in the 500 Hz band.
-    :ivar scattering_coefficient_630: The same in the 630 Hz band.
-    :ivar scattering_coefficient_800: The same in the 800 Hz band.
-    :ivar scattering_coefficient_1000: The same in the 1 kHz band.
-    :ivar scattering_coefficient_1250: The same in the 1.25 kHz band.
-    :ivar scattering_coefficient_1600: The same in the 1.6 kHz band.
-    :ivar scattering_coefficient_2000: The same in the 2 kHz band.
-    :ivar scattering_coefficient_2500: The same in the 2.5 kHz band.
-    :ivar scattering_coefficient_3150: The same in the 3.15 kHz band.
-    :ivar scattering_coefficient_4000: The same in the 4 kHz band.
-    :ivar scattering_coefficient_5000: The same in the 5 kHz band.
+    The band fields and the reading method come from
+    :class:`~phonometry.materials.diffusers._scattering.ScatteringBands`,
+    which a computed row carries too. What this class says, and what its name
+    is for, is that the numbers were measured. It does not inherit from the
+    predicted class and the predicted class does not inherit from it, so a
+    caller narrowing on the type gets a straight answer.
     """
-
-    scattering_coefficient_100: float | None = None
-    scattering_coefficient_125: float | None = None
-    scattering_coefficient_160: float | None = None
-    scattering_coefficient_200: float | None = None
-    scattering_coefficient_250: float | None = None
-    scattering_coefficient_315: float | None = None
-    scattering_coefficient_400: float | None = None
-    scattering_coefficient_500: float | None = None
-    scattering_coefficient_630: float | None = None
-    scattering_coefficient_800: float | None = None
-    scattering_coefficient_1000: float | None = None
-    scattering_coefficient_1250: float | None = None
-    scattering_coefficient_1600: float | None = None
-    scattering_coefficient_2000: float | None = None
-    scattering_coefficient_2500: float | None = None
-    scattering_coefficient_3150: float | None = None
-    scattering_coefficient_4000: float | None = None
-    scattering_coefficient_5000: float | None = None
-
-    _bands_hz: ClassVar[tuple[int, ...]] = SCATTERING_BANDS_HZ
-    _band_prefix: ClassVar[str] = "scattering_coefficient_"
-    _band_kind: ClassVar[str] = "a one-third octave"
-    _table_kind: ClassVar[str] = "scattering"
-
-    def scattering_coefficient(self, band_hz: int) -> float:
-        """The coefficient in one band, or a refusal that says what the page had.
-
-        :param band_hz: A one-third octave centre frequency from
-            :data:`SCATTERING_BANDS_HZ`.
-        :return: The printed scattering coefficient, dimensionless.
-        :raises ValueError: when the page has no number in that band, naming
-            the row, the band and what the cell held instead; or when
-            *band_hz* is not a band these tables print.
-        """
-        return self._in_band(band_hz)
 
 
 #: The hedges these tables spell as a set rather than a mapping.

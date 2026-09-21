@@ -264,6 +264,16 @@ SOURCED: dict[tuple[str, str], str] = {
         "ISO 17497-2"
     ),
     (
+        "materials/diffusers/predicted_scattering.py",
+        "PUBLISHED_PREDICTED_SCATTERING",
+    ): (
+        "Cox & D'Antonio 3e Table C.1 and Table C.2, forty rows of "
+        "three-dimensional boundary element predictions at normal and at "
+        "random incidence, credited to Lee and Sakuma (2015); "
+        "Cox & D'Antonio 3e Table C.3, twenty-seven surfaces of "
+        "two-dimensional predictions at three angles of incidence each"
+    ),
+    (
         "materials/absorbers/catalogue.py",
         "PUBLISHED_POROUS",
     ): (

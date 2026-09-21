@@ -57,6 +57,7 @@ from phonometry.materials.absorbers.porous import PUBLISHED_AIR  # noqa: E402
 from phonometry.materials.diffusers import (  # noqa: E402
     DIFFUSION_BANDS_HZ,
     PUBLISHED_DIFFUSION,
+    PUBLISHED_PREDICTED_SCATTERING,
     PUBLISHED_SCATTERING,
     SCATTERING_BANDS_HZ,
 )
@@ -228,6 +229,13 @@ DIFFUSION_COLUMNS = (
         )
         for band in DIFFUSION_BANDS_HZ
     ),
+)
+
+#: The predicted tables add the angle they were computed at and the solver
+#: that computed them, which is what a reader has to see before using a row.
+PREDICTED_SCATTERING_COLUMNS = (
+    ("angle_of_incidence_deg", "Angle of incidence", "Ángulo de incidencia", "°"),
+    *SCATTERING_COLUMNS,
 )
 
 GAS_COLUMNS = (
@@ -622,6 +630,13 @@ def rows(
             # say it, so the row carries it and the component gives it a
             # column of its own.
             "per": getattr(row, "per", ""),
+            # Which solver produced a predicted row, or which model a fluid
+            # state was closed with. It is text and not a quantity, so it
+            # never goes through the cell formatter, and it has a column of
+            # its own because a reader has to see it before using the number:
+            # a coefficient a boundary element model computed and one a
+            # reverberation room measured are not the same evidence.
+            "model": getattr(row, "model", ""),
             "source": row.source,
             "note": row.note,
             "attributedTo": dict(row.attributed_to),
@@ -822,6 +837,9 @@ def render() -> str:
         ),
         "scattering": section(PUBLISHED_SCATTERING, SCATTERING_COLUMNS),
         "diffusion": section(PUBLISHED_DIFFUSION, DIFFUSION_COLUMNS),
+        "predictedScattering": section(
+            PUBLISHED_PREDICTED_SCATTERING, PREDICTED_SCATTERING_COLUMNS
+        ),
         "absorptionAreas": section(PUBLISHED_ABSORPTION_AREAS, ABSORPTION_AREA_COLUMNS),
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
@@ -869,6 +887,7 @@ def main(argv: list[str] | None = None) -> int:
         "transmission loss": len(PUBLISHED_TRANSMISSION_LOSS),
         "scattering": len(PUBLISHED_SCATTERING),
         "diffusion": len(PUBLISHED_DIFFUSION),
+        "predicted scattering": len(PUBLISHED_PREDICTED_SCATTERING),
         "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }

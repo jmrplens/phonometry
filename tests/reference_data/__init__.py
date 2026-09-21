@@ -824,6 +824,11 @@ from .metrology import GUM_WELCH_VEFF as GUM_WELCH_VEFF
 from .metrology import GUMS1_TABLE2_INTERVAL_95 as GUMS1_TABLE2_INTERVAL_95
 from .metrology import GUMS1_TABLE3_INTERVAL_95 as GUMS1_TABLE3_INTERVAL_95
 from .metrology import GUMS1_TABLE3_U as GUMS1_TABLE3_U
+from .predicted_scattering import COX_C1_SCATTERING as COX_C1_SCATTERING
+from .predicted_scattering import COX_C2_SCATTERING as COX_C2_SCATTERING
+from .predicted_scattering import COX_C3_SCATTERING as COX_C3_SCATTERING
+from .predicted_scattering import COX_C_FLAT_BANDS_HZ as COX_C_FLAT_BANDS_HZ
+from .predicted_scattering import COX_C_WIDE_BANDS_HZ as COX_C_WIDE_BANDS_HZ
 from .psychoacoustics import ECMA418_1_DFC_1KHZ as ECMA418_1_DFC_1KHZ
 from .psychoacoustics import ECMA418_1_DFC_500HZ as ECMA418_1_DFC_500HZ
 from .psychoacoustics import ECMA418_1_F1_1KHZ as ECMA418_1_F1_1KHZ

@@ -1,97 +1,76 @@
 ---
-title: "materials.diffusers.measured_scattering"
-description: "Scattering coefficients as the books print them, one row per surface."
+title: "materials.diffusers.predicted_scattering"
+description: "Scattering coefficients a book computed, kept apart from the ones measured."
 sidebar:
-  label: "measured_scattering"
+  label: "predicted_scattering"
 ---
 
-Scattering coefficients as the books print them, one row per surface.
+Scattering coefficients a book computed, kept apart from the ones measured.
 
-A geometric room acoustics model asks for one number per surface per band,
-the scattering coefficient, and has no way of working it out. The rest of
-this subpackage computes it: `.reverberation_room_scattering` runs the
-ISO 17497-1 procedure on four reverberation times, and `.design`
-predicts a polar response from a well sequence. This module holds what other
-people measured, so that a modeller who has neither a turntable nor a
-boundary element solver has somewhere to start, and so that a measurement
-made here has published values to sit beside.
+`.measured_scattering` holds what turntables measured under ISO 17497-1.
+This holds the three tables of Cox & D'Antonio's Appendix C, which are
+boundary element predictions of the correlation scattering coefficient, and
+they are a separate catalogue for one reason: a row that says 0.45 because a
+solver said so and a row that says 0.45 because a reverberation room said so
+are not interchangeable, and a caller who mixes them without meaning to has no
+way of finding out afterwards.
 
-Scattering is not diffusion, and both live here
-------------------------------------------------
-ISO 17497 is two documents and two quantities. Part 1 measures the
-*scattering coefficient*, the fraction of reflected energy that leaves the
-specular direction, from four reverberation times in a room with a turning
-table; it says nothing about where that energy goes. Part 2 measures the
-*diffusion coefficient*, how even the polar response is, and a surface can
-score high on one and low on the other. A catalogue that put them in one
-field would let a caller pass a diffusion coefficient to a model that wants
-a scattering coefficient, which is a silent error, so they are two classes
-and two catalogues: [`PUBLISHED_SCATTERING`](/phonometry/reference/api/materials/measured-scattering/#published_scattering) here, and the diffusion
-coefficients of ISO 17497-2 where they belong.
-
-The band is the field
----------------------
-These tables are set in one-third octave bands, so each band is a field of
-its own, `scattering_coefficient_1000` and so on, with the band's centre
-frequency in hertz as the suffix and no unit because the quantity has none.
-Every hedge of `CatalogueRow` is keyed
-by field name, so a band the page leaves empty says so through
-`why_missing` rather than
-answering zero, and a zero here would read as a perfectly specular surface.
-[`ScatteringCoefficientSpectrum.bands`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumbands) and
-[`spectrum`](/phonometry/reference/api/materials/measured-scattering/#scatteringcoefficientspectrumspectrum) hand the row back as a
-spectrum for the caller who wants one.
-
-What the numbers are worth
+Three tables, three shapes
 --------------------------
-A row is a surface of that description, measured once, by one team, in one
-room. Cox prints no uncertainty and no laboratory, and the spread between
-teams is not small: the same battens, 10 cm high and 10 cm wide on a 20 cm
-period, appear twice in Appendix D, credited to two different papers, and
-read 0.28 and 0.44 at 630 Hz. Nothing is wrong with either; that is how wide
-the method is. A coefficient above one is likewise not an error but what the
-formula gave, since ISO 17497-1 derives it from a ratio of reverberation
-times and puts no ceiling on the result.
+Table C.1 and Table C.2 are three-dimensional predictions of 3 m by 3 m
+single-plane diffusers, at normal and at random incidence, over the one-third
+octave bands from 250 Hz to 4 kHz; the angle is in the table's title, so every
+row of one carries the same one. Table C.3 is two-dimensional, runs from
+100 Hz to 5 kHz, and prints three lines per surface at 0, 56.9 and random
+incidence, so there the angle is a field that varies inside the table. All
+three are [`PredictedScatteringSpectrum`](/phonometry/reference/api/materials/predicted-scattering/#predictedscatteringspectrum), and
+[`PredictedScatteringSpectrum.model`](/phonometry/reference/api/materials/predicted-scattering/#predictedscatteringspectrum) says which solver produced the row.
 
-The surfaces are described, not named. A row reads `"h = w = 10 cm,
-L = 2h"` and means nothing without the group heading above it, so
-`group` carries that
-heading and [`scattering_named`](/phonometry/reference/api/materials/measured-scattering/#scattering_named) matches on either.
+What the book says these are worth
+-----------------------------------
+More than usual, because the book spends a page on it. The correlation
+scattering coefficient "interprets any absorption as being scattering", so the
+formulation "needs to be revised for surfaces that partially absorb"; the
+random incidence values of the two-dimensional table "tend to have raised
+values at low frequencies"; and the coefficient "does not discriminate between
+different diffusers in a consistent manner", because it reads a redirection as
+a dispersion. Each of those is quoted in the `about` of the table it belongs
+to, with the page. A row here is a modelling result to compare against, not a
+specification.
+
+The summary rows
+----------------
+Each group of Tables C.1 and C.2 closes with a row labelled `"h/L = 20"` or
+`"h/L = 40"`, which cannot be read at face value: every surface of every
+group has L = 20 cm and h between 2 and 10 cm, so the ratio is between 0.1 and
+0.5. Read as a percentage they resolve, and three of the six carry exactly the
+values of a row of their own group, which is how the reading was settled. The
+book explains them nowhere. They are kept as rows, because they are rows.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
-## PUBLISHED_SCATTERING
-
-*Constant* (`mappingproxy`).
-
-## SCATTERING_BANDS_HZ
-
-*Constant* (`tuple`).
+## predicted_scattering_named
 
 ```python
-SCATTERING_BANDS_HZ = (100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000)
+predicted_scattering_named(
+    name: str,
+) -> tuple[PredictedScatteringSpectrum, ...]
 ```
 
-## scattering_named
-
-```python
-scattering_named(name: str) -> tuple[ScatteringCoefficientSpectrum, ...]
-```
-
-Every published row whose description or group contains *name*.
+Every predicted row whose description or heading contains *name*.
 
 **Parameters**
 
 | Name | Description |
 | :--- | :--- |
-| `name` | A fragment of the printed description or of the group heading above it, matched without case. The headings are where the useful words are: `"pyramid"`, `"vegetation"`, `"batten"`, since a row of its own reads `"h = w = 10 cm, L = 2h"`. |
+| `name` | A fragment of the printed description or of the heading above it, matched without case. The headings are where the topology is: `"sinusoidal"`, `"batten"`, `"triangle"`, since a row of its own reads `"h = 4 cm, L = 20 cm"`. |
 
-**Returns:** The rows that match, in the order the tables are read, which is empty when no page has one.
+**Returns:** The rows that match, in the order the tables are read, which is empty when no table has one.
 
-## ScatteringCoefficientSpectrum
+## PredictedScatteringSpectrum
 
 ```python
-ScatteringCoefficientSpectrum(
+PredictedScatteringSpectrum(
     *,
     name: str,
     source: str,
@@ -128,28 +107,32 @@ ScatteringCoefficientSpectrum(
     scattering_coefficient_3150: float | None = None,
     scattering_coefficient_4000: float | None = None,
     scattering_coefficient_5000: float | None = None,
+    angle_of_incidence_deg: float | None = None,
+    model: str = '',
 )
 ```
 
-One measured surface of a published table, band by band.
-
-The geometry is part of `name`, as the page prints
-it, and the family it belongs to is `group`: pulling
-`h` and `L` into fields would mean deciding what the height of a
-randomly arranged array of blocks is, and the pages do not agree on which
-letters they use.
+One computed surface at one angle, band by band.
 
 The band fields and the reading method come from
 `ScatteringBands`,
-which a computed row carries too. What this class says, and what its name
-is for, is that the numbers were measured. It does not inherit from the
-predicted class and the predicted class does not inherit from it, so a
-caller narrowing on the type gets a straight answer.
+which a measured row carries too, and the two classes are siblings rather
+than one inheriting from the other, so a caller narrowing on the type
+learns which kind of number they hold. The two fields below are what a
+prediction has and a measurement does not.
+
+The two three-dimensional tables start at 250 Hz, so their four lowest
+band fields are `None` on every row: the book says the coefficient
+below that "should be taken to be 0" and prints nothing, and filling
+those cells with zeros would put the book's advice into the data where
+nobody could tell it from a computed value.
 
 **Attributes**
 
 | Name | Description |
 | :--- | :--- |
+| `angle_of_incidence_deg` | The angle the row was computed at, in degrees from the normal. `None` where the page prints a word instead of a number: "Random" on an average over angles, "All/any" on the plane surface that scatters nothing at any of them, and `why_missing` says which. |
+| `model` | The solver behind the row, as the table's own title and the section that describes it give it: a two-dimensional or a three-dimensional boundary element prediction. It is not a hedge and not a note: it is what separates these rows from the measured ones. |
 | `scattering_coefficient_100` | Scattering coefficient in the 100 Hz one-third octave band, dimensionless, as printed. `None` where the table prints nothing there, which is not the same as zero: a zero is a surface that sends every ray back along the specular direction. |
 | `scattering_coefficient_125` | The same in the 125 Hz band. |
 | `scattering_coefficient_160` | The same in the 160 Hz band. |
@@ -186,18 +169,18 @@ caller narrowing on the type gets a straight answer.
 | `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
 | `note` | What the page says about this row beyond its numbers. |
 
-### ScatteringCoefficientSpectrum.bands()
+### PredictedScatteringSpectrum.bands()
 
 ```python
-ScatteringCoefficientSpectrum.bands() -> tuple[int, ...]
+PredictedScatteringSpectrum.bands() -> tuple[int, ...]
 ```
 
 The bands this row prints a value for, in hertz.
 
-### ScatteringCoefficientSpectrum.is_approximate()
+### PredictedScatteringSpectrum.is_approximate()
 
 ```python
-ScatteringCoefficientSpectrum.is_approximate(field_name: str) -> bool
+PredictedScatteringSpectrum.is_approximate(field_name: str) -> bool
 ```
 
 Whether the page prints this field with a `~`.
@@ -210,10 +193,10 @@ Whether the page prints this field with a `~`.
 
 **Returns:** `True` when the page rounded the cell on purpose.
 
-### ScatteringCoefficientSpectrum.is_derived()
+### PredictedScatteringSpectrum.is_derived()
 
 ```python
-ScatteringCoefficientSpectrum.is_derived(field_name: str) -> bool
+PredictedScatteringSpectrum.is_derived(field_name: str) -> bool
 ```
 
 Whether this library computed this field instead of reading it.
@@ -226,10 +209,10 @@ Whether this library computed this field instead of reading it.
 
 **Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
 
-### ScatteringCoefficientSpectrum.printed()
+### PredictedScatteringSpectrum.printed()
 
 ```python
-ScatteringCoefficientSpectrum.printed(
+PredictedScatteringSpectrum.printed(
     field_name: str,
     *,
     wanted_by: str = 'the caller',
@@ -260,10 +243,10 @@ and a cell holding the word "model".
 | :--- | :--- |
 | ValueError | when the page did not print a number there. |
 
-### ScatteringCoefficientSpectrum.scattering_coefficient()
+### PredictedScatteringSpectrum.scattering_coefficient()
 
 ```python
-ScatteringCoefficientSpectrum.scattering_coefficient(band_hz: int) -> float
+PredictedScatteringSpectrum.scattering_coefficient(band_hz: int) -> float
 ```
 
 The coefficient in one band, or a refusal that says what the page had.
@@ -282,10 +265,10 @@ The coefficient in one band, or a refusal that says what the page had.
 | :--- | :--- |
 | ValueError | when the table has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band these tables print. |
 
-### ScatteringCoefficientSpectrum.spectrum()
+### PredictedScatteringSpectrum.spectrum()
 
 ```python
-ScatteringCoefficientSpectrum.spectrum() -> dict[int, float]
+PredictedScatteringSpectrum.spectrum() -> dict[int, float]
 ```
 
 The row as `{band_hz: value}` over the bands it prints.
@@ -295,10 +278,10 @@ number, is left out rather than filled with a zero;
 `why_missing` on that band's field says which it
 was.
 
-### ScatteringCoefficientSpectrum.why_missing()
+### PredictedScatteringSpectrum.why_missing()
 
 ```python
-ScatteringCoefficientSpectrum.why_missing(field_name: str) -> str
+PredictedScatteringSpectrum.why_missing(field_name: str) -> str
 ```
 
 Why this field is `None`, in the page's own terms.
@@ -321,3 +304,7 @@ that is not a number. Each of those is a different answer.
 | Exception | When |
 | :--- | :--- |
 | AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
+
+## PUBLISHED_PREDICTED_SCATTERING
+
+*Constant* (`mappingproxy`).

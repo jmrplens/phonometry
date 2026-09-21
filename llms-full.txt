@@ -34401,8 +34401,8 @@ Schroeder diffuser you are designing yourself. Neither holds in the usual case:
 the reverberation room with a turntable in it belongs to somebody else, the
 goniometer arc even more so, and the number is needed this afternoon for a
 surface that already exists and is not a Schroeder diffuser. Cox & D'Antonio
-print four appendices of values for exactly that, and this library holds them
-row by row, with the page each one was read from.
+print three appendices of diffuser values for exactly that, B, C and D, and
+this library holds them row by row, with the page each one was read from.
 
 <picture><source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_diffusion_arrays_dark.svg"><img src="https://raw.githubusercontent.com/jmrplens/phonometry/main/.github/images/published_diffusion_arrays.svg" alt="Two stacked panels of normalised diffusion coefficient against one-third octave band from 100 Hz to 5 kHz, both at random incidence. Above, the same semicylinder in arrays of one, two, six and twelve periods: the single device climbs to 0.87 while twelve of it reach only 0.70, and the six and twelve period arrays stay near zero below 200 Hz. Below, six semiellipses of one width at four depths from 1 cm to 30 cm: the shallowest stays flat near zero across the whole range and the deepest climbs to 0.65 at 5 kHz" width="88%"></picture>
 

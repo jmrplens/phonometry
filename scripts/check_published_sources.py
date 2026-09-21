@@ -221,14 +221,17 @@ SOURCED: dict[tuple[str, str], str] = {
         "PUBLISHED_ABSORPTION",
     ): (
         "Bies 5e Table 6.2, the fifty-seven finishes it prints a Sabine "
-        "absorption coefficient for, band by band"
+        "absorption coefficient for, band by band; "
+        "Long 2e Table 7.1, the hundred finishes it prints a coefficient and "
+        "an ASTM C423 mounting for"
     ),
     (
         "materials/absorbers/measured.py",
         "PUBLISHED_ABSORPTION_AREAS",
     ): (
         "Bies 5e Table 6.2, the two audience rows it prints as an absorption "
-        "area per person"
+        "area per person; "
+        "Long 2e Table 7.1, the musician and the air it prints in sabins"
     ),
     (
         "materials/absorbers/catalogue.py",

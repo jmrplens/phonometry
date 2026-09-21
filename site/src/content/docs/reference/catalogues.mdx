@@ -128,18 +128,26 @@ a room, which is why the same carpet is a different number in every book and
 why a coefficient above 1 is common and not an error. Bies says of his table
 that the values are selected from the literature, that reverberation times
 calculated from them are approximate only, and that it is better to use the
-manufacturer's data or to measure. The rows are held in
-`materials.absorbers.PUBLISHED_ABSORPTION`, keyed by the table they came off,
-and `absorption_named` answers with every carpet of every table rather than
-choosing one.
+manufacturer's data or to measure. Long says of his that the list is by no
+means complete, and prints beside each row the ASTM C423 mounting it was
+measured on, because the airspace behind a material changes what it does:
+the same fibreglass board laid on the floor and hung over a 400 mm gap is
+two rows here, and at 125 Hz it is 0,03 on one and 0,65 on the other. The
+rows are held in `materials.absorbers.PUBLISHED_ABSORPTION`, keyed by the
+table they came off, and `absorption_named` answers with every carpet of
+every table rather than choosing one.
 
 <Catalogues catalogue="absorption" lang="en" />
 
 The same pages print a few rows that are not coefficients: an audience per
-person, a chair, priced in square metres of equivalent absorption because
-they have no surface a coefficient could multiply. Those are held apart, in
-`materials.absorbers.PUBLISHED_ABSORPTION_AREAS`, with the unit in the field
-name so that a number from there cannot be mistaken for a coefficient.
+person, a musician with an instrument, the air itself, priced in equivalent
+absorption area because they have no surface a coefficient could multiply.
+Those are held apart, in `materials.absorbers.PUBLISHED_ABSORPTION_AREAS`,
+with the unit in the field name so that a number from there cannot be
+mistaken for a coefficient. Long prices his in sabins, square feet, in a
+table set in inches and pounds; the field holds square metres, as every
+other field of this library does, and says on the cell what the page
+printed and what it was converted from.
 
 <Catalogues catalogue="absorptionAreas" lang="en" />
 

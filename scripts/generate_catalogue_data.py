@@ -539,6 +539,18 @@ def rows(
             "table": table,
             "name": row.name,
             "variant": row.variant,
+            # Only the absorption tables carry a mounting, and only one book
+            # prints one, so the field is empty on most rows and absent from
+            # every other catalogue. The component shows the column when any
+            # row of the catalogue fills it, the same rule the quantity
+            # columns follow.
+            "mounting": getattr(row, "mounting", ""),
+            # An area row is an area per something, and which something is the
+            # difference between a square metre of audience and a square metre
+            # per cubic metre of air. The unit in the column heading cannot
+            # say it, so the row carries it and the component gives it a
+            # column of its own.
+            "per": getattr(row, "per", ""),
             "source": row.source,
             "note": row.note,
             "attributedTo": dict(row.attributed_to),

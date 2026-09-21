@@ -22,7 +22,8 @@ Two catalogues, because the same page prints two quantities
 A table of absorption coefficients usually carries a few rows that are not
 coefficients at all. Bies prints an audience "per person seated" as
 $S\bar{\alpha}$ in square metres, an absorption area, in the same
-columns as the coefficients above it. A coefficient is dimensionless and
+columns as the coefficients above it, and Long prints a musician with
+instrument the same way, in sabins. A coefficient is dimensionless and
 bounded by the surface it belongs to; an area per person is a quantity in
 square metres that is added, not multiplied. Holding both under one field
 name would put a number in square metres behind a name that says otherwise,
@@ -47,12 +48,21 @@ What the numbers are worth
 --------------------------
 A reverberation-room coefficient depends on the sample size, the mounting and
 the room, which is why ISO 354 fixes all three and why a coefficient above 1
-is common and not an error. None of the books prints a mounting for every
-row, and the ones that print a thickness print it in the name. A row is
-therefore a representative value for a finish of that description, useful for
-a reverberation estimate and for a sanity check on a measurement, and not a
-specification of any product. Where a page says more than that about its
-numbers, the `about` of its data file quotes it.
+is common and not an error. Bies prints no mounting; Long prints the ASTM
+C423 mounting on most rows and the same fibreglass board twice, on the
+test-room floor and over a 400 mm airspace, with a different spectrum each
+time, and [`AbsorptionSpectrum.mounting`](/phonometry/reference/api/materials/measured/#absorptionspectrum) keeps that apart. The books
+that print a thickness print it in the name. A row is therefore a
+representative value for a finish of that description on that mount, useful
+for a reverberation estimate and for a sanity check on a measurement, and
+not a specification of any product. Where a page says more than that about
+its numbers, the `about` of its data file quotes it.
+
+Long sets his table in inches, pounds and ounces, and his two rows that are
+areas are in sabins, square feet of perfect absorption. The names keep the
+inches, because a name is what the page prints; the areas are converted to
+square metres at load and marked derived, because a field named `m2` holds
+square metres or it lies.
 
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
@@ -141,7 +151,7 @@ that a number from here cannot be mistaken for a coefficient.
 | `absorption_area_2000_m2` | The same in the 2 kHz band. |
 | `absorption_area_4000_m2` | The same in the 4 kHz band. |
 | `absorption_area_8000_m2` | The same in the 8 kHz band. |
-| `per` | What one unit of the area belongs to, as the page says it: `"person"` for an audience row, `"seat"` for a chair. |
+| `per` | What one unit of the area belongs to, as the page says it: `"person"` for an audience row, `"seat"` for a chair, and a cubic metre of air for the one row Long prints as an absorption per volume, which is the air term of a Sabine sum by another name. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
@@ -206,6 +216,7 @@ AbsorptionSpectrum(
     absorption_coefficient_2000: float | None = None,
     absorption_coefficient_4000: float | None = None,
     absorption_coefficient_8000: float | None = None,
+    mounting: str = '',
 )
 ```
 
@@ -229,6 +240,7 @@ mean deciding what "heavy carpet on concrete" is a thickness of.
 | `absorption_coefficient_2000` | The same in the 2 kHz band. |
 | `absorption_coefficient_4000` | The same in the 4 kHz band. |
 | `absorption_coefficient_8000` | The same in the 8 kHz band. |
+| `mounting` | The test mounting the page prints beside the row, as it prints it: `"A"`, `"E400"`, `"F"`. Long prints one on most rows and says they are the mountings of ASTM C423, A being the specimen laid on the test-room surface, E400 the specimen over a 400 mm airspace and F the duct-liner fixture, and that "the airspace behind the material greatly affects the results", which is why the same board is two rows here when the page prints it on two mounts. Empty for a page that prints no mounting, which is not the same as mounting A. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |

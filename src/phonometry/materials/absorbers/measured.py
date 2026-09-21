@@ -16,7 +16,8 @@ Two catalogues, because the same page prints two quantities
 A table of absorption coefficients usually carries a few rows that are not
 coefficients at all. Bies prints an audience "per person seated" as
 :math:`S\bar{\alpha}` in square metres, an absorption area, in the same
-columns as the coefficients above it. A coefficient is dimensionless and
+columns as the coefficients above it, and Long prints a musician with
+instrument the same way, in sabins. A coefficient is dimensionless and
 bounded by the surface it belongs to; an area per person is a quantity in
 square metres that is added, not multiplied. Holding both under one field
 name would put a number in square metres behind a name that says otherwise,
@@ -41,19 +42,28 @@ What the numbers are worth
 --------------------------
 A reverberation-room coefficient depends on the sample size, the mounting and
 the room, which is why ISO 354 fixes all three and why a coefficient above 1
-is common and not an error. None of the books prints a mounting for every
-row, and the ones that print a thickness print it in the name. A row is
-therefore a representative value for a finish of that description, useful for
-a reverberation estimate and for a sanity check on a measurement, and not a
-specification of any product. Where a page says more than that about its
-numbers, the ``about`` of its data file quotes it.
+is common and not an error. Bies prints no mounting; Long prints the ASTM
+C423 mounting on most rows and the same fibreglass board twice, on the
+test-room floor and over a 400 mm airspace, with a different spectrum each
+time, and :attr:`AbsorptionSpectrum.mounting` keeps that apart. The books
+that print a thickness print it in the name. A row is therefore a
+representative value for a finish of that description on that mount, useful
+for a reverberation estimate and for a sanity check on a measurement, and
+not a specification of any product. Where a page says more than that about
+its numbers, the ``about`` of its data file quotes it.
+
+Long sets his table in inches, pounds and ounces, and his two rows that are
+areas are in sabins, square feet of perfect absorption. The names keep the
+inches, because a name is what the page prints; the areas are converted to
+square metres at load and marked derived, because a field named ``m2`` holds
+square metres or it lies.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from ..._internal.catalogue import CatalogueRow, read_table, take
 
@@ -94,6 +104,15 @@ class AbsorptionSpectrum(CatalogueRow):
     :ivar absorption_coefficient_2000: The same in the 2 kHz band.
     :ivar absorption_coefficient_4000: The same in the 4 kHz band.
     :ivar absorption_coefficient_8000: The same in the 8 kHz band.
+    :ivar mounting: The test mounting the page prints beside the row, as it
+        prints it: ``"A"``, ``"E400"``, ``"F"``. Long prints one on most rows
+        and says they are the mountings of ASTM C423, A being the specimen
+        laid on the test-room surface, E400 the specimen over a 400 mm
+        airspace and F the duct-liner fixture, and that "the airspace behind
+        the material greatly affects the results", which is why the same
+        board is two rows here when the page prints it on two mounts. Empty
+        for a page that prints no mounting, which is not the same as
+        mounting A.
     """
 
     absorption_coefficient_63: float | None = None
@@ -104,6 +123,7 @@ class AbsorptionSpectrum(CatalogueRow):
     absorption_coefficient_2000: float | None = None
     absorption_coefficient_4000: float | None = None
     absorption_coefficient_8000: float | None = None
+    mounting: str = ""
 
     def bands(self) -> tuple[int, ...]:
         """The octave bands this row prints a coefficient for, in hertz."""
@@ -165,7 +185,9 @@ class AbsorptionAreaSpectrum(CatalogueRow):
     :ivar absorption_area_4000_m2: The same in the 4 kHz band.
     :ivar absorption_area_8000_m2: The same in the 8 kHz band.
     :ivar per: What one unit of the area belongs to, as the page says it:
-        ``"person"`` for an audience row, ``"seat"`` for a chair.
+        ``"person"`` for an audience row, ``"seat"`` for a chair, and a
+        cubic metre of air for the one row Long prints as an absorption per
+        volume, which is the air term of a Sabine sum by another name.
     """
 
     absorption_area_63_m2: float | None = None
@@ -198,8 +220,36 @@ class AbsorptionAreaSpectrum(CatalogueRow):
 _SETS = ("approximate", "bounded_above", "bounded_below")
 
 #: The published tables this catalogue reads, in the order the books print
-#: them. One file per table in ``materials/absorbers/data/``.
-_TABLES = ("bies-2017-table-6-2",)
+#: them, one data file per table.
+_TABLES = ("bies-2017-table-6-2", "long-2014-table-7-1")
+
+#: A square foot in square metres, exact since the 1959 definition of the
+#: yard. Long prints his two absorption areas in sabins, which in a table set
+#: in inches and pounds are square feet of perfect absorption.
+_SQUARE_FOOT_M2 = 0.09290304
+
+#: A thousand cubic feet in cubic metres, exact for the same reason. Long
+#: prints the absorption of air "per 1000 cubic feet".
+_THOUSAND_CUBIC_FEET_M3 = 28.316846592
+
+#: The imperial suffixes a data file may write an area field with, each with
+#: the factor that takes the printed number to the metric field and the
+#: wording that goes into :attr:`~phonometry._internal.catalogue.CatalogueRow.derived`.
+_IMPERIAL_AREAS = (
+    (
+        "_ft2_per_1000_ft3",
+        _SQUARE_FOOT_M2 / _THOUSAND_CUBIC_FEET_M3,
+        "from the {printed} sabins per 1000 cubic feet the page prints, at "
+        "0.092 903 04 m² to the square foot and 28.316 846 592 m³ to the "
+        "thousand cubic feet",
+    ),
+    (
+        "_ft2",
+        _SQUARE_FOOT_M2,
+        "from the {printed} sabins the page prints, at 0.092 903 04 m² to "
+        "the square foot",
+    ),
+)
 
 
 def _is_area(record: Mapping[str, object]) -> bool:
@@ -213,6 +263,34 @@ def _is_area(record: Mapping[str, object]) -> bool:
     return any(key.startswith("absorption_area_") for key in record)
 
 
+def _metric(fields: dict[str, Any]) -> dict[str, Any]:
+    """The area fields of a row in square metres, converted where printed otherwise.
+
+    A data file writes what the page prints, so a table set in feet writes
+    ``absorption_area_125_ft2`` and the number beside it is the sabins on the
+    page. The row holds square metres, because every other row does and
+    because a caller adding an audience to a room in metres cannot be handed
+    square feet under a field that says ``m2``. The conversion is done here,
+    once, and the field is marked derived with the printed number in the
+    wording, so the page's own figure is never more than a lookup away and
+    :meth:`~phonometry._internal.catalogue.CatalogueRow.is_derived` says
+    which cells were converted.
+    """
+    converted = dict(fields)
+    derived = dict(fields.get("derived", {}))
+    for name, value in fields.items():
+        for suffix, factor, wording in _IMPERIAL_AREAS:
+            if name.startswith("absorption_area_") and name.endswith(suffix):
+                metric = f"{name.removesuffix(suffix)}_m2"
+                del converted[name]
+                converted[metric] = value * factor
+                derived[metric] = wording.format(printed=value)
+                break
+    if derived:
+        converted["derived"] = derived
+    return converted
+
+
 def _load() -> tuple[dict[str, AbsorptionSpectrum], dict[str, AbsorptionAreaSpectrum]]:
     """Every row of every packaged table, split by the quantity it holds."""
     coefficients: dict[str, AbsorptionSpectrum] = {}
@@ -224,7 +302,7 @@ def _load() -> tuple[dict[str, AbsorptionSpectrum], dict[str, AbsorptionAreaSpec
             fields = take(record, frozen=_SETS)
             if _is_area(record):
                 areas[key] = AbsorptionAreaSpectrum(
-                    table=table, source=source, **fields
+                    table=table, source=source, **_metric(fields)
                 )
             else:
                 coefficients[key] = AbsorptionSpectrum(

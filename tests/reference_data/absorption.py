@@ -1,21 +1,28 @@
 #  Copyright (c) 2026. Jose Manuel Requena Plens
-"""Absorption coefficients as one book prints them, read a second time.
+"""Absorption coefficients as two books print them, read a second time.
 
-Source: Bies, Hansen & Howard (2017) Table 6.2 "Sabine absorption coefficients
-for some commonly used materials", PDF pages 367 to 369 (printed pp. 338 to
-340). Columns: the 63, 125, 250, 500, 1000, 2000 and 4000 Hz octave bands.
+Sources: Bies, Hansen & Howard (2017) Table 6.2 "Sabine absorption
+coefficients for some commonly used materials", PDF pages 367 to 369 (printed
+pp. 338 to 340), columns the 63, 125, 250, 500, 1000, 2000 and 4000 Hz octave
+bands; and Long (2014) Table 7.1 "Absorption Coefficients of Common
+Materials", PDF pages 287 to 290 (printed pp. 283 to 286), columns a mount
+and the 125 to 4000 Hz octave bands.
 
-This transcription was made from the rendered pages independently of the one
+Each transcription was made from the rendered pages independently of the one
 in the package's data file, by a second reader who never saw the first, and
-the two were compared cell by cell before either was kept: fifty-nine rows,
-seven bands, no difference. The test suite holds the catalogue against this
-copy so that a later edit to one cannot pass unnoticed by the other.
+the two were compared cell by cell before either was kept: fifty-nine rows
+and seven bands of Bies, a hundred and two rows, a mount and six bands of
+Long, no difference. The test suite holds the catalogue against this copy so
+that a later edit to one cannot pass unnoticed by the other.
 
-A name printed over a heading row and an indented sub-row is written here as
-``"<heading> / <sub-row>"``, the way the page reads it; the catalogue holds the
-heading as the name and the sub-row as the variant. The two rows the page
-prints as an absorption area per person, marked with S alpha-bar (m2) in the
-name, are tagged ``AREA``; every other row is a coefficient, tagged ``COEF``.
+Bies prints a name over a heading row and an indented sub-row, written here
+as ``"<heading> / <sub-row>"``, the way the page reads it; the catalogue holds
+the heading as the name and the sub-row as the variant. Long prints a
+thickness alone under a bold heading, written here as the thickness alone,
+which the catalogue holds as the variant under the heading. The rows a page
+prints as an absorption area rather than a coefficient are tagged ``AREA``,
+with the numbers in the unit the page uses; every other row is a coefficient,
+tagged ``COEF``.
 """
 
 from __future__ import annotations
@@ -23,7 +30,7 @@ from __future__ import annotations
 #: One row is a coefficient.
 COEF = "coefficient"
 
-#: One row is an equivalent absorption area per person, in square metres.
+#: One row is an equivalent absorption area per unit, in the page's own unit.
 AREA = "area"
 
 #: The octave bands Table 6.2 prints, in the order of the value tuples below.
@@ -360,5 +367,680 @@ BIES_6_2_ABSORPTION: tuple[tuple[str, str, str, tuple[float | None, ...]], ...] 
         "Orchestra with instruments on podium, 1.5 m² per person",
         COEF,
         (None, 0.27, 0.53, 0.67, 0.93, 0.87, 0.80),
+    ),
+)
+
+#: The octave bands Table 7.1 prints, in the order of the value tuples below.
+LONG_7_1_BANDS_HZ = (125, 250, 500, 1000, 2000, 4000)
+
+#: ``(group heading, name as printed, mount as printed, kind, values per
+#: band)``, every row of Long 2e Table 7.1 in the order printed. ``None`` is
+#: an empty cell. An ``AREA`` row's values are the sabins the page prints.
+LONG_7_1_ABSORPTION: tuple[tuple[str, str, str, str, tuple[float | None, ...]], ...] = (
+    (
+        "Walls",
+        "Glass, 1/4″, heavy plate",
+        "",
+        COEF,
+        (0.18, 0.06, 0.04, 0.05, 0.02, 0.02),
+    ),
+    (
+        "Walls",
+        "Glass, 3/32″, ordinary window",
+        "",
+        COEF,
+        (0.55, 0.25, 0.18, 0.12, 0.07, 0.04),
+    ),
+    (
+        "Walls",
+        "Gypsum board, 1/2″, on 2 × 4 studs",
+        "",
+        COEF,
+        (0.29, 0.10, 0.05, 0.04, 0.07, 0.09),
+    ),
+    (
+        "Walls",
+        "Plaster, 7/8″, gypsum or lime, on brick",
+        "",
+        COEF,
+        (0.013, 0.015, 0.02, 0.03, 0.04, 0.05),
+    ),
+    (
+        "Walls",
+        "Plaster, on concrete block",
+        "",
+        COEF,
+        (0.12, 0.09, 0.07, 0.05, 0.05, 0.04),
+    ),
+    ("Walls", "Plaster, 7/8″, on lath", "", COEF, (0.14, 0.10, 0.06, 0.04, 0.04, 0.05)),
+    (
+        "Walls",
+        "Plaster, 7/8″, lath on studs",
+        "",
+        COEF,
+        (0.30, 0.15, 0.10, 0.05, 0.04, 0.05),
+    ),
+    (
+        "Walls",
+        "Plywood, 1/4″, 3″ air space, 1″ batt,",
+        "",
+        COEF,
+        (0.60, 0.30, 0.10, 0.09, 0.09, 0.09),
+    ),
+    (
+        "Walls",
+        "Soundblox, type B, painted",
+        "",
+        COEF,
+        (0.74, 0.37, 0.45, 0.35, 0.36, 0.34),
+    ),
+    (
+        "Walls",
+        "Wood panel, 3/8″, 3-4″ air space",
+        "",
+        COEF,
+        (0.30, 0.25, 0.20, 0.17, 0.15, 0.10),
+    ),
+    (
+        "Walls",
+        "Concrete block, unpainted",
+        "",
+        COEF,
+        (0.36, 0.44, 0.51, 0.29, 0.39, 0.25),
+    ),
+    (
+        "Walls",
+        "Concrete block, painted",
+        "",
+        COEF,
+        (0.10, 0.05, 0.06, 0.07, 0.09, 0.08),
+    ),
+    (
+        "Walls",
+        "Concrete poured, unpainted",
+        "",
+        COEF,
+        (0.01, 0.01, 0.02, 0.02, 0.02, 0.03),
+    ),
+    (
+        "Walls",
+        "Brick, unglazed, unpainted",
+        "",
+        COEF,
+        (0.03, 0.03, 0.03, 0.04, 0.05, 0.07),
+    ),
+    (
+        "Walls",
+        "Wood paneling, 1/4″, with airspace behind",
+        "",
+        COEF,
+        (0.42, 0.21, 0.10, 0.08, 0.06, 0.06),
+    ),
+    (
+        "Walls",
+        "Wood, paneling, 1″, with airspace behind",
+        "",
+        COEF,
+        (0.19, 0.14, 0.09, 0.06, 0.06, 0.05),
+    ),
+    (
+        "Walls",
+        "Shredded-wood fiberboard, 2″, on concrete",
+        "A",
+        COEF,
+        (0.15, 0.26, 0.62, 0.94, 0.64, 0.92),
+    ),
+    (
+        "Walls",
+        "Carpet, heavy, on 5/8-in perforated mineral fiberboard",
+        "",
+        COEF,
+        (0.37, 0.41, 0.63, 0.85, 0.96, 0.92),
+    ),
+    (
+        "Walls",
+        "Brick, unglazed, painted",
+        "A",
+        COEF,
+        (0.01, 0.01, 0.02, 0.02, 0.02, 0.03),
+    ),
+    (
+        "Walls",
+        "Light velour, 10 oz per sq yd, hung straight, in contact with wall",
+        "",
+        COEF,
+        (0.03, 0.04, 0.11, 0.17, 0.24, 0.35),
+    ),
+    (
+        "Walls",
+        "Medium velour, 14 oz per sq yd, draped to half area",
+        "",
+        COEF,
+        (0.07, 0.31, 0.49, 0.75, 0.70, 0.60),
+    ),
+    (
+        "Walls",
+        "Heavy velour, 18 oz per sq yd, draped to half area",
+        "",
+        COEF,
+        (0.14, 0.35, 0.55, 0.72, 0.70, 0.65),
+    ),
+    (
+        "Floors",
+        "Floors, concrete or terrazzo",
+        "A",
+        COEF,
+        (0.01, 0.01, 0.015, 0.02, 0.02, 0.02),
+    ),
+    (
+        "Floors",
+        "Floors, linoleum, vinyl on concrete",
+        "A",
+        COEF,
+        (0.02, 0.03, 0.03, 0.03, 0.03, 0.02),
+    ),
+    (
+        "Floors",
+        "Floors, linoleum, vinyl on subfloor",
+        "",
+        COEF,
+        (0.02, 0.04, 0.05, 0.05, 0.10, 0.05),
+    ),
+    ("Floors", "Floors, wooden", "", COEF, (0.15, 0.11, 0.10, 0.07, 0.06, 0.07)),
+    (
+        "Floors",
+        "Floors, wooden platform w/airspace",
+        "",
+        COEF,
+        (0.40, 0.30, 0.20, 0.17, 0.15, 0.10),
+    ),
+    (
+        "Floors",
+        "Carpet, heavy on concrete",
+        "A",
+        COEF,
+        (0.02, 0.06, 0.14, 0.57, 0.60, 0.65),
+    ),
+    (
+        "Floors",
+        "Carpet, on 40 oz (1.35 kg / m²) pad",
+        "A",
+        COEF,
+        (0.08, 0.24, 0.57, 0.69, 0.71, 0.73),
+    ),
+    (
+        "Floors",
+        "Indoor-outdoor carpet",
+        "A",
+        COEF,
+        (0.01, 0.05, 0.10, 0.20, 0.45, 0.65),
+    ),
+    (
+        "Floors",
+        "Wood parquet in asphalt on concrete",
+        "A",
+        COEF,
+        (0.04, 0.04, 0.07, 0.06, 0.06, 0.07),
+    ),
+    (
+        "Ceilings",
+        "Acoustical coating K-13 1″",
+        "A",
+        COEF,
+        (0.08, 0.29, 0.75, 0.98, 0.93, 0.96),
+    ),
+    ("Ceilings", "1.5″", "A", COEF, (0.16, 0.50, 0.95, 1.06, 1.00, 0.97)),
+    ("Ceilings", "2″", "A", COEF, (0.29, 0.67, 1.04, 1.06, 1.00, 0.97)),
+    (
+        "Ceilings",
+        "Acoustical coating K-13 “fc” 1″",
+        "A",
+        COEF,
+        (0.12, 0.38, 0.88, 1.16, 1.15, 1.12),
+    ),
+    (
+        "Ceilings",
+        "Glass-fiber roof fabric, 12 oz/yd",
+        "",
+        COEF,
+        (0.65, 0.71, 0.82, 0.86, 0.76, 0.62),
+    ),
+    (
+        "Ceilings",
+        "Glass-fiber roof fabric, 37.5 oz/yd",
+        "",
+        COEF,
+        (0.38, 0.23, 0.17, 0.15, 0.09, 0.06),
+    ),
+    (
+        "Acoustical Tile",
+        "Standard mineral fiber, 5/8″",
+        "E400",
+        COEF,
+        (0.68, 0.76, 0.60, 0.65, 0.82, 0.76),
+    ),
+    (
+        "Acoustical Tile",
+        "Standard mineral fiber, 3/4″",
+        "E400",
+        COEF,
+        (0.72, 0.84, 0.70, 0.79, 0.76, 0.81),
+    ),
+    (
+        "Acoustical Tile",
+        "Standard mineral fiber, 1″",
+        "E400",
+        COEF,
+        (0.76, 0.84, 0.72, 0.89, 0.85, 0.81),
+    ),
+    (
+        "Acoustical Tile",
+        "Energy mineral fiber, 5/8″",
+        "E400",
+        COEF,
+        (0.70, 0.75, 0.58, 0.63, 0.78, 0.73),
+    ),
+    (
+        "Acoustical Tile",
+        "Energy mineral fiber, 3/4″",
+        "E400",
+        COEF,
+        (0.68, 0.81, 0.68, 0.78, 0.85, 0.80),
+    ),
+    (
+        "Acoustical Tile",
+        "Energy mineral fiber, 1″",
+        "E400",
+        COEF,
+        (0.74, 0.85, 0.68, 0.86, 0.90, 0.79),
+    ),
+    (
+        "Acoustical Tile",
+        "Film faced fiberglass, 1″",
+        "E400",
+        COEF,
+        (0.56, 0.63, 0.69, 0.83, 0.71, 0.55),
+    ),
+    (
+        "Acoustical Tile",
+        "Film faced fiberglass, 2″",
+        "E400",
+        COEF,
+        (0.52, 0.82, 0.88, 0.91, 0.75, 0.55),
+    ),
+    (
+        "Acoustical Tile",
+        "Film faced fiberglass, 3″",
+        "E400",
+        COEF,
+        (0.64, 0.88, 1.02, 0.91, 0.84, 0.62),
+    ),
+    (
+        "Glass Cloth Acoustical Ceiling Panels",
+        "Fiberglass tile, 3/4″",
+        "E400",
+        COEF,
+        (0.74, 0.89, 0.67, 0.89, 0.95, 1.07),
+    ),
+    (
+        "Glass Cloth Acoustical Ceiling Panels",
+        "Fiberglass tile, 1″",
+        "E400",
+        COEF,
+        (0.77, 0.74, 0.75, 0.95, 1.01, 1.02),
+    ),
+    (
+        "Glass Cloth Acoustical Ceiling Panels",
+        "Fiberglass tile, 1 1/2″",
+        "E400",
+        COEF,
+        (0.78, 0.93, 0.88, 1.01, 1.02, 1.00),
+    ),
+    (
+        "Seats and Audience",
+        "Unoccupied well-upholstered seats",
+        "",
+        COEF,
+        (0.19, 0.37, 0.56, 0.67, 0.61, 0.59),
+    ),
+    (
+        "Seats and Audience",
+        "Unoccupied leather-covered seats",
+        "",
+        COEF,
+        (0.19, 0.57, 0.56, 0.67, 0.61, 0.59),
+    ),
+    (
+        "Seats and Audience",
+        "Wooden pews, occupied",
+        "",
+        COEF,
+        (0.57, 0.44, 0.67, 0.70, 0.80, 0.72),
+    ),
+    (
+        "Seats and Audience",
+        "Fabric well-upholstered seats, with perforated seat pans, unoccupied",
+        "",
+        COEF,
+        (0.19, 0.37, 0.56, 0.67, 0.61, 0.59),
+    ),
+    (
+        "Seats and Audience",
+        "Leather-covered upholstered seats, unoccupied",
+        "",
+        COEF,
+        (0.44, 0.54, 0.60, 0.62, 0.58, 0.50),
+    ),
+    (
+        "Seats and Audience",
+        "Audience, seated in upholstered seats",
+        "",
+        COEF,
+        (0.39, 0.57, 0.80, 0.94, 0.92, 0.87),
+    ),
+    (
+        "Seats and Audience",
+        "Congregation, seated in wooden pews",
+        "",
+        COEF,
+        (0.57, 0.61, 0.75, 0.86, 0.91, 0.86),
+    ),
+    (
+        "Seats and Audience",
+        "Chair, metal or wood seat, unoccupied",
+        "",
+        COEF,
+        (0.15, 0.19, 0.22, 0.39, 0.38, 0.30),
+    ),
+    (
+        "Seats and Audience",
+        "Students, informally dressed, seated in tablet-arm chairs",
+        "",
+        COEF,
+        (0.30, 0.41, 0.49, 0.84, 0.87, 0.84),
+    ),
+    ("Duct Liners", "1/2″", "", COEF, (0.11, 0.51, 0.48, 0.70, 0.88, 0.98)),
+    ("Duct Liners", "1″", "", COEF, (0.16, 0.54, 0.67, 0.85, 0.97, 1.01)),
+    ("Duct Liners", "1 1/2″", "", COEF, (0.22, 0.73, 0.81, 0.97, 1.03, 1.04)),
+    ("Duct Liners", "2″", "", COEF, (0.33, 0.90, 0.96, 1.07, 1.07, 1.09)),
+    (
+        "Duct Liners",
+        "Aeroflex Type 150, 1″",
+        "F",
+        COEF,
+        (0.13, 0.51, 0.46, 0.65, 0.74, 0.95),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 150, 2″",
+        "F",
+        COEF,
+        (0.25, 0.73, 0.94, 1.03, 1.02, 1.09),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 200, 1/2″",
+        "F",
+        COEF,
+        (0.10, 0.44, 0.29, 0.39, 0.63, 0.81),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 200, 1″",
+        "F",
+        COEF,
+        (0.15, 0.59, 0.53, 0.78, 0.85, 1.00),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 200, 2″",
+        "F",
+        COEF,
+        (0.28, 0.81, 1.04, 1.10, 1.06, 1.09),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 300, 1/2″",
+        "F",
+        COEF,
+        (0.09, 0.43, 0.31, 0.43, 0.66, 0.98),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 300, 1″",
+        "F",
+        COEF,
+        (0.14, 0.56, 0.63, 0.82, 0.99, 1.04),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 150, 1″",
+        "A",
+        COEF,
+        (0.06, 0.24, 0.47, 0.71, 0.85, 0.97),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 150, 2″",
+        "A",
+        COEF,
+        (0.20, 0.51, 0.88, 1.02, 0.99, 1.04),
+    ),
+    (
+        "Duct Liners",
+        "Aeroflex Type 300, 1″",
+        "A",
+        COEF,
+        (0.08, 0.28, 0.65, 0.89, 1.01, 1.04),
+    ),
+    (
+        "Building Insulation - Fiberglass",
+        "3.5″ (R-11) (insulation exposed to sound)",
+        "A",
+        COEF,
+        (0.34, 0.85, 1.09, 0.97, 0.97, 1.12),
+    ),
+    (
+        "Building Insulation - Fiberglass",
+        "6.0″ (R-19) (insulation exposed to sound)",
+        "A",
+        COEF,
+        (0.64, 1.14, 1.09, 0.99, 1.00, 1.21),
+    ),
+    (
+        "Building Insulation - Fiberglass",
+        "3.5″ (R-11) (FRK facing exposed to sound)",
+        "A",
+        COEF,
+        (0.56, 1.11, 1.16, 0.61, 0.40, 0.21),
+    ),
+    (
+        "Building Insulation - Fiberglass",
+        "6.0″ (R-19) (FRK facing exposed to sound)",
+        "A",
+        COEF,
+        (0.94, 1.33, 1.02, 0.71, 0.56, 0.39),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 1″ thick",
+        "A",
+        COEF,
+        (0.03, 0.22, 0.69, 0.91, 0.96, 0.99),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 2″ thick",
+        "A",
+        COEF,
+        (0.22, 0.82, 1.21, 1.10, 1.02, 1.05),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 3″ thick",
+        "A",
+        COEF,
+        (0.53, 1.19, 1.21, 1.08, 1.01, 1.04),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 4″ thick",
+        "A",
+        COEF,
+        (0.84, 1.24, 1.24, 1.08, 1.00, 0.97),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 1″ thick",
+        "E400",
+        COEF,
+        (0.65, 0.94, 0.76, 0.98, 1.00, 1.14),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 2″ thick",
+        "E400",
+        COEF,
+        (0.66, 0.95, 1.06, 1.11, 1.09, 1.18),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 3″ thick",
+        "E400",
+        COEF,
+        (0.66, 0.93, 1.13, 1.10, 1.11, 1.14),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 3lb/ft³, 4″ thick",
+        "E400",
+        COEF,
+        (0.65, 1.01, 1.20, 1.14, 1.10, 1.16),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 1″ thick",
+        "A",
+        COEF,
+        (0.08, 0.25, 0.74, 0.95, 0.97, 1.00),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 2″ thick",
+        "A",
+        COEF,
+        (0.19, 0.74, 1.17, 1.11, 1.01, 1.01),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 3″ thick",
+        "A",
+        COEF,
+        (0.54, 1.12, 1.23, 1.07, 1.01, 1.05),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 4″ thick",
+        "A",
+        COEF,
+        (0.75, 1.19, 1.17, 1.05, 0.97, 0.98),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 1″ thick",
+        "E400",
+        COEF,
+        (0.68, 0.91, 0.78, 0.97, 1.05, 1.18),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 2″ thick",
+        "E400",
+        COEF,
+        (0.62, 0.95, 0.98, 1.07, 1.09, 1.22),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 3″ thick",
+        "E400",
+        COEF,
+        (0.66, 0.92, 1.11, 1.12, 1.10, 1.19),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, 6lb/ft³, 4″ thick",
+        "E400",
+        COEF,
+        (0.59, 0.91, 1.15, 1.11, 1.11, 1.19),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 1″ thick",
+        "A",
+        COEF,
+        (0.12, 0.74, 0.72, 0.68, 0.53, 0.24),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 2″ thick",
+        "A",
+        COEF,
+        (0.51, 0.65, 0.86, 0.71, 0.49, 0.26),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 3″ thick",
+        "A",
+        COEF,
+        (0.84, 0.88, 0.86, 0.71, 0.52, 0.25),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 4″ thick",
+        "A",
+        COEF,
+        (0.88, 0.90, 0.84, 0.71, 0.49, 0.23),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 1″ thick",
+        "E400",
+        COEF,
+        (0.48, 0.60, 0.80, 0.82, 0.52, 0.35),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 2″ thick",
+        "E400",
+        COEF,
+        (0.50, 0.61, 0.99, 0.83, 0.51, 0.35),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 3″ thick",
+        "E400",
+        COEF,
+        (0.59, 0.64, 1.09, 0.81, 0.50, 0.33),
+    ),
+    (
+        "Fiberglass Board (FB)",
+        "FB, FRK faced, 4″ thick",
+        "E400",
+        COEF,
+        (0.61, 0.69, 1.08, 0.81, 0.48, 0.34),
+    ),
+    (
+        "Miscellaneous",
+        "Musician (per person), with instrument",
+        "",
+        AREA,
+        (4.0, 8.5, 11.5, 14.0, 15.0, 12.0),
+    ),
+    (
+        "Miscellaneous",
+        "Air, Sabins per 1000 cubic feet @ 50% RH",
+        "",
+        AREA,
+        (None, None, None, 0.9, 2.3, 7.2),
     ),
 )

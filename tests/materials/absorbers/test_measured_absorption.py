@@ -37,6 +37,9 @@ BIES = "bies-2017-table-6-2"
 #: Long 2e Table 7.1 keyed the way the catalogue keys it.
 LONG = "long-2014-table-7-1"
 
+#: Cox & D'Antonio 3e Appendix A keyed the way the catalogue keys it.
+COX = "cox-2017-appendix-a"
+
 #: A square foot in square metres, which is what a sabin is in a table set in
 #: inches, and a thousand cubic feet in cubic metres. Both exact, and both
 #: written here again rather than imported so that the test does not check the
@@ -326,11 +329,16 @@ def test_an_area_row_says_what_it_is_per() -> None:
 # Looking a finish up
 # ---------------------------------------------------------------------------
 def test_a_fragment_answers_with_every_finish_that_contains_it() -> None:
-    """Four carpets in Bies and four in Long, and the caller reads the names."""
+    """Carpets from all three books at once, which is the point of the lookup.
+
+    Four in Bies, four in Long and thirteen in Cox, whose appendix compiles
+    carpets from six of its own sources. No book has them all and no two
+    describe one the same way, so the caller gets every match and reads the
+    names to pick theirs.
+    """
     carpets = absorption_named("carpet")
-    assert [row.table for row in carpets].count(BIES) == 4
-    assert [row.table for row in carpets].count(LONG) == 4
-    assert len(carpets) == 8
+    tables = [row.table for row in carpets]
+    assert (tables.count(BIES), tables.count(LONG), tables.count(COX)) == (4, 4, 13)
     assert all("carpet" in row.name.casefold() for row in carpets)
 
 
@@ -447,3 +455,149 @@ def test_the_pair_that_differs_most_is_the_carpet_at_one_kilohertz() -> None:
         if "concrete" in row.name.casefold()
     }
     assert carpets == {BIES: 0.37, LONG: 0.57}
+
+
+# ---------------------------------------------------------------------------
+# The compilation: Cox Appendix A against the second reading
+# ---------------------------------------------------------------------------
+def _cox_prints_as(row: AbsorptionSpectrum, printed: str) -> bool:
+    """Whether Cox's page prints this catalogue row under *printed*.
+
+    Five of the appendix's groups head a block of rows that are only a
+    condition or a percentage, and the catalogue holds those with the heading
+    as the name and the printed row as the variant, so a row prints as its
+    name, as its variant, or as the two joined. The credit is checked
+    separately, so the reference markers are dropped on both sides.
+    """
+    candidates = {row.name, row.variant, f"{row.name} {row.variant}".strip()}
+    return printed in {_plain_cox(text) for text in candidates if text}
+
+
+def _plain_cox(text: str) -> str:
+    """A name reduced to what the two readings can be compared on.
+
+    The reference markers go, because the credit is checked on its own; the
+    superscript two and three, the multiplication sign and the en dash are
+    written out, because one reading typed the character the page prints and
+    the other typed its ASCII stand-in, and neither is wrong about the paper.
+    """
+    text = re.sub(r"\(\d+(?:,\d+)*\)", "", text)
+    text = (
+        text.replace("²", "2")
+        .replace("³", "3")
+        .replace("×", "x")
+        .replace("–", "-")
+        .replace("—", "-")
+    )
+    return re.sub(r"\s+", " ", text).strip().rstrip(",")
+
+
+def test_the_catalogue_holds_every_row_of_the_appendix() -> None:
+    """A hundred and sixty-one rows, and the appendix has no area rows."""
+    rows = [k for k in PUBLISHED_ABSORPTION if k.startswith(f"{COX}/")]
+    assert len(rows) == len(ref.COX_A_ABSORPTION) == 161
+    assert not [k for k in PUBLISHED_ABSORPTION_AREAS if k.startswith(f"{COX}/")]
+
+
+def test_every_cell_of_the_appendix_is_a_number() -> None:
+    """The one table of the three with no empty cell anywhere.
+
+    Nine hundred and sixty-six cells, all filled. A row that lost a cell in
+    transcription, or gained one, fails here rather than quietly answering
+    ``None`` to a caller who asked for a band the page does print.
+    """
+    for key, row in PUBLISHED_ABSORPTION.items():
+        if row.table != COX:
+            continue
+        assert row.bands() == ref.COX_A_BANDS_HZ, key
+        assert len(row.spectrum()) == 6
+
+
+@pytest.mark.parametrize(
+    ("group", "name", "values"),
+    ref.COX_A_ABSORPTION,
+    ids=[f"{name[:36]}" for _, name, _ in ref.COX_A_ABSORPTION],
+)
+def test_each_appendix_row_holds_what_the_second_reader_read(
+    group: str, name: str, values: tuple[float, ...]
+) -> None:
+    """Cell by cell, matched by the printed name rather than by position."""
+    printed = _plain_cox(name)
+    matches = [
+        row
+        for row in _rows_of(COX)
+        if isinstance(row, AbsorptionSpectrum) and _cox_prints_as(row, printed)
+    ]
+    assert matches, f"{printed!r} is in the oracle and not in the catalogue"
+    held = [
+        [getattr(row, f"absorption_coefficient_{band}") for band in ref.COX_A_BANDS_HZ]
+        for row in matches
+    ]
+    assert list(values) in held, f"{printed!r}: {values} not among {held}"
+    # The credit too, on the row the values matched: the page prints it as a
+    # superscript number, and a number that moved from one row to another is
+    # as much a transcription error as a digit that did.
+    row = matches[held.index(list(values))]
+    numbers = re.findall(r"\((\d+(?:,\d+)*)\)", f"{group} {name}")
+    printed_credit = "; ".join(
+        ref.COX_A_REFERENCES[number]
+        for group_of in numbers
+        for number in group_of.split(",")
+    )
+    if printed_credit:
+        assert row.attributed_to.get("row") == printed_credit
+
+
+def test_a_credit_the_page_prints_as_a_number_is_held_as_the_reference() -> None:
+    """Twenty-nine sources behind one appendix, and the row says which.
+
+    A superscript 2 means nothing away from the page it is printed on, so the
+    catalogue holds the reference the number points at. The reference list is
+    on the page after the table.
+    """
+    row = PUBLISHED_ABSORPTION[f"{COX}/carpet_heavy_on_concrete"]
+    assert row.attributed_to == {"row": "Harris (1991)"}
+    two = PUBLISHED_ABSORPTION[f"{COX}/floors_concrete_or_terrazzo"]
+    assert two.attributed_to == {
+        "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+    }
+
+
+def test_the_four_rows_the_page_credits_to_nobody_carry_no_credit() -> None:
+    """Not a guess and not an empty string: the page prints no marker."""
+    uncredited = sorted(
+        row.name
+        for row in PUBLISHED_ABSORPTION.values()
+        if row.table == COX and not row.attributed_to
+    )
+    assert uncredited == [
+        "25 mm cork on solid backing",
+        "Anechoic chamber wall (wedges)",
+        "Polyurethane foam, 2.5 cm thick",
+        "Wood, 50 mm thick",
+    ]
+
+
+def test_a_row_printed_only_as_a_percentage_keeps_its_heading() -> None:
+    """ "20%" is not a material, so the heading is the name and 20% the variant."""
+    row = PUBLISHED_ABSORPTION[
+        f"{COX}/top_soil_with_different_percentage_of_vegetative_cover_20percent"
+    ]
+    assert row.name == "Top soil with different percentage of vegetative cover"
+    assert row.variant == "20%"
+    assert row.attributed_to == {"row": "Yang, Kang and Cheal (2013)"}
+
+
+def test_the_same_name_twice_is_two_rows_keyed_by_who_measured_it() -> None:
+    """The appendix prints two swimming pools, from two sources, side by side."""
+    pools = [
+        row
+        for row in PUBLISHED_ABSORPTION.values()
+        if row.table == COX and row.name == "Water surface in swimming pool"
+    ]
+    assert len(pools) == 2
+    assert {row.attributed_to["row"] for row in pools} == {
+        "Knudsen and Harris (1953)",
+        "Harris (1991)",
+    }
+    assert {row.spectrum()[125] for row in pools} == {0.01, 0.008}

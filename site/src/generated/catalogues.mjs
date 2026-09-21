@@ -50187,6 +50187,8048 @@ export const catalogues = {
             "note": ""
           }
         ]
+      },
+      {
+        "key": "cox-2017-appendix-a/light_velour_0_338_kg_m2_hung_straight_in_contact_with_wall",
+        "table": "cox-2017-appendix-a",
+        "name": "Light velour 0.338 kg/m² hung straight in contact with wall",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/medium_velour_0_475_kg_m2_hung_straight",
+        "table": "cox-2017-appendix-a",
+        "name": "Medium velour 0.475 kg/m², hung straight",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/medium_velour_0_475_kg_m2_draped_to_half_area",
+        "table": "cox-2017-appendix-a",
+        "name": "Medium velour 0.475 kg/m², draped to half area",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/heavy_velour_0_61_kg_m2_hung_straight",
+        "table": "cox-2017-appendix-a",
+        "name": "Heavy velour, 0.61 kg/m² hung straight",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/heavy_velour_0_61_kg_m2_draped_to_half_area",
+        "table": "cox-2017-appendix-a",
+        "name": "Heavy velour, 0.61 kg/m² draped to half area",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/variation_with_draping_hung_straight",
+        "table": "cox-2017-appendix-a",
+        "name": "Variation with draping",
+        "variant": "Hung straight",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/variation_with_draping_draped_to_half_area",
+        "table": "cox-2017-appendix-a",
+        "name": "Variation with draping",
+        "variant": "Draped to half area",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/variation_with_draping_draped_to_40percent_of_area",
+        "table": "cox-2017-appendix-a",
+        "name": "Variation with draping",
+        "variant": "Draped to 40% of area",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/variation_with_draping_curtains_in_folds_against_wall",
+        "table": "cox-2017-appendix-a",
+        "name": "Variation with draping",
+        "variant": "Curtains in folds against wall",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Templeton (1997)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/cotton_curtains_0_475_kg_m2_draped_to_7_8_area",
+        "table": "cox-2017-appendix-a",
+        "name": "Cotton curtains, 0.475 kg/m²",
+        "variant": "Draped to 7/8 area",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky (1971); Everest (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/cotton_curtains_0_475_kg_m2_draped_to_3_4_area",
+        "table": "cox-2017-appendix-a",
+        "name": "Cotton curtains, 0.475 kg/m²",
+        "variant": "Draped to 3/4 area",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky (1971); Everest (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/cotton_curtains_0_475_kg_m2_draped_to_1_2_area",
+        "table": "cox-2017-appendix-a",
+        "name": "Cotton curtains, 0.475 kg/m²",
+        "variant": "Draped to 1/2 area",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Mankovsky (1971); Everest (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/carpet_heavy_on_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Carpet heavy, on concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/heavy_carpet_same_as_line_above_on_foam_rubber_or_1_35_kg_m2_hair_felt",
+        "table": "cox-2017-appendix-a",
+        "name": "Heavy carpet (same as line above) on foam rubber or 1.35 kg/m² hair felt",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/heavy_carpet_same_as_2_lines_above_with_latex_backing_on_foam_rubber_or_1_35_kg_m2_hair_felt",
+        "table": "cox-2017-appendix-a",
+        "name": "Heavy carpet (same as 2 lines above) with latex backing on foam rubber or 1.35 kg/m² hair felt",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/haircord_on_felt",
+        "table": "cox-2017-appendix-a",
+        "name": "Haircord on felt",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/pile_and_thick_felt",
+        "table": "cox-2017-appendix-a",
+        "name": "Pile and thick felt",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/no_underlay_pad_woven_wool_loop_1_2_kg_m2_2_4_mm_pile_height",
+        "table": "cox-2017-appendix-a",
+        "name": "No underlay (pad), woven wool loop, 1.2 kg/m² 2.4 mm pile height",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/no_underlay_pad_woven_wool_loop_1_4_kg_m2_6_4_mm_pile_height",
+        "table": "cox-2017-appendix-a",
+        "name": "No underlay (pad), woven wool loop, 1.4 kg/m² 6.4 mm pile height",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/no_underlay_pad_woven_wool_loop_2_3_kg_m2_9_5_mm_pile_height",
+        "table": "cox-2017-appendix-a",
+        "name": "No underlay (pad) woven wool loop, 2.3 kg/m² 9.5 mm pile height",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/loop_pile_tufted_carpet_1_4_kg_m2_hair_underlay_1_4_kg_m2",
+        "table": "cox-2017-appendix-a",
+        "name": "Loop pile tufted carpet, 1.4 kg/m², hair underlay 1.4 kg/m²",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/loop_pile_tufted_carpet_1_4_kg_m2_hair_underlay_3_0_kg_m2",
+        "table": "cox-2017-appendix-a",
+        "name": "Loop pile tufted carpet, 1.4 kg/m², hair underlay 3.0 kg/m²",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/loop_pile_tufted_carpet_1_4_kg_m2_hair_and_jute_underlay_3_kg_m2",
+        "table": "cox-2017-appendix-a",
+        "name": "Loop pile tufted carpet, 1.4 kg/m², hair and jute underlay 3 kg/m²",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/loop_pile_tufted_carpet_1_4_kg_m2_no_underlay",
+        "table": "cox-2017-appendix-a",
+        "name": "Loop pile tufted carpet, 1.4 kg/m², no underlay",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/loop_pile_tufted_carpet_0_7_kg_m2_1_4_kg_m2_hair_underlay_pad",
+        "table": "cox-2017-appendix-a",
+        "name": "Loop pile tufted carpet, 0.7 kg/m², 1.4 kg/m² hair underlay pad",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/16_mm_wool_pile_with_underlay",
+        "table": "cox-2017-appendix-a",
+        "name": "16 mm wool pile with underlay",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/9_5_mm_wool_pile_no_underlay_on_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "9.5 mm wool pile no underlay on concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/cord_carpet",
+        "table": "cox-2017-appendix-a",
+        "name": "Cord carpet",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Templeton (1997)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/thin_6_mm_carpet_on_underlay",
+        "table": "cox-2017-appendix-a",
+        "name": "Thin (6 mm) carpet on underlay",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Parkin, Humphreys and Cowell (1979)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/6_mm_pile_carpet_bonded_to_closed_cell_foam_underlay",
+        "table": "cox-2017-appendix-a",
+        "name": "6 mm pile carpet bonded to closed-cell foam underlay",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Parkin, Humphreys and Cowell (1979)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/thick_9_mm_carpet_on_underlay",
+        "table": "cox-2017-appendix-a",
+        "name": "Thick (9 mm) carpet on underlay",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/needle_felt_5_mm_stuck_to_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Needle felt 5 mm stuck to concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/thin_carpet_cemented_to_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Thin carpet cemented to concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek and Hidaka (1998)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/wood_block_lino_rubber_flooring",
+        "table": "cox-2017-appendix-a",
+        "name": "Wood block/lino/rubber flooring",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/parquet_fixed_with_asphalt_on_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Parquet fixed with asphalt, on concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/wood_on_solid_floor",
+        "table": "cox-2017-appendix-a",
+        "name": "Wood on solid floor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/floors_wood",
+        "table": "cox-2017-appendix-a",
+        "name": "Floors, wood",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/wood_platform_large_airspace_below",
+        "table": "cox-2017-appendix-a",
+        "name": "Wood platform, large airspace below",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/floor_boards_on_joist_floor",
+        "table": "cox-2017-appendix-a",
+        "name": "Floor boards on joist floor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/floors_concrete_or_terrazzo",
+        "table": "cox-2017-appendix-a",
+        "name": "Floors, concrete or terrazzo",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/concrete_floor",
+        "table": "cox-2017-appendix-a",
+        "name": "Concrete floor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek and Hidaka (1998)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/linoleum_or_vinyl_stuck_to_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Linoleum or vinyl stuck to concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Petersen (1983)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/linoleum_asphalt_tile_or_cork_tile_on_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Linoleum, asphalt tile, or cork tile on concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991); Everest (2001); Young (1959)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/layer_of_rubber_cork_linoleum_and_underlay_or_vinyl_and_underlay_stuck_to_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Layer of rubber, cork, linoleum and underlay, or vinyl and underlay, stuck to concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/cork_lino_or_rubber_tile_on_solid_floor",
+        "table": "cox-2017-appendix-a",
+        "name": "Cork, lino or rubber tile on solid floor",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/25_mm_cork_on_solid_backing",
+        "table": "cox-2017-appendix-a",
+        "name": "25 mm cork on solid backing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/slate",
+        "table": "cox-2017-appendix-a",
+        "name": "Slate",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/beraneks_values",
+        "table": "cox-2017-appendix-a",
+        "name": "Beranek's values",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1969)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,59",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/average_of_nine_modern_seating_designs_0_9_m_row_spacing",
+        "table": "cox-2017-appendix-a",
+        "name": "Average of nine modern seating designs, 0.9 m row spacing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Davies, Orlowski and Lam (1994)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/one_seat_type_0_8_m_row_spacing",
+        "table": "cox-2017-appendix-a",
+        "name": "One seat type, 0.8 m row spacing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Davies, Orlowski and Lam (1994)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/same_seat_as_line_above_0_9_m_row_spacing",
+        "table": "cox-2017-appendix-a",
+        "name": "Same seat as line above, 0.9 m row spacing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Davies, Orlowski and Lam (1994)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/same_seat_as_two_lines_above_1_m_row_spacing",
+        "table": "cox-2017-appendix-a",
+        "name": "Same seat as two lines above, 1 m row spacing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Davies, Orlowski and Lam (1994)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/upholstered_seating",
+        "table": "cox-2017-appendix-a",
+        "name": "Upholstered seating",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/upholstered_seating_well_upholstered",
+        "table": "cox-2017-appendix-a",
+        "name": "Upholstered seating, well upholstered",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Bies and Hansen (1996)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/upholstered_seating_leather_covered",
+        "table": "cox-2017-appendix-a",
+        "name": "Upholstered seating, leather covered",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Bies and Hansen (1996)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/occupied_theatre_seating_average_from_references_1_and_16",
+        "table": "cox-2017-appendix-a",
+        "name": "Occupied theatre seating average from References 1 and 16",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954); Davies, Orlowski and Lam (1994)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/audience_on_timber_seats_1_m2",
+        "table": "cox-2017-appendix-a",
+        "name": "Audience on timber seats (1/m²)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/audience_on_timber_seats_2_m2",
+        "table": "cox-2017-appendix-a",
+        "name": "Audience on timber seats (2/m²)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/orchestra_with_instruments_1_5_m2_person",
+        "table": "cox-2017-appendix-a",
+        "name": "Orchestra with instruments (1.5 m²/person)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/wooden_pews_100percent_occupancy",
+        "table": "cox-2017-appendix-a",
+        "name": "Wooden pews (100% occupancy)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Bies and Hansen (1996)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/wooden_chairs_100percent_occupancy",
+        "table": "cox-2017-appendix-a",
+        "name": "Wooden chairs (100% occupancy)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Bies and Hansen (1996)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/wooden_pews_75percent_occupancy",
+        "table": "cox-2017-appendix-a",
+        "name": "Wooden pews (75% occupancy)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Bies and Hansen (1996)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/2_7_people_m2_see_reference_18",
+        "table": "cox-2017-appendix-a",
+        "name": "2.7 people/m² (see Reference 18)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Adelman-Larsen, Thompson and Gade (2010)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,14",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/water_surface_in_swimming_pool_knudsen",
+        "table": "cox-2017-appendix-a",
+        "name": "Water surface in swimming pool",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Knudsen and Harris (1953)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/water_surface_in_swimming_pool_harris",
+        "table": "cox-2017-appendix-a",
+        "name": "Water surface in swimming pool",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,008",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,008",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,013",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,025",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/marble_or_glazed_tile",
+        "table": "cox-2017-appendix-a",
+        "name": "Marble or glazed tile",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/solid_wooden_door",
+        "table": "cox-2017-appendix-a",
+        "name": "Solid wooden door",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/ventilation_grille",
+        "table": "cox-2017-appendix-a",
+        "name": "Ventilation grille",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/egg_boxes",
+        "table": "cox-2017-appendix-a",
+        "name": "Egg boxes",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Riverbank Acoustical Laboratories (accessed 2008)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/anechoic_chamber_wall_wedges",
+        "table": "cox-2017-appendix-a",
+        "name": "Anechoic chamber wall (wedges)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,997",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,997",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,997",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,997",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,997",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,997",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plywood_panelling_1_cm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Plywood panelling, 1 cm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/22_mm_chipboard_50_mm_cavity_filled_with_mineral_wool",
+        "table": "cox-2017-appendix-a",
+        "name": "22 mm chipboard, 50 mm cavity filled with mineral wool",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/3_4_mm_plywood_sheets_over75_mm_cavity_with_25_50_mm_mineral_wool",
+        "table": "cox-2017-appendix-a",
+        "name": "3–4 mm plywood sheets, >75 mm cavity with 25–50 mm mineral wool",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plywood_hardwood_air_space",
+        "table": "cox-2017-appendix-a",
+        "name": "Plywood/hardwood, air space",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/6_mm_wood_fibreboard_on_laths_cavity_over100_mm_deep",
+        "table": "cox-2017-appendix-a",
+        "name": "6 mm wood fibreboard on laths, cavity >100 mm deep",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/fibreboard_solid_backing",
+        "table": "cox-2017-appendix-a",
+        "name": "Fibreboard, solid backing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/fibreboard_25_mm_air_space",
+        "table": "cox-2017-appendix-a",
+        "name": "Fibreboard, 25 mm air space",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/9_5_12_7_mm_wood_panelling_5_10_cm_air_space_behind",
+        "table": "cox-2017-appendix-a",
+        "name": "9.5–12.7 mm wood panelling, 5–10 cm air space behind",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek (1954)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/wood_50_mm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Wood, 50 mm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/rough_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Rough concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "ISO/TR 11690-3 (1997)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/smooth_unpainted_concrete",
+        "table": "cox-2017-appendix-a",
+        "name": "Smooth unpainted concrete",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/smooth_concrete_painted_or_glazed",
+        "table": "cox-2017-appendix-a",
+        "name": "Smooth concrete, painted or glazed",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/concrete_block_coarse",
+        "table": "cox-2017-appendix-a",
+        "name": "Concrete block, coarse",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/concrete_block_painted",
+        "table": "cox-2017-appendix-a",
+        "name": "Concrete block, painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991); Everest (2001); Young (1959)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/porous_concrete_blocks_without_surface_finish_400_800_kg_m3",
+        "table": "cox-2017-appendix-a",
+        "name": "Porous concrete blocks without surface finish, 400–800 kg/m³",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/clinker_concrete_no_surface_finish_800_kg_m3",
+        "table": "cox-2017-appendix-a",
+        "name": "Clinker concrete, no surface finish, 800 kg/m³",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/brick_unglazed",
+        "table": "cox-2017-appendix-a",
+        "name": "Brick, unglazed",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/brickwork_plain_painted",
+        "table": "cox-2017-appendix-a",
+        "name": "Brickwork, plain painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/smooth_brickwork_with_flush_pointing_painted",
+        "table": "cox-2017-appendix-a",
+        "name": "Smooth brickwork with flush pointing, painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Knudsen and Harris (1953)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/brick_unglazed_painted",
+        "table": "cox-2017-appendix-a",
+        "name": "Brick, unglazed, painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/smooth_brickwork_with_flush_pointing",
+        "table": "cox-2017-appendix-a",
+        "name": "Smooth brickwork with flush pointing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/smooth_brickwork_10_mm_deep_pointing_pit_sand_mortar",
+        "table": "cox-2017-appendix-a",
+        "name": "Smooth brickwork, 10 mm deep pointing, pit sand mortar",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/breeze_block",
+        "table": "cox-2017-appendix-a",
+        "name": "Breeze block",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/lime_cement_plaster",
+        "table": "cox-2017-appendix-a",
+        "name": "Lime cement plaster",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/glaze_plaster",
+        "table": "cox-2017-appendix-a",
+        "name": "Glaze plaster",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/painted_plaster_surface",
+        "table": "cox-2017-appendix-a",
+        "name": "Painted plaster surface",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plaster_with_wallpaper_on_backing_paper",
+        "table": "cox-2017-appendix-a",
+        "name": "Plaster with wallpaper on backing paper",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Bobran (1973)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plaster_gypsum_or_lime_rough_finish_on_lath",
+        "table": "cox-2017-appendix-a",
+        "name": "Plaster, gypsum, or lime, rough finish on lath",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek and Hidaka (1998); Davis and Davis (1997)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plaster_gypsum_or_lime_smooth_finish_on_lath_harris",
+        "table": "cox-2017-appendix-a",
+        "name": "Plaster, gypsum, or lime, smooth finish on lath",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plaster_gypsum_or_lime_smooth_finish_on_lath_beranek",
+        "table": "cox-2017-appendix-a",
+        "name": "Plaster, gypsum, or lime, smooth finish on lath",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek and Hidaka (1998); Davis and Davis (1997)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plaster_on_laths_studs_air_space",
+        "table": "cox-2017-appendix-a",
+        "name": "Plaster, on laths/studs, air space",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plaster_gypsum_or_lime_smooth_finish_on_tile_or_brick",
+        "table": "cox-2017-appendix-a",
+        "name": "Plaster, gypsum, or lime, smooth finish on tile or brick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,013",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plaster_lime_or_gypsum_on_solid_backing",
+        "table": "cox-2017-appendix-a",
+        "name": "Plaster, lime, or gypsum on solid backing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/acoustics_plaster",
+        "table": "cox-2017-appendix-a",
+        "name": "Acoustics plaster",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/acoustics_plaster_40_mm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Acoustics plaster, 40 mm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/acoustics_plaster_68_mm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Acoustics plaster, 68 mm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/gypsum_board_1_27_cm_nailed_to_studs_with_4_1_m_c_t_c",
+        "table": "cox-2017-appendix-a",
+        "name": "Gypsum board, 1.27 cm nailed to studs with 4.1 m c-t-c",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plasterboard_on_frame_9_5_mm_boards_10_cm_empty_cavity",
+        "table": "cox-2017-appendix-a",
+        "name": "Plasterboard on frame, 9.5 mm boards, 10 cm empty cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Fasold and Winkler (1976)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plasterboard_on_frame_9_5_mm_boards_10_cm_cavity_filled_with_mineral_wool",
+        "table": "cox-2017-appendix-a",
+        "name": "Plasterboard on frame, 9.5 mm boards, 10 cm cavity filled with mineral wool",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Fasold and Winkler (1976)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plasterboard_on_frame_13_mm_boards_10_cm_empty_cavity",
+        "table": "cox-2017-appendix-a",
+        "name": "Plasterboard on frame, 13 mm boards, 10 cm empty cavity",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Fasold and Winkler (1976)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/plasterboard_on_frame_13_mm_boards_10_cm_cavity_filled_with_mineral_wool",
+        "table": "cox-2017-appendix-a",
+        "name": "Plasterboard on frame, 13 mm boards, 10 cm cavity filled with mineral wool",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Fasold and Winkler (1976)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/2_x_13_mm_plasterboard_on_steel_frame_5_cm_mineral_wool_in_cavity_surface_painted",
+        "table": "cox-2017-appendix-a",
+        "name": "2 × 13 mm plasterboard on steel frame, 5 cm mineral wool in cavity, surface painted",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Petersen (1983)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/glass_ordinary_window_glass",
+        "table": "cox-2017-appendix-a",
+        "name": "Glass, ordinary window glass",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/single_pane_of_glass_3_4_mm",
+        "table": "cox-2017-appendix-a",
+        "name": "Single pane of glass, 3–4 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/single_pane_of_glass_over4_mm",
+        "table": "cox-2017-appendix-a",
+        "name": "Single pane of glass, >4 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Fry (1987)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/single_pane_of_glass_3_mm",
+        "table": "cox-2017-appendix-a",
+        "name": "Single pane of glass, 3 mm",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Fasold and Winkler (1976)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/double_glazing_2_3_mm_glass_1_cm_gap",
+        "table": "cox-2017-appendix-a",
+        "name": "Double glazing, 2–3 mm glass, 1 cm gap",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/double_glazing_2_3_mm_glass_over3_cm_gap",
+        "table": "cox-2017-appendix-a",
+        "name": "Double glazing, 2–3 mm glass, >3 cm gap",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Lynge (2001); Fasold and Winkler (1976)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/glass_large_panes_heavy_glass",
+        "table": "cox-2017-appendix-a",
+        "name": "Glass, large panes, heavy glass",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991); Everest (2001); Young (1959)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/25_mm_fibreglass_rigid_backing",
+        "table": "cox-2017-appendix-a",
+        "name": "25 mm fibreglass, rigid backing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/2_54_cm_fibreglass_24_to_48_kg_m3",
+        "table": "cox-2017-appendix-a",
+        "name": "2.54 cm fibreglass, 24 to 48 kg/m³",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/2_5_cm_fibreglass_2_5_cm_airspace",
+        "table": "cox-2017-appendix-a",
+        "name": "2.5 cm fibreglass, 2.5 cm airspace",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/5_cm_fibreglass_rigid_backing",
+        "table": "cox-2017-appendix-a",
+        "name": "5 cm fibreglass, rigid backing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/7_5_cm_fibreglass_rigid_backing",
+        "table": "cox-2017-appendix-a",
+        "name": "7.5 cm fibreglass, rigid backing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/10_cm_fibreglass_rigid_backing",
+        "table": "cox-2017-appendix-a",
+        "name": "10 cm fibreglass, rigid backing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/5_cm_mineral_wool_40_kg_m3_glued_to_wall_untreated_surface",
+        "table": "cox-2017-appendix-a",
+        "name": "5 cm mineral wool (40 kg/m³), glued to wall, untreated surface",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/5_cm_mineral_wool_40_kg_m3_glued_to_wall_surface_sprayed_with_thin_plastic_solution",
+        "table": "cox-2017-appendix-a",
+        "name": "5 cm mineral wool (40 kg/m³), glued to wall, surface sprayed with thin plastic solution",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/5_cm_mineral_wool_70_kg_m3_30_cm_in_front_of_wall",
+        "table": "cox-2017-appendix-a",
+        "name": "5 cm mineral wool (70 kg/m³) 30 cm in front of wall",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/5_cm_wood_wool_set_in_mortar",
+        "table": "cox-2017-appendix-a",
+        "name": "5 cm wood-wool set in mortar",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Kristensen (1984); Lynge (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/5_1_cm_fibreglass_panels_with_plastic_sheet_wrapping_and_perforated_metal_facing",
+        "table": "cox-2017-appendix-a",
+        "name": "5.1 cm fibreglass, panels with plastic sheet wrapping and perforated metal facing",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,99",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/5_1_cm_fibreglass_24_48_kg_m3",
+        "table": "cox-2017-appendix-a",
+        "name": "5.1 cm fibreglass, 24–48 kg/m³",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/acoustic_tile_1_27_cm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Acoustic tile, 1.27 cm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Everest (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/acoustic_tile_1_9_cm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Acoustic tile, 1.9 cm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Everest (2001)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/polyurethane_foam_2_5_cm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Polyurethane foam, 2.5 cm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/thermafleece_sheep_wool_absorbent_100_mm_thick",
+        "table": "cox-2017-appendix-a",
+        "name": "Thermafleece, sheep wool absorbent 100 mm thick",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Greenshop (accessed 2008)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/ballast_or_other_crushed_stone_3_18_cm_15_2_deep",
+        "table": "cox-2017-appendix-a",
+        "name": "Ballast or other crushed stone, 3.18 cm, 15.2 deep",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/ballast_or_other_crushed_stone_3_18_cm_30_5_cm_deep",
+        "table": "cox-2017-appendix-a",
+        "name": "Ballast or other crushed stone, 3.18 cm, 30.5 cm deep",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/ballast_or_other_crushed_stone_3_18_cm_45_7_cm_deep",
+        "table": "cox-2017-appendix-a",
+        "name": "Ballast or other crushed stone, 3.18 cm, 45.7 cm deep",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/ballast_or_other_crushed_stone_0_64_cm_15_2_cm_deep",
+        "table": "cox-2017-appendix-a",
+        "name": "Ballast or other crushed stone, 0.64 cm, 15.2 cm deep",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/microperforated_absorber_4_cm_cavity",
+        "table": "cox-2017-appendix-a",
+        "name": "Microperforated absorber",
+        "variant": "4 cm cavity",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/microperforated_absorber_40_cm_cavity",
+        "table": "cox-2017-appendix-a",
+        "name": "Microperforated absorber",
+        "variant": "40 cm cavity",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/hybrid_absorber_diffuser_bad_panel_mounted_on_2_5_cm_fibreglass",
+        "table": "cox-2017-appendix-a",
+        "name": "Hybrid absorber-diffuser (BAD panel mounted on 2.5 cm fibreglass)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/2d_n_7_qrd_design_freq_500_hz",
+        "table": "cox-2017-appendix-a",
+        "name": "2D N = 7 QRD, design freq. = 500 Hz",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/2d_n_7_qrd_as_line_above_with_cloth_covering",
+        "table": "cox-2017-appendix-a",
+        "name": "2D N = 7 QRD as line above, with cloth covering",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/1d_n_7_qrd_design_freq_500_hz",
+        "table": "cox-2017-appendix-a",
+        "name": "1D N = 7 QRD, design freq. = 500 Hz",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/1d_n_7_qrd_as_line_above_with_cloth_covering",
+        "table": "cox-2017-appendix-a",
+        "name": "1D N = 7 QRD as line above, with cloth covering",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "RPG Diffusor Systems (accessed 2003)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/data_from_azkorra_et_al",
+        "table": "cox-2017-appendix-a",
+        "name": "Data from Azkorra et al.",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Azkorra et al. (2015)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/data_from_wong_et_al_100percent_greenery",
+        "table": "cox-2017-appendix-a",
+        "name": "Data from Wong et al. (100% greenery)",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Wong et al. (2010)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,48",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/data_from_yang_et_al",
+        "table": "cox-2017-appendix-a",
+        "name": "Data from Yang et al.",
+        "variant": "",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_percentage_of_vegetative_cover_0percent_bare_soil",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different percentage of vegetative cover",
+        "variant": "0%, bare soil",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_percentage_of_vegetative_cover_20percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different percentage of vegetative cover",
+        "variant": "20%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,92",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_percentage_of_vegetative_cover_40percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different percentage of vegetative cover",
+        "variant": "40%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_percentage_of_vegetative_cover_60percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different percentage of vegetative cover",
+        "variant": "60%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_percentage_of_vegetative_cover_80percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different percentage of vegetative cover",
+        "variant": "80%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_percentage_of_vegetative_cover_100percent_completely_covered",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different percentage of vegetative cover",
+        "variant": "100%, completely covered",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,98",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_moisture_content_12_5percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different moisture content",
+        "variant": "12.5%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_moisture_content_17percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different moisture content",
+        "variant": "17%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_moisture_content_20_4percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different moisture content",
+        "variant": "20.4%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_moisture_content_23_8percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different moisture content",
+        "variant": "23.8%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_moisture_content_25_4percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different moisture content",
+        "variant": "25.4%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "cox-2017-appendix-a/top_soil_with_different_moisture_content_34_1percent",
+        "table": "cox-2017-appendix-a",
+        "name": "Top soil with different moisture content",
+        "variant": "34.1%",
+        "mounting": "",
+        "per": "",
+        "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+        "note": "",
+        "attributedTo": {
+          "row": "Yang, Kang and Cheal (2013)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
       }
     ]
   },

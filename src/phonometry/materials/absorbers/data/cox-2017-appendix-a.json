@@ -1,0 +1,2269 @@
+{
+  "source": "Cox & D'Antonio 3e Appendix A, PDF pages 532-536 (printed pp. 475-479)",
+  "about": "The hundred and sixty-one rows of \"Appendix A: Table of absorption coefficients\", printed over five pages under twenty-two bold group headings: curtains or drapes, variation with draping, cotton curtains, carpet, other floors, theatre seating unoccupied, seating occupied, standing audience, miscellaneous, wood, concrete, bricks and blocks, plaster, plasterboard, glazing, wools and foam, ballast, microperforated absorber, diffusers, green wall systems, and two groups of top soil, one by vegetative cover and one by moisture content. Columns as printed: \"Material\" and, under \"Frequency (Hz)\", 125, 250, 500, 1000, 2000 and 4000. Every one of the 966 cells holds a number: no empty cell, no dash, no word. There is no mounting column and no thickness column, because where a thickness, a density or a cavity depth matters the page puts it in the name, and the names are kept as printed, centimetres, millimetres and kilograms per square metre included. Five groups head a block of rows that are only a condition, a cavity depth or a percentage, and those rows are held with the heading as the name and the printed row as the variant, because \"20%\" on its own is not a material. The appendix has no caption, no table number, no prose above it and no footnote under it. Its credits are per row: a superscript number on the material name, one or two of them, keyed to the list of twenty-nine references printed on PDF page 537 (printed p. 480), and the row holds that credit as the short form of the reference it points at, which is what makes this appendix a compilation of twenty-nine sources rather than one measurement campaign. Two rows cite in words instead of a superscript, \"average from References 1 and 16\" and \"see Reference 18\", and are credited the same way; the twelve top soil rows carry the credit their bold group heading prints once, reference 29, and each holds it. Four rows carry no credit at all: the cork on solid backing, the anechoic chamber wedges, the 50 mm wood and the polyurethane foam. Four rows are printed with three decimals where the rest of the page prints two, and the anechoic wedge row is 0.997 in every band. The page prints a standing audience above 1 at 1 kHz, 2 kHz and 4 kHz and a sheep wool absorbent above 1 at 4 kHz, which is what a reverberation-room coefficient does and not a misreading.",
+  "rows": [
+    {
+      "key": "light_velour_0_338_kg_m2_hung_straight_in_contact_with_wall",
+      "name": "Light velour 0.338 kg/m² hung straight in contact with wall",
+      "group": "Curtains or drapes",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.11,
+      "absorption_coefficient_1000": 0.18,
+      "absorption_coefficient_2000": 0.3,
+      "absorption_coefficient_4000": 0.35,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "medium_velour_0_475_kg_m2_hung_straight",
+      "name": "Medium velour 0.475 kg/m², hung straight",
+      "group": "Curtains or drapes",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.07,
+      "absorption_coefficient_500": 0.13,
+      "absorption_coefficient_1000": 0.22,
+      "absorption_coefficient_2000": 0.32,
+      "absorption_coefficient_4000": 0.35,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "medium_velour_0_475_kg_m2_draped_to_half_area",
+      "name": "Medium velour 0.475 kg/m², draped to half area",
+      "group": "Curtains or drapes",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.31,
+      "absorption_coefficient_500": 0.49,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.6,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "heavy_velour_0_61_kg_m2_hung_straight",
+      "name": "Heavy velour, 0.61 kg/m² hung straight",
+      "group": "Curtains or drapes",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.48,
+      "absorption_coefficient_2000": 0.38,
+      "absorption_coefficient_4000": 0.36,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "heavy_velour_0_61_kg_m2_draped_to_half_area",
+      "name": "Heavy velour, 0.61 kg/m² draped to half area",
+      "group": "Curtains or drapes",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.35,
+      "absorption_coefficient_500": 0.55,
+      "absorption_coefficient_1000": 0.77,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.6,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "variation_with_draping_hung_straight",
+      "name": "Variation with draping",
+      "variant": "Hung straight",
+      "group": "Variation with draping",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.16,
+      "absorption_coefficient_500": 0.19,
+      "absorption_coefficient_1000": 0.17,
+      "absorption_coefficient_2000": 0.2,
+      "absorption_coefficient_4000": 0.25,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "variation_with_draping_draped_to_half_area",
+      "name": "Variation with draping",
+      "variant": "Draped to half area",
+      "group": "Variation with draping",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.3,
+      "absorption_coefficient_1000": 0.28,
+      "absorption_coefficient_2000": 0.35,
+      "absorption_coefficient_4000": 0.4,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "variation_with_draping_draped_to_40percent_of_area",
+      "name": "Variation with draping",
+      "variant": "Draped to 40% of area",
+      "group": "Variation with draping",
+      "absorption_coefficient_125": 0.19,
+      "absorption_coefficient_250": 0.31,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.34,
+      "absorption_coefficient_2000": 0.44,
+      "absorption_coefficient_4000": 0.5,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "variation_with_draping_curtains_in_folds_against_wall",
+      "name": "Variation with draping",
+      "variant": "Curtains in folds against wall",
+      "group": "Variation with draping",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.15,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.4,
+      "absorption_coefficient_2000": 0.5,
+      "absorption_coefficient_4000": 0.5,
+      "attributed_to": {
+        "row": "Templeton (1997)"
+      }
+    },
+    {
+      "key": "cotton_curtains_0_475_kg_m2_draped_to_7_8_area",
+      "name": "Cotton curtains, 0.475 kg/m²",
+      "variant": "Draped to 7/8 area",
+      "group": "Cotton curtains, 0.475 kg/m²",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.15,
+      "absorption_coefficient_1000": 0.27,
+      "absorption_coefficient_2000": 0.37,
+      "absorption_coefficient_4000": 0.42,
+      "attributed_to": {
+        "row": "Mankovsky (1971); Everest (2001)"
+      }
+    },
+    {
+      "key": "cotton_curtains_0_475_kg_m2_draped_to_3_4_area",
+      "name": "Cotton curtains, 0.475 kg/m²",
+      "variant": "Draped to 3/4 area",
+      "group": "Cotton curtains, 0.475 kg/m²",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.23,
+      "absorption_coefficient_500": 0.4,
+      "absorption_coefficient_1000": 0.57,
+      "absorption_coefficient_2000": 0.53,
+      "absorption_coefficient_4000": 0.4,
+      "attributed_to": {
+        "row": "Mankovsky (1971); Everest (2001)"
+      }
+    },
+    {
+      "key": "cotton_curtains_0_475_kg_m2_draped_to_1_2_area",
+      "name": "Cotton curtains, 0.475 kg/m²",
+      "variant": "Draped to 1/2 area",
+      "group": "Cotton curtains, 0.475 kg/m²",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.37,
+      "absorption_coefficient_500": 0.49,
+      "absorption_coefficient_1000": 0.81,
+      "absorption_coefficient_2000": 0.65,
+      "absorption_coefficient_4000": 0.54,
+      "attributed_to": {
+        "row": "Mankovsky (1971); Everest (2001)"
+      }
+    },
+    {
+      "key": "carpet_heavy_on_concrete",
+      "name": "Carpet heavy, on concrete",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.14,
+      "absorption_coefficient_1000": 0.37,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "heavy_carpet_same_as_line_above_on_foam_rubber_or_1_35_kg_m2_hair_felt",
+      "name": "Heavy carpet (same as line above) on foam rubber or 1.35 kg/m² hair felt",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.24,
+      "absorption_coefficient_500": 0.57,
+      "absorption_coefficient_1000": 0.69,
+      "absorption_coefficient_2000": 0.71,
+      "absorption_coefficient_4000": 0.73,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "heavy_carpet_same_as_2_lines_above_with_latex_backing_on_foam_rubber_or_1_35_kg_m2_hair_felt",
+      "name": "Heavy carpet (same as 2 lines above) with latex backing on foam rubber or 1.35 kg/m² hair felt",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.27,
+      "absorption_coefficient_500": 0.39,
+      "absorption_coefficient_1000": 0.34,
+      "absorption_coefficient_2000": 0.48,
+      "absorption_coefficient_4000": 0.63,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "haircord_on_felt",
+      "name": "Haircord on felt",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.15,
+      "absorption_coefficient_500": 0.25,
+      "absorption_coefficient_1000": 0.3,
+      "absorption_coefficient_2000": 0.3,
+      "absorption_coefficient_4000": 0.3,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "pile_and_thick_felt",
+      "name": "Pile and thick felt",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.5,
+      "absorption_coefficient_1000": 0.5,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "no_underlay_pad_woven_wool_loop_1_2_kg_m2_2_4_mm_pile_height",
+      "name": "No underlay (pad), woven wool loop, 1.2 kg/m² 2.4 mm pile height",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.16,
+      "absorption_coefficient_500": 0.11,
+      "absorption_coefficient_1000": 0.3,
+      "absorption_coefficient_2000": 0.5,
+      "absorption_coefficient_4000": 0.47,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "no_underlay_pad_woven_wool_loop_1_4_kg_m2_6_4_mm_pile_height",
+      "name": "No underlay (pad), woven wool loop, 1.4 kg/m² 6.4 mm pile height",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.17,
+      "absorption_coefficient_500": 0.12,
+      "absorption_coefficient_1000": 0.32,
+      "absorption_coefficient_2000": 0.52,
+      "absorption_coefficient_4000": 0.57,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "no_underlay_pad_woven_wool_loop_2_3_kg_m2_9_5_mm_pile_height",
+      "name": "No underlay (pad) woven wool loop, 2.3 kg/m² 9.5 mm pile height",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.17,
+      "absorption_coefficient_250": 0.18,
+      "absorption_coefficient_500": 0.21,
+      "absorption_coefficient_1000": 0.5,
+      "absorption_coefficient_2000": 0.63,
+      "absorption_coefficient_4000": 0.83,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "loop_pile_tufted_carpet_1_4_kg_m2_hair_underlay_1_4_kg_m2",
+      "name": "Loop pile tufted carpet, 1.4 kg/m², hair underlay 1.4 kg/m²",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.55,
+      "absorption_coefficient_1000": 0.7,
+      "absorption_coefficient_2000": 0.62,
+      "absorption_coefficient_4000": 0.84,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "loop_pile_tufted_carpet_1_4_kg_m2_hair_underlay_3_0_kg_m2",
+      "name": "Loop pile tufted carpet, 1.4 kg/m², hair underlay 3.0 kg/m²",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.4,
+      "absorption_coefficient_500": 0.62,
+      "absorption_coefficient_1000": 0.7,
+      "absorption_coefficient_2000": 0.63,
+      "absorption_coefficient_4000": 0.88,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "loop_pile_tufted_carpet_1_4_kg_m2_hair_and_jute_underlay_3_kg_m2",
+      "name": "Loop pile tufted carpet, 1.4 kg/m², hair and jute underlay 3 kg/m²",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.2,
+      "absorption_coefficient_250": 0.5,
+      "absorption_coefficient_500": 0.68,
+      "absorption_coefficient_1000": 0.72,
+      "absorption_coefficient_2000": 0.65,
+      "absorption_coefficient_4000": 0.9,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "loop_pile_tufted_carpet_1_4_kg_m2_no_underlay",
+      "name": "Loop pile tufted carpet, 1.4 kg/m², no underlay",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.08,
+      "absorption_coefficient_500": 0.17,
+      "absorption_coefficient_1000": 0.33,
+      "absorption_coefficient_2000": 0.59,
+      "absorption_coefficient_4000": 0.75,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "loop_pile_tufted_carpet_0_7_kg_m2_1_4_kg_m2_hair_underlay_pad",
+      "name": "Loop pile tufted carpet, 0.7 kg/m², 1.4 kg/m² hair underlay pad",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.19,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.79,
+      "absorption_coefficient_2000": 0.69,
+      "absorption_coefficient_4000": 0.79,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "16_mm_wool_pile_with_underlay",
+      "name": "16 mm wool pile with underlay",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.2,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.4,
+      "absorption_coefficient_2000": 0.5,
+      "absorption_coefficient_4000": 0.75,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "9_5_mm_wool_pile_no_underlay_on_concrete",
+      "name": "9.5 mm wool pile no underlay on concrete",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.09,
+      "absorption_coefficient_250": 0.08,
+      "absorption_coefficient_500": 0.21,
+      "absorption_coefficient_1000": 0.26,
+      "absorption_coefficient_2000": 0.27,
+      "absorption_coefficient_4000": 0.37,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "cord_carpet",
+      "name": "Cord carpet",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.2,
+      "absorption_coefficient_2000": 0.45,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Templeton (1997)"
+      }
+    },
+    {
+      "key": "thin_6_mm_carpet_on_underlay",
+      "name": "Thin (6 mm) carpet on underlay",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.09,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.54,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.72,
+      "attributed_to": {
+        "row": "Parkin, Humphreys and Cowell (1979)"
+      }
+    },
+    {
+      "key": "6_mm_pile_carpet_bonded_to_closed_cell_foam_underlay",
+      "name": "6 mm pile carpet bonded to closed-cell foam underlay",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.09,
+      "absorption_coefficient_500": 0.25,
+      "absorption_coefficient_1000": 0.31,
+      "absorption_coefficient_2000": 0.33,
+      "absorption_coefficient_4000": 0.44,
+      "attributed_to": {
+        "row": "Parkin, Humphreys and Cowell (1979)"
+      }
+    },
+    {
+      "key": "thick_9_mm_carpet_on_underlay",
+      "name": "Thick (9 mm) carpet on underlay",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.08,
+      "absorption_coefficient_500": 0.3,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.75,
+      "absorption_coefficient_4000": 0.8,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "needle_felt_5_mm_stuck_to_concrete",
+      "name": "Needle felt 5 mm stuck to concrete",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.15,
+      "absorption_coefficient_2000": 0.3,
+      "absorption_coefficient_4000": 0.4,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "thin_carpet_cemented_to_concrete",
+      "name": "Thin carpet cemented to concrete",
+      "group": "Carpet",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.08,
+      "absorption_coefficient_1000": 0.2,
+      "absorption_coefficient_2000": 0.35,
+      "absorption_coefficient_4000": 0.4,
+      "attributed_to": {
+        "row": "Beranek and Hidaka (1998)"
+      }
+    },
+    {
+      "key": "wood_block_lino_rubber_flooring",
+      "name": "Wood block/lino/rubber flooring",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "parquet_fixed_with_asphalt_on_concrete",
+      "name": "Parquet fixed with asphalt, on concrete",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.07,
+      "absorption_coefficient_1000": 0.06,
+      "absorption_coefficient_2000": 0.06,
+      "absorption_coefficient_4000": 0.07,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "wood_on_solid_floor",
+      "name": "Wood on solid floor",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "floors_wood",
+      "name": "Floors, wood",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.11,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.06,
+      "absorption_coefficient_4000": 0.07,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "wood_platform_large_airspace_below",
+      "name": "Wood platform, large airspace below",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.4,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.17,
+      "absorption_coefficient_2000": 0.15,
+      "absorption_coefficient_4000": 0.1,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "floor_boards_on_joist_floor",
+      "name": "Floor boards on joist floor",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.2,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.1,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.1,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "floors_concrete_or_terrazzo",
+      "name": "Floors, concrete or terrazzo",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.015,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+      }
+    },
+    {
+      "key": "concrete_floor",
+      "name": "Concrete floor",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Beranek and Hidaka (1998)"
+      }
+    },
+    {
+      "key": "linoleum_or_vinyl_stuck_to_concrete",
+      "name": "Linoleum or vinyl stuck to concrete",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Lynge (2001); Petersen (1983)"
+      }
+    },
+    {
+      "key": "linoleum_asphalt_tile_or_cork_tile_on_concrete",
+      "name": "Linoleum, asphalt tile, or cork tile on concrete",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Harris (1991); Everest (2001); Young (1959)"
+      }
+    },
+    {
+      "key": "layer_of_rubber_cork_linoleum_and_underlay_or_vinyl_and_underlay_stuck_to_concrete",
+      "name": "Layer of rubber, cork, linoleum and underlay, or vinyl and underlay, stuck to concrete",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.1,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "cork_lino_or_rubber_tile_on_solid_floor",
+      "name": "Cork, lino or rubber tile on solid floor",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.04,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.03,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "25_mm_cork_on_solid_backing",
+      "name": "25 mm cork on solid backing",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.55,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.55
+    },
+    {
+      "key": "slate",
+      "name": "Slate",
+      "group": "Other floors",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "beraneks_values",
+      "name": "Beranek's values",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.19,
+      "absorption_coefficient_250": 0.37,
+      "absorption_coefficient_500": 0.56,
+      "absorption_coefficient_1000": 0.67,
+      "absorption_coefficient_2000": 0.61,
+      "absorption_coefficient_4000": 0.59,
+      "attributed_to": {
+        "row": "Beranek (1969)"
+      }
+    },
+    {
+      "key": "average_of_nine_modern_seating_designs_0_9_m_row_spacing",
+      "name": "Average of nine modern seating designs, 0.9 m row spacing",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.34,
+      "absorption_coefficient_250": 0.46,
+      "absorption_coefficient_500": 0.64,
+      "absorption_coefficient_1000": 0.71,
+      "absorption_coefficient_2000": 0.77,
+      "absorption_coefficient_4000": 0.85,
+      "attributed_to": {
+        "row": "Davies, Orlowski and Lam (1994)"
+      }
+    },
+    {
+      "key": "one_seat_type_0_8_m_row_spacing",
+      "name": "One seat type, 0.8 m row spacing",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.29,
+      "absorption_coefficient_250": 0.39,
+      "absorption_coefficient_500": 0.61,
+      "absorption_coefficient_1000": 0.74,
+      "absorption_coefficient_2000": 0.83,
+      "absorption_coefficient_4000": 0.88,
+      "attributed_to": {
+        "row": "Davies, Orlowski and Lam (1994)"
+      }
+    },
+    {
+      "key": "same_seat_as_line_above_0_9_m_row_spacing",
+      "name": "Same seat as line above, 0.9 m row spacing",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.25,
+      "absorption_coefficient_250": 0.35,
+      "absorption_coefficient_500": 0.58,
+      "absorption_coefficient_1000": 0.7,
+      "absorption_coefficient_2000": 0.78,
+      "absorption_coefficient_4000": 0.84,
+      "attributed_to": {
+        "row": "Davies, Orlowski and Lam (1994)"
+      }
+    },
+    {
+      "key": "same_seat_as_two_lines_above_1_m_row_spacing",
+      "name": "Same seat as two lines above, 1 m row spacing",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.23,
+      "absorption_coefficient_250": 0.34,
+      "absorption_coefficient_500": 0.52,
+      "absorption_coefficient_1000": 0.65,
+      "absorption_coefficient_2000": 0.73,
+      "absorption_coefficient_4000": 0.75,
+      "attributed_to": {
+        "row": "Davies, Orlowski and Lam (1994)"
+      }
+    },
+    {
+      "key": "upholstered_seating",
+      "name": "Upholstered seating",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.45,
+      "absorption_coefficient_250": 0.6,
+      "absorption_coefficient_500": 0.73,
+      "absorption_coefficient_1000": 0.8,
+      "absorption_coefficient_2000": 0.75,
+      "absorption_coefficient_4000": 0.64,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "upholstered_seating_well_upholstered",
+      "name": "Upholstered seating, well upholstered",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.44,
+      "absorption_coefficient_250": 0.6,
+      "absorption_coefficient_500": 0.77,
+      "absorption_coefficient_1000": 0.89,
+      "absorption_coefficient_2000": 0.82,
+      "absorption_coefficient_4000": 0.7,
+      "attributed_to": {
+        "row": "Bies and Hansen (1996)"
+      }
+    },
+    {
+      "key": "upholstered_seating_leather_covered",
+      "name": "Upholstered seating, leather covered",
+      "group": "Theatre seating, unoccupied",
+      "absorption_coefficient_125": 0.4,
+      "absorption_coefficient_250": 0.5,
+      "absorption_coefficient_500": 0.58,
+      "absorption_coefficient_1000": 0.61,
+      "absorption_coefficient_2000": 0.58,
+      "absorption_coefficient_4000": 0.5,
+      "attributed_to": {
+        "row": "Bies and Hansen (1996)"
+      }
+    },
+    {
+      "key": "occupied_theatre_seating_average_from_references_1_and_16",
+      "name": "Occupied theatre seating average from References 1 and 16",
+      "group": "Seating, occupied",
+      "absorption_coefficient_125": 0.41,
+      "absorption_coefficient_250": 0.58,
+      "absorption_coefficient_500": 0.8,
+      "absorption_coefficient_1000": 0.9,
+      "absorption_coefficient_2000": 0.92,
+      "absorption_coefficient_4000": 0.89,
+      "attributed_to": {
+        "row": "Beranek (1954); Davies, Orlowski and Lam (1994)"
+      }
+    },
+    {
+      "key": "audience_on_timber_seats_1_m2",
+      "name": "Audience on timber seats (1/m²)",
+      "group": "Seating, occupied",
+      "absorption_coefficient_125": 0.16,
+      "absorption_coefficient_250": 0.24,
+      "absorption_coefficient_500": 0.56,
+      "absorption_coefficient_1000": 0.69,
+      "absorption_coefficient_2000": 0.81,
+      "absorption_coefficient_4000": 0.78,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "audience_on_timber_seats_2_m2",
+      "name": "Audience on timber seats (2/m²)",
+      "group": "Seating, occupied",
+      "absorption_coefficient_125": 0.24,
+      "absorption_coefficient_250": 0.4,
+      "absorption_coefficient_500": 0.78,
+      "absorption_coefficient_1000": 0.98,
+      "absorption_coefficient_2000": 0.96,
+      "absorption_coefficient_4000": 0.87,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "orchestra_with_instruments_1_5_m2_person",
+      "name": "Orchestra with instruments (1.5 m²/person)",
+      "group": "Seating, occupied",
+      "absorption_coefficient_125": 0.27,
+      "absorption_coefficient_250": 0.53,
+      "absorption_coefficient_500": 0.67,
+      "absorption_coefficient_1000": 0.93,
+      "absorption_coefficient_2000": 0.87,
+      "absorption_coefficient_4000": 0.8,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "wooden_pews_100percent_occupancy",
+      "name": "Wooden pews (100% occupancy)",
+      "group": "Seating, occupied",
+      "absorption_coefficient_125": 0.57,
+      "absorption_coefficient_250": 0.61,
+      "absorption_coefficient_500": 0.75,
+      "absorption_coefficient_1000": 0.86,
+      "absorption_coefficient_2000": 0.91,
+      "absorption_coefficient_4000": 0.86,
+      "attributed_to": {
+        "row": "Bies and Hansen (1996)"
+      }
+    },
+    {
+      "key": "wooden_chairs_100percent_occupancy",
+      "name": "Wooden chairs (100% occupancy)",
+      "group": "Seating, occupied",
+      "absorption_coefficient_125": 0.6,
+      "absorption_coefficient_250": 0.74,
+      "absorption_coefficient_500": 0.88,
+      "absorption_coefficient_1000": 0.96,
+      "absorption_coefficient_2000": 0.93,
+      "absorption_coefficient_4000": 0.85,
+      "attributed_to": {
+        "row": "Bies and Hansen (1996)"
+      }
+    },
+    {
+      "key": "wooden_pews_75percent_occupancy",
+      "name": "Wooden pews (75% occupancy)",
+      "group": "Seating, occupied",
+      "absorption_coefficient_125": 0.46,
+      "absorption_coefficient_250": 0.56,
+      "absorption_coefficient_500": 0.65,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.72,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Bies and Hansen (1996)"
+      }
+    },
+    {
+      "key": "2_7_people_m2_see_reference_18",
+      "name": "2.7 people/m² (see Reference 18)",
+      "group": "Standing audience",
+      "absorption_coefficient_125": 0.23,
+      "absorption_coefficient_250": 0.46,
+      "absorption_coefficient_500": 0.95,
+      "absorption_coefficient_1000": 1.21,
+      "absorption_coefficient_2000": 1.2,
+      "absorption_coefficient_4000": 1.14,
+      "attributed_to": {
+        "row": "Adelman-Larsen, Thompson and Gade (2010)"
+      }
+    },
+    {
+      "key": "water_surface_in_swimming_pool_knudsen",
+      "name": "Water surface in swimming pool",
+      "group": "Miscellaneous",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.01,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Knudsen and Harris (1953)"
+      }
+    },
+    {
+      "key": "water_surface_in_swimming_pool_harris",
+      "name": "Water surface in swimming pool",
+      "group": "Miscellaneous",
+      "absorption_coefficient_125": 0.008,
+      "absorption_coefficient_250": 0.008,
+      "absorption_coefficient_500": 0.013,
+      "absorption_coefficient_1000": 0.015,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.025,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "marble_or_glazed_tile",
+      "name": "Marble or glazed tile",
+      "group": "Miscellaneous",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.01,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "solid_wooden_door",
+      "name": "Solid wooden door",
+      "group": "Miscellaneous",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.08,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.1,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "ventilation_grille",
+      "name": "Ventilation grille",
+      "group": "Miscellaneous",
+      "absorption_coefficient_125": 0.6,
+      "absorption_coefficient_250": 0.6,
+      "absorption_coefficient_500": 0.6,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.6,
+      "absorption_coefficient_4000": 0.6,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "egg_boxes",
+      "name": "Egg boxes",
+      "group": "Miscellaneous",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.07,
+      "absorption_coefficient_500": 0.43,
+      "absorption_coefficient_1000": 0.62,
+      "absorption_coefficient_2000": 0.51,
+      "absorption_coefficient_4000": 0.7,
+      "attributed_to": {
+        "row": "Riverbank Acoustical Laboratories (accessed 2008)"
+      }
+    },
+    {
+      "key": "anechoic_chamber_wall_wedges",
+      "name": "Anechoic chamber wall (wedges)",
+      "group": "Miscellaneous",
+      "absorption_coefficient_125": 0.997,
+      "absorption_coefficient_250": 0.997,
+      "absorption_coefficient_500": 0.997,
+      "absorption_coefficient_1000": 0.997,
+      "absorption_coefficient_2000": 0.997,
+      "absorption_coefficient_4000": 0.997
+    },
+    {
+      "key": "plywood_panelling_1_cm_thick",
+      "name": "Plywood panelling, 1 cm thick",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.28,
+      "absorption_coefficient_250": 0.22,
+      "absorption_coefficient_500": 0.17,
+      "absorption_coefficient_1000": 0.09,
+      "absorption_coefficient_2000": 0.1,
+      "absorption_coefficient_4000": 0.11,
+      "attributed_to": {
+        "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+      }
+    },
+    {
+      "key": "22_mm_chipboard_50_mm_cavity_filled_with_mineral_wool",
+      "name": "22 mm chipboard, 50 mm cavity filled with mineral wool",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.12,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "3_4_mm_plywood_sheets_over75_mm_cavity_with_25_50_mm_mineral_wool",
+      "name": "3–4 mm plywood sheets, >75 mm cavity with 25–50 mm mineral wool",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.5,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "plywood_hardwood_air_space",
+      "name": "Plywood/hardwood, air space",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.32,
+      "absorption_coefficient_250": 0.43,
+      "absorption_coefficient_500": 0.12,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.11,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "6_mm_wood_fibreboard_on_laths_cavity_over100_mm_deep",
+      "name": "6 mm wood fibreboard on laths, cavity >100 mm deep",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.2,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.1,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "fibreboard_solid_backing",
+      "name": "Fibreboard, solid backing",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.15,
+      "absorption_coefficient_1000": 0.25,
+      "absorption_coefficient_2000": 0.3,
+      "absorption_coefficient_4000": 0.3,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "fibreboard_25_mm_air_space",
+      "name": "Fibreboard, 25 mm air space",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.3,
+      "absorption_coefficient_1000": 0.3,
+      "absorption_coefficient_2000": 0.3,
+      "absorption_coefficient_4000": 0.3,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "9_5_12_7_mm_wood_panelling_5_10_cm_air_space_behind",
+      "name": "9.5–12.7 mm wood panelling, 5–10 cm air space behind",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.17,
+      "absorption_coefficient_2000": 0.15,
+      "absorption_coefficient_4000": 0.1,
+      "attributed_to": {
+        "row": "Beranek (1954)"
+      }
+    },
+    {
+      "key": "wood_50_mm_thick",
+      "name": "Wood, 50 mm thick",
+      "group": "Wood",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.04
+    },
+    {
+      "key": "rough_concrete",
+      "name": "Rough concrete",
+      "group": "Concrete",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.07,
+      "attributed_to": {
+        "row": "ISO/TR 11690-3 (1997)"
+      }
+    },
+    {
+      "key": "smooth_unpainted_concrete",
+      "name": "Smooth unpainted concrete",
+      "group": "Concrete",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "smooth_concrete_painted_or_glazed",
+      "name": "Smooth concrete, painted or glazed",
+      "group": "Concrete",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "concrete_block_coarse",
+      "name": "Concrete block, coarse",
+      "group": "Concrete",
+      "absorption_coefficient_125": 0.36,
+      "absorption_coefficient_250": 0.44,
+      "absorption_coefficient_500": 0.31,
+      "absorption_coefficient_1000": 0.29,
+      "absorption_coefficient_2000": 0.39,
+      "absorption_coefficient_4000": 0.25,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "concrete_block_painted",
+      "name": "Concrete block, painted",
+      "group": "Concrete",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.09,
+      "absorption_coefficient_4000": 0.08,
+      "attributed_to": {
+        "row": "Harris (1991); Everest (2001); Young (1959)"
+      }
+    },
+    {
+      "key": "porous_concrete_blocks_without_surface_finish_400_800_kg_m3",
+      "name": "Porous concrete blocks without surface finish, 400–800 kg/m³",
+      "group": "Concrete",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.08,
+      "absorption_coefficient_2000": 0.14,
+      "absorption_coefficient_4000": 0.2,
+      "attributed_to": {
+        "row": "Lynge (2001)"
+      }
+    },
+    {
+      "key": "clinker_concrete_no_surface_finish_800_kg_m3",
+      "name": "Clinker concrete, no surface finish, 800 kg/m³",
+      "group": "Concrete",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.2,
+      "absorption_coefficient_500": 0.4,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.5,
+      "absorption_coefficient_4000": 0.6,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "brick_unglazed",
+      "name": "Brick, unglazed",
+      "group": "Bricks and blocks",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.07,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "brickwork_plain_painted",
+      "name": "Brickwork, plain painted",
+      "group": "Bricks and blocks",
+      "absorption_coefficient_125": 0.05,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "smooth_brickwork_with_flush_pointing_painted",
+      "name": "Smooth brickwork with flush pointing, painted",
+      "group": "Bricks and blocks",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Knudsen and Harris (1953)"
+      }
+    },
+    {
+      "key": "brick_unglazed_painted",
+      "name": "Brick, unglazed, painted",
+      "group": "Bricks and blocks",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.03,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "smooth_brickwork_with_flush_pointing",
+      "name": "Smooth brickwork with flush pointing",
+      "group": "Bricks and blocks",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.07,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "smooth_brickwork_10_mm_deep_pointing_pit_sand_mortar",
+      "name": "Smooth brickwork, 10 mm deep pointing, pit sand mortar",
+      "group": "Bricks and blocks",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.09,
+      "absorption_coefficient_500": 0.12,
+      "absorption_coefficient_1000": 0.16,
+      "absorption_coefficient_2000": 0.22,
+      "absorption_coefficient_4000": 0.24,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "breeze_block",
+      "name": "Breeze block",
+      "group": "Bricks and blocks",
+      "absorption_coefficient_125": 0.2,
+      "absorption_coefficient_250": 0.3,
+      "absorption_coefficient_500": 0.6,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.5,
+      "absorption_coefficient_4000": 0.5,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "lime_cement_plaster",
+      "name": "Lime cement plaster",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Bobran (1973)"
+      }
+    },
+    {
+      "key": "glaze_plaster",
+      "name": "Glaze plaster",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.01,
+      "absorption_coefficient_250": 0.01,
+      "absorption_coefficient_500": 0.01,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "painted_plaster_surface",
+      "name": "Painted plaster surface",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.02,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "plaster_with_wallpaper_on_backing_paper",
+      "name": "Plaster with wallpaper on backing paper",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.08,
+      "attributed_to": {
+        "row": "Lynge (2001); Bobran (1973)"
+      }
+    },
+    {
+      "key": "plaster_gypsum_or_lime_rough_finish_on_lath",
+      "name": "Plaster, gypsum, or lime, rough finish on lath",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.03,
+      "attributed_to": {
+        "row": "Beranek and Hidaka (1998); Davis and Davis (1997)"
+      }
+    },
+    {
+      "key": "plaster_gypsum_or_lime_smooth_finish_on_lath_harris",
+      "name": "Plaster, gypsum, or lime, smooth finish on lath",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.03,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "plaster_gypsum_or_lime_smooth_finish_on_lath_beranek",
+      "name": "Plaster, gypsum, or lime, smooth finish on lath",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.02,
+      "absorption_coefficient_250": 0.02,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.03,
+      "attributed_to": {
+        "row": "Beranek and Hidaka (1998); Davis and Davis (1997)"
+      }
+    },
+    {
+      "key": "plaster_on_laths_studs_air_space",
+      "name": "Plaster, on laths/studs, air space",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.05,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "plaster_gypsum_or_lime_smooth_finish_on_tile_or_brick",
+      "name": "Plaster, gypsum, or lime, smooth finish on tile or brick",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.013,
+      "absorption_coefficient_250": 0.015,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "plaster_lime_or_gypsum_on_solid_backing",
+      "name": "Plaster, lime, or gypsum on solid backing",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.03,
+      "absorption_coefficient_250": 0.03,
+      "absorption_coefficient_500": 0.02,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "acoustics_plaster",
+      "name": "Acoustics plaster",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.35,
+      "absorption_coefficient_500": 0.5,
+      "absorption_coefficient_1000": 0.7,
+      "absorption_coefficient_2000": 0.7,
+      "absorption_coefficient_4000": 0.7,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "acoustics_plaster_40_mm_thick",
+      "name": "Acoustics plaster, 40 mm thick",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.31,
+      "absorption_coefficient_250": 0.55,
+      "absorption_coefficient_500": 0.84,
+      "absorption_coefficient_1000": 0.78,
+      "absorption_coefficient_2000": 0.71,
+      "absorption_coefficient_4000": 0.54,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "acoustics_plaster_68_mm_thick",
+      "name": "Acoustics plaster, 68 mm thick",
+      "group": "Plaster",
+      "absorption_coefficient_125": 0.47,
+      "absorption_coefficient_250": 0.74,
+      "absorption_coefficient_500": 0.76,
+      "absorption_coefficient_1000": 0.65,
+      "absorption_coefficient_2000": 0.62,
+      "absorption_coefficient_4000": 0.49,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "gypsum_board_1_27_cm_nailed_to_studs_with_4_1_m_c_t_c",
+      "name": "Gypsum board, 1.27 cm nailed to studs with 4.1 m c-t-c",
+      "group": "Plasterboard",
+      "absorption_coefficient_125": 0.29,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.09,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "plasterboard_on_frame_9_5_mm_boards_10_cm_empty_cavity",
+      "name": "Plasterboard on frame, 9.5 mm boards, 10 cm empty cavity",
+      "group": "Plasterboard",
+      "absorption_coefficient_125": 0.11,
+      "absorption_coefficient_250": 0.13,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.03,
+      "attributed_to": {
+        "row": "Lynge (2001); Fasold and Winkler (1976)"
+      }
+    },
+    {
+      "key": "plasterboard_on_frame_9_5_mm_boards_10_cm_cavity_filled_with_mineral_wool",
+      "name": "Plasterboard on frame, 9.5 mm boards, 10 cm cavity filled with mineral wool",
+      "group": "Plasterboard",
+      "absorption_coefficient_125": 0.28,
+      "absorption_coefficient_250": 0.14,
+      "absorption_coefficient_500": 0.09,
+      "absorption_coefficient_1000": 0.06,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Lynge (2001); Fasold and Winkler (1976)"
+      }
+    },
+    {
+      "key": "plasterboard_on_frame_13_mm_boards_10_cm_empty_cavity",
+      "name": "Plasterboard on frame, 13 mm boards, 10 cm empty cavity",
+      "group": "Plasterboard",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.11,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.03,
+      "attributed_to": {
+        "row": "Lynge (2001); Fasold and Winkler (1976)"
+      }
+    },
+    {
+      "key": "plasterboard_on_frame_13_mm_boards_10_cm_cavity_filled_with_mineral_wool",
+      "name": "Plasterboard on frame, 13 mm boards, 10 cm cavity filled with mineral wool",
+      "group": "Plasterboard",
+      "absorption_coefficient_125": 0.3,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.08,
+      "absorption_coefficient_1000": 0.06,
+      "absorption_coefficient_2000": 0.06,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Lynge (2001); Fasold and Winkler (1976)"
+      }
+    },
+    {
+      "key": "2_x_13_mm_plasterboard_on_steel_frame_5_cm_mineral_wool_in_cavity_surface_painted",
+      "name": "2 × 13 mm plasterboard on steel frame, 5 cm mineral wool in cavity, surface painted",
+      "group": "Plasterboard",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.06,
+      "absorption_coefficient_1000": 0.04,
+      "absorption_coefficient_2000": 0.04,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Lynge (2001); Petersen (1983)"
+      }
+    },
+    {
+      "key": "glass_ordinary_window_glass",
+      "name": "Glass, ordinary window glass",
+      "group": "Glazing",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.18,
+      "absorption_coefficient_1000": 0.12,
+      "absorption_coefficient_2000": 0.07,
+      "absorption_coefficient_4000": 0.04,
+      "attributed_to": {
+        "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+      }
+    },
+    {
+      "key": "single_pane_of_glass_3_4_mm",
+      "name": "Single pane of glass, 3–4 mm",
+      "group": "Glazing",
+      "absorption_coefficient_125": 0.2,
+      "absorption_coefficient_250": 0.15,
+      "absorption_coefficient_500": 0.1,
+      "absorption_coefficient_1000": 0.07,
+      "absorption_coefficient_2000": 0.05,
+      "absorption_coefficient_4000": 0.05,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "single_pane_of_glass_over4_mm",
+      "name": "Single pane of glass, >4 mm",
+      "group": "Glazing",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.07,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Fry (1987)"
+      }
+    },
+    {
+      "key": "single_pane_of_glass_3_mm",
+      "name": "Single pane of glass, 3 mm",
+      "group": "Glazing",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.04,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Lynge (2001); Fasold and Winkler (1976)"
+      }
+    },
+    {
+      "key": "double_glazing_2_3_mm_glass_1_cm_gap",
+      "name": "Double glazing, 2–3 mm glass, 1 cm gap",
+      "group": "Glazing",
+      "absorption_coefficient_125": 0.1,
+      "absorption_coefficient_250": 0.07,
+      "absorption_coefficient_500": 0.05,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "double_glazing_2_3_mm_glass_over3_cm_gap",
+      "name": "Double glazing, 2–3 mm glass, >3 cm gap",
+      "group": "Glazing",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.05,
+      "absorption_coefficient_500": 0.03,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Lynge (2001); Fasold and Winkler (1976)"
+      }
+    },
+    {
+      "key": "glass_large_panes_heavy_glass",
+      "name": "Glass, large panes, heavy glass",
+      "group": "Glazing",
+      "absorption_coefficient_125": 0.18,
+      "absorption_coefficient_250": 0.06,
+      "absorption_coefficient_500": 0.04,
+      "absorption_coefficient_1000": 0.03,
+      "absorption_coefficient_2000": 0.02,
+      "absorption_coefficient_4000": 0.02,
+      "attributed_to": {
+        "row": "Harris (1991); Everest (2001); Young (1959)"
+      }
+    },
+    {
+      "key": "25_mm_fibreglass_rigid_backing",
+      "name": "25 mm fibreglass, rigid backing",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.45,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.75,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+      }
+    },
+    {
+      "key": "2_54_cm_fibreglass_24_to_48_kg_m3",
+      "name": "2.54 cm fibreglass, 24 to 48 kg/m³",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.65,
+      "absorption_coefficient_1000": 0.85,
+      "absorption_coefficient_2000": 0.8,
+      "absorption_coefficient_4000": 0.75,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "2_5_cm_fibreglass_2_5_cm_airspace",
+      "name": "2.5 cm fibreglass, 2.5 cm airspace",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.55,
+      "absorption_coefficient_500": 0.8,
+      "absorption_coefficient_1000": 0.9,
+      "absorption_coefficient_2000": 0.85,
+      "absorption_coefficient_4000": 0.8,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "5_cm_fibreglass_rigid_backing",
+      "name": "5 cm fibreglass, rigid backing",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.21,
+      "absorption_coefficient_250": 0.5,
+      "absorption_coefficient_500": 0.75,
+      "absorption_coefficient_1000": 0.9,
+      "absorption_coefficient_2000": 0.85,
+      "absorption_coefficient_4000": 0.8,
+      "attributed_to": {
+        "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+      }
+    },
+    {
+      "key": "7_5_cm_fibreglass_rigid_backing",
+      "name": "7.5 cm fibreglass, rigid backing",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.35,
+      "absorption_coefficient_250": 0.65,
+      "absorption_coefficient_500": 0.8,
+      "absorption_coefficient_1000": 0.9,
+      "absorption_coefficient_2000": 0.85,
+      "absorption_coefficient_4000": 0.8,
+      "attributed_to": {
+        "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+      }
+    },
+    {
+      "key": "10_cm_fibreglass_rigid_backing",
+      "name": "10 cm fibreglass, rigid backing",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.45,
+      "absorption_coefficient_250": 0.9,
+      "absorption_coefficient_500": 0.95,
+      "absorption_coefficient_1000": 1.0,
+      "absorption_coefficient_2000": 0.95,
+      "absorption_coefficient_4000": 0.85,
+      "attributed_to": {
+        "row": "Kinsler, Frey, Coppens and Sanders (2000)"
+      }
+    },
+    {
+      "key": "5_cm_mineral_wool_40_kg_m3_glued_to_wall_untreated_surface",
+      "name": "5 cm mineral wool (40 kg/m³), glued to wall, untreated surface",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.7,
+      "absorption_coefficient_500": 0.6,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.85,
+      "absorption_coefficient_4000": 0.9,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "5_cm_mineral_wool_40_kg_m3_glued_to_wall_surface_sprayed_with_thin_plastic_solution",
+      "name": "5 cm mineral wool (40 kg/m³), glued to wall, surface sprayed with thin plastic solution",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.15,
+      "absorption_coefficient_250": 0.7,
+      "absorption_coefficient_500": 0.6,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.75,
+      "absorption_coefficient_4000": 0.75,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "5_cm_mineral_wool_70_kg_m3_30_cm_in_front_of_wall",
+      "name": "5 cm mineral wool (70 kg/m³) 30 cm in front of wall",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.7,
+      "absorption_coefficient_250": 0.45,
+      "absorption_coefficient_500": 0.65,
+      "absorption_coefficient_1000": 0.6,
+      "absorption_coefficient_2000": 0.75,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "5_cm_wood_wool_set_in_mortar",
+      "name": "5 cm wood-wool set in mortar",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.17,
+      "absorption_coefficient_500": 0.35,
+      "absorption_coefficient_1000": 0.45,
+      "absorption_coefficient_2000": 0.65,
+      "absorption_coefficient_4000": 0.65,
+      "attributed_to": {
+        "row": "Kristensen (1984); Lynge (2001)"
+      }
+    },
+    {
+      "key": "5_1_cm_fibreglass_panels_with_plastic_sheet_wrapping_and_perforated_metal_facing",
+      "name": "5.1 cm fibreglass, panels with plastic sheet wrapping and perforated metal facing",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.33,
+      "absorption_coefficient_250": 0.79,
+      "absorption_coefficient_500": 0.99,
+      "absorption_coefficient_1000": 0.91,
+      "absorption_coefficient_2000": 0.76,
+      "absorption_coefficient_4000": 0.64,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "5_1_cm_fibreglass_24_48_kg_m3",
+      "name": "5.1 cm fibreglass, 24–48 kg/m³",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.17,
+      "absorption_coefficient_250": 0.55,
+      "absorption_coefficient_500": 0.8,
+      "absorption_coefficient_1000": 0.9,
+      "absorption_coefficient_2000": 0.85,
+      "absorption_coefficient_4000": 0.8,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "acoustic_tile_1_27_cm_thick",
+      "name": "Acoustic tile, 1.27 cm thick",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.21,
+      "absorption_coefficient_500": 0.66,
+      "absorption_coefficient_1000": 0.75,
+      "absorption_coefficient_2000": 0.62,
+      "absorption_coefficient_4000": 0.49,
+      "attributed_to": {
+        "row": "Everest (2001)"
+      }
+    },
+    {
+      "key": "acoustic_tile_1_9_cm_thick",
+      "name": "Acoustic tile, 1.9 cm thick",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.09,
+      "absorption_coefficient_250": 0.28,
+      "absorption_coefficient_500": 0.78,
+      "absorption_coefficient_1000": 0.84,
+      "absorption_coefficient_2000": 0.73,
+      "absorption_coefficient_4000": 0.64,
+      "attributed_to": {
+        "row": "Everest (2001)"
+      }
+    },
+    {
+      "key": "polyurethane_foam_2_5_cm_thick",
+      "name": "Polyurethane foam, 2.5 cm thick",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.16,
+      "absorption_coefficient_250": 0.25,
+      "absorption_coefficient_500": 0.45,
+      "absorption_coefficient_1000": 0.84,
+      "absorption_coefficient_2000": 0.97,
+      "absorption_coefficient_4000": 0.87
+    },
+    {
+      "key": "thermafleece_sheep_wool_absorbent_100_mm_thick",
+      "name": "Thermafleece, sheep wool absorbent 100 mm thick",
+      "group": "Wools and foam",
+      "absorption_coefficient_125": 0.47,
+      "absorption_coefficient_250": 0.86,
+      "absorption_coefficient_500": 1.0,
+      "absorption_coefficient_1000": 0.94,
+      "absorption_coefficient_2000": 0.96,
+      "absorption_coefficient_4000": 1.02,
+      "attributed_to": {
+        "row": "Greenshop (accessed 2008)"
+      }
+    },
+    {
+      "key": "ballast_or_other_crushed_stone_3_18_cm_15_2_deep",
+      "name": "Ballast or other crushed stone, 3.18 cm, 15.2 deep",
+      "group": "Ballast",
+      "absorption_coefficient_125": 0.19,
+      "absorption_coefficient_250": 0.23,
+      "absorption_coefficient_500": 0.43,
+      "absorption_coefficient_1000": 0.37,
+      "absorption_coefficient_2000": 0.58,
+      "absorption_coefficient_4000": 0.62,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "ballast_or_other_crushed_stone_3_18_cm_30_5_cm_deep",
+      "name": "Ballast or other crushed stone, 3.18 cm, 30.5 cm deep",
+      "group": "Ballast",
+      "absorption_coefficient_125": 0.27,
+      "absorption_coefficient_250": 0.58,
+      "absorption_coefficient_500": 0.48,
+      "absorption_coefficient_1000": 0.54,
+      "absorption_coefficient_2000": 0.73,
+      "absorption_coefficient_4000": 0.63,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "ballast_or_other_crushed_stone_3_18_cm_45_7_cm_deep",
+      "name": "Ballast or other crushed stone, 3.18 cm, 45.7 cm deep",
+      "group": "Ballast",
+      "absorption_coefficient_125": 0.41,
+      "absorption_coefficient_250": 0.53,
+      "absorption_coefficient_500": 0.64,
+      "absorption_coefficient_1000": 0.84,
+      "absorption_coefficient_2000": 0.91,
+      "absorption_coefficient_4000": 0.63,
+      "attributed_to": {
+        "row": "Harris (1991)"
+      }
+    },
+    {
+      "key": "ballast_or_other_crushed_stone_0_64_cm_15_2_cm_deep",
+      "name": "Ballast or other crushed stone, 0.64 cm, 15.2 cm deep",
+      "group": "Ballast",
+      "absorption_coefficient_125": 0.22,
+      "absorption_coefficient_250": 0.64,
+      "absorption_coefficient_500": 0.7,
+      "absorption_coefficient_1000": 0.79,
+      "absorption_coefficient_2000": 0.88,
+      "absorption_coefficient_4000": 0.72,
+      "attributed_to": {
+        "row": "Harris (1991); Physikalisch-Technische Bundesanstalt (accessed 2003)"
+      }
+    },
+    {
+      "key": "microperforated_absorber_4_cm_cavity",
+      "name": "Microperforated absorber",
+      "variant": "4 cm cavity",
+      "group": "Microperforated absorber",
+      "absorption_coefficient_125": 0.08,
+      "absorption_coefficient_250": 0.27,
+      "absorption_coefficient_500": 0.7,
+      "absorption_coefficient_1000": 0.35,
+      "absorption_coefficient_2000": 0.11,
+      "absorption_coefficient_4000": 0.04,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "microperforated_absorber_40_cm_cavity",
+      "name": "Microperforated absorber",
+      "variant": "40 cm cavity",
+      "group": "Microperforated absorber",
+      "absorption_coefficient_125": 0.64,
+      "absorption_coefficient_250": 0.56,
+      "absorption_coefficient_500": 0.41,
+      "absorption_coefficient_1000": 0.28,
+      "absorption_coefficient_2000": 0.13,
+      "absorption_coefficient_4000": 0.06,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "hybrid_absorber_diffuser_bad_panel_mounted_on_2_5_cm_fibreglass",
+      "name": "Hybrid absorber-diffuser (BAD panel mounted on 2.5 cm fibreglass)",
+      "group": "Diffusers",
+      "absorption_coefficient_125": 0.17,
+      "absorption_coefficient_250": 0.4,
+      "absorption_coefficient_500": 0.86,
+      "absorption_coefficient_1000": 1.0,
+      "absorption_coefficient_2000": 0.84,
+      "absorption_coefficient_4000": 0.61,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "2d_n_7_qrd_design_freq_500_hz",
+      "name": "2D N = 7 QRD, design freq. = 500 Hz",
+      "group": "Diffusers",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.12,
+      "absorption_coefficient_500": 0.14,
+      "absorption_coefficient_1000": 0.2,
+      "absorption_coefficient_2000": 0.09,
+      "absorption_coefficient_4000": 0.12,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "2d_n_7_qrd_as_line_above_with_cloth_covering",
+      "name": "2D N = 7 QRD as line above, with cloth covering",
+      "group": "Diffusers",
+      "absorption_coefficient_125": 0.16,
+      "absorption_coefficient_250": 0.17,
+      "absorption_coefficient_500": 0.28,
+      "absorption_coefficient_1000": 0.41,
+      "absorption_coefficient_2000": 0.26,
+      "absorption_coefficient_4000": 0.3,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "1d_n_7_qrd_design_freq_500_hz",
+      "name": "1D N = 7 QRD, design freq. = 500 Hz",
+      "group": "Diffusers",
+      "absorption_coefficient_125": 0.11,
+      "absorption_coefficient_250": 0.1,
+      "absorption_coefficient_500": 0.07,
+      "absorption_coefficient_1000": 0.08,
+      "absorption_coefficient_2000": 0.06,
+      "absorption_coefficient_4000": 0.06,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "1d_n_7_qrd_as_line_above_with_cloth_covering",
+      "name": "1D N = 7 QRD as line above, with cloth covering",
+      "group": "Diffusers",
+      "absorption_coefficient_125": 0.13,
+      "absorption_coefficient_250": 0.14,
+      "absorption_coefficient_500": 0.2,
+      "absorption_coefficient_1000": 0.24,
+      "absorption_coefficient_2000": 0.2,
+      "absorption_coefficient_4000": 0.23,
+      "attributed_to": {
+        "row": "RPG Diffusor Systems (accessed 2003)"
+      }
+    },
+    {
+      "key": "data_from_azkorra_et_al",
+      "name": "Data from Azkorra et al.",
+      "group": "Green wall systems",
+      "absorption_coefficient_125": 0.46,
+      "absorption_coefficient_250": 0.42,
+      "absorption_coefficient_500": 0.36,
+      "absorption_coefficient_1000": 0.38,
+      "absorption_coefficient_2000": 0.45,
+      "absorption_coefficient_4000": 0.5,
+      "attributed_to": {
+        "row": "Azkorra et al. (2015)"
+      }
+    },
+    {
+      "key": "data_from_wong_et_al_100percent_greenery",
+      "name": "Data from Wong et al. (100% greenery)",
+      "group": "Green wall systems",
+      "absorption_coefficient_125": 0.09,
+      "absorption_coefficient_250": 0.23,
+      "absorption_coefficient_500": 0.43,
+      "absorption_coefficient_1000": 0.46,
+      "absorption_coefficient_2000": 0.5,
+      "absorption_coefficient_4000": 0.48,
+      "attributed_to": {
+        "row": "Wong et al. (2010)"
+      }
+    },
+    {
+      "key": "data_from_yang_et_al",
+      "name": "Data from Yang et al.",
+      "group": "Green wall systems",
+      "absorption_coefficient_125": 0.61,
+      "absorption_coefficient_250": 0.62,
+      "absorption_coefficient_500": 0.69,
+      "absorption_coefficient_1000": 0.68,
+      "absorption_coefficient_2000": 0.68,
+      "absorption_coefficient_4000": 0.72,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_percentage_of_vegetative_cover_0percent_bare_soil",
+      "name": "Top soil with different percentage of vegetative cover",
+      "variant": "0%, bare soil",
+      "group": "Top soil with different percentage of vegetative cover",
+      "absorption_coefficient_125": 0.27,
+      "absorption_coefficient_250": 0.57,
+      "absorption_coefficient_500": 0.76,
+      "absorption_coefficient_1000": 0.9,
+      "absorption_coefficient_2000": 0.89,
+      "absorption_coefficient_4000": 0.84,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_percentage_of_vegetative_cover_20percent",
+      "name": "Top soil with different percentage of vegetative cover",
+      "variant": "20%",
+      "group": "Top soil with different percentage of vegetative cover",
+      "absorption_coefficient_125": 0.34,
+      "absorption_coefficient_250": 0.63,
+      "absorption_coefficient_500": 0.79,
+      "absorption_coefficient_1000": 0.92,
+      "absorption_coefficient_2000": 0.89,
+      "absorption_coefficient_4000": 0.81,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_percentage_of_vegetative_cover_40percent",
+      "name": "Top soil with different percentage of vegetative cover",
+      "variant": "40%",
+      "group": "Top soil with different percentage of vegetative cover",
+      "absorption_coefficient_125": 0.39,
+      "absorption_coefficient_250": 0.68,
+      "absorption_coefficient_500": 0.83,
+      "absorption_coefficient_1000": 0.95,
+      "absorption_coefficient_2000": 0.9,
+      "absorption_coefficient_4000": 0.83,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_percentage_of_vegetative_cover_60percent",
+      "name": "Top soil with different percentage of vegetative cover",
+      "variant": "60%",
+      "group": "Top soil with different percentage of vegetative cover",
+      "absorption_coefficient_125": 0.45,
+      "absorption_coefficient_250": 0.72,
+      "absorption_coefficient_500": 0.85,
+      "absorption_coefficient_1000": 0.97,
+      "absorption_coefficient_2000": 0.9,
+      "absorption_coefficient_4000": 0.8,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_percentage_of_vegetative_cover_80percent",
+      "name": "Top soil with different percentage of vegetative cover",
+      "variant": "80%",
+      "group": "Top soil with different percentage of vegetative cover",
+      "absorption_coefficient_125": 0.46,
+      "absorption_coefficient_250": 0.73,
+      "absorption_coefficient_500": 0.85,
+      "absorption_coefficient_1000": 0.97,
+      "absorption_coefficient_2000": 0.89,
+      "absorption_coefficient_4000": 0.72,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_percentage_of_vegetative_cover_100percent_completely_covered",
+      "name": "Top soil with different percentage of vegetative cover",
+      "variant": "100%, completely covered",
+      "group": "Top soil with different percentage of vegetative cover",
+      "absorption_coefficient_125": 0.49,
+      "absorption_coefficient_250": 0.75,
+      "absorption_coefficient_500": 0.89,
+      "absorption_coefficient_1000": 0.98,
+      "absorption_coefficient_2000": 0.91,
+      "absorption_coefficient_4000": 0.73,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_moisture_content_12_5percent",
+      "name": "Top soil with different moisture content",
+      "variant": "12.5%",
+      "group": "Top soil with different moisture content",
+      "absorption_coefficient_125": 0.26,
+      "absorption_coefficient_250": 0.55,
+      "absorption_coefficient_500": 0.73,
+      "absorption_coefficient_1000": 0.89,
+      "absorption_coefficient_2000": 0.85,
+      "absorption_coefficient_4000": 0.67,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_moisture_content_17percent",
+      "name": "Top soil with different moisture content",
+      "variant": "17%",
+      "group": "Top soil with different moisture content",
+      "absorption_coefficient_125": 0.25,
+      "absorption_coefficient_250": 0.51,
+      "absorption_coefficient_500": 0.69,
+      "absorption_coefficient_1000": 0.81,
+      "absorption_coefficient_2000": 0.78,
+      "absorption_coefficient_4000": 0.57,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_moisture_content_20_4percent",
+      "name": "Top soil with different moisture content",
+      "variant": "20.4%",
+      "group": "Top soil with different moisture content",
+      "absorption_coefficient_125": 0.23,
+      "absorption_coefficient_250": 0.45,
+      "absorption_coefficient_500": 0.57,
+      "absorption_coefficient_1000": 0.64,
+      "absorption_coefficient_2000": 0.58,
+      "absorption_coefficient_4000": 0.38,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_moisture_content_23_8percent",
+      "name": "Top soil with different moisture content",
+      "variant": "23.8%",
+      "group": "Top soil with different moisture content",
+      "absorption_coefficient_125": 0.2,
+      "absorption_coefficient_250": 0.36,
+      "absorption_coefficient_500": 0.43,
+      "absorption_coefficient_1000": 0.46,
+      "absorption_coefficient_2000": 0.38,
+      "absorption_coefficient_4000": 0.2,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_moisture_content_25_4percent",
+      "name": "Top soil with different moisture content",
+      "variant": "25.4%",
+      "group": "Top soil with different moisture content",
+      "absorption_coefficient_125": 0.14,
+      "absorption_coefficient_250": 0.28,
+      "absorption_coefficient_500": 0.33,
+      "absorption_coefficient_1000": 0.34,
+      "absorption_coefficient_2000": 0.29,
+      "absorption_coefficient_4000": 0.12,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    },
+    {
+      "key": "top_soil_with_different_moisture_content_34_1percent",
+      "name": "Top soil with different moisture content",
+      "variant": "34.1%",
+      "group": "Top soil with different moisture content",
+      "absorption_coefficient_125": 0.07,
+      "absorption_coefficient_250": 0.22,
+      "absorption_coefficient_500": 0.23,
+      "absorption_coefficient_1000": 0.24,
+      "absorption_coefficient_2000": 0.2,
+      "absorption_coefficient_4000": 0.06,
+      "attributed_to": {
+        "row": "Yang, Kang and Cheal (2013)"
+      }
+    }
+  ]
+}

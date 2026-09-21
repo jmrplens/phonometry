@@ -193,6 +193,26 @@ medida.
 
 <Catalogues catalogue="transmissionLoss" lang="es" />
 
+## Coeficientes de dispersión
+
+Cuánto de una reflexión se va de la dirección especular, banda a banda, para
+una superficie con algo encima. Los modelos de sala de esta biblioteca piden
+un número por superficie y banda y no tienen forma de deducirlo, y medirlo
+exige una cámara reverberante con un plato giratorio dentro, así que estos son
+los valores de los que parte quien modela. Cox los midió o los recopiló según
+la ISO 17497-1 y acredita cada fila al artículo del que sale; son el único de
+sus cuatro apéndices cuyos números están medidos y no calculados.
+
+La tabla se lee bien por lo ancho que es el método. Los mismos listones, de
+10 cm de alto y 10 cm de ancho con un periodo de 20 cm, aparecen dos veces bajo
+un mismo encabezado porque los midieron dos equipos, y dan 0,28 y 0,44 en
+630 Hz. Una celda pasa de uno, que es lo que da la ISO 17497-1 cuando la
+energía reflejada se compara con una placa base y nada limita el cociente. Una
+fila se describe en vez de nombrarse, así que el encabezado bajo el que está es
+parte de la descripción y el filtro busca en los dos.
+
+<Catalogues catalogue="scattering" lang="es" />
+
 ## Superficies de suelo
 
 La resistividad al flujo efectiva que todo modelo de propagación exterior le

@@ -883,10 +883,18 @@ def build_model() -> tuple[list[ModuleDoc], dict[str, str], list[str]]:
                     xref[method.name] = anchored
                     xref[f"{module_name}.{method.name}"] = anchored
 
-    slugs = {(page.section.key, page.slug) for page in pages}
-    if len(slugs) != len(pages):
-        msg = "slug collision between module pages"
-        raise ValueError(msg)
+    seen: dict[tuple[str, str], str] = {}
+    for page in pages:
+        slug = (page.section.key, page.slug)
+        if slug in seen:
+            msg = (
+                f"slug collision between module pages: {page.module} and "
+                f"{seen[slug]} both land on {page.slug!r} in section "
+                f"{page.section.key!r}. Two modules of one section cannot share "
+                f"a basename; rename one of them."
+            )
+            raise ValueError(msg)
+        seen[slug] = page.module
 
     return pages, xref, issues
 

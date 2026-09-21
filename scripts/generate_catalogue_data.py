@@ -54,6 +54,10 @@ from phonometry.materials.absorbers import (  # noqa: E402
 )
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
 from phonometry.materials.absorbers.porous import PUBLISHED_AIR  # noqa: E402
+from phonometry.materials.diffusers import (  # noqa: E402
+    PUBLISHED_SCATTERING,
+    SCATTERING_BANDS_HZ,
+)
 from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
 from phonometry.solids import PUBLISHED_SOLIDS  # noqa: E402
 
@@ -141,9 +145,21 @@ POROUS_COLUMNS = (
 )
 
 
-def _band_heading(band: int) -> str:
-    """How the site heads an octave-band column: ``125 Hz``, ``1 kHz``."""
-    return f"{band // 1000} kHz" if band >= 1000 else f"{band} Hz"
+def _band_heading(band: int, *, spanish: bool = False) -> str:
+    """How the site heads a band column: ``125 Hz``, ``1 kHz``, ``1.25 kHz``.
+
+    The one-third octave bands put a decimal in the heading, and a decimal is
+    the one part of a frequency that does translate: Spanish writes it with a
+    comma.
+
+    :param band: The band's centre frequency, in hertz.
+    :param spanish: Whether to spell the decimal separator the Spanish way.
+    :return: The heading.
+    """
+    if band < 1000:
+        return f"{band} Hz"
+    heading = f"{band / 1000:g} kHz"
+    return heading.replace(".", ",") if spanish else heading
 
 
 #: One column per octave band. The heading is the band itself, in both
@@ -183,6 +199,18 @@ TRANSMISSION_LOSS_COLUMNS = (
         )
         for band in TRANSMISSION_LOSS_BANDS_HZ
     ),
+)
+
+#: One column per one-third octave band, which is where the decimal
+#: separator of the heading starts to matter.
+SCATTERING_COLUMNS = tuple(
+    (
+        f"scattering_coefficient_{band}",
+        _band_heading(band),
+        _band_heading(band, spanish=True),
+        "",
+    )
+    for band in SCATTERING_BANDS_HZ
 )
 
 GAS_COLUMNS = (
@@ -560,6 +588,11 @@ def rows(
             "table": table,
             "name": row.name,
             "variant": row.variant,
+            # The bold heading the row sits under, where the page prints one.
+            # Four catalogues carry it and it is not decoration: a scattering
+            # row reads "h = w = 10 cm, L = 2h" and means nothing without
+            # "Periodic 1D battens" above it.
+            "group": row.group,
             # Only the absorption tables carry a mounting, and only one book
             # prints one, so the field is empty on most rows and absent from
             # every other catalogue. The component shows the column when any
@@ -770,6 +803,7 @@ def render() -> str:
         "transmissionLoss": section(
             PUBLISHED_TRANSMISSION_LOSS, TRANSMISSION_LOSS_COLUMNS
         ),
+        "scattering": section(PUBLISHED_SCATTERING, SCATTERING_COLUMNS),
         "absorptionAreas": section(PUBLISHED_ABSORPTION_AREAS, ABSORPTION_AREA_COLUMNS),
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
@@ -815,6 +849,7 @@ def main(argv: list[str] | None = None) -> int:
         "gases": len(PUBLISHED_GASES),
         "absorption": len(PUBLISHED_ABSORPTION),
         "transmission loss": len(PUBLISHED_TRANSMISSION_LOSS),
+        "scattering": len(PUBLISHED_SCATTERING),
         "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }

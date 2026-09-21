@@ -68,6 +68,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   Seven of the printed rows are a label whose variants follow underneath, so
   "draped to 1/2 area" is three rows under three different drapes rather than
   one row that overwrites two.
+- **Scattering coefficients somebody actually measured.**
+  `materials.diffusers.PUBLISHED_SCATTERING` holds the forty-six surfaces of
+  Cox & D'Antonio 3e Appendix D, from sinusoidal corrugation and battens
+  through blocks, pyramids and grooves cut into rubber to wooden hemispheres
+  and hedges, in one-third octave bands from 100 Hz to 5 kHz. They were
+  measured under ISO 17497-1 and credited to the seven papers the appendix
+  lists, and the catalogue holds the paper rather than the superscript, which
+  means nothing once the row leaves the page. A geometric room model takes one
+  of these numbers per surface per band and cannot work it out, and measuring
+  one needs a reverberation room with a turntable in it.
+  `ScatteringCoefficientSpectrum.scattering_coefficient(band)` refuses rather
+  than answering zero for a band the page leaves out, because zero here is a
+  surface that reflects every ray back along the specular direction, and the
+  ten rows where the page prints a dash are told apart from the twenty where
+  it prints nothing at all. Nothing is clipped: one cell reads 1.17, which is
+  what ISO 17497-1 gives when the ratio it is built from goes that way. The
+  same battens measured by two teams are two rows, 0.28 and 0.44 at 630 Hz,
+  and two rows the book prints with one description and two spectra stay two
+  rows, with the errata register saying why. Read twice from the rendered
+  pages, cell by cell, like every other table here.
 - **Transmission loss as a catalogue, not a formula.**
   `building.PUBLISHED_TRANSMISSION_LOSS` holds the ninety-four constructions
   of Bies 5e Table 7.6, from sheet panels and sandwich panels through masonry

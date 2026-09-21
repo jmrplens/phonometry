@@ -247,6 +247,14 @@ SOURCED: dict[tuple[str, str], str] = {
         "surface density and eight octave bands of transmission loss"
     ),
     (
+        "materials/diffusers/measured_scattering.py",
+        "PUBLISHED_SCATTERING",
+    ): (
+        "Cox & D'Antonio 3e Appendix D, forty-six surfaces whose random "
+        "incidence scattering coefficient was measured according to "
+        "ISO 17497-1, each credited to the paper it comes from"
+    ),
+    (
         "materials/absorbers/catalogue.py",
         "PUBLISHED_POROUS",
     ): (

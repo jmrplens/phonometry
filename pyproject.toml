@@ -128,6 +128,7 @@ phonometry = [
     "environment/propagation/data/*.json",
     "fluids/data/*.json",
     "materials/absorbers/data/*.json",
+    "materials/diffusers/data/*.json",
     "solids/data/*.json",
 ]
 

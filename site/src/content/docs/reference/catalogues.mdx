@@ -1,6 +1,6 @@
 ---
 title: "Published catalogues"
-description: "Every material and fluid this library reads from a printed page: elastic constants, porous parameters and fluid states, each with the table it came from and what its cell said."
+description: "Every material, gas and fluid this library reads from a printed page: elastic constants, porous parameters, absorption coefficients, ground surfaces and fluid states, each with the table it came from and what its cell said."
 ---
 
 import Catalogues from '../../../components/Catalogues.astro';
@@ -119,6 +119,29 @@ calculation and a compiled row to know whether a number you measured is
 plausible.
 
 <Catalogues catalogue="porous" lang="en" />
+
+## Absorption coefficients
+
+What a finish did in a reverberation room, band by band, as the books print
+it. These are not properties of a material but of a specimen, a mounting and
+a room, which is why the same carpet is a different number in every book and
+why a coefficient above 1 is common and not an error. Bies says of his table
+that the values are selected from the literature, that reverberation times
+calculated from them are approximate only, and that it is better to use the
+manufacturer's data or to measure. The rows are held in
+`materials.absorbers.PUBLISHED_ABSORPTION`, keyed by the table they came off,
+and `absorption_named` answers with every carpet of every table rather than
+choosing one.
+
+<Catalogues catalogue="absorption" lang="en" />
+
+The same pages print a few rows that are not coefficients: an audience per
+person, a chair, priced in square metres of equivalent absorption because
+they have no surface a coefficient could multiply. Those are held apart, in
+`materials.absorbers.PUBLISHED_ABSORPTION_AREAS`, with the unit in the field
+name so that a number from there cannot be mistaken for a coefficient.
+
+<Catalogues catalogue="absorptionAreas" lang="en" />
 
 ## Ground surfaces
 

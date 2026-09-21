@@ -1,6 +1,6 @@
 ---
 title: "Catálogos publicados"
-description: "Todo el material y todo el fluido que esta biblioteca lee de una página impresa: constantes elásticas, parámetros de porosos y estados de fluido, cada uno con su tabla y con lo que decía su celda."
+description: "Todo el material, gas y fluido que esta biblioteca lee de una página impresa: constantes elásticas, parámetros de porosos, coeficientes de absorción, superficies de suelo y estados de fluido, cada uno con su tabla y con lo que decía su celda."
 ---
 
 import Catalogues from '../../../../components/Catalogues.astro';
@@ -122,6 +122,30 @@ para reproducir un cálculo y una fila compilada para saber si un número que ha
 medido es verosímil.
 
 <Catalogues catalogue="porous" lang="es" />
+
+## Coeficientes de absorción
+
+Lo que hizo un acabado en una cámara reverberante, banda a banda, tal como lo
+imprimen los libros. No son propiedades de un material sino de una probeta,
+un montaje y una sala, que es por lo que la misma moqueta es un número
+distinto en cada libro y por lo que un coeficiente mayor que 1 es corriente y
+no un error. Bies dice de su tabla que los valores están tomados de la
+literatura, que los tiempos de reverberación calculados con ellos son sólo
+aproximados, y que es mejor usar los datos del fabricante o medir. Las filas
+están en `materials.absorbers.PUBLISHED_ABSORPTION`, con la clave de la tabla
+de la que salieron, y `absorption_named` devuelve todas las moquetas de todas
+las tablas en vez de elegir una.
+
+<Catalogues catalogue="absorption" lang="es" />
+
+Las mismas páginas imprimen unas pocas filas que no son coeficientes: un
+público por persona, una silla, tasados en metros cuadrados de absorción
+equivalente porque no tienen superficie por la que multiplicar un
+coeficiente. Esas van aparte, en
+`materials.absorbers.PUBLISHED_ABSORPTION_AREAS`, con la unidad en el nombre
+del campo para que un número de ahí no pueda confundirse con un coeficiente.
+
+<Catalogues catalogue="absorptionAreas" lang="es" />
 
 ## Superficies de suelo
 

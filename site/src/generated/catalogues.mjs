@@ -41482,6 +41482,2802 @@ export const catalogues = {
       }
     ]
   },
+  "absorption": {
+    "columns": [
+      {
+        "field": "absorption_coefficient_63",
+        "heading": "63 Hz",
+        "headingEs": "63 Hz",
+        "unit": ""
+      },
+      {
+        "field": "absorption_coefficient_125",
+        "heading": "125 Hz",
+        "headingEs": "125 Hz",
+        "unit": ""
+      },
+      {
+        "field": "absorption_coefficient_250",
+        "heading": "250 Hz",
+        "headingEs": "250 Hz",
+        "unit": ""
+      },
+      {
+        "field": "absorption_coefficient_500",
+        "heading": "500 Hz",
+        "headingEs": "500 Hz",
+        "unit": ""
+      },
+      {
+        "field": "absorption_coefficient_1000",
+        "heading": "1 kHz",
+        "headingEs": "1 kHz",
+        "unit": ""
+      },
+      {
+        "field": "absorption_coefficient_2000",
+        "heading": "2 kHz",
+        "headingEs": "2 kHz",
+        "unit": ""
+      },
+      {
+        "field": "absorption_coefficient_4000",
+        "heading": "4 kHz",
+        "headingEs": "4 kHz",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "bies-2017-table-6-2/unoccupied_heavily_upholstered_seats",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – heavily upholstered seats",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {
+          "row": "Beranek and Hidaka (1998)"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,81",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_medium_upholstered_seats",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – medium upholstered seats",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,66",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_light_upholstered_seats",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – light upholstered seats",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_very_light_upholstered_seats",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – very light upholstered seats",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_average_well_upholstered_seating_areas",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – average well-upholstered seating areas",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,82",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_leather_covered_upholstered_seating_areas",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – leather-covered upholstered seating areas",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_metal_or_wood_seats",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – metal or wood seats",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_concert_hall_no_seats_halls_lined_with_thin_wood_or_other_materials_3_cm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – concert hall, no seats",
+        "variant": "halls lined with thin wood or other materials <3 cm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/unoccupied_concert_hall_no_seats_halls_lined_with_heavy_materials",
+        "table": "bies-2017-table-6-2",
+        "name": "Unoccupied – concert hall, no seats",
+        "variant": "Halls lined with heavy materials",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/100_occupied_audience_orchestra_and_chorus_areas_upholstered_seats",
+        "table": "bies-2017-table-6-2",
+        "name": "100% occupied audience (orchestra and chorus areas) – upholstered seats",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/wooden_pews_100_occupied",
+        "table": "bies-2017-table-6-2",
+        "name": "Wooden pews – 100% occupied",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/wooden_chairs_100_occupied",
+        "table": "bies-2017-table-6-2",
+        "name": "Wooden chairs – 100% occupied",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,88",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,96",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/wooden_chairs_75_occupied",
+        "table": "bies-2017-table-6-2",
+        "name": "Wooden chairs – 75% occupied",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/acoustic_plaster_10_mm_thick_sprayed_on_solid_wall",
+        "table": "bies-2017-table-6-2",
+        "name": "Acoustic plaster, 10 mm thick sprayed on solid wall",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/hard_surfaces_brick_walls_plaster_hard_floors_etc",
+        "table": "bies-2017-table-6-2",
+        "name": "Hard surfaces (brick walls, plaster, hard floors, etc.)",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/gypsum_board_on_50_100_mm_studs",
+        "table": "bies-2017-table-6-2",
+        "name": "Gypsum board on 50 × 100 mm studs",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/plaster_gypsum_or_lime_smooth_finish_on_brick",
+        "table": "bies-2017-table-6-2",
+        "name": "Plaster, gypsum or lime, smooth finish",
+        "variant": "on brick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,013",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/plaster_gypsum_or_lime_smooth_finish_on_concrete_block",
+        "table": "bies-2017-table-6-2",
+        "name": "Plaster, gypsum or lime, smooth finish",
+        "variant": "on concrete block",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,012",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/plaster_gypsum_or_lime_smooth_finish_on_lath",
+        "table": "bies-2017-table-6-2",
+        "name": "Plaster, gypsum or lime, smooth finish",
+        "variant": "on lath",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,014",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/solid_timber_door",
+        "table": "bies-2017-table-6-2",
+        "name": "Solid timber door",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_16_kg_m3_25_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "16 kg/m³, 25 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,74",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_16_kg_m3_50_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "16 kg/m³, 50 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_16_kg_m3_75_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "16 kg/m³, 75 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_16_kg_m3_100_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "16 kg/m³, 100 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_24_kg_m3_25_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "24 kg/m³, 25 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,77",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,89",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,91",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_24_kg_m3_50_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "24 kg/m³, 50 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,94",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_24_kg_m3_75_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "24 kg/m³, 75 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_24_kg_m3_100_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "24 kg/m³, 100 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_48_kg_m3_50_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "48 kg/m³, 50 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_48_kg_m3_75_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "48 kg/m³, 75 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_48_kg_m3_100_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "48 kg/m³, 100 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_60_kg_m3_25_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "60 kg/m³, 25 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,68",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/fibreglass_or_rockwool_blanket_60_kg_m3_50_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Fibreglass or rockwool blanket",
+        "variant": "60 kg/m³, 50 mm thick",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,83",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/polyurethane_foam_27_kg_m3_15_mm_thick",
+        "table": "bies-2017-table-6-2",
+        "name": "Polyurethane foam, 27 kg/m³ 15 mm thick",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/wood_platform_with_large_space_beneath",
+        "table": "bies-2017-table-6-2",
+        "name": "Wood platform with large space beneath",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/wood_floor_on_joists",
+        "table": "bies-2017-table-6-2",
+        "name": "Wood floor on joists",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/concrete_or_terrazzo",
+        "table": "bies-2017-table-6-2",
+        "name": "Concrete or terrazzo",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/concrete_block_painted",
+        "table": "bies-2017-table-6-2",
+        "name": "Concrete block painted",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/linoleum_asphalt_rubber_or_cork_tile_on_concrete",
+        "table": "bies-2017-table-6-2",
+        "name": "Linoleum, asphalt, rubber or cork tile on concrete",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/varnished_wood_joist_floor",
+        "table": "bies-2017-table-6-2",
+        "name": "Varnished wood joist floor",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/carpet_heavy_on_concrete",
+        "table": "bies-2017-table-6-2",
+        "name": "Carpet, heavy, on concrete",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/carpet_heavy_on_1_35_kg_m2_hair_felt_or_foam_rubber",
+        "table": "bies-2017-table-6-2",
+        "name": "Carpet, heavy, on 1.35 kg/m² hair felt or foam rubber",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,73",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/carpet_5_mm_thick_on_hard_floor",
+        "table": "bies-2017-table-6-2",
+        "name": "Carpet, 5 mm thick, on hard floor",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/carpet_6_mm_thick_on_underlay",
+        "table": "bies-2017-table-6-2",
+        "name": "Carpet, 6 mm thick, on underlay",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,09",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/cork_floor_tiles_3_4_inch_thick_glued_down",
+        "table": "bies-2017-table-6-2",
+        "name": "Cork floor tiles (3-4 inch thick) – glued down",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "The page prints the thickness as \"3-4 inch\". A cork floor tile between 75 and 100 mm thick is not a thing, and the classic compilations describe this specimen as three-quarters of an inch, about 19 mm; the name is held as printed and the reading is left to the reader.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,08",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,22",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/glazed_tile_marble",
+        "table": "bies-2017-table-6-2",
+        "name": "Glazed tile/marble",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/13_mm_mineral_tile_direct_fixed_to_floor_slab",
+        "table": "bies-2017-table-6-2",
+        "name": "13 mm mineral tile direct fixed to floor slab",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/13_mm_mineral_tile_suspended_500_mm_below_ceiling",
+        "table": "bies-2017-table-6-2",
+        "name": "13 mm mineral tile suspended 500 mm below ceiling",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,9",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/light_velour_338_g_m2_hung_flat_on_wall",
+        "table": "bies-2017-table-6-2",
+        "name": "Light velour, 338 g/m²",
+        "variant": "hung flat on wall",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/light_velour_338_g_m2_hung_in_folds_on_wall",
+        "table": "bies-2017-table-6-2",
+        "name": "Light velour, 338 g/m²",
+        "variant": "hung in folds on wall",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/medium_velour_475_g_m2_draped_to_half_area",
+        "table": "bies-2017-table-6-2",
+        "name": "Medium velour, 475 g/m² draped to half area",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/heavy_velour_610_g_m2_draped_to_half_area",
+        "table": "bies-2017-table-6-2",
+        "name": "Heavy velour, 610 g/m² draped to half area",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/glass_heavy_plate",
+        "table": "bies-2017-table-6-2",
+        "name": "Glass, heavy plate",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,06",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/ordinary_window",
+        "table": "bies-2017-table-6-2",
+        "name": "Ordinary window",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,07",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,04",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/stage_openings",
+        "table": "bies-2017-table-6-2",
+        "name": "Stage openings",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/water_surface_of_pool",
+        "table": "bies-2017-table-6-2",
+        "name": "Water (surface of pool)",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,02",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,03",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/orchestra_with_instruments_on_podium_1_5_m_per_person",
+        "table": "bies-2017-table-6-2",
+        "name": "Orchestra with instruments on podium, 1.5 m² per person",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "absorptionAreas": {
+    "columns": [
+      {
+        "field": "absorption_area_125_m2",
+        "heading": "125 Hz",
+        "headingEs": "125 Hz",
+        "unit": "m²"
+      },
+      {
+        "field": "absorption_area_250_m2",
+        "heading": "250 Hz",
+        "headingEs": "250 Hz",
+        "unit": "m²"
+      },
+      {
+        "field": "absorption_area_500_m2",
+        "heading": "500 Hz",
+        "headingEs": "500 Hz",
+        "unit": "m²"
+      },
+      {
+        "field": "absorption_area_1000_m2",
+        "heading": "1 kHz",
+        "headingEs": "1 kHz",
+        "unit": "m²"
+      },
+      {
+        "field": "absorption_area_2000_m2",
+        "heading": "2 kHz",
+        "headingEs": "2 kHz",
+        "unit": "m²"
+      },
+      {
+        "field": "absorption_area_4000_m2",
+        "heading": "4 kHz",
+        "headingEs": "4 kHz",
+        "unit": "m²"
+      }
+    ],
+    "rows": [
+      {
+        "key": "bies-2017-table-6-2/audience_per_person_seated",
+        "table": "bies-2017-table-6-2",
+        "name": "Audience, per person seated",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "The page prints the quantity as S alpha-bar (m2) beside the name: an absorption area per person, not a coefficient.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,45",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "bies-2017-table-6-2/audience_per_person_standing",
+        "table": "bies-2017-table-6-2",
+        "name": "Audience, per person standing",
+        "variant": "",
+        "source": "Bies 5e Table 6.2, PDF pages 367-369 (printed pp. 338-340)",
+        "note": "The page prints the quantity as S alpha-bar (m2) beside the name: an absorption area per person, not a coefficient.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,43",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
   "fluids": {
     "columns": [
       {

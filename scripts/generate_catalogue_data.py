@@ -42,7 +42,12 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 from phonometry.building.prediction.detailed_model import EN_12354_AIR  # noqa: E402
 from phonometry.environment.propagation import PUBLISHED_GROUND  # noqa: E402
 from phonometry.fluids import PUBLISHED_FLUIDS, PUBLISHED_GASES  # noqa: E402
-from phonometry.materials.absorbers import PUBLISHED_POROUS  # noqa: E402
+from phonometry.materials.absorbers import (  # noqa: E402
+    ABSORPTION_BANDS_HZ,
+    PUBLISHED_ABSORPTION,
+    PUBLISHED_ABSORPTION_AREAS,
+    PUBLISHED_POROUS,
+)
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
 from phonometry.materials.absorbers.porous import PUBLISHED_AIR  # noqa: E402
 from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
@@ -129,6 +134,34 @@ POROUS_COLUMNS = (
         "Factor de pérdidas estructural",
         "",
     ),
+)
+
+
+def _band_heading(band: int) -> str:
+    """How the site heads an octave-band column: ``125 Hz``, ``1 kHz``."""
+    return f"{band // 1000} kHz" if band >= 1000 else f"{band} Hz"
+
+
+#: One column per octave band. The heading is the band itself, in both
+#: languages, because a frequency does not translate.
+ABSORPTION_COLUMNS = tuple(
+    (
+        f"absorption_coefficient_{band}",
+        _band_heading(band),
+        _band_heading(band),
+        "",
+    )
+    for band in ABSORPTION_BANDS_HZ
+)
+
+ABSORPTION_AREA_COLUMNS = tuple(
+    (
+        f"absorption_area_{band}_m2",
+        _band_heading(band),
+        _band_heading(band),
+        "m²",
+    )
+    for band in ABSORPTION_BANDS_HZ
 )
 
 GAS_COLUMNS = (
@@ -456,6 +489,37 @@ def styles(
     }
 
 
+def printed_columns(
+    catalogue: Mapping[str, CatalogueRow],
+    columns: tuple[tuple[str, str, str, str], ...],
+) -> tuple[tuple[str, str, str, str], ...]:
+    """The columns at least one row of *catalogue* has something in.
+
+    An absorption table declares a column for every octave band any book
+    prints, and a given book prints six or seven of them; the site should not
+    show a 63 Hz column of fifty-nine empty cells because two rows fill it in
+    another table. A column stays when any row holds a value, a range, a
+    listed cell, a word or a registered misprint in it, all of which the page
+    printed something for.
+    """
+
+    def spoken(row: CatalogueRow, field: str) -> bool:
+        return (
+            getattr(row, field) is not None
+            or field in row.ranges
+            or field in row.reported
+            or field in row.unquantified
+            or field in row.misprinted
+            or field in row.not_derivable
+        )
+
+    return tuple(
+        column
+        for column in columns
+        if any(spoken(row, column[0]) for row in catalogue.values())
+    )
+
+
 def rows(
     catalogue: Mapping[str, CatalogueRow],
     columns: tuple[tuple[str, str, str, str], ...],
@@ -587,6 +651,27 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     return columns, out
 
 
+def section(
+    catalogue: Mapping[str, CatalogueRow],
+    columns: tuple[tuple[str, str, str, str], ...],
+) -> dict[str, Any]:
+    """One catalogue as the site's page wants it: its columns and its rows."""
+    shown = printed_columns(catalogue, columns)
+    written = styles(catalogue, shown)
+    return {
+        "columns": [
+            {
+                "field": field,
+                "heading": heading,
+                "headingEs": spanish,
+                "unit": written[field].unit,
+            }
+            for field, heading, spanish, _ in shown
+        ],
+        "rows": list(rows(catalogue, shown)),
+    }
+
+
 def render() -> str:
     """The module the site imports.
 
@@ -648,6 +733,8 @@ def render() -> str:
             ],
             "rows": list(rows(PUBLISHED_GASES, GAS_COLUMNS)),
         },
+        "absorption": section(PUBLISHED_ABSORPTION, ABSORPTION_COLUMNS),
+        "absorptionAreas": section(PUBLISHED_ABSORPTION_AREAS, ABSORPTION_AREA_COLUMNS),
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
     }
     body = json.dumps(document, ensure_ascii=False, indent=2, sort_keys=False)
@@ -690,6 +777,8 @@ def main(argv: list[str] | None = None) -> int:
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
         "gases": len(PUBLISHED_GASES),
+        "absorption": len(PUBLISHED_ABSORPTION),
+        "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
     }
     print(f"{OUTPUT.name}: " + ", ".join(f"{n} {k}" for k, n in counts.items()))

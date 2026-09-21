@@ -1,0 +1,298 @@
+---
+title: "materials.absorbers.measured"
+description: "Absorption coefficients as the books print them, one row per finish."
+sidebar:
+  label: "measured"
+---
+
+Absorption coefficients as the books print them, one row per finish.
+
+The other catalogues of this package hold what a material *is*: a flow
+resistivity, a porosity, a modulus. This one holds what a surface *did* in a
+reverberation room, band by band, which is a different kind of number. It is
+not a property of the material but of a specimen, a mounting and a room, and
+the books say so in their own ways: Bies calls his "Sabine absorption
+coefficients for some commonly used materials", which names the method and
+hedges the sample in one line. So a row here is a measurement somebody once
+made, kept because it is what the room-acoustics formulas of this library
+ask for and because no reader has a reverberation room to hand.
+
+Two catalogues, because the same page prints two quantities
+------------------------------------------------------------
+A table of absorption coefficients usually carries a few rows that are not
+coefficients at all. Bies prints an audience "per person seated" as
+$S\bar{\alpha}$ in square metres, an absorption area, in the same
+columns as the coefficients above it. A coefficient is dimensionless and
+bounded by the surface it belongs to; an area per person is a quantity in
+square metres that is added, not multiplied. Holding both under one field
+name would put a number in square metres behind a name that says otherwise,
+so they are two classes and two catalogues, [`PUBLISHED_ABSORPTION`](/phonometry/reference/api/materials/measured/#published_absorption) and
+[`PUBLISHED_ABSORPTION_AREAS`](/phonometry/reference/api/materials/measured/#published_absorption_areas), and the data file tells them apart by
+the fields each row carries.
+
+The band is the field
+---------------------
+Each octave band is a field of its own, `absorption_coefficient_125` and so
+on, with the band's centre frequency in hertz as the suffix. That is not the
+tidiest shape for a spectrum and it is the right one for a catalogue: every
+hedge of `CatalogueRow` is keyed by
+field name, so a cell the page prints as a range, or leaves empty, or prints
+wrong, is handled the way the same cell is handled in every other catalogue,
+and `why_missing` answers
+for a band the way it answers for a modulus. [`AbsorptionSpectrum.bands`](/phonometry/reference/api/materials/measured/#absorptionspectrumbands)
+and [`AbsorptionSpectrum.spectrum`](/phonometry/reference/api/materials/measured/#absorptionspectrumspectrum) give the row back as a spectrum for
+the caller who wants one.
+
+What the numbers are worth
+--------------------------
+A reverberation-room coefficient depends on the sample size, the mounting and
+the room, which is why ISO 354 fixes all three and why a coefficient above 1
+is common and not an error. None of the books prints a mounting for every
+row, and the ones that print a thickness print it in the name. A row is
+therefore a representative value for a finish of that description, useful for
+a reverberation estimate and for a sanity check on a measurement, and not a
+specification of any product. Where a page says more than that about its
+numbers, the `about` of its data file quotes it.
+
+> Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
+
+## ABSORPTION_BANDS_HZ
+
+*Constant* (`tuple`).
+
+```python
+ABSORPTION_BANDS_HZ = (63, 125, 250, 500, 1000, 2000, 4000, 8000)
+```
+
+## absorption_named
+
+```python
+absorption_named(name: str) -> tuple[AbsorptionSpectrum, ...]
+```
+
+Every published coefficient row whose name contains *name*.
+
+A finish is described rather than named, and no two books describe one
+the same way, so this matches a fragment inside the printed name, without
+regard to case: `"carpet"` answers with every carpet of every table,
+and the caller reads the names to pick the one that is the carpet they
+mean. That is deliberate. A lookup that returned one row for "carpet"
+would be choosing a thickness, a backing and a floor on the caller's
+behalf.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `name` | A fragment of the printed name, matched without case. |
+
+**Returns:** The rows whose [`AbsorptionSpectrum.name`](/phonometry/reference/api/materials/measured/#absorptionspectrum) contains it, in the order the tables are read, which is empty when no page has one.
+
+## AbsorptionAreaSpectrum
+
+```python
+AbsorptionAreaSpectrum(
+    *,
+    name: str,
+    source: str,
+    table: str = '',
+    variant: str = '',
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    ranges: Mapping[str, tuple[float, float]] = ...,
+    bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
+    reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
+    unquantified: Mapping[str, str] = ...,
+    uncertainty: Mapping[str, float] = ...,
+    not_derivable: Mapping[str, str] = ...,
+    misprinted: Mapping[str, str] = ...,
+    attributed_to: Mapping[str, str] = ...,
+    group: str = '',
+    note: str = '',
+    absorption_area_63_m2: float | None = None,
+    absorption_area_125_m2: float | None = None,
+    absorption_area_250_m2: float | None = None,
+    absorption_area_500_m2: float | None = None,
+    absorption_area_1000_m2: float | None = None,
+    absorption_area_2000_m2: float | None = None,
+    absorption_area_4000_m2: float | None = None,
+    absorption_area_8000_m2: float | None = None,
+    per: str = 'person',
+)
+```
+
+One row a table prints as an absorption area rather than a coefficient.
+
+An audience, a chair, a person standing: things a book prices per unit in
+square metres of equivalent absorption, because they have no surface area
+a coefficient could multiply. The fields carry the unit in their name so
+that a number from here cannot be mistaken for a coefficient.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `absorption_area_63_m2` | Equivalent absorption area in the 63 Hz octave band, in square metres per unit of `per`. |
+| `absorption_area_125_m2` | The same in the 125 Hz band. |
+| `absorption_area_250_m2` | The same in the 250 Hz band. |
+| `absorption_area_500_m2` | The same in the 500 Hz band. |
+| `absorption_area_1000_m2` | The same in the 1 kHz band. |
+| `absorption_area_2000_m2` | The same in the 2 kHz band. |
+| `absorption_area_4000_m2` | The same in the 4 kHz band. |
+| `absorption_area_8000_m2` | The same in the 8 kHz band. |
+| `per` | What one unit of the area belongs to, as the page says it: `"person"` for an audience row, `"seat"` for a chair. |
+| `name` | The material as the table names it, attribution stripped. |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
+| `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
+| `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
+| `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |
+| `misprinted` | Field to what the page prints there and why it cannot be that, for a cell whose defect is confirmed and registered in `docs/ERRATA.md`. The number is not served, because a catalogue that handed it over would put a value its own registry calls wrong behind every calculation downstream; it is not dropped either, because a reader reproducing the book needs to see what the book says. This is the narrowest of the hedges and the one that costs most to claim: a cell earns it only when the defect follows from the page itself or from something as settled as the molar mass of a named molecule, and never from one book disagreeing with another. |
+| `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
+| `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
+| `note` | What the page says about this row beyond its numbers. |
+
+### AbsorptionAreaSpectrum.bands()
+
+```python
+AbsorptionAreaSpectrum.bands() -> tuple[int, ...]
+```
+
+The octave bands this row prints an area for, in hertz.
+
+### AbsorptionAreaSpectrum.spectrum()
+
+```python
+AbsorptionAreaSpectrum.spectrum() -> dict[int, float]
+```
+
+The row as `{band_hz: area_m2}` over the bands it prints.
+
+## AbsorptionSpectrum
+
+```python
+AbsorptionSpectrum(
+    *,
+    name: str,
+    source: str,
+    table: str = '',
+    variant: str = '',
+    approximate: frozenset[str] = frozenset(),
+    derived: Mapping[str, str] = ...,
+    ranges: Mapping[str, tuple[float, float]] = ...,
+    bounded_above: frozenset[str] = frozenset(),
+    bounded_below: frozenset[str] = frozenset(),
+    reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
+    unquantified: Mapping[str, str] = ...,
+    uncertainty: Mapping[str, float] = ...,
+    not_derivable: Mapping[str, str] = ...,
+    misprinted: Mapping[str, str] = ...,
+    attributed_to: Mapping[str, str] = ...,
+    group: str = '',
+    note: str = '',
+    absorption_coefficient_63: float | None = None,
+    absorption_coefficient_125: float | None = None,
+    absorption_coefficient_250: float | None = None,
+    absorption_coefficient_500: float | None = None,
+    absorption_coefficient_1000: float | None = None,
+    absorption_coefficient_2000: float | None = None,
+    absorption_coefficient_4000: float | None = None,
+    absorption_coefficient_8000: float | None = None,
+)
+```
+
+One finish of a published table, with its coefficient in each band.
+
+The hedges of `CatalogueRow` apply
+to each band as to any other field, and the material's thickness,
+density or mounting are part of `name`, as the page prints them,
+because the books print them there and pulling them into fields would
+mean deciding what "heavy carpet on concrete" is a thickness of.
+
+**Attributes**
+
+| Name | Description |
+| :--- | :--- |
+| `absorption_coefficient_63` | Sabine absorption coefficient in the 63 Hz octave band, dimensionless, as printed. |
+| `absorption_coefficient_125` | The same in the 125 Hz band. |
+| `absorption_coefficient_250` | The same in the 250 Hz band. |
+| `absorption_coefficient_500` | The same in the 500 Hz band. |
+| `absorption_coefficient_1000` | The same in the 1 kHz band. |
+| `absorption_coefficient_2000` | The same in the 2 kHz band. |
+| `absorption_coefficient_4000` | The same in the 4 kHz band. |
+| `absorption_coefficient_8000` | The same in the 8 kHz band. |
+| `name` | The material as the table names it, attribution stripped. |
+| `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
+| `source` | Document, table, PDF page and printed folio. |
+| `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
+| `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
+| `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
+| `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
+| `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
+| `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |
+| `misprinted` | Field to what the page prints there and why it cannot be that, for a cell whose defect is confirmed and registered in `docs/ERRATA.md`. The number is not served, because a catalogue that handed it over would put a value its own registry calls wrong behind every calculation downstream; it is not dropped either, because a reader reproducing the book needs to see what the book says. This is the narrowest of the hedges and the one that costs most to claim: a cell earns it only when the defect follows from the page itself or from something as settled as the molar mass of a named molecule, and never from one book disagreeing with another. |
+| `not_derivable` | Field to why this library leaves it empty although the arithmetic would reach it. Bies leaves the speed of his aluminium honeycomb panels blank, and the modulus and the density beside it are effective ones, so `sqrt(E/rho)` would put a one-dimensional speed on a panel that has none. A row says so here, and nothing fills the cell afterwards. |
+| `attributed_to` | Credit for a cell the book takes from someone else. Keyed by field name, or by `"row"` or `"table"` when the credit covers all of one. |
+| `group` | The heading of the block this row sits under, when the table prints its rows in named groups: Cox files each material under `"Fibrous materials"`, `"Cellular materials"`, `"Granular materials"` or `"Other"`. Empty for a table that prints one list. |
+| `note` | What the page says about this row beyond its numbers. |
+
+### AbsorptionSpectrum.absorption_coefficient()
+
+```python
+AbsorptionSpectrum.absorption_coefficient(band_hz: int) -> float
+```
+
+The coefficient in one band, or a refusal that says what the page had.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `band_hz` | An octave-band centre frequency from [`ABSORPTION_BANDS_HZ`](/phonometry/reference/api/materials/measured/#absorption_bands_hz). |
+
+**Returns:** The printed coefficient, as a float.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page has no number in that band, naming the row, the band and what the cell held instead; or when *band_hz* is not a band any absorption table prints. |
+
+### AbsorptionSpectrum.bands()
+
+```python
+AbsorptionSpectrum.bands() -> tuple[int, ...]
+```
+
+The octave bands this row prints a coefficient for, in hertz.
+
+### AbsorptionSpectrum.spectrum()
+
+```python
+AbsorptionSpectrum.spectrum() -> dict[int, float]
+```
+
+The row as `{band_hz: coefficient}` over the bands it prints.
+
+A band the page left empty, or printed as something other than a
+number, is left out rather than filled; `why_missing` on the
+band's field says which it was.
+
+## PUBLISHED_ABSORPTION
+
+*Constant* (`mappingproxy`).
+
+## PUBLISHED_ABSORPTION_AREAS
+
+*Constant* (`mappingproxy`).

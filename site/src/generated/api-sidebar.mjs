@@ -180,6 +180,7 @@ export const apiSections = {
       'reference/api/materials/standing-wave',
       'reference/api/materials/porous',
       'reference/api/materials/catalogue',
+      'reference/api/materials/measured',
       'reference/api/materials/layered',
       'reference/api/materials/biot',
       'reference/api/materials/slow-sound',

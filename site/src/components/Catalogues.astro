@@ -568,14 +568,15 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 		max-width: 22ch;
 	}
 
-	/* Long enough for "three-dimensional boundary element prediction" to
-	   wrap onto two lines rather than stretch the table. */
+	/* Wide enough that "three-dimensional boundary element prediction"
+	   wraps onto three lines. At sixteen characters it broke into six, one
+	   word per line, and every row of the table grew to match. */
 	.model {
-		min-width: 16ch;
+		min-width: 21ch;
 	}
 
 	.model .wrap {
-		max-width: 24ch;
+		max-width: 26ch;
 	}
 
 	.conditions {

@@ -218,6 +218,38 @@ derived through the Poisson ratio, and
 | :--- | :--- |
 | ValueError | when the source prints no elastic constants. |
 
+### PorousMaterial.is_approximate()
+
+```python
+PorousMaterial.is_approximate(field_name: str) -> bool
+```
+
+Whether the page prints this field with a `~`.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page rounded the cell on purpose.
+
+### PorousMaterial.is_derived()
+
+```python
+PorousMaterial.is_derived(field_name: str) -> bool
+```
+
+Whether this library computed this field instead of reading it.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** `True` when the page did not print it and the value follows from cells that it did. `derived` says how.
+
 ### PorousMaterial.medium()
 
 ```python
@@ -250,6 +282,67 @@ print and converted, here and once, to the metres
 | Exception | When |
 | :--- | :--- |
 | ValueError | for an unknown model name, or when the page does not print a parameter the model needs, in which case the message says what the page had there instead. |
+
+### PorousMaterial.printed()
+
+```python
+PorousMaterial.printed(
+    field_name: str,
+    *,
+    wanted_by: str = 'the caller',
+) -> float
+```
+
+One quantity this page prints, or a refusal that says what it had.
+
+Every quantity of a row is optional, because the pages print different
+columns, so a caller passing one into a function that requires a float
+has to narrow it. Doing it here beats an assertion at each call site:
+the refusal names the field, who wanted it and what the page had in
+that cell, which is the difference between a cell the book left empty
+and a cell holding the word "model".
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | The quantity wanted. |
+| `wanted_by` | What wants it, named in the message. |
+
+**Returns:** The value, as a float.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| ValueError | when the page did not print a number there. |
+
+### PorousMaterial.why_missing()
+
+```python
+PorousMaterial.why_missing(field_name: str) -> str
+```
+
+Why this field is `None`, in the page's own terms.
+
+A catalogue that answers `None` and stops is asking the caller to
+guess whether the material has no such property, whether the book
+measured it and printed a dash, or whether the cell holds something
+that is not a number. Each of those is a different answer.
+
+**Parameters**
+
+| Name | Description |
+| :--- | :--- |
+| `field_name` | One of the numeric field names of this class. |
+
+**Returns:** What the page had in that cell, or the empty string when the field is not missing at all. A field the page has no column for and this library cannot derive, because the cells it would need are themselves a range, answers that it does not follow.
+
+**Raises**
+
+| Exception | When |
+| :--- | :--- |
+| AttributeError | for a name this class does not have, because a misspelt field would otherwise answer as if the cell were empty. |
 
 ## PUBLISHED_POROUS
 

@@ -374,3 +374,7 @@ are taken as given, from laboratory data or from the mass-law estimates of
 - [Dynamic stiffness of resilient materials (EN 29052-1)](../../materials/resilient/dynamic-stiffness.md):
   the $s'$ input to the EN 12354-2 floating-floor term.
 - API reference: [`building.prediction.simplified_model`](https://jmrplens.github.io/phonometry/reference/api/building/simplified-model/) and [`building.prediction.facade`](https://jmrplens.github.io/phonometry/reference/api/building/facade/).
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#transmission-loss): the
+  band-by-band transmission loss and single-number ratings the books print for
+  real constructions.
+

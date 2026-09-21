@@ -704,6 +704,9 @@ against the exact half-plane and coherent-ground models.
 - [Environmental noise levels](../assessment/environmental-levels.md): what happens to the predicted level once it becomes an assessed one.
 - API reference: [`environment.propagation.outdoor_propagation`](https://jmrplens.github.io/phonometry/reference/api/environment/outdoor-propagation/) and [`environment.propagation.air_absorption`](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/).
 - Theory: [Outdoor propagation](../../reference/theory/environment-transport.md#outdoor-propagation-general-method-iso-9613-2): the ISO 9613-2 attenuation terms derived one by one, and the atmospheric absorption of Part 1.
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#ground-surfaces): the
+  flow resistivity and the model parameters the books print for grass, snow,
+  asphalt and the rest of the ground surfaces.
 
 ## References
 

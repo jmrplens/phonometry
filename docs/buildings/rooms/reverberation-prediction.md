@@ -355,6 +355,9 @@ repository. Click the preview to open the PDF:
   applies.
 - API reference: [`room.reverberation_prediction`](https://jmrplens.github.io/phonometry/reference/api/rooms/reverberation-prediction/) and [`environment.propagation.air_absorption`](https://jmrplens.github.io/phonometry/reference/api/environment/air-absorption/).
 - Theory: [Steady-state room field](../../reference/theory/rooms-buildings.md#steady-state-room-field-bies-64-kuttruff-56): the diffuse-field assumption every Sabine-family formula makes, and where it stops holding.
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#absorption-coefficients): the
+  band-by-band absorption coefficients the books print, with the mounting each
+  one was measured on.
 
 ## References
 

@@ -120,7 +120,9 @@ three of them print a steel and they are not the same steel. Bies 5e
 **Table C.1** adds one hundred and five metals, building materials, woods,
 plastics and honeycomb panels, and its loss factor column is two quantities and
 not a range: the low end is the internal loss factor and the high end the one a
-panel has once it is installed.
+panel has once it is installed. Every row is also on the
+[published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#solids)
+page, filterable, with the book and the page each one was read on.
 
 ```python
 from phonometry import solids

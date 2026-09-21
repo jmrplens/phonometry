@@ -1,0 +1,333 @@
+---
+/**
+ * The one place to choose what you are looking at on the catalogues page.
+ *
+ * The page holds eleven catalogues and a little under fourteen hundred rows.
+ * Printed one after another that is a page you scroll through rather than a
+ * page you consult, and on a phone the first table is several screens below
+ * the fold, so a reader who arrived wanting the density of lead met an essay
+ * about how the rows are sourced and no sign that a table existed at all.
+ *
+ * So the three choices a reader actually makes, which catalogue, which
+ * material and which published table, are made here, once, at the top of the
+ * page, and only the chosen catalogue is shown. The per-catalogue filters
+ * that used to sit above each table are gone: two of the three choices were
+ * repeated eleven times and the third, the one that matters most, could not
+ * be made at all.
+ *
+ * Nothing here is rendered from a list of catalogues kept in this file. The
+ * options are read out of the document: every `<section data-catalogue>` the
+ * page rendered, labelled by the `## heading` above it, which is prose in the
+ * page and therefore already translated. Adding a catalogue to the page adds
+ * it to this control and to nothing else.
+ *
+ * Progressive enhancement, like the table it drives: the panel stays hidden
+ * until the script runs, and with JavaScript off the page is the eleven
+ * catalogues one after another, exactly as it was, with every row in the
+ * document for Pagefind to index.
+ */
+interface Props {
+	/** Locale of the page it is rendered on. */
+	lang?: 'en' | 'es';
+}
+const { lang = 'en' } = Astro.props;
+
+const copy = {
+	en: {
+		category: 'Category',
+		table: 'Published table',
+		everyTable: 'Every table',
+		jump: 'Go to the table',
+		rows: 'rows',
+		hint: 'Every catalogue on this page is behind this control. Pick one and only that one is shown.',
+	},
+	es: {
+		category: 'Categoría',
+		table: 'Tabla publicada',
+		everyTable: 'Todas las tablas',
+		jump: 'Ir a la tabla',
+		rows: 'filas',
+		hint: 'Todos los catálogos de esta página están detrás de este control. Elige uno y sólo se muestra ese.',
+	},
+}[lang];
+---
+
+<div
+	class="finder not-content"
+	data-finder
+	data-rows-word={copy.rows}
+	data-every-table={copy.everyTable}
+	hidden
+>
+	<p class="hint">{copy.hint}</p>
+	<div class="controls">
+		<label class="wide">
+			<span>{copy.category}</span>
+			<select data-category></select>
+		</label>
+		<label class="wide">
+			<span data-search-label></span>
+			<input type="search" data-search />
+		</label>
+		<label>
+			<span>{copy.table}</span>
+			<select data-table>
+				<option value="">{copy.everyTable}</option>
+			</select>
+		</label>
+		<button type="button" data-jump>{copy.jump}</button>
+		<span class="count" data-count></span>
+	</div>
+</div>
+
+<script>
+	(() => {
+		const finder = document.querySelector('[data-finder]');
+		const sections = [...document.querySelectorAll('[data-catalogue]')];
+		if (!finder || sections.length === 0) return;
+
+		const category = finder.querySelector('[data-category]');
+		const search = finder.querySelector('[data-search]');
+		const searchLabel = finder.querySelector('[data-search-label]');
+		const tableSelect = finder.querySelector('[data-table]');
+		const count = finder.querySelector('[data-count]');
+		const jump = finder.querySelector('[data-jump]');
+		/* The two words the control prints for itself. They travel on the panel
+		   rather than through `define:vars`, which would force this script inline
+		   and therefore to run where it is written, above every table it is
+		   looking for. */
+		const rowsWord = finder.dataset.rowsWord ?? '';
+		const everyTable = finder.dataset.everyTable ?? '';
+
+		/* A catalogue on this page is a heading, the prose under it and one or
+		   more tables: three kinds of sibling in the same markdown flow rather
+		   than one element that could be hidden on its own. So the flow is walked
+		   once and cut at every `h2`, and a run that contains a table is a
+		   catalogue. It has to be a run rather than one table per heading because
+		   the absorption heading covers two: the coefficients, and the few rows
+		   the same pages price in equivalent absorption area because they have no
+		   surface to multiply. A reader who asks for absorption wants both. */
+		const flow = [...sections[0].parentElement.children];
+		const groups = [];
+		let run = null;
+		for (const node of flow) {
+			/* Starlight does not leave a heading bare: it wraps it, with its
+			   anchor link, in a `div.sl-heading-wrapper`, so the cut is made on
+			   whatever element holds the `h2` rather than on the `h2` itself. */
+			const h2 = node.tagName === 'H2' ? node : node.querySelector(':scope > h2');
+			if (h2) {
+				run = { heading: h2, nodes: [node], tables: [] };
+				groups.push(run);
+				continue;
+			}
+			if (!run) continue;
+			run.nodes.push(node);
+			if (node.matches('[data-catalogue]')) run.tables.push(node);
+		}
+		const catalogues = groups.filter((group) => group.tables.length > 0);
+		if (catalogues.length === 0) return;
+		for (const group of catalogues) {
+			group.key = group.tables[0].dataset.catalogue;
+			group.rowCount = group.tables.reduce(
+				(total, table) => total + Number(table.dataset.rowCount ?? 0),
+				0,
+			);
+			group.published = [
+				...new Set(group.tables.flatMap((table) => JSON.parse(table.dataset.tables ?? '[]'))),
+			].sort();
+		}
+
+		/** The heading's own words, without the anchor link Starlight adds. */
+		const labelOf = (group) => {
+			const clone = group.heading.cloneNode(true);
+			for (const anchor of clone.querySelectorAll('a')) anchor.remove();
+			return clone.textContent.trim();
+		};
+
+		for (const group of catalogues) {
+			const option = document.createElement('option');
+			option.value = group.key;
+			option.textContent = `${labelOf(group)} (${group.rowCount} ${rowsWord})`;
+			category.append(option);
+		}
+
+		let active = catalogues[0];
+
+		const rowsOf = (group) => group.tables.flatMap((table) => [...table.querySelectorAll('[data-row]')]);
+
+		const applyFilter = () => {
+			const needle = search.value.trim().toLowerCase();
+			const wanted = tableSelect.value;
+			let shown = 0;
+			for (const row of rowsOf(active)) {
+				const visible =
+					(!needle || (row.dataset.text ?? '').includes(needle)) &&
+					(!wanted || row.dataset.table === wanted);
+				row.hidden = !visible;
+				if (visible) shown += 1;
+			}
+			count.textContent = `${shown} ${rowsWord}`;
+			/* One message per table, so the reader is told which of the two
+			   absorption tables their filter emptied and which still has rows. */
+			for (const table of active.tables) {
+				const empty = table.querySelector('[data-empty]');
+				const left = [...table.querySelectorAll('[data-row]')].some((row) => !row.hidden);
+				if (empty) empty.toggleAttribute('hidden', left);
+			}
+		};
+
+		const show = (group, { scroll = false } = {}) => {
+			active = group;
+			for (const other of catalogues) {
+				const hide = other !== group;
+				for (const node of other.nodes) node.classList.toggle('catalogue-hidden', hide);
+			}
+			category.value = group.key;
+			searchLabel.textContent = group.tables[0].dataset.searchLabel ?? '';
+			search.placeholder = group.tables[0].dataset.placeholder ?? '';
+			search.value = '';
+			tableSelect.replaceChildren();
+			const every = document.createElement('option');
+			every.value = '';
+			every.textContent = everyTable;
+			tableSelect.append(every);
+			for (const table of group.published) {
+				const option = document.createElement('option');
+				option.value = table;
+				option.textContent = table;
+				tableSelect.append(option);
+			}
+			applyFilter();
+			if (scroll) group.heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		};
+
+		/* A link can name a catalogue two ways: by the heading's own id, which is
+		   what this page's table of contents uses and what every guide links to,
+		   and is therefore Spanish on the Spanish page; or by the section's
+		   stable id, the same word in both languages, which nothing publishes
+		   but which is the obvious thing to try by hand. */
+		const fromHash = () => {
+			const hash = decodeURIComponent(location.hash.replace('#', ''));
+			if (!hash) return null;
+			return (
+				catalogues.find((group) => group.tables.some((table) => table.id === hash)) ??
+				catalogues.find((group) => group.heading.id === hash) ??
+				null
+			);
+		};
+
+		category.addEventListener('change', () => {
+			const group = catalogues.find((candidate) => candidate.key === category.value);
+			if (group) show(group, { scroll: true });
+		});
+		search.addEventListener('input', applyFilter);
+		tableSelect.addEventListener('change', applyFilter);
+		jump.addEventListener('click', () => {
+			active.heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		});
+		window.addEventListener('hashchange', () => {
+			const group = fromHash();
+			if (group) show(group, { scroll: true });
+		});
+
+		finder.removeAttribute('hidden');
+		show(fromHash() ?? catalogues[0]);
+	})();
+</script>
+
+<style is:global>
+	/* The heading, the prose and the table of a catalogue nobody asked for.
+	   `!important` because the rule has to beat whatever display the markdown
+	   styles give an `h2` or a `p`, and losing that fight would leave eleven
+	   catalogues stacked on the page with one of them also claiming to be the
+	   only one shown. */
+	.catalogue-hidden {
+		display: none !important;
+	}
+</style>
+
+<style>
+	.finder {
+		margin-block: 0 2rem;
+		padding: 1rem 1.15rem 1.15rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.6rem;
+		background: color-mix(in srgb, var(--sl-color-gray-6) 45%, var(--sl-color-black));
+	}
+
+	.hint {
+		margin: 0 0 0.9rem;
+		color: var(--sl-color-gray-3);
+		font-size: var(--sl-text-sm);
+	}
+
+	.controls {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.75rem 1.25rem;
+		align-items: end;
+	}
+
+	.controls label {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-2);
+	}
+
+	/* The two controls a reader reaches for first get room to print what they
+	   hold: a category option is a heading plus its row count, and at the
+	   width a bare select takes "Predicted scattering coefficients (119 rows)"
+	   is elided to about a third of itself. */
+	.controls .wide {
+		flex: 1 1 15rem;
+		min-width: 0;
+	}
+
+	.controls input,
+	.controls select {
+		font: inherit;
+		width: 100%;
+		padding: 0.35rem 0.5rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.25rem;
+		background: var(--sl-color-black);
+		color: var(--sl-color-white);
+	}
+
+	.controls button {
+		font: inherit;
+		padding: 0.4rem 0.9rem;
+		border: 1px solid var(--sl-color-text-accent);
+		border-radius: 0.25rem;
+		background: var(--sl-color-text-accent);
+		color: var(--sl-color-black);
+		cursor: pointer;
+	}
+
+	.controls button:hover {
+		background: color-mix(in srgb, var(--sl-color-text-accent) 82%, var(--sl-color-black));
+	}
+
+	.count {
+		font-size: var(--sl-text-sm);
+		color: var(--sl-color-gray-3);
+		padding-block-end: 0.45rem;
+	}
+
+	/* On a phone the four controls are one per line, and the button that
+	   carries the reader past the prose to the table is worth the full width:
+	   it is the whole reason this panel is at the top of the page. */
+	@media (max-width: 30rem) {
+		.controls {
+			gap: 0.7rem;
+		}
+
+		.controls label,
+		.controls button {
+			flex: 1 1 100%;
+			width: 100%;
+		}
+	}
+</style>

@@ -866,6 +866,9 @@ found in the sources during this work are recorded in the
   half of Cox & D'Antonio, implemented separately; this guide covers only
   the absorber half of the book.
 - Theory: [Acoustic material characterisation](../../reference/theory/materials-surfaces.md#acoustic-material-characterisation-iso-11654-iso-9053-12-iso-10534-12-astm-e2611): the characterisation quantities the empirical and phenomenological models take as input.
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#porous-materials): the
+  flow resistivity, porosity and tortuosity the books print, for named
+  specimens and for whole classes of material.
 
 ## References
 

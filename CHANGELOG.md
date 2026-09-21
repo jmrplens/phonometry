@@ -842,6 +842,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
+- **The published catalogues page shows one catalogue at a time.** Eleven
+  tables and a little under fourteen hundred rows printed one after another
+  made a page you scrolled rather than a page you consulted, and on a phone
+  the first table sat several screens below the fold with nothing above it to
+  say a table was coming. The three choices a reader makes, which catalogue,
+  which material and which published table, are now made once, in a panel at
+  the top of the page, and only the chosen catalogue is shown; a button beside
+  them carries the reader straight to it. The panel reads the catalogues out
+  of the page itself, so adding one adds it to the control and to nothing
+  else, and with JavaScript off the page is still the eleven catalogues one
+  after another with every row in the document. Guides across the site now
+  link to the catalogue their subject lives in rather than to the page as a
+  whole.
+- **What a marked cell means now opens on click.** The dotted underlines, the
+  derived italics and the note a book made about a row all promised a
+  sentence that a phone could not reach at all and a desktop reached only
+  after the browser's own hover delay. Clicking one now opens it at once and
+  pins it until you dismiss it, hovering still opens it after a pause, and the
+  `title` a screen reader reads is left in place while no pointer is near it.
+
 - **The medium's entry in the navigation now says what it holds.** The
   sidebar and the API reference call it "Fluids", beside "Elastic solids",
   where it used to read "The medium". The page keeps that title, because the

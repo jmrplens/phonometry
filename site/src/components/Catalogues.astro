@@ -77,8 +77,6 @@ const copy = {
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
 		diffusionPlaceholder: 'semiellipse, triangle, QRD',
-		table: 'Published table',
-		everyTable: 'Every table',
 		empty: 'No row matches that filter.',
 		material: 'Material',
 		surface: 'Surface',
@@ -92,7 +90,6 @@ const copy = {
 		solver: 'Computed with',
 		fixedBy: 'What fixes it',
 		source: 'Source',
-		rows: (n: number) => `${n} rows`,
 		regionLabel: 'Published values, scrollable sideways',
 		legend: 'Italic is a value this library worked out; a dotted underline is a cell that is not a plain number, and what it is reads on the cell; an asterisk is a note the page made about the row.',
 		kinds: {
@@ -116,8 +113,6 @@ const copy = {
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
 		diffusionPlaceholder: 'semiellipse, triangle, QRD',
-		table: 'Tabla publicada',
-		everyTable: 'Todas las tablas',
 		empty: 'Ninguna fila coincide con ese filtro.',
 		material: 'Material',
 		surface: 'Superficie',
@@ -131,7 +126,6 @@ const copy = {
 		solver: 'Calculado con',
 		fixedBy: 'Qué lo fija',
 		source: 'Fuente',
-		rows: (n: number) => `${n} filas`,
 		regionLabel: 'Valores publicados, con desplazamiento lateral',
 		legend: 'La cursiva es un valor calculado por esta biblioteca; el subrayado punteado es una celda que no es un número a secas, y lo que es se lee en la propia celda; el asterisco es una nota que la página hace sobre la fila.',
 		kinds: {
@@ -218,21 +212,21 @@ const showsModel = section !== 'fluids' && data.rows.some((row) => row.model);
 const showsPer = data.rows.some((row: { per?: string }) => row.per);
 ---
 
-<section class="catalogue not-content" data-catalogue={section}>
-	<div class="controls" data-controls hidden>
-		<label>
-			<span>{searchLabel}</span>
-			<input type="search" data-search placeholder={placeholder} />
-		</label>
-		<label>
-			<span>{copy.table}</span>
-			<select data-table>
-				<option value="">{copy.everyTable}</option>
-				{tables.map((table) => <option value={table}>{table}</option>)}
-			</select>
-		</label>
-		<span class="count" data-count>{copy.rows(data.rows.length)}</span>
-	</div>
+<!-- The filters live in CatalogueFinder.astro, at the top of the page, and
+     reach in here through these attributes: which catalogue this is, what its
+     filter should be called and suggest, how many rows it holds and which
+     published tables it draws on. The id is the same word in both languages,
+     which the finder resolves as well as the heading's own id; the guides link
+     to the heading, because that is the anchor the link checker can see. -->
+<section
+	class="catalogue not-content"
+	id={`catalogue-${section}`}
+	data-catalogue={section}
+	data-row-count={data.rows.length}
+	data-search-label={searchLabel}
+	data-placeholder={placeholder}
+	data-tables={JSON.stringify(tables)}
+>
 	<p class="legend">{copy.legend}</p>
 
 	<!-- Focusable because it scrolls sideways and holds nothing focusable of
@@ -314,9 +308,15 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 									title={(!cell.text && cell.note) || undefined}
 								>
 									{cell.text ? (
+										/* A number the page simply printed has nothing to
+										   explain, so it carries no tooltip: the marked cells
+										   are the ones that are not a plain number, and
+										   "as the page prints it" on every other cell would
+										   bury them. It keeps its `cursor: auto` for the same
+										   reason. */
 										<span
 											class={`cell cell-${cell.kind}`}
-											title={cell.note || copy.kinds[cell.kind]}
+											title={cell.note || (cell.kind === 'printed' ? undefined : copy.kinds[cell.kind])}
 										>
 											{cell.text}
 										</span>
@@ -343,39 +343,163 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 </section>
 
 <script>
-	// Progressive enhancement only: every row is already in the document, so a
-	// reader without JavaScript, and Pagefind's crawler, both see the whole
-	// catalogue. The controls stay hidden until this runs, so nothing offers a
-	// filter that would not work.
-	for (const section of document.querySelectorAll('[data-catalogue]')) {
-		const controls = section.querySelector('[data-controls]') as HTMLElement | null;
-		const search = section.querySelector('[data-search]') as HTMLInputElement | null;
-		const table = section.querySelector('[data-table]') as HTMLSelectElement | null;
-		const count = section.querySelector('[data-count]') as HTMLElement | null;
-		const empty = section.querySelector('[data-empty]') as HTMLElement | null;
-		const rows = [...section.querySelectorAll('[data-row]')] as HTMLElement[];
-		const template = count?.textContent?.trim() ?? '';
-		controls?.removeAttribute('hidden');
+	/* The explanations that hang off a cell.
+	   Every mark in these tables promises a sentence: what a dotted underline
+	   means, what a page actually printed where a number is missing, what note
+	   the book made about a row. Until now that sentence was a `title`, which
+	   is a promise a phone cannot keep at all and a desktop keeps only after
+	   the browser's own delay, on hover, in a tooltip nobody can copy from.
 
-		const apply = () => {
-			const needle = (search?.value ?? '').trim().toLowerCase();
-			const wanted = table?.value ?? '';
-			let shown = 0;
-			for (const row of rows) {
-				const visible =
-					(!needle || (row.dataset.text ?? '').includes(needle)) &&
-					(!wanted || row.dataset.table === wanted);
-				row.hidden = !visible;
-				if (visible) shown += 1;
+	   So the sentence now opens on click, at once, and on hover after a pause
+	   of its own. The `title` stays on the element while no pointer is near
+	   it, because that is what a screen reader reads and what a reader with
+	   JavaScript off still gets; it is lifted off only while this tooltip is
+	   the thing showing, or the browser would print its own on top a moment
+	   later. */
+	(() => {
+		const tables = document.querySelectorAll('[data-catalogue]');
+		if (tables.length === 0) return;
+
+		const tip = document.createElement('div');
+		tip.className = 'catalogue-tip';
+		tip.setAttribute('role', 'tooltip');
+		tip.hidden = true;
+		document.body.append(tip);
+
+		let current = null;
+		let pinned = false;
+		let timer = 0;
+
+		/** Put the `title` back on whatever we last took it from. */
+		const restore = (element) => {
+			if (element && element.dataset.tip !== undefined) {
+				element.setAttribute('title', element.dataset.tip);
+				delete element.dataset.tip;
 			}
-			if (count) count.textContent = template.replace(/^\d+/, String(shown));
-			empty?.toggleAttribute('hidden', shown > 0);
 		};
 
-		search?.addEventListener('input', apply);
-		table?.addEventListener('change', apply);
-	}
+		const hide = () => {
+			clearTimeout(timer);
+			tip.hidden = true;
+			restore(current);
+			current = null;
+			pinned = false;
+		};
+
+		const place = (element) => {
+			const box = element.getBoundingClientRect();
+			tip.hidden = false;
+			const own = tip.getBoundingClientRect();
+			const margin = 8;
+			let left = box.left + box.width / 2 - own.width / 2;
+			left = Math.max(margin, Math.min(left, window.innerWidth - own.width - margin));
+			/* Above the cell when there is room, below it when there is not:
+			   the row at the top of a phone screen is exactly the one whose
+			   explanation would otherwise be drawn off the top of it. */
+			const above = box.top - own.height - margin;
+			tip.style.left = `${Math.round(left)}px`;
+			tip.style.top = `${Math.round(above > margin ? above : box.bottom + margin)}px`;
+		};
+
+		const open = (element, { pin }) => {
+			if (current && current !== element) restore(current);
+			const text = element.getAttribute('title') ?? element.dataset.tip;
+			if (!text) return;
+			if (element.hasAttribute('title')) {
+				element.dataset.tip = text;
+				element.removeAttribute('title');
+			}
+			current = element;
+			pinned = pin;
+			tip.textContent = text;
+			place(element);
+		};
+
+		const target = (event) => {
+			const element = event.target instanceof Element ? event.target.closest('[title]') : null;
+			if (element && element.closest('[data-catalogue]')) return element;
+			/* Already open and its `title` is parked in `dataset.tip`, so the
+			   selector above no longer matches it. */
+			const parked = event.target instanceof Element ? event.target.closest('[data-tip]') : null;
+			return parked && parked.closest('[data-catalogue]') ? parked : null;
+		};
+
+		for (const table of tables) {
+			table.addEventListener('pointerover', (event) => {
+				if (pinned) return;
+				const element = target(event);
+				if (!element || element === current) return;
+				clearTimeout(timer);
+				timer = window.setTimeout(() => open(element, { pin: false }), 400);
+			});
+			table.addEventListener('pointerout', (event) => {
+				if (pinned) return;
+				const element = target(event);
+				if (element && element === current) hide();
+				else clearTimeout(timer);
+			});
+			table.addEventListener('click', (event) => {
+				const element = target(event);
+				if (!element) return;
+				if (pinned && element === current) {
+					hide();
+					return;
+				}
+				open(element, { pin: true });
+			});
+		}
+
+		document.addEventListener('click', (event) => {
+			if (!pinned) return;
+			const element = event.target instanceof Element ? event.target.closest('[data-catalogue]') : null;
+			if (!element) hide();
+		});
+		document.addEventListener('keydown', (event) => {
+			if (event.key === 'Escape') hide();
+		});
+		/* Scrolling must not close it: the table scrolls sideways inside its own
+		   box, a phone scrolls the page under your thumb, and the browser
+		   scrolls the cell into view when you click it, which closed the
+		   tooltip the click had just opened. The tooltip is positioned against
+		   the viewport, so it follows the cell instead, and gives up only when
+		   the cell itself has left the screen. `capture` is what makes the
+		   sideways scroll of the table reach this at all: a scroll event on an
+		   element does not bubble. */
+		const follow = () => {
+			if (!current || tip.hidden) return;
+			const box = current.getBoundingClientRect();
+			if (box.bottom < 0 || box.top > window.innerHeight) hide();
+			else place(current);
+		};
+		window.addEventListener('scroll', follow, { passive: true, capture: true });
+		window.addEventListener('resize', hide);
+	})();
 </script>
+
+<style is:global>
+	/* The tooltip is appended to the body so that nothing in the table can clip
+	   it: the scroll box the table lives in has `overflow-x: auto`, and a
+	   tooltip drawn inside it would be cut off exactly at the edges where the
+	   reader most needs it. That puts it outside this component's scope, so
+	   its rules are global and its class is named for the page it belongs to. */
+	.catalogue-tip {
+		position: fixed;
+		z-index: 100;
+		max-width: min(32rem, calc(100vw - 1rem));
+		padding: 0.5rem 0.7rem;
+		border: 1px solid var(--sl-color-gray-5);
+		border-radius: 0.35rem;
+		background: var(--sl-color-black);
+		color: var(--sl-color-white);
+		box-shadow: 0 2px 10px rgb(0 0 0 / 35%);
+		font-size: var(--sl-text-sm);
+		line-height: 1.4;
+		/* It follows the pointer's target, never the pointer, so it must not
+		   become a target itself: hovering it would fire the leave that hides
+		   it and the two would fight. */
+		pointer-events: none;
+	}
+</style>
 
 <style>
 	.catalogue {
@@ -385,38 +509,6 @@ const showsPer = data.rows.some((row: { per?: string }) => row.per);
 	.blurb {
 		color: var(--sl-color-gray-3);
 		max-width: 60ch;
-	}
-
-	.controls {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75rem 1.25rem;
-		align-items: end;
-		margin-block: 1rem;
-	}
-
-	.controls label {
-		display: flex;
-		flex-direction: column;
-		gap: 0.25rem;
-		font-size: var(--sl-text-sm);
-		color: var(--sl-color-gray-2);
-	}
-
-	.controls input,
-	.controls select {
-		font: inherit;
-		padding: 0.3rem 0.5rem;
-		border: 1px solid var(--sl-color-gray-5);
-		border-radius: 0.25rem;
-		background: var(--sl-color-black);
-		color: var(--sl-color-white);
-	}
-
-	.count {
-		font-size: var(--sl-text-sm);
-		color: var(--sl-color-gray-3);
-		padding-block-end: 0.4rem;
 	}
 
 	/* `not-content` on the section above is Starlight's own opt-out from the

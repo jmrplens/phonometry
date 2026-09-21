@@ -303,3 +303,7 @@ their own pages: intensity (ISO 15186), the floor-covering improvement
 - [Sound Power](../../devices/emission/sound-power.md): the $L_W$ methods that share the
   absorption-area machinery of the receiving room.
 - API reference: [`building.measurement.lab_insulation`](https://jmrplens.github.io/phonometry/reference/api/building/lab-insulation/).
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#transmission-loss): the
+  band-by-band transmission loss and single-number ratings the books print for
+  real constructions.
+

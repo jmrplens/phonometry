@@ -253,6 +253,9 @@ the model, is $\sigma$.
   reverberation-room measurement and the ISO 11654 rating of the finished
   absorber.
 - API reference: [`materials.absorbers.airflow_resistance`](https://jmrplens.github.io/phonometry/reference/api/materials/airflow-resistance/).
+- [Published catalogues](https://jmrplens.github.io/phonometry/reference/catalogues/#porous-materials): the
+  flow resistivity, porosity and tortuosity the books print, for named
+  specimens and for whole classes of material.
 
 ## References
 

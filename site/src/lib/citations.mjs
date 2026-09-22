@@ -132,9 +132,9 @@ export function referenceNode(ref, bibliographyUrl) {
  *   - `citation`   the full bibliography, primary or not.
  *
  * @param {object} options
- * @param {Array}  options.references     Frontmatter `references`, possibly undefined.
+ * @param {Array | undefined} options.references Frontmatter `references`, possibly undefined.
  * @param {string} options.bibliographyUrl Absolute URL of the bibliography page.
- * @param {boolean} options.full           Emit whole nodes rather than `@id` stubs.
+ * @param {boolean} [options.full]         Emit whole nodes rather than `@id` stubs.
  */
 export function citationsFor({ references, bibliographyUrl, full = false }) {
   const refs = references ?? [];

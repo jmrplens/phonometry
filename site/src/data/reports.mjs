@@ -98,7 +98,18 @@ function titleOf(text, path) {
   return match ? match[1] : relative(DOCS, path);
 }
 
+/**
+ * @typedef {object} Report
+ * @property {string} name
+ * @property {string} title
+ * @property {string} description
+ * @property {string} area
+ * @property {string} page
+ * @property {string} pageTitle
+ */
+
 function collect(root) {
+  /** @type {Map<string, Report>} */
   const found = new Map();
   for (const path of pages(root)) {
     const text = readFileSync(path, 'utf8');
@@ -167,12 +178,16 @@ export const reportsEs = reports
   .map((report) => ({ ...report, ...(declaredEs.get(report.name) ?? {}), area: report.area }))
   .sort((a, b) => a.area.localeCompare(b.area) || a.title.localeCompare(b.title));
 
-/** Group a list of fiches by documentation area, in the order they are listed. */
+/**
+ * Group a list of fiches by documentation area, in the order they are listed.
+ * @param {Report[]} list
+ * @returns {Record<string, Report[]>}
+ */
 function byArea(list) {
   return list.reduce((groups, report) => {
     (groups[report.area] ??= []).push(report);
     return groups;
-  }, {});
+  }, /** @type {Record<string, Report[]>} */ ({}));
 }
 
 /** The fiches grouped by documentation area. */

@@ -1205,3 +1205,14 @@ from .wave3_solids import NORTON_KARCZUB_APPENDIX_4B as NORTON_KARCZUB_APPENDIX_
 from .wave3_solids import NORTON_KARCZUB_APPENDIX_4C as NORTON_KARCZUB_APPENDIX_4C
 from .wave3_solids import ROSSING_15_5 as ROSSING_15_5
 from .wave3_solids import VIGRAN_3_1 as VIGRAN_3_1
+from .wave4_building import HARRIS_31_2 as HARRIS_31_2
+from .wave4_building import HARRIS_31_3 as HARRIS_31_3
+from .wave4_building import HARRIS_31_5 as HARRIS_31_5
+from .wave4_building import HARRIS_31_6 as HARRIS_31_6
+from .wave4_building import HARRIS_31_7 as HARRIS_31_7
+from .wave4_building import HARRIS_31_8 as HARRIS_31_8
+from .wave4_building import HARRIS_31_9 as HARRIS_31_9
+from .wave4_building import HARRIS_1977_19_2 as HARRIS_1977_19_2
+from .wave4_building import HARRIS_1977_19_3 as HARRIS_1977_19_3
+from .wave4_building import HARRIS_1977_19_4 as HARRIS_1977_19_4
+from .wave4_building import ROSSING_11_4 as ROSSING_11_4

@@ -26,6 +26,13 @@ from phonometry.building import (
 #: Harris 3e Tables 32.1 to 32.8 keyed the way the catalogue keys it.
 HARRIS = "harris-1995-tables-32-1-to-32-8"
 
+#: The rows of those eight tables. The catalogue also holds three tables of
+#: Harris (1977), which are tested in ``test_wave4_catalogues.py``; everything
+#: here is about Chapter 32 and reads only its rows.
+CHAPTER_32 = {
+    key: row for key, row in PUBLISHED_IMPACT_INSULATION.items() if row.table == HARRIS
+}
+
 
 def _row(printed_row: str) -> ImpactInsulation:
     """The row the page numbers *printed_row*, which is also its key."""
@@ -35,18 +42,14 @@ def _row(printed_row: str) -> ImpactInsulation:
 def _floors() -> tuple[ImpactInsulation, ...]:
     """The rows of Tables 32.1 to 32.7, in the order the pages print them."""
     return tuple(
-        row
-        for row in PUBLISHED_IMPACT_INSULATION.values()
-        if not row.group.startswith("TABLA 32.8.")
+        row for row in CHAPTER_32.values() if not row.group.startswith("TABLA 32.8.")
     )
 
 
 def _treatments() -> tuple[ImpactInsulation, ...]:
     """The six rows of Table 32.8."""
     return tuple(
-        row
-        for row in PUBLISHED_IMPACT_INSULATION.values()
-        if row.group.startswith("TABLA 32.8.")
+        row for row in CHAPTER_32.values() if row.group.startswith("TABLA 32.8.")
     )
 
 
@@ -54,7 +57,7 @@ def _treatments() -> tuple[ImpactInsulation, ...]:
 # The transcription against the second reading
 # ---------------------------------------------------------------------------
 def test_the_catalogue_holds_every_row_of_the_eight_tables() -> None:
-    assert len(PUBLISHED_IMPACT_INSULATION) == 48
+    assert len(CHAPTER_32) == 48
     assert len(ref.HARRIS_32_FLOORS) == 42
     assert len(ref.HARRIS_32_8) == 6
 
@@ -131,14 +134,14 @@ def test_no_row_holds_a_rating_and_an_improvement_at_once() -> None:
     """
     both = [
         row
-        for row in PUBLISHED_IMPACT_INSULATION.values()
+        for row in CHAPTER_32.values()
         if row.impact_insulation_class is not None
         and row.impact_insulation_class_improvement is not None
     ]
     assert both == []
     filled = [
         row
-        for row in PUBLISHED_IMPACT_INSULATION.values()
+        for row in CHAPTER_32.values()
         if row.impact_insulation_class is not None
         or row.impact_insulation_class_improvement is not None
     ]
@@ -217,7 +220,7 @@ def test_the_row_numbers_run_from_one_to_thirty_eight_without_a_gap() -> None:
     a sequence rather than a short table, and a table read twice leaves a
     duplicate. Counting the rows would find neither.
     """
-    printed = [row.split("/")[1] for row in PUBLISHED_IMPACT_INSULATION]
+    printed = [row.split("/")[1] for row in CHAPTER_32]
     numbered = [entry for entry in printed if entry[0].isdigit()]
     stems = []
     for entry in numbered:
@@ -239,11 +242,11 @@ def test_a_lettered_pair_is_two_rows_and_not_one_row_in_two_conditions() -> None
     """
     lettered = [
         key.split("/")[1]
-        for key in PUBLISHED_IMPACT_INSULATION
+        for key in CHAPTER_32
         if key[-1] in "AB" and key.split("/")[1][:-1].isdigit()
     ]
     assert lettered == ["34A", "34B", "35A", "35B", "36A", "36B", "37A", "37B"]
-    assert not [row for row in PUBLISHED_IMPACT_INSULATION.values() if row.variant]
+    assert not [row for row in CHAPTER_32.values() if row.variant]
 
 
 # ---------------------------------------------------------------------------
@@ -340,11 +343,7 @@ def test_no_other_row_of_the_eight_tables_is_marked_misprinted() -> None:
         {row for row, _pair in ref.HARRIS_32_MISPRINTED_PAIRS},
         key=lambda printed_row: (int(printed_row.rstrip("AB")), printed_row),
     )
-    held = [
-        key.split("/")[1]
-        for key, row in PUBLISHED_IMPACT_INSULATION.items()
-        if row.misprinted
-    ]
+    held = [key.split("/")[1] for key, row in CHAPTER_32.items() if row.misprinted]
     assert held == marked
     assert len(marked) == 17
 
@@ -438,7 +437,7 @@ def test_the_two_blank_ratings_say_their_column_was_printed_for_them() -> None:
 def test_the_section_drawings_are_recorded_and_nothing_else_is() -> None:
     drawn = [
         row.split("/")[1]
-        for row, value in PUBLISHED_IMPACT_INSULATION.items()
+        for row, value in CHAPTER_32.items()
         if value.has_section_drawing
     ]
     assert drawn == list(ref.HARRIS_32_DRAWINGS)
@@ -485,9 +484,7 @@ def test_the_density_field_says_layer_because_two_of_the_three_are_not_slabs() -
 
 
 def test_no_other_row_claims_a_density() -> None:
-    with_density = [
-        row for row in PUBLISHED_IMPACT_INSULATION.values() if row.layer_density_kg_m3
-    ]
+    with_density = [row for row in CHAPTER_32.values() if row.layer_density_kg_m3]
     assert len(ref.HARRIS_32_DENSITIES) == 3
     assert [row.name[:20] for row in with_density] == [
         _row("5").name[:20],
@@ -523,7 +520,7 @@ def test_the_module_says_there_is_no_spectrum_to_be_had() -> None:
 # The shape of the catalogue
 # ---------------------------------------------------------------------------
 def test_every_row_says_which_pages_it_was_read_on() -> None:
-    for row in PUBLISHED_IMPACT_INSULATION.values():
+    for row in CHAPTER_32.values():
         assert row.source == (
             "Harris 3e Tables 32.1 to 32.8, PDF pages 750-757 (printed pp. 32.8-32.15)"
         )
@@ -542,7 +539,13 @@ def test_the_lookup_matches_a_fragment_of_the_printed_description() -> None:
 
 def test_the_catalogue_is_reachable_from_the_package() -> None:
     assert building.PUBLISHED_IMPACT_INSULATION is PUBLISHED_IMPACT_INSULATION
-    assert all(key.startswith(f"{HARRIS}/") for key in PUBLISHED_IMPACT_INSULATION)
+    assert all(key.startswith(f"{row.table}/") for key, row in CHAPTER_32.items())
+    assert {row.table for row in PUBLISHED_IMPACT_INSULATION.values()} == {
+        HARRIS,
+        "harris-1977-table-19-2",
+        "harris-1977-table-19-3",
+        "harris-1977-table-19-4",
+    }
 
 
 def test_the_catalogue_cannot_be_written_to() -> None:

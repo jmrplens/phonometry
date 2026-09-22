@@ -7042,6 +7042,27 @@ in the same order.
   on every other row.
 - **Status:** unreported.
 
+## Rossing (2014), Table 11.4 ("Open-plane" for an open-plan office)
+
+- **Location:** Table 11.4, "Transmission loss and STC values for common
+  partitions", ninth row, on printed page 413 (PDF page 428). Non-normative
+  source: a handbook.
+- **The print:** the row is labelled "Open-plane office partition", with a
+  transmission loss of $10$ to $12$ dB in every band and an STC of $12$.
+- **The problem:** an open-plan office is one laid out without walls, and a
+  plane is not a kind of office. The label is a typing slip for "Open-plan";
+  no number on the row is affected, and its low values are those of the
+  screen that partitions an open-plan office.
+- **Evidence:** Verified on PDF page 428 (printed p. 413) of Rossing (ed.),
+  *Springer Handbook of Acoustics* 2e (2014); both independent readings of
+  the page and a crop of the cell print "Open-plane".
+- **What the library does:** the row is served under the name the page
+  prints, in
+  [`PUBLISHED_TRANSMISSION_LOSS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/catalogue.py),
+  so that a search for the printed word finds it, and its note says what the
+  word stands for.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

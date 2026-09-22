@@ -1,0 +1,46 @@
+{
+  "source": "Harris 3e Table 31.7, PDF page 733 (printed p. 31.27)",
+  "about": "Five ratings from Table 31.7 of the Spanish edition: exterior doors with weatherstripping (\"con burlete\"). The first column is headed \"Tipo de puerta, puertas 45 mm (1 3/4 in) de grosor\", which is the thickness of every row, and the page prints the weight twice, in kg/m2 and in lb/ft2. The surface density here is the kg/m2 column. The two columns were checked against each other with the criterion the errata registry uses for the double-unit pairs of Chapter 32 (the SI half is the conversion of the imperial half rounded or truncated to the precision it is printed to) and all five pairs hold.",
+  "rows": [
+    {
+      "key": "madera_de_nucleo_hueco",
+      "name": "Madera de núcleo hueco",
+      "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+      "thickness_mm": 45,
+      "surface_density_kg_m2": 7,
+      "sound_transmission_class": 20
+    },
+    {
+      "key": "madera_de_nucleo_hueco_30_de_area_acristalada_con_vidrio_de_3_mm",
+      "name": "Madera de núcleo hueco (30 % de área acristalada con vidrio de 3 mm)",
+      "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+      "thickness_mm": 45,
+      "surface_density_kg_m2": 7,
+      "sound_transmission_class": 19
+    },
+    {
+      "key": "madera_de_nucleo_macizo",
+      "name": "Madera de núcleo macizo",
+      "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+      "thickness_mm": 45,
+      "surface_density_kg_m2": 17,
+      "sound_transmission_class": 26
+    },
+    {
+      "key": "puerta_con_cubierta_de_acero_nucleo_de_poliuretano_rigido",
+      "name": "Puerta con cubierta de acero, núcleo de poliuretano rígido",
+      "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+      "thickness_mm": 45,
+      "surface_density_kg_m2": 16,
+      "sound_transmission_class": 26
+    },
+    {
+      "key": "puerta_de_plastico_reforzado_con_fibra_de_vidrio_nucleo_de_poliuretano_rigido",
+      "name": "Puerta de plástico reforzado con fibra de vidrio, núcleo de poliuretano rígido",
+      "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+      "thickness_mm": 45,
+      "surface_density_kg_m2": 12,
+      "sound_transmission_class": 24
+    }
+  ]
+}

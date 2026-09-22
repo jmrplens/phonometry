@@ -1,0 +1,300 @@
+{
+  "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+  "about": "Forty-two ratings from Table 31.2 of the Spanish edition: seven stud walls, each rated in six conditions. The page prints one row per framing and six columns under the spanning heading \"Capas de escayola (lado 1/lado 2)\": three without absorbent in the cavity (\"Sin cámara de absorción\") and three with it (\"Con cámara de absorción\"), for one layer of plasterboard on each side (1/1), one and two (1/2) and two and two (2/2). Each column is a row here, with the framing as the name and the column as the variant, composed from the two printed headings above the cell.\n\nThe caption calls the values approximate (\"Valores aproximados\") and gives the plasterboard as 13 mm on both sides. The page prints no thickness, no surface density, no frequency band and no source for any row: the sound transmission class is all there is.",
+  "rows": [
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_sin_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera de 38 por 89 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 33
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_sin_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera de 38 por 89 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 41
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_sin_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera de 38 por 89 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 43
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera de 38 por 89 mm",
+      "variant": "Con cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 36
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera de 38 por 89 mm",
+      "variant": "Con cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera de 38 por 89 mm",
+      "variant": "Con cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 46
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_65_mm_sin_camara_de_absorcion_1_1",
+      "name": "Tirantes de acero de calibre 24 de 65 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 36
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_65_mm_sin_camara_de_absorcion_1_2",
+      "name": "Tirantes de acero de calibre 24 de 65 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_65_mm_sin_camara_de_absorcion_2_2",
+      "name": "Tirantes de acero de calibre 24 de 65 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 46
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_65_mm_con_camara_de_absorcion_1_1",
+      "name": "Tirantes de acero de calibre 24 de 65 mm",
+      "variant": "Con cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_65_mm_con_camara_de_absorcion_1_2",
+      "name": "Tirantes de acero de calibre 24 de 65 mm",
+      "variant": "Con cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 48
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_65_mm_con_camara_de_absorcion_2_2",
+      "name": "Tirantes de acero de calibre 24 de 65 mm",
+      "variant": "Con cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_90_mm_sin_camara_de_absorcion_1_1",
+      "name": "Tirantes de acero de calibre 24 de 90 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 39
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_90_mm_sin_camara_de_absorcion_1_2",
+      "name": "Tirantes de acero de calibre 24 de 90 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 45
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_90_mm_sin_camara_de_absorcion_2_2",
+      "name": "Tirantes de acero de calibre 24 de 90 mm",
+      "variant": "Sin cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 50
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_90_mm_con_camara_de_absorcion_1_1",
+      "name": "Tirantes de acero de calibre 24 de 90 mm",
+      "variant": "Con cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 45
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_90_mm_con_camara_de_absorcion_1_2",
+      "name": "Tirantes de acero de calibre 24 de 90 mm",
+      "variant": "Con cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 49
+    },
+    {
+      "key": "tirantes_de_acero_de_calibre_24_de_90_mm_con_camara_de_absorcion_2_2",
+      "name": "Tirantes de acero de calibre 24 de 90 mm",
+      "variant": "Con cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 56
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+      "variant": "Sin cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 40
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+      "variant": "Sin cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+      "variant": "Sin cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+      "variant": "Con cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 48
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+      "variant": "Con cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+      "variant": "Con cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 56
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_sin_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+      "variant": "Sin cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 41
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_sin_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+      "variant": "Sin cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 47
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_sin_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+      "variant": "Sin cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_con_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+      "variant": "Con cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 50
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_con_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+      "variant": "Con cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 53
+    },
+    {
+      "key": "tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_con_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+      "variant": "Con cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 55
+    },
+    {
+      "key": "tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_1",
+      "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+      "variant": "Sin cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 45
+    },
+    {
+      "key": "tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_2",
+      "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+      "variant": "Sin cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 51
+    },
+    {
+      "key": "tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_2_2",
+      "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+      "variant": "Sin cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 56
+    },
+    {
+      "key": "tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_1",
+      "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+      "variant": "Con cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 56
+    },
+    {
+      "key": "tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_2",
+      "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+      "variant": "Con cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 58
+    },
+    {
+      "key": "tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_2_2",
+      "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+      "variant": "Con cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 61
+    },
+    {
+      "key": "tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_sin_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+      "variant": "Sin cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 46
+    },
+    {
+      "key": "tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_sin_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+      "variant": "Sin cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_sin_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+      "variant": "Sin cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 57
+    },
+    {
+      "key": "tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_con_camara_de_absorcion_1_1",
+      "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+      "variant": "Con cámara de absorción, capas de escayola 1/1",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 57
+    },
+    {
+      "key": "tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_con_camara_de_absorcion_1_2",
+      "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+      "variant": "Con cámara de absorción, capas de escayola 1/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 60
+    },
+    {
+      "key": "tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_con_camara_de_absorcion_2_2",
+      "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+      "variant": "Con cámara de absorción, capas de escayola 2/2",
+      "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+      "sound_transmission_class": 63
+    }
+  ]
+}

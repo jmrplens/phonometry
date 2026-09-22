@@ -181,7 +181,7 @@ def test_a_fragment_answers_with_every_construction_that_carries_it() -> None:
     word. A lookup over printed names finds the ten that carry it, and the
     group is what finds the other two.
     """
-    doors = transmission_loss_named("door")
+    doors = [row for row in transmission_loss_named("door") if row.table == BIES]
     assert len(doors) == 10
     assert all("door" in row.name.casefold() for row in doors)
     assert sorted({row.thickness_mm for row in doors}) == [
@@ -226,14 +226,16 @@ def _ashrae() -> list[TransmissionLossSpectrum]:
     ]
 
 
-def test_the_catalogue_reads_both_of_its_tables() -> None:
-    """Ninety-four constructions from one book and nine from another.
+def test_the_catalogue_reads_every_one_of_its_tables() -> None:
+    """Ninety-four constructions from Bies, nine from ASHRAE, and the rest.
 
     They are the same quantity measured the same way, which is why they are
     one catalogue, and the key names the table because a reader comparing two
     walls of the same description across two books has to know which is which.
+    Rossing's table and the seven of Harris Chapter 31 are counted in
+    ``test_wave4_catalogues.py``; this is the sum.
     """
-    assert len(PUBLISHED_TRANSMISSION_LOSS) == 94 + 9
+    assert len(PUBLISHED_TRANSMISSION_LOSS) == 94 + 9 + 23 + 129
     assert len(_ashrae()) == len(ref.ASHRAE_49_TABLE_40) == 9
     assert {row.table for row in _ashrae()} == {ASHRAE}
 

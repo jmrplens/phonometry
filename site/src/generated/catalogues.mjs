@@ -78498,6 +78498,18 @@ export const catalogues = {
         "unit": "kg/m²"
       },
       {
+        "field": "block_mass_kg",
+        "heading": "Mass of one block",
+        "headingEs": "Masa de un bloque",
+        "unit": "kg"
+      },
+      {
+        "field": "sound_transmission_class",
+        "heading": "Sound transmission class",
+        "headingEs": "Clase de transmisión del sonido",
+        "unit": ""
+      },
+      {
         "field": "transmission_loss_63_db",
         "heading": "63 Hz",
         "headingEs": "63 Hz",
@@ -78575,6 +78587,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "22",
             "kind": "printed",
             "note": ""
@@ -78644,6 +78666,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "24",
             "kind": "printed",
             "note": ""
@@ -78710,6 +78742,16 @@ export const catalogues = {
           {
             "text": "2,5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -78787,6 +78829,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "27",
             "kind": "printed",
             "note": ""
@@ -78848,6 +78900,16 @@ export const catalogues = {
           {
             "text": "6",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -78920,6 +78982,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "3",
             "kind": "printed",
             "note": ""
@@ -78986,6 +79058,16 @@ export const catalogues = {
           {
             "text": "10",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -79058,6 +79140,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "9",
             "kind": "printed",
             "note": ""
@@ -79124,6 +79216,16 @@ export const catalogues = {
           {
             "text": "39",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -79196,6 +79298,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "20",
             "kind": "printed",
             "note": ""
@@ -79262,6 +79374,16 @@ export const catalogues = {
           {
             "text": "11",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -79334,6 +79456,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "10",
             "kind": "printed",
             "note": ""
@@ -79400,6 +79532,16 @@ export const catalogues = {
           {
             "text": "7",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -79477,6 +79619,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "24",
             "kind": "printed",
             "note": ""
@@ -79538,6 +79690,16 @@ export const catalogues = {
           {
             "text": "3,5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -79615,6 +79777,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "10",
             "kind": "printed",
             "note": ""
@@ -79676,6 +79848,16 @@ export const catalogues = {
           {
             "text": "25",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -79748,6 +79930,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "0",
             "kind": "printed",
             "note": ""
@@ -79814,6 +80006,16 @@ export const catalogues = {
           {
             "text": "75",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -79891,6 +80093,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "17",
             "kind": "printed",
             "note": ""
@@ -79952,6 +80164,16 @@ export const catalogues = {
           {
             "text": "5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80029,6 +80251,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "24",
             "kind": "printed",
             "note": ""
@@ -80090,6 +80322,16 @@ export const catalogues = {
           {
             "text": "7,3",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80167,6 +80409,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "15",
             "kind": "printed",
             "note": ""
@@ -80228,6 +80480,16 @@ export const catalogues = {
           {
             "text": "25",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80300,6 +80562,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "25",
             "kind": "printed",
             "note": ""
@@ -80366,6 +80638,16 @@ export const catalogues = {
           {
             "text": "50",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80438,6 +80720,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "19",
             "kind": "printed",
             "note": ""
@@ -80504,6 +80796,16 @@ export const catalogues = {
           {
             "text": "37",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80576,6 +80878,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "15",
             "kind": "printed",
             "note": ""
@@ -80642,6 +80954,16 @@ export const catalogues = {
           {
             "text": "240",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80714,6 +81036,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "34",
             "kind": "printed",
             "note": ""
@@ -80780,6 +81112,16 @@ export const catalogues = {
           {
             "text": "720",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80852,6 +81194,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "20",
             "kind": "printed",
             "note": ""
@@ -80918,6 +81270,16 @@ export const catalogues = {
           {
             "text": "85",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -80990,6 +81352,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "22",
             "kind": "printed",
             "note": ""
@@ -81056,6 +81428,16 @@ export const catalogues = {
           {
             "text": "75",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -81128,6 +81510,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "20",
             "kind": "printed",
             "note": ""
@@ -81194,6 +81586,16 @@ export const catalogues = {
           {
             "text": "510",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -81271,6 +81673,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "30",
             "kind": "printed",
             "note": ""
@@ -81332,6 +81744,16 @@ export const catalogues = {
           {
             "text": "50",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -81409,6 +81831,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "31",
             "kind": "printed",
             "note": ""
@@ -81470,6 +81902,16 @@ export const catalogues = {
           {
             "text": "380",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -81542,6 +81984,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "27",
             "kind": "printed",
             "note": ""
@@ -81611,6 +82063,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "12",
             "kind": "printed",
             "note": ""
@@ -81677,6 +82139,16 @@ export const catalogues = {
           {
             "text": "60",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -81754,6 +82226,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "20",
             "kind": "printed",
             "note": ""
@@ -81815,6 +82297,16 @@ export const catalogues = {
           {
             "text": "30",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -81892,6 +82384,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "19",
             "kind": "printed",
             "note": ""
@@ -81953,6 +82455,16 @@ export const catalogues = {
           {
             "text": "30",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82030,6 +82542,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "33",
             "kind": "printed",
             "note": ""
@@ -82091,6 +82613,16 @@ export const catalogues = {
           {
             "text": "26",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82168,6 +82700,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "35",
             "kind": "printed",
             "note": ""
@@ -82229,6 +82771,16 @@ export const catalogues = {
           {
             "text": "28",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82306,6 +82858,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "20",
             "kind": "printed",
             "note": ""
@@ -82367,6 +82929,16 @@ export const catalogues = {
           {
             "text": "15",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82439,6 +83011,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "18",
             "kind": "printed",
             "note": ""
@@ -82505,6 +83087,16 @@ export const catalogues = {
           {
             "text": "22,5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82577,6 +83169,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "20",
             "kind": "printed",
             "note": ""
@@ -82643,6 +83245,16 @@ export const catalogues = {
           {
             "text": "62,5",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82720,6 +83332,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "23",
             "kind": "printed",
             "note": ""
@@ -82781,6 +83403,16 @@ export const catalogues = {
           {
             "text": "15",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82853,6 +83485,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "18",
             "kind": "printed",
             "note": ""
@@ -82919,6 +83561,16 @@ export const catalogues = {
           {
             "text": "34",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -82991,6 +83643,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "25",
             "kind": "printed",
             "note": ""
@@ -83060,6 +83722,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "26",
             "kind": "printed",
             "note": ""
@@ -83126,6 +83798,16 @@ export const catalogues = {
           {
             "text": "42",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -83203,6 +83885,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "13",
             "kind": "printed",
             "note": ""
@@ -83264,6 +83956,16 @@ export const catalogues = {
           {
             "text": "35",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -83341,6 +84043,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "27",
             "kind": "printed",
             "note": ""
@@ -83402,6 +84114,16 @@ export const catalogues = {
           {
             "text": "40",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -83474,6 +84196,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "1",
             "kind": "printed",
             "note": ""
@@ -83543,6 +84275,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "13",
             "kind": "printed",
             "note": ""
@@ -83604,6 +84346,16 @@ export const catalogues = {
           {
             "text": "100",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -83686,6 +84438,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "26",
             "kind": "printed",
             "note": ""
@@ -83747,6 +84509,16 @@ export const catalogues = {
           {
             "text": "20",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -83824,6 +84596,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "22",
             "kind": "printed",
             "note": ""
@@ -83885,6 +84667,16 @@ export const catalogues = {
           {
             "text": "94",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -83962,6 +84754,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "46",
             "kind": "printed",
             "note": ""
@@ -84023,6 +84825,16 @@ export const catalogues = {
           {
             "text": "181",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -84100,6 +84912,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "50",
             "kind": "printed",
             "note": ""
@@ -84161,6 +84983,16 @@ export const catalogues = {
           {
             "text": "20",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -84238,6 +85070,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "24",
             "kind": "printed",
             "note": ""
@@ -84299,6 +85141,16 @@ export const catalogues = {
           {
             "text": "13",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -84371,6 +85223,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "15",
             "kind": "printed",
             "note": ""
@@ -84437,6 +85299,16 @@ export const catalogues = {
           {
             "text": "35",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -84509,6 +85381,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "32",
             "kind": "printed",
             "note": ""
@@ -84575,6 +85457,16 @@ export const catalogues = {
           {
             "text": "460",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -84647,6 +85539,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "37",
             "kind": "printed",
             "note": ""
@@ -84713,6 +85615,16 @@ export const catalogues = {
           {
             "text": "420",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -84790,6 +85702,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "34",
             "kind": "printed",
             "note": ""
@@ -84851,6 +85773,16 @@ export const catalogues = {
           {
             "text": "282",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -84928,6 +85860,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
             "text": "34",
             "kind": "printed",
             "note": ""
@@ -84984,6 +85926,16 @@ export const catalogues = {
           {
             "text": "318",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -85061,6 +86013,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
             "text": "35",
             "kind": "printed",
             "note": ""
@@ -85127,6 +86089,16 @@ export const catalogues = {
           {
             "text": "",
             "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
             "note": ""
           },
           {
@@ -85199,6 +86171,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
             "text": "18",
             "kind": "printed",
             "note": ""
@@ -85265,6 +86247,16 @@ export const catalogues = {
           {
             "text": "",
             "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
             "note": ""
           },
           {
@@ -85337,6 +86329,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
             "text": "19",
             "kind": "printed",
             "note": ""
@@ -85403,6 +86405,16 @@ export const catalogues = {
           {
             "text": "",
             "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
             "note": ""
           },
           {
@@ -85475,6 +86487,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
             "text": "40",
             "kind": "printed",
             "note": ""
@@ -85541,6 +86563,16 @@ export const catalogues = {
           {
             "text": "",
             "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "72",
+            "kind": "printed",
             "note": ""
           },
           {
@@ -85613,6 +86645,16 @@ export const catalogues = {
             "note": ""
           },
           {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
             "text": "53",
             "kind": "printed",
             "note": ""
@@ -85653,6 +86695,12014 @@ export const catalogues = {
             "note": ""
           }
         ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_drywall_on_both_sides_of_wooden_studs",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch drywall on both sides of wooden studs",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_drywall_on_wooden_studs_with_2_inches_of_insulation",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch drywall on wooden studs with 2 inches of insulation",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/double_layer_of_1_2_inch_drywall_on_wooden_studs",
+        "table": "rossing-2014-table-11-4",
+        "name": "Double layer of 1/2 inch drywall on wooden studs",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_drywall_on_staggered_wooden_studs",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch drywall on staggered wooden studs",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_drywall_on_staggered_wooden_studs_with_2_inches_of_insulation",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch drywall on staggered wooden studs with 2 inches of insulation",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_drywall_on_metal_studs",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch drywall on metal studs",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_drywall_on_metal_studs_with_2_inches_of_insulation",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch drywall on metal studs with 2 inches of insulation",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/8_inch_thick_concrete_masonry_units",
+        "table": "rossing-2014-table-11-4",
+        "name": "8 inch thick concrete masonry units",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "203,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/open_plane_office_partition",
+        "table": "rossing-2014-table-11-4",
+        "name": "Open-plane office partition",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "Printed \"Open-plane\"; the partition of an open-plan office. The name is kept as printed and the typing slip is registered in docs/ERRATA.md.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/4_inch_thick_brick_wall",
+        "table": "rossing-2014-table-11-4",
+        "name": "4 inch thick brick wall",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "101,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_drywall_inside_1_inch_stucco_outside_on_wooden_studs",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch drywall inside/1 inch stucco outside on wooden studs",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/single_paned_1_8_inch_thick_glass",
+        "table": "rossing-2014-table-11-4",
+        "name": "Single-paned 1/8 inch thick glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "3,175",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/1_2_inch_thick_laminated_glass",
+        "table": "rossing-2014-table-11-4",
+        "name": "1/2 inch thick laminated glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/double_paned_1_8_inch_thick_glass_with_2_inch_air_gap",
+        "table": "rossing-2014-table-11-4",
+        "name": "Double-paned 1/8 inch thick glass with 2 inch air gap",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/hollow_wooden_door_1_3_4_inch_thick",
+        "table": "rossing-2014-table-11-4",
+        "name": "Hollow wooden door, 1 3/4 inch thick",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "44,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/solid_wooden_door_1_3_4_inch_thick",
+        "table": "rossing-2014-table-11-4",
+        "name": "Solid wooden door, 1 3/4 inch thick",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "44,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/hollow_metal_door_1_3_4_inch_thick",
+        "table": "rossing-2014-table-11-4",
+        "name": "Hollow metal door, 1 3/4 inch thick",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "44,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/filled_metal_door_1_3_4_inch_thick",
+        "table": "rossing-2014-table-11-4",
+        "name": "Filled metal door, 1 3/4 inch thick",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "44,45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/wood_joist_floor_ceiling_with_1_2_inch_plywood_subfloor_and_1_2_inch_drywall",
+        "table": "rossing-2014-table-11-4",
+        "name": "Wood joist floor/ceiling with 1/2 inch plywood subfloor and 1/2 inch drywall",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/8_inch_thick_concrete_slab_floor",
+        "table": "rossing-2014-table-11-4",
+        "name": "8 inch thick concrete slab floor",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "203,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/wood_plank_shingled_roof",
+        "table": "rossing-2014-table-11-4",
+        "name": "Wood plank shingled roof",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/wood_plank_shingled_roof_with_1_2_inch_drywall_ceiling_4_inches_of_insulation",
+        "table": "rossing-2014-table-11-4",
+        "name": "Wood plank shingled roof with 1/2 inch drywall ceiling, 4 inches of insulation",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-11-4/corrugated_steel_roof_with_1_inch_of_sprayed_cellulose",
+        "table": "rossing-2014-table-11-4",
+        "name": "Corrugated steel roof with 1 inch of sprayed cellulose",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 11.4, PDF page 428 (printed p. 413)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_sin_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_sin_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_sin_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm",
+        "variant": "Con cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm",
+        "variant": "Con cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm",
+        "variant": "Con cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_65_mm_sin_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 65 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_65_mm_sin_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 65 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_65_mm_sin_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 65 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_65_mm_con_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 65 mm",
+        "variant": "Con cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_65_mm_con_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 65 mm",
+        "variant": "Con cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_65_mm_con_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 65 mm",
+        "variant": "Con cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_90_mm_sin_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 90 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_90_mm_sin_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 90 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_90_mm_sin_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 90 mm",
+        "variant": "Sin cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_90_mm_con_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 90 mm",
+        "variant": "Con cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_90_mm_con_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 90 mm",
+        "variant": "Con cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_de_calibre_24_de_90_mm_con_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero de calibre 24 de 90 mm",
+        "variant": "Con cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+        "variant": "Sin cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+        "variant": "Sin cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+        "variant": "Sin cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+        "variant": "Con cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+        "variant": "Con cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm con canales flexibles de acero sobre un lado",
+        "variant": "Con cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_sin_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+        "variant": "Sin cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_sin_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+        "variant": "Sin cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_sin_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+        "variant": "Sin cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_con_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+        "variant": "Con cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_con_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+        "variant": "Con cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_de_38_por_89_mm_al_tresbolillo_con_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera de 38 por 89 mm al tresbolillo",
+        "variant": "Con cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+        "variant": "Sin cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+        "variant": "Sin cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_sin_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+        "variant": "Sin cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+        "variant": "Con cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+        "variant": "Con cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_acero_que_soportan_carga_de_150_mm_con_canales_flexibles_de_acero_sobre_un_lado_con_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de acero que soportan carga, de 150 mm, con canales flexibles de acero sobre un lado",
+        "variant": "Con cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_sin_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+        "variant": "Sin cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_sin_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+        "variant": "Sin cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_sin_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+        "variant": "Sin cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_con_camara_de_absorcion_1_1",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+        "variant": "Con cámara de absorción, capas de escayola 1/1",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_con_camara_de_absorcion_1_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+        "variant": "Con cámara de absorción, capas de escayola 1/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-2/tirantes_de_madera_dobles_de_38_por_89_mm_con_un_espacio_de_25_mm_entre_ellos_con_camara_de_absorcion_2_2",
+        "table": "harris-1995-table-31-2",
+        "name": "Tirantes de madera dobles de 38 por 89 mm con un espacio de 25 mm entre ellos",
+        "variant": "Con cámara de absorción, capas de escayola 2/2",
+        "group": "TABLA 31.2. Valores aproximados de clase de transmisión del sonido (STC) para paredes con 13 mm de escayola sobre ambos lados",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.2, PDF page 723 (printed p. 31.17)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "63",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_ligero_90_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso ligero",
+        "variant": "90 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_normal_90_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso normal",
+        "variant": "90 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_ligero_150_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso ligero",
+        "variant": "150 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_normal_150_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso normal",
+        "variant": "150 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_ligero_200_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso ligero",
+        "variant": "200 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_normal_200_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso normal",
+        "variant": "200 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_ligero_250_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso ligero",
+        "variant": "250 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "250",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_normal_250_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso normal",
+        "variant": "250 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "250",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_ligero_300_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso ligero",
+        "variant": "300 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-3/peso_normal_300_mm",
+        "table": "harris-1995-table-31-3",
+        "name": "Pared de bloques de peso normal",
+        "variant": "300 mm",
+        "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+        "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/bloques_sin_revestir_sin_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Bloques sin revestir",
+        "variant": "Sin fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/aplicada_directamente_sin_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Aplicada directamente",
+        "variant": "Sin fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/aplicada_directamente_sin_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Aplicada directamente",
+        "variant": "Sin fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_de_madera_de_40_mm_sin_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta de madera de 40 mm",
+        "variant": "Sin fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_de_madera_de_40_mm_sin_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta de madera de 40 mm",
+        "variant": "Sin fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_de_madera_de_40_mm_con_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta de madera de 40 mm",
+        "variant": "Con fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_de_madera_de_40_mm_con_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta de madera de 40 mm",
+        "variant": "Con fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/canales_flexibles_de_13_mm_sin_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Canales flexibles de 13 mm",
+        "variant": "Sin fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/canales_flexibles_de_13_mm_sin_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Canales flexibles de 13 mm",
+        "variant": "Sin fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/canales_flexibles_de_13_mm_con_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Canales flexibles de 13 mm",
+        "variant": "Con fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/canales_flexibles_de_13_mm_con_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Canales flexibles de 13 mm",
+        "variant": "Con fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "49",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_flexible_de_50_mm_sin_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta flexible de 50 mm",
+        "variant": "Sin fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_flexible_de_50_mm_sin_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta flexible de 50 mm",
+        "variant": "Sin fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_flexible_de_50_mm_con_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta flexible de 50 mm",
+        "variant": "Con fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_flexible_de_50_mm_con_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta flexible de 50 mm",
+        "variant": "Con fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/tirantes_de_acero_de_65_mm_sin_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Tirantes de acero de 65 mm",
+        "variant": "Sin fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "58",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/tirantes_de_acero_de_65_mm_sin_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Tirantes de acero de 65 mm",
+        "variant": "Sin fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/tirantes_de_acero_de_65_mm_con_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Tirantes de acero de 65 mm",
+        "variant": "Con fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/tirantes_de_acero_de_65_mm_con_fibra_de_vidrio_ambos_lados",
+        "table": "harris-1995-table-31-5",
+        "name": "Tirantes de acero de 65 mm",
+        "variant": "Con fibra de vidrio, ambos lados",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_flexible_de_75_mm_sin_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta flexible de 75 mm",
+        "variant": "Sin fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-5/cubierta_flexible_de_75_mm_con_fibra_de_vidrio_un_lado",
+        "table": "harris-1995-table-31-5",
+        "name": "Cubierta flexible de 75 mm",
+        "variant": "Con fibra de vidrio, un lado",
+        "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "61",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/madera_con_nucleo_hueco_sin_sellar",
+        "table": "harris-1995-table-31-6",
+        "name": "Madera con núcleo hueco",
+        "variant": "Sin sellar",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/madera_con_nucleo_hueco_bien_selladas",
+        "table": "harris-1995-table-31-6",
+        "name": "Madera con núcleo hueco",
+        "variant": "Bien selladas",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/madera_con_nucleo_macizo_sin_sellar",
+        "table": "harris-1995-table-31-6",
+        "name": "Madera con núcleo macizo",
+        "variant": "Sin sellar",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/madera_con_nucleo_macizo_bien_selladas",
+        "table": "harris-1995-table-31-6",
+        "name": "Madera con núcleo macizo",
+        "variant": "Bien selladas",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/acero_con_nucleo_hueco_calibre_18_sin_sellar",
+        "table": "harris-1995-table-31-6",
+        "name": "Acero con núcleo hueco (calibre 18)",
+        "variant": "Sin sellar",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/acero_con_nucleo_hueco_calibre_18_bien_selladas",
+        "table": "harris-1995-table-31-6",
+        "name": "Acero con núcleo hueco (calibre 18)",
+        "variant": "Bien selladas",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_de_nucleo_hueco_camara_de_100_mm_sin_sellar",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera de núcleo hueco, cámara de 100 mm)",
+        "variant": "Sin sellar",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"7 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7 each",
+            "kind": "unquantified",
+            "note": "the page prints “7 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_de_nucleo_hueco_camara_de_100_mm_bien_selladas",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera de núcleo hueco, cámara de 100 mm)",
+        "variant": "Bien selladas",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"7 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7 each",
+            "kind": "unquantified",
+            "note": "the page prints “7 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_de_aire_sin_sellar",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara de aire)",
+        "variant": "Sin sellar",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20 each",
+            "kind": "unquantified",
+            "note": "the page prints “20 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_de_aire_bien_selladas",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara de aire)",
+        "variant": "Bien selladas",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20 each",
+            "kind": "unquantified",
+            "note": "the page prints “20 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_con_absorcion_sin_sellar",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara con absorción)",
+        "variant": "Sin sellar",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20 each",
+            "kind": "unquantified",
+            "note": "the page prints “20 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_con_absorcion_bien_selladas",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara con absorción)",
+        "variant": "Bien selladas",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20 each",
+            "kind": "unquantified",
+            "note": "the page prints “20 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_230_mm_de_camara_con_absorcion_sin_sellar",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 230 mm de cámara con absorción)",
+        "variant": "Sin sellar",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20 each",
+            "kind": "unquantified",
+            "note": "the page prints “20 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-6/puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_230_mm_de_camara_con_absorcion_bien_selladas",
+        "table": "harris-1995-table-31-6",
+        "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 230 mm de cámara con absorción)",
+        "variant": "Bien selladas",
+        "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+        "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20 each",
+            "kind": "unquantified",
+            "note": "the page prints “20 each” where the number would be"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-7/madera_de_nucleo_hueco",
+        "table": "harris-1995-table-31-7",
+        "name": "Madera de núcleo hueco",
+        "variant": "",
+        "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.7, PDF page 733 (printed p. 31.27)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-7/madera_de_nucleo_hueco_30_de_area_acristalada_con_vidrio_de_3_mm",
+        "table": "harris-1995-table-31-7",
+        "name": "Madera de núcleo hueco (30 % de área acristalada con vidrio de 3 mm)",
+        "variant": "",
+        "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.7, PDF page 733 (printed p. 31.27)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-7/madera_de_nucleo_macizo",
+        "table": "harris-1995-table-31-7",
+        "name": "Madera de núcleo macizo",
+        "variant": "",
+        "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.7, PDF page 733 (printed p. 31.27)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-7/puerta_con_cubierta_de_acero_nucleo_de_poliuretano_rigido",
+        "table": "harris-1995-table-31-7",
+        "name": "Puerta con cubierta de acero, núcleo de poliuretano rígido",
+        "variant": "",
+        "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.7, PDF page 733 (printed p. 31.27)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-7/puerta_de_plastico_reforzado_con_fibra_de_vidrio_nucleo_de_poliuretano_rigido",
+        "table": "harris-1995-table-31-7",
+        "name": "Puerta de plástico reforzado con fibra de vidrio, núcleo de poliuretano rígido",
+        "variant": "",
+        "group": "TABLA 31.7. Aislamiento acústico de puertas exteriores con burlete",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.7, PDF page 733 (printed p. 31.27)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_l_7_mm_100_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y L-7 mm",
+        "variant": "100 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_6_mm_120_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y 6 mm",
+        "variant": "120 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_l_7_mm_60_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y L-7 mm",
+        "variant": "60 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "46",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_150_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "150 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_6_mm_80_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y 6 mm",
+        "variant": "80 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_l_7_mm_40_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y L-7 mm",
+        "variant": "40 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_100_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "100 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_6_mm_50_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y 6 mm",
+        "variant": "50 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_l_7_mm_25_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y L-7 mm",
+        "variant": "25 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_unico_l_20_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal único",
+        "variant": "L-20 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "L marks laminated glass, by the table's own footnote.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_70_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "70 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_6_mm_30_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y 6 mm",
+        "variant": "30 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_l_7_mm_16_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y L-7 mm",
+        "variant": "16 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_unico_l_12_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal único",
+        "variant": "L-12 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "L marks laminated glass, by the table's own footnote.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_50_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "50 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_6_mm_20_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y 6 mm",
+        "variant": "20 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_l_7_mm_10_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y L-7 mm",
+        "variant": "10 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_unico_12_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal único",
+        "variant": "12 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_30_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "30 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_6_mm_13_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y 6 mm",
+        "variant": "13 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "36",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_unico_l_6_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal único",
+        "variant": "L-6 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "L marks laminated glass, by the table's own footnote.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_20_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "20 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_6_mm_y_6_mm_8_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 6 mm y 6 mm",
+        "variant": "8 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "34",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_unico_6_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal único",
+        "variant": "6 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_10_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "10 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "32",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_unico_3_mm_4_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal único",
+        "variant": "3 mm, 4 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The page prints two thicknesses in one cell, \"3 mm, 4 mm\", for the same rating.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "3, 4",
+            "kind": "reported",
+            "note": "the page lists 3, 4 and no single value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-8/cristal_doble_3_mm_y_3_mm_6_mm",
+        "table": "harris-1995-table-31-8",
+        "name": "Cristal doble, 3 mm y 3 mm",
+        "variant": "6 mm",
+        "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+        "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/1",
+        "table": "harris-1995-table-31-9",
+        "name": "Hormigón reforzado 90 mm",
+        "variant": "Ninguno",
+        "group": "Viguetas de hormigón",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/2",
+        "table": "harris-1995-table-31-9",
+        "name": "Hormigón reforzado 130 mm",
+        "variant": "Ninguno",
+        "group": "Viguetas de hormigón",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/3",
+        "table": "harris-1995-table-31-9",
+        "name": "Perfiles de acero con un tablero de hormigón de 50 mm mínimo",
+        "variant": "Capas de escayola de 16 mm para revestir los canales en donde encajan los perfiles, con material de absorción en la cámara optativo",
+        "group": "Perfiles de acero",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "53",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/4",
+        "table": "harris-1995-table-31-9",
+        "name": "Subsuelo de 19 mm T&G o tablero de láminas de madera de 15,5 mm",
+        "variant": "Capa de escayola de 16 mm adherida a los canales metálicos flexibles, con material absorbente en la cámara",
+        "group": "Tirantes de madera o marcos",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/5",
+        "table": "harris-1995-table-31-9",
+        "name": "Igual que 4, con un tablero adicional de láminas de madera de 15,5 mm en el suelo",
+        "variant": "Capa de escayola de 16 mm adherida a los canales metálicos flexibles, con material absorbente en la cámara",
+        "group": "Tirantes de madera o marcos",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/6",
+        "table": "harris-1995-table-31-9",
+        "name": "Capa de hormigón-escayola de 19 mm (de al menos 34 kg/m²) sobre subsuelo con T&G de 19 mm o con tablero de láminas de madera de 15,5 mm",
+        "variant": "Dos capas de escayola de 13 mm o 16 mm",
+        "group": "Tirantes de madera o marcos",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/7",
+        "table": "harris-1995-table-31-9",
+        "name": "Igual que 6",
+        "variant": "Dos capas de escayola de 13 mm o 16 mm, adheridas a los canales metálicos flexibles, con material absorbente en la cámara",
+        "group": "Tirantes de madera o marcos",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "55",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/8",
+        "table": "harris-1995-table-31-9",
+        "name": "Capa de hormigón ligero de 50 mm (de al menos 70 kg/m²) sobre subsuelo con T&G de 19 mm o con tablero de láminas de madera de 15,5 mm",
+        "variant": "Dos capas de escayola de 13 mm o 16 mm",
+        "group": "Tirantes de madera o marcos",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/9",
+        "table": "harris-1995-table-31-9",
+        "name": "Igual que 8",
+        "variant": "Capa de escayola de 16 mm, adherida a los canales metálicos flexibles",
+        "group": "Tirantes de madera o marcos",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-31-9/10",
+        "table": "harris-1995-table-31-9",
+        "name": "Igual que 8",
+        "variant": "Capa de escayola de 16 mm, adherida a los canales metálicos flexibles con material absorbente en la cámara",
+        "group": "Tirantes de madera o marcos",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
       }
     ]
   },
@@ -85675,6 +98725,18 @@ export const catalogues = {
         "heading": "Density of one layer",
         "headingEs": "Densidad de una capa",
         "unit": "kg/m³"
+      },
+      {
+        "field": "impact_sound_improvement_db",
+        "heading": "Average improvement",
+        "headingEs": "Mejora media",
+        "unit": "dB"
+      },
+      {
+        "field": "added_load_pa",
+        "heading": "Added load",
+        "headingEs": "Carga adicional",
+        "unit": "kPa"
       }
     ],
     "rows": [
@@ -85700,6 +98762,16 @@ export const catalogues = {
           {
             "text": "25",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -85747,6 +98819,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -85772,6 +98854,16 @@ export const catalogues = {
           {
             "text": "45",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -85819,6 +98911,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -85855,6 +98957,16 @@ export const catalogues = {
             "text": "35,2",
             "kind": "printed",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -85880,6 +98992,16 @@ export const catalogues = {
           {
             "text": "35",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -85927,6 +99049,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -85952,6 +99084,16 @@ export const catalogues = {
           {
             "text": "53",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -85999,6 +99141,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86024,6 +99176,16 @@ export const catalogues = {
           {
             "text": "32",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86071,6 +99233,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86096,6 +99268,16 @@ export const catalogues = {
           {
             "text": "42",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86143,6 +99325,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86168,6 +99360,16 @@ export const catalogues = {
           {
             "text": "30",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86215,6 +99417,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86240,6 +99452,16 @@ export const catalogues = {
           {
             "text": "63",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86287,6 +99509,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86312,6 +99544,16 @@ export const catalogues = {
           {
             "text": "49",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86359,6 +99601,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86384,6 +99636,16 @@ export const catalogues = {
           {
             "text": "32",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86431,6 +99693,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86456,6 +99728,16 @@ export const catalogues = {
           {
             "text": "40",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86503,6 +99785,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86528,6 +99820,16 @@ export const catalogues = {
           {
             "text": "56",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86575,6 +99877,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86600,6 +99912,16 @@ export const catalogues = {
           {
             "text": "43",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86647,6 +99969,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86672,6 +100004,16 @@ export const catalogues = {
           {
             "text": "58",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86719,6 +100061,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86741,6 +100093,16 @@ export const catalogues = {
           "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
         },
         "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
           {
             "text": "",
             "kind": "absent",
@@ -86791,6 +100153,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86816,6 +100188,16 @@ export const catalogues = {
           {
             "text": "57",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86863,6 +100245,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86888,6 +100280,16 @@ export const catalogues = {
           {
             "text": "49",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -86935,6 +100337,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86971,6 +100383,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": "the page prints this density twice, “410 kg/m3 (26,1 lb/ft3)”, and one pound per cubic foot is 16,0185 kg/m3 by the definitions of the pound and the foot, so 26,1 lb/ft3 is 418 kg/m3 and 410 kg/m3 is 25,6 lb/ft3; the page does not say which of the two halves carries the defect and this library does not choose one, so no density is served for this row. The cell is argued in docs/ERRATA.md."
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -86996,6 +100418,16 @@ export const catalogues = {
           {
             "text": "45",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -87043,6 +100475,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -87068,6 +100510,16 @@ export const catalogues = {
           {
             "text": "63",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -87115,6 +100567,16 @@ export const catalogues = {
             "text": "2 370",
             "kind": "printed",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -87151,6 +100613,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -87173,6 +100645,16 @@ export const catalogues = {
           "table": "the chapter's Reference 5, \"A guide to airborne, impact and structureborne noise control in multi-family dwellings\", prepared for the Federal Housing Administration by the National Bureau of Standards, September 1967, which folio 32.7 names as what Tables 32.1 to 32.7 are based on"
         },
         "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
           {
             "text": "",
             "kind": "absent",
@@ -87223,6 +100705,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -87253,6 +100745,16 @@ export const catalogues = {
           {
             "text": "19",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -87295,6 +100797,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -87325,6 +100837,16 @@ export const catalogues = {
           {
             "text": "17",
             "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           },
           {
@@ -87367,6 +100889,16 @@ export const catalogues = {
             "text": "",
             "kind": "absent",
             "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
           }
         ]
       },
@@ -87402,6 +100934,1028 @@ export const catalogues = {
           {
             "text": "",
             "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/linoleum_3_2_mm",
+        "table": "harris-1977-table-19-2",
+        "name": "Linóleum, 3,2 mm",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/baldosa_de_caucho_3_2_mm",
+        "table": "harris-1977-table-19-2",
+        "name": "Baldosa de caucho, 3,2 mm",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/asfalto",
+        "table": "harris-1977-table-19-2",
+        "name": "Asfalto",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5 to 7",
+            "kind": "range",
+            "note": "the page prints 5 to 7 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/suelo_de_parquet_sobre_listones",
+        "table": "harris-1977-table-19-2",
+        "name": "Suelo de parquet sobre listones",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/plancha_de_corcho_8_mm",
+        "table": "harris-1977-table-19-2",
+        "name": "Plancha de corcho, 8 mm",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/moqueta_wilton_9_5_mm",
+        "table": "harris-1977-table-19-2",
+        "name": "Moqueta Wilton, 9,5 mm",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/4_mm_de_linoleum_sobre_6_4_mm_de_plancha_de_corcho_duro",
+        "table": "harris-1977-table-19-2",
+        "name": "4 mm de linóleum sobre 6,4 mm de plancha de corcho duro",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/4_mm_de_linoleum_sobre_6_4_mm_de_plancha_de_corcho_blando",
+        "table": "harris-1977-table-19-2",
+        "name": "4 mm de linóleum sobre 6,4 mm de plancha de corcho blando",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/4_mm_de_linoleum_sobre_12_8_mm_de_corcho_blando",
+        "table": "harris-1977-table-19-2",
+        "name": "4 mm de linóleum sobre 12,8 mm de corcho blando",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "16",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-2/4_mm_de_linoleum_sobre_12_8_mm_de_tablero_blando",
+        "table": "harris-1977-table-19-2",
+        "name": "4 mm de linóleum sobre 12,8 mm de tablero blando",
+        "variant": "",
+        "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "18",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-3/37_mm_de_franjas_de_hormigon_sobre_12_mm_de_tablero_blando",
+        "table": "harris-1977-table-19-3",
+        "name": "37 mm de franjas de hormigón sobre 12 mm de tablero blando",
+        "variant": "",
+        "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.3, PDF page 746 (printed p. 733)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-3/37_mm_de_franjas_de_hormigon_sobre_25_mm_de_corcho_granulado",
+        "table": "harris-1977-table-19-3",
+        "name": "37 mm de franjas de hormigón sobre 25 mm de corcho granulado",
+        "variant": "",
+        "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.3, PDF page 746 (printed p. 733)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-3/37_mm_de_franjas_de_hormigon_sobre_25_mm_de_cubierta_elastica",
+        "table": "harris-1977-table-19-3",
+        "name": "37 mm de franjas de hormigón sobre 25 mm de cubierta elástica",
+        "variant": "",
+        "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.3, PDF page 746 (printed p. 733)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-3/25_mm_de_asfalto_o_12_mm_de_tablero_blando",
+        "table": "harris-1977-table-19-3",
+        "name": "25 mm de asfalto o 12 mm de tablero blando",
+        "variant": "",
+        "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.3, PDF page 746 (printed p. 733)",
+        "note": "The page prints \"o\" (or) between the two layers, where the other four rows print \"sobre\" (on). The description is kept as printed.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-3/37_mm_de_asfalto_sobre_25_mm_de_lana_mineral",
+        "table": "harris-1977-table-19-3",
+        "name": "37 mm de asfalto sobre 25 mm de lana mineral",
+        "variant": "",
+        "group": "Tabla 19.3. Aislamiento medio al impacto sonoro proporcionado por franjas de hormigón o asfalto sobre un suelo de hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.3, PDF page 746 (printed p. 733)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sobre_listones_unloaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet sobre listones",
+        "variant": "Sin carga adicional",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sobre_listones_descansando_sobre_bandas_de_corcho_de_37_mm_unloaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet sobre listones descansando sobre bandas de corcho de 37 mm",
+        "variant": "Sin carga adicional",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sobre_listones_descansando_sobre_bandas_de_lana_mineral_de_25_mm_loaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet sobre listones descansando sobre bandas de lana mineral de 25 mm",
+        "variant": "Carga adicional 0,84 kg/cm²",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "82,37586",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sin_listones_sobre_50_mm_de_arena_seca_unloaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet (sin listones) sobre 50 mm de arena seca",
+        "variant": "Sin carga adicional",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sin_listones_sobre_50_mm_de_serrin_seco_loaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet (sin listones) sobre 50 mm de serrín seco",
+        "variant": "Carga adicional 0,84 kg/cm²",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "82,37586",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sin_listones_sobre_cubierta_de_lana_de_vidrio_de_18_mm_unloaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet (sin listones) sobre cubierta de lana de vidrio de 18 mm",
+        "variant": "Sin carga adicional",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sin_listones_sobre_cubierta_de_lana_de_vidrio_de_18_mm_loaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet (sin listones) sobre cubierta de lana de vidrio de 18 mm",
+        "variant": "Carga adicional 0,84 kg/cm²",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "82,37586",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-19-4/suelo_de_parquet_sin_listones_sobre_cubierta_de_lana_de_vidrio_de_25_mm_loaded",
+        "table": "harris-1977-table-19-4",
+        "name": "Suelo de parquet (sin listones) sobre cubierta de lana de vidrio de 25 mm",
+        "variant": "Carga adicional 0,84 kg/cm²",
+        "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "82,37586",
+            "kind": "printed",
             "note": ""
           }
         ]

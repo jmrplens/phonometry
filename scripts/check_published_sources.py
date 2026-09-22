@@ -258,7 +258,11 @@ SOURCED: dict[tuple[str, str], str] = {
         "surface density and eight octave bands of transmission loss; "
         "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, nine "
         "machine equipment room walls, floors and ceilings with a sound "
-        "transmission class and seven octave bands"
+        "transmission class and seven octave bands; Rossing (2014) Table "
+        "11.4, twenty-three partitions with six octave bands and a sound "
+        "transmission class; Harris 3e Tables 31.2, 31.3 and 31.5 to 31.9, "
+        "a hundred and twenty-nine walls, doors, windows and floors with a "
+        "sound transmission class and no band"
     ),
     (
         "noise_control/duct_walls.py",
@@ -275,7 +279,9 @@ SOURCED: dict[tuple[str, str], str] = {
     ): (
         "Harris 3e Tables 32.1 to 32.8, forty-two floor-ceiling constructions "
         "with an impact insulation class and six elastic surface treatments "
-        "with the improvement each adds over a hard massive floor"
+        "with the improvement each adds over a hard massive floor; Harris "
+        "(1977) Tables 19.2 to 19.4, twenty-three floor treatments on bare "
+        "concrete with the average improvement in impact sound insulation"
     ),
     (
         "materials/diffusers/measured_scattering.py",

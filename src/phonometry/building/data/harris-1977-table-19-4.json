@@ -1,0 +1,70 @@
+{
+  "source": "Harris (1977) Table 19.4, PDF page 747 (printed p. 734)",
+  "about": "Eight timber floors on a bare concrete floor, from Table 19.4 of the Spanish edition of the first Handbook of Noise Control, with the average improvement in impact sound insulation each one gives, in decibels, and the additional load it was measured under (\"Carga adicional, kg/cm²\"). The load is printed in kg/cm2, the technical atmosphere of 98 066.5 Pa exactly, and is held in pascals: 0,84 kg/cm2 is 82 375.86 Pa. A printed 0 is an unloaded floor.\n\nThe same construction, a parquet floor without battens on an 18 mm glass wool blanket, is printed twice, unloaded at 27 dB and loaded at 22 dB, and only the load tells the two rows apart; the key and the variant carry it for every row.",
+  "rows": [
+    {
+      "key": "suelo_de_parquet_sobre_listones_unloaded",
+      "name": "Suelo de parquet sobre listones",
+      "variant": "Sin carga adicional",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 0,
+      "impact_sound_improvement_db": 7
+    },
+    {
+      "key": "suelo_de_parquet_sobre_listones_descansando_sobre_bandas_de_corcho_de_37_mm_unloaded",
+      "name": "Suelo de parquet sobre listones descansando sobre bandas de corcho de 37 mm",
+      "variant": "Sin carga adicional",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 0,
+      "impact_sound_improvement_db": 10
+    },
+    {
+      "key": "suelo_de_parquet_sobre_listones_descansando_sobre_bandas_de_lana_mineral_de_25_mm_loaded",
+      "name": "Suelo de parquet sobre listones descansando sobre bandas de lana mineral de 25 mm",
+      "variant": "Carga adicional 0,84 kg/cm²",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 82375.86,
+      "impact_sound_improvement_db": 15
+    },
+    {
+      "key": "suelo_de_parquet_sin_listones_sobre_50_mm_de_arena_seca_unloaded",
+      "name": "Suelo de parquet (sin listones) sobre 50 mm de arena seca",
+      "variant": "Sin carga adicional",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 0,
+      "impact_sound_improvement_db": 11
+    },
+    {
+      "key": "suelo_de_parquet_sin_listones_sobre_50_mm_de_serrin_seco_loaded",
+      "name": "Suelo de parquet (sin listones) sobre 50 mm de serrín seco",
+      "variant": "Carga adicional 0,84 kg/cm²",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 82375.86,
+      "impact_sound_improvement_db": 21
+    },
+    {
+      "key": "suelo_de_parquet_sin_listones_sobre_cubierta_de_lana_de_vidrio_de_18_mm_unloaded",
+      "name": "Suelo de parquet (sin listones) sobre cubierta de lana de vidrio de 18 mm",
+      "variant": "Sin carga adicional",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 0,
+      "impact_sound_improvement_db": 27
+    },
+    {
+      "key": "suelo_de_parquet_sin_listones_sobre_cubierta_de_lana_de_vidrio_de_18_mm_loaded",
+      "name": "Suelo de parquet (sin listones) sobre cubierta de lana de vidrio de 18 mm",
+      "variant": "Carga adicional 0,84 kg/cm²",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 82375.86,
+      "impact_sound_improvement_db": 22
+    },
+    {
+      "key": "suelo_de_parquet_sin_listones_sobre_cubierta_de_lana_de_vidrio_de_25_mm_loaded",
+      "name": "Suelo de parquet (sin listones) sobre cubierta de lana de vidrio de 25 mm",
+      "variant": "Carga adicional 0,84 kg/cm²",
+      "group": "Tabla 19.4. Aislamiento medio al impacto sonoro proporcionado por varios tipos de suelos de madera sobre hormigón desnudo",
+      "added_load_pa": 82375.86,
+      "impact_sound_improvement_db": 21
+    }
+  ]
+}

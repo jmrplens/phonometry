@@ -310,6 +310,13 @@ IMPACT_INSULATION_COLUMNS = (
         "",
     ),
     ("layer_density_kg_m3", "Density of one layer", "Densidad de una capa", "kg/m³"),
+    (
+        "impact_sound_improvement_db",
+        "Average improvement",
+        "Mejora media",
+        "dB",
+    ),
+    ("added_load_pa", "Added load", "Carga adicional", "Pa"),
 )
 
 
@@ -354,10 +361,19 @@ ABSORPTION_AREA_COLUMNS = tuple(
 
 #: The transmission loss table prints a thickness and a surface density
 #: beside the description, and those two are what tell six windows of the same
-#: name apart, so they lead the table rather than trailing the bands.
+#: name apart, so they lead the table rather than trailing the bands. The
+#: rating follows them: seven of the tables print nothing else, and a column
+#: of STC after eight empty bands would be the last thing a reader finds.
 TRANSMISSION_LOSS_COLUMNS = (
     ("thickness_mm", "Thickness", "Espesor", "mm"),
     ("surface_density_kg_m2", "Surface density", "Masa superficial", "kg/m²"),
+    ("block_mass_kg", "Mass of one block", "Masa de un bloque", "kg"),
+    (
+        "sound_transmission_class",
+        "Sound transmission class",
+        "Clase de transmisión del sonido",
+        "",
+    ),
     *(
         (
             f"transmission_loss_{band}_db",

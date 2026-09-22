@@ -9,6 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **A hundred and fifty-two more partitions, most of them rated and not
+  measured band by band.** `building.PUBLISHED_TRANSMISSION_LOSS` adds
+  Rossing (2014) Table 11.4, twenty-three common partitions with six octave
+  bands and a sound transmission class, and seven tables of the Spanish
+  edition of Harris, Chapter 31, with a hundred and twenty-nine sound
+  transmission classes and no band: stud walls in six conditions, concrete
+  block walls of two weights, block walls under six plasterboard mountings,
+  doors unsealed and sealed, exterior doors, sealed windows and floor-ceiling
+  systems. A construction the page rates under several conditions is one row
+  per condition, with the condition as the variant; the window table, which
+  is printed with the ratings as rows, is turned so that a row is a window.
+  `TransmissionLossSpectrum` gains `block_mass_kg` and `refers_to_row`, and
+  the published catalogue now shows the STC column it was already holding for
+  ASHRAE's nine machine room constructions. Rossing's "Open-plane office
+  partition" is served under the name the page prints and registered as a
+  typing slip.
+- **The impact insulation of the first edition, in decibels.**
+  `building.PUBLISHED_IMPACT_INSULATION` adds Harris (1977) Tables 19.2 to
+  19.4: twenty-three floor finishes, floating screeds and timber floors on a
+  bare concrete floor, with the average improvement in impact sound
+  insulation each one gives. It is a level difference averaged over
+  frequency, neither a class nor an improvement on one, and is held in a
+  field of its own, `ImpactInsulation.impact_sound_improvement_db`; the load
+  Table 19.4 prints in kg/cm² is `added_load_pa`. Every cell of the eleven
+  tables was read twice from the page and compared: 501 cells, and no
+  disagreement.
 - **Two more books of solids, and the speeds most tables print only one of.**
   Norton & Karczub 2e Appendix 4 A adds twenty-one solids to
   `solids.PUBLISHED_SOLIDS` with the bar and the bulk longitudinal speed in

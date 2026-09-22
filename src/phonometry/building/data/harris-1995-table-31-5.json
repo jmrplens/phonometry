@@ -1,0 +1,153 @@
+{
+  "source": "Harris 3e Table 31.5, PDF page 727 (printed p. 31.21)",
+  "about": "Twenty-one ratings from Table 31.5 of the Spanish edition: a 190 mm wall of normal-weight concrete blocks, bare and under six ways of mounting 16 mm plasterboard, with and without glass fibre filling the cavities, on one side or on both. The page prints seven mountings as rows and four columns under two spanning headings (\"Sin fibra de vidrio\" and \"Con fibra de vidrio\", each over \"Un lado\" and \"Ambos lados\"); each printed cell is a row here, with the mounting as the name and the column as the variant.\n\nSeven cells are blank on the page, with no dash and no note: the bare blocks print only the first column, \"Aplicada directamente\" prints nothing with glass fibre, and \"Cubierta flexible de 75 mm\" prints nothing on both sides. A blank cell is a configuration the page does not rate, so it has no row here.\n\nOne printed rating is lower on both sides than on one: \"Canales flexibles de 13 mm\" with glass fibre prints 54 on one side and 49 on both. It is held as printed; the page gives no reason, and nothing on it says the number is wrong.",
+  "rows": [
+    {
+      "key": "bloques_sin_revestir_sin_fibra_de_vidrio_un_lado",
+      "name": "Bloques sin revestir",
+      "variant": "Sin fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 50
+    },
+    {
+      "key": "aplicada_directamente_sin_fibra_de_vidrio_un_lado",
+      "name": "Aplicada directamente",
+      "variant": "Sin fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 50
+    },
+    {
+      "key": "aplicada_directamente_sin_fibra_de_vidrio_ambos_lados",
+      "name": "Aplicada directamente",
+      "variant": "Sin fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 49
+    },
+    {
+      "key": "cubierta_de_madera_de_40_mm_sin_fibra_de_vidrio_un_lado",
+      "name": "Cubierta de madera de 40 mm",
+      "variant": "Sin fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 53
+    },
+    {
+      "key": "cubierta_de_madera_de_40_mm_sin_fibra_de_vidrio_ambos_lados",
+      "name": "Cubierta de madera de 40 mm",
+      "variant": "Sin fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 54
+    },
+    {
+      "key": "cubierta_de_madera_de_40_mm_con_fibra_de_vidrio_un_lado",
+      "name": "Cubierta de madera de 40 mm",
+      "variant": "Con fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 55
+    },
+    {
+      "key": "cubierta_de_madera_de_40_mm_con_fibra_de_vidrio_ambos_lados",
+      "name": "Cubierta de madera de 40 mm",
+      "variant": "Con fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 59
+    },
+    {
+      "key": "canales_flexibles_de_13_mm_sin_fibra_de_vidrio_un_lado",
+      "name": "Canales flexibles de 13 mm",
+      "variant": "Sin fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 51
+    },
+    {
+      "key": "canales_flexibles_de_13_mm_sin_fibra_de_vidrio_ambos_lados",
+      "name": "Canales flexibles de 13 mm",
+      "variant": "Sin fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 49
+    },
+    {
+      "key": "canales_flexibles_de_13_mm_con_fibra_de_vidrio_un_lado",
+      "name": "Canales flexibles de 13 mm",
+      "variant": "Con fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 54
+    },
+    {
+      "key": "canales_flexibles_de_13_mm_con_fibra_de_vidrio_ambos_lados",
+      "name": "Canales flexibles de 13 mm",
+      "variant": "Con fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 49
+    },
+    {
+      "key": "cubierta_flexible_de_50_mm_sin_fibra_de_vidrio_un_lado",
+      "name": "Cubierta flexible de 50 mm",
+      "variant": "Sin fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "cubierta_flexible_de_50_mm_sin_fibra_de_vidrio_ambos_lados",
+      "name": "Cubierta flexible de 50 mm",
+      "variant": "Sin fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "cubierta_flexible_de_50_mm_con_fibra_de_vidrio_un_lado",
+      "name": "Cubierta flexible de 50 mm",
+      "variant": "Con fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 59
+    },
+    {
+      "key": "cubierta_flexible_de_50_mm_con_fibra_de_vidrio_ambos_lados",
+      "name": "Cubierta flexible de 50 mm",
+      "variant": "Con fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 64
+    },
+    {
+      "key": "tirantes_de_acero_de_65_mm_sin_fibra_de_vidrio_un_lado",
+      "name": "Tirantes de acero de 65 mm",
+      "variant": "Sin fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 58
+    },
+    {
+      "key": "tirantes_de_acero_de_65_mm_sin_fibra_de_vidrio_ambos_lados",
+      "name": "Tirantes de acero de 65 mm",
+      "variant": "Sin fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 57
+    },
+    {
+      "key": "tirantes_de_acero_de_65_mm_con_fibra_de_vidrio_un_lado",
+      "name": "Tirantes de acero de 65 mm",
+      "variant": "Con fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 60
+    },
+    {
+      "key": "tirantes_de_acero_de_65_mm_con_fibra_de_vidrio_ambos_lados",
+      "name": "Tirantes de acero de 65 mm",
+      "variant": "Con fibra de vidrio, ambos lados",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 72
+    },
+    {
+      "key": "cubierta_flexible_de_75_mm_sin_fibra_de_vidrio_un_lado",
+      "name": "Cubierta flexible de 75 mm",
+      "variant": "Sin fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 57
+    },
+    {
+      "key": "cubierta_flexible_de_75_mm_con_fibra_de_vidrio_un_lado",
+      "name": "Cubierta flexible de 75 mm",
+      "variant": "Con fibra de vidrio, un lado",
+      "group": "TABLA 31.5. Valores de la clase de transmisión del sonido (STC) para paredes de bloques de peso normal de 190 mm con distintos métodos de montaje de escayola de 16 mm, con y sin fibra de vidrio rellenando las cámaras",
+      "sound_transmission_class": 61
+    }
+  ]
+}

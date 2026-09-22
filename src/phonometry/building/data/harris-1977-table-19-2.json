@@ -1,0 +1,71 @@
+{
+  "source": "Harris (1977) Table 19.2, PDF page 742 (printed p. 729)",
+  "about": "Ten floor finishes laid on a bare concrete floor, from Table 19.2 of the Spanish edition of the first Handbook of Noise Control, in the chapter \"Control del ruido a través de los sólidos\" by Fritz Ingerslev and Cyril M. Harris. The column is headed \"Aislamiento al impacto sonoro, db\", and the caption and the running text say what it is: the average improvement in impact sound insulation the finish gives over the bare slab (\"Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados\"; on the next page, \"Las mejorías «medias» fueron de 3 y 24 db\" for the linoleum and the Wilton carpet of Figure 19.6). It is a level difference in decibels averaged over frequency, which is neither an impact insulation class nor its improvement, and it is held in a field of its own.\n\nThe asphalt row prints a range, \"5-7\", held as one. The table is set at the foot of PDF page 742 (printed p. 729), although the running text that calls it is on the next page.",
+  "rows": [
+    {
+      "key": "linoleum_3_2_mm",
+      "name": "Linóleum, 3,2 mm",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 3
+    },
+    {
+      "key": "baldosa_de_caucho_3_2_mm",
+      "name": "Baldosa de caucho, 3,2 mm",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 5
+    },
+    {
+      "key": "asfalto",
+      "name": "Asfalto",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "ranges": {
+        "impact_sound_improvement_db": [
+          5,
+          7
+        ]
+      }
+    },
+    {
+      "key": "suelo_de_parquet_sobre_listones",
+      "name": "Suelo de parquet sobre listones",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 7
+    },
+    {
+      "key": "plancha_de_corcho_8_mm",
+      "name": "Plancha de corcho, 8 mm",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 10
+    },
+    {
+      "key": "moqueta_wilton_9_5_mm",
+      "name": "Moqueta Wilton, 9,5 mm",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 24
+    },
+    {
+      "key": "4_mm_de_linoleum_sobre_6_4_mm_de_plancha_de_corcho_duro",
+      "name": "4 mm de linóleum sobre 6,4 mm de plancha de corcho duro",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 6
+    },
+    {
+      "key": "4_mm_de_linoleum_sobre_6_4_mm_de_plancha_de_corcho_blando",
+      "name": "4 mm de linóleum sobre 6,4 mm de plancha de corcho blando",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 14
+    },
+    {
+      "key": "4_mm_de_linoleum_sobre_12_8_mm_de_corcho_blando",
+      "name": "4 mm de linóleum sobre 12,8 mm de corcho blando",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 16
+    },
+    {
+      "key": "4_mm_de_linoleum_sobre_12_8_mm_de_tablero_blando",
+      "name": "4 mm de linóleum sobre 12,8 mm de tablero blando",
+      "group": "Tabla 19.2. Valores medios del aislamiento al impacto sonoro proporcionado por varios acabados de suelo aplicados sobre hormigón desnudo",
+      "impact_sound_improvement_db": 18
+    }
+  ]
+}

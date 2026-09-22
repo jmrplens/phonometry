@@ -1,0 +1,142 @@
+{
+  "source": "Harris 3e Table 31.6, PDF page 730 (printed p. 31.24)",
+  "about": "Fourteen ratings from Table 31.6 of the Spanish edition: three single doors and four pairs of communicating doors, each rated unsealed (\"STC (sin sellar)\") and well sealed (\"STC (bien selladas)\"). The door is the name and the sealing the variant.\n\nThe single doors print a surface density in kg/m2. The four pairs print theirs as \"7 each\" or \"20 each\", in English inside the Spanish edition, which is the mass of one door of the pair; the construction's own surface density is not printed, so those rows hold the cell as printed and serve no number.",
+  "rows": [
+    {
+      "key": "madera_con_nucleo_hueco_sin_sellar",
+      "name": "Madera con núcleo hueco",
+      "variant": "Sin sellar",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "surface_density_kg_m2": 7,
+      "sound_transmission_class": 17
+    },
+    {
+      "key": "madera_con_nucleo_hueco_bien_selladas",
+      "name": "Madera con núcleo hueco",
+      "variant": "Bien selladas",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "surface_density_kg_m2": 7,
+      "sound_transmission_class": 20
+    },
+    {
+      "key": "madera_con_nucleo_macizo_sin_sellar",
+      "name": "Madera con núcleo macizo",
+      "variant": "Sin sellar",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "surface_density_kg_m2": 20,
+      "sound_transmission_class": 20
+    },
+    {
+      "key": "madera_con_nucleo_macizo_bien_selladas",
+      "name": "Madera con núcleo macizo",
+      "variant": "Bien selladas",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "surface_density_kg_m2": 20,
+      "sound_transmission_class": 28
+    },
+    {
+      "key": "acero_con_nucleo_hueco_calibre_18_sin_sellar",
+      "name": "Acero con núcleo hueco (calibre 18)",
+      "variant": "Sin sellar",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "surface_density_kg_m2": 25,
+      "sound_transmission_class": 20
+    },
+    {
+      "key": "acero_con_nucleo_hueco_calibre_18_bien_selladas",
+      "name": "Acero con núcleo hueco (calibre 18)",
+      "variant": "Bien selladas",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "surface_density_kg_m2": 25,
+      "sound_transmission_class": 30
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_de_nucleo_hueco_camara_de_100_mm_sin_sellar",
+      "name": "Puertas de comunicación (2 puertas de madera de núcleo hueco, cámara de 100 mm)",
+      "variant": "Sin sellar",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "7 each"
+      },
+      "note": "The surface density is printed as \"7 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 22
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_de_nucleo_hueco_camara_de_100_mm_bien_selladas",
+      "name": "Puertas de comunicación (2 puertas de madera de núcleo hueco, cámara de 100 mm)",
+      "variant": "Bien selladas",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "7 each"
+      },
+      "note": "The surface density is printed as \"7 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 26
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_de_aire_sin_sellar",
+      "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara de aire)",
+      "variant": "Sin sellar",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "20 each"
+      },
+      "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 28
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_de_aire_bien_selladas",
+      "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara de aire)",
+      "variant": "Bien selladas",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "20 each"
+      },
+      "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 40
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_con_absorcion_sin_sellar",
+      "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara con absorción)",
+      "variant": "Sin sellar",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "20 each"
+      },
+      "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 40
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_70_mm_de_camara_con_absorcion_bien_selladas",
+      "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 70 mm de cámara con absorción)",
+      "variant": "Bien selladas",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "20 each"
+      },
+      "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_230_mm_de_camara_con_absorcion_sin_sellar",
+      "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 230 mm de cámara con absorción)",
+      "variant": "Sin sellar",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "20 each"
+      },
+      "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 42
+    },
+    {
+      "key": "puertas_de_comunicacion_2_puertas_de_madera_maciza_o_de_acero_hueco_con_230_mm_de_camara_con_absorcion_bien_selladas",
+      "name": "Puertas de comunicación (2 puertas de madera maciza o de acero hueco, con 230 mm de cámara con absorción)",
+      "variant": "Bien selladas",
+      "group": "TABLA 31.6. Aislamiento acústico de puertas convencionales y puertas (dobles) de comunicación",
+      "unquantified": {
+        "surface_density_kg_m2": "20 each"
+      },
+      "note": "The surface density is printed as \"20 each\", with the English word the Spanish edition keeps: it is the mass of each of the two doors, not of the pair, and is not served as the surface density of the construction.",
+      "sound_transmission_class": 50
+    }
+  ]
+}

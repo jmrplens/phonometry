@@ -1,0 +1,231 @@
+{
+  "source": "Harris 3e Table 31.8, PDF page 736 (printed p. 31.30)",
+  "about": "Twenty-seven ratings from Table 31.8 of the Spanish edition, sealed windows. The page prints this table the other way round from every other in the chapter: the rows are ratings, from STC 48 down to 30 in steps of two, and each cell names the glazing that reaches that rating in its column. The table is turned here, so that a row is a window: the column heading is the name, the printed cell is the variant and the row heading is the sound transmission class. Blank cells are glazings the page does not list at that rating and have no row.\n\nIn the single glass column the cell is the thickness of the pane, and \"L\" marks laminated glass (\"L denota cristal laminado\", by the footnote marked with a dagger). In the three double glazing columns the cell is the width of the air gap, by the footnote marked with an asterisk (\"Estos valores indican la anchura de la cámara de aire entre los dos cristales\"), so those rows hold no thickness. The headnote under the caption says that for double glazing the values correspond to the air gap given, and that working windows with the same glass usually rate 3 to 5 lower (\"Las ventanas funcionales con el mismo cristal suelen tener valores STC de 3 a 5 inferiores\"): these are sealed windows.",
+  "rows": [
+    {
+      "key": "cristal_doble_6_mm_y_l_7_mm_100_mm",
+      "name": "Cristal doble, 6 mm y L-7 mm",
+      "variant": "100 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 48
+    },
+    {
+      "key": "cristal_doble_6_mm_y_6_mm_120_mm",
+      "name": "Cristal doble, 6 mm y 6 mm",
+      "variant": "120 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 46
+    },
+    {
+      "key": "cristal_doble_6_mm_y_l_7_mm_60_mm",
+      "name": "Cristal doble, 6 mm y L-7 mm",
+      "variant": "60 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 46
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_150_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "150 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "cristal_doble_6_mm_y_6_mm_80_mm",
+      "name": "Cristal doble, 6 mm y 6 mm",
+      "variant": "80 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "cristal_doble_6_mm_y_l_7_mm_40_mm",
+      "name": "Cristal doble, 6 mm y L-7 mm",
+      "variant": "40 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 44
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_100_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "100 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 42
+    },
+    {
+      "key": "cristal_doble_6_mm_y_6_mm_50_mm",
+      "name": "Cristal doble, 6 mm y 6 mm",
+      "variant": "50 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 42
+    },
+    {
+      "key": "cristal_doble_6_mm_y_l_7_mm_25_mm",
+      "name": "Cristal doble, 6 mm y L-7 mm",
+      "variant": "25 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 42
+    },
+    {
+      "key": "cristal_unico_l_20_mm",
+      "name": "Cristal único",
+      "variant": "L-20 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "thickness_mm": 20,
+      "note": "L marks laminated glass, by the table's own footnote.",
+      "sound_transmission_class": 40
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_70_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "70 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 40
+    },
+    {
+      "key": "cristal_doble_6_mm_y_6_mm_30_mm",
+      "name": "Cristal doble, 6 mm y 6 mm",
+      "variant": "30 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 40
+    },
+    {
+      "key": "cristal_doble_6_mm_y_l_7_mm_16_mm",
+      "name": "Cristal doble, 6 mm y L-7 mm",
+      "variant": "16 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 40
+    },
+    {
+      "key": "cristal_unico_l_12_mm",
+      "name": "Cristal único",
+      "variant": "L-12 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "thickness_mm": 12,
+      "note": "L marks laminated glass, by the table's own footnote.",
+      "sound_transmission_class": 38
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_50_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "50 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 38
+    },
+    {
+      "key": "cristal_doble_6_mm_y_6_mm_20_mm",
+      "name": "Cristal doble, 6 mm y 6 mm",
+      "variant": "20 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 38
+    },
+    {
+      "key": "cristal_doble_6_mm_y_l_7_mm_10_mm",
+      "name": "Cristal doble, 6 mm y L-7 mm",
+      "variant": "10 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 38
+    },
+    {
+      "key": "cristal_unico_12_mm",
+      "name": "Cristal único",
+      "variant": "12 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "thickness_mm": 12,
+      "sound_transmission_class": 36
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_30_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "30 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 36
+    },
+    {
+      "key": "cristal_doble_6_mm_y_6_mm_13_mm",
+      "name": "Cristal doble, 6 mm y 6 mm",
+      "variant": "13 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 36
+    },
+    {
+      "key": "cristal_unico_l_6_mm",
+      "name": "Cristal único",
+      "variant": "L-6 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "thickness_mm": 6,
+      "note": "L marks laminated glass, by the table's own footnote.",
+      "sound_transmission_class": 34
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_20_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "20 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 34
+    },
+    {
+      "key": "cristal_doble_6_mm_y_6_mm_8_mm",
+      "name": "Cristal doble, 6 mm y 6 mm",
+      "variant": "8 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 34
+    },
+    {
+      "key": "cristal_unico_6_mm",
+      "name": "Cristal único",
+      "variant": "6 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "thickness_mm": 6,
+      "sound_transmission_class": 32
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_10_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "10 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 32
+    },
+    {
+      "key": "cristal_unico_3_mm_4_mm",
+      "name": "Cristal único",
+      "variant": "3 mm, 4 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "reported": {
+        "thickness_mm": [
+          3,
+          4
+        ]
+      },
+      "note": "The page prints two thicknesses in one cell, \"3 mm, 4 mm\", for the same rating.",
+      "sound_transmission_class": 30
+    },
+    {
+      "key": "cristal_doble_3_mm_y_3_mm_6_mm",
+      "name": "Cristal doble, 3 mm y 3 mm",
+      "variant": "6 mm",
+      "group": "TABLA 31.8. Clase de transmisión del sonido para ventanas selladas típicas",
+      "note": "The variant is the width of the air gap between the two panes, by the footnote on the column heading, and not the thickness of the window.",
+      "sound_transmission_class": 30
+    }
+  ]
+}

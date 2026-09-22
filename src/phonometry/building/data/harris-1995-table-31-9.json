@@ -1,0 +1,80 @@
+{
+  "source": "Harris 3e Table 31.9, PDF page 738 (printed p. 31.32)",
+  "about": "Ten ratings from Table 31.9 of the Spanish edition, floor-ceiling systems, under three full-width group headings: concrete joists, steel sections, and timber joists or frames. The page prints a floor (\"Suelo\") and a ceiling (\"Techo\") for each numbered row; the floor is the name here and the ceiling the variant, because three floors are printed once and rated under two or three ceilings. The printed row number is the key, and the four floors printed as \"Igual que 4\", \"Igual que 6\" and \"Igual que 8\" name the row they refer to in refers_to_row.\n\nThe italic note under the caption says the ratings rest on laboratory test data with a high degree of reliability, that particular tests may differ slightly because of measurement technique and minor construction details, that the absorbent materials of the table are mineral and glass fibre or cellulose, and that the fill must exceed two thirds of the cavity volume (\"Los materiales absorbentes incluidos en la tabla son fibra mineral y de vidrio, o celulosa, y el relleno debe superar los dos tercios del volumen de la cámara de aire\").",
+  "rows": [
+    {
+      "key": "1",
+      "name": "Hormigón reforzado 90 mm",
+      "variant": "Ninguno",
+      "group": "Viguetas de hormigón",
+      "sound_transmission_class": 48
+    },
+    {
+      "key": "2",
+      "name": "Hormigón reforzado 130 mm",
+      "variant": "Ninguno",
+      "group": "Viguetas de hormigón",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "3",
+      "name": "Perfiles de acero con un tablero de hormigón de 50 mm mínimo",
+      "variant": "Capas de escayola de 16 mm para revestir los canales en donde encajan los perfiles, con material de absorción en la cámara optativo",
+      "group": "Perfiles de acero",
+      "sound_transmission_class": 53
+    },
+    {
+      "key": "4",
+      "name": "Subsuelo de 19 mm T&G o tablero de láminas de madera de 15,5 mm",
+      "variant": "Capa de escayola de 16 mm adherida a los canales metálicos flexibles, con material absorbente en la cámara",
+      "group": "Tirantes de madera o marcos",
+      "sound_transmission_class": 48
+    },
+    {
+      "key": "5",
+      "name": "Igual que 4, con un tablero adicional de láminas de madera de 15,5 mm en el suelo",
+      "variant": "Capa de escayola de 16 mm adherida a los canales metálicos flexibles, con material absorbente en la cámara",
+      "group": "Tirantes de madera o marcos",
+      "refers_to_row": "4",
+      "sound_transmission_class": 52
+    },
+    {
+      "key": "6",
+      "name": "Capa de hormigón-escayola de 19 mm (de al menos 34 kg/m²) sobre subsuelo con T&G de 19 mm o con tablero de láminas de madera de 15,5 mm",
+      "variant": "Dos capas de escayola de 13 mm o 16 mm",
+      "group": "Tirantes de madera o marcos",
+      "sound_transmission_class": 55
+    },
+    {
+      "key": "7",
+      "name": "Igual que 6",
+      "variant": "Dos capas de escayola de 13 mm o 16 mm, adheridas a los canales metálicos flexibles, con material absorbente en la cámara",
+      "group": "Tirantes de madera o marcos",
+      "refers_to_row": "6",
+      "sound_transmission_class": 55
+    },
+    {
+      "key": "8",
+      "name": "Capa de hormigón ligero de 50 mm (de al menos 70 kg/m²) sobre subsuelo con T&G de 19 mm o con tablero de láminas de madera de 15,5 mm",
+      "variant": "Dos capas de escayola de 13 mm o 16 mm",
+      "group": "Tirantes de madera o marcos",
+      "sound_transmission_class": 56
+    },
+    {
+      "key": "9",
+      "name": "Igual que 8",
+      "variant": "Capa de escayola de 16 mm, adherida a los canales metálicos flexibles",
+      "group": "Tirantes de madera o marcos",
+      "refers_to_row": "8",
+      "sound_transmission_class": 57
+    },
+    {
+      "key": "10",
+      "name": "Igual que 8",
+      "variant": "Capa de escayola de 16 mm, adherida a los canales metálicos flexibles con material absorbente en la cámara",
+      "group": "Tirantes de madera o marcos",
+      "refers_to_row": "8",
+      "sound_transmission_class": 60
+    }
+  ]
+}

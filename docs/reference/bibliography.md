@@ -678,15 +678,24 @@ it; the list grows as guides gain their References sections.
   [Laboratory Insulation Measurement](../buildings/insulation/insulation-lab.md),
   [Dynamic stiffness of resilient materials](../materials/resilient/dynamic-stiffness.md) and
   [Predicting Panel Sound Insulation](../buildings/design/panel-sound-insulation.md).
+- Harris, C. M. (Ed.). (1977). *Manual para el control del ruido* (Vol. 1).
+  Instituto de Estudios de Administración Local.
+  The Spanish translation of the first edition of the *Handbook of Noise
+  Control* (McGraw-Hill, 1957), cited in this tree as Harris (1977). Chapter
+  19, "Control del ruido a través de los sólidos", by Fritz Ingerslev and
+  Cyril M. Harris, prints in its Tables 19.2 to 19.4 the average improvement
+  in impact sound insulation of twenty-three floor finishes, floating screeds
+  and timber floors on a bare concrete floor.
 - Harris, C. M. (Ed.). (1995). *Manual de medidas acústicas y control del
   ruido* (3.ª ed.). McGraw-Hill.
   The Spanish edition of the handbook, cited in this tree as Harris 3e and not
   to be confused with the window paper of F. J. Harris under Signal processing.
+  Chapter 31 prints in seven tables the sound transmission class of stud
+  walls, block walls, doors, sealed windows and floor-ceiling systems, and
   Chapter 32, "Aislamiento del sonido transmitido por estructuras", prints in
   its Tables 32.1 to 32.8 the measured impact insulation class of forty-two
   floor-ceiling constructions and the improvement six elastic surface
-  treatments add over a hard massive floor, which is the only published impact
-  insulation this library holds.
+  treatments add over a hard massive floor.
 - International Organization for Standardization. (2020). *Acoustics —
   Rating of sound insulation in buildings and of building elements — Part 1:
   Airborne sound insulation* (ISO 717-1:2020).

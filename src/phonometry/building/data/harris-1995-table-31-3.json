@@ -1,0 +1,106 @@
+{
+  "source": "Harris 3e Table 31.3, PDF page 724 (printed p. 31.18)",
+  "about": "Ten ratings from Table 31.3 of the Spanish edition: concrete block walls sealed on at least one side, in five nominal thicknesses (90 to 300 mm) and two weight classes of block, lightweight (\"Peso ligero\") and normal (\"Peso normal\"). Each weight class prints the mass of one block and the sound transmission class. The thickness is the nominal one the page heads the first column with (\"Grosor nominal, mm\"), and the block mass is kilograms per block, which is not a surface density and is held in a field of its own.\n\nThe page prints the asterisk after the lightweight STC heading and its footnote, \"STC = Clase de transmisión del sonido\", which only expands the abbreviation.",
+  "rows": [
+    {
+      "key": "peso_ligero_90_mm",
+      "name": "Pared de bloques de peso ligero",
+      "variant": "90 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 90,
+      "block_mass_kg": 7,
+      "sound_transmission_class": 43,
+      "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_normal_90_mm",
+      "name": "Pared de bloques de peso normal",
+      "variant": "90 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 90,
+      "block_mass_kg": 10,
+      "sound_transmission_class": 44,
+      "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_ligero_150_mm",
+      "name": "Pared de bloques de peso ligero",
+      "variant": "150 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 150,
+      "block_mass_kg": 10,
+      "sound_transmission_class": 44,
+      "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_normal_150_mm",
+      "name": "Pared de bloques de peso normal",
+      "variant": "150 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 150,
+      "block_mass_kg": 15,
+      "sound_transmission_class": 46,
+      "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_ligero_200_mm",
+      "name": "Pared de bloques de peso ligero",
+      "variant": "200 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 200,
+      "block_mass_kg": 13,
+      "sound_transmission_class": 45,
+      "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_normal_200_mm",
+      "name": "Pared de bloques de peso normal",
+      "variant": "200 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 200,
+      "block_mass_kg": 17,
+      "sound_transmission_class": 48,
+      "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_ligero_250_mm",
+      "name": "Pared de bloques de peso ligero",
+      "variant": "250 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 250,
+      "block_mass_kg": 15,
+      "sound_transmission_class": 47,
+      "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_normal_250_mm",
+      "name": "Pared de bloques de peso normal",
+      "variant": "250 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 250,
+      "block_mass_kg": 21,
+      "sound_transmission_class": 49,
+      "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_ligero_300_mm",
+      "name": "Pared de bloques de peso ligero",
+      "variant": "300 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 300,
+      "block_mass_kg": 18,
+      "sound_transmission_class": 48,
+      "note": "The name is composed from the caption and the column heading (\"Peso ligero\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    },
+    {
+      "key": "peso_normal_300_mm",
+      "name": "Pared de bloques de peso normal",
+      "variant": "300 mm",
+      "group": "TABLA 31.3. Valores STC para paredes de bloques normales y ligeros selladas al menos por un lado",
+      "thickness_mm": 300,
+      "block_mass_kg": 25,
+      "sound_transmission_class": 51,
+      "note": "The name is composed from the caption and the column heading (\"Peso normal\"); the page names the wall by its nominal thickness and the weight class of the block, and by nothing else."
+    }
+  ]
+}

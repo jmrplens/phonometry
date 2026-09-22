@@ -60,6 +60,32 @@ measured in two directions that are different numbers and is indexed by the
 duct's cross section, length and sheet gauge; it is published from
 [`phonometry.noise_control.duct_walls`](/phonometry/reference/api/noise_control/duct-walls/).
 
+Rossing's Table 11.4 is the same kind of row with fewer bands: twenty-three
+common partitions, six octaves from 125 Hz to 4 kHz and a sound transmission
+class, with no source, laboratory or standard named for any of them.
+
+Tables that print a rating and nothing else
+-------------------------------------------
+Chapter 31 of the Spanish edition of Harris prints seven tables of sound
+transmission class alone, with no frequency band anywhere: stud walls in six
+conditions, concrete block walls of two weights, block walls under six
+plasterboard mountings, doors unsealed and sealed, exterior doors, sealed
+windows and floor-ceiling systems. Each is a row of this catalogue with every
+band empty, and the rating in [`TransmissionLossSpectrum.sound_transmission_class`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrum).
+A caller after a spectrum reads the band fields and finds `None`;
+[`TransmissionLossSpectrum.transmission_loss_db`](/phonometry/reference/api/building/catalogue/#transmissionlossspectrumtransmission_loss_db) then refuses with the
+row and the band, because the page printed nothing there.
+
+Most of those tables print one construction under several conditions, as
+columns: the plasterboard layers and the cavity absorbent of Table 31.2, the
+sealing of the doors of Table 31.6. A column is a row here, the construction
+is its `name` and the
+column its `variant`,
+composed from the printed headings above the cell. The window table is
+printed the other way round, with the ratings as rows and the glazings as
+cells, and is turned so that a row is a window. A row the page leaves blank
+is a configuration it does not rate and has no row.
+
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
 ## PUBLISHED_TRANSMISSION_LOSS
@@ -88,7 +114,7 @@ Every published row whose printed description contains *name*.
 | :--- | :--- |
 | `name` | A fragment of the printed description, matched without case. |
 
-**Returns:** The rows whose description contains it, in the order the tables are read, which is empty when no page has one. It matches the printed description and nothing else: `"door"` answers with the ten rows that carry the word, and not with the hollow flush panel or the solid hardwood, which the page describes without it. The caller reads the thickness and the surface density to pick the row they mean.
+**Returns:** The rows whose description contains it, in the order the tables are read, which is empty when no page has one. It matches the printed description and nothing else, in the language the page is set in: `"door"` answers with the rows that carry the word, and not with Bies's hollow flush panel or solid hardwood, which the page describes without it, nor with the doors of the Spanish edition of Harris, which are `"puerta"`. The caller reads the thickness, the surface density and the variant to pick the row they mean.
 
 ## TransmissionLossSpectrum
 
@@ -123,6 +149,8 @@ TransmissionLossSpectrum(
     thickness_mm: float | None = None,
     surface_density_kg_m2: float | None = None,
     sound_transmission_class: float | None = None,
+    block_mass_kg: float | None = None,
+    refers_to_row: str = '',
 )
 ```
 
@@ -142,7 +170,9 @@ One construction of a published table, with its loss in each band.
 | `transmission_loss_8000_db` | The same in the 8 kHz band. |
 | `thickness_mm` | The overall thickness of the construction, in millimetres, as the page prints it beside the description. It is the assembly's thickness and not a leaf's: a double wall prints the pair and the cavity together. |
 | `surface_density_kg_m2` | The mass per unit area, in kilograms per square metre, as printed. This is what the mass law takes, and what two rows of the same description are told apart by. |
-| `sound_transmission_class` | The single-number rating the page prints beside the spectrum, where it prints one. It is not a band value and it does not follow from the ones beside it: an STC is computed from third-octave data, so a table that prints octave bands and an STC is printing two readings of one measurement and this catalogue keeps both. Empty for a page that rates nothing, which is most of them. |
+| `sound_transmission_class` | The single-number rating the page prints beside the spectrum, where it prints one. It is not a band value and it does not follow from the ones beside it: an STC is computed from third-octave data, so a table that prints octave bands and an STC is printing two readings of one measurement and this catalogue keeps both. Empty for a page that rates nothing. |
+| `block_mass_kg` | The mass of one masonry block, in kilograms, where a page prints it beside the rating. It is a mass per block and not per square metre, so it is not a surface density and is not comparable with `surface_density_kg_m2`: Harris Table 31.3 tells its lightweight and normal-weight walls of one thickness apart by it. |
+| `refers_to_row` | The row this row's printed description refers to instead of repeating itself, named by the number the table prints. Harris Table 31.9 prints three floors once and the rows after them as "Igual que 8"; the printed text is kept whole in `name`, and this is the row it inherits from, resolved as `PUBLISHED_TRANSMISSION_LOSS[f"{row.table}/{row.refers_to_row}"]`. Empty when the description stands on its own. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |

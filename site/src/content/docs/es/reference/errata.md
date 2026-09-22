@@ -7483,6 +7483,29 @@ dos ediciones con las mismas entradas y en el mismo orden.
   cumple en las demás filas.
 - **Estado:** sin comunicar.
 
+## Rossing (2014), tabla 11.4 («Open-plane» por una oficina diáfana)
+
+- **Dónde:** tabla 11.4, «Transmission loss and STC values for common
+  partitions», novena fila, en la página impresa 413 (página 428 del PDF).
+  Fuente no normativa: un manual.
+- **Lo impreso:** la fila se rotula «Open-plane office partition», con una
+  pérdida por transmisión de $10$ a $12$ dB en todas las bandas y una STC de
+  $12$.
+- **El problema:** una oficina *open-plan* es una oficina diáfana, sin
+  tabiques, y un plano no es una clase de oficina. El rótulo es un desliz
+  tipográfico por «Open-plan»; ningún número de la fila se ve afectado, y sus
+  valores bajos son los de la mampara que separa puestos en una oficina
+  diáfana.
+- **Evidencia:** Verificado en la página 428 del PDF (p. impresa 413) de
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014); las dos lecturas
+  independientes de la página y un recorte de la celda imprimen «Open-plane».
+- **Qué hace la biblioteca:** la fila se sirve con el nombre que imprime la
+  página, en
+  [`PUBLISHED_TRANSMISSION_LOSS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/building/catalogue.py),
+  para que una búsqueda por la palabra impresa la encuentre, y su nota dice
+  qué quiere decir.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

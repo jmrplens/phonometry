@@ -215,6 +215,7 @@ jobs:
         working-directory: site
       - name: Build site
         run: pnpm install --frozen-lockfile && pnpm build
+        working-directory: site
 
       # Every page, component and script of the site type-checked in strict
       # mode. A catalogue row read through a field its table does not carry,

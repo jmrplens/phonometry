@@ -125,7 +125,6 @@ _FREQ_POSITIVE_MSG = "'frequency' must be positive."
 _FREQ_1D_MSG = "'frequency' must be a non-empty 1-D array."
 
 
-
 def _plateau_constants() -> dict[str, tuple[float, float, float]]:
     """The plateau method's three numbers per material, by lower-case name.
 

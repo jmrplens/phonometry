@@ -271,3 +271,14 @@ def test_air_condition_requires_standard_bands() -> None:
             air_condition="20C_50-70",
             frequencies=[500.0, 1000.0],
         )
+
+
+def test_the_default_band_axis_is_the_results_own_copy() -> None:
+    """The default ``frequencies`` is :data:`OCTAVE_BANDS`, which refuses writes.
+
+    The result used to carry that very array, so writing into
+    ``result.frequencies`` edited the published bands for every later caller.
+    """
+    result = m.enclosed_space_reverberation([(20.0, 0.5)], 50.0)
+    assert not np.shares_memory(result.frequencies, m.OCTAVE_BANDS)
+    assert result.frequencies.flags.writeable

@@ -932,3 +932,31 @@ def test_the_chain_carries_the_example_from_the_fan_to_the_second_junction() -> 
 def test_the_octave_limits_refuse_a_level_that_is_not_one() -> None:
     with pytest.raises(ValueError, match=r"'a_weighted_limit_db' must be finite"):
         hvac.octave_band_limits(float("nan"))
+
+
+def test_a_default_band_axis_is_the_results_own_copy() -> None:
+    """``frequencies=None`` reads :data:`hvac.OCTAVE_BANDS`, which refuses writes.
+
+    The two VDI spectra used to hand that array back as their own
+    ``frequencies``, so writing into a result edited the published bands for
+    every later caller; now it would raise instead. Either way the result has
+    to own its axis.
+    """
+    results = (
+        hvac.unlined_circular_duct_attenuation(
+            None, 1.0, diameter_m=0.160, model="vdi2081"
+        ),
+        hvac.silencer_self_noise(
+            None,
+            SILENCER_GAP_VELOCITY,
+            5,
+            0.6,
+            model="vdi2081",
+            pressure_drop_pa=SILENCER_PRESSURE_DROP_PA,
+            approach_area=SILENCER_APPROACH_AREA_M2,
+            airway_width=SILENCER_GAP_M,
+        ),
+    )
+    for result in results:
+        assert not np.shares_memory(result.frequencies, hvac.OCTAVE_BANDS)
+        assert result.frequencies.flags.writeable

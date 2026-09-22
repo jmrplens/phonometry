@@ -76,6 +76,7 @@ overlapping modes where the statistical field of this module applies.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, overload
 
 import numpy as np
@@ -89,6 +90,8 @@ from .._internal.validation import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -288,11 +291,13 @@ def schroeder_frequency(
 #: ``Pi_0 Q`` (reflecting boundaries load it and it radiates *more*, the
 #: conservative upper bound), a constant-pressure source ``Pi_0 / Q`` (the
 #: theoretical lower bound).
-SOURCE_POWER_MODELS: dict[str, float] = {
-    "constant_power": 0.0,
-    "constant_volume": 1.0,
-    "constant_pressure": -1.0,
-}
+SOURCE_POWER_MODELS: Mapping[str, float] = MappingProxyType(
+    {
+        "constant_power": 0.0,
+        "constant_volume": 1.0,
+        "constant_pressure": -1.0,
+    }
+)
 
 
 @overload

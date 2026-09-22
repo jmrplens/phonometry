@@ -146,7 +146,7 @@ themselves.
 
 ## FITTING_DETAIL_LEVELS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 FITTING_DETAIL_LEVELS = {1: 'fittings are not taken into account', 2: 'one mean density and one mean absorption for the whole room', 3: 'one mean density and one mean absorption per part of the room', 4: 'the actual shape and location, with shielding and reflection'}
@@ -176,7 +176,7 @@ One category of Table 4, with the detail levels of Table E.1.
 
 ## PREDICTION_METHODS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 PREDICTION_METHODS = {'1': PredictionMethod(category='1', family='diffuse field', rooms='rooms whose field may be treated as diffuse', room_detail=(1,), fitting_detail=(1,), source_detail=(1, 2, 3)), '2a': PredictionMethod(category='2a', family='geometrical', rooms='rooms that can be approximated by one mean absorption coefficient for each wall and one mean density for the fittings', room_detail=(1, 2), fitting_detail=(1, 2), source_detail=(1, 2, 3)), '2b': PredictionMethod(category='2b', family='geometrical', rooms='rooms that can be approximated by one mean absorption coefficient for each room surface and one mean density for the fittings in each zone', room_detail=(1, 2, 3), fitting_detail=(1, 2, 3), source_detail=(1, 2, 3)), '2c': PredictionMethod(category='2c', family='geometrical', rooms='rooms for which the individual distribution of absorption and fittings has to be considered', room_detail=(1, 2, 3, 4), fitting_detail=(1, 2, 3, 4), source_detail=(1, 2, 3))}
@@ -210,7 +210,7 @@ One row of Table 4, with what Table E.1 asks it to be fed.
 
 ## RECOMMENDED_DETAIL
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 RECOMMENDED_DETAIL = {'1': ((1,), (1,), (1, 2, 3)), '2a': ((1, 2), (1, 2), (1, 2, 3)), '2b': ((1, 2, 3), (1, 2, 3), (1, 2, 3)), '2c': ((1, 2, 3, 4), (1, 2, 3, 4), (1, 2, 3))}
@@ -218,7 +218,7 @@ RECOMMENDED_DETAIL = {'1': ((1,), (1,), (1, 2, 3)), '2a': ((1, 2), (1, 2), (1, 2
 
 ## ROOM_DETAIL_LEVELS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 ROOM_DETAIL_LEVELS = {1: 'the volume and the mean absorption coefficient of the surfaces', 2: 'a box-like shape, one absorption coefficient per surface', 3: 'a box-like shape, surfaces subdivided by absorption coefficient', 4: 'the actual shape, with absorption and reflection distributed over it'}
@@ -226,7 +226,7 @@ ROOM_DETAIL_LEVELS = {1: 'the volume and the mean absorption coefficient of the 
 
 ## SOURCE_DETAIL_LEVELS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 SOURCE_DETAIL_LEVELS = {1: 'omnidirectional point sources', 2: 'point sources with a directivity pattern', 3: 'complex sources'}
@@ -289,7 +289,7 @@ What 4.3 says `DL2` usually is in one region, in decibels.
 
 ## TYPICAL_DECAY_RANGE_DB
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 TYPICAL_DECAY_RANGE_DB = {'near': (5.0, 6.0), 'middle': (2.0, 5.0), 'far': (6.0, None)}
@@ -322,7 +322,7 @@ the far region `DLf` may be negative; the near region it leaves open.
 
 ## TYPICAL_EXCESS_RANGE_DB
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 TYPICAL_EXCESS_RANGE_DB = {'near': (None, None), 'middle': (2.0, 10.0), 'far': (None, None)}

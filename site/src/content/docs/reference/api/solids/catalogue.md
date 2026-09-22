@@ -54,7 +54,7 @@ right.
 
 ## PUBLISHED_SOLIDS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## SolidMaterial
 

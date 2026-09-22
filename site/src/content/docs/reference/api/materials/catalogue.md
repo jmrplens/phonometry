@@ -346,4 +346,4 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_POROUS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

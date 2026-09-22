@@ -80,7 +80,7 @@ integrated impulse response, Clause 6).
 
 ## DECAY_UNCERTAINTY_COEFFICIENTS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 DECAY_UNCERTAINTY_COEFFICIENTS = {20.0: (0.88, 1.9), 30.0: (0.55, 1.52)}
@@ -150,7 +150,7 @@ those two figures sit against the exact IEC 61260 band edges.
 
 ## FILTER_BANDWIDTH_FRACTION
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 FILTER_BANDWIDTH_FRACTION = {1: 0.71, 3: 0.23}

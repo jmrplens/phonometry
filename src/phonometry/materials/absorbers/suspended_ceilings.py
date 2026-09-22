@@ -48,6 +48,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -62,6 +63,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
@@ -150,14 +153,16 @@ _SATURATION_PERCENT = 100.0
 #: Table 1: the reproducibility uncertainty of the sound absorption
 #: coefficient, by nominal octave centre frequency in hertz. The 125 Hz row
 #: carries its own footnote: that band is not part of the weighted rating.
-CEILING_UNCERTAINTY: dict[float, float] = {
-    125.0: 0.23,
-    250.0: 0.23,
-    500.0: 0.11,
-    1000.0: 0.10,
-    2000.0: 0.10,
-    4000.0: 0.13,
-}
+CEILING_UNCERTAINTY: Mapping[float, float] = MappingProxyType(
+    {
+        125.0: 0.23,
+        250.0: 0.23,
+        500.0: 0.11,
+        1000.0: 0.10,
+        2000.0: 0.10,
+        4000.0: 0.13,
+    }
+)
 
 #: Table 1, last row: the same for the weighted sound absorption coefficient,
 #: computed without rounding anywhere in the EN ISO 11654 chain.
@@ -169,12 +174,14 @@ EN16487_COVERAGE_FACTOR: float = 2.8
 
 #: 4.1.1.2 and 4.1.2.1: the mountings this test code admits, by the letter
 #: EN ISO 354 Annex B gives them.
-MOUNTING_TYPES: dict[str, str] = {
-    "A": "attached directly against a hard surface, with no air space",
-    "B": "glued to a hard surface with a 3 mm air space kept by corner shims",
-    "E": "suspended from a hard surface with an air space behind it",
-    "J": "a discrete absorber, freely suspended or standing",
-}
+MOUNTING_TYPES: Mapping[str, str] = MappingProxyType(
+    {
+        "A": "attached directly against a hard surface, with no air space",
+        "B": "glued to a hard surface with a 3 mm air space kept by corner shims",
+        "E": "suspended from a hard surface with an air space behind it",
+        "J": "a discrete absorber, freely suspended or standing",
+    }
+)
 
 
 @dataclass(frozen=True)

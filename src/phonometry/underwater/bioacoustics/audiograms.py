@@ -39,6 +39,7 @@ sirenians, ``PCW``/``OCW`` phocid and otariid carnivores in water and
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -46,6 +47,8 @@ import numpy as np
 from ..._internal.validation import require_ranks, require_same_length
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -125,15 +128,17 @@ AUDIOGRAM_GROUPS: tuple[str, ...] = tuple(_AUDIOGRAM_ORIGINAL)
 #: Southall et al. (2019) Table 4, PDF page 24 (printed p. 148): frequency of
 #: best hearing
 #: ``f0`` (kHz) from the original and from the normalised fits.
-BEST_HEARING_FREQUENCY_KHZ: dict[str, tuple[float, float]] = {
-    "HF": (55.0, 58.0),
-    "VHF": (105.0, 105.0),
-    "SI": (16.0, 12.0),
-    "PCW": (8.6, 13.0),
-    "OCW": (12.0, 10.0),
-    "PCA": (2.3, 2.3),
-    "OCA": (10.0, 10.0),
-}
+BEST_HEARING_FREQUENCY_KHZ: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "HF": (55.0, 58.0),
+        "VHF": (105.0, 105.0),
+        "SI": (16.0, 12.0),
+        "PCW": (8.6, 13.0),
+        "OCW": (12.0, 10.0),
+        "PCA": (2.3, 2.3),
+        "OCA": (10.0, 10.0),
+    }
+)
 
 #: Validity range of Ainslie's orca audiogram, Equation (11.159), in kHz.
 ORCA_AUDIOGRAM_RANGE_KHZ = (0.5, 80.0)

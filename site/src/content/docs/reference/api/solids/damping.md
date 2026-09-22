@@ -257,4 +257,4 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_DAMPING
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

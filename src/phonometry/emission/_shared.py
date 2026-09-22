@@ -53,13 +53,17 @@ import another method to get them.
 from __future__ import annotations
 
 import warnings
-from typing import Literal, cast
+from types import MappingProxyType
+from typing import TYPE_CHECKING, Literal, cast
 
 import numpy as np
 
 from .._internal.levels_math import energy_mean
 from .._internal.validation import require_positive
 from .._internal.warnings import PhonometryWarning
+
+if TYPE_CHECKING:
+    from collections.abc import Mapping
 
 _S0 = 1.0  #: Reference area, in square metres (ISO 3744, 8.2.5).
 #: Reference static pressure of the ISO 3740 family, in kilopascals
@@ -213,7 +217,7 @@ def _check_grade(grade: str) -> Grade:
     if grade not in ("engineering", "survey"):
         msg = "'grade' must be 'engineering' or 'survey'."
         raise ValueError(msg)
-    return cast(Grade, grade)
+    return cast("Grade", grade)
 
 
 def _single_event_mean(
@@ -335,22 +339,24 @@ def _background_exposure(
 #: says "rectangular" and "on part of ceiling or walls" where it says "with a
 #: small amount of sound-absorbing material on ceiling or walls". ISO 11202:2010
 #: prints no such table at all; its Annex A refers ``alpha`` out to ISO 3746.
-ROOM_ABSORPTION_ESTIMATES: dict[float, str] = {
-    0.05: (
-        "Nearly empty room with smooth hard walls made of concrete, brick, "
-        "plaster or tile"
-    ),
-    0.1: "Partly empty room; room with smooth walls",
-    0.15: "Room with furniture; rectangular machinery room; rectangular industrial room",
-    0.2: (
-        "Irregularly shaped room with furniture; irregularly shaped machinery "
-        "room or industrial room"
-    ),
-    0.25: (
-        "Room with upholstered furniture; machinery or industrial room with a "
-        "small amount of sound-absorbing material on ceiling or walls "
-        "(e.g. partially absorptive ceiling)"
-    ),
-    0.35: "Room with sound-absorbing materials on both ceiling and walls",
-    0.5: "Room with large amounts of sound-absorbing materials on ceiling and walls",
-}
+ROOM_ABSORPTION_ESTIMATES: Mapping[float, str] = MappingProxyType(
+    {
+        0.05: (
+            "Nearly empty room with smooth hard walls made of concrete, brick, "
+            "plaster or tile"
+        ),
+        0.1: "Partly empty room; room with smooth walls",
+        0.15: "Room with furniture; rectangular machinery room; rectangular industrial room",
+        0.2: (
+            "Irregularly shaped room with furniture; irregularly shaped machinery "
+            "room or industrial room"
+        ),
+        0.25: (
+            "Room with upholstered furniture; machinery or industrial room with a "
+            "small amount of sound-absorbing material on ceiling or walls "
+            "(e.g. partially absorptive ceiling)"
+        ),
+        0.35: "Room with sound-absorbing materials on both ceiling and walls",
+        0.5: "Room with large amounts of sound-absorbing materials on ceiling and walls",
+    }
+)

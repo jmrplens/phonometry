@@ -68,6 +68,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -96,6 +97,8 @@ from ._insulation_shared import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -212,7 +215,9 @@ MAX_SOURCE_POSITIONS_IN_SITU: int = 6
 #: may differ, by octave centre frequency in hertz. Bands above those listed
 #: take :data:`DEFAULT_BAND_FLATNESS_LIMIT_DB`; the standard prints no limit
 #: below 125 Hz.
-BAND_FLATNESS_LIMIT_DB: dict[float, float] = {125.0: 6.0, 250.0: 5.0}
+BAND_FLATNESS_LIMIT_DB: Mapping[float, float] = MappingProxyType(
+    {125.0: 6.0, 250.0: 5.0}
+)
 
 #: 6.4 and 7.2.1: the limit in every octave above 250 Hz.
 DEFAULT_BAND_FLATNESS_LIMIT_DB: float = 4.0

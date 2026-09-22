@@ -466,7 +466,7 @@ Draw the band levels the protector leaves, where there are any.
 
 ## PROTECTION_PERFORMANCES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 PROTECTION_PERFORMANCES = {50: 0.0, 75: 0.67, 80: 0.84, 84: 1.0, 90: 1.28, 95: 1.64, 98: 2.0}

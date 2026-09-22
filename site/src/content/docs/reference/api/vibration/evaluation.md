@@ -266,7 +266,7 @@ by 10 dB per decade, which on an amplitude is an exponent of one half.
 
 ## GEAR_UNIT_CLASSES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 GEAR_UNIT_CLASSES = {('I', 'a'): GearUnitRatings(displacement=31.5, velocity=3.15, acceleration=50.0), ('I', 'b_low'): GearUnitRatings(displacement=31.5, velocity=3.15, acceleration=None), ('I', 'b_high'): GearUnitRatings(displacement=50.0, velocity=5.0, acceleration=None), ('II', 'a'): GearUnitRatings(displacement=50.0, velocity=5.0, acceleration=80.0), ('II', 'b_low'): GearUnitRatings(displacement=50.0, velocity=5.0, acceleration=None), ('II', 'b_high'): GearUnitRatings(displacement=80.0, velocity=8.0, acceleration=None), ('III', 'a'): GearUnitRatings(displacement=80.0, velocity=8.0, acceleration=125.0), ('III', 'b_low'): GearUnitRatings(displacement=80.0, velocity=8.0, acceleration=None), ('III', 'b_high'): GearUnitRatings(displacement=125.0, velocity=12.5, acceleration=None), ('IV', 'a'): GearUnitRatings(displacement=125.0, velocity=20.0, acceleration=125.0), ('IV', 'b_low'): GearUnitRatings(displacement=125.0, velocity=12.5, acceleration=None), ('IV', 'b_high'): GearUnitRatings(displacement=200.0, velocity=20.0, acceleration=None)}
@@ -304,7 +304,7 @@ finds its row; nothing a reader would call a different rating does.
 
 ## GEAR_UNIT_ZONES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 GEAR_UNIT_ZONES = {'displacement': {31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0), 50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0), 80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0), 125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0), 200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0)}, 'velocity': {3.15: ZoneBoundaries(a_b=2.0, b_c=3.15, c_d=5.0), 5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0), 8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5), 12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0), 20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5)}, 'acceleration': {5.0: ZoneBoundaries(a_b=3.15, b_c=5.0, c_d=8.0), 8.0: ZoneBoundaries(a_b=5.0, b_c=8.0, c_d=12.5), 12.5: ZoneBoundaries(a_b=8.0, b_c=12.5, c_d=20.0), 20.0: ZoneBoundaries(a_b=12.5, b_c=20.0, c_d=31.5), 31.5: ZoneBoundaries(a_b=20.0, b_c=31.5, c_d=50.0), 50.0: ZoneBoundaries(a_b=31.5, b_c=50.0, c_d=80.0), 80.0: ZoneBoundaries(a_b=50.0, b_c=80.0, c_d=125.0), 125.0: ZoneBoundaries(a_b=80.0, b_c=125.0, c_d=200.0), 200.0: ZoneBoundaries(a_b=125.0, b_c=200.0, c_d=315.0)}}
@@ -383,7 +383,7 @@ reason the tables state each class twice.
 
 ## INDUSTRIAL_MACHINE_ZONES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 INDUSTRIAL_MACHINE_ZONES = {('group_1', 'rigid'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=29.0, b_c=57.0, c_d=90.0), velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1)), ('group_1', 'flexible'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=45.0, b_c=90.0, c_d=140.0), velocity_mm_s=ZoneBoundaries(a_b=3.5, b_c=7.1, c_d=11.0)), ('group_2', 'rigid'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=22.0, b_c=45.0, c_d=71.0), velocity_mm_s=ZoneBoundaries(a_b=1.4, b_c=2.8, c_d=4.5)), ('group_2', 'flexible'): MachineZoneLimits(displacement_um=ZoneBoundaries(a_b=37.0, b_c=71.0, c_d=113.0), velocity_mm_s=ZoneBoundaries(a_b=2.3, b_c=4.5, c_d=7.1))}
@@ -496,7 +496,7 @@ TYPICAL_BOUNDARY_LADDER_MM_S = (0.28, 0.45, 0.71, 1.12, 1.8, 2.8, 4.5, 7.1, 9.3,
 
 ## TYPICAL_ZONE_BOUNDARY_RANGES_MM_S
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 TYPICAL_ZONE_BOUNDARY_RANGES_MM_S = {'A/B': (0.71, 4.5), 'B/C': (1.8, 9.3), 'C/D': (4.5, 14.7)}
@@ -600,7 +600,7 @@ vibration moves by 5,2.
 
 ## ZONE_LIMIT_FACTORS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 ZONE_LIMIT_FACTORS = {'A': 1.0, 'B': 2.56, 'C': 6.4}

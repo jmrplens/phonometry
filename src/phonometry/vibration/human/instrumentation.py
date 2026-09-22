@@ -58,6 +58,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -77,6 +78,8 @@ from .exposure import (
 )
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -103,15 +106,19 @@ _TRANSITION_EXPONENTS: dict[str, tuple[int, int, int, int]] = {
 }
 
 #: Table 4 as frequencies in hertz, ``(ft1, ft2, ft3, ft4)`` per weighting.
-TRANSITION_FREQUENCIES_HZ: dict[str, tuple[float, float, float, float]] = {
-    name: (
-        10.0 ** (exponents[0] / 10.0),
-        10.0 ** (exponents[1] / 10.0),
-        10.0 ** (exponents[2] / 10.0),
-        10.0 ** (exponents[3] / 10.0),
+TRANSITION_FREQUENCIES_HZ: Mapping[str, tuple[float, float, float, float]] = (
+    MappingProxyType(
+        {
+            name: (
+                10.0 ** (exponents[0] / 10.0),
+                10.0 ** (exponents[1] / 10.0),
+                10.0 ** (exponents[2] / 10.0),
+                10.0 ** (exponents[3] / 10.0),
+            )
+            for name, exponents in _TRANSITION_EXPONENTS.items()
+        }
     )
-    for name, exponents in _TRANSITION_EXPONENTS.items()
-}
+)
 
 #: The lower limit the standard writes as ``−100 %``: below the first
 #: transition frequency and above the last one, no response is too small.
@@ -142,25 +149,27 @@ _REFERENCE_RAD_S: dict[str, float] = {
     "Wk": 100.0,
     "Wm": 100.0,
 }
-REFERENCE_FREQUENCY_HZ: dict[str, float] = {
-    name: omega / (2.0 * math.pi) for name, omega in _REFERENCE_RAD_S.items()
-}
+REFERENCE_FREQUENCY_HZ: Mapping[str, float] = MappingProxyType(
+    {name: omega / (2.0 * math.pi) for name, omega in _REFERENCE_RAD_S.items()}
+)
 
 #: Table 1: the r.m.s. acceleration the reference condition is defined at, in
 #: metres per second squared. The weightings are not unity there, so the
 #: indication a conforming meter shows is this value times the weighting
 #: factor at the reference frequency.
-REFERENCE_ACCELERATION_M_S2: dict[str, float] = {
-    "Wb": 1.0,
-    "Wc": 1.0,
-    "Wd": 1.0,
-    "We": 1.0,
-    "Wf": 0.1,
-    "Wh": 10.0,
-    "Wj": 1.0,
-    "Wk": 1.0,
-    "Wm": 1.0,
-}
+REFERENCE_ACCELERATION_M_S2: Mapping[str, float] = MappingProxyType(
+    {
+        "Wb": 1.0,
+        "Wc": 1.0,
+        "Wd": 1.0,
+        "We": 1.0,
+        "Wf": 0.1,
+        "Wh": 10.0,
+        "Wj": 1.0,
+        "Wk": 1.0,
+        "Wm": 1.0,
+    }
+)
 
 #: Table 1: the nominal frequency range of each weighting, in hertz, as the
 #: ``(lower, upper)`` pair the column prints. These are the nominal values
@@ -173,17 +182,19 @@ REFERENCE_ACCELERATION_M_S2: dict[str, float] = {
 #: 8 Hz that opens the hand-transmitted range is the band centred on
 #: ``10**(9/10) = 7,943`` Hz, which is why the printed lower bound is 8 and
 #: the first Annex B row inside it is not.
-NOMINAL_FREQUENCY_RANGE_HZ: dict[str, tuple[float, float]] = {
-    "Wb": (0.5, 80.0),
-    "Wc": (0.5, 80.0),
-    "Wd": (0.5, 80.0),
-    "We": (0.5, 80.0),
-    "Wf": (0.1, 0.5),
-    "Wh": (8.0, 1000.0),
-    "Wj": (0.5, 80.0),
-    "Wk": (0.5, 80.0),
-    "Wm": (1.0, 80.0),
-}
+NOMINAL_FREQUENCY_RANGE_HZ: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "Wb": (0.5, 80.0),
+        "Wc": (0.5, 80.0),
+        "Wd": (0.5, 80.0),
+        "We": (0.5, 80.0),
+        "Wf": (0.1, 0.5),
+        "Wh": (8.0, 1000.0),
+        "Wj": (0.5, 80.0),
+        "Wk": (0.5, 80.0),
+        "Wm": (1.0, 80.0),
+    }
+)
 
 #: The coverage factor the expanded uncertainty of a conformance measurement
 #: is calculated with. 13.1 (folio 42) and 14.1 (folio 48) both print
@@ -209,23 +220,25 @@ ISO8041_COVERAGE_FACTOR = 2.0
 #: prints are ``0,5 °C`` and ``10 %`` relative humidity, which are
 #: uncertainties of the environmental conditions rather than of a deviation
 #: from a design goal.
-MAX_EXPANDED_UNCERTAINTY_PERCENT: dict[str, float] = {
-    "12.7": 2.0,  # folio 29, indication at the reference frequency
-    "12.10.1": 2.0,  # folio 31, electrical amplitude linearity
-    "12.10.2": 3.0,  # folio 32, mechanical linearity, reference range
-    "12.10.2 additional ranges": 4.0,  # folio 33, the other ranges
-    "12.11.2": 4.5,  # folio 34, mechanical frequency response
-    "12.11.3": 3.0,  # folio 35, electrical frequency response
-    "12.11.4": 5.0,  # folio 35, the overall response that combines them
-    "12.13": 3.0,  # folio 36, signal-burst response
-    "12.14": 2.0,  # folio 36, overload indication
-    "12.18": 0.01,  # folio 37, timing facilities
-    "13.9": 2.0,  # folio 44, indication, one-off instrument
-    "13.11": 4.0,  # folio 46, linearity and frequency response, one-off
-    "13.14": 2.0,  # folio 47, overload indication, one-off
-    "13.15": 0.01,  # folio 47, timing facilities, one-off
-    "14.9": 5.0,  # folio 51, linearity and frequency response, periodic
-}
+MAX_EXPANDED_UNCERTAINTY_PERCENT: Mapping[str, float] = MappingProxyType(
+    {
+        "12.7": 2.0,  # folio 29, indication at the reference frequency
+        "12.10.1": 2.0,  # folio 31, electrical amplitude linearity
+        "12.10.2": 3.0,  # folio 32, mechanical linearity, reference range
+        "12.10.2 additional ranges": 4.0,  # folio 33, the other ranges
+        "12.11.2": 4.5,  # folio 34, mechanical frequency response
+        "12.11.3": 3.0,  # folio 35, electrical frequency response
+        "12.11.4": 5.0,  # folio 35, the overall response that combines them
+        "12.13": 3.0,  # folio 36, signal-burst response
+        "12.14": 2.0,  # folio 36, overload indication
+        "12.18": 0.01,  # folio 37, timing facilities
+        "13.9": 2.0,  # folio 44, indication, one-off instrument
+        "13.11": 4.0,  # folio 46, linearity and frequency response, one-off
+        "13.14": 2.0,  # folio 47, overload indication, one-off
+        "13.15": 0.01,  # folio 47, timing facilities, one-off
+        "14.9": 5.0,  # folio 51, linearity and frequency response, periodic
+    }
+)
 
 #: Table 2: how far the indication itself may sit from the true value at the
 #: reference frequency, in per cent. The low-frequency whole-body case (Wf)
@@ -1032,10 +1045,14 @@ _DECAY_FRACTION = 0.1
 #: value takes to fall to 10 % of its initial value after a steady reference
 #: sinusoid is suddenly shut off, in seconds. One row per printed time
 #: constant, ``(integration time, printed time, printed tolerance)``.
-RUNNING_RMS_DECAY_TIME_S: dict[str, tuple[tuple[float, float, float], ...]] = {
-    "linear": ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2)),
-    "exponential": ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0)),
-}
+RUNNING_RMS_DECAY_TIME_S: Mapping[str, tuple[tuple[float, float, float], ...]] = (
+    MappingProxyType(
+        {
+            "linear": ((0.125, 0.124, 0.005), (1.0, 0.99, 0.05), (8.0, 7.92, 0.2)),
+            "exponential": ((0.125, 0.58, 0.03), (1.0, 4.61, 0.25), (8.0, 36.8, 2.0)),
+        }
+    )
+)
 
 #: Table 11 (folio 21): the equivalent decay rate of the exponential average,
 #: in decibels per second, as ``(integration time, lower, upper)``. Table 10

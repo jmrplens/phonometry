@@ -156,7 +156,7 @@ coefficients, also the model/reality combination of Formula (A.2).
 
 ## COVERAGE_FACTORS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ```python
 COVERAGE_FACTORS = {(0.68, False): 1.0, (0.8, False): 1.28, (0.9, False): 1.65, (0.95, False): 1.96, (0.99, False): 2.58, (0.999, False): 3.29, (0.84, True): 1.0, (0.9, True): 1.28, (0.95, True): 1.65, (0.975, True): 1.96, (0.995, True): 2.58, (0.9995, True): 3.29}

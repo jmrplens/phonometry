@@ -237,7 +237,7 @@ IMPULSE_REPEATS = 3
 
 ## ISO11821_BAND_RANGE_HZ
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 ISO11821_BAND_RANGE_HZ = {3: (100.0, 5000.0), 1: (125.0, 4000.0)}

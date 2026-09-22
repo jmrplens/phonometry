@@ -223,4 +223,4 @@ that is not a number. Each of those is a different answer.
 
 ## PUBLISHED_PLATEAU_DATA
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

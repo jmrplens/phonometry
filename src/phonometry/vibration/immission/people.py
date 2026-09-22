@@ -77,6 +77,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -95,6 +96,8 @@ from .vibration_meter import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -137,14 +140,18 @@ __all__ = [
 
 #: The assessment period :math:`T_r` of 3.7.3, in seconds: 16 h by day (6:00
 #: to 22:00) and 8 h by night.
-ASSESSMENT_PERIOD_S: dict[str, float] = {"day": 16.0 * 3600.0, "night": 8.0 * 3600.0}
+ASSESSMENT_PERIOD_S: Mapping[str, float] = MappingProxyType(
+    {"day": 16.0 * 3600.0, "night": 8.0 * 3600.0}
+)
 
 #: :math:`N_r` of Annex A: the 30 s clock intervals in an assessment period,
 #: 1920 by day and 960 by night.
-ASSESSMENT_TAKT_COUNT: dict[str, int] = {
-    period: round(seconds / TAKT_DURATION_S)
-    for period, seconds in ASSESSMENT_PERIOD_S.items()
-}
+ASSESSMENT_TAKT_COUNT: Mapping[str, int] = MappingProxyType(
+    {
+        period: round(seconds / TAKT_DURATION_S)
+        for period, seconds in ASSESSMENT_PERIOD_S.items()
+    }
+)
 
 #: The rest hours of the day (3.7.4), in seconds: 6:00 to 7:00 and 19:00 to
 #: 22:00 on working days, four hours; on Sundays and holidays the whole day.
@@ -184,10 +191,12 @@ URBAN_RAILWAY_FACTOR: float = 1.5
 #: area, or above 0,3 on an underground line in the areas of rows 3 to 5, is
 #: a reason to look into the cause (flat spots on wheels, for one) and to put
 #: it right, not a verdict. The value still counts in :math:`KB_{FTr}`.
-RAILWAY_NIGHT_INVESTIGATION_KB: dict[str, float] = {
-    "surface": 0.6,
-    "underground": 0.3,
-}
+RAILWAY_NIGHT_INVESTIGATION_KB: Mapping[str, float] = MappingProxyType(
+    {
+        "surface": 0.6,
+        "underground": 0.3,
+    }
+)
 
 #: E DIN 4150-2:2023-08, 6.5.2: by night a road is not judged on :math:`A_o`,
 #: whose rare exceedance does not fail the requirement; a single clock
@@ -237,47 +246,63 @@ class GuideValues:
 #: (neither mainly commercial nor mainly dwellings: core, mixed and village
 #: areas), ``"residential"`` row 4 (mainly or only dwellings, small
 #: settlements) and ``"sensitive"`` row 5 (hospitals, spas and the like).
-GUIDE_VALUES: dict[str, dict[str, GuideValues]] = {
-    "industrial": {
-        "day": GuideValues(0.4, 6.0, 0.2),
-        "night": GuideValues(0.3, 0.6, 0.15, time_of_day="night"),
-    },
-    "commercial": {
-        "day": GuideValues(0.3, 6.0, 0.15),
-        "night": GuideValues(0.2, 0.4, 0.1, time_of_day="night"),
-    },
-    "mixed": {
-        "day": GuideValues(0.2, 5.0, 0.1),
-        "night": GuideValues(0.15, 0.3, 0.07, time_of_day="night"),
-    },
-    "residential": {
-        "day": GuideValues(0.15, 3.0, 0.07),
-        "night": GuideValues(0.1, 0.2, 0.05, time_of_day="night"),
-    },
-    "sensitive": {
-        "day": GuideValues(0.1, 3.0, 0.05),
-        "night": GuideValues(0.1, 0.15, 0.05, time_of_day="night"),
-    },
-}
+GUIDE_VALUES: Mapping[str, Mapping[str, GuideValues]] = MappingProxyType(
+    {
+        "industrial": MappingProxyType(
+            {
+                "day": GuideValues(0.4, 6.0, 0.2),
+                "night": GuideValues(0.3, 0.6, 0.15, time_of_day="night"),
+            }
+        ),
+        "commercial": MappingProxyType(
+            {
+                "day": GuideValues(0.3, 6.0, 0.15),
+                "night": GuideValues(0.2, 0.4, 0.1, time_of_day="night"),
+            }
+        ),
+        "mixed": MappingProxyType(
+            {
+                "day": GuideValues(0.2, 5.0, 0.1),
+                "night": GuideValues(0.15, 0.3, 0.07, time_of_day="night"),
+            }
+        ),
+        "residential": MappingProxyType(
+            {
+                "day": GuideValues(0.15, 3.0, 0.07),
+                "night": GuideValues(0.1, 0.2, 0.05, time_of_day="night"),
+            }
+        ),
+        "sensitive": MappingProxyType(
+            {
+                "day": GuideValues(0.1, 3.0, 0.05),
+                "night": GuideValues(0.1, 0.15, 0.05, time_of_day="night"),
+            }
+        ),
+    }
+)
 
 #: Table 1 of E DIN 4150-2:2023-08 (printed page 14): the same thirty cells
 #: as :data:`GUIDE_VALUES` but one, the night :math:`A_u` of row 3, the mixed
 #: area, down from 0,15 to 0,1; the row now names urban areas too.
-GUIDE_VALUES_2023: dict[str, dict[str, GuideValues]] = {
-    area: {
-        "day": GuideValues(
-            row["day"].a_u, row["day"].a_o, row["day"].a_r, "day", "2023"
-        ),
-        "night": GuideValues(
-            0.1 if area == "mixed" else row["night"].a_u,
-            row["night"].a_o,
-            row["night"].a_r,
-            "night",
-            "2023",
-        ),
+GUIDE_VALUES_2023: Mapping[str, Mapping[str, GuideValues]] = MappingProxyType(
+    {
+        area: MappingProxyType(
+            {
+                "day": GuideValues(
+                    row["day"].a_u, row["day"].a_o, row["day"].a_r, "day", "2023"
+                ),
+                "night": GuideValues(
+                    0.1 if area == "mixed" else row["night"].a_u,
+                    row["night"].a_o,
+                    row["night"].a_r,
+                    "night",
+                    "2023",
+                ),
+            }
+        )
+        for area, row in GUIDE_VALUES.items()
     }
-    for area, row in GUIDE_VALUES.items()
-}
+)
 
 #: The three stages of 6.5.4.2 a construction site may be held to: below
 #: stage I no considerable annoyance is expected; below stage II none either
@@ -291,35 +316,45 @@ CONSTRUCTION_STAGES: tuple[str, ...] = ("I", "II", "III")
 #: to 6 days are interpolated (Figure 3), and beyond 78 days the standard
 #: makes no statement. :math:`A_o` is 5 in every cell, or 6 in a commercial
 #: or industrial area.
-CONSTRUCTION_GUIDE_VALUES: dict[str, dict[int, GuideValues]] = {
-    "I": {
-        1: GuideValues(0.8, 5.0, 0.4),
-        26: GuideValues(0.4, 5.0, 0.3),
-        78: GuideValues(0.3, 5.0, 0.2),
-    },
-    "II": {
-        1: GuideValues(1.2, 5.0, 0.8),
-        26: GuideValues(0.8, 5.0, 0.6),
-        78: GuideValues(0.6, 5.0, 0.4),
-    },
-    "III": {
-        1: GuideValues(1.6, 5.0, 1.2),
-        26: GuideValues(1.2, 5.0, 1.0),
-        78: GuideValues(0.8, 5.0, 0.6),
-    },
-}
+CONSTRUCTION_GUIDE_VALUES: Mapping[str, Mapping[int, GuideValues]] = MappingProxyType(
+    {
+        "I": MappingProxyType(
+            {
+                1: GuideValues(0.8, 5.0, 0.4),
+                26: GuideValues(0.4, 5.0, 0.3),
+                78: GuideValues(0.3, 5.0, 0.2),
+            }
+        ),
+        "II": MappingProxyType(
+            {
+                1: GuideValues(1.2, 5.0, 0.8),
+                26: GuideValues(0.8, 5.0, 0.6),
+                78: GuideValues(0.6, 5.0, 0.4),
+            }
+        ),
+        "III": MappingProxyType(
+            {
+                1: GuideValues(1.6, 5.0, 1.2),
+                26: GuideValues(1.2, 5.0, 1.0),
+                78: GuideValues(0.8, 5.0, 0.6),
+            }
+        ),
+    }
+)
 
 #: Table 3 (printed page 10): the empirical factor :math:`c_F` of Formula (7)
 #: by kind of vibration, rows 1 to 4 with their a) and b). Mean values from
 #: experience, the table says, and about 15 % either way.
-PEAK_TO_KB_FACTORS: dict[str, float] = {
-    "harmonic": 0.9,
-    "harmonic_distorted": 0.8,
-    "stochastic_resonant": 0.8,
-    "stochastic": 0.7,
-    "single_event_resonant": 0.8,
-    "single_event": 0.6,
-}
+PEAK_TO_KB_FACTORS: Mapping[str, float] = MappingProxyType(
+    {
+        "harmonic": 0.9,
+        "harmonic_distorted": 0.8,
+        "stochastic_resonant": 0.8,
+        "stochastic": 0.7,
+        "single_event_resonant": 0.8,
+        "single_event": 0.6,
+    }
+)
 
 _PERIODS = tuple(ASSESSMENT_PERIOD_S)
 _AREAS = tuple(GUIDE_VALUES)

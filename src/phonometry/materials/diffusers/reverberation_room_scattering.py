@@ -28,6 +28,7 @@ import math
 import warnings
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -120,26 +121,28 @@ BASE_PLATE_BANDS: tuple[int, ...] = (
 #: Maximum admissible scattering coefficient of the base plate alone
 #: (ISO 17497-1:2004+A1:2014, Table 1, Clause 6.2), keyed by equivalent
 #: full-scale one-third-octave centre frequency in Hz.
-BASE_PLATE_MAX_SCATTERING: dict[int, float] = {
-    100: 0.05,
-    125: 0.05,
-    160: 0.05,
-    200: 0.05,
-    250: 0.05,
-    315: 0.05,
-    400: 0.05,
-    500: 0.05,
-    630: 0.10,
-    800: 0.10,
-    1000: 0.10,
-    1250: 0.15,
-    1600: 0.15,
-    2000: 0.15,
-    2500: 0.20,
-    3150: 0.20,
-    4000: 0.20,
-    5000: 0.25,
-}
+BASE_PLATE_MAX_SCATTERING: Mapping[int, float] = MappingProxyType(
+    {
+        100: 0.05,
+        125: 0.05,
+        160: 0.05,
+        200: 0.05,
+        250: 0.05,
+        315: 0.05,
+        400: 0.05,
+        500: 0.05,
+        630: 0.10,
+        800: 0.10,
+        1000: 0.10,
+        1250: 0.15,
+        1600: 0.15,
+        2000: 0.15,
+        2500: 0.20,
+        3150: 0.20,
+        4000: 0.20,
+        5000: 0.25,
+    }
+)
 
 
 class ScatteringDiffusionWarning(PhonometryWarning):

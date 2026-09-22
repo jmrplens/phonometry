@@ -55,6 +55,7 @@ and the rows run the standard's own 960 and its own inputs.
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -74,6 +75,8 @@ from .people import (
 from .vibration_meter import TAKT_SUPPRESSION_THRESHOLD
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
@@ -113,20 +116,24 @@ TRAIN_KINDS: tuple[str, ...] = (
 #: ``"underground"``. E DIN 45672-3:2023-02 Table E.1 prints the same ten
 #: values. A people mover or any other very short vehicle with a short
 #: passage takes the tram row.
-TRAIN_WEIGHTING_FACTORS: dict[str, dict[str, float]] = {
-    "tram_metro": {"surface": 0.7, "underground": 1.0},
-    "s_bahn": {"surface": 0.8, "underground": 1.0},
-    "passenger": {"surface": 0.9, "underground": 1.0},
-    "freight": {"surface": 1.0, "underground": 1.0},
-    "freight_long": {"surface": 1.3, "underground": 1.3},
-}
+TRAIN_WEIGHTING_FACTORS: Mapping[str, Mapping[str, float]] = MappingProxyType(
+    {
+        "tram_metro": MappingProxyType({"surface": 0.7, "underground": 1.0}),
+        "s_bahn": MappingProxyType({"surface": 0.8, "underground": 1.0}),
+        "passenger": MappingProxyType({"surface": 0.9, "underground": 1.0}),
+        "freight": MappingProxyType({"surface": 1.0, "underground": 1.0}),
+        "freight_long": MappingProxyType({"surface": 1.3, "underground": 1.3}),
+    }
+)
 
 #: The upper guide value :math:`A_o` a line to be built new is held to at
 #: night (6.5.3.5): 0,6 on the surface in any area; underground, the night
 #: :math:`A_o` of Table 1 in an industrial or commercial area and 0,3 in a
 #: mixed, residential or sensitive one. The same values bound the planned
 #: case of an altered line (6.5.3.6 b)).
-RAILWAY_NEW_LINE_NIGHT_A_O: dict[str, float] = {"surface": 0.6, "underground": 0.3}
+RAILWAY_NEW_LINE_NIGHT_A_O: Mapping[str, float] = MappingProxyType(
+    {"surface": 0.6, "underground": 0.3}
+)
 
 #: The least increase of :math:`KB_{F\mathrm{max}}` or :math:`KB_{FTr}` that
 #: an altered or extended line may bring where a guide value is exceeded

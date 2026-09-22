@@ -680,7 +680,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ## MAX_SOURCE_DIRECTIVITY_DEVIATION_DB
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 MAX_SOURCE_DIRECTIVITY_DEVIATION_DB = {125.0: 1.0, 250.0: 1.0, 500.0: 1.0, 1000.0: 3.0, 2000.0: 5.0, 4000.0: 6.0}
@@ -799,7 +799,7 @@ pair means little for them.
 
 ## OCTAVE_PAIRS_HZ
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 OCTAVE_PAIRS_HZ = {'low': (125.0, 250.0), 'mid': (500.0, 1000.0), 'high': (2000.0, 4000.0)}
@@ -1304,7 +1304,7 @@ Requires matplotlib (`pip install phonometry[plot]`); returns the
 
 ## TABLE_A1
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ## TEST_REPORT_ITEMS
 

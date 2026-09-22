@@ -388,7 +388,7 @@ side is not part of what is measured.
 
 ## INSTALLATION_CASES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ## InstallationCase
 
@@ -434,7 +434,7 @@ ISO11820_AMBIENT_PRESSURE_PA = 100000.0
 
 ## ISO11820_BACKGROUND_CORRECTIONS_DB
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 ISO11820_BACKGROUND_CORRECTIONS_DB = {3: 3.0, 4: 2.0, 5: 2.0, 6: 1.0, 7: 1.0, 8: 1.0, 9: 0.5, 10: 0.5}

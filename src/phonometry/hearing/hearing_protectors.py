@@ -56,12 +56,13 @@ Clause, formula and table numbers refer to ISO 4869-2:2018(E).
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from collections.abc import Sequence
+    from collections.abc import Mapping, Sequence
 
     from matplotlib.axes import Axes
 
@@ -83,15 +84,17 @@ __all__ = [
 #: tabulates, keyed by the performance ``x`` in per cent. ``alpha`` is the
 #: inverse of the standard normal cumulative distribution at ``x``, so a
 #: larger performance subtracts more of the spread.
-PROTECTION_PERFORMANCES: dict[int, float] = {
-    50: 0.00,
-    75: 0.67,
-    80: 0.84,
-    84: 1.00,
-    90: 1.28,
-    95: 1.64,
-    98: 2.00,
-}
+PROTECTION_PERFORMANCES: Mapping[int, float] = MappingProxyType(
+    {
+        50: 0.00,
+        75: 0.67,
+        80: 0.84,
+        84: 1.00,
+        90: 1.28,
+        95: 1.64,
+        98: 2.00,
+    }
+)
 
 #: The eight octave bands of Formula (2), in hertz. ``f(1) = 63`` Hz through
 #: ``f(8) = 8000`` Hz; the reference spectra of Tables 2 and 3 start at

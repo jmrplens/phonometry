@@ -38,6 +38,7 @@ from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
 
+from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -59,34 +60,38 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 #: Octave-band centre frequencies, in hertz (Table 1 / Table D.1).
-OCTAVE_BANDS: np.ndarray = np.array(
-    [16.0, 31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
-    dtype=np.float64,
+OCTAVE_BANDS: np.ndarray = read_only(
+    np.array(
+        [16.0, 31.5, 63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0],
+        dtype=np.float64,
+    )
 )
 
 #: NC curve designations (value at 1000 Hz), Table 1.
-NC_INDICES: np.ndarray = np.array(
-    [15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70], dtype=np.float64
+NC_INDICES: np.ndarray = read_only(
+    np.array([15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70], dtype=np.float64)
 )
 
 #: NC curve octave-band sound pressure levels, in dB (Table 1), one row per
 #: entry of :data:`NC_INDICES`, columns aligned with :data:`OCTAVE_BANDS`.
-NC_CURVES: np.ndarray = np.array(
-    [
-        [78, 61, 47, 36, 28, 22, 18, 14, 12, 11],  # NC-15
-        [79, 63, 50, 40, 33, 26, 22, 20, 17, 16],  # NC-20
-        [80, 65, 54, 44, 37, 31, 27, 24, 22, 22],  # NC-25
-        [81, 68, 57, 48, 41, 35, 32, 29, 28, 27],  # NC-30
-        [82, 71, 60, 52, 45, 40, 36, 34, 33, 32],  # NC-35
-        [84, 74, 64, 56, 50, 44, 41, 39, 38, 37],  # NC-40
-        [85, 76, 67, 60, 54, 49, 46, 44, 43, 42],  # NC-45
-        [87, 79, 71, 64, 58, 54, 51, 49, 48, 47],  # NC-50
-        [89, 82, 74, 67, 62, 58, 56, 54, 53, 52],  # NC-55
-        [90, 85, 77, 71, 66, 63, 60, 59, 58, 57],  # NC-60
-        [90, 88, 80, 75, 71, 68, 65, 64, 63, 62],  # NC-65
-        [90, 90, 84, 79, 75, 72, 71, 70, 68, 68],  # NC-70
-    ],
-    dtype=np.float64,
+NC_CURVES: np.ndarray = read_only(
+    np.array(
+        [
+            [78, 61, 47, 36, 28, 22, 18, 14, 12, 11],  # NC-15
+            [79, 63, 50, 40, 33, 26, 22, 20, 17, 16],  # NC-20
+            [80, 65, 54, 44, 37, 31, 27, 24, 22, 22],  # NC-25
+            [81, 68, 57, 48, 41, 35, 32, 29, 28, 27],  # NC-30
+            [82, 71, 60, 52, 45, 40, 36, 34, 33, 32],  # NC-35
+            [84, 74, 64, 56, 50, 44, 41, 39, 38, 37],  # NC-40
+            [85, 76, 67, 60, 54, 49, 46, 44, 43, 42],  # NC-45
+            [87, 79, 71, 64, 58, 54, 51, 49, 48, 47],  # NC-50
+            [89, 82, 74, 67, 62, 58, 56, 54, 53, 52],  # NC-55
+            [90, 85, 77, 71, 66, 63, 60, 59, 58, 57],  # NC-60
+            [90, 88, 80, 75, 71, 68, 65, 64, 63, 62],  # NC-65
+            [90, 90, 84, 79, 75, 72, 71, 70, 68, 68],  # NC-70
+        ],
+        dtype=np.float64,
+    )
 )
 
 #: Integer octave steps of each band relative to 1000 Hz (Annex D generation).

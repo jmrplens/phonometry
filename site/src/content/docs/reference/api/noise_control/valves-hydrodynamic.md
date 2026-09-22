@@ -69,7 +69,7 @@ areas, only the last stage is calculated at all.
 
 ## ACOUSTIC_POWER_RATIOS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 ACOUSTIC_POWER_RATIOS = {'globe parabolic plug': 0.25, 'globe 3 V-port plug': 0.25, 'globe 4 V-port plug': 0.25, 'globe 6 V-port plug': 0.25, 'globe 60 hole drilled cage': 0.25, 'globe 120 hole drilled cage': 0.25, 'butterfly swing-through': 0.5, 'butterfly fluted vane': 0.5, 'butterfly 60 deg flat disk': 0.5, 'eccentric rotary plug': 0.25, 'segmented ball 90 deg': 0.25, 'expander': 1.0}
@@ -132,7 +132,7 @@ $\eta_{cav}/(\eta_{turb}+\eta_{cav})$ alone.
 
 ## CAPACITY_SCALE_CONSTANTS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 CAPACITY_SCALE_CONSTANTS = {'Cv': 1.17, 'Kv': 1.0}
@@ -1098,7 +1098,7 @@ What one throttling stage of a multistage trim sees.
 
 ## STROUHAL_CONSTANTS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 STROUHAL_CONSTANTS = {'annex': 0.036, 'clause': 0.02}

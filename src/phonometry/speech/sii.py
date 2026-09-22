@@ -46,6 +46,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
     require_axis_count,
@@ -81,53 +82,57 @@ SII_METHODS: tuple[str, ...] = (
 # ---------------------------------------------------------------------------
 
 #: One-third-octave band centre frequencies, in hertz (18 bands, Table 3).
-BAND_CENTERS: np.ndarray = np.array(
-    [
-        160.0,
-        200.0,
-        250.0,
-        315.0,
-        400.0,
-        500.0,
-        630.0,
-        800.0,
-        1000.0,
-        1250.0,
-        1600.0,
-        2000.0,
-        2500.0,
-        3150.0,
-        4000.0,
-        5000.0,
-        6300.0,
-        8000.0,
-    ],
-    dtype=np.float64,
+BAND_CENTERS: np.ndarray = read_only(
+    np.array(
+        [
+            160.0,
+            200.0,
+            250.0,
+            315.0,
+            400.0,
+            500.0,
+            630.0,
+            800.0,
+            1000.0,
+            1250.0,
+            1600.0,
+            2000.0,
+            2500.0,
+            3150.0,
+            4000.0,
+            5000.0,
+            6300.0,
+            8000.0,
+        ],
+        dtype=np.float64,
+    )
 )
 
 #: Band-importance function ``Ii`` (Table 3, average speech material); sums to 1.
-BAND_IMPORTANCE: np.ndarray = np.array(
-    [
-        0.0083,
-        0.0095,
-        0.0150,
-        0.0289,
-        0.0440,
-        0.0578,
-        0.0653,
-        0.0711,
-        0.0818,
-        0.0844,
-        0.0882,
-        0.0898,
-        0.0868,
-        0.0844,
-        0.0771,
-        0.0527,
-        0.0364,
-        0.0185,
-    ],
-    dtype=np.float64,
+BAND_IMPORTANCE: np.ndarray = read_only(
+    np.array(
+        [
+            0.0083,
+            0.0095,
+            0.0150,
+            0.0289,
+            0.0440,
+            0.0578,
+            0.0653,
+            0.0711,
+            0.0818,
+            0.0844,
+            0.0882,
+            0.0898,
+            0.0868,
+            0.0844,
+            0.0771,
+            0.0527,
+            0.0364,
+            0.0185,
+        ],
+        dtype=np.float64,
+    )
 )
 
 #: Standard speech spectrum level ``Ui`` by vocal effort (Table 3), dB SPL.
@@ -234,28 +239,30 @@ _SPEECH_SPECTRA: dict[str, np.ndarray] = {
 }
 
 #: Reference internal noise spectrum level ``Xi`` (Table 3), dB SPL.
-REFERENCE_INTERNAL_NOISE: np.ndarray = np.array(
-    [
-        0.6,
-        -1.7,
-        -3.9,
-        -6.1,
-        -8.2,
-        -9.7,
-        -10.8,
-        -11.9,
-        -12.5,
-        -13.5,
-        -15.4,
-        -17.7,
-        -21.2,
-        -24.2,
-        -25.9,
-        -23.6,
-        -15.8,
-        -7.1,
-    ],
-    dtype=np.float64,
+REFERENCE_INTERNAL_NOISE: np.ndarray = read_only(
+    np.array(
+        [
+            0.6,
+            -1.7,
+            -3.9,
+            -6.1,
+            -8.2,
+            -9.7,
+            -10.8,
+            -11.9,
+            -12.5,
+            -13.5,
+            -15.4,
+            -17.7,
+            -21.2,
+            -24.2,
+            -25.9,
+            -23.6,
+            -15.8,
+            -7.1,
+        ],
+        dtype=np.float64,
+    )
 )
 
 VOCAL_EFFORTS: tuple[str, ...] = ("normal", "raised", "loud", "shout")

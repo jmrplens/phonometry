@@ -45,7 +45,7 @@ catalogue here.
 
 ## PUBLISHED_SOLID_NONLINEARITY
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## solid_nonlinearity_named
 

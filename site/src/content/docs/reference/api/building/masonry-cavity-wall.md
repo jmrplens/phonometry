@@ -129,7 +129,7 @@ area cancels and only the tie density `n` enters.
 
 ## WALL_TIE_STIFFNESS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 WALL_TIE_STIFFNESS = {'butterfly': (0.05, 1700000.0), 'double_triangle': (0.05, 16100000.0), 'vertical_twist': (0.05, 94000000.0), 'vertical_twist_100mm': (0.1, 43400000.0)}

@@ -61,6 +61,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -77,6 +78,8 @@ from .._internal.warnings import PhonometryWarning
 from .cabin_insulation import OPERATOR_SPHERE_RADIUS_M
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -128,10 +131,12 @@ DIRECTIVITY_CIRCLE_RADIUS_M: float = 1.5
 DIRECTIVITY_INDEX_LIMIT_DB: float = 8.0
 
 #: 5.2.2: the band range the measurement covers, by band fraction.
-ISO11821_BAND_RANGE_HZ: dict[int, tuple[float, float]] = {
-    3: (100.0, 5000.0),
-    1: (125.0, 4000.0),
-}
+ISO11821_BAND_RANGE_HZ: Mapping[int, tuple[float, float]] = MappingProxyType(
+    {
+        3: (100.0, 5000.0),
+        1: (125.0, 4000.0),
+    }
+)
 
 #: 5.5.2 and the key to Figure 2: the height a microphone stands at where no
 #: operator height is specified, in metres, and its tolerance.

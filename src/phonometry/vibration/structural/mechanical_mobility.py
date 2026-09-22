@@ -71,11 +71,14 @@ random error with its < 5 % averaging criterion (:func:`random_error_percent`).
 from __future__ import annotations
 
 from dataclasses import KW_ONLY, dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -108,14 +111,16 @@ _FRF_TYPES: dict[str, tuple[int, bool]] = {
 }
 
 #: SI unit strings for each FRF, for labelling.
-FRF_UNITS: dict[str, str] = {
-    "receptance": "m/N",
-    "mobility": "m/(N·s)",
-    "accelerance": "1/kg",
-    "dynamic_stiffness": "N/m",
-    "impedance": "N·s/m",
-    "apparent_mass": "kg",
-}
+FRF_UNITS: Mapping[str, str] = MappingProxyType(
+    {
+        "receptance": "m/N",
+        "mobility": "m/(N·s)",
+        "accelerance": "1/kg",
+        "dynamic_stiffness": "N/m",
+        "impedance": "N·s/m",
+        "apparent_mass": "kg",
+    }
+)
 
 
 def _omega(frequency: ArrayLike) -> NDArray[np.float64]:

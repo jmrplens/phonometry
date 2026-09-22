@@ -325,6 +325,38 @@ llamada:
 ax = result.plot()
 ```
 
+## Las tablas publicadas no admiten escritura
+
+Toda tabla que la biblioteca publica a nivel de módulo es de sólo lectura en
+la 4.0. En la 3.3.0 las tablas publicadas eran diccionarios corrientes y los
+arrays publicados admitían aritmética sobre el propio array, así que una
+línea como `REFERENCE_CURVE[500] = 0.9` o `BAND_IMPORTANCE *= 2` cambiaba el
+número para todo lo que se ejecutara después en el mismo proceso, sin que
+nada lo avisara. Los diccionarios son ahora `types.MappingProxyType`, también
+los que van anidados dentro de otra tabla, y los arrays tienen desactivada la
+bandera `writeable`. Leer no cambia; escribir lanza `TypeError` en una tabla y
+`ValueError` en un array.
+
+El código que retocaba una tabla publicada tiene que copiarla antes:
+
+```python
+from phonometry.materials.absorbers import REFERENCE_CURVE
+from phonometry.speech.sii import BAND_IMPORTANCE
+
+curve = dict(REFERENCE_CURVE)
+curve[4000] = 1.0
+weights = BAND_IMPORTANCE.copy()
+weights[0] = 0.0
+print(REFERENCE_CURVE[4000], curve[4000], weights[0], BAND_IMPORTANCE[0])
+# 0.9 1.0 0.0 0.0083
+```
+
+Una tabla que lleva tablas dentro necesita copiar cada nivel, como en
+`{area: dict(rows) for area, rows in GUIDE_VALUES.items()}`. La misma copia
+hace falta antes de serializar una tabla con pickle, copiarla en profundidad o
+escribirla como JSON, porque un mapeo de sólo lectura no admite ninguna de las
+tres cosas.
+
 ## Los diez nombres que ya no están
 
 Todo lo demás se movió. Estos diez no existen en ningún módulo público:

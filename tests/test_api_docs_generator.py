@@ -590,3 +590,17 @@ def test_a_class_with_no_documented_base_inherits_nothing() -> None:
         """No fields at all."""
 
     assert gad.inherited_ivars(Plain) == ""
+
+
+def test_a_read_only_table_is_labelled_and_shown_as_a_mapping() -> None:
+    """Every published table is a ``MappingProxyType``, nested ones included.
+
+    Its class reports itself as ``builtins.mappingproxy``, so a label taken
+    from the class printed a name nobody can import, and the repr wrapped every
+    inner table in ``mappingproxy(...)``.
+    """
+    from types import MappingProxyType
+
+    table = MappingProxyType({"day": MappingProxyType({"a_u": 0.1}), "k": (1, 2)})
+    assert gad._type_name(table) == "mapping"
+    assert gad._constant_repr(table) == "{'day': {'a_u': 0.1}, 'k': (1, 2)}"

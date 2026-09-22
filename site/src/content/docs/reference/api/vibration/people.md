@@ -214,7 +214,7 @@ under the rules of the other is not an assessment of either.
 
 ## ASSESSMENT_PERIOD_S
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 ASSESSMENT_PERIOD_S = {'day': 57600.0, 'night': 28800.0}
@@ -222,7 +222,7 @@ ASSESSMENT_PERIOD_S = {'day': 57600.0, 'night': 28800.0}
 
 ## ASSESSMENT_TAKT_COUNT
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 ASSESSMENT_TAKT_COUNT = {'day': 1920, 'night': 960}
@@ -292,7 +292,7 @@ CONSTRUCTION_BLASTING_A_O = 8.0
 
 ## CONSTRUCTION_GUIDE_VALUES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 CONSTRUCTION_GUIDE_VALUES = {'I': {1: GuideValues(a_u=0.8, a_o=5.0, a_r=0.4, time_of_day='day', edition='1999'), 26: GuideValues(a_u=0.4, a_o=5.0, a_r=0.3, time_of_day='day', edition='1999'), 78: GuideValues(a_u=0.3, a_o=5.0, a_r=0.2, time_of_day='day', edition='1999')}, 'II': {1: GuideValues(a_u=1.2, a_o=5.0, a_r=0.8, time_of_day='day', edition='1999'), 26: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6, time_of_day='day', edition='1999'), 78: GuideValues(a_u=0.6, a_o=5.0, a_r=0.4, time_of_day='day', edition='1999')}, 'III': {1: GuideValues(a_u=1.6, a_o=5.0, a_r=1.2, time_of_day='day', edition='1999'), 26: GuideValues(a_u=1.2, a_o=5.0, a_r=1.0, time_of_day='day', edition='1999'), 78: GuideValues(a_u=0.8, a_o=5.0, a_r=0.6, time_of_day='day', edition='1999')}}
@@ -354,7 +354,7 @@ DAY_REST_TIME_S = 14400.0
 
 ## GUIDE_VALUES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 GUIDE_VALUES = {'industrial': {'day': GuideValues(a_u=0.4, a_o=6.0, a_r=0.2, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.3, a_o=0.6, a_r=0.15, time_of_day='night', edition='1999')}, 'commercial': {'day': GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.2, a_o=0.4, a_r=0.1, time_of_day='night', edition='1999')}, 'mixed': {'day': GuideValues(a_u=0.2, a_o=5.0, a_r=0.1, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.15, a_o=0.3, a_r=0.07, time_of_day='night', edition='1999')}, 'residential': {'day': GuideValues(a_u=0.15, a_o=3.0, a_r=0.07, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.1, a_o=0.2, a_r=0.05, time_of_day='night', edition='1999')}, 'sensitive': {'day': GuideValues(a_u=0.1, a_o=3.0, a_r=0.05, time_of_day='day', edition='1999'), 'night': GuideValues(a_u=0.1, a_o=0.15, a_r=0.05, time_of_day='night', edition='1999')}}
@@ -393,7 +393,7 @@ The guide values of Table 1 for one area, time of day and kind of source.
 
 ## GUIDE_VALUES_2023
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 GUIDE_VALUES_2023 = {'industrial': {'day': GuideValues(a_u=0.4, a_o=6.0, a_r=0.2, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.3, a_o=0.6, a_r=0.15, time_of_day='night', edition='2023')}, 'commercial': {'day': GuideValues(a_u=0.3, a_o=6.0, a_r=0.15, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.2, a_o=0.4, a_r=0.1, time_of_day='night', edition='2023')}, 'mixed': {'day': GuideValues(a_u=0.2, a_o=5.0, a_r=0.1, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.1, a_o=0.3, a_r=0.07, time_of_day='night', edition='2023')}, 'residential': {'day': GuideValues(a_u=0.15, a_o=3.0, a_r=0.07, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.1, a_o=0.2, a_r=0.05, time_of_day='night', edition='2023')}, 'sensitive': {'day': GuideValues(a_u=0.1, a_o=3.0, a_r=0.05, time_of_day='day', edition='2023'), 'night': GuideValues(a_u=0.1, a_o=0.15, a_r=0.05, time_of_day='night', edition='2023')}}
@@ -532,7 +532,7 @@ KB_UNCERTAINTY_PERCENT = 15.0
 
 ## PEAK_TO_KB_FACTORS
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 PEAK_TO_KB_FACTORS = {'harmonic': 0.9, 'harmonic_distorted': 0.8, 'stochastic_resonant': 0.8, 'stochastic': 0.7, 'single_event_resonant': 0.8, 'single_event': 0.6}
@@ -631,7 +631,7 @@ how Example 8 reports $0{,}325^{+0{,}059}_{-0{,}073}$.
 
 ## RAILWAY_NIGHT_INVESTIGATION_KB
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 RAILWAY_NIGHT_INVESTIGATION_KB = {'surface': 0.6, 'underground': 0.3}

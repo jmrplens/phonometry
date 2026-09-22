@@ -216,4 +216,4 @@ Every published carpet whose construction, surface or fibre contains *name*.
 
 ## PUBLISHED_CARPETS
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).

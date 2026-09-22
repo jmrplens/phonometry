@@ -48,8 +48,10 @@ mixes two methods and is a convenience, not a normative chain.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from collections.abc import Mapping
+from dataclasses import dataclass, fields
 from enum import Enum
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -432,14 +434,42 @@ class RoadEmissionCoefficients:
     :ivar temperature_k: ``K_m`` of (2.2.10), in dB per degree Celsius.
     """
 
-    rolling_a: dict[str, tuple[float, ...]]
-    rolling_b: dict[str, tuple[float, ...]]
-    propulsion_a: dict[str, tuple[float, ...]]
-    propulsion_b: dict[str, tuple[float, ...]]
+    rolling_a: Mapping[str, tuple[float, ...]]
+    rolling_b: Mapping[str, tuple[float, ...]]
+    propulsion_a: Mapping[str, tuple[float, ...]]
+    propulsion_b: Mapping[str, tuple[float, ...]]
     studded_a: tuple[float, ...]
     studded_b: tuple[float, ...]
-    junction_c: dict[str, tuple[tuple[float, float], tuple[float, float]]]
-    temperature_k: dict[str, float]
+    junction_c: Mapping[str, tuple[tuple[float, float], tuple[float, float]]]
+    temperature_k: Mapping[str, float]
+
+    def __post_init__(self) -> None:
+        """Hold every per-category table read-only.
+
+        ``frozen=True`` stops a field from being rebound, not a dictionary in
+        it from being edited, and the default instance is shared by every
+        caller. The tables are wrapped on this instance and on any a caller
+        builds.
+        """
+        for field in fields(self):
+            value = getattr(self, field.name)
+            if isinstance(value, Mapping):
+                object.__setattr__(self, field.name, MappingProxyType(dict(value)))
+
+    def __reduce__(
+        self,
+    ) -> tuple[type[RoadEmissionCoefficients], tuple[object, ...]]:
+        """Rebuild from plain dictionaries when pickled or deep-copied.
+
+        A read-only mapping can be neither pickled nor deep-copied, so the
+        instance travels as plain dictionaries and :meth:`__post_init__`
+        wraps them again on arrival, which keeps the coefficients usable as
+        an argument to a process pool.
+        """
+        return type(self), tuple(
+            dict(value) if isinstance(value, Mapping) else value
+            for value in (getattr(self, field.name) for field in fields(self))
+        )
 
 
 #: The Appendix F database of the consolidated Directive: Tables F-1 and F-4 as

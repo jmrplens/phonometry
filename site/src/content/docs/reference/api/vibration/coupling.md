@@ -134,7 +134,7 @@ The confidence limit of the meter's own error on one quantity (Table 3).
 
 ## INSTRUMENT_CONFIDENCE_LIMITS_PERCENT
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 INSTRUMENT_CONFIDENCE_LIMITS_PERCENT = {'rms': (15.0, 25.0), 'peak': (20.0, 35.0)}
@@ -142,7 +142,7 @@ INSTRUMENT_CONFIDENCE_LIMITS_PERCENT = {'rms': (15.0, 25.0), 'peak': (20.0, 35.0
 
 ## LOOSE_MOUNTING_LIMITS_HZ
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 LOOSE_MOUNTING_LIMITS_HZ = {'vertical': 100.0, 'horizontal': 40.0}

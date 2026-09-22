@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Any
 
 import numpy as np
 
+from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
     require_equal_shapes,
@@ -41,34 +42,36 @@ if TYPE_CHECKING:
     from .._report.metadata import ReportMetadata
 
 #: The 24 one-third-octave band centre frequencies (Hz) used by PNL/EPNL.
-NOY_BANDS: NDArray[np.float64] = np.array(
-    [
-        50.0,
-        63.0,
-        80.0,
-        100.0,
-        125.0,
-        160.0,
-        200.0,
-        250.0,
-        315.0,
-        400.0,
-        500.0,
-        630.0,
-        800.0,
-        1000.0,
-        1250.0,
-        1600.0,
-        2000.0,
-        2500.0,
-        3150.0,
-        4000.0,
-        5000.0,
-        6300.0,
-        8000.0,
-        10000.0,
-    ],
-    dtype=np.float64,
+NOY_BANDS: NDArray[np.float64] = read_only(
+    np.array(
+        [
+            50.0,
+            63.0,
+            80.0,
+            100.0,
+            125.0,
+            160.0,
+            200.0,
+            250.0,
+            315.0,
+            400.0,
+            500.0,
+            630.0,
+            800.0,
+            1000.0,
+            1250.0,
+            1600.0,
+            2000.0,
+            2500.0,
+            3150.0,
+            4000.0,
+            5000.0,
+            6300.0,
+            8000.0,
+            10000.0,
+        ],
+        dtype=np.float64,
+    )
 )
 
 _INF = np.inf

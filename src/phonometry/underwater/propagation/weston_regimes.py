@@ -51,6 +51,7 @@ interference cycles converges on the cylindrical-spreading law, with
 from __future__ import annotations
 
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -59,6 +60,8 @@ from scipy.special import erf
 from ..._internal.validation import require_positive, require_ranks, require_same_length
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import NDArray
 
@@ -100,26 +103,28 @@ class WestonSeabed:
 #: (printed p. 454): medium sand
 #: (``Mz = 1.5``, a reflecting bottom with a critical angle) and mud
 #: (``Mz = 8``, refracting, no critical angle).
-WESTON_SEABEDS: dict[str, WestonSeabed] = {
-    "sand": WestonSeabed(
-        name="sand",
-        grain_size=1.5,
-        sound_speed_ratio=1.20,
-        density_ratio=2.1,
-        attenuation_db_per_wavelength=0.88,
-        loss_parameter=0.0161,
-        sound_speed_gradient_per_s=0.0,
-    ),
-    "mud": WestonSeabed(
-        name="mud",
-        grain_size=8.0,
-        sound_speed_ratio=1.00,
-        density_ratio=1.4,
-        attenuation_db_per_wavelength=0.09,
-        loss_parameter=0.00165,
-        sound_speed_gradient_per_s=1.0,
-    ),
-}
+WESTON_SEABEDS: Mapping[str, WestonSeabed] = MappingProxyType(
+    {
+        "sand": WestonSeabed(
+            name="sand",
+            grain_size=1.5,
+            sound_speed_ratio=1.20,
+            density_ratio=2.1,
+            attenuation_db_per_wavelength=0.88,
+            loss_parameter=0.0161,
+            sound_speed_gradient_per_s=0.0,
+        ),
+        "mud": WestonSeabed(
+            name="mud",
+            grain_size=8.0,
+            sound_speed_ratio=1.00,
+            density_ratio=1.4,
+            attenuation_db_per_wavelength=0.09,
+            loss_parameter=0.00165,
+            sound_speed_gradient_per_s=1.0,
+        ),
+    }
+)
 
 
 def _seabed(seabed: str | WestonSeabed) -> WestonSeabed:

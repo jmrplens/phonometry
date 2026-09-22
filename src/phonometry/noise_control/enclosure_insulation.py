@@ -75,6 +75,7 @@ from __future__ import annotations
 
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -101,6 +102,8 @@ from ._insulation_shared import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -194,17 +197,21 @@ _ISO_11204 = "ISO 11204"
 #: ``None``. The last column of the printed table is headed ISO 10204, which
 #: is no standard; its own footnote names ISO 11204, and that is the key here
 #: (see the errata).
-TEST_ENVIRONMENT_REQUIREMENTS: dict[str, tuple[float | None, float | None]] = {
-    _ISO_3743_1: (None, 6.0),
-    _ISO_3744: (2.0, 6.0),
-    _ISO_3746: (7.0, 3.0),
-    _ISO_3747: (None, 3.0),
-    _ISO_9614_1: (None, None),
-    _ISO_9614_2: (None, None),
-    _ISO_11201: (2.0, 6.0),
-    _ISO_11202: (7.0, 3.0),
-    _ISO_11204: (7.0, 6.0),
-}
+TEST_ENVIRONMENT_REQUIREMENTS: Mapping[str, tuple[float | None, float | None]] = (
+    MappingProxyType(
+        {
+            _ISO_3743_1: (None, 6.0),
+            _ISO_3744: (2.0, 6.0),
+            _ISO_3746: (7.0, 3.0),
+            _ISO_3747: (None, 3.0),
+            _ISO_9614_1: (None, None),
+            _ISO_9614_2: (None, None),
+            _ISO_11201: (2.0, 6.0),
+            _ISO_11202: (7.0, 3.0),
+            _ISO_11204: (7.0, 6.0),
+        }
+    )
+)
 
 #: The base standards that hand back an A-weighted number and nothing per
 #: band, so a band quantity cannot be asked of them.

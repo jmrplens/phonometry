@@ -57,6 +57,7 @@ and one legend swaps two line styles; all in ``docs/ERRATA.md``.
 from __future__ import annotations
 
 import math
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -70,6 +71,8 @@ from ..._internal.validation import (
 )
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from numpy.typing import ArrayLike, NDArray
 
 __all__ = [
@@ -112,16 +115,18 @@ __all__ = [
 #: (``"harmonic"``, stationary, or ``"impulsive"``) and the wave that
 #: carries it (``"surface"`` or ``"body"``). Each of point, impulsive and
 #: body adds 0,5 to the 0 of a harmonic line source on a surface wave.
-SOURCE_EXPONENTS: dict[tuple[str, str, str], float] = {
-    ("line", "harmonic", "surface"): 0.0,
-    ("line", "harmonic", "body"): 0.5,
-    ("point", "harmonic", "surface"): 0.5,
-    ("line", "impulsive", "surface"): 0.5,
-    ("point", "harmonic", "body"): 1.0,
-    ("line", "impulsive", "body"): 1.0,
-    ("point", "impulsive", "surface"): 1.0,
-    ("point", "impulsive", "body"): 1.5,
-}
+SOURCE_EXPONENTS: Mapping[tuple[str, str, str], float] = MappingProxyType(
+    {
+        ("line", "harmonic", "surface"): 0.0,
+        ("line", "harmonic", "body"): 0.5,
+        ("point", "harmonic", "surface"): 0.5,
+        ("line", "impulsive", "surface"): 0.5,
+        ("point", "harmonic", "body"): 1.0,
+        ("line", "impulsive", "body"): 1.0,
+        ("point", "impulsive", "surface"): 1.0,
+        ("point", "impulsive", "body"): 1.5,
+    }
+)
 
 #: The far-field exponent of a train, a chain of point sources not excited
 #: in phase: between 0,3 and 0,5 (Clause 4.2).
@@ -155,10 +160,12 @@ STOREY_FORMULA_MIN_STOREYS: int = 5
 #: How far the vibration of a blast is very rarely relevant beyond (Clause
 #: 5.1.2), in metres: 1500 for quarry blasting, 400 for construction
 #: blasting.
-BLASTING_RELEVANT_DISTANCE_M: dict[str, float] = {
-    "quarry": 1500.0,
-    "construction": 400.0,
-}
+BLASTING_RELEVANT_DISTANCE_M: Mapping[str, float] = MappingProxyType(
+    {
+        "quarry": 1500.0,
+        "construction": 400.0,
+    }
+)
 
 #: The spacing of the rail supports (Clause 5.3.2), in metres: 0,6 to 0,9.
 RAIL_SUPPORT_SPACING_M: tuple[float, float] = (0.6, 0.9)
@@ -167,19 +174,23 @@ RAIL_SUPPORT_SPACING_M: tuple[float, float] = (0.6, 0.9)
 #: move with its speed (Clause 5.3.2), in hertz: the car body on its
 #: secondary suspension, 1 to 3; the bogie on its primary suspension, 6 to
 #: 10.
-VEHICLE_NATURAL_FREQUENCIES_HZ: dict[str, tuple[float, float]] = {
-    "car_body": (1.0, 3.0),
-    "bogie": (6.0, 10.0),
-}
+VEHICLE_NATURAL_FREQUENCIES_HZ: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "car_body": (1.0, 3.0),
+        "bogie": (6.0, 10.0),
+    }
+)
 
 #: The bands a form of track passes on preferentially (Clause 5.3.2), in
 #: hertz: ballasted track 40 to 80, a tunnel with under-ballast mats 15 to
 #: 40, a mass-spring system 5 to 20.
-TRACK_TRANSMITTED_BANDS_HZ: dict[str, tuple[float, float]] = {
-    "ballast": (40.0, 80.0),
-    "under_ballast_mat": (15.0, 40.0),
-    "mass_spring": (5.0, 20.0),
-}
+TRACK_TRANSMITTED_BANDS_HZ: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "ballast": (40.0, 80.0),
+        "under_ballast_mat": (15.0, 40.0),
+        "mass_spring": (5.0, 20.0),
+    }
+)
 
 #: How far rail vibration reaches at most (Clause 5.3.2), in metres: 80,
 #: further on soft layers.
@@ -189,11 +200,13 @@ RAIL_INFLUENCE_RANGE_M: float = 80.0
 #: rams of a counter-blow hammer 4 to 8, the horizontal pendulum of a
 #: forging press on its foundation 5 to 15, a frame saw 4 to 8 with its
 #: harmonics.
-MACHINE_FREQUENCY_BANDS_HZ: dict[str, tuple[float, float]] = {
-    "counter_blow_hammer": (4.0, 8.0),
-    "forging_press_horizontal": (5.0, 15.0),
-    "frame_saw": (4.0, 8.0),
-}
+MACHINE_FREQUENCY_BANDS_HZ: Mapping[str, tuple[float, float]] = MappingProxyType(
+    {
+        "counter_blow_hammer": (4.0, 8.0),
+        "forging_press_horizontal": (5.0, 15.0),
+        "frame_saw": (4.0, 8.0),
+    }
+)
 
 #: Figure 3 (printed page 14): the numbers of machines :math:`N` the
 #: correction :math:`\chi` of Formula (7) is read at, from 4 to 100.
@@ -207,7 +220,7 @@ MACHINE_COUNT_AXIS: tuple[int, ...] = (
 #: nothing else; these are the curves read off the page at the centre of
 #: their stroke, to a five-hundredth. None of the six starts at
 #: :math:`1/\sqrt{N_B}`, so it is an empirical family and not a rule.
-MACHINE_COUNT_CORRECTION: dict[int, tuple[float, ...]] = {
+MACHINE_COUNT_CORRECTION: Mapping[int, tuple[float, ...]] = MappingProxyType({
     3: (
         0.551, 0.537, 0.519, 0.496, 0.471, 0.423, 0.383, 0.360, 0.336, 0.323,
         0.309, 0.300, 0.292, 0.289, 0.289, 0.289, 0.286,
@@ -232,7 +245,7 @@ MACHINE_COUNT_CORRECTION: dict[int, tuple[float, ...]] = {
         0.189, 0.188, 0.180, 0.173, 0.161, 0.147, 0.134, 0.125, 0.117, 0.111,
         0.108, 0.100, 0.100, 0.100, 0.100, 0.100, 0.099,
     ),
-}  # fmt: skip
+})  # fmt: skip
 
 _GEOMETRIES = ("point", "line")
 _CHARACTERS = ("harmonic", "impulsive")

@@ -493,7 +493,7 @@ sign included.
 
 ## TABLE_D1_QUANTITIES
 
-*Constant* (`dict`).
+*Constant* (`mapping`).
 
 ```python
 TABLE_D1_QUANTITIES = {'mass': ('mass',), 'bar_end': ('density', 'longitudinal_velocity', 'area'), 'beam': ('density', 'longitudinal_velocity', 'thickness', 'width'), 'plate': ('density', 'longitudinal_velocity', 'thickness'), 'pipe': ('density', 'longitudinal_velocity', 'thickness', 'radius'), 'mass_spring': ('mass', 'stiffness', 'loss_factor')}

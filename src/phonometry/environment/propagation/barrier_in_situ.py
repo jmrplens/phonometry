@@ -62,6 +62,7 @@ from __future__ import annotations
 import math
 import warnings
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any, Literal
 
 import numpy as np
@@ -76,6 +77,8 @@ from ..._internal.validation import (
 from ..._internal.warnings import PhonometryWarning
 
 if TYPE_CHECKING:  # pragma: no cover - typing only
+    from collections.abc import Mapping
+
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike, NDArray
 
@@ -122,14 +125,16 @@ __all__ = [
 #: level without it. The column reads "correction to be made to", so the
 #: printed values are negative and are added rather than subtracted; the table
 #: of ISO 11820 reads the other way round and the two must not share a helper.
-ISO10847_BACKGROUND_CORRECTIONS_DB: dict[int, float] = {
-    4: -2.0,
-    5: -2.0,
-    6: -1.0,
-    7: -1.0,
-    8: -1.0,
-    9: -1.0,
-}
+ISO10847_BACKGROUND_CORRECTIONS_DB: Mapping[int, float] = MappingProxyType(
+    {
+        4: -2.0,
+        5: -2.0,
+        6: -1.0,
+        7: -1.0,
+        8: -1.0,
+        9: -1.0,
+    }
+)
 
 #: 6.4: under this margin the results are not valid, and this is the margin
 #: the clause would rather have.
@@ -142,17 +147,23 @@ ISO10847_PREFERRED_BACKGROUND_MARGIN_DB: float = 10.0
 #: - 5", because the two rows above it are "+ 1 to + 5" and "- 1 to + 1" and
 #: an upwind class starting at +1 m/s would sit inside the downwind one (see
 #: the errata).
-WIND_CLASSES: dict[str, dict[str, tuple[float, float]]] = {
-    "all": {
-        "downwind": (1.0, 5.0),
-        "calm": (-1.0, 1.0),
-    },
-    "short": {
-        "downwind": (1.0, 5.0),
-        "calm": (-1.0, 1.0),
-        "upwind": (-5.0, -1.0),
-    },
-}
+WIND_CLASSES: Mapping[str, Mapping[str, tuple[float, float]]] = MappingProxyType(
+    {
+        "all": MappingProxyType(
+            {
+                "downwind": (1.0, 5.0),
+                "calm": (-1.0, 1.0),
+            }
+        ),
+        "short": MappingProxyType(
+            {
+                "downwind": (1.0, 5.0),
+                "calm": (-1.0, 1.0),
+                "upwind": (-5.0, -1.0),
+            }
+        ),
+    }
+)
 
 #: 6.3.1: no measurement is made above this average wind velocity, in metres
 #: per second, whatever its direction.
@@ -173,21 +184,23 @@ TEMPERATURE_TOLERANCE_C: float = 10.0
 
 #: Table 2 (6.3.4): the four classes of cloud cover, as the table describes
 #: them. The two campaigns are made in the same class.
-CLOUD_COVER_CLASSES: dict[int, str] = {
-    1: (
-        "heavily overcast day or night, 80 % cloud cover or more for 100 % of "
-        "the measurement time"
-    ),
-    2: (
-        "moderately overcast day or night, 50 % to 80 % cloud cover for at "
-        "least 80 % of the measurement time"
-    ),
-    3: (
-        "lightly overcast or sunny day or night, either continuous sun or "
-        "less than 50 % cloud cover for at least 80 % of the measurement time"
-    ),
-    4: "clear night",
-}
+CLOUD_COVER_CLASSES: Mapping[int, str] = MappingProxyType(
+    {
+        1: (
+            "heavily overcast day or night, 80 % cloud cover or more for 100 % of "
+            "the measurement time"
+        ),
+        2: (
+            "moderately overcast day or night, 50 % to 80 % cloud cover for at "
+            "least 80 % of the measurement time"
+        ),
+        3: (
+            "lightly overcast or sunny day or night, either continuous sun or "
+            "less than 50 % cloud cover for at least 80 % of the measurement time"
+        ),
+        4: "clear night",
+    }
+)
 
 #: 6.2: the terrain, the obstructions and the ground of a substitute site
 #: match the real one inside this sector, in degrees on either side of the
@@ -221,10 +234,12 @@ MINIMUM_RECEIVER_HEIGHT_M: float = 1.2
 
 #: 8.2.2: the correction for the kind of receiver position, in decibels. The
 #: 6 dB is the pressure doubling at a large hard surface.
-RECEIVER_CORRECTIONS_DB: dict[str, float] = {
-    "hemi_free_field": 0.0,
-    "reflecting_surface": 6.0,
-}
+RECEIVER_CORRECTIONS_DB: Mapping[str, float] = MappingProxyType(
+    {
+        "hemi_free_field": 0.0,
+        "reflecting_surface": 6.0,
+    }
+)
 
 #: 8.1.4: the fewest repetitions, and the source-receiver distance in metres
 #: past which more may be needed.

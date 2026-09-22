@@ -75,6 +75,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -187,55 +188,59 @@ _CYCLE_COUNTS = (1, 2, 4, 8, 16)
 #: ISO 8041-1:2017 Table 6 (folio 17), one entry per application. The
 #: continuous row of Tables 7 to 9 is requested with ``cycles=None`` and is
 #: not a sixth entry here, because Table 6 does not give it a burst length.
-SAWTOOTH_BURST_TESTS: dict[str, SawtoothBurstTest] = {
-    _HAND_ARM: SawtoothBurstTest(
-        application=_HAND_ARM,
-        weightings=("Wh",),
-        band_limiting_weighting="Wh",
-        angular_frequency_rad_s=500.0,
-        start_time_s=0.2,
-        cycle_counts=_CYCLE_COUNTS,
-        repeat_time_s=2.0,
-        duration_s=12.0,
-        max_fall_time_s=_max_fall_time_s("Wh"),
-        recommended_sampling_rate_hz=200_000.0,
-    ),
-    _WHOLE_BODY: SawtoothBurstTest(
-        application=_WHOLE_BODY,
-        weightings=("Wb", "Wc", "Wd", "We", "Wj", "Wk", "Wm"),
-        band_limiting_weighting="Wb",
-        angular_frequency_rad_s=100.0,
-        start_time_s=1.0,
-        cycle_counts=_CYCLE_COUNTS,
-        repeat_time_s=10.0,
-        duration_s=60.0,
-        max_fall_time_s=_max_fall_time_s("Wb"),
-        recommended_sampling_rate_hz=20_000.0,
-    ),
-    _LOW_FREQUENCY_WHOLE_BODY: SawtoothBurstTest(
-        application=_LOW_FREQUENCY_WHOLE_BODY,
-        weightings=("Wf",),
-        band_limiting_weighting="Wf",
-        angular_frequency_rad_s=2.5,
-        start_time_s=40.0,
-        cycle_counts=_CYCLE_COUNTS,
-        repeat_time_s=400.0,
-        duration_s=2400.0,
-        max_fall_time_s=_max_fall_time_s("Wf"),
-        recommended_sampling_rate_hz=200.0,
-    ),
-}
+SAWTOOTH_BURST_TESTS: Mapping[str, SawtoothBurstTest] = MappingProxyType(
+    {
+        _HAND_ARM: SawtoothBurstTest(
+            application=_HAND_ARM,
+            weightings=("Wh",),
+            band_limiting_weighting="Wh",
+            angular_frequency_rad_s=500.0,
+            start_time_s=0.2,
+            cycle_counts=_CYCLE_COUNTS,
+            repeat_time_s=2.0,
+            duration_s=12.0,
+            max_fall_time_s=_max_fall_time_s("Wh"),
+            recommended_sampling_rate_hz=200_000.0,
+        ),
+        _WHOLE_BODY: SawtoothBurstTest(
+            application=_WHOLE_BODY,
+            weightings=("Wb", "Wc", "Wd", "We", "Wj", "Wk", "Wm"),
+            band_limiting_weighting="Wb",
+            angular_frequency_rad_s=100.0,
+            start_time_s=1.0,
+            cycle_counts=_CYCLE_COUNTS,
+            repeat_time_s=10.0,
+            duration_s=60.0,
+            max_fall_time_s=_max_fall_time_s("Wb"),
+            recommended_sampling_rate_hz=20_000.0,
+        ),
+        _LOW_FREQUENCY_WHOLE_BODY: SawtoothBurstTest(
+            application=_LOW_FREQUENCY_WHOLE_BODY,
+            weightings=("Wf",),
+            band_limiting_weighting="Wf",
+            angular_frequency_rad_s=2.5,
+            start_time_s=40.0,
+            cycle_counts=_CYCLE_COUNTS,
+            repeat_time_s=400.0,
+            duration_s=2400.0,
+            max_fall_time_s=_max_fall_time_s("Wf"),
+            recommended_sampling_rate_hz=200.0,
+        ),
+    }
+)
 
 #: The tolerance each printed column of Tables 7 to 9 is judged against, in
 #: per cent. Every column is 10 % except the vibration dose value, which is
 #: 12 % in all 48 of its cells.
-BURST_TOLERANCE_PERCENT: dict[str, float] = {
-    "rms": 10.0,
-    "vdv": 12.0,
-    "mtvv_linear": 10.0,
-    "mtvv_exponential": 10.0,
-    "msdv": 10.0,
-}
+BURST_TOLERANCE_PERCENT: Mapping[str, float] = MappingProxyType(
+    {
+        "rms": 10.0,
+        "vdv": 12.0,
+        "mtvv_linear": 10.0,
+        "mtvv_exponential": 10.0,
+        "msdv": 10.0,
+    }
+)
 
 #: The quantities each table prints, in printed column order.
 _TABLE_7_QUANTITIES = ("rms",)
@@ -361,14 +366,14 @@ _PRINTED_TABLES: tuple[_PrintedTable, ...] = (
 )
 
 
-def _build_response_table() -> dict[tuple[str, str, int | None], dict[str, float]]:
+def _build_response_table() -> dict[tuple[str, str, int | None], Mapping[str, float]]:
     """Flatten the three printed tables into one indication lookup."""
-    table: dict[tuple[str, str, int | None], dict[str, float]] = {}
+    table: dict[tuple[str, str, int | None], Mapping[str, float]] = {}
     for application, quantities, rows in _PRINTED_TABLES:
         for row, cells in rows.items():
             for cycles, values in cells.items():
-                table[application, row, cycles] = dict(
-                    zip(quantities, values, strict=True)
+                table[application, row, cycles] = MappingProxyType(
+                    dict(zip(quantities, values, strict=True))
                 )
     return table
 
@@ -380,8 +385,8 @@ def _build_response_table() -> dict[tuple[str, str, int | None], dict[str, float
 #: MSDV). ``cycles`` is ``None`` for the continuous row. The values are the
 #: response to a 1 m/s2 amplitude signal and scale with the amplitude of the
 #: actual test signal, which is what 5.9 says on folio 16.
-SIGNAL_BURST_RESPONSE: dict[tuple[str, str, int | None], dict[str, float]] = (
-    _build_response_table()
+SIGNAL_BURST_RESPONSE: Mapping[tuple[str, str, int | None], Mapping[str, float]] = (
+    MappingProxyType(_build_response_table())
 )
 
 

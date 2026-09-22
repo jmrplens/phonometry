@@ -219,6 +219,14 @@ dead-constants:
 parameter-units:
 	$(PYTHON) scripts/check_parameter_units.py
 
+# A published table is shared by the whole process, and a dict behind a
+# `Mapping` annotation or a writeable array lets one caller change a printed
+# number for every caller after it. This holds every value reachable from a
+# public name to immutable containers all the way down. Needs the package
+# importable, for the same reason parameter-units does.
+frozen-constants:
+	$(PYTHON) scripts/check_frozen_constants.py
+
 # A number transcribed from a book is only checkable if the next reader can
 # open the same page, and nothing used to require that a published value say
 # which one. This holds every record carrying a `source` to the grammar the
@@ -544,5 +552,5 @@ check: lint security test
 	llms pypi-readme api-docs site-reports conformance install-hooks test test-perf test-gpu coverage check \
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point figure-legends control-characters hazards dead-constants \
-	conformance-rows conformance-vocabulary parameter-units published-sources \
+	conformance-rows conformance-vocabulary parameter-units frozen-constants published-sources \
 	solid-agreement shared-sources catalogue-data published-catalogues

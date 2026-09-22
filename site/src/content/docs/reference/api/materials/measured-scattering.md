@@ -62,7 +62,7 @@ heading and [`scattering_named`](/phonometry/reference/api/materials/measured-sc
 
 ## PUBLISHED_SCATTERING
 
-*Constant* (`mappingproxy`).
+*Constant* (`mapping`).
 
 ## SCATTERING_BANDS_HZ
 

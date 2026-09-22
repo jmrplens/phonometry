@@ -80,6 +80,7 @@ from typing import TYPE_CHECKING, Any, Literal, overload
 
 import numpy as np
 
+from .._internal.frozen import read_only
 from .._internal.validation import (
     check_engine,
     require_choice,
@@ -101,8 +102,8 @@ if TYPE_CHECKING:
 _C_AIR = 343.0
 
 #: The eight octave bands of the ASHRAE / Long duct-borne noise calculation, Hz.
-OCTAVE_BANDS: NDArray[np.float64] = np.array(
-    [63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0]
+OCTAVE_BANDS: NDArray[np.float64] = read_only(
+    np.array([63.0, 125.0, 250.0, 500.0, 1000.0, 2000.0, 4000.0, 8000.0])
 )
 
 # Half an octave, in log2 (octave) units: the half-spacing of adjacent
@@ -358,8 +359,8 @@ _VDI2081_END_REFLECTION_CAP = 15.0
 #: over the octaves 63 Hz to 8 kHz. It is the inverse A-weighting less the 5 dB
 #: the guideline allows for summing eight octave bands, rounded to whole
 #: decibels as printed.
-VDI2081_SPECTRAL_CORRECTION: NDArray[np.float64] = np.array(
-    [21, 11, 4, -2, -5, -6, -6, -4], dtype=float
+VDI2081_SPECTRAL_CORRECTION: NDArray[np.float64] = read_only(
+    np.array([21, 11, 4, -2, -5, -6, -6, -4], dtype=float)
 )
 
 #: Section 6.3 -- VDI 3733's recommendation that no more than 5 dB be taken
@@ -538,7 +539,9 @@ _DAMPER_CORRECTION: dict[str, NDArray[np.float64]] = {
 
 
 def _frequencies(frequencies: ArrayLike) -> NDArray[np.float64]:
-    f = np.atleast_1d(np.asarray(frequencies, dtype=np.float64))
+    # A copy, so a result never hands out OCTAVE_BANDS (read-only) or the
+    # caller's own array.
+    f = np.array(frequencies, dtype=np.float64, ndmin=1)
     if f.ndim != 1 or f.size == 0:
         msg = "'frequencies' must be a non-empty 1-D array."
         raise ValueError(msg)

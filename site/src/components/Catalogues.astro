@@ -39,7 +39,7 @@
  * fluids. The prose that introduces each catalogue is in the page for the same
  * reason it always is: it is prose, and it is translated as prose.
  */
-import { catalogues } from '../generated/catalogues.mjs';
+import { catalogues, type CatalogueRow } from '../generated/catalogues.mjs';
 
 interface Props {
 	/** Which catalogue to render. */
@@ -292,7 +292,7 @@ const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => ro
     column the table gains is searchable the day it appears; two of them, the
     bonding of a solid and what an area is an area of, were shown and not
     matched while this was a second list. */
-const haystack = (row: Record<string, unknown>) =>
+const haystack = (row: CatalogueRow) =>
 	[
 		row.name,
 		row.variant,
@@ -342,11 +342,16 @@ const textColumns = (
 		   than a solver that computed a row, so it is the last column of that
 		   table and not one of these. */
 		{ field: 'model', label: copy.solver, wrap: true, notOn: 'fluids' },
-	] as { field: string; label: string; wrap: boolean; notOn?: string }[]
+	] as {
+		field: 'mounting' | 'per' | 'direction' | 'shape' | 'gauge' | 'weave' | 'bonding' | 'model';
+		label: string;
+		wrap: boolean;
+		notOn?: string;
+	}[]
 ).filter(
 	(column) =>
 		column.notOn !== section &&
-		data.rows.some((row: Record<string, unknown>) => row[column.field]),
+		data.rows.some((row) => row[column.field]),
 );
 ---
 
@@ -446,7 +451,12 @@ const textColumns = (
 										   reason. */
 										<span
 											class={`cell cell-${cell.kind}`}
-											title={cell.note || (cell.kind === 'printed' ? undefined : copy.kinds[cell.kind])}
+											title={
+												cell.note ||
+												(cell.kind === 'printed' || cell.kind === 'absent'
+													? undefined
+													: copy.kinds[cell.kind])
+											}
 										>
 											{cell.text}
 										</span>
@@ -504,12 +514,12 @@ const textColumns = (
 		tip.hidden = true;
 		document.body.append(tip);
 
-		let current = null;
+		let current: HTMLElement | null = null;
 		let pinned = false;
 		let timer = 0;
 
 		/** Put the `title` back on whatever we last took it from. */
-		const restore = (element) => {
+		const restore = (element: HTMLElement | null) => {
 			if (element && element.dataset.tip !== undefined) {
 				element.setAttribute('title', element.dataset.tip);
 				delete element.dataset.tip;
@@ -525,7 +535,7 @@ const textColumns = (
 			pinned = false;
 		};
 
-		const place = (element) => {
+		const place = (element: HTMLElement) => {
 			const box = element.getBoundingClientRect();
 			tip.hidden = false;
 			const own = tip.getBoundingClientRect();
@@ -540,7 +550,7 @@ const textColumns = (
 			tip.style.top = `${Math.round(above > margin ? above : box.bottom + margin)}px`;
 		};
 
-		const open = (element, { pin }) => {
+		const open = (element: HTMLElement, { pin }: { pin: boolean }) => {
 			/* A click can land inside the hover delay. Without this the pending
 			   timer fires a moment later with `pin: false`, and the pointer
 			   leaving then closes what the click had pinned open. */
@@ -560,12 +570,14 @@ const textColumns = (
 			place(element);
 		};
 
-		const target = (event) => {
-			const element = event.target instanceof Element ? event.target.closest('[title]') : null;
+		const target = (event: Event): HTMLElement | null => {
+			const element =
+				event.target instanceof Element ? event.target.closest<HTMLElement>('[title]') : null;
 			if (element && element.closest('[data-catalogue]')) return element;
 			/* Already open and its `title` is parked in `dataset.tip`, so the
 			   selector above no longer matches it. */
-			const parked = event.target instanceof Element ? event.target.closest('[data-tip]') : null;
+			const parked =
+				event.target instanceof Element ? event.target.closest<HTMLElement>('[data-tip]') : null;
 			return parked && parked.closest('[data-catalogue]') ? parked : null;
 		};
 
@@ -605,14 +617,14 @@ const textColumns = (
 		   cursor skips the rows the filter is hiding, because a reader stepping
 		   through six carpets should not be walked through the four hundred
 		   rows they filtered out. */
-		const marksOf = (region) =>
-			[...region.querySelectorAll('[title], [data-tip]')].filter((element) => {
+		const marksOf = (region: Element): HTMLElement[] =>
+			[...region.querySelectorAll<HTMLElement>('[title], [data-tip]')].filter((element) => {
 				const row = element.closest('tr');
 				return !row || !row.hidden;
 			});
 
-		let cursor = null;
-		let cursorRegion = null;
+		let cursor: HTMLElement | null = null;
+		let cursorRegion: HTMLElement | null = null;
 
 		const leaveCursor = () => {
 			cursor?.classList.remove('cell-cursor');
@@ -620,7 +632,7 @@ const textColumns = (
 			cursorRegion = null;
 		};
 
-		const moveCursor = (region, step) => {
+		const moveCursor = (region: HTMLElement, step: number) => {
 			const marks = marksOf(region);
 			if (marks.length === 0) return;
 			const from = cursor ? marks.indexOf(cursor) : -1;
@@ -633,7 +645,15 @@ const textColumns = (
 			open(cursor, { pin: true });
 		};
 
-		for (const region of document.querySelectorAll('[data-catalogue] .table-scroll')) {
+		/** Which way a printed arrow key steps the cursor, in reading order. */
+		const ARROW_STEP: Record<string, number> = {
+			ArrowRight: 1,
+			ArrowDown: 1,
+			ArrowLeft: -1,
+			ArrowUp: -1,
+		};
+
+		for (const region of document.querySelectorAll<HTMLElement>('[data-catalogue] .table-scroll')) {
 			region.addEventListener('keydown', (event) => {
 				if (event.key === 'Enter' || event.key === ' ') {
 					event.preventDefault();
@@ -641,14 +661,14 @@ const textColumns = (
 					return;
 				}
 				if (cursorRegion !== region) return;
-				const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key];
+				const step = ARROW_STEP[event.key];
 				if (step === undefined) return;
 				event.preventDefault();
 				moveCursor(region, step);
 			});
 			region.addEventListener('focusout', (event) => {
 				if (cursorRegion !== region) return;
-				if (event.relatedTarget && region.contains(event.relatedTarget)) return;
+				if (event.relatedTarget instanceof Node && region.contains(event.relatedTarget)) return;
 				leaveCursor();
 				hide();
 			});

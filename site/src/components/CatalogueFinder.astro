@@ -81,17 +81,31 @@ const copy = {
 </div>
 
 <script>
+	/** One catalogue: a heading, the prose and tables under it, and the state
+	    the controls above need once it is picked. `key`, `rowCount` and
+	    `published` are filled in a second pass, right after every group is
+	    found and before any of them is read. */
+	interface CatalogueGroup {
+		heading: Element;
+		nodes: Element[];
+		tables: HTMLElement[];
+		key: string;
+		rowCount: number;
+		published: string[];
+	}
+
 	(() => {
-		const finder = document.querySelector('[data-finder]');
-		const sections = [...document.querySelectorAll('[data-catalogue]')];
+		const finder = document.querySelector<HTMLElement>('[data-finder]');
+		const sections = [...document.querySelectorAll<HTMLElement>('[data-catalogue]')];
 		if (!finder || sections.length === 0) return;
 
-		const category = finder.querySelector('[data-category]');
-		const search = finder.querySelector('[data-search]');
-		const searchLabel = finder.querySelector('[data-search-label]');
-		const tableSelect = finder.querySelector('[data-table]');
-		const count = finder.querySelector('[data-count]');
-		const jump = finder.querySelector('[data-jump]');
+		const category = finder.querySelector<HTMLSelectElement>('[data-category]');
+		const search = finder.querySelector<HTMLInputElement>('[data-search]');
+		const searchLabel = finder.querySelector<HTMLElement>('[data-search-label]');
+		const tableSelect = finder.querySelector<HTMLSelectElement>('[data-table]');
+		const count = finder.querySelector<HTMLElement>('[data-count]');
+		const jump = finder.querySelector<HTMLButtonElement>('[data-jump]');
+		if (!category || !search || !searchLabel || !tableSelect || !count || !jump) return;
 		/* The two words the control prints for itself. They travel on the panel
 		   rather than through `define:vars`, which would force this script inline
 		   and therefore to run where it is written, above every table it is
@@ -107,27 +121,29 @@ const copy = {
 		   the absorption heading covers two: the coefficients, and the few rows
 		   the same pages price in equivalent absorption area because they have no
 		   surface to multiply. A reader who asks for absorption wants both. */
-		const flow = [...sections[0].parentElement.children];
-		const groups = [];
-		let run = null;
+		const root = sections[0].parentElement;
+		if (!root) return;
+		const flow = [...root.children];
+		const groups: CatalogueGroup[] = [];
+		let run: CatalogueGroup | null = null;
 		for (const node of flow) {
 			/* Starlight does not leave a heading bare: it wraps it, with its
 			   anchor link, in a `div.sl-heading-wrapper`, so the cut is made on
 			   whatever element holds the `h2` rather than on the `h2` itself. */
 			const h2 = node.tagName === 'H2' ? node : node.querySelector(':scope > h2');
 			if (h2) {
-				run = { heading: h2, nodes: [node], tables: [] };
+				run = { heading: h2, nodes: [node], tables: [], key: '', rowCount: 0, published: [] };
 				groups.push(run);
 				continue;
 			}
 			if (!run) continue;
 			run.nodes.push(node);
-			if (node.matches('[data-catalogue]')) run.tables.push(node);
+			if (node instanceof HTMLElement && node.matches('[data-catalogue]')) run.tables.push(node);
 		}
 		const catalogues = groups.filter((group) => group.tables.length > 0);
 		if (catalogues.length === 0) return;
 		for (const group of catalogues) {
-			group.key = group.tables[0].dataset.catalogue;
+			group.key = group.tables[0].dataset.catalogue ?? '';
 			group.rowCount = group.tables.reduce(
 				(total, table) => total + Number(table.dataset.rowCount ?? 0),
 				0,
@@ -138,10 +154,12 @@ const copy = {
 		}
 
 		/** The heading's own words, without the anchor link Starlight adds. */
-		const labelOf = (group) => {
-			const clone = group.heading.cloneNode(true);
+		const labelOf = (group: CatalogueGroup) => {
+			// `cloneNode` is typed as returning a plain `Node` however specific the
+			// element cloned was; a clone of an `Element` is always an `Element`.
+			const clone = group.heading.cloneNode(true) as Element;
 			for (const anchor of clone.querySelectorAll('a')) anchor.remove();
-			return clone.textContent.trim();
+			return (clone.textContent ?? '').trim();
 		};
 
 		for (const group of catalogues) {
@@ -153,7 +171,8 @@ const copy = {
 
 		let active = catalogues[0];
 
-		const rowsOf = (group) => group.tables.flatMap((table) => [...table.querySelectorAll('[data-row]')]);
+		const rowsOf = (group: CatalogueGroup) =>
+			group.tables.flatMap((table) => [...table.querySelectorAll<HTMLElement>('[data-row]')]);
 
 		const applyFilter = () => {
 			const needle = search.value.trim().toLowerCase();
@@ -170,13 +189,15 @@ const copy = {
 			/* One message per table, so the reader is told which of the two
 			   absorption tables their filter emptied and which still has rows. */
 			for (const table of active.tables) {
-				const empty = table.querySelector('[data-empty-message]');
-				const left = [...table.querySelectorAll('[data-row]')].some((row) => !row.hidden);
+				const empty = table.querySelector<HTMLElement>('[data-empty-message]');
+				const left = [...table.querySelectorAll<HTMLElement>('[data-row]')].some(
+					(row) => !row.hidden,
+				);
 				if (empty) empty.textContent = left ? '' : (empty.dataset.message ?? '');
 			}
 		};
 
-		const show = (group, { scroll = false } = {}) => {
+		const show = (group: CatalogueGroup, { scroll = false }: { scroll?: boolean } = {}) => {
 			active = group;
 			for (const other of catalogues) {
 				const hide = other !== group;

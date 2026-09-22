@@ -8,8 +8,9 @@ never saw each other's work. These tests keep that comparison alive, cell by
 cell and in the page's own notation, and check the three things a transcription
 cannot say about itself: that every unit was converted with the factor the
 page's own heading names, that a cell the page misprinted is refused rather
-than served, and that a column the table derives from its other columns is
-recomputed rather than stored.
+than served, and that a column the table derives from its other columns by
+its own approximation is held as printed rather than replaced by this
+library's.
 """
 
 from __future__ import annotations
@@ -143,17 +144,22 @@ def test_every_appendix_cell_is_the_printed_one(
         assert _same(_cell(text), _held(row, field)), f"{name}.{field}: page {text!r}"
 
 
-def test_the_last_appendix_column_is_recomputed_not_stored() -> None:
+def test_the_last_appendix_column_is_held_as_printed() -> None:
     """The product of critical frequency and thickness is c_air^2 / (1.8 c).
 
-    The page prints it, but it is derived from the speed beside it: the bar
-    speed where the page gives one and the bulk speed where it does not. So the
-    catalogue does not hold it, and the page's figure is reproduced from the
-    row to within the rounding the page applied.
+    The page derives it from the speed beside it, the bar speed where the page
+    gives one and the bulk speed where it does not, with its own 1.8 for the
+    plate's 2 pi / sqrt(12) and no Poisson correction. That is an
+    approximation this library does not make, so the column is held as the
+    page prints it and marked as printed, and the page's own arithmetic is
+    checked to reproduce it to within the rounding the page applied.
     """
     checked = 0
     for name, cells in ref.NORTON_KARCZUB_APPENDIX_4A:
         printed = _cell(cells[5])[1]
+        row = _named(PUBLISHED_SOLIDS, APPENDIX_A, name)
+        assert row.thickness_critical_frequency_product_m_hz == printed, name
+        assert not row.is_derived("thickness_critical_frequency_product_m_hz")
         bar, bulk = cells[3], cells[4]
         # The printed bar speed where there is one, the printed bulk speed
         # where there is not; never a speed this library derived, which for
@@ -262,6 +268,28 @@ def test_the_one_static_modulus_says_so() -> None:
     assert all("static" not in row.note for row in others)
 
 
+def test_the_static_modulus_derives_no_dynamic_quantity() -> None:
+    """A wave speed is dynamic, and this row's modulus is not.
+
+    Every other row of the table derives its three speeds, a shear modulus and
+    a critical frequency from its dynamic modulus. Doing it here would put a
+    static modulus into a dynamic quantity, so each of those says why it is
+    empty instead.
+    """
+    aerated = _named(PUBLISHED_SOLIDS, VIGRAN, "Concrete (autoclaved aerated)")
+    assert dict(aerated.derived) == {}
+    for field in (
+        "shear_modulus_pa",
+        "bar_longitudinal_speed_m_s",
+        "plate_longitudinal_speed_m_s",
+        "bulk_longitudinal_speed_m_s",
+        "transverse_speed_m_s",
+        "thickness_critical_frequency_product_m_hz",
+    ):
+        assert getattr(aerated, field) is None
+        assert "static" in aerated.why_missing(field)
+
+
 # ---------------------------------------------------------------------------
 # Norton & Karczub Appendix 4 B and C: liquids and gases
 # ---------------------------------------------------------------------------
@@ -297,6 +325,21 @@ def test_every_fluid_state_is_the_printed_one(
             _ = state.heat_capacity_ratio
     else:
         assert state.heat_capacity_ratio == pytest.approx(_number(gamma))
+
+
+def test_a_repeated_density_says_so_on_the_state_itself() -> None:
+    """A state has no note, so the row's note follows the table's hedge.
+
+    The page prints hydrogen and oxygen with one density at two temperatures;
+    a caller who reads those four states has to be told, and a note left in
+    the data file would have told nobody.
+    """
+    for name in ("Hydrogen", "Oxygen"):
+        for temperature in (0.0, 20.0):
+            validity = _fluid(name, temperature).validity
+            assert validity.startswith("Norton & Karczub say of Appendix 4")
+            assert "same density" in validity
+    assert "same density" not in _fluid("Air", 20.0).validity
 
 
 def test_each_fluid_table_carries_its_own_books_hedge() -> None:
@@ -367,6 +410,29 @@ def test_the_scaling_factor_follows_the_printed_relation_except_on_maple() -> No
     maple = solids.orthotropic_wood_named("maple")[0]
     assert "1.50" in maple.note
     assert "ERRATA" in maple.note
+
+
+def test_the_constants_are_the_ones_equation_15_86_defines() -> None:
+    """D1 and D3 are the two directions, D2 the coupling, D4 the twisting.
+
+    Along the grain over across it is D1 over D3, which puts spruce at
+    thirteen, and the scaling factor the page prints beside it is the fourth
+    root of that same ratio. The coupling term D2 is the smallest of the
+    four in spruce; read as "across the grain" it would give sixteen.
+    """
+    spruce = PUBLISHED_ORTHOTROPIC_WOOD["rossing-2014-table-15-5/spruce"]
+    along = spruce.plate_stiffness_d1_pa
+    across = spruce.plate_stiffness_d3_pa
+    assert along / across == pytest.approx(13.1, abs=0.05)
+    assert (along / across) ** 0.25 == pytest.approx(
+        spruce.relative_scaling_factor, abs=0.05
+    )
+    assert spruce.plate_stiffness_d2_pa == min(
+        spruce.plate_stiffness_d1_pa,
+        spruce.plate_stiffness_d2_pa,
+        spruce.plate_stiffness_d3_pa,
+        spruce.plate_stiffness_d4_pa,
+    )
 
 
 def test_the_table_credits_woodhouse_on_every_row() -> None:

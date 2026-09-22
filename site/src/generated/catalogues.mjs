@@ -19775,9 +19775,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "11,94",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "12,7",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -19864,9 +19864,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "17,23",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "18,7",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -19953,8 +19953,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "21,1",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -20042,9 +20042,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "16,41",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "17,7",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -20131,8 +20131,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "130,7",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -20220,9 +20220,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "16,86",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "17,7",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -20309,9 +20309,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "12,13",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "12,6",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -20398,8 +20398,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "9,61",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -20487,9 +20487,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "48,2",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "54,5",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -20576,9 +20576,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "12,62",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "13,3",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -20665,8 +20665,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "97,7",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -20754,8 +20754,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "127,4",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -20843,8 +20843,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "127,6",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -20932,8 +20932,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "71,6",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -21021,8 +21021,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "21,2",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -21110,9 +21110,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "41,11",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "45,1",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -21199,8 +21199,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "62,2",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -21288,9 +21288,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "22,11",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "24,2",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -21377,9 +21377,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "12,37",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "12,9",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -21466,9 +21466,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "24,66",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "26,1",
+            "kind": "printed",
+            "note": ""
           }
         ]
       },
@@ -21555,8 +21555,8 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "",
-            "kind": "absent",
+            "text": "15,2",
+            "kind": "printed",
             "note": ""
           }
         ]
@@ -23013,9 +23013,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1,583",
-            "kind": "derived",
-            "note": "from the modulus and the Poisson ratio"
+            "text": "",
+            "kind": "absent",
+            "note": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
           },
           {
             "text": "0,2",
@@ -23028,24 +23028,24 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "1 710",
-            "kind": "derived",
-            "note": "from the modulus and the density"
+            "text": "",
+            "kind": "absent",
+            "note": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
           },
           {
-            "text": "1 745",
-            "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio"
+            "text": "",
+            "kind": "absent",
+            "note": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
           },
           {
-            "text": "1 802",
-            "kind": "derived",
-            "note": "from the modulus, the density and the Poisson ratio"
+            "text": "",
+            "kind": "absent",
+            "note": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
           },
           {
-            "text": "1 104",
-            "kind": "derived",
-            "note": "from the shear modulus and the density"
+            "text": "",
+            "kind": "absent",
+            "note": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
           },
           {
             "text": "0,01 to 0,02",
@@ -23068,9 +23068,9 @@ export const catalogues = {
             "note": ""
           },
           {
-            "text": "37,17",
-            "kind": "derived",
-            "note": "from the plate speed, for the 343 m/s the heading assumes"
+            "text": "",
+            "kind": "absent",
+            "note": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
           }
         ]
       },
@@ -50692,20 +50692,20 @@ export const catalogues = {
       },
       {
         "field": "plate_stiffness_d2_pa",
-        "heading": "D2, across the grain",
-        "headingEs": "D2, a través de la fibra",
+        "heading": "D2, coupling",
+        "headingEs": "D2, acoplamiento",
         "unit": "MPa"
       },
       {
         "field": "plate_stiffness_d3_pa",
-        "heading": "D3, twisting",
-        "headingEs": "D3, torsión",
+        "heading": "D3, across the grain",
+        "headingEs": "D3, a través de la fibra",
         "unit": "MPa"
       },
       {
         "field": "plate_stiffness_d4_pa",
-        "heading": "D4, coupling",
-        "headingEs": "D4, acoplamiento",
+        "heading": "D4, twisting",
+        "headingEs": "D4, torsión",
         "unit": "MPa"
       },
       {
@@ -50781,7 +50781,7 @@ export const catalogues = {
         "gauge": "",
         "weave": "",
         "source": "Rossing (2014) Table 15.5, PDF page 632 (printed p. 622)",
-        "note": "Two of this row's four plate stiffnesses carry the table's asterisk: the table marks this cell with an asterisk and its own footnote calls the asterisked values “intelligent guesses in the absence of experimental data”, so it is the author's estimate and not a measurement. They are served, because the page prints them as numbers, but they are marked as estimates so that a caller who wants measurements can tell them apart. The relative scaling factor the page prints for maple, 1.4, does not follow from this row: the same row prints the relation as the fourth root of D1 over D3, and maple's D1 of 860 MPa and D3 of 170 MPa, neither of them asterisked, give 1.50. Spruce's 1.9 does follow from its own row. The factor is served as printed and the defect is registered in docs/ERRATA.md under “Rossing (2014), Table 15.5”.",
+        "note": "Two of this row's four plate constants, D2 and D4, carry the table's asterisk, which the caption explains as “intelligent guesses in the absence of experimental data”: they are the author's estimates and not measurements. They are served, because the page prints them as numbers, but they are marked as estimates so that a caller who wants measurements can tell them apart. The relative scaling factor the page prints for maple, 1.4, does not follow from this row: the same row prints the relation as the fourth root of D1 over D3, and maple's D1 of 860 MPa and D3 of 170 MPa, neither of them asterisked, give 1.50. Spruce's 1.9 does follow from its own row. The factor is served as printed and the defect is registered in docs/ERRATA.md under “Rossing (2014), Table 15.5”.",
         "attributedTo": {
           "table": "Woodhouse [15.77]"
         },
@@ -50798,7 +50798,7 @@ export const catalogues = {
           },
           {
             "text": "140",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -50808,7 +50808,7 @@ export const catalogues = {
           },
           {
             "text": "230",
-            "kind": "printed",
+            "kind": "estimated",
             "note": ""
           },
           {
@@ -120660,7 +120660,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/fresh_water_20c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Fresh water 20c",
+        "name": "Fresh water",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Fresh water as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
@@ -120691,7 +120691,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/fresh_water_13c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Fresh water 13c",
+        "name": "Fresh water",
         "temperature": "13",
         "pressure": "101 325",
         "model": "Fresh water as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
@@ -120815,7 +120815,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/sea_water_13c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Sea water 13c",
+        "name": "Sea water",
         "temperature": "13",
         "pressure": "101 325",
         "model": "Sea water as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
@@ -120877,7 +120877,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/air_0c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Air 0c",
+        "name": "Air",
         "temperature": "0",
         "pressure": "101 325",
         "model": "Air as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
@@ -120908,7 +120908,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/air_20c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Air 20c",
+        "name": "Air",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Air as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
@@ -120939,7 +120939,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/carbon_dioxide_20c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Carbon dioxide 20c",
+        "name": "Carbon dioxide",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Carbon dioxide as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
@@ -120970,11 +120970,11 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/hydrogen_0c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Hydrogen 0c",
+        "name": "Hydrogen",
         "temperature": "0",
         "pressure": "101 325",
         "model": "Hydrogen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
-        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which. The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant.",
         "cells": [
           {
             "text": "1 270",
@@ -120984,7 +120984,7 @@ export const catalogues = {
           {
             "text": "0,084",
             "kind": "printed",
-            "note": ""
+            "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
           },
           {
             "text": "",
@@ -121001,11 +121001,11 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/hydrogen_20c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Hydrogen 20c",
+        "name": "Hydrogen",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Hydrogen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
-        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which. The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant.",
         "cells": [
           {
             "text": "1 330",
@@ -121015,7 +121015,7 @@ export const catalogues = {
           {
             "text": "0,084",
             "kind": "printed",
-            "note": ""
+            "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
           },
           {
             "text": "",
@@ -121032,7 +121032,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/nitrogen_20c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Nitrogen 20c",
+        "name": "Nitrogen",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Nitrogen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
@@ -121063,11 +121063,11 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/oxygen_0c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Oxygen 0c",
+        "name": "Oxygen",
         "temperature": "0",
         "pressure": "101 325",
         "model": "Oxygen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
-        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which. The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant.",
         "cells": [
           {
             "text": "317",
@@ -121077,7 +121077,7 @@ export const catalogues = {
           {
             "text": "1,43",
             "kind": "printed",
-            "note": ""
+            "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
           },
           {
             "text": "",
@@ -121094,11 +121094,11 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/oxygen_20c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Oxygen 20c",
+        "name": "Oxygen",
         "temperature": "20",
         "pressure": "101 325",
         "model": "Oxygen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
-        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which. The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant.",
         "cells": [
           {
             "text": "326",
@@ -121108,7 +121108,7 @@ export const catalogues = {
           {
             "text": "1,43",
             "kind": "printed",
-            "note": ""
+            "note": "The appendix prints the same density for this substance at both temperatures it lists, while the speed beside it changes as a speed should. Air, in the same part of the same table, does drop from 1.293 to 1.21 kg/m3 over the same interval, so the repetition here is the table departing from its own practice. It is served exactly as printed: the ideal-gas relation P = rho c^2 / gamma applied to these three columns puts this row between 96 and 109 kPa, which is no further from an atmosphere than the carbon dioxide and steam rows that nobody disputes, so nothing in the document settles which of the two densities was meant."
           },
           {
             "text": "",
@@ -121125,7 +121125,7 @@ export const catalogues = {
       {
         "key": "norton-karczub-2003-appendix-4bc/steam_100c",
         "table": "norton-karczub-2003-appendix-4bc",
-        "name": "Steam 100c",
+        "name": "Steam",
         "temperature": "100",
         "pressure": "101 325",
         "model": "Steam as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",

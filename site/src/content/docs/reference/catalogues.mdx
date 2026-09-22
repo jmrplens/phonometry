@@ -146,17 +146,18 @@ project's errata and are left empty here rather than guessed at.
 
 Every solid above is isotropic: one Young's modulus, one Poisson ratio, and the
 same answer whichever way a wave runs through it. Wood is not. A spruce plate
-is sixteen times stiffer along the grain than across it, and an instrument
+is thirteen times stiffer along the grain than across it, and an instrument
 maker chooses the wood precisely for that difference, so a single modulus for
 it describes no direction at all. These two woods, the ones a stringed
-instrument is made of, carry the four stiffnesses a thin orthotropic plate
-actually has: along the grain, across it, in twisting, and the coupling
-between the two. They are stiffnesses of a plate rather than moduli of a
-material, so they do not compare with the fir and spruce in the solids table.
-The page prints the woods as its columns and this table turns it so that a
-wood is a row. Two of maple's stiffnesses are the author's own guesses, which
-the page marks and the table shows, and maple's printed scaling factor does
-not follow from its own row, which is registered in this project's errata.
+instrument is made of, carry the four elastic constants of a thin orthotropic
+plate: D1 along the grain, D3 across it, D2 the coupling between the two
+directions and D4 the twisting stiffness. Each is a modulus divided by twelve
+or a third of the shear modulus rather than a modulus itself, so they do not
+compare with the fir and spruce in the solids table. The page prints the
+woods as its columns and this table turns it so that a wood is a row. Two of
+maple's constants are the author's own guesses, which the page marks and the
+table shows, and maple's printed scaling factor does not follow from its own
+row, which is registered in this project's errata.
 
 <Catalogues catalogue="orthotropicWood" lang="en" />
 
@@ -164,12 +165,15 @@ not follow from its own row, which is registered in this project's errata.
 
 The three numbers the plateau method needs to sketch a single panel's
 transmission loss without solving the plate model: the mass one millimetre of
-the material brings, how deep the coincidence dip goes, and how wide the
-plateau is in frequency. The first is a density in disguise, kilograms per
-square metre per millimetre, which is the density divided by a thousand; it is
-kept in that unit because that is the unit the method uses it in. None of the
-three is a transmission loss. The measured insulation of real constructions is
-in the transmission loss table below.
+the material brings, how high the plateau sits, and how wide it is in
+frequency. The first is a density in disguise, kilograms per square metre per
+millimetre, which is the density divided by a thousand; it is kept in that
+unit because that is the unit the method uses it in. The second is a
+transmission loss, the level the method draws as a horizontal line over the
+coincidence region, and it depends on the material and not on the thickness.
+These are the numbers the library's own plateau-method prediction reads. The
+measured insulation of real constructions is in the transmission loss table
+below.
 
 <Catalogues catalogue="plateau" lang="en" />
 

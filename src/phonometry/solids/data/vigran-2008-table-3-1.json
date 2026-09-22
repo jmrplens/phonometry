@@ -1,6 +1,6 @@
 {
   "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
-  "about": "Nine common building materials, read as the page sets them rather than reduced to a figure each: six of the nine print a density as a range, five print the modulus as a range, and every loss factor is either a range or an approximation the page marks with a tilde. The loss factor column is headed eta_int times ten to the minus three, so a printed 0.1 is a loss factor of 0.0001 and is stored as one. The modulus column is dynamic by its own footnote, except the one cell a second footnote makes static, which carries a note saying so. Glass prints a rule where its Poisson ratio would go and is served without one. The table credits no source.",
+  "about": "Nine common building materials, read as the page sets them rather than reduced to a figure each: five of the nine print a density as a range, five print the modulus as a range, and every loss factor is either a range or an approximation the page marks with a tilde. The loss factor column is headed eta_int times ten to the minus three, so a printed 0.1 is a loss factor of 0.0001 and is stored as one. The modulus column is dynamic by its own footnote, except the one cell a second footnote makes static, which carries a note saying so. Glass prints a rule where its Poisson ratio would go and is served without one. The table credits no source.",
   "rows": [
     {
       "key": "steel",
@@ -110,7 +110,15 @@
       },
       "approximate": [
         "poisson_ratio"
-      ]
+      ],
+      "not_derivable": {
+        "shear_modulus_pa": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "bar_longitudinal_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "plate_longitudinal_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "bulk_longitudinal_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "transverse_speed_m_s": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus",
+        "thickness_critical_frequency_product_m_hz": "the modulus this row prints is the static one, by the table's footnote 2, and a wave speed, a shear modulus or a critical frequency worked out from it would be a dynamic quantity computed from a static modulus"
+      }
     },
     {
       "key": "gypsum_plasterboard",

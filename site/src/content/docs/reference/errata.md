@@ -7064,8 +7064,9 @@ published sources:
   not registered as an erratum because the table's own columns do not settle
   it: $P = \rho c^2/\gamma$ puts these rows between $96$ and $109$ kPa, no
   further from an atmosphere than the carbon dioxide and steam rows. Verified
-  on PDF page 626 (printed p. 606). The four rows carry a note in
-  [`PUBLISHED_FLUIDS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/catalogue.py).
+  on PDF page 626 (printed p. 606). The four states say so in their
+  `validity` in [`PUBLISHED_FLUIDS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/catalogue.py),
+  and the published catalogues page shows it on their density.
 - **ISO 11546-1:1995 Annex A and Annex B:** Figure B.1 is captioned "Source
   spectrum for an artificial sound source constructed according to the
   guidelines given in annex A", while Annex A, which asks for a steel plate of

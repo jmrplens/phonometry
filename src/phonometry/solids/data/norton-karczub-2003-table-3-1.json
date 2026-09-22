@@ -1,6 +1,6 @@
 {
   "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
-  "about": "Eight materials with the three numbers the plateau method needs to estimate the transmission loss of a panel without solving the plate model: the surface density of one millimetre of the material, the height of the coincidence dip in decibels, and the ratio of the two frequencies that bound the plateau. The first column is a density in disguise, kilograms per square metre per millimetre of thickness, which is the material's density divided by a thousand, and it is kept in the unit the page prints rather than converted, because the method is applied with it in that form. The table credits no source and every cell is a plain number: no range, no bound, no rule.",
+  "about": "Eight materials with the three numbers the plateau method needs to estimate the transmission loss of a panel without solving the plate model: the surface density of one millimetre of the material, the height of the plateau in decibels, which is the transmission loss the method draws as a horizontal line over the coincidence region, and the ratio of the two frequencies that bound the plateau. The first column is a density in disguise, kilograms per square metre per millimetre of thickness, which is the material's density divided by a thousand, and it is kept in the unit the page prints rather than converted, because the method is applied with it in that form. The table credits no source and every cell is a plain number: no range, no bound, no rule.",
   "rows": [
     {
       "key": "aluminium",

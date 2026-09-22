@@ -151,19 +151,19 @@ erratas del proyecto y aquí se quedan vacías en vez de adivinarse.
 
 Todos los sólidos de arriba son isótropos: un módulo de Young, un coeficiente
 de Poisson y la misma respuesta vaya la onda en la dirección que vaya. La
-madera no. Una placa de picea es dieciséis veces más rígida a lo largo de la
+madera no. Una placa de picea es trece veces más rígida a lo largo de la
 fibra que a través, y un constructor de instrumentos elige la madera
 justamente por esa diferencia, así que un solo módulo para ella no describe
 ninguna dirección. Estas dos maderas, las de las que se hace un instrumento de
-cuerda, llevan las cuatro rigideces que tiene de verdad una placa delgada
-ortótropa: a lo largo de la fibra, a través de ella, a torsión, y el
-acoplamiento entre las dos. Son rigideces de placa y no módulos de material,
-así que no se comparan con el abeto y la picea de la tabla de sólidos. La
-página imprime las maderas como columnas y esta tabla la gira para que una
-madera sea una fila. Dos rigideces del arce son estimaciones del propio autor,
-que la página marca y la tabla enseña, y el factor de escala que imprime para
-el arce no se sigue de su propia fila, lo que consta en las erratas del
-proyecto.
+cuerda, llevan las cuatro constantes elásticas de una placa delgada
+ortótropa: D1 a lo largo de la fibra, D3 a través de ella, D2 el acoplamiento
+entre las dos direcciones y D4 la rigidez a torsión. Cada una es un módulo
+dividido entre doce o un tercio del módulo de cizalladura, no un módulo, así
+que no se comparan con el abeto y la picea de la tabla de sólidos. La página
+imprime las maderas como columnas y esta tabla la gira para que una madera sea
+una fila. Dos constantes del arce son estimaciones del propio autor, que la
+página marca y la tabla enseña, y el factor de escala que imprime para el arce
+no se sigue de su propia fila, lo que consta en las erratas del proyecto.
 
 <Catalogues catalogue="orthotropicWood" lang="es" />
 
@@ -171,13 +171,15 @@ proyecto.
 
 Los tres números que necesita el método de la meseta para esbozar la pérdida
 por transmisión de un panel simple sin resolver el modelo de placa: la masa que
-aporta un milímetro del material, lo profunda que es la caída en la
-coincidencia y lo ancha que es la meseta en frecuencia. El primero es una
-densidad disfrazada, kilogramos por metro cuadrado y por milímetro, que es la
-densidad dividida entre mil; se guarda en esa unidad porque es la unidad en la
-que la usa el método. Ninguno de los tres es una pérdida por transmisión. El
-aislamiento medido de construcciones reales está en la tabla de pérdida por
-transmisión de más abajo.
+aporta un milímetro del material, a qué altura está la meseta y lo ancha que
+es en frecuencia. El primero es una densidad disfrazada, kilogramos por metro
+cuadrado y por milímetro, que es la densidad dividida entre mil; se guarda en
+esa unidad porque es la unidad en la que la usa el método. El segundo es una
+pérdida por transmisión, el nivel que el método dibuja como una recta
+horizontal sobre la zona de coincidencia, y depende del material y no del
+espesor. Son los números que lee la predicción por el método de la meseta de
+la propia biblioteca. El aislamiento medido de construcciones reales está en
+la tabla de pérdida por transmisión de más abajo.
 
 <Catalogues catalogue="plateau" lang="es" />
 

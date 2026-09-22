@@ -40,6 +40,9 @@ ALLOWED_EDGES: set[tuple[str, str]] = {
     ("building", "vibration"),
     # double-wall cavity fill uses the porous equivalent-fluid model
     ("building", "materials"),
+    # the plateau-method prediction reads its three constants per material
+    # from the solids catalogue, where Norton & Karczub Table 3.1 is held once
+    ("building", "solids"),
     # HVAC plenum and machine enclosures reuse the room constant
     # R = S*alpha/(1 - alpha) of the steady-state room field
     ("noise_control", "room"),

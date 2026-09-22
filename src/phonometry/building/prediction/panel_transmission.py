@@ -101,6 +101,7 @@ from ..._internal.validation import (
     require_same_length,
 )
 from ...materials.absorbers.porous import PUBLISHED_AIR
+from ...solids import PUBLISHED_PLATEAU_DATA
 from ...vibration.structural.point_mobility import plate_bending_stiffness
 from ...vibration.structural.radiation_efficiency import coincidence_frequency
 
@@ -123,20 +124,34 @@ _FREQ_POSITIVE_MSG = "'frequency' must be positive."
 #: Error message for a malformed frequency axis (shared by the module funcs).
 _FREQ_1D_MSG = "'frequency' must be a non-empty 1-D array."
 
+
+
+def _plateau_constants() -> dict[str, tuple[float, float, float]]:
+    """The plateau method's three numbers per material, by lower-case name.
+
+    Read from :data:`phonometry.solids.PUBLISHED_PLATEAU_DATA`, where the
+    table is transcribed once with its citation, rather than typed a second
+    time here. Every row of that table prints all three, so a missing one is
+    a broken data file and not a material the method cannot handle.
+    """
+    constants: dict[str, tuple[float, float, float]] = {}
+    for row in PUBLISHED_PLATEAU_DATA.values():
+        density = row.surface_density_per_mm_kg_m2
+        height = row.coincidence_height_db
+        ratio = row.plateau_frequency_ratio
+        if density is None or height is None or ratio is None:  # pragma: no cover
+            msg = f"{row.name!r} lacks a plateau-method constant ({row.source})"
+            raise ValueError(msg)
+        constants[row.name.casefold()] = (density, height, ratio)
+    return constants
+
+
 #: Norton & Karczub (2003) Table 3.1, PDF page 261 (printed p. 241):
 #: plateau-method data for common materials, as ``(surface density in kg/m2
 #: per mm of thickness, coincidence plateau height in dB, frequency ratio
-#: B/A)``.
-PLATEAU_MATERIALS: dict[str, tuple[float, float, float]] = {
-    "aluminium": (2.66, 29.0, 11.0),
-    "brick": (2.10, 37.0, 4.5),
-    "concrete": (2.28, 38.0, 4.5),
-    "glass": (2.47, 27.0, 10.0),
-    "lead": (11.20, 56.0, 4.0),
-    "plaster": (1.71, 30.0, 8.0),
-    "plywood": (0.57, 19.0, 6.5),
-    "steel": (7.60, 40.0, 11.0),
-}
+#: B/A)``, keyed by the lower-case material name. The numbers are the rows of
+#: :data:`phonometry.solids.PUBLISHED_PLATEAU_DATA`, which holds the table.
+PLATEAU_MATERIALS: dict[str, tuple[float, float, float]] = _plateau_constants()
 #: Field-incidence correction of Norton Eq. (3.106): a flat 5 dB below the
 #: normal-incidence mass law (a diffuse field limited to 78 degrees).
 _NORTON_FIELD_CORRECTION: float = 5.0

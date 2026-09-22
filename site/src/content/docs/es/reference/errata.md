@@ -7506,8 +7506,9 @@ concordancia con las fuentes publicadas:
   registra como errata porque las propias columnas de la tabla no lo resuelven:
   $P = \rho c^2/\gamma$ sitúa estas filas entre $96$ y $109$ kPa, no más lejos
   de una atmósfera que las del dióxido de carbono y el vapor. Verificado en la
-  página 626 del PDF (p. impresa 606). Las cuatro filas llevan una nota en
-  [`PUBLISHED_FLUIDS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/catalogue.py).
+  página 626 del PDF (p. impresa 606). Los cuatro estados lo dicen en su
+  `validity` en [`PUBLISHED_FLUIDS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/fluids/catalogue.py),
+  y la página de catálogos publicados lo muestra sobre su densidad.
 - **ISO 11546-1:1995, anexos A y B:** la figura B.1 se titula «Source
   spectrum for an artificial sound source constructed according to the
   guidelines given in annex A», mientras que el anexo A, que pide una chapa de

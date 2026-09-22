@@ -13,7 +13,9 @@ This is the second reading, kept as the oracle the tests check against,
 with the one body cell the comparison settled against it put back to what
 the page prints: reader B wrote the aerated concrete modulus as ``3.8 2``,
 flattening the superscript footnote mark that makes it a static modulus,
-and the cropped page shows ``3.8 ²``. Every
+and the cropped page shows ``3.8 ²``; and reader B set the symbol of the
+scaling factor with a space each side of the solidus, which the comparison
+measured on the page and found to be the glyph's own sidebearing. Every
 cell is **as the page prints it**: ranges keep their dash, approximations keep
 their tilde, a rule is the rule character, powers of ten keep their
 superscripts, and a footnote mark stays attached to the cell it marks. Two
@@ -126,5 +128,5 @@ ROSSING_15_5: tuple[tuple[str, str, str, str], ...] = (
     ("D₂", "MPa", "67", "140*"),
     ("D₃", "MPa", "84", "170"),
     ("D₄", "MPa", "230", "230*"),
-    ("⁴√(D₁ / D₃)", "", "1.9", "1.4"),
+    ("⁴√(D₁/D₃)", "", "1.9", "1.4"),
 )

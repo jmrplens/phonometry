@@ -1,6 +1,6 @@
 {
   "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
-  "about": "Twenty-one solids with the bar and the bulk longitudinal speed in two separate columns, which is the reason this table is worth holding beside the others: most compilations print one speed and leave the reader to guess which. Eleven of the twenty-one print a rule rather than a Poisson ratio and ten print no bar speed, and a rule is served as an absent field rather than shifted out of the way. The table's last column, the product of critical frequency and thickness, is not held: it reproduces the air speed squared over 1.8 times the speed in the row, so it is a quantity this library recomputes rather than a reading it keeps. One modulus is refused as a misprint. The appendix credits several sources at the foot without saying which row came from which, so no row carries an attribution.",
+  "about": "Twenty-one solids with the bar and the bulk longitudinal speed in two separate columns, which is the reason this table is worth holding beside the others: most compilations print one speed and leave the reader to guess which. Ten of the twenty-one print a rule rather than a Poisson ratio and nine print no bar speed, and a rule is served as an absent field rather than shifted out of the way. The table's last column, the product of critical frequency and thickness, is held as printed. It is Norton & Karczub's own approximation, the speed of sound in air squared over 1.8 times the speed in the row (the bar speed where the row prints one and the bulk speed where it does not, by the footnote on the heading), and it is not the plate-speed product this library derives for rows that print none: for aluminium the page prints 12.7 m/s where the plate speed gives 11.9. One modulus is refused as a misprint. The appendix credits several sources at the foot without saying which row came from which, so no row carries an attribution.",
   "rows": [
     {
       "key": "aluminium",
@@ -9,7 +9,8 @@
       "youngs_modulus_pa": 71000000000.0,
       "poisson_ratio": 0.33,
       "bar_longitudinal_speed_m_s": 5150.0,
-      "bulk_longitudinal_speed_m_s": 6300.0
+      "bulk_longitudinal_speed_m_s": 6300.0,
+      "thickness_critical_frequency_product_m_hz": 12.7
     },
     {
       "key": "brass",
@@ -18,13 +19,15 @@
       "youngs_modulus_pa": 104000000000.0,
       "poisson_ratio": 0.37,
       "bar_longitudinal_speed_m_s": 3500.0,
-      "bulk_longitudinal_speed_m_s": 4700.0
+      "bulk_longitudinal_speed_m_s": 4700.0,
+      "thickness_critical_frequency_product_m_hz": 18.7
     },
     {
       "key": "concrete_dense",
       "name": "Concrete (dense)",
       "density_kg_m3": 2600.0,
       "youngs_modulus_pa": 25000000000.0,
+      "thickness_critical_frequency_product_m_hz": 21.1,
       "approximate": [
         "youngs_modulus_pa"
       ],
@@ -37,12 +40,14 @@
       "youngs_modulus_pa": 122000000000.0,
       "poisson_ratio": 0.35,
       "bar_longitudinal_speed_m_s": 3700.0,
-      "bulk_longitudinal_speed_m_s": 5000.0
+      "bulk_longitudinal_speed_m_s": 5000.0,
+      "thickness_critical_frequency_product_m_hz": 17.7
     },
     {
       "key": "cork",
       "name": "Cork",
       "density_kg_m3": 250.0,
+      "thickness_critical_frequency_product_m_hz": 130.7,
       "misprinted": {
         "youngs_modulus_pa": "the page prints 6.2 x 10^10 Pa, which is the modulus it also prints for Pyrex glass two rows below, and the rest of this row contradicts it: a density of 250 kg/m3 and the 500 m/s this table prints beside it give 6.25 x 10^7 Pa, a thousand times smaller, and the table's own last column agrees with that 500 m/s. The mantissa is right and the exponent is not, but the page does not print the exponent it meant, so nothing is served here. The defect is registered in docs/ERRATA.md under “Norton & Karczub 2e (2003), Appendix 4”."
       },
@@ -55,7 +60,8 @@
       "youngs_modulus_pa": 105000000000.0,
       "poisson_ratio": 0.28,
       "bar_longitudinal_speed_m_s": 3700.0,
-      "bulk_longitudinal_speed_m_s": 4350.0
+      "bulk_longitudinal_speed_m_s": 4350.0,
+      "thickness_critical_frequency_product_m_hz": 17.7
     },
     {
       "key": "glass_pyrex",
@@ -64,13 +70,15 @@
       "youngs_modulus_pa": 62000000000.0,
       "poisson_ratio": 0.24,
       "bar_longitudinal_speed_m_s": 5200.0,
-      "bulk_longitudinal_speed_m_s": 5600.0
+      "bulk_longitudinal_speed_m_s": 5600.0,
+      "thickness_critical_frequency_product_m_hz": 12.6
     },
     {
       "key": "gypsum_plasterboard",
       "name": "Gypsum (plasterboard)",
       "density_kg_m3": 650.0,
-      "bulk_longitudinal_speed_m_s": 6800.0
+      "bulk_longitudinal_speed_m_s": 6800.0,
+      "thickness_critical_frequency_product_m_hz": 9.61
     },
     {
       "key": "lead",
@@ -79,7 +87,8 @@
       "youngs_modulus_pa": 16500000000.0,
       "poisson_ratio": 0.44,
       "bar_longitudinal_speed_m_s": 1200.0,
-      "bulk_longitudinal_speed_m_s": 2050.0
+      "bulk_longitudinal_speed_m_s": 2050.0,
+      "thickness_critical_frequency_product_m_hz": 54.5
     },
     {
       "key": "nickel",
@@ -88,40 +97,46 @@
       "youngs_modulus_pa": 210000000000.0,
       "poisson_ratio": 0.31,
       "bar_longitudinal_speed_m_s": 4900.0,
-      "bulk_longitudinal_speed_m_s": 5850.0
+      "bulk_longitudinal_speed_m_s": 5850.0,
+      "thickness_critical_frequency_product_m_hz": 13.3
     },
     {
       "key": "particle_board",
       "name": "Particle board",
       "density_kg_m3": 750.0,
-      "bulk_longitudinal_speed_m_s": 669.0
+      "bulk_longitudinal_speed_m_s": 669.0,
+      "thickness_critical_frequency_product_m_hz": 97.7
     },
     {
       "key": "polyurethane",
       "name": "Polyurethane",
       "density_kg_m3": 72.0,
       "youngs_modulus_pa": 19000000.0,
-      "bulk_longitudinal_speed_m_s": 513.0
+      "bulk_longitudinal_speed_m_s": 513.0,
+      "thickness_critical_frequency_product_m_hz": 127.4
     },
     {
       "key": "polystyrene",
       "name": "Polystyrene",
       "density_kg_m3": 42.0,
       "youngs_modulus_pa": 11000000.0,
-      "bulk_longitudinal_speed_m_s": 512.0
+      "bulk_longitudinal_speed_m_s": 512.0,
+      "thickness_critical_frequency_product_m_hz": 127.6
     },
     {
       "key": "pvc",
       "name": "PVC",
       "density_kg_m3": 66.0,
       "youngs_modulus_pa": 55000000.0,
-      "bulk_longitudinal_speed_m_s": 913.0
+      "bulk_longitudinal_speed_m_s": 913.0,
+      "thickness_critical_frequency_product_m_hz": 71.6
     },
     {
       "key": "plywood",
       "name": "Plywood",
       "density_kg_m3": 600.0,
-      "bulk_longitudinal_speed_m_s": 3080.0
+      "bulk_longitudinal_speed_m_s": 3080.0,
+      "thickness_critical_frequency_product_m_hz": 21.2
     },
     {
       "key": "rubber_hard",
@@ -130,14 +145,16 @@
       "youngs_modulus_pa": 2300000000.0,
       "poisson_ratio": 0.4,
       "bar_longitudinal_speed_m_s": 1450.0,
-      "bulk_longitudinal_speed_m_s": 2400.0
+      "bulk_longitudinal_speed_m_s": 2400.0,
+      "thickness_critical_frequency_product_m_hz": 45.1
     },
     {
       "key": "rubber_soft",
       "name": "Rubber (soft)",
       "density_kg_m3": 950.0,
       "youngs_modulus_pa": 5000000.0,
-      "bulk_longitudinal_speed_m_s": 1050.0
+      "bulk_longitudinal_speed_m_s": 1050.0,
+      "thickness_critical_frequency_product_m_hz": 62.2
     },
     {
       "key": "silver",
@@ -146,7 +163,8 @@
       "youngs_modulus_pa": 78000000000.0,
       "poisson_ratio": 0.37,
       "bar_longitudinal_speed_m_s": 2700.0,
-      "bulk_longitudinal_speed_m_s": 3700.0
+      "bulk_longitudinal_speed_m_s": 3700.0,
+      "thickness_critical_frequency_product_m_hz": 24.2
     },
     {
       "key": "steel",
@@ -155,7 +173,8 @@
       "youngs_modulus_pa": 195000000000.0,
       "poisson_ratio": 0.28,
       "bar_longitudinal_speed_m_s": 5050.0,
-      "bulk_longitudinal_speed_m_s": 6100.0
+      "bulk_longitudinal_speed_m_s": 6100.0,
+      "thickness_critical_frequency_product_m_hz": 12.9
     },
     {
       "key": "tin",
@@ -163,14 +182,16 @@
       "density_kg_m3": 7300.0,
       "youngs_modulus_pa": 45000000000.0,
       "poisson_ratio": 0.33,
-      "bar_longitudinal_speed_m_s": 2500.0
+      "bar_longitudinal_speed_m_s": 2500.0,
+      "thickness_critical_frequency_product_m_hz": 26.1
     },
     {
       "key": "wood_hard",
       "name": "Wood (hard)",
       "density_kg_m3": 650.0,
       "youngs_modulus_pa": 12000000000.0,
-      "bar_longitudinal_speed_m_s": 4300.0
+      "bar_longitudinal_speed_m_s": 4300.0,
+      "thickness_critical_frequency_product_m_hz": 15.2
     }
   ]
 }

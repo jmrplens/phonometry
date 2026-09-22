@@ -97,6 +97,13 @@ def _transcribed() -> dict[str, Fluid]:
     :class:`~phonometry.fluids.Fluid` whose ``model`` names the table, with
     its page, rather than a closed form that was never used. The pressure is
     the one atmosphere every such table assumes without printing it.
+
+    A :class:`~phonometry.fluids.Fluid` is a physical state and has no note
+    of its own, so what the row's note says about the page follows the
+    table's hedge in the state's ``validity``: a caller who reads the four
+    hydrogen and oxygen states of Norton & Karczub learns there that the
+    page prints one density at two temperatures, where a note left in the
+    data file would have reached nobody.
     """
     states: dict[str, Fluid] = {}
     for table in _FLUID_TABLES:
@@ -113,12 +120,13 @@ def _transcribed() -> dict[str, Fluid]:
             }
             if "heat_capacity_ratio" in row:
                 properties["heat_capacity_ratio"] = row["heat_capacity_ratio"]
+            note = row.get("note", "")
             states[f"{table}/{row['key']}"] = Fluid(
                 temperature_c=row["temperature_c"],
                 static_pressure_pa=_ONE_ATMOSPHERE_PA,
                 composition={},
                 model=f"{row['name']} as printed in {source}",
-                validity=about,
+                validity=f"{about} {note}" if note else about,
                 properties=properties,
             )
     return states

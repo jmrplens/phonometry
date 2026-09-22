@@ -15,10 +15,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   separate columns, and their Table 6.1 adds eleven structural loss factors.
   Vigran (2008) Table 3.1 adds nine building materials, almost every cell a
   range or an approximation the page marks, with the modulus column dynamic by
-  its own footnote except the one cell a second footnote makes static. The
-  appendix's last column, the product of critical frequency and thickness, is
-  not held: it is the speed of sound in air squared over 1.8 times the speed in
-  the row, so it is recomputed rather than kept. Every table was read twice
+  its own footnote except the one cell a second footnote makes static, and
+  that row derives no wave speed from it. The appendix's last column, the
+  product of critical frequency and thickness, is held as printed: it is
+  Norton & Karczub's own approximation, the speed of sound in air squared over
+  1.8 times the speed in the row, and not the plate-speed product this library
+  derives where a page prints none. Every table was read twice
   from the page and compared cell by cell: 392 cells, and no disagreement about
   a number.
 - **Eighteen liquids and gases, each at the temperature its page states.**
@@ -26,19 +28,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   density, a speed of sound and, where the page prints one, the ratio of
   specific heats. A substance printed at two temperatures is two states. A row
   that prints a rule where the ratio of specific heats would go refuses to
-  answer for it rather than borrowing one.
+  answer for it rather than borrowing one. The four hydrogen and oxygen
+  states, whose page prints one density at two temperatures, say so in their
+  `validity`.
 - **Wood that is not the same material in two directions.**
   `solids.PUBLISHED_ORTHOTROPIC_WOOD` holds Rossing (2014) Table 15.5, after
-  Woodhouse: spruce and maple with the four plate stiffnesses of a thin
-  orthotropic plate. Every other solid here is isotropic and cannot say that
-  spruce is sixteen times stiffer along the grain than across it.
-  `OrthotropicWood.is_estimated` answers for the two maple cells the page's own
-  footnote calls intelligent guesses.
-- **The plateau method's three constants.** `solids.PUBLISHED_PLATEAU_DATA`
-  holds Norton & Karczub Table 3.1: for eight materials, the mass a millimetre
-  brings, the depth of the coincidence dip and the width of the plateau, which
-  is what it takes to sketch a single panel's transmission loss without solving
-  the plate model.
+  Woodhouse: spruce and maple with the four elastic constants of a thin
+  orthotropic plate, D1 along the grain, D3 across it, D2 the coupling and D4
+  the twisting stiffness. Every other solid here is isotropic and cannot say
+  that spruce is thirteen times stiffer along the grain than across it.
+  `OrthotropicWood.is_estimated` answers for the two maple cells the table's
+  caption calls intelligent guesses, and the published catalogue marks them.
+- **The plateau method's three constants, in one place.**
+  `solids.PUBLISHED_PLATEAU_DATA` holds Norton & Karczub Table 3.1: for eight
+  materials, the mass a millimetre brings, the height of the plateau and its
+  width, which is what it takes to sketch a single panel's transmission loss
+  without solving the plate model. `building.PLATEAU_MATERIALS`, which typed
+  the same twenty-four numbers a second time, is now built from it.
 
 ### Fixed
 

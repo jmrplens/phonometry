@@ -11,9 +11,16 @@ the curve flattens into a plateau.
 
 The plateau method is the cheap way to draw that shape. Rather than solving
 the plate model, it places the plateau from three numbers that depend only on
-what the panel is made of: how much mass a millimetre of it brings, how deep
-the coincidence dip goes, and how wide the plateau is in frequency. This
-module holds those three, for the eight materials Norton & Karczub tabulate.
+what the panel is made of: how much mass a millimetre of it brings, how high
+the plateau sits, and how wide it is in frequency. Norton & Karczub draw the
+mass law first, then "the coincidence region is approximated by a horizontal
+line whose height is obtained from Table 3.1"; the plateau starts where that
+line meets the mass law, at a frequency A, ends at B, which the frequency
+ratio places relative to A, and above B the curve rises at 10 dB per octave.
+This module holds those three numbers, for the eight materials the table
+lists, and :func:`phonometry.building.plateau_transmission_loss` draws the
+curve from them: its ``building.PLATEAU_MATERIALS`` is built from the rows
+here, so the table is typed once.
 
 Why the first column is not a density
 -------------------------------------
@@ -28,10 +35,11 @@ a unit nobody uses it in has made the reader's work harder to look tidier.
 
 What this is not
 ----------------
-It is not a transmission loss. Nothing here is a decibel of insulation except
-:attr:`PlateauMaterial.coincidence_height_db`, which is the depth of the dip
-rather than the loss at any frequency. The measured and tabulated insulation
-of real constructions lives in
+It is not a transmission loss spectrum. One of the three numbers is a
+transmission loss, :attr:`PlateauMaterial.coincidence_height_db`, the level of
+the plateau in decibels, and it holds only over the plateau and only as the
+method's approximation to it. The measured and tabulated insulation of real
+constructions lives in
 :data:`~phonometry.building.PUBLISHED_TRANSMISSION_LOSS`, and the duct walls
 in :data:`~phonometry.noise_control.PUBLISHED_DUCT_TRANSMISSION_LOSS`.
 
@@ -68,11 +76,14 @@ class PlateauMaterial(CatalogueRow):
         material brings per millimetre of thickness, in kg/m2 per mm. It is
         the density divided by a thousand and is held as the page prints it;
         see the module docstring for why.
-    :ivar coincidence_height_db: How far the transmission loss falls at
-        coincidence, in decibels, measured from the plateau rather than from
-        the mass law.
+    :ivar coincidence_height_db: The height of the plateau, in decibels: the
+        transmission loss the method gives the panel over the coincidence
+        region, drawn as a horizontal line. It depends on the material and
+        not on the thickness, which moves the plateau along the frequency
+        axis and leaves its level where it is.
     :ivar plateau_frequency_ratio: The ratio of the two frequencies that bound
-        the plateau, which the page writes B/A. Dimensionless.
+        the plateau, which the page writes B/A: A where the plateau meets the
+        mass law, B where the curve starts to rise again. Dimensionless.
     """
 
     surface_density_per_mm_kg_m2: float | None = None

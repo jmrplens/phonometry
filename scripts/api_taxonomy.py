@@ -104,6 +104,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.fluids.gas",
             "phonometry.fluids.water",
             "phonometry.fluids.catalogue",
+            "phonometry.fluids.nonlinearity",
         ),
     ),
     Section(
@@ -512,6 +513,7 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "PUBLISHED_ABSORPTION_AREAS": "phonometry.materials.absorbers.measured",
     "PUBLISHED_FLUIDS": "phonometry.fluids.catalogue",
     "PUBLISHED_GASES": "phonometry.fluids.catalogue",
+    "PUBLISHED_NONLINEARITY": "phonometry.fluids.nonlinearity",
     "Gas": "phonometry.fluids.catalogue",
     "gases_named": "phonometry.fluids.catalogue",
     # The ideal-gas closure and its two published constants are owned by the

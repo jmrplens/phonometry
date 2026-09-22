@@ -45567,7 +45567,7 @@ export const catalogues = {
         },
         "cells": [
           {
-            "text": "540",
+            "text": "540 ± 92",
             "kind": "printed",
             "note": ""
           },
@@ -45618,7 +45618,7 @@ export const catalogues = {
         },
         "cells": [
           {
-            "text": "230",
+            "text": "230 ± 220",
             "kind": "printed",
             "note": ""
           },
@@ -45669,7 +45669,7 @@ export const catalogues = {
         },
         "cells": [
           {
-            "text": "30",
+            "text": "30 ± 30",
             "kind": "printed",
             "note": ""
           },
@@ -45720,7 +45720,7 @@ export const catalogues = {
         },
         "cells": [
           {
-            "text": "9",
+            "text": "9 ± 5",
             "kind": "printed",
             "note": ""
           },
@@ -46536,12 +46536,12 @@ export const catalogues = {
         },
         "cells": [
           {
-            "text": "150",
+            "text": "150 ± 90",
             "kind": "printed",
             "note": ""
           },
           {
-            "text": "48",
+            "text": "48 ± 4",
             "kind": "printed",
             "note": ""
           },
@@ -48270,7 +48270,7 @@ export const catalogues = {
         },
         "cells": [
           {
-            "text": "420",
+            "text": "420 ± 17",
             "kind": "printed",
             "note": ""
           },
@@ -48321,7 +48321,7 @@ export const catalogues = {
         },
         "cells": [
           {
-            "text": "370",
+            "text": "370 ± 110",
             "kind": "printed",
             "note": ""
           },
@@ -51110,6 +51110,6760 @@ export const catalogues = {
           {
             "text": "11",
             "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "nonlinearity": {
+    "columns": [
+      {
+        "field": "b_over_a",
+        "heading": "B/A",
+        "headingEs": "B/A",
+        "unit": ""
+      },
+      {
+        "field": "temperature_c",
+        "heading": "Temperature",
+        "headingEs": "Temperatura",
+        "unit": "°C"
+      },
+      {
+        "field": "static_pressure_pa",
+        "heading": "Static pressure",
+        "headingEs": "Presión estática",
+        "unit": "MPa"
+      },
+      {
+        "field": "year",
+        "heading": "Year",
+        "headingEs": "Año",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "rossing-2014-table-8-1/water_0c_8_59",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "4,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1974",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_20c_8_59",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1974",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_20c_8_60",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+        },
+        "cells": [
+          {
+            "text": "4,985 ± 0,063",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1989",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_25c_8_61",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+        },
+        "cells": [
+          {
+            "text": "5,11 ± 0,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1983",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_26c_8_62",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
+        },
+        "cells": [
+          {
+            "text": "5,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1989",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_30c_8_63",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
+        },
+        "cells": [
+          {
+            "text": "5,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1985",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_30c_8_64",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
+        },
+        "cells": [
+          {
+            "text": "5,18 ± 0,033",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1991",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_30c_8_60",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "E.C. Everbach: Tissue Composition Determination via Measurement of the Acoustic Nonlinearity Parameter B/A. Ph.D. Thesis (Yale Univ., New Haven 1989) pp. 66– [8.60]"
+        },
+        "cells": [
+          {
+            "text": "5,28 ± 0,021",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1989",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_30c_8_65",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,38 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_40c_8_59",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "5,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1974",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_40c_8_65",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,54 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_50c_8_65",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,69 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_60c_8_59",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "5,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1974",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_60c_8_65",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,82 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_70c_8_65",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,98 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_80c_8_59",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "6,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1974",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_80c_8_65",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,06 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 2001 in the Year column, and the chapter's own reference list dates [8.65] to 2002 (J. Acoust. Soc. Am. 111, 707-715), where every other row's year is its reference's; registered in docs/ERRATA.md"
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-1/water_100c_8_59",
+        "table": "rossing-2014-table-8-1",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.1, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "6,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1974",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_0_1mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,38 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_0_1mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,54 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_0_1mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,69 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_0_1mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,82 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_0_1mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,98 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_0_1mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,06 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,46 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,59 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,76 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,87 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,04 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,07 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_90c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,03 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_100c_5mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,05 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,55 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,62 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,78 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,94 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,03 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,11 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_90c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,06 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_100c_10mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,01 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,57 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,66 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,83 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,96 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,07 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,09 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_90c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,11 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_100c_15mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,08 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,61 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,68 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,81 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,98 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,1 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,14 ± 0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_90c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,12 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_100c_20mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,06 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,63 ± 0,12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,7 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,84 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,95 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,07 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,16 ± 0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_90c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,09 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_100c_30mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,08 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,73 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,77 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,86 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,02 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,11 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,14 ± 0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_90c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,16 ± 0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_100c_40mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,14 ± 0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_30c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,82 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_40c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,84 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_50c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "5,93 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_60c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,04 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_70c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,13 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "70",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_80c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,16 ± 0,14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_90c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,12 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "90",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-2/water_100c_50mpa",
+        "table": "rossing-2014-table-8-2",
+        "name": "Water",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.2, PDF page 284 (printed p. 268)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "F. Plantier, L. Daridon, B. Lagourette: Measurement of the B/A nonlinearity parameter under high pressure: Application to water, J. Acoust. Soc. Am. 111, 707–715 (2002) [8.65]"
+        },
+        "cells": [
+          {
+            "text": "6,09 ± 0,13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_2_dhcp_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "1,2-DHCP",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "11,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_propanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Propanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "9,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_butanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Butanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "9,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_pentanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Pentanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "The page prints this row twice, one line under the other, with the same temperature, value and reference; it is one measurement and is held once. The repetition is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_hexanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Hexanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "10,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_heptanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Heptanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "10,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_octanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Octanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "10,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_nonanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Nonanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "10,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/1_decanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "1-Decanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "10,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/acetone_20c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Acetone",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "9,23",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/acetone_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "Acetone",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/acetone_40c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Acetone",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "9,51",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/benzene_20c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Benzene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/benzene_20c_8_70",
+        "table": "rossing-2014-table-8-3",
+        "name": "Benzene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "O. Nomoto: Nonlinear parameter of the ‘Rao Liquid’, J. Phys. Soc. Jpn. 21, 569–571 (1966) [8.70]"
+        },
+        "cells": [
+          {
+            "text": "8,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/benzene_25c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Benzene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "6,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/benzene_40c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Benzene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "8,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/benzyl_alcohol_30c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Benzyl alcohol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/benzyl_alcohol_50c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Benzyl alcohol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "9,97",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "50",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/carbon_bisulfide_10c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Carbon bisulfide",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "6,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/carbon_bisulfide_25c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Carbon bisulfide",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "6,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/carbon_bisulfide_40c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Carbon bisulfide",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "6,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/carbon_tetrachloride_10c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Carbon tetrachloride",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "8,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/carbon_tetrachloride_25c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Carbon tetrachloride",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "8,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/carbon_tetrachloride_25c_8_61",
+        "table": "rossing-2014-table-8-3",
+        "name": "Carbon tetrachloride",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+        },
+        "cells": [
+          {
+            "text": "7,85 ± 0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/carbon_tetrachloride_40c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Carbon tetrachloride",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "9,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/chlorobenzene_30c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Chlorobenzene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "9,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/chloroform_25c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Chloroform",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "8,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/cyclohexane_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Cyclohexane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "10,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/diethylamine_30c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Diethylamine",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethanol_0c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethanol_20c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,52",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "9,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethanol_40c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethylene_glycol_25c_8_61",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethylene glycol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+        },
+        "cells": [
+          {
+            "text": "9,88 ± 0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethylene_glycol_26c_8_62",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethylene glycol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
+        },
+        "cells": [
+          {
+            "text": "9,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethylene_glycol_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethylene glycol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "9,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethylene_glycol_30c_8_63",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethylene glycol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
+        },
+        "cells": [
+          {
+            "text": "9,93",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethylene_glycol_30c_8_64",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethylene glycol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
+        },
+        "cells": [
+          {
+            "text": "9,88 ± 0,035",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/ethyl_formate_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Ethyl formate",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "9,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/heptane_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Heptane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/heptane_40c_8_72",
+        "table": "rossing-2014-table-8-3",
+        "name": "Heptane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+        },
+        "cells": [
+          {
+            "text": "10,05",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/hexane_25c_8_61",
+        "table": "rossing-2014-table-8-3",
+        "name": "Hexane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+        },
+        "cells": [
+          {
+            "text": "9,81 ± 0,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/hexane_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Hexane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "9,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/hexane_40c_8_72",
+        "table": "rossing-2014-table-8-3",
+        "name": "Hexane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+        },
+        "cells": [
+          {
+            "text": "10,39",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/methanol_20c_8_68",
+        "table": "rossing-2014-table-8-3",
+        "name": "Methanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+        },
+        "cells": [
+          {
+            "text": "8,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/methanol_20c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Methanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "9,42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/methanol_30c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "Methanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "9,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/methyl_acetate_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Methyl acetate",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "9,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/methyl_iodide_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Methyl iodide",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "8,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/nitrobenzene_30c_8_59",
+        "table": "rossing-2014-table-8-3",
+        "name": "Nitrobenzene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "9,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/n_butanol_0c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "n-Butanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/n_butanol_20c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "n-Butanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/n_butanol_40c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "n-Butanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/n_propanol_0c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "n-Propanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/n_propanol_20c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "n-Propanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,69",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/n_propanol_40c_8_69",
+        "table": "rossing-2014-table-8-3",
+        "name": "n-Propanol",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+        },
+        "cells": [
+          {
+            "text": "10,73",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/octane_40c_8_72",
+        "table": "rossing-2014-table-8-3",
+        "name": "Octane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+        },
+        "cells": [
+          {
+            "text": "9,75",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/pentane_30c_8_72",
+        "table": "rossing-2014-table-8-3",
+        "name": "Pentane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+        },
+        "cells": [
+          {
+            "text": "9,87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/toluene_20c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Toluene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "5,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/toluene_25c_8_71",
+        "table": "rossing-2014-table-8-3",
+        "name": "Toluene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+        },
+        "cells": [
+          {
+            "text": "7,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-3/toluene_30c_8_73",
+        "table": "rossing-2014-table-8-3",
+        "name": "Toluene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "S.K. Kor, U.S. Tandon: Scattering of sound by sound from Beyers (B/A) parameters, Acustica 28, 129–130 (1973) [8.73]"
+        },
+        "cells": [
+          {
+            "text": "8,929",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/bismuth_318c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Bismuth",
+        "variant": "",
+        "group": "Liquid metals",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "7,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "318",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/indium_160c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Indium",
+        "variant": "",
+        "group": "Liquid metals",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "4,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "160",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/mercury_30c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Mercury",
+        "variant": "",
+        "group": "Liquid metals",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "7,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/potassium_100c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Potassium",
+        "variant": "",
+        "group": "Liquid metals",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "2,9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/sodium_110c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Sodium",
+        "variant": "",
+        "group": "Liquid metals",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "2,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "110",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/tin_240c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Tin",
+        "variant": "",
+        "group": "Liquid metals",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "4,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "240",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/argon_m_187_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Argon",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "5,01",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-187,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/argon_m_183_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Argon",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "The caption says atmospheric pressure, and argon boils at -185.85 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "5,67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-183,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/helium_m_271_38c_8_75",
+        "table": "rossing-2014-table-8-4",
+        "name": "Helium",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+        },
+        "cells": [
+          {
+            "text": "4,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-271,38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/hydrogen_m_259_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Hydrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "5,59",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-259,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/hydrogen_m_257_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Hydrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "6,87",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-257,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/hydrogen_m_255_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Hydrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "7,64",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-255,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/hydrogen_m_253_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Hydrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "7,79",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-253,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/methane_m_163_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Methane",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "17,95",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-163,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/methane_m_153_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Methane",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -153.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "10,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-153,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/methane_m_143_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Methane",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -143.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "6,54",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-143,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/methane_m_138_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Methane",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "The caption says atmospheric pressure, and methane boils at -161.49 °C at one atmosphere, so at -138.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "5,41",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-138,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/nitrogen_m_203_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Nitrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "7,7",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-203,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/nitrogen_m_195_76c_8_75",
+        "table": "rossing-2014-table-8-4",
+        "name": "Nitrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "H.A. Kashkooli, P.J. Dolan Jr., C.W. Smith: Measurement of the acoustic nonlinearity parameter in water, methanol, liquid nitrogen, and liquid helium-II by two different methods: A comparison, J. Acoust. Soc. Am. 82, 2086–2089 (1987) [8.75]"
+        },
+        "cells": [
+          {
+            "text": "6,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-195,76",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/nitrogen_m_193_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Nitrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -193.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "8,03",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-193,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/nitrogen_m_183_15c_8_74",
+        "table": "rossing-2014-table-8-4",
+        "name": "Nitrogen",
+        "variant": "",
+        "group": "Liquid gases",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "The caption says atmospheric pressure, and nitrogen boils at -195.79 °C at one atmosphere, so at -183.15 °C it is liquid only under a higher pressure the page does not print; the reference, [8.74], measured B/A in liquefied gases as a function of temperature and pressure. The value is served as printed and the caption's condition is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "b_over_a": "K.M. Swamy, K.L. Narayana, P.S. Swamy: A study of (B/A) in liquified gases as a function of temperature and pressure from ultrasonic velocity measurements, Acustica 32, 339–341 (1975) [8.74]"
+        },
+        "cells": [
+          {
+            "text": "9",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "-183,15",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/sea_water_3_5_nacl_20c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Sea water (3.5% NaCl)",
+        "variant": "",
+        "group": "Other substances",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "5,25",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "20",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-8-4/sulfur_121c_8_59",
+        "table": "rossing-2014-table-8-4",
+        "name": "Sulfur",
+        "variant": "",
+        "group": "Other substances",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 8.4, PDF page 285 (printed p. 269)",
+        "note": "",
+        "attributedTo": {
+          "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+        },
+        "cells": [
+          {
+            "text": "9,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "121",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
             "note": ""
           }
         ]

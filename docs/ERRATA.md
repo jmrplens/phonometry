@@ -7037,6 +7037,71 @@ in the same order.
   word stands for.
 - **Status:** unreported.
 
+## Rossing (2014), Table 8.3 (the 1-pentanol line printed twice)
+
+- **Location:** Table 8.3, "B/A values for organic liquids at atmospheric
+  pressure", fourth and fifth lines of the left panel, on printed page 269
+  (PDF page 285). Non-normative source: a handbook.
+- **The print:** two consecutive lines read "1-Pentanol | 20 | 10 | [8.68]",
+  identical in every cell.
+- **The problem:** every other substance of the table names itself once and
+  leaves the name blank on its further lines, and every other repeated
+  temperature of a substance cites a different paper or prints a different
+  value. These two lines are one measurement printed twice: the lines above
+  and below them run through the 1-alcohols from propanol to decanol, one line
+  each and all citing the same paper, and pentanol is the only one that
+  appears twice.
+- **Evidence:** Verified on PDF page 285 (printed p. 269) of Rossing (ed.),
+  *Springer Handbook of Acoustics* 2e (2014); both independent readings of
+  the page and a crop of the panel print the line twice.
+- **What the library does:** the measurement is held once in
+  [`PUBLISHED_NONLINEARITY`](../src/phonometry/fluids/nonlinearity.py), and
+  its note says the page prints it twice.
+- **Status:** unreported.
+
+## Rossing (2014), Table 8.1 (a year its own reference list contradicts)
+
+- **Location:** Table 8.1, "B/A values for pure water at atmospheric
+  pressure", column "Year", the six rows credited to [8.65], on printed page
+  268 (PDF page 284). Non-normative source: a handbook.
+- **The print:** the six rows at 30, 40, 50, 60, 70 and 80 °C credited to
+  [8.65] print the year 2001.
+- **The problem:** the chapter's reference list, on printed page 308 (PDF page
+  324), gives [8.65] as Plantier, Daridon and Lagourette, J. Acoust. Soc. Am.
+  111, 707-715 (2002). Every other row of the column prints the year its
+  reference carries in that list (1974, 1983, 1985, 1989, 1991), so the
+  column is the year of the reference, and 2001 is not the year of this one.
+- **Evidence:** Verified on PDF pages 284 and 324 (printed pp. 268 and 308) of
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), on the page images.
+- **What the library does:** in
+  [`PUBLISHED_NONLINEARITY`](../src/phonometry/fluids/nonlinearity.py) the six
+  rows serve no year and mark the cell `misprinted`, quoting both dates; their
+  values and their reference are unaffected.
+- **Status:** unreported.
+
+## Rossing (2014), Table 8.4 ("at atmospheric pressure" for six gases above their boiling point)
+
+- **Location:** Table 8.4, "B/A values for liquid metals and gases at
+  atmospheric pressure", block "Liquid gases", on printed page 269 (PDF page
+  285). Non-normative source: a handbook.
+- **The print:** the caption gives every row at atmospheric pressure, and the
+  block prints argon at −183,15 °C, methane at −153,15, −143,15 and −138,15 °C
+  and nitrogen at −193,15 and −183,15 °C.
+- **The problem:** at one atmosphere argon boils at −185,85 °C, methane at
+  −161,49 °C and nitrogen at −195,79 °C, so at those six temperatures each is a
+  gas, and a liquid only under a higher pressure. The rows' own reference,
+  [8.74], is titled on PDF page 324 "A study of (B/A) in liquified gases as a
+  function of temperature and pressure". The values are not in question; the
+  condition the caption attaches to them is.
+- **Evidence:** Verified on PDF pages 285 and 324 (printed pp. 269 and 308) of
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), on the page
+  images; the normal boiling points are those of the NIST Chemistry WebBook.
+- **What the library does:** the six rows are served as printed in
+  [`PUBLISHED_NONLINEARITY`](../src/phonometry/fluids/nonlinearity.py), hold
+  no pressure, and each says in its note that the caption's condition cannot
+  hold for it.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

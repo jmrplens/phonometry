@@ -69,6 +69,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`fluids.gas`](/phonometry/reference/api/fluids/gas/) | An ideal gas from the two numbers a gas table prints. |
 | [`fluids.water`](/phonometry/reference/api/fluids/water/) | Sea water: its speed of sound, and its density. |
 | [`fluids.catalogue`](/phonometry/reference/api/fluids/catalogue/) | Fluid states read from a printed page. |
+| [`fluids.nonlinearity`](/phonometry/reference/api/fluids/nonlinearity/) | The nonlinearity parameter B/A of liquids, as a handbook tabulates it. |
 
 ## Elastic solids
 

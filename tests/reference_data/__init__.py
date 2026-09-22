@@ -1216,3 +1216,7 @@ from .wave4_building import HARRIS_1977_19_2 as HARRIS_1977_19_2
 from .wave4_building import HARRIS_1977_19_3 as HARRIS_1977_19_3
 from .wave4_building import HARRIS_1977_19_4 as HARRIS_1977_19_4
 from .wave4_building import ROSSING_11_4 as ROSSING_11_4
+from .wave4_fluids import ROSSING_8_1 as ROSSING_8_1
+from .wave4_fluids import ROSSING_8_2 as ROSSING_8_2
+from .wave4_fluids import ROSSING_8_3 as ROSSING_8_3
+from .wave4_fluids import ROSSING_8_4 as ROSSING_8_4

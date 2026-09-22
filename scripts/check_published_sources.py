@@ -197,7 +197,19 @@ SOURCED: dict[tuple[str, str], str] = {
     (
         "fluids/catalogue.py",
         "PUBLISHED_FLUIDS",
-    ): "Bies 5e Table C.1, the three fluids it prints before its solids",
+    ): (
+        "Bies 5e Table C.1, the three fluids it prints before its solids; "
+        "Norton & Karczub (2003) Appendix 4 B and C, nine liquids and nine "
+        "gases each at a stated temperature"
+    ),
+    (
+        "fluids/nonlinearity.py",
+        "PUBLISHED_NONLINEARITY",
+    ): (
+        "Rossing (2014) Tables 8.1 to 8.4, a hundred and sixty-four values of "
+        "the nonlinearity parameter B/A, each credited to the paper it comes "
+        "from"
+    ),
     (
         "simulation/elastic_fdtd.py",
         "ALUMINIUM",

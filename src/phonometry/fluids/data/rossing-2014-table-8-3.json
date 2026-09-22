@@ -1,0 +1,568 @@
+{
+  "source": "Rossing (2014) Table 8.3, PDF page 285 (printed p. 269)",
+  "about": "Sixty-one values of the nonlinearity parameter B/A of organic liquids at atmospheric pressure, as Table 8.3 prints them over its two panels: a substance, a temperature, a value and the reference the value comes from, which the row carries in attributed_to with the reference list of the chapter spelled out. The page names a substance on the first of its rows and leaves the name blank on the rows under it; every row here carries the name. Several substances are measured more than once and each measurement is a row of its own, which is where this quantity shows its spread: toluene prints 5.6 at 20 °C and 8.929 at 30 °C, from two different references. Four values print a plus-or-minus, held in uncertainty.\n\nThe page prints the 1-pentanol row twice, identically; it is held once, and the repetition is registered in docs/ERRATA.md. The caption gives the pressure as atmospheric and prints no number for it, so no row holds a pressure.",
+  "rows": [
+    {
+      "key": "1_2_dhcp_30c_8_59",
+      "name": "1,2-DHCP",
+      "temperature_c": 30,
+      "b_over_a": 11.8,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "1_propanol_20c_8_68",
+      "name": "1-Propanol",
+      "temperature_c": 20,
+      "b_over_a": 9.5,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "1_butanol_20c_8_68",
+      "name": "1-Butanol",
+      "temperature_c": 20,
+      "b_over_a": 9.8,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "1_pentanol_20c_8_68",
+      "name": "1-Pentanol",
+      "temperature_c": 20,
+      "b_over_a": 10,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      },
+      "note": "The page prints this row twice, one line under the other, with the same temperature, value and reference; it is one measurement and is held once. The repetition is registered in docs/ERRATA.md."
+    },
+    {
+      "key": "1_hexanol_20c_8_68",
+      "name": "1-Hexanol",
+      "temperature_c": 20,
+      "b_over_a": 10.2,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "1_heptanol_20c_8_68",
+      "name": "1-Heptanol",
+      "temperature_c": 20,
+      "b_over_a": 10.6,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "1_octanol_20c_8_68",
+      "name": "1-Octanol",
+      "temperature_c": 20,
+      "b_over_a": 10.7,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "1_nonanol_20c_8_68",
+      "name": "1-Nonanol",
+      "temperature_c": 20,
+      "b_over_a": 10.8,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "1_decanol_20c_8_68",
+      "name": "1-Decanol",
+      "temperature_c": 20,
+      "b_over_a": 10.7,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "acetone_20c_8_69",
+      "name": "Acetone",
+      "temperature_c": 20,
+      "b_over_a": 9.23,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "acetone_20c_8_68",
+      "name": "Acetone",
+      "temperature_c": 20,
+      "b_over_a": 8,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "acetone_40c_8_69",
+      "name": "Acetone",
+      "temperature_c": 40,
+      "b_over_a": 9.51,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "benzene_20c_8_59",
+      "name": "Benzene",
+      "temperature_c": 20,
+      "b_over_a": 9,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "benzene_20c_8_70",
+      "name": "Benzene",
+      "temperature_c": 20,
+      "b_over_a": 8.4,
+      "attributed_to": {
+        "b_over_a": "O. Nomoto: Nonlinear parameter of the ‘Rao Liquid’, J. Phys. Soc. Jpn. 21, 569–571 (1966) [8.70]"
+      }
+    },
+    {
+      "key": "benzene_25c_8_71",
+      "name": "Benzene",
+      "temperature_c": 25,
+      "b_over_a": 6.5,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "benzene_40c_8_71",
+      "name": "Benzene",
+      "temperature_c": 40,
+      "b_over_a": 8.5,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "benzyl_alcohol_30c_8_69",
+      "name": "Benzyl alcohol",
+      "temperature_c": 30,
+      "b_over_a": 10.19,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "benzyl_alcohol_50c_8_69",
+      "name": "Benzyl alcohol",
+      "temperature_c": 50,
+      "b_over_a": 9.97,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "carbon_bisulfide_10c_8_71",
+      "name": "Carbon bisulfide",
+      "temperature_c": 10,
+      "b_over_a": 6.4,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "carbon_bisulfide_25c_8_71",
+      "name": "Carbon bisulfide",
+      "temperature_c": 25,
+      "b_over_a": 6.2,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "carbon_bisulfide_40c_8_71",
+      "name": "Carbon bisulfide",
+      "temperature_c": 40,
+      "b_over_a": 6.1,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "carbon_tetrachloride_10c_8_71",
+      "name": "Carbon tetrachloride",
+      "temperature_c": 10,
+      "b_over_a": 8.1,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "carbon_tetrachloride_25c_8_71",
+      "name": "Carbon tetrachloride",
+      "temperature_c": 25,
+      "b_over_a": 8.7,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "carbon_tetrachloride_25c_8_61",
+      "name": "Carbon tetrachloride",
+      "temperature_c": 25,
+      "b_over_a": 7.85,
+      "uncertainty": {
+        "b_over_a": 0.31
+      },
+      "attributed_to": {
+        "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+      }
+    },
+    {
+      "key": "carbon_tetrachloride_40c_8_71",
+      "name": "Carbon tetrachloride",
+      "temperature_c": 40,
+      "b_over_a": 9.3,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "chlorobenzene_30c_8_69",
+      "name": "Chlorobenzene",
+      "temperature_c": 30,
+      "b_over_a": 9.33,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "chloroform_25c_8_71",
+      "name": "Chloroform",
+      "temperature_c": 25,
+      "b_over_a": 8.2,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "cyclohexane_30c_8_59",
+      "name": "Cyclohexane",
+      "temperature_c": 30,
+      "b_over_a": 10.1,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "diethylamine_30c_8_69",
+      "name": "Diethylamine",
+      "temperature_c": 30,
+      "b_over_a": 10.3,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "ethanol_0c_8_69",
+      "name": "Ethanol",
+      "temperature_c": 0,
+      "b_over_a": 10.42,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "ethanol_20c_8_69",
+      "name": "Ethanol",
+      "temperature_c": 20,
+      "b_over_a": 10.52,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "ethanol_20c_8_68",
+      "name": "Ethanol",
+      "temperature_c": 20,
+      "b_over_a": 9.3,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "ethanol_40c_8_69",
+      "name": "Ethanol",
+      "temperature_c": 40,
+      "b_over_a": 10.6,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "ethylene_glycol_25c_8_61",
+      "name": "Ethylene glycol",
+      "temperature_c": 25,
+      "b_over_a": 9.88,
+      "uncertainty": {
+        "b_over_a": 0.4
+      },
+      "attributed_to": {
+        "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+      }
+    },
+    {
+      "key": "ethylene_glycol_26c_8_62",
+      "name": "Ethylene glycol",
+      "temperature_c": 26,
+      "b_over_a": 9.6,
+      "attributed_to": {
+        "b_over_a": "X. Gong, Z. Zhu, T. Shi, J. Huang: Determination of the acoustic nonlinearity parameter in biological media using FAIS and ITD methods, J. Acoust. Soc. Am. 86, 1–5 (1989) [8.62]"
+      }
+    },
+    {
+      "key": "ethylene_glycol_30c_8_59",
+      "name": "Ethylene glycol",
+      "temperature_c": 30,
+      "b_over_a": 9.7,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "ethylene_glycol_30c_8_63",
+      "name": "Ethylene glycol",
+      "temperature_c": 30,
+      "b_over_a": 9.93,
+      "attributed_to": {
+        "b_over_a": "K. Law, A. Frizell, F. Dunn: Determination of the nonlinearity parameter B/A of biological media, Ultrasound Med. Biol. 11, 307–318 (1985) [8.63]"
+      }
+    },
+    {
+      "key": "ethylene_glycol_30c_8_64",
+      "name": "Ethylene glycol",
+      "temperature_c": 30,
+      "b_over_a": 9.88,
+      "uncertainty": {
+        "b_over_a": 0.035
+      },
+      "attributed_to": {
+        "b_over_a": "J. Zhang, F. Dunn: A small volume thermodynamic system for B/A measurement, J. Acoust. Soc. Am. 89, 73–79 (1991) [8.64]"
+      }
+    },
+    {
+      "key": "ethyl_formate_30c_8_59",
+      "name": "Ethyl formate",
+      "temperature_c": 30,
+      "b_over_a": 9.8,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "heptane_30c_8_59",
+      "name": "Heptane",
+      "temperature_c": 30,
+      "b_over_a": 10,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "heptane_40c_8_72",
+      "name": "Heptane",
+      "temperature_c": 40,
+      "b_over_a": 10.05,
+      "attributed_to": {
+        "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+      }
+    },
+    {
+      "key": "hexane_25c_8_61",
+      "name": "Hexane",
+      "temperature_c": 25,
+      "b_over_a": 9.81,
+      "uncertainty": {
+        "b_over_a": 0.39
+      },
+      "attributed_to": {
+        "b_over_a": "Z. Zhu, S. Roos, N. Cobb, K. Jensen: Determination of the acoustic nonlinearity parameter B/A from phase measurements, J. Acoust. Soc. Am. 74, 1518–1521 (1983) [8.61]"
+      }
+    },
+    {
+      "key": "hexane_30c_8_59",
+      "name": "Hexane",
+      "temperature_c": 30,
+      "b_over_a": 9.9,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "hexane_40c_8_72",
+      "name": "Hexane",
+      "temperature_c": 40,
+      "b_over_a": 10.39,
+      "attributed_to": {
+        "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+      }
+    },
+    {
+      "key": "methanol_20c_8_68",
+      "name": "Methanol",
+      "temperature_c": 20,
+      "b_over_a": 8.6,
+      "attributed_to": {
+        "b_over_a": "J. Banchet, J.D.N. Cheeke: Measurements of the acoustic nonlinearity parameter B/A in solvents: Dependence on chain length and sound velocity, J. Acoust. Soc. Am. 108, 2754–2758 (2000) [8.68]"
+      }
+    },
+    {
+      "key": "methanol_20c_8_69",
+      "name": "Methanol",
+      "temperature_c": 20,
+      "b_over_a": 9.42,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "methanol_30c_8_69",
+      "name": "Methanol",
+      "temperature_c": 30,
+      "b_over_a": 9.64,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "methyl_acetate_30c_8_59",
+      "name": "Methyl acetate",
+      "temperature_c": 30,
+      "b_over_a": 9.7,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "methyl_iodide_30c_8_59",
+      "name": "Methyl iodide",
+      "temperature_c": 30,
+      "b_over_a": 8.2,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "nitrobenzene_30c_8_59",
+      "name": "Nitrobenzene",
+      "temperature_c": 30,
+      "b_over_a": 9.9,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Nonlinear Acoustics (Naval Ship Systems Command, Washington 1974), Table 3-1 [8.59]"
+      }
+    },
+    {
+      "key": "n_butanol_0c_8_69",
+      "name": "n-Butanol",
+      "temperature_c": 0,
+      "b_over_a": 10.71,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "n_butanol_20c_8_69",
+      "name": "n-Butanol",
+      "temperature_c": 20,
+      "b_over_a": 10.69,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "n_butanol_40c_8_69",
+      "name": "n-Butanol",
+      "temperature_c": 40,
+      "b_over_a": 10.75,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "n_propanol_0c_8_69",
+      "name": "n-Propanol",
+      "temperature_c": 0,
+      "b_over_a": 10.47,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "n_propanol_20c_8_69",
+      "name": "n-Propanol",
+      "temperature_c": 20,
+      "b_over_a": 10.69,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "n_propanol_40c_8_69",
+      "name": "n-Propanol",
+      "temperature_c": 40,
+      "b_over_a": 10.73,
+      "attributed_to": {
+        "b_over_a": "A.B. Coppens, R.T. Beyer, M.B. Seiden, J. Donohue, F. Guepin, R.H. Hodson, C. Townsend: Parameter of nonlinearity in fluids II, J. Acoust. Soc. Am. 38, 797–804 (1965) [8.69]"
+      }
+    },
+    {
+      "key": "octane_40c_8_72",
+      "name": "Octane",
+      "temperature_c": 40,
+      "b_over_a": 9.75,
+      "attributed_to": {
+        "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+      }
+    },
+    {
+      "key": "pentane_30c_8_72",
+      "name": "Pentane",
+      "temperature_c": 30,
+      "b_over_a": 9.87,
+      "attributed_to": {
+        "b_over_a": "K.L. Narayana, K.M. Swamy: Acoustic nonlinear parameter (B/A) in n-pentane, Acustica 49, 336–339 (1981) [8.72]"
+      }
+    },
+    {
+      "key": "toluene_20c_8_71",
+      "name": "Toluene",
+      "temperature_c": 20,
+      "b_over_a": 5.6,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "toluene_25c_8_71",
+      "name": "Toluene",
+      "temperature_c": 25,
+      "b_over_a": 7.9,
+      "attributed_to": {
+        "b_over_a": "R.T. Beyer: Parameter of nonlinearity in fluids, J. Acoust. Soc. Am. 32, 719–721 (1960) [8.71]"
+      }
+    },
+    {
+      "key": "toluene_30c_8_73",
+      "name": "Toluene",
+      "temperature_c": 30,
+      "b_over_a": 8.929,
+      "attributed_to": {
+        "b_over_a": "S.K. Kor, U.S. Tandon: Scattering of sound by sound from Beyers (B/A) parameters, Acustica 28, 129–130 (1973) [8.73]"
+      }
+    }
+  ]
+}

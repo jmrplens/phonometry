@@ -62,6 +62,7 @@ interface Props {
 		| 'diffusion'
 		| 'predictedScattering'
 		| 'fluids'
+		| 'nonlinearity'
 		| 'airAttenuation';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
@@ -85,6 +86,7 @@ const copy = {
 		searchPlaceholder: 'steel, foam, glass',
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
+		liquidPlaceholder: 'water, ethanol, mercury',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -106,6 +108,7 @@ const copy = {
 		duct: 'Duct',
 		condition: 'Condition',
 		state: 'State',
+		substance: 'Substance',
 		conditions: 'Conditions',
 		mounting: 'Mount',
 		per: 'Per',
@@ -140,6 +143,7 @@ const copy = {
 		searchPlaceholder: 'steel, foam, glass',
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
+		liquidPlaceholder: 'water, ethanol, mercury',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -161,6 +165,7 @@ const copy = {
 		duct: 'Conducto',
 		condition: 'Condición',
 		state: 'Estado',
+		substance: 'Sustancia',
 		conditions: 'Condiciones',
 		mounting: 'Montaje',
 		per: 'Por',
@@ -224,12 +229,14 @@ const placeholders: Partial<Record<typeof section, string>> = {
 	impactInsulation: copy.floorPlaceholder,
 	ductTransmissionLoss: copy.ductPlaceholder,
 	airAttenuation: copy.conditionPlaceholder,
+	nonlinearity: copy.liquidPlaceholder,
 };
 const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 
 /** What the first column holds, which is not a material in every catalogue. */
 const rowHeadings: Partial<Record<typeof section, string>> = {
 	fluids: copy.state,
+	nonlinearity: copy.substance,
 	ground: copy.surface,
 	gases: copy.gas,
 	absorption: copy.finish,

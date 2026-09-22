@@ -95,10 +95,12 @@ What it is not
 It is not a specification and it is not a prediction. The chapter says the
 tables hold "datos de mediciones" collected from a 1967 report prepared for the
 Federal Housing Administration by the National Bureau of Standards, and Table
-32.8 credits a 1963 paper by Zeller; each row carries the one that covers its
-table in `attributed_to`,
-because a row read on its own would otherwise answer the same source for both.
-No laboratory, no test standard and no uncertainty is named for any row. Table
+32.8 credits a 1963 paper by Zeller; each row of Chapter 32 carries the one
+that covers its table in
+`attributed_to`, because a
+row read on its own would otherwise answer the same source for both. The 1977
+tables credit no source and their rows carry none. No laboratory, no test
+standard and no uncertainty is named for any row. Table
 32.8 carries a footnote of its own worth reading before its numbers are used
 anywhere: over wood-joist floors the improvement may be substantially smaller
 than the one printed.

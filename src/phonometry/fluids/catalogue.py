@@ -79,6 +79,9 @@ __all__ = [
     "gases_named",
 ]
 
+#: The package whose ``data`` directory holds every table this module reads.
+_PACKAGE = "phonometry.fluids"
+
 #: The table of fluid states this catalogue reads from a data file. One file
 #: per published table, in ``fluids/data``, each citing its own page.
 _FLUID_TABLES = ("bies-2017-table-c1-fluids", "norton-karczub-2003-appendix-4bc")
@@ -107,8 +110,8 @@ def _transcribed() -> dict[str, Fluid]:
     """
     states: dict[str, Fluid] = {}
     for table in _FLUID_TABLES:
-        source, rows = read_table("phonometry.fluids", f"{table}.json")
-        about = _table_validity("phonometry.fluids", f"{table}.json")
+        source, rows = read_table(_PACKAGE, f"{table}.json")
+        about = _table_validity(_PACKAGE, f"{table}.json")
         for row in rows:
             # Only what the row prints. A table that gives the ratio of
             # specific heats fixes it; one that does not leaves the state
@@ -252,7 +255,7 @@ def _gases() -> dict[str, Gas]:
     """
     rows: dict[str, Gas] = {}
     for table in _GAS_TABLES:
-        source, records = read_table("phonometry.fluids", f"{table}.json")
+        source, records = read_table(_PACKAGE, f"{table}.json")
         for record in records:
             rows[f"{table}/{record['key']}"] = Gas(
                 table=table, source=source, **take(record, frozen=_SETS)

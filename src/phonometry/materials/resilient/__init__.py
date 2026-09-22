@@ -15,8 +15,16 @@ from .dynamic_stiffness import (
     natural_frequency,
     resilient_layer,
 )
+from .moduli import (
+    PUBLISHED_RESILIENT_MODULI,
+    ResilientMaterial,
+    resilient_moduli_named,
+)
 
 __all__ = [
+    "PUBLISHED_RESILIENT_MODULI",
+    "ResilientMaterial",
+    "resilient_moduli_named",
     "PUBLISHED_RESILIENT_LAYERS",
     "DynamicStiffnessResult",
     "DynamicStiffnessWarning",

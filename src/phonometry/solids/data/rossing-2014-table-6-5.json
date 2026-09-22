@@ -1,0 +1,57 @@
+{
+  "source": "Rossing (2014) Table 6.5, PDF page 261 (printed p. 244)",
+  "about": "Eight room-temperature values of the ultrasonic nonlinearity parameter of solids, beta_avg, from Table 6.5: five crystal structures or bonding classes (zincblende, fluorite, face-centred cubic metals and inert-gas solids, body-centred cubic metals) and three named materials (NaCl, fused silica and a YBCO ceramic), each with its bonding. The prose beside the table says each value is the average over the three pure-mode directions [100], [110] and [111] of a cubic crystal, which differ but not greatly; for a structure it is also an average over the solids that share it.\n\nThe parameter is the page's own beta, defined in its Eq. (6.76) as -(3 + K3/K2) with K2 and K3 the second- and third-order elastic coefficients of the propagation direction. The page's Table 6.6 gives the same parameter for a liquid as B/A + 2 and for an ideal gas as gamma + 1, so a solid's beta compares with a liquid's B/A + 2 and not with its B/A. The table credits no source.",
+  "rows": [
+    {
+      "key": "zincblende",
+      "name": "Zincblende",
+      "bonding": "Covalent",
+      "nonlinearity_parameter": 2.2
+    },
+    {
+      "key": "fluorite",
+      "name": "Flourite",
+      "bonding": "Ionic",
+      "nonlinearity_parameter": 3.8,
+      "note": "Printed \"Flourite\", the fluorite structure of CaF2; the name is kept as printed and the spelling is registered in docs/ERRATA.md."
+    },
+    {
+      "key": "fcc",
+      "name": "FCC",
+      "bonding": "Metallic",
+      "nonlinearity_parameter": 5.6
+    },
+    {
+      "key": "fcc_inert_gas",
+      "name": "FCC (inert gas)",
+      "bonding": "van der Waals",
+      "nonlinearity_parameter": 6.4
+    },
+    {
+      "key": "bcc",
+      "name": "BCC",
+      "bonding": "Metallic",
+      "nonlinearity_parameter": 8.2
+    },
+    {
+      "key": "nacl",
+      "name": "NaCl",
+      "bonding": "Ionic",
+      "nonlinearity_parameter": 14.6
+    },
+    {
+      "key": "fused_silica",
+      "name": "Fused silica",
+      "bonding": "Isotropic",
+      "nonlinearity_parameter": -3.4,
+      "note": "The only negative value of the table, and printed with its minus sign: by the page's definition beta = -(3 + K3/K2), a negative beta means K3/K2 is above -3, the opposite of the crystals. The prose beside the table gives the range as 2 to 15 for cubic crystals, and fused silica, an isotropic glass, is not one."
+    },
+    {
+      "key": "ybco_ceramic",
+      "name": "YBa2Cu3O7−δ (ceramic)",
+      "bonding": "Isotropic",
+      "nonlinearity_parameter": 14.3,
+      "note": "The page sets the formula with subscripts, YBa₂Cu₃O₇₋δ, a ceramic superconductor."
+    }
+  ]
+}

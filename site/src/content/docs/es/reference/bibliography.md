@@ -468,12 +468,18 @@ se reparte la absorción, que es justo donde discrepan los cinco.
   capítulo 19, «Control del ruido a través de los sólidos», de Fritz
   Ingerslev y Cyril M. Harris, imprime en las tablas 19.2 a 19.4 la mejora
   media del aislamiento al impacto de veintitrés acabados, soleras flotantes y
-  suelos de madera sobre un forjado de hormigón desnudo.
+  suelos de madera sobre un forjado de hormigón desnudo, y la tabla 14.2, en el
+  capítulo de Richard N. Hamme sobre el amortiguamiento de la vibración, la tasa
+  de decaimiento de ocho tratamientos de fieltro asfáltico sobre un panel
+  normalizado de acero.
 - Harris, C. M. (ed.). (1995). *Manual de medidas acústicas y control del
   ruido* (3.ª ed.). McGraw-Hill.
   La edición española del manual, citada en este árbol como Harris 3e y que no
   hay que confundir con el artículo de ventanas de F. J. Harris, en Análisis de
-  señal. Su capítulo 31 imprime en siete tablas la clase de transmisión del
+  señal. Su capítulo 30 imprime en las tablas 30.2 y 30.3 el coeficiente de
+  reducción del ruido de diecinueve alfombras sobre hormigón desnudo y sobre un
+  relleno de pelo; su capítulo 31 imprime en siete tablas la clase de
+  transmisión del
   sonido de tabiques de montantes, muros de bloques, puertas, ventanas selladas
   y sistemas de suelo-techo, y su capítulo 32, «Aislamiento del sonido
   transmitido por estructuras», imprime en las tablas 32.1 a 32.8 la clase de

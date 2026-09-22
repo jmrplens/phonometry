@@ -7575,6 +7575,61 @@ dos ediciones con las mismas entradas y en el mismo orden.
   cumplirse para ella.
 - **Estado:** sin comunicar.
 
+## Harris 3e (1995), tabla 30.2 (cinco pesos del pelo cuyas dos mitades no son la misma)
+
+- **Dónde:** tabla 30.2, «Absorción del sonido de alfombras sobre hormigón
+  desnudo», columna «Peso del pelo kg/m$^2$ (oz/yd$^2$)», en el folio impreso
+  30.22 (página 704 del PDF), capítulo 30 de la edición española. Fuente no
+  normativa: un manual.
+- **Lo impreso:** cada peso del pelo se imprime dos veces, primero en SI y
+  entre paréntesis en unidades estadounidenses: «1,2 (35)», «1,5 (43)» y así,
+  once pares en la tabla.
+- **El problema:** una onza por yarda cuadrada son $0{,}033906$ kg/m$^2$ por
+  definición, y cinco de los once pares no son el mismo número con el
+  criterio de la entrada del capítulo 32 (la mitad SI es la conversión
+  redondeada o truncada a la precisión con la que se imprime):
+  - «2,3 (66)», «3,1 (88)» y «2,1 (60)»: $66 \times 0{,}0339 = 2{,}24$,
+    $88 \times 0{,}0339 = 2{,}98$ y $60 \times 0{,}0339 = 2{,}03$. Los tres
+    son lo que da $0{,}035$ kg/m$^2$ por oz/yd$^2$, un factor que también
+    reproduce todos los pares de las tablas 30.2 y 30.3 que sí cuadran, y por
+    eso estos tres salen una décima altos: la columna métrica sigue un factor un
+    3 por ciento por encima de la definición.
+  - «1,3 (32)»: $32 \times 0{,}0339 = 1{,}08$, y $0{,}035$ da $1{,}12$;
+    ninguno llega a $1{,}3$.
+  - «1,1 (3,2)»: $3{,}2$ oz/yd$^2$ son $0{,}11$ kg/m$^2$. La misma alfombra,
+    de nudo, de nylon cortado con pelo de 14 mm, se imprime «1,1 (32)» en la
+    tabla 30.3, así que a la mitad imperial le sobra una coma decimal.
+- **Evidencia:** Verificado en la página 704 del PDF (p. impresa 30.22) de
+  Harris (ed.), *Manual de medidas acústicas y control del ruido* 3.ª ed.
+  (1995); las dos lecturas independientes de la página y un recorte de la
+  columna imprimen los cinco pares tal como se citan. Los ocho pares de la
+  tabla 30.3, en esa página y la siguiente, cuadran.
+- **Qué hace la biblioteca:** en
+  [`PUBLISHED_CARPETS`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/materials/absorbers/carpets.py) las
+  cuatro filas cuyos kilogramos quedan en duda no sirven peso del pelo y
+  marcan la celda como `misprinted`, citando el par; la quinta sirve su 1,1
+  kg/m$^2$ y dice en su nota que a las onzas les falta una cifra.
+- **Estado:** sin comunicar.
+
+## Rossing (2014), tabla 6.5 («Flourite» por fluorita)
+
+- **Dónde:** tabla 6.5, «Comparison of room-temperature values of the
+  ultrasonic nonlinearity parameters of solids», segunda fila, en la página
+  impresa 244 (página 261 del PDF). Fuente no normativa: un manual.
+- **Lo impreso:** la fila se rotula «Flourite», enlace iónico, beta 3,8.
+- **El problema:** la estructura cristalina del fluoruro de calcio es la
+  fluorita (*fluorite*); el rótulo intercambia dos letras. Ningún número de la
+  fila se ve afectado.
+- **Evidencia:** Verificado en la página 261 del PDF (p. impresa 244) de
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014), sobre la imagen de
+  la página y en la capa de texto del propio PDF, que imprimen las dos
+  «Flourite».
+- **Qué hace la biblioteca:** la fila se sirve con el nombre impreso en
+  [`PUBLISHED_SOLID_NONLINEARITY`](https://github.com/jmrplens/phonometry/blob/main/src/phonometry/solids/nonlinearity.py),
+  para que una búsqueda por la palabra impresa la encuentre, con la clave
+  `fluorite`, y su nota dice qué quiere decir.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la

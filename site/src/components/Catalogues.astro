@@ -46,14 +46,17 @@ interface Props {
 	catalogue:
 		| 'solids'
 		| 'damping'
+		| 'dampingTreatments'
 		| 'orthotropicWood'
 		| 'plateau'
 		| 'porous'
 		| 'flowResistance'
 		| 'resilientLayers'
+		| 'resilientModuli'
 		| 'ground'
 		| 'gases'
 		| 'absorption'
+		| 'carpets'
 		| 'absorptionAreas'
 		| 'transmissionLoss'
 		| 'impactInsulation'
@@ -63,6 +66,7 @@ interface Props {
 		| 'predictedScattering'
 		| 'fluids'
 		| 'nonlinearity'
+		| 'solidNonlinearity'
 		| 'airAttenuation';
 	/** Locale of the page it is rendered on. */
 	lang?: 'en' | 'es';
@@ -87,6 +91,10 @@ const copy = {
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
 		liquidPlaceholder: 'water, ethanol, mercury',
+		treatmentPlaceholder: 'muescado, alfombra',
+		carpetPlaceholder: 'nylon, lana, rizo',
+		resilientModulusPlaceholder: 'rock wool, cork',
+		solidNonlinearityPlaceholder: 'FCC, NaCl, ionic',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -109,6 +117,9 @@ const copy = {
 		condition: 'Condition',
 		state: 'State',
 		substance: 'Substance',
+		treatment: 'Treatment',
+		construction: 'Construction',
+		structure: 'Material or structure',
 		conditions: 'Conditions',
 		mounting: 'Mount',
 		per: 'Per',
@@ -117,6 +128,7 @@ const copy = {
 		shape: 'Shape',
 		gauge: 'Sheet gauge',
 		weave: 'Weave',
+		bonding: 'Bonding',
 		fixedBy: 'What fixes it',
 		source: 'Source',
 		regionLabel: 'Published values, scrollable sideways',
@@ -144,6 +156,10 @@ const copy = {
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
 		liquidPlaceholder: 'water, ethanol, mercury',
+		treatmentPlaceholder: 'muescado, alfombra',
+		carpetPlaceholder: 'nylon, lana, rizo',
+		resilientModulusPlaceholder: 'rock wool, cork',
+		solidNonlinearityPlaceholder: 'FCC, NaCl, ionic',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -166,6 +182,9 @@ const copy = {
 		condition: 'Condición',
 		state: 'Estado',
 		substance: 'Sustancia',
+		treatment: 'Tratamiento',
+		construction: 'Construcción',
+		structure: 'Material o estructura',
 		conditions: 'Condiciones',
 		mounting: 'Montaje',
 		per: 'Por',
@@ -174,6 +193,7 @@ const copy = {
 		shape: 'Forma',
 		gauge: 'Calibre de chapa',
 		weave: 'Tejido',
+		bonding: 'Enlace',
 		fixedBy: 'Qué lo fija',
 		source: 'Fuente',
 		regionLabel: 'Valores publicados, con desplazamiento lateral',
@@ -230,6 +250,10 @@ const placeholders: Partial<Record<typeof section, string>> = {
 	ductTransmissionLoss: copy.ductPlaceholder,
 	airAttenuation: copy.conditionPlaceholder,
 	nonlinearity: copy.liquidPlaceholder,
+	dampingTreatments: copy.treatmentPlaceholder,
+	carpets: copy.carpetPlaceholder,
+	resilientModuli: copy.resilientModulusPlaceholder,
+	solidNonlinearity: copy.solidNonlinearityPlaceholder,
 };
 const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 
@@ -237,6 +261,9 @@ const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 const rowHeadings: Partial<Record<typeof section, string>> = {
 	fluids: copy.state,
 	nonlinearity: copy.substance,
+	solidNonlinearity: copy.structure,
+	dampingTreatments: copy.treatment,
+	carpets: copy.construction,
 	ground: copy.surface,
 	gases: copy.gas,
 	absorption: copy.finish,
@@ -259,20 +286,21 @@ const heading = (column: { heading: string; headingEs?: string }) =>
 /** The distinct published tables of a catalogue, for its filter. */
 const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => row.table))].sort();
 
-/** What the filter matches against: everything a reader might type. */
+/** What the filter matches against: everything a reader might type, which
+    is the row's names and every word column the table shows for it. The word
+    columns are read from `textColumns` rather than listed again here, so a
+    column the table gains is searchable the day it appears; two of them, the
+    bonding of a solid and what an area is an area of, were shown and not
+    matched while this was a second list. */
 const haystack = (row: Record<string, unknown>) =>
 	[
 		row.name,
 		row.variant,
 		row.group,
-		row.mounting,
 		row.table,
 		row.source,
 		row.model,
-		row.direction,
-		row.shape,
-		row.gauge,
-		row.weave,
+		...textColumns.map((column) => row[column.field]),
 	]
 		.filter(Boolean)
 		.join(' ')
@@ -309,6 +337,7 @@ const textColumns = (
 		{ field: 'shape', label: copy.shape, wrap: false },
 		{ field: 'gauge', label: copy.gauge, wrap: false },
 		{ field: 'weave', label: copy.weave, wrap: false },
+		{ field: 'bonding', label: copy.bonding, wrap: false },
 		/* The fluids carry a model too, and it is what fixes the state rather
 		   than a solver that computed a row, so it is the last column of that
 		   table and not one of these. */

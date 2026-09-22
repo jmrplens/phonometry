@@ -56,6 +56,7 @@ from phonometry.materials.absorbers import (  # noqa: E402
     ABSORPTION_BANDS_HZ,
     PUBLISHED_ABSORPTION,
     PUBLISHED_ABSORPTION_AREAS,
+    PUBLISHED_CARPETS,
     PUBLISHED_FLOW_RESISTANCE,
     PUBLISHED_POROUS,
 )
@@ -68,7 +69,10 @@ from phonometry.materials.diffusers import (  # noqa: E402
     PUBLISHED_SCATTERING,
     SCATTERING_BANDS_HZ,
 )
-from phonometry.materials.resilient import PUBLISHED_RESILIENT_LAYERS  # noqa: E402
+from phonometry.materials.resilient import (  # noqa: E402
+    PUBLISHED_RESILIENT_LAYERS,
+    PUBLISHED_RESILIENT_MODULI,
+)
 from phonometry.noise_control import (  # noqa: E402
     DUCT_WALL_BANDS_HZ,
     PUBLISHED_DUCT_TRANSMISSION_LOSS,
@@ -81,8 +85,10 @@ from phonometry.room.enclosed_space_absorption import (  # noqa: E402
 from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
 from phonometry.solids import (  # noqa: E402
     PUBLISHED_DAMPING,
+    PUBLISHED_DAMPING_TREATMENTS,
     PUBLISHED_ORTHOTROPIC_WOOD,
     PUBLISHED_PLATEAU_DATA,
+    PUBLISHED_SOLID_NONLINEARITY,
     PUBLISHED_SOLIDS,
 )
 
@@ -217,6 +223,46 @@ PLATEAU_COLUMNS = (
         "Razón de frecuencias B/A",
         "",
     ),
+)
+
+#: A damping treatment on the chapter's standard panel: the decay rate leads,
+#: then what the treatment is and how it was laid.
+DAMPING_TREATMENT_COLUMNS = (
+    ("decay_rate_db_s", "Decay rate", "Tasa de decaimiento", "dB/s"),
+    ("temperature_c", "Temperature", "Temperatura", "°C"),
+    ("adhered_area_percent", "Area bonded", "Área adherida", "%"),
+    ("surface_density_kg_m2", "Surface density", "Masa superficial", "kg/m²"),
+)
+
+#: A resilient material under a floating floor: the modulus it springs with,
+#: the density it is sold by, and the load the modulus was measured under.
+RESILIENT_MODULUS_COLUMNS = (
+    (
+        "dynamic_youngs_modulus_pa",
+        "Dynamic modulus",
+        "Módulo dinámico",
+        "Pa",
+    ),
+    ("density_kg_m3", "Density", "Densidad", "kg/m³"),
+    ("static_load_pa", "Static load", "Carga estática", "Pa"),
+)
+
+#: A carpet: its pile, then the one acoustic number the page gives it.
+CARPET_COLUMNS = (
+    ("pile_weight_kg_m2", "Pile weight", "Peso del pelo", "kg/m²"),
+    ("pile_height_mm", "Pile height", "Altura del pelo", "mm"),
+    (
+        "noise_reduction_coefficient",
+        "Noise reduction coefficient",
+        "Coeficiente de reducción del ruido",
+        "",
+    ),
+)
+
+#: The nonlinearity parameter of a solid. The bonding is a word and has a
+#: text column of its own, the way a duct's shape does.
+SOLID_NONLINEARITY_COLUMNS = (
+    ("nonlinearity_parameter", "β (averaged)", "β (promediado)", ""),
 )
 
 #: The nonlinearity parameter of a liquid, and the conditions it was
@@ -911,6 +957,9 @@ def rows(
             "shape": getattr(row, "shape", ""),
             "gauge": getattr(row, "sheet_metal_gauge", ""),
             "weave": getattr(row, "weave_construction", ""),
+            # The bonding of a solid, which the nonlinearity table prints
+            # beside each structure and which is a word, not a quantity.
+            "bonding": getattr(row, "bonding", ""),
             "source": row.source,
             "note": row.note,
             "attributedTo": dict(row.attributed_to),
@@ -1125,6 +1174,7 @@ def transcribed(
                 "shape": "",
                 "gauge": "",
                 "weave": "",
+                "bonding": "",
                 "source": record["source"],
                 "note": record.get("note", ""),
                 "attributedTo": record.get("attributedTo", {}),
@@ -1289,12 +1339,22 @@ def render() -> str:
             "rows": list(rows(PUBLISHED_GASES, GAS_COLUMNS)),
         },
         "damping": section(PUBLISHED_DAMPING, DAMPING_COLUMNS),
+        "dampingTreatments": section(
+            PUBLISHED_DAMPING_TREATMENTS, DAMPING_TREATMENT_COLUMNS
+        ),
         "orthotropicWood": section(PUBLISHED_ORTHOTROPIC_WOOD, WOOD_COLUMNS),
         "plateau": section(PUBLISHED_PLATEAU_DATA, PLATEAU_COLUMNS),
         "nonlinearity": section(PUBLISHED_NONLINEARITY, NONLINEARITY_COLUMNS),
+        "solidNonlinearity": section(
+            PUBLISHED_SOLID_NONLINEARITY, SOLID_NONLINEARITY_COLUMNS
+        ),
         "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
         "resilientLayers": transcribed(resilient_layers(), RESILIENT_LAYER_COLUMNS),
+        "resilientModuli": section(
+            PUBLISHED_RESILIENT_MODULI, RESILIENT_MODULUS_COLUMNS
+        ),
         "absorption": section(PUBLISHED_ABSORPTION, ABSORPTION_COLUMNS),
+        "carpets": section(PUBLISHED_CARPETS, CARPET_COLUMNS),
         "transmissionLoss": section(
             PUBLISHED_TRANSMISSION_LOSS, TRANSMISSION_LOSS_COLUMNS
         ),
@@ -1353,7 +1413,11 @@ def main(argv: list[str] | None = None) -> int:
         "damping materials": len(PUBLISHED_DAMPING),
         "orthotropic woods": len(PUBLISHED_ORTHOTROPIC_WOOD),
         "plateau materials": len(PUBLISHED_PLATEAU_DATA),
+        "damping treatments": len(PUBLISHED_DAMPING_TREATMENTS),
+        "resilient moduli": len(PUBLISHED_RESILIENT_MODULI),
+        "carpets": len(PUBLISHED_CARPETS),
         "nonlinearity values": len(PUBLISHED_NONLINEARITY),
+        "solid nonlinearity": len(PUBLISHED_SOLID_NONLINEARITY),
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
         "resistive facings": len(PUBLISHED_FLOW_RESISTANCE),

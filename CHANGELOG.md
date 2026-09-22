@@ -9,6 +9,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
+- **Three small catalogues a floor, a panel and a room need.**
+  `materials.PUBLISHED_RESILIENT_MODULI` holds Vigran (2008) Table 8.3, the
+  dynamic modulus of six resilient materials under a static load of about
+  2 kPa, from which a layer's dynamic stiffness is the modulus over its
+  thickness. `solids.PUBLISHED_DAMPING_TREATMENTS` holds Harris (1977) Table
+  14.2, eight asphalt felt treatments rated by the decay rate of a standard
+  steel panel at 160 Hz, which is not a loss factor and is not held as one.
+  `materials.PUBLISHED_CARPETS` holds Harris 3e Tables 30.2 and 30.3,
+  nineteen carpets on bare concrete and on a hair pad with their pile and
+  noise reduction coefficient; five pile weights of Table 30.2 whose two
+  printed halves are not each other are registered, and the four in doubt
+  serve nothing. Each catalogue has a lookup by name and a section of the
+  published catalogues page.
+- **The nonlinearity parameter of solids.** `solids.PUBLISHED_SOLID_NONLINEARITY`
+  holds Rossing (2014) Table 6.5, the ultrasonic β of eight solids at room
+  temperature, averaged over the pure-mode directions of a cubic crystal. It
+  is the page's β = −(3 + K3/K2), which for a liquid is B/A + 2 and not B/A,
+  and the documentation says so beside the B/A catalogue.
 - **A hundred and sixty-four published values of the nonlinearity parameter
   B/A.** `fluids.PUBLISHED_NONLINEARITY` holds Rossing (2014) Tables 8.1 to
   8.4: pure water from 0 to 100 °C, water up to 50 MPa, organic liquids,

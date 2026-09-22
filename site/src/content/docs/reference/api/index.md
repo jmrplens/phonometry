@@ -78,6 +78,8 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`solids.elastic`](/phonometry/reference/api/solids/elastic/) | Three longitudinal wave speeds of a solid, and which one a table prints. |
 | [`solids.catalogue`](/phonometry/reference/api/solids/catalogue/) | Solid materials as one published table prints them. |
 | [`solids.damping`](/phonometry/reference/api/solids/damping/) | Commercial damping materials, with the temperature and the frequency. |
+| [`solids.damping_treatments`](/phonometry/reference/api/solids/damping-treatments/) | Damping treatments rated by the decay rate of a treated panel. |
+| [`solids.nonlinearity`](/phonometry/reference/api/solids/nonlinearity/) | The nonlinearity parameter of solids, as a handbook tabulates it. |
 | [`solids.orthotropic_wood`](/phonometry/reference/api/solids/orthotropic-wood/) | Wood, which is not the same material in two directions. |
 | [`solids.plateau`](/phonometry/reference/api/solids/plateau/) | The three numbers a panel needs before its transmission loss can be sketched. |
 
@@ -179,6 +181,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`materials.absorbers.uncertainty`](/phonometry/reference/api/materials/uncertainty/) | Measurement uncertainty for sound absorption (ISO 12999-2:2020). |
 | [`materials.absorbers.airflow_resistance`](/phonometry/reference/api/materials/airflow-resistance/) | Airflow resistance of porous materials: ISO 9053-1 and ISO 9053-2. |
 | [`materials.resilient.dynamic_stiffness`](/phonometry/reference/api/materials/dynamic-stiffness/) | Dynamic stiffness of resilient materials under floating floors (EN 29052-1:1992). |
+| [`materials.resilient.moduli`](/phonometry/reference/api/materials/moduli/) | The dynamic modulus of resilient materials, as a textbook tabulates it. |
 | [`materials.absorbers.impedance_tube`](/phonometry/reference/api/materials/impedance-tube/) | Two-microphone transfer-function method in the impedance tube. |
 | [`materials.absorbers.four_microphone`](/phonometry/reference/api/materials/four-microphone/) | Four-microphone transfer-matrix method for the transmission of a specimen. |
 | [`materials.absorbers.standing_wave`](/phonometry/reference/api/materials/standing-wave/) | Standing-wave-ratio method for normal-incidence absorption and impedance. |
@@ -186,6 +189,7 @@ La referencia de la API se genera a partir de los docstrings del código (en ing
 | [`materials.absorbers.catalogue`](/phonometry/reference/api/materials/catalogue/) | Porous specimens as the pages that print them have them. |
 | [`materials.absorbers.resistive_sheets`](/phonometry/reference/api/materials/resistive-sheets/) | Thin resistive facings, and the resistance of one square metre of them. |
 | [`materials.absorbers.measured`](/phonometry/reference/api/materials/measured/) | Absorption coefficients as the books print them, one row per finish. |
+| [`materials.absorbers.carpets`](/phonometry/reference/api/materials/carpets/) | Carpets, rated by their noise reduction coefficient and described by their pile. |
 | [`materials.absorbers.layered`](/phonometry/reference/api/materials/layered/) | Declarative layer stacks and the transfer-matrix absorber solver. |
 | [`materials.absorbers.biot`](/phonometry/reference/api/materials/biot/) | Biot poroelastic layers: the three waves and the 6x6 transfer matrix. |
 | [`materials.absorbers.slow_sound`](/phonometry/reference/api/materials/slow-sound/) | Slow-sound slit panels loaded with Helmholtz resonators (perfect absorbers). |

@@ -608,12 +608,16 @@ distributed, which is exactly where the five disagree.
   19, "Control del ruido a través de los sólidos", by Fritz Ingerslev and
   Cyril M. Harris, prints in its Tables 19.2 to 19.4 the average improvement
   in impact sound insulation of twenty-three floor finishes, floating screeds
-  and timber floors on a bare concrete floor.
+  and timber floors on a bare concrete floor, and Table 14.2, in Richard N.
+  Hamme's chapter on vibration damping, the decay rate of eight asphalt felt
+  treatments on a standard steel panel.
 - Harris, C. M. (Ed.). (1995). *Manual de medidas acústicas y control del
   ruido* (3.ª ed.). McGraw-Hill.
   The Spanish edition of the handbook, cited in this tree as Harris 3e and not
   to be confused with the window paper of F. J. Harris under Signal processing.
-  Chapter 31 prints in seven tables the sound transmission class of stud
+  Chapter 30 prints in Tables 30.2 and 30.3 the noise reduction coefficient of
+  nineteen carpets on bare concrete and on a hair pad; Chapter 31 prints in
+  seven tables the sound transmission class of stud
   walls, block walls, doors, sealed windows and floor-ceiling systems, and
   Chapter 32, "Aislamiento del sonido transmitido por estructuras", prints in
   its Tables 32.1 to 32.8 the measured impact insulation class of forty-two

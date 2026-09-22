@@ -1,0 +1,118 @@
+{
+  "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+  "about": "Eight asphalt felt damping treatments from Table 14.2 of the Spanish edition of the first Handbook of Noise Control, in the chapter \"Amortiguamiento de la vibración\" by Richard N. Hamme: one to four plies, plain, punched or notched, bonded or not, and covered with carpet or with a metal sheet. Each row prints the decay rate of the vibration of a treated panel in decibels per second at 21 °C, the percentage of the panel's area the felt is bonded over, and the weight of the treatment in kg/m2; ranges are printed with a hyphen and held as ranges.\n\nThe decay rate is not a loss factor and is not held as one. It is the chapter's own measure, fixed in its text on PDF page 492 (printed p. 479): \"en decibelios por segundo a 160 cps, para un panel normalizado de ensayo de 50 x 50 x 0,6 cm\", the thick-plate test the chapter describes, with the bare panel decaying at less than 1 dB/s. At that frequency a decay rate D corresponds to a loss factor of the treated panel of D / (27.3 x 160), so the 400 dB/s of a notched ply under a metal sheet is about 0.09; the row holds the decay rate the page prints and the conversion is the reader's.\n\nTwo rows were tested without adhesive, which the Area adherida column prints as the word \"No\" and a footnote explains.",
+  "rows": [
+    {
+      "key": "1_pliegue_comun",
+      "name": "1 pliegue común",
+      "adhered_area_percent": 100,
+      "temperature_c": 21,
+      "ranges": {
+        "decay_rate_db_s": [
+          1,
+          12
+        ],
+        "surface_density_kg_m2": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "key": "1_pliegue_punzado",
+      "name": "1 pliegue punzado",
+      "adhered_area_percent": 100,
+      "temperature_c": 21,
+      "ranges": {
+        "decay_rate_db_s": [
+          1,
+          6
+        ],
+        "surface_density_kg_m2": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "key": "1_pliegue_muescado",
+      "name": "1 pliegue muescado",
+      "adhered_area_percent": 100,
+      "temperature_c": 21,
+      "ranges": {
+        "decay_rate_db_s": [
+          1,
+          11
+        ],
+        "surface_density_kg_m2": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "key": "1_pliegue_muescado_sin_adhesivo",
+      "name": "1 pliegue muescado",
+      "variant": "sin adhesivo",
+      "decay_rate_db_s": 21,
+      "unquantified": {
+        "adhered_area_percent": "No"
+      },
+      "surface_density_kg_m2": 1.5,
+      "temperature_c": 21,
+      "note": "The page marks this row with the asterisk of its footnote, \"Para los ensayos hechos sin adhesivo, se pinta el panel con la pintura del suelo del automóvil\": the felt was not bonded, and the panel was painted with automobile floor paint instead."
+    },
+    {
+      "key": "lo_mismo_cubierto_con_alfombra_sin_adhesivo",
+      "name": "Lo mismo, cubierto con alfombra",
+      "variant": "sin adhesivo",
+      "decay_rate_db_s": 85,
+      "unquantified": {
+        "adhered_area_percent": "No"
+      },
+      "surface_density_kg_m2": 3.5,
+      "temperature_c": 21,
+      "note": "The page marks this row with the asterisk of its footnote, \"Para los ensayos hechos sin adhesivo, se pinta el panel con la pintura del suelo del automóvil\": the felt was not bonded, and the panel was painted with automobile floor paint instead. \"Lo mismo\" is the row above it: one ply of notched felt, not bonded."
+    },
+    {
+      "key": "2_pliegues_muesca_comun",
+      "name": "2 pliegues, muesca+común",
+      "adhered_area_percent": 100,
+      "temperature_c": 21,
+      "ranges": {
+        "decay_rate_db_s": [
+          6,
+          20
+        ],
+        "surface_density_kg_m2": [
+          1,
+          2
+        ]
+      }
+    },
+    {
+      "key": "4_pliegues_alternando_muesca_y_comun",
+      "name": "4 pliegues, alternando muesca y común",
+      "adhered_area_percent": 100,
+      "temperature_c": 21,
+      "ranges": {
+        "decay_rate_db_s": [
+          20,
+          40
+        ],
+        "surface_density_kg_m2": [
+          3.5,
+          5
+        ]
+      }
+    },
+    {
+      "key": "1_pl_muescado_cubierto_con_hoja_de_metal",
+      "name": "1 pl. muescado, cubierto con hoja de metal",
+      "decay_rate_db_s": 400,
+      "adhered_area_percent": 100,
+      "surface_density_kg_m2": 5,
+      "temperature_c": 21
+    }
+  ]
+}

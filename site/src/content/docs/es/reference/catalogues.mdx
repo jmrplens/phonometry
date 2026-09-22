@@ -147,6 +147,21 @@ erratas del proyecto y aquí se quedan vacías en vez de adivinarse.
 
 <Catalogues catalogue="damping" lang="es" />
 
+## Tratamientos amortiguadores
+
+La forma antigua de valorar un tratamiento amortiguador: pegarlo a una placa
+normalizada de acero de 50 por 50 por 0,6 cm, golpearla y medir lo deprisa que
+se apaga su vibración a 160 Hz, en decibelios por segundo. Las ocho filas son
+fieltros asfálticos de uno a cuatro pliegues, lisos, punzados o muescados,
+pegados o sueltos, y cubiertos con alfombra o con una chapa, y van de 1 dB/s a
+400. Una tasa de decaimiento es del tratamiento sobre esa placa, así que se
+compara con las demás filas de esta tabla y con nada más; a 160 Hz corresponde
+a un factor de pérdidas de la placa tratada igual a la tasa dividida entre
+4 368, que no es un factor de pérdidas del fieltro. Las descripciones son las
+de la traducción española.
+
+<Catalogues catalogue="dampingTreatments" lang="es" />
+
 ## Madera ortótropa
 
 Todos los sólidos de arriba son isótropos: un módulo de Young, un coeficiente
@@ -245,6 +260,20 @@ acreditan a un artículo suyo.
 
 <Catalogues catalogue="resilientLayers" lang="es" />
 
+## Módulo dinámico de materiales elásticos
+
+El módulo con el que hace de muelle una capa elástica, para seis materiales
+sobre los que se apoya un suelo flotante: lana de vidrio, dos lanas de roca,
+espuma de poliestireno, espuma de poliuretano y corcho. La rigidez dinámica por
+unidad de superficie de una capa es este módulo dividido entre su espesor, así
+que estas filas dan la rigidez de cualquier espesor donde la tabla de arriba la
+da para uno. Todos los módulos se imprimen como intervalo y se midieron con una
+carga estática de unos 2 kPa, y la carga importa: la misma página dice que la
+lana de roca es un 20 por ciento más blanda a 1 kPa y un 30 por ciento más
+rígida a 4.
+
+<Catalogues catalogue="resilientModuli" lang="es" />
+
 ## Coeficientes de absorción
 
 Lo que hizo un acabado en una cámara reverberante, banda a banda, tal como lo
@@ -295,6 +324,22 @@ esta biblioteca, y en la propia celda dice lo que imprimió la página y de qué
 se convirtió.
 
 <Catalogues catalogue="absorptionAreas" lang="es" />
+
+## Alfombras
+
+Diecinueve alfombras valoradas por su coeficiente de reducción del ruido, la
+media de la absorción a 250, 500, 1000 y 2000 Hz: once sobre hormigón desnudo,
+de 0,25 a 0,55, y ocho sobre un relleno de pelo, de 0,40 a 0,70. Cada fila da
+el peso, la altura, la superficie y la fibra del pelo; el propio texto del
+capítulo dice que la fibra no cambia la absorción de forma significativa, y el
+relleno y el pelo sí. El NRC es un número para cuatro bandas y de
+él no sale ninguna banda. Cinco de los pesos del pelo de la primera tabla se
+imprimen con una mitad imperial que no es la métrica, y los cuatro cuyos
+kilogramos quedan en duda se dejan vacíos y constan en las erratas del
+proyecto. Las filas se leen en español, el idioma de la edición de la que se
+leyeron.
+
+<Catalogues catalogue="carpets" lang="es" />
 
 ## Aislamiento acústico
 
@@ -516,6 +561,19 @@ a 20 °C según un artículo y 8,929 a 30 °C según otro. Elegir entre ellos es
 cosa del lector.
 
 <Catalogues catalogue="nonlinearity" lang="es" />
+
+## Parámetro de no linealidad de sólidos
+
+La contrapartida sólida de la tabla de arriba: el parámetro de no linealidad
+ultrasónico β de ocho sólidos a temperatura ambiente, cada uno promediado sobre
+las tres direcciones en que una onda longitudinal viaja pura en un cristal
+cúbico. Cinco filas son estructuras cristalinas o clases de enlace y no
+materiales, y solo se nombran el cloruro de sodio, la sílice fundida y un
+superconductor cerámico. La β de la página vale B/A + 2 en un líquido, no B/A,
+así que el B/A de unos 5 del agua queda en torno a 7 en esta escala. La sílice
+fundida es el único valor negativo, y así se imprime.
+
+<Catalogues catalogue="solidNonlinearity" lang="es" />
 
 ## Atenuación del aire
 

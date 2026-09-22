@@ -94,6 +94,7 @@ const copy = {
 		treatmentPlaceholder: 'muescado, alfombra',
 		carpetPlaceholder: 'nylon, lana, rizo',
 		resilientModulusPlaceholder: 'rock wool, cork',
+		solidNonlinearityPlaceholder: 'FCC, NaCl, ionic',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -158,6 +159,7 @@ const copy = {
 		treatmentPlaceholder: 'muescado, alfombra',
 		carpetPlaceholder: 'nylon, lana, rizo',
 		resilientModulusPlaceholder: 'rock wool, cork',
+		solidNonlinearityPlaceholder: 'FCC, NaCl, ionic',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -251,6 +253,7 @@ const placeholders: Partial<Record<typeof section, string>> = {
 	dampingTreatments: copy.treatmentPlaceholder,
 	carpets: copy.carpetPlaceholder,
 	resilientModuli: copy.resilientModulusPlaceholder,
+	solidNonlinearity: copy.solidNonlinearityPlaceholder,
 };
 const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 
@@ -283,20 +286,21 @@ const heading = (column: { heading: string; headingEs?: string }) =>
 /** The distinct published tables of a catalogue, for its filter. */
 const tablesOf = (rows: { table: string }[]) => [...new Set(rows.map((row) => row.table))].sort();
 
-/** What the filter matches against: everything a reader might type. */
+/** What the filter matches against: everything a reader might type, which
+    is the row's names and every word column the table shows for it. The word
+    columns are read from `textColumns` rather than listed again here, so a
+    column the table gains is searchable the day it appears; two of them, the
+    bonding of a solid and what an area is an area of, were shown and not
+    matched while this was a second list. */
 const haystack = (row: Record<string, unknown>) =>
 	[
 		row.name,
 		row.variant,
 		row.group,
-		row.mounting,
 		row.table,
 		row.source,
 		row.model,
-		row.direction,
-		row.shape,
-		row.gauge,
-		row.weave,
+		...textColumns.map((column) => row[column.field]),
 	]
 		.filter(Boolean)
 		.join(' ')

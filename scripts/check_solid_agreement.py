@@ -83,6 +83,29 @@ ACCEPTED: dict[str, str] = {
         "that is a fact about the material rather than something either page "
         "contradicts, so it is a disagreement between books and not an errata."
     ),
+    "polystyrene": (
+        "Mechel prints 1070 kg/m3 and Norton & Karczub 42, which is a factor "
+        "of twenty-five and looks like a lost digit until the rest of the row "
+        "is read. Norton & Karczub also print 1.1e7 Pa and 512 m/s for it, and "
+        "those three numbers satisfy E = rho c^2 to within a per cent: the row "
+        "is internally consistent as the expanded polymer, while Mechel's is "
+        "the solid one. Both pages are right about the material they describe "
+        "and neither says which it means, so the disagreement is about what "
+        "the bare name covers, not about a number."
+    ),
+    "polyurethane": (
+        "Bies prints 900 kg/m3 and Norton & Karczub 72. As with polystyrene, "
+        "the Norton & Karczub row carries 1.9e7 Pa and 513 m/s beside it and "
+        "satisfies E = rho c^2, so it describes the foam and Bies the solid. "
+        "Neither page qualifies the name."
+    ),
+    "pvc": (
+        "Bies prints 1400 kg/m3 and Norton & Karczub 66. The Norton & Karczub "
+        "row carries 5.5e7 Pa and 913 m/s and satisfies E = rho c^2, so it is "
+        "the cellular form; solid PVC is near 1400 kg/m3 with a speed around "
+        "1400 m/s, which is Bies's row. The same disagreement about the name, "
+        "not about a reading."
+    ),
 }
 
 #: The quantities worth comparing, in the order the report prints them, with

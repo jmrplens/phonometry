@@ -23,5 +23,6 @@
       "density_kg_m3": 1025.0,
       "speed_of_sound_m_s": 1530.0
     }
-  ]
+  ],
+  "validity": "Bies 5e says of Table C.1 that its values 'should be used with caution and should be considered as representative only'."
 }

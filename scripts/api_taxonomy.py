@@ -117,6 +117,8 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.solids.elastic",
             "phonometry.solids.catalogue",
             "phonometry.solids.damping",
+            "phonometry.solids.orthotropic_wood",
+            "phonometry.solids.plateau",
         ),
     ),
     Section(
@@ -482,6 +484,8 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The published catalogue is a mapping, so a plain scan sees it in the
     # module that builds it and in the package that re-exports it.
     "PUBLISHED_DAMPING": "phonometry.solids.damping",
+    "PUBLISHED_ORTHOTROPIC_WOOD": "phonometry.solids.orthotropic_wood",
+    "PUBLISHED_PLATEAU_DATA": "phonometry.solids.plateau",
     "PUBLISHED_DUCT_TRANSMISSION_LOSS": "phonometry.noise_control.duct_walls",
     "DUCT_WALL_BANDS_HZ": "phonometry.noise_control.duct_walls",
     "PUBLISHED_SOLIDS": "phonometry.solids.catalogue",

@@ -74,7 +74,12 @@ from phonometry.room.enclosed_space_absorption import (  # noqa: E402
     PUBLISHED_AIR_CONDITION,
 )
 from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
-from phonometry.solids import PUBLISHED_DAMPING, PUBLISHED_SOLIDS  # noqa: E402
+from phonometry.solids import (  # noqa: E402
+    PUBLISHED_DAMPING,
+    PUBLISHED_ORTHOTROPIC_WOOD,
+    PUBLISHED_PLATEAU_DATA,
+    PUBLISHED_SOLIDS,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -171,6 +176,42 @@ DAMPING_COLUMNS = (
         "Pa",
     ),
     ("loss_modulus_max_pa", "Maximum loss modulus", "Módulo de pérdidas máximo", "Pa"),
+)
+
+
+WOOD_COLUMNS = (
+    ("density_kg_m3", "Density", "Densidad", "kg/m³"),
+    (
+        "plate_stiffness_d1_pa",
+        "D1, along the grain",
+        "D1, a lo largo de la fibra",
+        "Pa",
+    ),
+    ("plate_stiffness_d2_pa", "D2, across the grain", "D2, a través de la fibra", "Pa"),
+    ("plate_stiffness_d3_pa", "D3, twisting", "D3, torsión", "Pa"),
+    ("plate_stiffness_d4_pa", "D4, coupling", "D4, acoplamiento", "Pa"),
+    (
+        "relative_scaling_factor",
+        "Relative scaling factor",
+        "Factor de escala relativo",
+        "",
+    ),
+)
+
+PLATEAU_COLUMNS = (
+    (
+        "surface_density_per_mm_kg_m2",
+        "Surface density per mm",
+        "Densidad superficial por mm",
+        "kg/m² per mm",
+    ),
+    ("coincidence_height_db", "Coincidence height", "Altura de la coincidencia", "dB"),
+    (
+        "plateau_frequency_ratio",
+        "Plateau frequency ratio B/A",
+        "Razón de frecuencias B/A",
+        "",
+    ),
 )
 
 POROUS_COLUMNS = (
@@ -1177,6 +1218,8 @@ def render() -> str:
             "rows": list(rows(PUBLISHED_GASES, GAS_COLUMNS)),
         },
         "damping": section(PUBLISHED_DAMPING, DAMPING_COLUMNS),
+        "orthotropicWood": section(PUBLISHED_ORTHOTROPIC_WOOD, WOOD_COLUMNS),
+        "plateau": section(PUBLISHED_PLATEAU_DATA, PLATEAU_COLUMNS),
         "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
         "resilientLayers": transcribed(resilient_layers(), RESILIENT_LAYER_COLUMNS),
         "absorption": section(PUBLISHED_ABSORPTION, ABSORPTION_COLUMNS),
@@ -1236,6 +1279,8 @@ def main(argv: list[str] | None = None) -> int:
     counts = {
         "solids": len(PUBLISHED_SOLIDS),
         "damping materials": len(PUBLISHED_DAMPING),
+        "orthotropic woods": len(PUBLISHED_ORTHOTROPIC_WOOD),
+        "plateau materials": len(PUBLISHED_PLATEAU_DATA),
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
         "resistive facings": len(PUBLISHED_FLOW_RESISTANCE),

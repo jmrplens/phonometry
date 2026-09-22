@@ -95,11 +95,17 @@ def test_the_catalogue_holds_only_what_it_read_from_a_page() -> None:
     make the medium depend on three of the domains that stand on it. The
     comparison a reader wants is a documentation artefact and is built as one.
     """
-    assert set(PUBLISHED_FLUIDS) == {
+    assert {key.split("/", 1)[0] for key in PUBLISHED_FLUIDS} == {
+        "bies-2017-table-c1-fluids",
+        "norton-karczub-2003-appendix-4bc",
+    }
+    assert {key for key in PUBLISHED_FLUIDS if key.startswith("bies-")} == {
         "bies-2017-table-c1-fluids/air",
         "bies-2017-table-c1-fluids/fresh_water",
         "bies-2017-table-c1-fluids/sea_water",
     }
+    airs = (ANNEX_A_AIR, EN_12354_AIR, PUBLISHED_AIR, SIMULATION_AIR)
+    assert not any(state is air for state in PUBLISHED_FLUIDS.values() for air in airs)
 
 
 def test_the_four_airs_of_the_tree_still_disagree_the_way_their_documents_do() -> None:

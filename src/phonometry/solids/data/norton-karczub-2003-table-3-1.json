@@ -1,0 +1,62 @@
+{
+  "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+  "about": "Eight materials with the three numbers the plateau method needs to estimate the transmission loss of a panel without solving the plate model: the surface density of one millimetre of the material, the height of the coincidence dip in decibels, and the ratio of the two frequencies that bound the plateau. The first column is a density in disguise, kilograms per square metre per millimetre of thickness, which is the material's density divided by a thousand, and it is kept in the unit the page prints rather than converted, because the method is applied with it in that form. The table credits no source and every cell is a plain number: no range, no bound, no rule.",
+  "rows": [
+    {
+      "key": "aluminium",
+      "name": "Aluminium",
+      "surface_density_per_mm_kg_m2": 2.66,
+      "coincidence_height_db": 29.0,
+      "plateau_frequency_ratio": 11.0
+    },
+    {
+      "key": "brick",
+      "name": "Brick",
+      "surface_density_per_mm_kg_m2": 2.1,
+      "coincidence_height_db": 37.0,
+      "plateau_frequency_ratio": 4.5
+    },
+    {
+      "key": "concrete",
+      "name": "Concrete",
+      "surface_density_per_mm_kg_m2": 2.28,
+      "coincidence_height_db": 38.0,
+      "plateau_frequency_ratio": 4.5
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "surface_density_per_mm_kg_m2": 2.47,
+      "coincidence_height_db": 27.0,
+      "plateau_frequency_ratio": 10.0
+    },
+    {
+      "key": "lead",
+      "name": "Lead",
+      "surface_density_per_mm_kg_m2": 11.2,
+      "coincidence_height_db": 56.0,
+      "plateau_frequency_ratio": 4.0
+    },
+    {
+      "key": "plaster",
+      "name": "Plaster",
+      "surface_density_per_mm_kg_m2": 1.71,
+      "coincidence_height_db": 30.0,
+      "plateau_frequency_ratio": 8.0
+    },
+    {
+      "key": "plywood",
+      "name": "Plywood",
+      "surface_density_per_mm_kg_m2": 0.57,
+      "coincidence_height_db": 19.0,
+      "plateau_frequency_ratio": 6.5
+    },
+    {
+      "key": "steel",
+      "name": "Steel",
+      "surface_density_per_mm_kg_m2": 7.6,
+      "coincidence_height_db": 40.0,
+      "plateau_frequency_ratio": 11.0
+    }
+  ]
+}

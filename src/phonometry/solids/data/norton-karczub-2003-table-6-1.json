@@ -1,0 +1,71 @@
+{
+  "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+  "about": "Eleven structural loss factors, which the table heads with the symbol eta_s and calls structural rather than internal: it is the loss of a structure made of the material, not of a coupon of it. The page sets every value as a mantissa times a power of ten, and two of the eleven as a range rather than a figure, which this catalogue keeps as a range. \"Brick, concrete\" is one printed row covering two materials and is kept as the page sets it rather than split into two rows this library would have invented. The table credits no source.",
+  "rows": [
+    {
+      "key": "aluminium",
+      "name": "Aluminium",
+      "loss_factor": 0.0001
+    },
+    {
+      "key": "brick_concrete",
+      "name": "Brick, concrete",
+      "loss_factor": 0.015
+    },
+    {
+      "key": "cast_iron",
+      "name": "Cast iron",
+      "loss_factor": 0.001
+    },
+    {
+      "key": "copper",
+      "name": "Copper",
+      "loss_factor": 0.002
+    },
+    {
+      "key": "glass",
+      "name": "Glass",
+      "loss_factor": 0.001
+    },
+    {
+      "key": "plaster",
+      "name": "Plaster",
+      "loss_factor": 0.005
+    },
+    {
+      "key": "plywood",
+      "name": "Plywood",
+      "loss_factor": 0.015
+    },
+    {
+      "key": "pvc",
+      "name": "PVC",
+      "loss_factor": 0.3
+    },
+    {
+      "key": "sand_dry",
+      "name": "Sand (dry)",
+      "ranges": {
+        "loss_factor": [
+          0.02,
+          0.2
+        ]
+      }
+    },
+    {
+      "key": "steel",
+      "name": "Steel",
+      "ranges": {
+        "loss_factor": [
+          0.0001,
+          0.0006
+        ]
+      }
+    },
+    {
+      "key": "tin",
+      "name": "Tin",
+      "loss_factor": 0.002
+    }
+  ]
+}

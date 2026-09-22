@@ -7367,11 +7367,108 @@ dos ediciones con las mismas entradas y en el mismo orden.
   cuyas densidades convierten bien, se sirven con normalidad.
 - **Estado:** sin comunicar.
 
+## Norton & Karczub 2e (2003), apéndice 4 (el módulo de Young del corcho, tres potencias de diez por encima)
+
+- **Dónde:** apéndice 4, «Physical properties of some common substances»,
+  parte A «Solids», fila «Cork», en la página impresa 605 (página 625 del
+  PDF). Fuente no normativa: un libro de texto.
+- **Lo impreso:** corcho: densidad $250$ kg/m$^3$, módulo de Young
+  $6.2 \times 10^{10}$ Pa, coeficiente de Poisson y velocidad de barra en raya,
+  velocidad en medio infinito $500$ m/s, producto de frecuencia crítica y
+  espesor $130.7$.
+- **El problema:** $6.2 \times 10^{10}$ Pa es el módulo de un vidrio, y es el
+  valor que la misma tabla imprime para Glass (Pyrex) dos filas más abajo. El
+  resto de la fila del corcho lo contradice: con la densidad y la velocidad que
+  imprime la propia fila, $\rho c^2 = 250 \times 500^2 = 6.25 \times 10^{7}$
+  Pa, unas mil veces menos. La última columna de la tabla concuerda con los
+  $500$ m/s y no con el módulo: es $c_0^2/(1.8\,c)$ con $c_0 = 343$ m/s, y
+  $343^2/(1.8 \times 500) = 130.7$, que es lo que imprime la página. Los otros
+  dos sólidos espumados o celulares del mismo bloque, poliuretano y
+  poliestireno, van a $1.9 \times 10^{7}$ y $1.1 \times 10^{7}$ Pa. La mantisa
+  es coherente con la fila y el exponente no.
+- **Evidencia:** Verificado en la página 625 del PDF (p. impresa 605) de
+  Norton & Karczub, *Fundamentals of Noise and Vibration Analysis for
+  Engineers* 2e (2003). Los dos módulos, el del corcho y el del Pyrex, se leen
+  y son idénticos; la densidad, la velocidad y la última columna de la fila
+  del corcho se leen igual de bien y son coherentes entre sí.
+- **Qué hace la biblioteca:** la celda se guarda como `misprinted` en
+  [`PUBLISHED_SOLIDS`](../src/phonometry/solids/catalogue.py), de modo que la
+  fila conserva lo que imprime el libro y se niega a servirlo como módulo. La
+  página no imprime el exponente que quería decir, así que no se suministra
+  ningún valor corregido. El resto de la fila se sirve con normalidad.
+- **Estado:** sin comunicar.
+
+## Vigran (2008), tabla 3.1 (un coeficiente de Poisson cuyo segundo extremo ha perdido el punto decimal)
+
+- **Dónde:** tabla 3.1, «Examples of material properties», fila «Aluminium»,
+  columna «Poisson's ratio», en la página impresa 88 (página 109 del PDF).
+  Fuente no normativa: un libro de texto.
+- **Lo impreso:** «0.33–034».
+- **El problema:** un coeficiente de Poisson está entre $-1$ y $0.5$, y $034$
+  no lo es. La fila de encima, el acero, imprime su intervalo como
+  «0.28–0.31» con los dos extremos en decimal, igual que todos los demás
+  intervalos de la columna. Al segundo extremo del intervalo del aluminio se
+  le ha caído el punto decimal.
+- **Evidencia:** Verificado en la página 109 del PDF (p. impresa 88) de
+  Vigran, *Building Acoustics* (2008). La celda se lee y dice «0.33–034»; la
+  del acero justo encima dice «0.28–0.31».
+- **Qué hace la biblioteca:** la celda se guarda como `misprinted` en
+  [`PUBLISHED_SOLIDS`](../src/phonometry/solids/catalogue.py) y se rechaza.
+  El extremo que se quería poner es fácil de adivinar por el patrón, pero la
+  página no lo imprime, y esta biblioteca no termina un valor que la página
+  dejó sin terminar.
+- **Estado:** sin comunicar.
+
+## Rossing (2014), tabla 15.5 (un factor de escala relativo que su propia fila no da)
+
+- **Dónde:** tabla 15.5, «Typical densities and elastic properties of wood
+  used for stringed instrument modelling (after Woodhouse)», columna «Maple»,
+  fila «Relative scaling factors», en la página impresa 622 (página 632 del
+  PDF). Fuente no normativa: un manual.
+- **Lo impreso:** la fila imprime su símbolo como $\sqrt[4]{D_1/D_3}$ y los
+  valores $1.9$ para la picea y $1.4$ para el arce. El $D_1$ del arce es
+  $860$ MPa y su $D_3$, $170$ MPa; la tabla marca con asterisco dos de las
+  rigideces del arce como estimaciones, y ninguna de estas dos lo lleva.
+- **El problema:** $\sqrt[4]{860/170} = 1.50$, no $1.4$. El factor impreso de
+  la picea sí se sigue de su fila: $\sqrt[4]{1100/84} = 1.90$. La misma fila
+  imprime la relación y el valor que no la cumple, y la página no dice si lo
+  que está mal es el factor o una de las dos rigideces.
+- **Evidencia:** Verificado en la página 632 del PDF (p. impresa 622) de
+  Rossing (ed.), *Springer Handbook of Acoustics* 2e (2014). El texto de la
+  misma página enuncia la relación por su cuenta: «The relative change in
+  scaled dimensions is therefore $\sqrt[4]{D_1/D_3}$».
+- **Qué hace la biblioteca:** todas las celdas se sirven tal como se imprimen
+  en [`PUBLISHED_ORTHOTROPIC_WOOD`](../src/phonometry/solids/orthotropic_wood.py),
+  porque nada en la página dice cuál de las tres es la equivocada; la fila del
+  arce lleva una nota que lo dice, y un test comprueba que la relación se
+  cumple en las demás filas.
+- **Estado:** sin comunicar.
+
 ## Propiedades de las fuentes, relacionadas, que no son erratas
 
 Registradas aquí para prevenir futuros «arreglos» que romperían la
 concordancia con las fuentes publicadas:
 
+- **Norton & Karczub 2e (2003), apéndice 4 A, las densidades del
+  poliestireno, el poliuretano y el PVC:** el apéndice imprime $42$, $72$ y
+  $66$ kg/m$^3$, donde Mechel y Bies imprimen $1070$, $900$ y $1400$ para los
+  mismos nombres. La diferencia no es un dígito perdido. Cada fila de Norton &
+  Karczub imprime también un módulo de Young y una velocidad en medio infinito,
+  y los tres cumplen $E = \rho c^2$ con un uno por ciento de margen, lo que
+  describe la forma expandida o celular del polímero; los otros libros
+  describen la maciza. Ninguna de las dos páginas matiza el nombre. Verificado
+  en la página 625 del PDF (p. impresa 605). Se registra aquí, y en `ACCEPTED`
+  de `scripts/check_solid_agreement.py`, para que las densidades bajas no se
+  «corrijan» a las del polímero macizo.
+- **Norton & Karczub 2e (2003), apéndice 4 C, hidrógeno y oxígeno a 0 y
+  20 °C:** cada gas se imprime con la misma densidad a las dos temperaturas,
+  $0.084$ y $1.43$ kg/m$^3$, mientras su velocidad cambia como debe y el aire,
+  en la misma tabla, baja de $1.293$ a $1.21$ en el mismo intervalo. No se
+  registra como errata porque las propias columnas de la tabla no lo resuelven:
+  $P = \rho c^2/\gamma$ sitúa estas filas entre $96$ y $109$ kPa, no más lejos
+  de una atmósfera que las del dióxido de carbono y el vapor. Verificado en la
+  página 626 del PDF (p. impresa 606). Las cuatro filas llevan una nota en
+  [`PUBLISHED_FLUIDS`](../src/phonometry/fluids/catalogue.py).
 - **ISO 11546-1:1995, anexos A y B:** la figura B.1 se titula «Source
   spectrum for an artificial sound source constructed according to the
   guidelines given in annex A», mientras que el anexo A, que pide una chapa de

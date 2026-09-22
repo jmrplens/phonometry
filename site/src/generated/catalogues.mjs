@@ -19691,6 +19691,3655 @@ export const catalogues = {
             "note": ""
           }
         ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/aluminium",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Aluminium",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "26,69",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5 150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5 432",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "6 300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3 144",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "11,94",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/brass",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Brass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "8 500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "104",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37,96",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3 765",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "4 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2 113",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "17,23",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/concrete_dense",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Concrete (dense)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2 600",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 101",
+            "kind": "derived",
+            "note": "from the modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/copper",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Copper",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "8 900",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "122",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45,19",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3 952",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "5 000",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2 253",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "16,41",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/cork",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Cork",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "250",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints 6.2 x 10^10 Pa, which is the modulus it also prints for Pyrex glass two rows below, and the rest of this row contradicts it: a density of 250 kg/m3 and the 500 m/s this table prints beside it give 6.25 x 10^7 Pa, a thousand times smaller, and the table's own last column agrees with that 500 m/s. The mantissa is right and the exponent is not, but the page does not print the exponent it meant, so nothing is served here. The defect is registered in docs/ERRATA.md under “Norton & Karczub 2e (2003), Appendix 4”."
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/cast_iron",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Cast iron",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "7 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "105",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "41,02",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3 847",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "4 350",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2 308",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "16,86",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/glass_pyrex",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Glass (Pyrex)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2 300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "62",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "25",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,24",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5 200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5 348",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "5 600",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3 297",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "12,13",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/gypsum_plasterboard",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Gypsum (plasterboard)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "650",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "6 800",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/lead",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Lead",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "11 300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5,729",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,44",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 200",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 346",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "2 050",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "712",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "48,2",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/nickel",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Nickel",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "8 800",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "210",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "80,15",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,31",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4 900",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5 138",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "5 850",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3 018",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "12,62",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/particle_board",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Particle board",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "750",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "669",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/polyurethane",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Polyurethane",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "72",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,019",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "513,7",
+            "kind": "derived",
+            "note": "from the modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "513",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/polystyrene",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Polystyrene",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "42",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,011",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "511,8",
+            "kind": "derived",
+            "note": "from the modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "512",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/pvc",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "PVC",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,055",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "912,9",
+            "kind": "derived",
+            "note": "from the modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "913",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/plywood",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Plywood",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "600",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "3 080",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/rubber_hard",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Rubber (hard)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1 100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,8214",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 450",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 578",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "2 400",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "864,1",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "41,11",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/rubber_soft",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Rubber (soft)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "950",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,005",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "72,55",
+            "kind": "derived",
+            "note": "from the modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 050",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/silver",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Silver",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "10 500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "78",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "28,47",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2 934",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "3 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 647",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "22,11",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/steel",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Steel",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "7 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "195",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "76,17",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "5 050",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5 242",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "6 100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3 145",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "12,37",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/tin",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Tin",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "7 300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "45",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "16,92",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,33",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "2 500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "2 630",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "3 022",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "1 522",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "24,66",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4a/wood_hard",
+        "table": "norton-karczub-2003-appendix-4a",
+        "name": "Wood (hard)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Appendix 4 A, PDF page 625 (printed p. 605)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "650",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "12",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4 300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/aluminium",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Aluminium",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,0001",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/brick_concrete",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Brick, concrete",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/cast_iron",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Cast iron",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,001",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/copper",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Copper",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,002",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/glass",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,001",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/plaster",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Plaster",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,005",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/plywood",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Plywood",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,015",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/pvc",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "PVC",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/sand_dry",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Sand (dry)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,02 to 0,2",
+            "kind": "range",
+            "note": "the page prints 0.02 to 0.2 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/steel",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Steel",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,0001 to 0,0006",
+            "kind": "range",
+            "note": "the page prints 0.0001 to 0.0006 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-6-1/tin",
+        "table": "norton-karczub-2003-table-6-1",
+        "name": "Tin",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 6.1, PDF page 430 (printed p. 410)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,002",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/steel",
+        "table": "vigran-2008-table-3-1",
+        "name": "Steel",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "7 700 to 7 800",
+            "kind": "range",
+            "note": "the page prints 7700 to 7800 and no value"
+          },
+          {
+            "text": "190 to 210",
+            "kind": "range",
+            "note": "the page prints 1.9e+11 to 2.1e+11 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,28 to 0,31",
+            "kind": "range",
+            "note": "the page prints 0.28 to 0.31 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,0001",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/aluminium",
+        "table": "vigran-2008-table-3-1",
+        "name": "Aluminium",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2 700",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "66 to 72",
+            "kind": "range",
+            "note": "the page prints 6.6e+10 to 7.2e+10 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints “0.33–034”, and 034 is not a Poisson ratio: the second endpoint has lost its decimal point, which the steel row above it keeps (“0.28–0.31”). The intended endpoint is legible from the pattern but the page does not print it, and this library does not finish a value the page left unfinished. The defect is registered in docs/ERRATA.md under “Vigran (2008), Table 3.1”."
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,0001",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/glass",
+        "table": "vigran-2008-table-3-1",
+        "name": "Glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2 500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "60",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "4 899",
+            "kind": "derived",
+            "note": "from the modulus and the density"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,0006 to 0,002",
+            "kind": "range",
+            "note": "the page prints 0.0006 to 0.002 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/concrete",
+        "table": "vigran-2008-table-3-1",
+        "name": "Concrete",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2 300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "32 to 40",
+            "kind": "range",
+            "note": "the page prints 3.2e+10 to 4e+10 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,15 to 0,2",
+            "kind": "range",
+            "note": "the page prints 0.15 to 0.2 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,004 to 0,008",
+            "kind": "range",
+            "note": "the page prints 0.004 to 0.008 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/concrete_lightweight_aggregate",
+        "table": "vigran-2008-table-3-1",
+        "name": "Concrete (lightweight aggregate)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "400 to 600",
+            "kind": "range",
+            "note": "the page prints 400 to 600 and no value"
+          },
+          {
+            "text": "1 to 2,5",
+            "kind": "range",
+            "note": "the page prints 1e+09 to 2.5e+09 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01 to 0,02",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.02 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/concrete_autoclaved_aerated",
+        "table": "vigran-2008-table-3-1",
+        "name": "Concrete (autoclaved aerated)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "Footnote 2 of the table marks this modulus alone: where the heading's footnote 1 makes the whole column a dynamic modulus, this cell is the modulus for static pressure. It is therefore not comparable with the other eight rows of the same column.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1 300",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,583",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1 710",
+            "kind": "derived",
+            "note": "from the modulus and the density"
+          },
+          {
+            "text": "1 745",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "1 802",
+            "kind": "derived",
+            "note": "from the modulus, the density and the Poisson ratio"
+          },
+          {
+            "text": "1 104",
+            "kind": "derived",
+            "note": "from the shear modulus and the density"
+          },
+          {
+            "text": "0,01 to 0,02",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.02 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "37,17",
+            "kind": "derived",
+            "note": "from the plate speed, for the 343 m/s the heading assumes"
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/gypsum_plasterboard",
+        "table": "vigran-2008-table-3-1",
+        "name": "Gypsum plate (plasterboard)",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "800 to 900",
+            "kind": "range",
+            "note": "the page prints 800 to 900 and no value"
+          },
+          {
+            "text": "4,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,577",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,3",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01 to 0,015",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.015 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/chipboard",
+        "table": "vigran-2008-table-3-1",
+        "name": "Chipboard",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "650 to 800",
+            "kind": "range",
+            "note": "the page prints 650 to 800 and no value"
+          },
+          {
+            "text": "3,8",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,583",
+            "kind": "derived",
+            "note": "from the modulus and the Poisson ratio"
+          },
+          {
+            "text": "0,2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,01 to 0,03",
+            "kind": "range",
+            "note": "the page prints 0.01 to 0.03 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-3-1/fir_spruce",
+        "table": "vigran-2008-table-3-1",
+        "name": "Fir, spruce",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 3.1, PDF page 109 (printed p. 88)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "400 to 700",
+            "kind": "range",
+            "note": "the page prints 400 to 700 and no value"
+          },
+          {
+            "text": "7 to 12",
+            "kind": "range",
+            "note": "the page prints 7e+09 to 1.2e+10 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "0,008 to 0,01",
+            "kind": "range",
+            "note": "the page prints 0.008 to 0.01 and no value"
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
       }
     ]
   },
@@ -47022,6 +50671,446 @@ export const catalogues = {
             "text": "241,3",
             "kind": "derived",
             "note": "3.5e4 psi as the page prints it, by the exact 6894.757293 Pa/psi"
+          }
+        ]
+      }
+    ]
+  },
+  "orthotropicWood": {
+    "columns": [
+      {
+        "field": "density_kg_m3",
+        "heading": "Density",
+        "headingEs": "Densidad",
+        "unit": "kg/m³"
+      },
+      {
+        "field": "plate_stiffness_d1_pa",
+        "heading": "D1, along the grain",
+        "headingEs": "D1, a lo largo de la fibra",
+        "unit": "GPa"
+      },
+      {
+        "field": "plate_stiffness_d2_pa",
+        "heading": "D2, across the grain",
+        "headingEs": "D2, a través de la fibra",
+        "unit": "MPa"
+      },
+      {
+        "field": "plate_stiffness_d3_pa",
+        "heading": "D3, twisting",
+        "headingEs": "D3, torsión",
+        "unit": "MPa"
+      },
+      {
+        "field": "plate_stiffness_d4_pa",
+        "heading": "D4, coupling",
+        "headingEs": "D4, acoplamiento",
+        "unit": "MPa"
+      },
+      {
+        "field": "relative_scaling_factor",
+        "heading": "Relative scaling factor",
+        "headingEs": "Factor de escala relativo",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "rossing-2014-table-15-5/spruce",
+        "table": "rossing-2014-table-15-5",
+        "name": "Spruce",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 15.5, PDF page 632 (printed p. 622)",
+        "note": "",
+        "attributedTo": {
+          "table": "Woodhouse [15.77]"
+        },
+        "cells": [
+          {
+            "text": "420",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "67",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "230",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,9",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "rossing-2014-table-15-5/maple",
+        "table": "rossing-2014-table-15-5",
+        "name": "Maple",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Rossing (2014) Table 15.5, PDF page 632 (printed p. 622)",
+        "note": "Two of this row's four plate stiffnesses carry the table's asterisk: the table marks this cell with an asterisk and its own footnote calls the asterisked values “intelligent guesses in the absence of experimental data”, so it is the author's estimate and not a measurement. They are served, because the page prints them as numbers, but they are marked as estimates so that a caller who wants measurements can tell them apart. The relative scaling factor the page prints for maple, 1.4, does not follow from this row: the same row prints the relation as the fourth root of D1 over D3, and maple's D1 of 860 MPa and D3 of 170 MPa, neither of them asterisked, give 1.50. Spruce's 1.9 does follow from its own row. The factor is served as printed and the defect is registered in docs/ERRATA.md under “Rossing (2014), Table 15.5”.",
+        "attributedTo": {
+          "table": "Woodhouse [15.77]"
+        },
+        "cells": [
+          {
+            "text": "650",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,86",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "140",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "170",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "230",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "plateau": {
+    "columns": [
+      {
+        "field": "surface_density_per_mm_kg_m2",
+        "heading": "Surface density per mm",
+        "headingEs": "Densidad superficial por mm",
+        "unit": "kg/m² per mm"
+      },
+      {
+        "field": "coincidence_height_db",
+        "heading": "Coincidence height",
+        "headingEs": "Altura de la coincidencia",
+        "unit": "dB"
+      },
+      {
+        "field": "plateau_frequency_ratio",
+        "heading": "Plateau frequency ratio B/A",
+        "headingEs": "Razón de frecuencias B/A",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "norton-karczub-2003-table-3-1/aluminium",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Aluminium",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2,66",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "29",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-3-1/brick",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Brick",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "37",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-3-1/concrete",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Concrete",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2,28",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "38",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-3-1/glass",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Glass",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "2,47",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "27",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-3-1/lead",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Lead",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "11,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "56",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-3-1/plaster",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Plaster",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1,71",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "30",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "8",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-3-1/plywood",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Plywood",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,57",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "19",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-table-3-1/steel",
+        "table": "norton-karczub-2003-table-3-1",
+        "name": "Steel",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Norton & Karczub 2e Table 3.1, PDF page 261 (printed p. 241)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "7,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "40",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "11",
+            "kind": "printed",
+            "note": ""
           }
         ]
       }
@@ -116502,6 +120591,564 @@ export const catalogues = {
           {
             "text": "",
             "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/castor_oil",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Castor oil",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Castor oil as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 540",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "950",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/ethyl_alcohol",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Ethyl alcohol",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Ethyl alcohol as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 150",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "790",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/fresh_water_20c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Fresh water 20c",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Fresh water as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 483",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "998",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,004",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/fresh_water_13c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Fresh water 13c",
+        "temperature": "13",
+        "pressure": "101 325",
+        "model": "Fresh water as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 441",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "998",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,004",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/glycerin",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Glycerin",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Glycerin as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 980",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 260",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/mercury",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Mercury",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Mercury as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 450",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13 600",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,13",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/petrol",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Petrol",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Petrol as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 390",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "680",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/sea_water_13c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Sea water 13c",
+        "temperature": "13",
+        "pressure": "101 325",
+        "model": "Sea water as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 500",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 026",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,01",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/turpentine",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Turpentine",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Turpentine as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 250",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "870",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,27",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/air_0c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Air 0c",
+        "temperature": "0",
+        "pressure": "101 325",
+        "model": "Air as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "332",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,293",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,402",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/air_20c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Air 20c",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Air as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "343",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,402",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/carbon_dioxide_20c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Carbon dioxide 20c",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Carbon dioxide as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "267",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,84",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/hydrogen_0c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Hydrogen 0c",
+        "temperature": "0",
+        "pressure": "101 325",
+        "model": "Hydrogen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 270",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,084",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/hydrogen_20c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Hydrogen 20c",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Hydrogen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "1 330",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,084",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,41",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/nitrogen_20c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Nitrogen 20c",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Nitrogen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "349",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,17",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/oxygen_0c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Oxygen 0c",
+        "temperature": "0",
+        "pressure": "101 325",
+        "model": "Oxygen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "317",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/oxygen_20c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Oxygen 20c",
+        "temperature": "20",
+        "pressure": "101 325",
+        "model": "Oxygen as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "326",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1,43",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "norton-karczub-2003-appendix-4bc/steam_100c",
+        "table": "norton-karczub-2003-appendix-4bc",
+        "name": "Steam 100c",
+        "temperature": "100",
+        "pressure": "101 325",
+        "model": "Steam as printed in Norton & Karczub 2e Appendix 4 B and C, PDF page 626 (printed p. 606)",
+        "validity": "Norton & Karczub say of Appendix 4 that its data 'have been collated from several sources' and name four of their own references, without saying which row came from which.",
+        "cells": [
+          {
+            "text": "405",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "",
+            "kind": "absent",
+            "note": ""
+          },
+          {
+            "text": "1,324",
+            "kind": "printed",
             "note": ""
           }
         ]

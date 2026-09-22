@@ -398,6 +398,9 @@ def test_a_material_several_books_print_comes_back_several_times() -> None:
         "cremer-2005-table-4-3",
         "bies-2017-table-c1",
         "long-2014-table-12-1",
+        "norton-karczub-2003-appendix-4a",
+        "norton-karczub-2003-table-6-1",
+        "vigran-2008-table-3-1",
     }
     assert len(steels) > len({row.table for row in steels})
 

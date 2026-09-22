@@ -81,7 +81,7 @@ __all__ = [
 
 #: The table of fluid states this catalogue reads from a data file. One file
 #: per published table, in ``fluids/data``, each citing its own page.
-_FLUID_TABLES = ("bies-2017-table-c1-fluids",)
+_FLUID_TABLES = ("bies-2017-table-c1-fluids", "norton-karczub-2003-appendix-4bc")
 
 #: The tables of gas constants, read from the same directory and the same
 #: way. A gas table prints what a gas is rather than what one sample of it
@@ -101,17 +101,25 @@ def _transcribed() -> dict[str, Fluid]:
     states: dict[str, Fluid] = {}
     for table in _FLUID_TABLES:
         source, rows = read_table("phonometry.fluids", f"{table}.json")
+        about = _table_validity("phonometry.fluids", f"{table}.json")
         for row in rows:
+            # Only what the row prints. A table that gives the ratio of
+            # specific heats fixes it; one that does not leaves the state
+            # refusing to answer for it, rather than this library supplying a
+            # value the page never printed.
+            properties = {
+                "speed_of_sound": row["speed_of_sound_m_s"],
+                "density": row["density_kg_m3"],
+            }
+            if "heat_capacity_ratio" in row:
+                properties["heat_capacity_ratio"] = row["heat_capacity_ratio"]
             states[f"{table}/{row['key']}"] = Fluid(
                 temperature_c=row["temperature_c"],
                 static_pressure_pa=_ONE_ATMOSPHERE_PA,
                 composition={},
                 model=f"{row['name']} as printed in {source}",
-                validity=_REPRESENTATIVE_ONLY,
-                properties={
-                    "speed_of_sound": row["speed_of_sound_m_s"],
-                    "density": row["density_kg_m3"],
-                },
+                validity=about,
+                properties=properties,
             )
     return states
 
@@ -120,13 +128,29 @@ def _transcribed() -> dict[str, Fluid]:
 #: and a temperature and no pressure at all.
 _ONE_ATMOSPHERE_PA = 101325.0
 
-#: What Bies says about the whole of Table C.1, carried into the validity of
-#: every state read from it, because a reader who takes a density off it
-#: should get the book's own hedge with the number.
-_REPRESENTATIVE_ONLY = (
-    "Bies 5e says of Table C.1 that its values 'should be used with caution "
-    "and should be considered as representative only'."
-)
+
+def _table_validity(package: str, filename: str) -> str:
+    """The hedge a book puts on a whole table, read from the table's own file.
+
+    What a book says about a table belongs with any number a reader takes off
+    it, and it is different for every book: Bies calls Table C.1
+    representative only, Norton & Karczub say their appendix was collated from
+    several sources without saying which row came from which. That sentence
+    used to be a constant in this module, which meant the second table to
+    arrive would have carried the first book's hedge, so it now lives in the
+    data file beside the rows it qualifies.
+    """
+    import json
+    from importlib.resources import files
+
+    document = json.loads(
+        (files(package) / "data" / filename).read_text(encoding="utf-8")
+    )
+    validity = document["validity"]
+    if not isinstance(validity, str):  # pragma: no cover - a malformed file
+        msg = f"{filename}: 'validity' must be a string"
+        raise TypeError(msg)
+    return validity
 
 
 #: The fluid states this library has read from a published page, keyed

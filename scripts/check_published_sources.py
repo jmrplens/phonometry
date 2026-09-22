@@ -667,7 +667,15 @@ def _bibliography_problems(cite: str, parsed: references.Reference) -> list[str]
         lead = re.split(r" (?:&|and) | et al\.?", designation)[0].strip()
         if not lead:
             continue
-        if not re.search(rf"^- {re.escape(lead)}[,.]", text, re.MULTILINE):
+        # The same two shapes ``_BIBLIOGRAPHY_ENTRY`` accepts: a person,
+        # written ``- Cremer, L., ...``, and an organisation that authors
+        # its own handbook, written ``- ASHRAE (2019). ...``. A corporate
+        # designation usually carries its year, so the lead ends up being
+        # "ASHRAE (2019)" and the full stop follows it; one written without
+        # a year would reach here as "ASHRAE" and be rejected against an
+        # entry that does have one. Two patterns for one rule is how the
+        # first of them came to be wrong on its own.
+        if not re.search(rf"^- {re.escape(lead)}(?:[,.]| \()", text, re.MULTILINE):
             problems.append(
                 f"{cite!r} names {designation!r}, which has no entry in "
                 "docs/reference/bibliography.md"

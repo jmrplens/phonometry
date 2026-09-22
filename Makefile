@@ -545,4 +545,4 @@ check: lint security test
 	snippets snippets-static claims subscripts docstring-math language-forwarding \
 	fence-names decimal-comma figure-decimal-point figure-legends control-characters hazards dead-constants \
 	conformance-rows conformance-vocabulary parameter-units published-sources \
-	solid-agreement shared-sources catalogue-data
+	solid-agreement shared-sources catalogue-data published-catalogues

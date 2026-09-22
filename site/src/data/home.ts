@@ -122,7 +122,7 @@ export const en: HomeContent = {
 	stats: [
 		{ value: String(passingChecks), label: 'conformance checks passing', href: '/phonometry/reference/conformance/' },
 		{ value: String(standards), label: `standards referenced, across ${domains} test domains`, href: '/phonometry/reference/conformance/' },
-		{ value: String(catalogueRows), label: 'material values read from printed pages, each naming its book', href: '/phonometry/reference/catalogues/' },
+		{ value: String(catalogueRows), label: 'published catalogue rows, each naming the source it came from', href: '/phonometry/reference/catalogues/' },
 		{ value: String(fiches), label: 'PDF fiches in the reporting format their standard defines', href: '/phonometry/reference/reports/' },
 	],
 	what: {
@@ -284,7 +284,7 @@ export const es: HomeContent = {
 	stats: [
 		{ value: String(passingChecks), label: 'comprobaciones de conformidad superadas', href: '/phonometry/es/reference/conformance/' },
 		{ value: String(standards), label: `normas referenciadas, en ${domains} dominios` },
-		{ value: String(catalogueRows), label: 'valores de material leídos de páginas impresas, cada uno con su libro', href: '/phonometry/es/reference/catalogues/' },
+		{ value: String(catalogueRows), label: 'filas de catálogo publicadas, cada una con la fuente de la que sale', href: '/phonometry/es/reference/catalogues/' },
 		{ value: String(fiches), label: 'fichas PDF con el formato de informe que define su norma', href: '/phonometry/es/reference/reports/' },
 	],
 	what: {

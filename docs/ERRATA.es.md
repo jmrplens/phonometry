@@ -7545,8 +7545,8 @@ dos ediciones con las mismas entradas y en el mismo orden.
 - **Lo impreso:** cada peso del pelo se imprime dos veces, primero en SI y
   entre paréntesis en unidades estadounidenses: «1,2 (35)», «1,5 (43)» y así,
   once pares en la tabla.
-- **El problema:** una onza por yarda cuadrada son $0{,}0339$ kg/m$^2$ exactos
-  por definición, y cinco de los once pares no son el mismo número con el
+- **El problema:** una onza por yarda cuadrada son $0{,}033906$ kg/m$^2$ por
+  definición, y cinco de los once pares no son el mismo número con el
   criterio de la entrada del capítulo 32 (la mitad SI es la conversión
   redondeada o truncada a la precisión con la que se imprime):
   - «2,3 (66)», «3,1 (88)» y «2,1 (60)»: $66 \times 0{,}0339 = 2{,}24$,

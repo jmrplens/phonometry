@@ -87510,7 +87510,7 @@ export const catalogues = {
         "weave": "",
         "bonding": "",
         "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
-        "note": "",
+        "note": "The page prints the fibre as \"Madera\" (wood). The same carpet, knotted, cut, 1,5 kg/m2 and 13 mm, is printed with wool (\"Lana\") in Table 30.3, and the chapter's text gives it as its example of an NRC of 0,70 on a pad; the page says nothing of a wood pile. The fibre is kept as printed.",
         "attributedTo": {
           "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
         },

@@ -9,7 +9,8 @@ Carpets, rated by their noise reduction coefficient and described by their pile.
 
 A carpet is the one absorber most rooms already have, and what it absorbs
 depends less on the fibre than on how much pile there is and what it is laid
-on. Two tables of Harris say so side by side: carpets on bare concrete and
+on: the chapter's own text says the type of fibre, nylon or wool, has no
+significant effect on the absorption. Two tables of Harris say so side by side: carpets on bare concrete and
 carpets on a hair pad, with the pile's weight, height, surface and fibre
 beside a single number, the noise reduction coefficient: 0.25 to 0.55 on
 concrete, 0.40 to 0.70 on the pad.
@@ -27,7 +28,7 @@ What the page got wrong
 -----------------------
 The pile weight is printed twice, in kg/m2 and in oz/yd2, and five of the
 eleven pairs of Table 30.2 are not each other. Three follow from the imperial
-half at 0.035 kg/m2 per oz/yd2 instead of the 0.0339 of the definition, one
+half at 0.035 kg/m2 per oz/yd2 instead of the 0.033906 of the definition, one
 follows at neither, and one has lost a digit of its imperial half to a decimal
 comma. They are registered in `docs/ERRATA.md`; the four whose kilograms are
 in doubt serve no pile weight and say why, and the fifth serves its kilograms,
@@ -75,7 +76,7 @@ Carpet(
 One carpet as a page printed it: its pile, what it is laid on, and its NRC.
 
 The `name` is the
-construction the page prints, woven or knotted, and the
+construction the page prints, woven, knitted or knotted, and the
 `variant` is the pile
 surface and the fibre, which is what tells two rows of one construction
 apart.

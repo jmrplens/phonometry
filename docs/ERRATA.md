@@ -7111,8 +7111,8 @@ in the same order.
 - **The print:** every pile weight is printed twice, SI first and the US
   customary value in parentheses: "1,2 (35)", "1,5 (43)" and so on, eleven
   pairs in the table.
-- **The problem:** one ounce per square yard is $0{,}0339$ kg/m$^2$ exactly
-  by definition, and five of the eleven pairs are not each other under the
+- **The problem:** one ounce per square yard is $0{,}033906$ kg/m$^2$ by
+  definition, and five of the eleven pairs are not each other under the
   criterion the Chapter 32 entry uses (the SI half is the conversion rounded or
   truncated to the precision it is printed to):
   - "2,3 (66)", "3,1 (88)" and "2,1 (60)": $66 \times 0{,}0339 = 2{,}24$,

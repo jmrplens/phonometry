@@ -26,6 +26,7 @@ from .biot import (
     frame_quarter_wave_resonance,
     poroelastic_transfer_matrix,
 )
+from .carpets import PUBLISHED_CARPETS, Carpet, carpets_named
 from .catalogue import (
     PUBLISHED_POROUS,
     PorousMaterial,
@@ -187,6 +188,9 @@ from .uncertainty import (
 )
 
 __all__ = [
+    "PUBLISHED_CARPETS",
+    "Carpet",
+    "carpets_named",
     "ABSORPTION_BANDS_HZ",
     "AIR_CORRECTION_LIMIT",
     "ANNEX_A_AIR",

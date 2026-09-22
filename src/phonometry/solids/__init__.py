@@ -18,6 +18,11 @@ from __future__ import annotations
 
 from .catalogue import PUBLISHED_SOLIDS, SolidMaterial, solids_named
 from .damping import PUBLISHED_DAMPING, DampingMaterial, damping_named
+from .damping_treatments import (
+    PUBLISHED_DAMPING_TREATMENTS,
+    DampingTreatment,
+    damping_treatments_named,
+)
 from .elastic import (
     DEFAULT_SPEED_OF_SOUND_M_S,
     beam_longitudinal_speed,
@@ -36,6 +41,9 @@ from .orthotropic_wood import (
 from .plateau import PUBLISHED_PLATEAU_DATA, PlateauMaterial, plateau_material_named
 
 __all__ = [
+    "PUBLISHED_DAMPING_TREATMENTS",
+    "DampingTreatment",
+    "damping_treatments_named",
     "DEFAULT_SPEED_OF_SOUND_M_S",
     "PUBLISHED_DAMPING",
     "PUBLISHED_SOLIDS",

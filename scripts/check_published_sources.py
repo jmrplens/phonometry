@@ -203,6 +203,27 @@ SOURCED: dict[tuple[str, str], str] = {
         "gases each at a stated temperature"
     ),
     (
+        "solids/damping_treatments.py",
+        "PUBLISHED_DAMPING_TREATMENTS",
+    ): (
+        "Harris (1977) Table 14.2, eight asphalt felt treatments rated by the "
+        "decay rate of a standard steel panel"
+    ),
+    (
+        "materials/resilient/moduli.py",
+        "PUBLISHED_RESILIENT_MODULI",
+    ): (
+        "Vigran (2008) Table 8.3, the dynamic modulus of six resilient "
+        "materials under a static load of about 2 kPa"
+    ),
+    (
+        "materials/absorbers/carpets.py",
+        "PUBLISHED_CARPETS",
+    ): (
+        "Harris 3e Tables 30.2 and 30.3, nineteen carpets with their pile and "
+        "noise reduction coefficient"
+    ),
+    (
         "fluids/nonlinearity.py",
         "PUBLISHED_NONLINEARITY",
     ): (

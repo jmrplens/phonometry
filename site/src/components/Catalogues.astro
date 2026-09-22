@@ -46,14 +46,17 @@ interface Props {
 	catalogue:
 		| 'solids'
 		| 'damping'
+		| 'dampingTreatments'
 		| 'orthotropicWood'
 		| 'plateau'
 		| 'porous'
 		| 'flowResistance'
 		| 'resilientLayers'
+		| 'resilientModuli'
 		| 'ground'
 		| 'gases'
 		| 'absorption'
+		| 'carpets'
 		| 'absorptionAreas'
 		| 'transmissionLoss'
 		| 'impactInsulation'
@@ -87,6 +90,9 @@ const copy = {
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
 		liquidPlaceholder: 'water, ethanol, mercury',
+		treatmentPlaceholder: 'muescado, alfombra',
+		carpetPlaceholder: 'nylon, lana, rizo',
+		resilientModulusPlaceholder: 'rock wool, cork',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -109,6 +115,8 @@ const copy = {
 		condition: 'Condition',
 		state: 'State',
 		substance: 'Substance',
+		treatment: 'Treatment',
+		construction: 'Construction',
 		conditions: 'Conditions',
 		mounting: 'Mount',
 		per: 'Per',
@@ -144,6 +152,9 @@ const copy = {
 		groundPlaceholder: 'grass, snow, asphalt',
 		gasPlaceholder: 'methane, argon, steam',
 		liquidPlaceholder: 'water, ethanol, mercury',
+		treatmentPlaceholder: 'muescado, alfombra',
+		carpetPlaceholder: 'nylon, lana, rizo',
+		resilientModulusPlaceholder: 'rock wool, cork',
 		absorptionPlaceholder: 'carpet, plaster, velour',
 		partitionPlaceholder: 'brick, door, glass',
 		scatteringPlaceholder: 'pyramid, batten, hedge',
@@ -166,6 +177,8 @@ const copy = {
 		condition: 'Condición',
 		state: 'Estado',
 		substance: 'Sustancia',
+		treatment: 'Tratamiento',
+		construction: 'Construcción',
 		conditions: 'Condiciones',
 		mounting: 'Montaje',
 		per: 'Por',
@@ -230,6 +243,9 @@ const placeholders: Partial<Record<typeof section, string>> = {
 	ductTransmissionLoss: copy.ductPlaceholder,
 	airAttenuation: copy.conditionPlaceholder,
 	nonlinearity: copy.liquidPlaceholder,
+	dampingTreatments: copy.treatmentPlaceholder,
+	carpets: copy.carpetPlaceholder,
+	resilientModuli: copy.resilientModulusPlaceholder,
 };
 const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 
@@ -237,6 +253,8 @@ const placeholder = placeholders[section] ?? copy.searchPlaceholder;
 const rowHeadings: Partial<Record<typeof section, string>> = {
 	fluids: copy.state,
 	nonlinearity: copy.substance,
+	dampingTreatments: copy.treatment,
+	carpets: copy.construction,
 	ground: copy.surface,
 	gases: copy.gas,
 	absorption: copy.finish,

@@ -118,6 +118,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.solids.elastic",
             "phonometry.solids.catalogue",
             "phonometry.solids.damping",
+            "phonometry.solids.damping_treatments",
             "phonometry.solids.orthotropic_wood",
             "phonometry.solids.plateau",
         ),
@@ -234,6 +235,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.materials.absorbers.uncertainty",
             "phonometry.materials.absorbers.airflow_resistance",
             "phonometry.materials.resilient.dynamic_stiffness",
+            "phonometry.materials.resilient.moduli",
             "phonometry.materials.absorbers.impedance_tube",
             "phonometry.materials.absorbers.four_microphone",
             "phonometry.materials.absorbers.standing_wave",
@@ -241,6 +243,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.materials.absorbers.catalogue",
             "phonometry.materials.absorbers.resistive_sheets",
             "phonometry.materials.absorbers.measured",
+            "phonometry.materials.absorbers.carpets",
             "phonometry.materials.absorbers.layered",
             "phonometry.materials.absorbers.biot",
             "phonometry.materials.absorbers.slow_sound",
@@ -485,6 +488,9 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     # The published catalogue is a mapping, so a plain scan sees it in the
     # module that builds it and in the package that re-exports it.
     "PUBLISHED_DAMPING": "phonometry.solids.damping",
+    "PUBLISHED_DAMPING_TREATMENTS": "phonometry.solids.damping_treatments",
+    "PUBLISHED_RESILIENT_MODULI": "phonometry.materials.resilient.moduli",
+    "PUBLISHED_CARPETS": "phonometry.materials.absorbers.carpets",
     "PUBLISHED_ORTHOTROPIC_WOOD": "phonometry.solids.orthotropic_wood",
     "PUBLISHED_PLATEAU_DATA": "phonometry.solids.plateau",
     "PUBLISHED_DUCT_TRANSMISSION_LOSS": "phonometry.noise_control.duct_walls",

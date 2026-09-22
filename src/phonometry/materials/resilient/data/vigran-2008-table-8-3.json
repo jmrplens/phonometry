@@ -1,0 +1,112 @@
+{
+  "source": "Vigran (2008) Table 8.3, PDF page 339 (printed p. 318)",
+  "about": "Six resilient materials with the dynamic modulus of elasticity a floating floor is designed with, from Table 8.3, \"Dynamic modulus of elasticity\". The page prints the density in kg/m3 and the modulus in MPa, and every modulus and all but one density as a range; the modulus is held in pascals. The glass wool density is printed \"approx. 125\" and held as approximate. The two rock wool rows share a name and are told apart only by their densities, which is why their keys carry them.\n\nThe modulus heading carries the load it was measured under, \"(static load ≈ 2 kPa)\", which is on every row as static_load_pa and marked approximate. The running text above the table says the same and adds how much that matters: rock wool of 150 to 175 kg/m3 is about 0.3 MPa at 2 kPa, about 20 per cent lower at 1 kPa and about 30 per cent higher at 4 kPa. A dynamic modulus is a property of the layer under its load and not of the material alone.\n\nThese are moduli and not dynamic stiffnesses: the stiffness per unit area of a layer is its modulus divided by its thickness, s' = E_dyn / d, and the page prints no thickness. The table credits no source.",
+  "rows": [
+    {
+      "key": "glass_wool",
+      "name": "Glass wool",
+      "density_kg_m3": 125,
+      "static_load_pa": 2000,
+      "ranges": {
+        "dynamic_youngs_modulus_pa": [
+          110000.0,
+          130000.0
+        ]
+      },
+      "approximate": [
+        "density_kg_m3",
+        "static_load_pa"
+      ]
+    },
+    {
+      "key": "rock_wool_150_175",
+      "name": "Rock wool",
+      "static_load_pa": 2000,
+      "ranges": {
+        "density_kg_m3": [
+          150,
+          175
+        ],
+        "dynamic_youngs_modulus_pa": [
+          270000.0,
+          330000.0
+        ]
+      },
+      "approximate": [
+        "static_load_pa"
+      ]
+    },
+    {
+      "key": "rock_wool_110_135",
+      "name": "Rock wool",
+      "static_load_pa": 2000,
+      "ranges": {
+        "density_kg_m3": [
+          110,
+          135
+        ],
+        "dynamic_youngs_modulus_pa": [
+          250000.0,
+          300000.0
+        ]
+      },
+      "approximate": [
+        "static_load_pa"
+      ]
+    },
+    {
+      "key": "polystyrene_foam",
+      "name": "Polystyrene foam",
+      "static_load_pa": 2000,
+      "ranges": {
+        "density_kg_m3": [
+          10,
+          20
+        ],
+        "dynamic_youngs_modulus_pa": [
+          300000.0,
+          3000000.0
+        ]
+      },
+      "approximate": [
+        "static_load_pa"
+      ]
+    },
+    {
+      "key": "polyurethane_foam",
+      "name": "Polyurethane foam",
+      "static_load_pa": 2000,
+      "ranges": {
+        "density_kg_m3": [
+          33,
+          72
+        ],
+        "dynamic_youngs_modulus_pa": [
+          7000000.0,
+          19000000.0
+        ]
+      },
+      "approximate": [
+        "static_load_pa"
+      ]
+    },
+    {
+      "key": "cork",
+      "name": "Cork",
+      "static_load_pa": 2000,
+      "ranges": {
+        "density_kg_m3": [
+          120,
+          250
+        ],
+        "dynamic_youngs_modulus_pa": [
+          10000000.0,
+          30000000.0
+        ]
+      },
+      "approximate": [
+        "static_load_pa"
+      ]
+    }
+  ]
+}

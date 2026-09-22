@@ -7102,6 +7102,42 @@ in the same order.
   hold for it.
 - **Status:** unreported.
 
+## Harris 3e (1995), Table 30.2 (five pile weights whose two halves are not each other)
+
+- **Location:** Table 30.2, "Absorción del sonido de alfombras sobre hormigón
+  desnudo", column "Peso del pelo kg/m$^2$ (oz/yd$^2$)", on printed folio
+  30.22 (PDF page 704), in chapter 30 of the Spanish edition. Non-normative
+  source: a handbook.
+- **The print:** every pile weight is printed twice, SI first and the US
+  customary value in parentheses: "1,2 (35)", "1,5 (43)" and so on, eleven
+  pairs in the table.
+- **The problem:** one ounce per square yard is $0{,}0339$ kg/m$^2$ exactly
+  by definition, and five of the eleven pairs are not each other under the
+  criterion the Chapter 32 entry uses (the SI half is the conversion rounded or
+  truncated to the precision it is printed to):
+  - "2,3 (66)", "3,1 (88)" and "2,1 (60)": $66 \times 0{,}0339 = 2{,}24$,
+    $88 \times 0{,}0339 = 2{,}98$ and $60 \times 0{,}0339 = 2{,}03$. All three
+    are what $0{,}035$ kg/m$^2$ per oz/yd$^2$ gives, a factor that also
+    reproduces every pair of Tables 30.2 and 30.3 that does hold, which is how
+    these three come out a tenth high: the metric column follows a factor 3 per
+    cent above the definition.
+  - "1,3 (32)": $32 \times 0{,}0339 = 1{,}08$, and $0{,}035$ gives $1{,}12$;
+    neither reaches $1{,}3$.
+  - "1,1 (3,2)": $3{,}2$ oz/yd$^2$ is $0{,}11$ kg/m$^2$. The same carpet,
+    knotted, cut nylon with a pile of 14 mm, is printed "1,1 (32)" in Table
+    30.3, so the imperial half has a stray decimal comma.
+- **Evidence:** Verified on PDF page 704 (printed p. 30.22) of Harris (ed.),
+  *Manual de medidas acústicas y control del ruido* 3.ª ed. (1995); both
+  independent readings of the page and a crop of the column print all five
+  pairs as quoted. All eight pairs of Table 30.3, on the same page and the
+  next, hold.
+- **What the library does:** in
+  [`PUBLISHED_CARPETS`](../src/phonometry/materials/absorbers/carpets.py) the
+  four rows whose kilograms are in doubt serve no pile weight and mark the
+  cell `misprinted`, quoting the pair; the fifth serves its 1,1 kg/m$^2$ and
+  says in its note that the ounces lost a digit.
+- **Status:** unreported.
+
 ## Related source properties that are not errata
 
 Recorded here to prevent future "fixes" that would break agreement with the

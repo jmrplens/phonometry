@@ -1,0 +1,131 @@
+{
+  "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+  "about": "Eight carpets laid on a hair pad of 1,4 kg/m2 (40 oz/yd2), from Table 30.3 of the Spanish edition, with the same columns as Table 30.2. The table starts on PDF page 704 under Table 30.2 and ends on page 705 under its own caption repeated with \"(Continuación)\". The pile weight and the pile height are printed twice, SI first and the US customary value in parentheses; the SI half is held. The noise reduction coefficient is the only acoustic quantity: the page prints no band, and the NRC is the arithmetic mean of the absorption coefficients at 250, 500, 1000 and 2000 Hz rounded to the nearest 0,05, so no band can be recovered from it. The construction, the pile surface and the fibre are printed as words and held as words; the surface and the fibre are the variant. Every pair of this table holds.",
+  "rows": [
+    {
+      "key": "tejida_forrada_1_5_6_cortado_lana",
+      "name": "Tejida forrada",
+      "variant": "Cortado, lana",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Cortado",
+      "fibre": "Lana",
+      "pile_weight_kg_m2": 1.5,
+      "pile_height_mm": 6,
+      "noise_reduction_coefficient": 0.4,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    },
+    {
+      "key": "tejida_no_forrada_1_5_6_rizo_lana",
+      "name": "Tejida no forrada",
+      "variant": "Rizo, lana",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Rizo",
+      "fibre": "Lana",
+      "pile_weight_kg_m2": 1.5,
+      "pile_height_mm": 6,
+      "noise_reduction_coefficient": 0.4,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    },
+    {
+      "key": "de_punto_1_4_5_10_rizo_lana",
+      "name": "De punto",
+      "variant": "Rizo, lana",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Rizo",
+      "fibre": "Lana",
+      "pile_weight_kg_m2": 1.4,
+      "ranges": {
+        "pile_height_mm": [
+          5,
+          10
+        ]
+      },
+      "noise_reduction_coefficient": 0.65,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    },
+    {
+      "key": "de_nudo_0_5_6_rizo_nylon",
+      "name": "De nudo",
+      "variant": "Rizo, nylon",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Rizo",
+      "fibre": "Nylon",
+      "pile_weight_kg_m2": 0.5,
+      "pile_height_mm": 6,
+      "noise_reduction_coefficient": 0.65,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    },
+    {
+      "key": "de_nudo_1_5_6_rizo_acrilica",
+      "name": "De nudo",
+      "variant": "Rizo, acrílica",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Rizo",
+      "fibre": "Acrílica",
+      "pile_weight_kg_m2": 1.5,
+      "pile_height_mm": 6,
+      "noise_reduction_coefficient": 0.5,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    },
+    {
+      "key": "de_nudo_1_4_10_rizo_lana",
+      "name": "De nudo",
+      "variant": "Rizo, lana",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Rizo",
+      "fibre": "Lana",
+      "pile_weight_kg_m2": 1.4,
+      "pile_height_mm": 10,
+      "noise_reduction_coefficient": 0.6,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    },
+    {
+      "key": "de_nudo_1_1_14_cortado_nylon",
+      "name": "De nudo",
+      "variant": "Cortado, nylon",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Cortado",
+      "fibre": "Nylon",
+      "pile_weight_kg_m2": 1.1,
+      "pile_height_mm": 14,
+      "noise_reduction_coefficient": 0.7,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    },
+    {
+      "key": "de_nudo_1_5_13_cortado_lana",
+      "name": "De nudo",
+      "variant": "Cortado, lana",
+      "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+      "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+      "pile_surface": "Cortado",
+      "fibre": "Lana",
+      "pile_weight_kg_m2": 1.5,
+      "pile_height_mm": 13,
+      "noise_reduction_coefficient": 0.7,
+      "attributed_to": {
+        "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+      }
+    }
+  ]
+}

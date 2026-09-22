@@ -50676,6 +50676,348 @@ export const catalogues = {
       }
     ]
   },
+  "dampingTreatments": {
+    "columns": [
+      {
+        "field": "decay_rate_db_s",
+        "heading": "Decay rate",
+        "headingEs": "Tasa de decaimiento",
+        "unit": "dB/s"
+      },
+      {
+        "field": "temperature_c",
+        "heading": "Temperature",
+        "headingEs": "Temperatura",
+        "unit": "°C"
+      },
+      {
+        "field": "adhered_area_percent",
+        "heading": "Area bonded",
+        "headingEs": "Área adherida",
+        "unit": "%"
+      },
+      {
+        "field": "surface_density_kg_m2",
+        "heading": "Surface density",
+        "headingEs": "Masa superficial",
+        "unit": "kg/m²"
+      }
+    ],
+    "rows": [
+      {
+        "key": "harris-1977-table-14-2/1_pliegue_comun",
+        "table": "harris-1977-table-14-2",
+        "name": "1 pliegue común",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1 to 12",
+            "kind": "range",
+            "note": "the page prints 1 to 12 and no value"
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 to 2",
+            "kind": "range",
+            "note": "the page prints 1 to 2 and no value"
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-14-2/1_pliegue_punzado",
+        "table": "harris-1977-table-14-2",
+        "name": "1 pliegue punzado",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1 to 6",
+            "kind": "range",
+            "note": "the page prints 1 to 6 and no value"
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 to 2",
+            "kind": "range",
+            "note": "the page prints 1 to 2 and no value"
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-14-2/1_pliegue_muescado",
+        "table": "harris-1977-table-14-2",
+        "name": "1 pliegue muescado",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "1 to 11",
+            "kind": "range",
+            "note": "the page prints 1 to 11 and no value"
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 to 2",
+            "kind": "range",
+            "note": "the page prints 1 to 2 and no value"
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-14-2/1_pliegue_muescado_sin_adhesivo",
+        "table": "harris-1977-table-14-2",
+        "name": "1 pliegue muescado",
+        "variant": "sin adhesivo",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "The page marks this row with the asterisk of its footnote, \"Para los ensayos hechos sin adhesivo, se pinta el panel con la pintura del suelo del automóvil\": the felt was not bonded, and the panel was painted with automobile floor paint instead.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "No",
+            "kind": "unquantified",
+            "note": "the page prints “No” where the number would be"
+          },
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-14-2/lo_mismo_cubierto_con_alfombra_sin_adhesivo",
+        "table": "harris-1977-table-14-2",
+        "name": "Lo mismo, cubierto con alfombra",
+        "variant": "sin adhesivo",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "The page marks this row with the asterisk of its footnote, \"Para los ensayos hechos sin adhesivo, se pinta el panel con la pintura del suelo del automóvil\": the felt was not bonded, and the panel was painted with automobile floor paint instead. \"Lo mismo\" is the row above it: one ply of notched felt, not bonded.",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "85",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "No",
+            "kind": "unquantified",
+            "note": "the page prints “No” where the number would be"
+          },
+          {
+            "text": "3,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-14-2/2_pliegues_muesca_comun",
+        "table": "harris-1977-table-14-2",
+        "name": "2 pliegues, muesca+común",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "6 to 20",
+            "kind": "range",
+            "note": "the page prints 6 to 20 and no value"
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "1 to 2",
+            "kind": "range",
+            "note": "the page prints 1 to 2 and no value"
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-14-2/4_pliegues_alternando_muesca_y_comun",
+        "table": "harris-1977-table-14-2",
+        "name": "4 pliegues, alternando muesca y común",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "20 to 40",
+            "kind": "range",
+            "note": "the page prints 20 to 40 and no value"
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "3,5 to 5",
+            "kind": "range",
+            "note": "the page prints 3.5 to 5 and no value"
+          }
+        ]
+      },
+      {
+        "key": "harris-1977-table-14-2/1_pl_muescado_cubierto_con_hoja_de_metal",
+        "table": "harris-1977-table-14-2",
+        "name": "1 pl. muescado, cubierto con hoja de metal",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris (1977) Table 14.2, PDF page 496 (printed p. 483)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "400",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "21",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "100",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
   "orthotropicWood": {
     "columns": [
       {
@@ -60220,6 +60562,234 @@ export const catalogues = {
             "text": "15",
             "kind": "printed",
             "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "resilientModuli": {
+    "columns": [
+      {
+        "field": "dynamic_youngs_modulus_pa",
+        "heading": "Dynamic modulus",
+        "headingEs": "Módulo dinámico",
+        "unit": "MPa"
+      },
+      {
+        "field": "density_kg_m3",
+        "heading": "Density",
+        "headingEs": "Densidad",
+        "unit": "kg/m³"
+      },
+      {
+        "field": "static_load_pa",
+        "heading": "Static load",
+        "headingEs": "Carga estática",
+        "unit": "kPa"
+      }
+    ],
+    "rows": [
+      {
+        "key": "vigran-2008-table-8-3/glass_wool",
+        "table": "vigran-2008-table-8-3",
+        "name": "Glass wool",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 8.3, PDF page 339 (printed p. 318)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,11 to 0,13",
+            "kind": "range",
+            "note": "the page prints 110000 to 130000 and no value"
+          },
+          {
+            "text": "125",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          },
+          {
+            "text": "2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-8-3/rock_wool_150_175",
+        "table": "vigran-2008-table-8-3",
+        "name": "Rock wool",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 8.3, PDF page 339 (printed p. 318)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,27 to 0,33",
+            "kind": "range",
+            "note": "the page prints 270000 to 330000 and no value"
+          },
+          {
+            "text": "150 to 175",
+            "kind": "range",
+            "note": "the page prints 150 to 175 and no value"
+          },
+          {
+            "text": "2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-8-3/rock_wool_110_135",
+        "table": "vigran-2008-table-8-3",
+        "name": "Rock wool",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 8.3, PDF page 339 (printed p. 318)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,25 to 0,3",
+            "kind": "range",
+            "note": "the page prints 250000 to 300000 and no value"
+          },
+          {
+            "text": "110 to 135",
+            "kind": "range",
+            "note": "the page prints 110 to 135 and no value"
+          },
+          {
+            "text": "2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-8-3/polystyrene_foam",
+        "table": "vigran-2008-table-8-3",
+        "name": "Polystyrene foam",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 8.3, PDF page 339 (printed p. 318)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "0,3 to 3",
+            "kind": "range",
+            "note": "the page prints 300000 to 3e+06 and no value"
+          },
+          {
+            "text": "10 to 20",
+            "kind": "range",
+            "note": "the page prints 10 to 20 and no value"
+          },
+          {
+            "text": "2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-8-3/polyurethane_foam",
+        "table": "vigran-2008-table-8-3",
+        "name": "Polyurethane foam",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 8.3, PDF page 339 (printed p. 318)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "7 to 19",
+            "kind": "range",
+            "note": "the page prints 7e+06 to 1.9e+07 and no value"
+          },
+          {
+            "text": "33 to 72",
+            "kind": "range",
+            "note": "the page prints 33 to 72 and no value"
+          },
+          {
+            "text": "2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
+          }
+        ]
+      },
+      {
+        "key": "vigran-2008-table-8-3/cork",
+        "table": "vigran-2008-table-8-3",
+        "name": "Cork",
+        "variant": "",
+        "group": "",
+        "mounting": "",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Vigran (2008) Table 8.3, PDF page 339 (printed p. 318)",
+        "note": "",
+        "attributedTo": {},
+        "cells": [
+          {
+            "text": "10 to 30",
+            "kind": "range",
+            "note": "the page prints 1e+07 to 3e+07 and no value"
+          },
+          {
+            "text": "120 to 250",
+            "kind": "range",
+            "note": "the page prints 120 to 250 and no value"
+          },
+          {
+            "text": "2",
+            "kind": "approximate",
+            "note": "the page prints it with a tilde"
           }
         ]
       }
@@ -85230,6 +85800,714 @@ export const catalogues = {
           },
           {
             "text": "0,16",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      }
+    ]
+  },
+  "carpets": {
+    "columns": [
+      {
+        "field": "pile_weight_kg_m2",
+        "heading": "Pile weight",
+        "headingEs": "Peso del pelo",
+        "unit": "kg/m²"
+      },
+      {
+        "field": "pile_height_mm",
+        "heading": "Pile height",
+        "headingEs": "Altura del pelo",
+        "unit": "mm"
+      },
+      {
+        "field": "noise_reduction_coefficient",
+        "heading": "Noise reduction coefficient",
+        "headingEs": "Coeficiente de reducción del ruido",
+        "unit": ""
+      }
+    ],
+    "rows": [
+      {
+        "key": "harris-1995-table-30-2/tejida_1_2_4_cortado_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "Tejida",
+        "variant": "Cortado, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/tejida_1_2_4_corte_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "Tejida",
+        "variant": "Corte, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "The page prints \"Corte\" in the surface column here and \"Cortado\" on every other cut-pile row; it is kept as printed.",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,2",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/de_nudo_1_1_14_cortado_nylon",
+        "table": "harris-1995-table-30-2",
+        "name": "De nudo",
+        "variant": "Cortado, nylon",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "The pile weight is printed \"1,1 (3,2)\": 3,2 oz/yd2 is 0,11 kg/m2 and not 1,1, and the same carpet, knotted, cut nylon of 14 mm, is printed \"1,1 (32)\" in Table 30.3, so the imperial half has lost its digit to a decimal comma. The 1,1 kg/m2 is served; the slip is registered in docs/ERRATA.md.",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/de_nudo_1_3_14_cortado_acrilica",
+        "table": "harris-1995-table-30-2",
+        "name": "De nudo",
+        "variant": "Cortado, acrílica",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"1,3 (32)\", and 32 oz/yd2 is 1.085 kg/m2, so the two halves are not one weight and the page does not say which is wrong; registered in docs/ERRATA.md"
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/de_nudo_1_5_13_cortado_madera",
+        "table": "harris-1995-table-30-2",
+        "name": "De nudo",
+        "variant": "Cortado, madera",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,55",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/tejida_1_5_6_rizo_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "Tejida",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/tejida_2_3_10_rizo_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "Tejida",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"2,3 (66)\", and 66 oz/yd2 is 2.238 kg/m2, so the two halves are not one weight and the page does not say which is wrong; registered in docs/ERRATA.md"
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/tejida_3_1_13_rizo_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "Tejida",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"3,1 (88)\", and 88 oz/yd2 is 2.984 kg/m2, so the two halves are not one weight and the page does not say which is wrong; registered in docs/ERRATA.md"
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/de_nudo_0_5_6_rizo_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "De nudo",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,25",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/de_nudo_1_4_6_rizo_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "De nudo",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,35",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-2/de_nudo_2_1_6_rizo_lana",
+        "table": "harris-1995-table-30-2",
+        "name": "De nudo",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.2. Absorción del sonido de alfombras sobre hormigón desnudo",
+        "mounting": "Sobre hormigón desnudo",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.2, PDF page 704 (printed p. 30.22)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "",
+            "kind": "absent",
+            "note": "the page prints \"2,1 (60)\", and 60 oz/yd2 is 2.034 kg/m2, so the two halves are not one weight and the page does not say which is wrong; registered in docs/ERRATA.md"
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,3",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/tejida_forrada_1_5_6_cortado_lana",
+        "table": "harris-1995-table-30-3",
+        "name": "Tejida forrada",
+        "variant": "Cortado, lana",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/tejida_no_forrada_1_5_6_rizo_lana",
+        "table": "harris-1995-table-30-3",
+        "name": "Tejida no forrada",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,4",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/de_punto_1_4_5_10_rizo_lana",
+        "table": "harris-1995-table-30-3",
+        "name": "De punto",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "5 to 10",
+            "kind": "range",
+            "note": "the page prints 5 to 10 and no value"
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/de_nudo_0_5_6_rizo_nylon",
+        "table": "harris-1995-table-30-3",
+        "name": "De nudo",
+        "variant": "Rizo, nylon",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,65",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/de_nudo_1_5_6_rizo_acrilica",
+        "table": "harris-1995-table-30-3",
+        "name": "De nudo",
+        "variant": "Rizo, acrílica",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "6",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,5",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/de_nudo_1_4_10_rizo_lana",
+        "table": "harris-1995-table-30-3",
+        "name": "De nudo",
+        "variant": "Rizo, lana",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,4",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "10",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,6",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/de_nudo_1_1_14_cortado_nylon",
+        "table": "harris-1995-table-30-3",
+        "name": "De nudo",
+        "variant": "Cortado, nylon",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,1",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "14",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
+            "kind": "printed",
+            "note": ""
+          }
+        ]
+      },
+      {
+        "key": "harris-1995-table-30-3/de_nudo_1_5_13_cortado_lana",
+        "table": "harris-1995-table-30-3",
+        "name": "De nudo",
+        "variant": "Cortado, lana",
+        "group": "TABLA 30.3. Absorción del sonido de varias alfombras sobre un relleno (tejido inferior) con pelo de 1,4 kg/m2 (40 oz/yd2)",
+        "mounting": "Sobre un relleno de pelo de 1,4 kg/m² (40 oz/yd²)",
+        "per": "",
+        "model": "",
+        "direction": "",
+        "shape": "",
+        "gauge": "",
+        "weave": "",
+        "source": "Harris 3e Table 30.3, PDF pages 704-705 (printed pp. 30.22-30.23)",
+        "note": "",
+        "attributedTo": {
+          "table": "the chapter's Reference 5, \"Sound conditionig with carpet\", American Carpet and Rug Institute, as the table's credit line \"Fuente: A partir de la Referencia 5\" says"
+        },
+        "cells": [
+          {
+            "text": "1,5",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "13",
+            "kind": "printed",
+            "note": ""
+          },
+          {
+            "text": "0,7",
             "kind": "printed",
             "note": ""
           }

@@ -1220,3 +1220,7 @@ from .wave4_fluids import ROSSING_8_1 as ROSSING_8_1
 from .wave4_fluids import ROSSING_8_2 as ROSSING_8_2
 from .wave4_fluids import ROSSING_8_3 as ROSSING_8_3
 from .wave4_fluids import ROSSING_8_4 as ROSSING_8_4
+from .wave4_materials import HARRIS_30_2 as HARRIS_30_2
+from .wave4_materials import HARRIS_30_3 as HARRIS_30_3
+from .wave4_materials import HARRIS_1977_14_2 as HARRIS_1977_14_2
+from .wave4_materials import VIGRAN_8_3 as VIGRAN_8_3

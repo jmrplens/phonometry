@@ -722,6 +722,17 @@ def build_llms_txt(version: str, shard_slugs: tuple[str, ...]) -> str:
             "found in published standards, each re-derived from that standard's own "
             "normative clauses"
         ),
+        (
+            f"- [Published catalogues]({SITE_URL}/reference/catalogues/): every "
+            "value this library read off a printed page, with the book, the "
+            "table and the page it came from, and what the page printed where "
+            "a number is missing"
+        ),
+        (
+            f"- [Report fiches]({SITE_URL}/reference/reports/): every PDF fiche "
+            "the library renders, in the reporting format its standard defines, "
+            "with the guide that explains the measurement behind each one"
+        ),
         f"- [Bibliography]({SITE_URL}/reference/bibliography/)",
         f"- [About the author and the method]({SITE_URL}/start/about/)",
         "",

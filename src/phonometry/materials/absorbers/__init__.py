@@ -121,6 +121,11 @@ from .rating import (
     weighted_absorption,
     weighted_absorption_from_third_octave,
 )
+from .resistive_sheets import (
+    PUBLISHED_FLOW_RESISTANCE,
+    ResistiveSheet,
+    resistive_sheet_named,
+)
 from .slow_sound import (
     CriticalCouplingResult,
     HelmholtzResonator,
@@ -220,6 +225,7 @@ __all__ = [
     "PUBLISHED_ABSORPTION",
     "PUBLISHED_ABSORPTION_AREAS",
     "PUBLISHED_AIR",
+    "PUBLISHED_FLOW_RESISTANCE",
     "PUBLISHED_POROUS",
     "PerforatedPlateLayer",
     "PoroelasticLayer",
@@ -231,6 +237,7 @@ __all__ = [
     "ROCK_WOOL_FIBRE_DENSITY_KG_M3",
     "ROCK_WOOL_LATERAL_FIT",
     "ROCK_WOOL_LONGITUDINAL_FIT",
+    "ResistiveSheet",
     "SUBSTRUCTURE_LIMITS_MM",
     "SUBSTRUCTURE_SPACING_M",
     "SUPPORT_SECTION_MM",
@@ -305,6 +312,7 @@ __all__ = [
     "rectangular_duct_properties",
     "reflection_factor",
     "reproducibility_uncertainty",
+    "resistive_sheet_named",
     "single_number_rating_uncertainty",
     "slit_effective_properties",
     "slit_helmholtz_absorber",

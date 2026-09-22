@@ -18,6 +18,7 @@ representations one copy.
 
 from __future__ import annotations
 
+import ast
 import inspect
 import pathlib
 import re
@@ -493,13 +494,33 @@ def test_no_model_defaults_to_a_published_specimen() -> None:
         )
 
 
+def _uses(source: str, name: str) -> bool:
+    """Whether *source* uses *name*, rather than merely mentioning it.
+
+    Read through the syntax tree and not by searching the text, because a
+    module is allowed to name a sibling catalogue in its prose and one has
+    to: ``resistive_sheets`` opens by saying that its flow resistance is per
+    unit area and is not the per-metre resistivity of ``PUBLISHED_POROUS``,
+    which is the confusion most likely to cost a reader a factor of the
+    thickness. A guard that counted that sentence as a read would push the
+    next author into dropping the warning to keep the test green.
+    """
+    tree = ast.parse(source)
+    return any(
+        (isinstance(node, ast.Name) and node.id == name)
+        or (isinstance(node, ast.Attribute) and node.attr == name)
+        or (isinstance(node, ast.alias) and node.name == name)
+        for node in ast.walk(tree)
+    )
+
+
 def test_nothing_in_the_library_reads_the_published_tables() -> None:
     """No module of ``src`` reads the catalogue except where it is defined."""
     root = pathlib.Path(phonometry.__file__).parent
     readers = [
         path.relative_to(root).as_posix()
         for path in root.rglob("*.py")
-        if "PUBLISHED_POROUS" in path.read_text(encoding="utf-8")
+        if _uses(path.read_text(encoding="utf-8"), "PUBLISHED_POROUS")
     ]
     assert sorted(readers) == [
         "materials/__init__.py",

@@ -64,6 +64,7 @@ export const apiSections = {
     items: [
       'reference/api/solids/elastic',
       'reference/api/solids/catalogue',
+      'reference/api/solids/damping',
     ],
   },
   'io': {
@@ -145,6 +146,7 @@ export const apiSections = {
       'reference/api/building/low-frequency',
       'reference/api/building/ratings',
       'reference/api/building/catalogue',
+      'reference/api/building/impact-catalogue',
       'reference/api/building/panel-transmission',
       'reference/api/building/masonry-cavity-wall',
       'reference/api/building/heavy-impact',
@@ -181,6 +183,7 @@ export const apiSections = {
       'reference/api/materials/standing-wave',
       'reference/api/materials/porous',
       'reference/api/materials/catalogue',
+      'reference/api/materials/resistive-sheets',
       'reference/api/materials/measured',
       'reference/api/materials/layered',
       'reference/api/materials/biot',
@@ -327,6 +330,7 @@ export const apiSections = {
       'reference/api/noise_control/hvac',
       'reference/api/noise_control/duct-path',
       'reference/api/noise_control/duct-modes',
+      'reference/api/noise_control/duct-walls',
       'reference/api/noise_control/enclosures',
       'reference/api/noise_control/enclosure-insulation',
       'reference/api/noise_control/cabin-insulation',

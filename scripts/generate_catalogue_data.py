@@ -40,6 +40,7 @@ from typing import TYPE_CHECKING, Any, NamedTuple
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1] / "src"))
 
 from phonometry.building import (  # noqa: E402
+    PUBLISHED_IMPACT_INSULATION,
     PUBLISHED_TRANSMISSION_LOSS,
     TRANSMISSION_LOSS_BANDS_HZ,
 )
@@ -50,6 +51,7 @@ from phonometry.materials.absorbers import (  # noqa: E402
     ABSORPTION_BANDS_HZ,
     PUBLISHED_ABSORPTION,
     PUBLISHED_ABSORPTION_AREAS,
+    PUBLISHED_FLOW_RESISTANCE,
     PUBLISHED_POROUS,
 )
 from phonometry.materials.absorbers.airflow_resistance import ANNEX_A_AIR  # noqa: E402
@@ -61,8 +63,18 @@ from phonometry.materials.diffusers import (  # noqa: E402
     PUBLISHED_SCATTERING,
     SCATTERING_BANDS_HZ,
 )
+from phonometry.materials.resilient import PUBLISHED_RESILIENT_LAYERS  # noqa: E402
+from phonometry.noise_control import (  # noqa: E402
+    DUCT_WALL_BANDS_HZ,
+    PUBLISHED_DUCT_TRANSMISSION_LOSS,
+)
+from phonometry.room.enclosed_space_absorption import (  # noqa: E402
+    AIR_ATTENUATION,
+    OCTAVE_BANDS,
+    PUBLISHED_AIR_CONDITION,
+)
 from phonometry.simulation.ntff import SIMULATION_AIR  # noqa: E402
-from phonometry.solids import PUBLISHED_SOLIDS  # noqa: E402
+from phonometry.solids import PUBLISHED_DAMPING, PUBLISHED_SOLIDS  # noqa: E402
 
 if TYPE_CHECKING:
     from collections.abc import Iterable, Iterator, Mapping
@@ -113,6 +125,54 @@ SOLID_COLUMNS = (
     ),
 )
 
+#: The damping treatments, where a loss factor is never one number. The peak
+#: leads, because it is what the table is for, and the three temperatures
+#: follow it immediately, because the peak is not a property of the material
+#: until they are beside it: the same polymer at 10 Hz and at 1 kHz peaks
+#: thirty degrees apart. The four moduli close the row, the transition one
+#: being the only of the three storage moduli that applies where the loss
+#: factor peaks.
+DAMPING_COLUMNS = (
+    ("max_loss_factor", "Maximum loss factor", "Factor de pérdidas máximo", ""),
+    (
+        "peak_temperature_at_10_hz_c",
+        "Peak at 10 Hz",
+        "Pico a 10 Hz",
+        "°C",
+    ),
+    (
+        "peak_temperature_at_100_hz_c",
+        "Peak at 100 Hz",
+        "Pico a 100 Hz",
+        "°C",
+    ),
+    (
+        "peak_temperature_at_1000_hz_c",
+        "Peak at 1 kHz",
+        "Pico a 1 kHz",
+        "°C",
+    ),
+    (
+        "youngs_modulus_max_pa",
+        "Young's modulus, stiff end",
+        "Módulo de Young, extremo rígido",
+        "Pa",
+    ),
+    (
+        "youngs_modulus_min_pa",
+        "Young's modulus, soft end",
+        "Módulo de Young, extremo blando",
+        "Pa",
+    ),
+    (
+        "youngs_modulus_transition_pa",
+        "Young's modulus, transition",
+        "Módulo de Young, en la transición",
+        "Pa",
+    ),
+    ("loss_modulus_max_pa", "Maximum loss modulus", "Módulo de pérdidas máximo", "Pa"),
+)
+
 POROUS_COLUMNS = (
     (
         "flow_resistivity_pa_s_m2",
@@ -145,6 +205,69 @@ POROUS_COLUMNS = (
         "Factor de pérdidas estructural",
         "",
     ),
+)
+
+
+#: The thin resistive facings, whose resistance is per unit **area**. The unit
+#: says so and the heading cannot, which is why the prose of the page says it
+#: too: the porous table above holds a resistivity per metre of bulk material
+#: and the two are a thickness apart.
+FLOW_RESISTANCE_COLUMNS = (
+    (
+        "specific_flow_resistance_pa_s_m",
+        "Specific flow resistance",
+        "Resistencia al flujo específica",
+        "Pa·s/m",
+    ),
+    (
+        "normalized_flow_resistance",
+        "Normalized flow resistance",
+        "Resistencia al flujo normalizada",
+        "",
+    ),
+    ("wires_per_cm", "Wires per centimetre", "Hilos por centímetro", "1/cm"),
+    ("wire_diameter_um", "Wire diameter", "Diámetro del hilo", "µm"),
+    ("thickness_mm", "Thickness", "Espesor", "mm"),
+    (
+        "mass_per_area_kg_m2",
+        "Mass per unit area",
+        "Masa por unidad de área",
+        "kg/m²",
+    ),
+    ("surface_density_g_m2", "Surface density", "Masa superficial", "g/m²"),
+    ("nonlinearity_factor", "Nonlinearity factor", "Factor de no linealidad", ""),
+)
+
+#: The resilient layers of a floating floor. The stiffness is per unit area,
+#: which is what the N/m³ of the heading says, and the density and the
+#: thickness beside it are what tell four rows of one material apart.
+RESILIENT_LAYER_COLUMNS = (
+    (
+        "dynamic_stiffness_n_m3",
+        "Dynamic stiffness per unit area",
+        "Rigidez dinámica por unidad de superficie",
+        "N/m³",
+    ),
+    ("density_kg_m3", "Density", "Densidad", "kg/m³"),
+    ("thickness_mm", "Thickness", "Espesor", "mm"),
+)
+
+#: The impact insulation of a floor. Two ratings that are never both on one
+#: row, and a density that three rows bury in their printed description.
+IMPACT_INSULATION_COLUMNS = (
+    (
+        "impact_insulation_class",
+        "Impact insulation class",
+        "Clase de aislamiento al impacto",
+        "",
+    ),
+    (
+        "impact_insulation_class_improvement",
+        "Improvement in the class",
+        "Mejora de la clase",
+        "",
+    ),
+    ("layer_density_kg_m3", "Density of one layer", "Densidad de una capa", "kg/m³"),
 )
 
 
@@ -202,6 +325,44 @@ TRANSMISSION_LOSS_COLUMNS = (
         )
         for band in TRANSMISSION_LOSS_BANDS_HZ
     ),
+)
+
+#: A duct wall, whose size leads the row for the same reason the thickness
+#: leads a partition: it is what tells two rows of one table apart. The
+#: diameter is worth its own column although the row is labelled with it,
+#: because two rows do not print one and carry it down from the merged cell
+#: above, and only a column can show that those two were derived. The length
+#: is printed by two of the six tables and empty on the other four, whose note
+#: gives the 6,1 m they were all measured at.
+DUCT_TRANSMISSION_LOSS_COLUMNS = (
+    ("diameter_mm", "Diameter", "Diámetro", "mm"),
+    ("first_side_mm", "First side", "Primer lado", "mm"),
+    ("second_side_mm", "Second side", "Segundo lado", "mm"),
+    ("duct_length_m", "Duct length", "Longitud del conducto", "m"),
+    *(
+        (
+            f"transmission_loss_{band}_db",
+            _band_heading(band),
+            _band_heading(band),
+            "dB",
+        )
+        for band in DUCT_WALL_BANDS_HZ
+    ),
+)
+
+#: One column per octave band of the air attenuation table, whose rows are
+#: conditions rather than materials. The coefficient is a power attenuation in
+#: neper per metre, which is not the decibel per metre of an outdoor
+#: propagation model, and the column style moves the standard's own factor of
+#: a thousand into the heading.
+AIR_ATTENUATION_COLUMNS = tuple(
+    (
+        f"air_attenuation_{int(band)}_np_m",
+        _band_heading(int(band)),
+        _band_heading(int(band)),
+        "Np/m",
+    )
+    for band in OCTAVE_BANDS
 )
 
 #: One column per one-third octave band, which is where the decimal
@@ -316,7 +477,10 @@ _PREFIXES = (
 #: (``kg/m3``), a squared one (``m2``, where a prefix would square with it) and
 #: a compound of two quantities (``m.Hz``) are left alone, and a column in one
 #: of those that still does not read as digits falls back on a power of ten.
-_PREFIXABLE = frozenset({"Pa", "Pa·s", "Pa·s/m²"})
+#: The prefix goes on the first unit of the set and binds to that alone, which
+#: is why a stiffness per unit volume takes one: ``MN/m3`` is a meganewton over
+#: a cubic metre, and it is what the book that prints those rows prints.
+_PREFIXABLE = frozenset({"N/m³", "Np/m", "Pa", "Pa·s", "Pa·s/m²"})
 
 #: The superscript digits a power of ten is written with, so the exponent sets
 #: as an exponent in a table cell, in the markdown twin of the page and in the
@@ -407,7 +571,7 @@ def values(catalogue: Mapping[str, CatalogueRow], field: str) -> Iterator[float]
             yield value
         interval = row.ranges.get(field)
         if interval is not None:
-            yield from interval
+            yield from (end for end in interval if end is not None)
         for entry in row.reported.get(field, ()):
             yield from entry if isinstance(entry, tuple) else (entry,)
 
@@ -511,16 +675,21 @@ def cell(
         if row.is_approximate(field):
             kind, note = "approximate", "the page prints it with a tilde"
         return {"text": written(value, exact=not derived), "kind": kind, "note": note}
-    if field in row.ranges:
-        low, high = row.ranges[field]
-        bound = field in row.bounded_above
-        return {
-            "text": f"< {written(high)}"
-            if bound
-            else f"{written(low)} to {written(high)}",
-            "kind": "bound" if bound else "range",
-            "note": row.why_missing(field),
-        }
+    interval = row.ranges.get(field)
+    if interval is not None:
+        low, high = interval
+        if high is not None and field in row.bounded_above:
+            text, kind = f"< {written(high)}", "bound"
+        elif low is not None and field in row.bounded_below:
+            # A lower bound reads as one. Before this branch existed a ">45"
+            # was published as "45 to 1 000", a two-sided interval nobody
+            # measured, and a bound whose open end is empty had no number to
+            # print there at all.
+            text, kind = f"> {written(low)}", "bound"
+        else:
+            text = " to ".join(written(end) for end in interval if end is not None)
+            kind = "range"
+        return {"text": text, "kind": kind, "note": row.why_missing(field)}
     if field in row.reported:
         listed = ", ".join(
             f"{written(entry[0])} to {written(entry[1])}"
@@ -637,6 +806,17 @@ def rows(
             # a coefficient a boundary element model computed and one a
             # reverberation room measured are not the same evidence.
             "model": getattr(row, "model", ""),
+            # The words a row carries where another catalogue carries a
+            # number, each one the thing that tells two otherwise identical
+            # rows apart: which way the sound crossed a duct wall, what shape
+            # that duct is, what gauge its sheet was, how a glass cloth is
+            # woven. They follow the rule the mounting follows, which is that
+            # the component shows the column when a row of the catalogue fills
+            # it, so no catalogue pays for another's.
+            "direction": getattr(row, "direction", ""),
+            "shape": getattr(row, "shape", ""),
+            "gauge": getattr(row, "sheet_metal_gauge", ""),
+            "weave": getattr(row, "weave_construction", ""),
             "source": row.source,
             "note": row.note,
             "attributedTo": dict(row.attributed_to),
@@ -749,6 +929,171 @@ def fluids() -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     return columns, out
 
 
+#: Where the resilient layers were read, spelled the way a packaged data file
+#: of that table would be named. They are the one catalogue held inline in the
+#: module that computes with them rather than in a data file of its own, so
+#: they carry no table name to key them by and the page needs one: the filter
+#: that picks a published table reads it, and a row without one would be filed
+#: under the empty string.
+RESILIENT_LAYER_TABLE = "hopkins-2007-table-a3"
+
+#: The same for the air attenuation, whose rows are the six conditions the
+#: standard tabulates rather than six materials.
+AIR_ATTENUATION_TABLE = "en-12354-6-table-1"
+
+#: Significant figures the air attenuation table prints, which is what its
+#: coefficients are written back to here. The standard prints them in
+#: thousandths of a neper per metre and the library holds them in neper per
+#: metre, so each one reached the package through a multiplication by a
+#: thousandth, and that multiplication does not round-trip in binary: the
+#: 1,8 the page prints is held as 0,001 800 000 000 000 000 2. Every digit a
+#: float carries is what a number read off a page earns, and those last
+#: fifteen are not digits this page printed. Three is the most any cell of the
+#: table has, so nothing printed is lost by writing them back to three.
+_AIR_ATTENUATION_FIGURES = 3
+
+
+def transcribed(
+    records: list[dict[str, Any]],
+    columns: tuple[tuple[str, str, str, str], ...],
+) -> dict[str, Any]:
+    """A catalogue whose cells are numbers and nothing else.
+
+    Most of these catalogues are rows of
+    :class:`~phonometry._internal.catalogue.CatalogueRow`, which carries the
+    intervals, the bounds, the listed readings and the words a page can print
+    where a number would go, and :func:`section` reads all of that back. Two
+    are not: the resilient layers are a plain record of three measured numbers
+    and the air attenuation is a mapping of arrays. Their pages hedge nothing,
+    so there is nothing for the hedges to carry, and what they need is the
+    column styles and the number formatting the rest of the page is written
+    in. That is what this is, and it is why it is not a second set of rules:
+    a cell here goes through the same :func:`column_style` and the same
+    :func:`number` as every other cell on the page.
+
+    :param records: One per row: its ``key``, the ``table`` it belongs to, its
+        ``name``, its ``source``, the ``values`` it holds by field name, and
+        optionally a ``note`` and an ``attributedTo``.
+    :param columns: The columns, as ``(field, heading, heading in Spanish,
+        unit)``.
+    :return: The catalogue as the site's page wants it.
+    """
+    written = {
+        field: column_style(
+            unit,
+            [
+                record["values"][field]
+                for record in records
+                if field in record["values"]
+            ],
+        )
+        for field, _, _, unit in columns
+    }
+    return {
+        "columns": [
+            {
+                "field": field,
+                "heading": heading,
+                "headingEs": spanish,
+                "unit": written[field].unit,
+            }
+            for field, heading, spanish, _ in columns
+        ],
+        "rows": [
+            {
+                "key": record["key"],
+                "table": record["table"],
+                "name": record["name"],
+                "variant": "",
+                "group": "",
+                "mounting": "",
+                "per": "",
+                "model": "",
+                "direction": "",
+                "shape": "",
+                "gauge": "",
+                "weave": "",
+                "source": record["source"],
+                "note": record.get("note", ""),
+                "attributedTo": record.get("attributedTo", {}),
+                "cells": [
+                    {
+                        "text": number(
+                            record["values"][field],
+                            exponent=written[field].exponent,
+                            scientific=written[field].scientific,
+                        ),
+                        "kind": "printed",
+                        "note": "",
+                    }
+                    if field in record["values"]
+                    else {"text": "", "kind": "absent", "note": ""}
+                    for field, _, _, _ in columns
+                ],
+            }
+            for record in records
+        ],
+    }
+
+
+def resilient_layers() -> list[dict[str, Any]]:
+    """The fifteen resilient layers, as records :func:`transcribed` can write.
+
+    :return: One record per layer, in the order the table prints them.
+    """
+    return [
+        {
+            "key": f"{RESILIENT_LAYER_TABLE}/{key}",
+            "table": RESILIENT_LAYER_TABLE,
+            "name": layer.name,
+            "source": layer.source,
+            "attributedTo": {"row": layer.attributed_to} if layer.attributed_to else {},
+            "values": {
+                "dynamic_stiffness_n_m3": layer.dynamic_stiffness_n_m3,
+                "density_kg_m3": layer.density_kg_m3,
+                "thickness_mm": layer.thickness_mm,
+            },
+        }
+        for key, layer in PUBLISHED_RESILIENT_LAYERS.items()
+    ]
+
+
+def air_conditions() -> list[dict[str, Any]]:
+    """The six air conditions of the room standard's own attenuation table.
+
+    The name is read off the key rather than written out again, because the
+    key is how the library spells the condition and a second spelling of
+    ``20C_50-70`` would be a second thing to keep in step with the first.
+
+    :return: One record per condition, in the order the table prints them.
+    """
+    records = []
+    for key, coefficients in AIR_ATTENUATION.items():
+        temperature, _, humidity = key.partition("_")
+        recommended = key == PUBLISHED_AIR_CONDITION
+        records.append(
+            {
+                "key": f"{AIR_ATTENUATION_TABLE}/{key}",
+                "table": AIR_ATTENUATION_TABLE,
+                "name": f"{temperature.removesuffix('C')} °C, {humidity} %",
+                "source": "EN 12354-6:2003 Table 1",
+                "note": "The condition clause 4.3 recommends when the room's "
+                "own temperature and humidity are not known."
+                if recommended
+                else "",
+                "values": {
+                    f"air_attenuation_{int(band)}_np_m": float(
+                        f"{coefficient:.{_AIR_ATTENUATION_FIGURES}g}"
+                    )
+                    for band, coefficient in zip(
+                        OCTAVE_BANDS, coefficients, strict=True
+                    )
+                },
+            }
+        )
+    return records
+
+
 def section(
     catalogue: Mapping[str, CatalogueRow],
     columns: tuple[tuple[str, str, str, str], ...],
@@ -831,9 +1176,18 @@ def render() -> str:
             ],
             "rows": list(rows(PUBLISHED_GASES, GAS_COLUMNS)),
         },
+        "damping": section(PUBLISHED_DAMPING, DAMPING_COLUMNS),
+        "flowResistance": section(PUBLISHED_FLOW_RESISTANCE, FLOW_RESISTANCE_COLUMNS),
+        "resilientLayers": transcribed(resilient_layers(), RESILIENT_LAYER_COLUMNS),
         "absorption": section(PUBLISHED_ABSORPTION, ABSORPTION_COLUMNS),
         "transmissionLoss": section(
             PUBLISHED_TRANSMISSION_LOSS, TRANSMISSION_LOSS_COLUMNS
+        ),
+        "impactInsulation": section(
+            PUBLISHED_IMPACT_INSULATION, IMPACT_INSULATION_COLUMNS
+        ),
+        "ductTransmissionLoss": section(
+            PUBLISHED_DUCT_TRANSMISSION_LOSS, DUCT_TRANSMISSION_LOSS_COLUMNS
         ),
         "scattering": section(PUBLISHED_SCATTERING, SCATTERING_COLUMNS),
         "diffusion": section(PUBLISHED_DIFFUSION, DIFFUSION_COLUMNS),
@@ -842,6 +1196,7 @@ def render() -> str:
         ),
         "absorptionAreas": section(PUBLISHED_ABSORPTION_AREAS, ABSORPTION_AREA_COLUMNS),
         "fluids": {"columns": fluid_columns, "rows": fluid_rows},
+        "airAttenuation": transcribed(air_conditions(), AIR_ATTENUATION_COLUMNS),
     }
     body = json.dumps(document, ensure_ascii=False, indent=2, sort_keys=False)
     return (
@@ -880,16 +1235,22 @@ def main(argv: list[str] | None = None) -> int:
     OUTPUT.write_text(fresh, encoding="utf-8")
     counts = {
         "solids": len(PUBLISHED_SOLIDS),
+        "damping materials": len(PUBLISHED_DAMPING),
         "ground": len(PUBLISHED_GROUND),
         "porous": len(PUBLISHED_POROUS),
+        "resistive facings": len(PUBLISHED_FLOW_RESISTANCE),
+        "resilient layers": len(PUBLISHED_RESILIENT_LAYERS),
         "gases": len(PUBLISHED_GASES),
         "absorption": len(PUBLISHED_ABSORPTION),
         "transmission loss": len(PUBLISHED_TRANSMISSION_LOSS),
+        "impact insulation": len(PUBLISHED_IMPACT_INSULATION),
+        "duct walls": len(PUBLISHED_DUCT_TRANSMISSION_LOSS),
         "scattering": len(PUBLISHED_SCATTERING),
         "diffusion": len(PUBLISHED_DIFFUSION),
         "predicted scattering": len(PUBLISHED_PREDICTED_SCATTERING),
         "absorption areas": len(PUBLISHED_ABSORPTION_AREAS),
         "fluids": len(PUBLISHED_FLUIDS) + len(IN_TREE_FLUIDS),
+        "air conditions": len(AIR_ATTENUATION),
     }
     print(f"{OUTPUT.name}: " + ", ".join(f"{n} {k}" for k, n in counts.items()))
     return 0

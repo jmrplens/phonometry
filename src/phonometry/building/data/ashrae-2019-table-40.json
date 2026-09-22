@@ -1,0 +1,129 @@
+{
+  "source": "ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 40, PDF page 922 (printed p. 49.38)",
+  "about": "Nine mechanical equipment room constructions, printed with a Sound Transmission Class and seven octave bands of transmission loss, in the chapter's section “Special Construction Types”. They are here rather than with the duct walls of Tables 29 to 34 because they are an ordinary partition and the same quantity Bies Table 7.6 prints: a wall, a floor or a ceiling between a plant room and whatever is next to it, measured the way any partition is. A duct wall is not that. It is measured in two directions that are not the same number, and it is indexed by the duct's cross section, its length and the gauge of its sheet, none of which a partition has.\n\nWhat the page says about the numbers is one sentence, on the same folio: “Sound transmission loss values for some typical constructions are given in Table 40. These data are compiled from controlled laboratory tests and represent a condition typically superior to that found in field installations, because the in situ acoustical performance of any wall, floor, or ceiling is adversely affected by flanking paths, holes, penetrations, and other anomalies.” No laboratory, test standard or reference is named for any row. The table's own note adds “Actual material composition (e.g., density, porosity, stiffness) affects transmission loss and STC values.”\n\nThe table prints no 8 kHz column and no thickness or surface density column, so those fields stay empty on all nine rows. It does print a single-number rating beside each row, a Sound Transmission Class, and that column is kept rather than dropped: an STC is computed from third-octave data, so the seven octave bands beside it do not give it back, and a rating a page prints and this library cannot recompute is the kind of cell a catalogue of published values exists to carry. Bies Table 7.6 prints no such column, so the field is empty on its ninety-four rows. The asterisk in two of the names is the page's own, and points at the footnote “*CMU = concrete masonry unit; GWB = gypsum wallboard.” Two readers transcribed the nine rows from the rendered page without seeing each other's work and agreed on every cell, including the page's own inconsistency between “2 layers” in digits on one row and “two layers” in words on another.",
+  "conventions": [
+    "Table 40 note: “Note: Actual material composition (e.g., density, porosity, stiffness) affects transmission loss and STC values.”",
+    "Table 40 footnote, whose marker is the asterisk inside two of the printed names: “*CMU = concrete masonry unit; GWB = gypsum wallboard.”"
+  ],
+  "rows": [
+    {
+      "key": "200_mm_cmu",
+      "name": "200 mm CMU*",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 50,
+      "transmission_loss_63_db": 35,
+      "transmission_loss_125_db": 35,
+      "transmission_loss_250_db": 41,
+      "transmission_loss_500_db": 44,
+      "transmission_loss_1000_db": 50,
+      "transmission_loss_2000_db": 57,
+      "transmission_loss_4000_db": 64,
+      "note": "The asterisk inside the printed name is the page's own and points at the footnote “*CMU = concrete masonry unit; GWB = gypsum wallboard.”"
+    },
+    {
+      "key": "200_mm_cmu_with_16_mm_gwb_on_furring_strips",
+      "name": "200 mm CMU with 16 mm GWB* on furring strips",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 53,
+      "transmission_loss_63_db": 33,
+      "transmission_loss_125_db": 32,
+      "transmission_loss_250_db": 44,
+      "transmission_loss_500_db": 50,
+      "transmission_loss_1000_db": 56,
+      "transmission_loss_2000_db": 59,
+      "transmission_loss_4000_db": 65,
+      "note": "The asterisk inside the printed name is the page's own and points at the footnote “*CMU = concrete masonry unit; GWB = gypsum wallboard.”"
+    },
+    {
+      "key": "16_mm_gwb_on_both_sides_of_92_mm_metal_studs",
+      "name": "16 mm GWB on both sides of 92 mm metal studs",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 38,
+      "transmission_loss_63_db": 18,
+      "transmission_loss_125_db": 16,
+      "transmission_loss_250_db": 33,
+      "transmission_loss_500_db": 47,
+      "transmission_loss_1000_db": 55,
+      "transmission_loss_2000_db": 43,
+      "transmission_loss_4000_db": 47
+    },
+    {
+      "key": "16_mm_gwb_on_both_sides_of_92_mm_metal_studs_with_fiberglass",
+      "name": "16 mm GWB on both sides of 92 mm metal studs with fiberglass insulation in cavity",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 49,
+      "transmission_loss_63_db": 16,
+      "transmission_loss_125_db": 23,
+      "transmission_loss_250_db": 44,
+      "transmission_loss_500_db": 58,
+      "transmission_loss_1000_db": 64,
+      "transmission_loss_2000_db": 52,
+      "transmission_loss_4000_db": 53
+    },
+    {
+      "key": "2_layers_of_16_mm_gwb_on_both_sides_of_92_mm_metal_studs_wit",
+      "name": "2 layers of 16 mm GWB on both sides of 92 mm metal studs with fiberglass insulation in cavity",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 56,
+      "transmission_loss_63_db": 19,
+      "transmission_loss_125_db": 32,
+      "transmission_loss_250_db": 50,
+      "transmission_loss_500_db": 62,
+      "transmission_loss_1000_db": 67,
+      "transmission_loss_2000_db": 58,
+      "transmission_loss_4000_db": 63
+    },
+    {
+      "key": "double_row_of_92_mm_metal_studs_25_mm_apart_each_with_2_laye",
+      "name": "Double row of 92 mm metal studs, 25 mm apart, each with 2 layers of 16 mm GWB and fiberglass insulation in cavity",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 64,
+      "transmission_loss_63_db": 23,
+      "transmission_loss_125_db": 40,
+      "transmission_loss_250_db": 54,
+      "transmission_loss_500_db": 62,
+      "transmission_loss_1000_db": 71,
+      "transmission_loss_2000_db": 69,
+      "transmission_loss_4000_db": 74
+    },
+    {
+      "key": "150_mm_solid_concrete_floor_ceiling",
+      "name": "150 mm solid concrete floor/ceiling",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 53,
+      "transmission_loss_63_db": 40,
+      "transmission_loss_125_db": 40,
+      "transmission_loss_250_db": 40,
+      "transmission_loss_500_db": 49,
+      "transmission_loss_1000_db": 58,
+      "transmission_loss_2000_db": 67,
+      "transmission_loss_4000_db": 76
+    },
+    {
+      "key": "150_mm_solid_concrete_floor_with_100_mm_isolated_concrete_sl",
+      "name": "150 mm solid concrete floor with 100 mm isolated concrete slab and fiberglass insulation in cavity",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 72,
+      "transmission_loss_63_db": 44,
+      "transmission_loss_125_db": 52,
+      "transmission_loss_250_db": 58,
+      "transmission_loss_500_db": 73,
+      "transmission_loss_1000_db": 87,
+      "transmission_loss_2000_db": 97,
+      "transmission_loss_4000_db": 100
+    },
+    {
+      "key": "150_mm_solid_concrete_floor_with_two_layers_of_16_mm_gwb_hun",
+      "name": "150 mm solid concrete floor with two layers of 16 mm GWB hung on spring isolators with fiberglass insulation in cavity",
+      "group": "Mechanical equipment room constructions",
+      "sound_transmission_class": 84,
+      "transmission_loss_63_db": 53,
+      "transmission_loss_125_db": 63,
+      "transmission_loss_250_db": 70,
+      "transmission_loss_500_db": 84,
+      "transmission_loss_1000_db": 93,
+      "transmission_loss_2000_db": 104,
+      "transmission_loss_4000_db": 105
+    }
+  ]
+}

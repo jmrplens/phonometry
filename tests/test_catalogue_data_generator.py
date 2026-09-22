@@ -262,6 +262,38 @@ def test_an_upper_bound_stays_a_bound() -> None:
     assert cell["kind"] == "bound"
 
 
+def test_a_lower_bound_stays_a_bound_and_reads_as_one() -> None:
+    """Before this branch existed it was published as a two-sided interval.
+
+    Cox prints a porosity of ">0.75" and the published table read it back as
+    "0,75 to 1", an interval whose high end nobody measured; a table whose
+    bound has no ceiling at all had no number to put on that side and reached
+    this function with an infinity.
+    """
+    row = _row(
+        ranges={"porosity": (0.75, 1.0)},
+        bounded_below=frozenset({"porosity"}),
+    )
+
+    cell = gcd.cell(row, "porosity")
+
+    assert cell["text"] == "> 0,75"
+    assert cell["kind"] == "bound"
+
+
+def test_a_bound_whose_open_end_is_empty_prints_the_end_the_page_gave() -> None:
+    open_ended = _row(
+        ranges={"porosity": (0.75, None)},
+        bounded_below=frozenset({"porosity"}),
+    )
+
+    cell = gcd.cell(open_ended, "porosity")
+
+    assert cell["text"] == "> 0,75"
+    assert cell["kind"] == "bound"
+    assert list(gcd.values({"x": open_ended}, "porosity")) == [0.75]
+
+
 def test_a_cell_that_lists_several_readings_lists_them() -> None:
     row = _row(reported={"viscous_length_um": (25.0, 207.0, (200.0, 450.0))})
 

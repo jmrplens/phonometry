@@ -255,6 +255,58 @@ def test_a_field_the_row_does_have_has_no_reason_to_be_missing() -> None:
     assert row.why_missing("name") == ""
 
 
+def test_a_bound_may_leave_open_the_end_the_quantity_has_no_limit_on() -> None:
+    """A transmission loss printed ">45" has no ceiling to record.
+
+    Cox's aerogel stops at a porosity of 1 because that is what a porosity
+    is; ASHRAE's duct wall stops nowhere, so the open end holds nothing. The
+    refusal reads off the end the page did print, which is the whole of what
+    it says.
+    """
+    from phonometry.noise_control import DuctWallSpectrum
+
+    row = DuctWallSpectrum(
+        name="200 mm",
+        source="ASHRAE (2019) Chapter 49 Table 30, PDF page 914 (printed p. 49.30)",
+        ranges={"transmission_loss_63_db": (45.0, None)},
+        bounded_below=frozenset({"transmission_loss_63_db"}),
+    )
+    assert row.ranges["transmission_loss_63_db"] == (45.0, None)
+    assert row.why_missing("transmission_loss_63_db") == (
+        "the page prints a lower bound of 45 and no value"
+    )
+
+
+@pytest.mark.parametrize(
+    ("ranges", "bounded_above", "bounded_below"),
+    [
+        ({"x": (45.0, None)}, frozenset(), frozenset()),
+        ({"x": (None, 5.0)}, frozenset(), frozenset()),
+        ({"x": (None, 5.0)}, frozenset(), frozenset({"x"})),
+        ({"x": (45.0, None)}, frozenset({"x"}), frozenset()),
+    ],
+)
+def test_a_range_missing_the_end_the_page_printed_is_refused(
+    ranges: dict[str, tuple[float | None, float | None]],
+    bounded_above: frozenset[str],
+    bounded_below: frozenset[str],
+) -> None:
+    """Only the open side of a bound may be empty.
+
+    An interval missing the end the page did print reads back as a cell the
+    book left blank, which is the one thing these hedges exist to tell apart,
+    and it would reach a published table as half a range.
+    """
+    with pytest.raises(CatalogueError, match="missing an end"):
+        CatalogueRow(
+            name="x",
+            source="y",
+            ranges=ranges,
+            bounded_above=bounded_above,
+            bounded_below=bounded_below,
+        )
+
+
 # ---------------------------------------------------------------------------
 # What every packaged data file must hold, whatever catalogue it belongs to
 # ---------------------------------------------------------------------------
@@ -300,6 +352,25 @@ def _significant_figures(value: float) -> int:
 def test_every_data_file_is_in_the_sweep() -> None:
     """The glob is the guard; an empty one would pass every test below."""
     assert _DATA_FILES
+
+
+def _not_a_json_constant(token: str) -> float:
+    """Refuse the three bare tokens that only CPython's reader accepts."""
+    msg = f"{token} is a Python constant, not JSON"
+    raise ValueError(msg)
+
+
+@pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
+def test_a_data_file_is_json_and_not_python(path: pathlib.Path) -> None:
+    """Whatever reads one of these next may not be Python.
+
+    ``Infinity``, ``-Infinity`` and ``NaN`` are an extension of CPython's
+    ``json`` module and not JSON: ``JSON.parse`` rejects them on the first
+    character, and the published tables are read from JavaScript. One
+    catalogue shipped seventeen bare ``Infinity`` tokens as the open end of a
+    lower bound before this ran, and the file imported cleanly the whole time.
+    """
+    json.loads(path.read_text(encoding="utf-8"), parse_constant=_not_a_json_constant)
 
 
 @pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
@@ -355,6 +426,30 @@ def test_a_misprinted_cell_says_what_the_page_printed_and_why_it_cannot_be(
             assert "ERRATA" in reason, (
                 f"{path.name}: {row['key']}.{field} calls a printed value wrong "
                 f"without pointing at the registry entry that argues it"
+            )
+
+
+@pytest.mark.parametrize("path", _DATA_FILES, ids=lambda path: path.name)
+def test_a_misprinted_number_is_not_also_served(path: pathlib.Path) -> None:
+    """The hedge says the number is not served, so the field has to be empty.
+
+    Hung on a field that holds a number, it is read by nothing:
+    :meth:`~phonometry._internal.catalogue.CatalogueRow.why_missing` answers
+    the empty string for a field that is not missing, and the published table
+    prints the number and stops before ever looking at the hedge. The reader
+    is told the book is wrong nowhere at all, while the value the registry
+    calls wrong goes on being handed out. A defect in a cell this library does
+    not hold, such as the customary restatement of a value kept in SI, belongs
+    in ``note``, which is served. A defect inside a printed description is a
+    different thing and not this: there is no number in that cell to refuse.
+    """
+    document = json.loads(path.read_text(encoding="utf-8"))
+    for row in document["rows"]:
+        for field in row.get("misprinted") or {}:
+            held = row.get(field)
+            assert not isinstance(held, (int, float)), (
+                f"{path.name}: {row['key']}.{field} is served as {held!r} and "
+                f"carries a misprinted hedge, which says it is not served"
             )
 
 

@@ -42,6 +42,17 @@ over the range of angles a laboratory measures, and is what its own theory
 computes. So a row here is a published measurement of a construction of that
 description, useful for a sanity check and for an order of magnitude, and it
 is not a specification of any wall anybody will build.
+
+ASHRAE says as little and says it plainly: its nine machine equipment room
+constructions are "compiled from controlled laboratory tests and represent a
+condition typically superior to that found in field installations, because the
+in situ acoustical performance of any wall, floor, or ceiling is adversely
+affected by flanking paths, holes, penetrations, and other anomalies". No
+laboratory, standard or reference is named for any of them either. Those rows
+are here and the duct walls of the same chapter are not, because a duct wall is
+measured in two directions that are different numbers and is indexed by the
+duct's cross section, length and sheet gauge; it is published from
+:mod:`phonometry.noise_control.duct_walls`.
 """
 
 from __future__ import annotations
@@ -97,6 +108,12 @@ class TransmissionLossSpectrum(BandedRow):
     :ivar surface_density_kg_m2: The mass per unit area, in kilograms per
         square metre, as printed. This is what the mass law takes, and what
         two rows of the same description are told apart by.
+    :ivar sound_transmission_class: The single-number rating the page prints
+        beside the spectrum, where it prints one. It is not a band value and
+        it does not follow from the ones beside it: an STC is computed from
+        third-octave data, so a table that prints octave bands and an STC is
+        printing two readings of one measurement and this catalogue keeps
+        both. Empty for a page that rates nothing, which is most of them.
     """
 
     transmission_loss_63_db: float | None = None
@@ -109,6 +126,7 @@ class TransmissionLossSpectrum(BandedRow):
     transmission_loss_8000_db: float | None = None
     thickness_mm: float | None = None
     surface_density_kg_m2: float | None = None
+    sound_transmission_class: float | None = None
 
     _bands_hz: ClassVar[tuple[int, ...]] = TRANSMISSION_LOSS_BANDS_HZ
     _band_prefix: ClassVar[str] = "transmission_loss_"
@@ -133,7 +151,7 @@ class TransmissionLossSpectrum(BandedRow):
 _SETS = ("approximate", "bounded_above", "bounded_below")
 
 #: The published tables this catalogue reads, one data file per table.
-_TABLES = ("bies-2017-table-7-6",)
+_TABLES = ("bies-2017-table-7-6", "ashrae-2019-table-40")
 
 
 def _load() -> dict[str, TransmissionLossSpectrum]:
@@ -155,7 +173,10 @@ def _load() -> dict[str, TransmissionLossSpectrum]:
 #: rather than named, and two rows of one description are told apart by the
 #: thickness and the surface density beside them, which is why the key carries
 #: the thickness and why :func:`transmission_loss_named` answers with every
-#: match.
+#: match. The second table is the nine machine equipment room walls, floors and
+#: ceilings of ASHRAE Chapter 49, which are a partition measured the way any
+#: partition is and belong here rather than beside the duct walls of the same
+#: chapter.
 PUBLISHED_TRANSMISSION_LOSS: Mapping[str, TransmissionLossSpectrum] = MappingProxyType(
     _load()
 )

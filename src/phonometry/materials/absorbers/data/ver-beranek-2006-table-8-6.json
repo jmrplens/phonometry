@@ -1,0 +1,157 @@
+{
+  "source": "Vér & Beranek 2e TABLE 8.6, PDF page 267 (printed p. 263)",
+  "about": "Thirteen woven glass fibre cloths from TABLE 8.6 of chapter 8, \"Sound-Absorbing Materials and Sound Absorbers\". The quantity is the one the chapter introduces for a thin layer on printed folio 262: “The acoustical properties of such thin layers are characterized by their flow resistance R_s = Δp/v and their mass per unit area ρ_s.” That is a resistance per unit area, in N s/m3, which is a pascal second per metre and what an older literature calls an mks rayl. It is not the flow resistivity of a bulk absorber, which is per metre of thickness and lives in PUBLISHED_POROUS.\n\nNothing here is converted, and this table is the one that gives the least to check: it prints the surface density twice, in oz/yd2 and in g/m2, and prints the weave and the flow resistance once each and in one unit. The two surface densities disagree by about eleven per cent on every one of the thirteen rows. One ounce per square yard is 28.349523125 / 0.83612736 grams per square metre by the exact definitions of the ounce and the yard, a quotient that does not terminate and is 33.906 to three decimals, and this table behaves as though it were 30.5; the page does not say which of its two columns carries the wrong factor. This file holds the g/m2 the page prints, as it prints it, and every row's note gives the oz/yd2 beside it. The defect is registered in docs/ERRATA.md. The thirteen flow resistances have no second printing at all, so nothing but the second reader stands behind them.\n\nFootnote a qualifies the surface density: “Averaged over a large sample.” Footnote b resolves the manufacturer code each row prints into a maker, which is why the credit here is per row. The table gives no measurement method, no laboratory and no standard. The running text on printed folio 262 says of this table and of TABLE 8.5 that the values listed “represent the linear part of the flow resistance, which is appropriate for design use only if the particle velocity is low”.",
+  "rows": [
+    {
+      "key": "glass_cloth_120",
+      "name": "120",
+      "surface_density_g_m2": 96.0,
+      "specific_flow_resistance_pa_s_m": 300.0,
+      "weave_construction": "60 × 58",
+      "note": "The page prints this surface density twice, 3.16 oz/yd2 and 96 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.6 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 120 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_126",
+      "name": "126",
+      "surface_density_g_m2": 164.0,
+      "specific_flow_resistance_pa_s_m": 45.0,
+      "weave_construction": "34 × 32",
+      "note": "The page prints this surface density twice, 5.37 oz/yd2 and 164 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.0 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 126 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_138",
+      "name": "138",
+      "surface_density_g_m2": 204.0,
+      "specific_flow_resistance_pa_s_m": 2200.0,
+      "weave_construction": "64 × 60",
+      "note": "The page prints this surface density twice, 6.70 oz/yd2 and 204 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.4 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 138 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_181",
+      "name": "181",
+      "surface_density_g_m2": 272.0,
+      "specific_flow_resistance_pa_s_m": 380.0,
+      "weave_construction": "57 × 54",
+      "note": "The page prints this surface density twice, 8.90 oz/yd2 and 272 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 10.9 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 181 of Burlington Glass Fabrics Company, J. P. Schwebel and Company and United Merchants Industrial Fabrics, credited row by row by the manufacturer code 1, 2, 3 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1044",
+      "name": "1044",
+      "surface_density_g_m2": 585.0,
+      "specific_flow_resistance_pa_s_m": 36.0,
+      "weave_construction": "14 × 14",
+      "note": "The page prints this surface density twice, 19.2 oz/yd2 and 585 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.3 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1044 of United Merchants Industrial Fabrics, credited row by row by the manufacturer code 3 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1544",
+      "name": "1544",
+      "surface_density_g_m2": 535.0,
+      "specific_flow_resistance_pa_s_m": 19.0,
+      "weave_construction": "14 × 14",
+      "note": "The page prints this surface density twice, 17.7 oz/yd2 and 535 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 12.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1544 of J. P. Schwebel and Company, credited row by row by the manufacturer code 2 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_3862",
+      "name": "3862",
+      "surface_density_g_m2": 375.0,
+      "specific_flow_resistance_pa_s_m": 350.0,
+      "weave_construction": "20 × 38",
+      "note": "The page prints this surface density twice, 12.3 oz/yd2 and 375 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 3862 of United Merchants Industrial Fabrics, credited row by row by the manufacturer code 3 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1658",
+      "name": "1658",
+      "surface_density_g_m2": 57.0,
+      "specific_flow_resistance_pa_s_m": 10.0,
+      "weave_construction": "24 × 24",
+      "note": "The page prints this surface density twice, 1.87 oz/yd2 and 57 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1658 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1562",
+      "name": "1562",
+      "surface_density_g_m2": 59.0,
+      "ranges": {
+        "specific_flow_resistance_pa_s_m": [
+          0.0,
+          5.0
+        ]
+      },
+      "bounded_above": [
+        "specific_flow_resistance_pa_s_m"
+      ],
+      "weave_construction": "30 × 16",
+      "note": "The page prints this surface density twice, 1.94 oz/yd2 and 59 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.5 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1562 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1500",
+      "name": "1500",
+      "surface_density_g_m2": 293.0,
+      "specific_flow_resistance_pa_s_m": 13.0,
+      "weave_construction": "16 × 14",
+      "note": "The page prints this surface density twice, 9.60 oz/yd2 and 293 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.1 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1500 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1582",
+      "name": "1582",
+      "surface_density_g_m2": 442.0,
+      "specific_flow_resistance_pa_s_m": 400.0,
+      "weave_construction": "60 × 56",
+      "note": "The page prints this surface density twice, 14.5 oz/yd2 and 442 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1582 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1584",
+      "name": "1584",
+      "surface_density_g_m2": 750.0,
+      "specific_flow_resistance_pa_s_m": 200.0,
+      "weave_construction": "42 × 36",
+      "note": "The page prints this surface density twice, 24.6 oz/yd2 and 750 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1584 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+      }
+    },
+    {
+      "key": "glass_cloth_1589",
+      "name": "1589",
+      "surface_density_g_m2": 366.0,
+      "specific_flow_resistance_pa_s_m": 11.0,
+      "weave_construction": "13 × 12",
+      "note": "The page prints this surface density twice, 12.0 oz/yd2 and 366 g/m2, and one ounce per square yard is 33.906 grams per square metre to three decimals, by the exact definitions of the ounce and the yard, so the two printings are 11.2 per cent apart. The whole column is, by the same factor; the page does not say which of its two columns carries it, so this row holds the g/m2 as printed and docs/ERRATA.md argues the pair. Footnote a: “Averaged over a large sample.”",
+      "attributed_to": {
+        "row": "cloth number 1589 of Burlington Glass Fabrics Company, credited row by row by the manufacturer code 1 of footnote b"
+      }
+    }
+  ]
+}

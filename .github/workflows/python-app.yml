@@ -415,6 +415,8 @@ jobs:
         pip install -e .
     - name: Check that every published value cites its page and folio
       run: python scripts/check_published_sources.py
+    - name: Check that every published catalogue reaches the catalogues page
+      run: python scripts/check_published_catalogues_reach_the_page.py
     # The site renders the catalogues from a module this dumps, so a row added
     # to a data file without regenerating it would leave the page showing the
     # catalogue as it was. Same arrangement as the API reference: the artefact

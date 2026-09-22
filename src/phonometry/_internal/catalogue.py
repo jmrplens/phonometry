@@ -151,7 +151,9 @@ class CatalogueRow:
         worked out from the cells the page did print. A derived value is never
         stored as if it had been read.
     :ivar ranges: ``(low, high)`` for each field the page prints as an
-        interval rather than a value.
+        interval rather than a value. One end is ``None`` only for a bound
+        whose open side the quantity has no limit on; the end the page prints
+        is always a number, and a two-sided interval has two.
     :ivar bounded_above: The subset of :attr:`ranges` the page prints as
         ``< x`` or ``<= x``, where the low end is a floor and not a
         measurement.
@@ -159,7 +161,12 @@ class CatalogueRow:
         ``> x`` or ``>= x``, where the high end is the ceiling the quantity
         cannot pass and not a measurement: Cox gives an aerogel a porosity of
         ``>0.75``, and the 1 beside it is what a porosity is, not what anybody
-        measured.
+        measured. A quantity with no such ceiling leaves that end ``None``
+        rather than borrowing a number for it: ASHRAE prints ``>45`` for a
+        duct wall whose radiated sound the background swamped, and a
+        transmission loss has no value it cannot pass, so the open end is
+        empty. It is never an infinity, which is not a number the page has
+        and not a token JSON can carry.
     :ivar reported: Field to the values the page lists for it, for a cell that
         prints several with no single one: ``"25, 207, 230"`` or ``"96,
         200-450"``, readings from as many studies. Each entry is a number or
@@ -210,7 +217,9 @@ class CatalogueRow:
     variant: str = ""
     approximate: frozenset[str] = frozenset()
     derived: Mapping[str, str] = field(default_factory=dict)
-    ranges: Mapping[str, tuple[float, float]] = field(default_factory=dict)
+    ranges: Mapping[str, tuple[float | None, float | None]] = field(
+        default_factory=dict
+    )
     bounded_above: frozenset[str] = frozenset()
     bounded_below: frozenset[str] = frozenset()
     reported: Mapping[str, tuple[float | tuple[float, float], ...]] = field(
@@ -235,6 +244,32 @@ class CatalogueRow:
         """
         for name in _MAPPINGS:
             object.__setattr__(self, name, MappingProxyType(dict(getattr(self, name))))
+        self._check_range_ends()
+
+    def _check_range_ends(self) -> None:
+        """Refuse a range missing the end the page printed.
+
+        The open side of a bound may be empty, because a quantity with no
+        ceiling has nothing to put there. The printed side never may: a bound
+        whose own number is missing would read back as a cell the page left
+        blank, which is the one thing this class exists to tell apart.
+
+        :raises CatalogueError: when a bound has no printed end, or when a
+            two-sided interval is missing either of them.
+        """
+        for field_name, (low, high) in self.ranges.items():
+            if field_name in self.bounded_above:
+                missing = high is None
+            elif field_name in self.bounded_below:
+                missing = low is None
+            else:
+                missing = low is None or high is None
+            if missing:
+                msg = (
+                    f"{self.name!r}: the range of {field_name!r} is missing an end "
+                    "the page prints; only the open side of a bound may be empty"
+                )
+                raise CatalogueError(msg)
 
     def is_approximate(self, field_name: str) -> bool:
         """Whether the page prints this field with a ``~``.
@@ -306,11 +341,12 @@ class CatalogueRow:
             return self.not_derivable[field_name]
         if field_name in self.ranges:
             low, high = self.ranges[field_name]
-            if field_name in self.bounded_above:
+            if high is not None and field_name in self.bounded_above:
                 return f"the page prints an upper bound of {high:g} and no value"
-            if field_name in self.bounded_below:
+            if low is not None and field_name in self.bounded_below:
                 return f"the page prints a lower bound of {low:g} and no value"
-            return f"the page prints {low:g} to {high:g} and no value"
+            if low is not None and high is not None:
+                return f"the page prints {low:g} to {high:g} and no value"
         if field_name in self.reported:
             listed = ", ".join(_spell(entry) for entry in self.reported[field_name])
             return f"the page lists {listed} and no single value"
@@ -321,8 +357,8 @@ class CatalogueRow:
 class BandedRow(CatalogueRow):
     """One row of a table that prints its quantity once per frequency band.
 
-    Five catalogues of this library hold a spectrum read off a page, and each
-    of them keeps one field per band rather than an array, because every hedge
+    The catalogues of this library that hold a spectrum read off a page keep
+    one field per band rather than an array, because every hedge
     of :class:`CatalogueRow` is keyed by field name and a cell the page left
     empty has to say so the way any other cell does. What they then need is
     the same three things: which bands this row filled, the row as a spectrum,

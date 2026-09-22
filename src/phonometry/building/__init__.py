@@ -25,6 +25,11 @@ from .catalogue import (
     TransmissionLossSpectrum,
     transmission_loss_named,
 )
+from .impact_catalogue import (
+    PUBLISHED_IMPACT_INSULATION,
+    ImpactInsulation,
+    impact_insulation_named,
+)
 from .measurement import (
     COVERAGE_FACTORS,
     HEAVY_IMPACT_A_WEIGHTING,
@@ -308,6 +313,9 @@ __all__ = [
     "TRANSMISSION_LOSS_BANDS_HZ",
     "TransmissionLossSpectrum",
     "transmission_loss_named",
+    "PUBLISHED_IMPACT_INSULATION",
+    "ImpactInsulation",
+    "impact_insulation_named",
     "CEILING_ATTENUATION_CONTOUR",
     "COVERAGE_FACTORS",
     "DB_HR_FREQUENCIES",

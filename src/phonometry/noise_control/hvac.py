@@ -507,9 +507,10 @@ _SILENCER_SELF_NOISE_CORRECTION: NDArray[np.float64] = np.array(
 )
 
 # ---------------------------------------------------------------------------
-# ASHRAE (2019) HVAC Applications Handbook, Chapter 49, Table 9 -- maximum
-# recommended "free" opening airflow velocity, m/s, at the neck of a supply
-# diffuser or return register to achieve a design RC(N), keyed by design RC.
+# ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 9, PDF page 899
+# (printed p. 49.15) -- maximum recommended "free" opening airflow velocity,
+# m/s, at the neck of a supply diffuser or return register to achieve a design
+# RC(N), keyed by design RC.
 # ---------------------------------------------------------------------------
 _TERMINAL_VELOCITY_LIMIT: dict[str, dict[int, float]] = {
     "supply": {45: 3.2, 40: 2.8, 35: 2.5, 30: 2.2, 25: 1.8},
@@ -517,11 +518,18 @@ _TERMINAL_VELOCITY_LIMIT: dict[str, dict[int, float]] = {
 }
 
 # ---------------------------------------------------------------------------
-# ASHRAE (2019) HVAC Applications Handbook, Chapter 49, Table 10 -- decibels to
-# be added to the diffuser sound rating to allow for throttling of a volume
-# damper, keyed by the damper pressure ratio and by where the damper sits.
+# ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 10, PDF page 899
+# (printed p. 49.15) -- decibels to be added to the diffuser sound rating to
+# allow for throttling of a volume damper, keyed by the damper pressure ratio
+# and by where the damper sits.
 # ---------------------------------------------------------------------------
 _DAMPER_PRESSURE_RATIOS: NDArray[np.float64] = np.array([1.5, 2.0, 2.5, 3.0, 4.0, 6.0])
+
+#: ASHRAE (2019) HVAC Applications Handbook Chapter 49 Table 10, PDF page 899
+#: (printed p. 49.15) -- the decibels themselves, read against the ratios
+#: above. The citation is
+#: repeated rather than left to the block over the ratios because a census
+#: reads the comment immediately above a name, and these are the numbers.
 _DAMPER_CORRECTION: dict[str, NDArray[np.float64]] = {
     "diffuser_neck": np.array([5, 9, 12, 15, 18, 24], dtype=float),
     "plenum_inlet": np.array([2, 3, 4, 5, 6, 9], dtype=float),

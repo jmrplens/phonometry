@@ -1,0 +1,52 @@
+{
+  "source": "Vér & Beranek 2e TABLE 8.5, PDF page 266 (printed p. 262)",
+  "about": "Five woven wire mesh cloths from TABLE 8.5 of chapter 8, \"Sound-Absorbing Materials and Sound Absorbers\". The quantity is the one the chapter introduces for a thin layer on printed folio 262: “The acoustical properties of such thin layers are characterized by their flow resistance R_s = Δp/v and their mass per unit area ρ_s.” That is a resistance per unit area, in N s/m3, which is a pascal second per metre and what an older literature calls an mks rayl. It is not the flow resistivity of a bulk absorber, which is per metre of thickness and lives in PUBLISHED_POROUS.\n\nNothing here is converted. This table prints every one of its quantities twice, but only three of the four pairs are one quantity in two systems of units: the wire count in wires per centimetre and wires per inch, the wire diameter in micrometres and mils, and the mass in kg/m2 and lb/ft2. The fourth pair prints the flow resistance in N s/m3 and again as a multiple of rho0 c0, which is no unit at all. This file keeps the SI printing of each pair of units, so the values are the page's own digits and not arithmetic on them. That leaves the customary printing free to check the SI one, which is how the one defect of this table was found: on the last row the mass per unit area is printed as 0.31 kg/m2 and as 0.63 lb/ft2, when 0.31 kg/m2 is 0.063 lb/ft2 and the decimal point of the pound cell is one place too far right. The row keeps the kilogram cell, which the column above it and the weave of the mesh both support, and its note records the pound cell; docs/ERRATA.md argues which of the two is wrong.\n\nThe table credits nobody: no manufacturer, no footnote and no source note. It gives no measurement method, no laboratory, no standard and no measurement condition. The running text above it says of this table and of TABLE 8.6 that the values listed “represent the linear part of the flow resistance, which is appropriate for design use only if the particle velocity is low”, and that above 140 dB the flow resistance has to be measured as a function of the face velocity instead.",
+  "rows": [
+    {
+      "key": "wire_mesh_12",
+      "name": "12",
+      "wires_per_cm": 12.0,
+      "wire_diameter_um": 330.0,
+      "mass_per_area_kg_m2": 1.6,
+      "specific_flow_resistance_pa_s_m": 5.7,
+      "normalized_flow_resistance": 0.014
+    },
+    {
+      "key": "wire_mesh_20",
+      "name": "20",
+      "wires_per_cm": 20.0,
+      "wire_diameter_um": 220.0,
+      "mass_per_area_kg_m2": 1.2,
+      "specific_flow_resistance_pa_s_m": 5.9,
+      "normalized_flow_resistance": 0.014
+    },
+    {
+      "key": "wire_mesh_40",
+      "name": "40",
+      "wires_per_cm": 40.0,
+      "wire_diameter_um": 115.0,
+      "mass_per_area_kg_m2": 0.63,
+      "specific_flow_resistance_pa_s_m": 9.0,
+      "normalized_flow_resistance": 0.022
+    },
+    {
+      "key": "wire_mesh_47",
+      "name": "47",
+      "wires_per_cm": 47.0,
+      "wire_diameter_um": 90.0,
+      "mass_per_area_kg_m2": 0.48,
+      "specific_flow_resistance_pa_s_m": 13.5,
+      "normalized_flow_resistance": 0.033
+    },
+    {
+      "key": "wire_mesh_80",
+      "name": "80",
+      "wires_per_cm": 80.0,
+      "wire_diameter_um": 57.0,
+      "mass_per_area_kg_m2": 0.31,
+      "specific_flow_resistance_pa_s_m": 24.6,
+      "normalized_flow_resistance": 0.06,
+      "note": "The page prints this mass twice, 0.31 kg/m2 and 0.63 lb/ft2, and 0.63 lb/ft2 is 3.08 kg/m2, ten times the first. The defective cell is the pound one, the restatement, which this catalogue does not hold; the row serves the 0.31 kg/m2 that the column above it and the weave of the mesh both support. See docs/ERRATA.md."
+    }
+  ]
+}

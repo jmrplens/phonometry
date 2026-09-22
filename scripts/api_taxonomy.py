@@ -113,7 +113,11 @@ _SECTION_LIST: tuple[Section, ...] = (
         # The relations live in ``elastic`` and the published rows in
         # ``catalogue``; the ``__init__`` only re-exports, so it holds no
         # public name of its own.
-        modules=("phonometry.solids.elastic", "phonometry.solids.catalogue"),
+        modules=(
+            "phonometry.solids.elastic",
+            "phonometry.solids.catalogue",
+            "phonometry.solids.damping",
+        ),
     ),
     Section(
         key="io",
@@ -195,6 +199,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.building.measurement.low_frequency",
             "phonometry.building.measurement.ratings",
             "phonometry.building.catalogue",
+            "phonometry.building.impact_catalogue",
             "phonometry.building.prediction.panel_transmission",
             "phonometry.building.prediction.masonry_cavity_wall",
             "phonometry.building.measurement.heavy_impact",
@@ -231,6 +236,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.materials.absorbers.standing_wave",
             "phonometry.materials.absorbers.porous",
             "phonometry.materials.absorbers.catalogue",
+            "phonometry.materials.absorbers.resistive_sheets",
             "phonometry.materials.absorbers.measured",
             "phonometry.materials.absorbers.layered",
             "phonometry.materials.absorbers.biot",
@@ -377,6 +383,7 @@ _SECTION_LIST: tuple[Section, ...] = (
             "phonometry.noise_control.hvac",
             "phonometry.noise_control.duct_path",
             "phonometry.noise_control.duct_modes",
+            "phonometry.noise_control.duct_walls",
             "phonometry.noise_control.enclosures",
             "phonometry.noise_control.enclosure_insulation",
             "phonometry.noise_control.cabin_insulation",
@@ -474,14 +481,19 @@ OBJECT_MODULE_OVERRIDES: dict[str, str] = {
     "DEFAULT_SPEED_OF_SOUND_M_S": "phonometry.solids.elastic",
     # The published catalogue is a mapping, so a plain scan sees it in the
     # module that builds it and in the package that re-exports it.
+    "PUBLISHED_DAMPING": "phonometry.solids.damping",
+    "PUBLISHED_DUCT_TRANSMISSION_LOSS": "phonometry.noise_control.duct_walls",
+    "DUCT_WALL_BANDS_HZ": "phonometry.noise_control.duct_walls",
     "PUBLISHED_SOLIDS": "phonometry.solids.catalogue",
     "PUBLISHED_GROUND": "phonometry.environment.propagation.ground_surfaces",
     "PUBLISHED_POROUS": "phonometry.materials.absorbers.catalogue",
+    "PUBLISHED_FLOW_RESISTANCE": "phonometry.materials.absorbers.resistive_sheets",
     "PUBLISHED_ABSORPTION": "phonometry.materials.absorbers.measured",
     "PUBLISHED_TRANSMISSION_LOSS": "phonometry.building.catalogue",
     "TRANSMISSION_LOSS_BANDS_HZ": "phonometry.building.catalogue",
     "TransmissionLossSpectrum": "phonometry.building.catalogue",
     "transmission_loss_named": "phonometry.building.catalogue",
+    "PUBLISHED_IMPACT_INSULATION": "phonometry.building.impact_catalogue",
     "PUBLISHED_SCATTERING": "phonometry.materials.diffusers.measured_scattering",
     "SCATTERING_BANDS_HZ": "phonometry.materials.diffusers.measured_scattering",
     "ScatteringCoefficientSpectrum": "phonometry.materials.diffusers.measured_scattering",

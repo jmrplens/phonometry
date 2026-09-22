@@ -109,6 +109,36 @@ a key names the table it came from.
 
 <Catalogues catalogue="solids" lang="en" />
 
+## Damping materials
+
+Seventeen commercial damping treatments, and one thing about them that makes
+this a different table from the solids above: a loss factor here is not a
+number. Every loss factor in the solids catalogue is a single figure, because
+for a metal it hardly moves. For a polymer worked near its glass transition it
+moves by two orders of magnitude with temperature and with frequency, and the
+peak is all these pages print. So the peak arrives with three temperatures
+beside it, one per frequency the table prints a column for: where the material
+peaks when it is worked at 10 Hz, at 100 Hz and at 1 kHz. A treatment whose
+peak sits at 20 °C at 100 Hz is doing nothing for you at 100 Hz on a winter
+morning, and a row read without its temperatures says the opposite of what it
+holds.
+
+The three storage moduli are the same argument again. One is the stiff end, at
+low temperature or high frequency, one is the soft end, and one is the modulus
+that applies in the band where the loss factor peaks, which is the only one of
+the three that belongs beside the peak. The fourth column is the loss modulus,
+the imaginary part, which the chapter gives as the product of the other two and
+is the cheapest check there is on a row. The page is in degrees Fahrenheit and
+pounds per square inch, so every temperature and every modulus here was
+converted and is marked as worked out rather than read, with the figure the
+page prints beside it. The loss factor is the one column that was not: it has
+no units, so it is served exactly as printed. The page says in a footnote that the values were read off published
+curves and that damping data should come from the supplier of the material;
+three of its cells are corrupted in the printing, are registered in this
+project's errata and are left empty here rather than guessed at.
+
+<Catalogues catalogue="damping" lang="en" />
+
 ## Porous materials
 
 The parameters the equivalent-fluid and poroelastic models take, read from the
@@ -122,6 +152,51 @@ calculation and a compiled row to know whether a number you measured is
 plausible.
 
 <Catalogues catalogue="porous" lang="en" />
+
+## Resistive facings
+
+Twenty-nine thin resistive facings, the wire meshes, glass cloths and sintered
+metal sheets that go over a porous absorber or across the mouth of a cavity,
+each with the flow resistance of unit **area** of it. That is the thing this
+table is most likely to be misread for. The porous catalogue above holds a flow
+**resistivity**, per metre of the bulk material it describes; a facing is a
+sheet with no thickness worth dividing by, so what is measured on it is a
+resistance in pascal seconds per metre, and the two quantities are a thickness
+apart. Multiplying one of these rows by a thickness gives a number nobody
+measured.
+
+Two of the three tables print that resistance twice, once as the page's N s/m³
+and once as a multiple of the characteristic impedance of air, and neither says
+what it took the impedance to be. Both columns are kept as printed rather than
+one being recomputed from the other, because dividing them gives the impedance
+back: the wire meshes imply 407 to 421 Pa s/m and the sintered sheets 400,
+except for the one block that implies 397,7, which is a property of the page
+and not of any facing. The sintered sheets are
+also the only rows with a nonlinearity factor, the ratio of the resistances
+measured at face velocities of 500 and 20 cm/s, and they run from 1,8 to 5: a
+facing at 1 would be the linear one the rest of this library assumes. The
+others are named by what a weaver would call them, a wire count or a weave, and
+the search matches a bare number because that is what a glass cloth is called.
+
+<Catalogues catalogue="flowResistance" lang="en" />
+
+## Resilient layers
+
+Fifteen resilient layers, which is what a floating floor floats on, each with
+the dynamic stiffness per unit area measured on it to ISO 9052-1. It is the
+thinnest table on this page and the one with the least to interpret: a
+stiffness, a density and a thickness, and the last two are here because four
+rock wool rows and four glass wool rows differ by nothing else.
+
+What a row is not is a product. A floating floor is designed with the stiffness
+its manufacturer declares for the material actually being laid; these are
+specimens somebody measured and published in an appendix, and they are the
+order of magnitude for when there is no declared value in front of you, or the
+way to see how far the stiffness moves when the same wool is laid at twice the
+density. Eleven are the author's own measurements and the four rebond foams are
+credited to a paper of his own.
+
+<Catalogues catalogue="resilientLayers" lang="en" />
 
 ## Absorption coefficients
 
@@ -189,6 +264,62 @@ strip ties and 55 dB on expanded metal ties, same mass and same thickness.
 No formula in the book gives that difference; the measurement does.
 
 <Catalogues catalogue="transmissionLoss" lang="en" />
+
+## Impact insulation
+
+Forty-eight rows of measured impact insulation: forty-two floor-ceiling
+constructions with the impact insulation class of each, and six elastic surface
+treatments with the improvement each one adds. The class belongs to neither the
+slab nor the covering. It is what a tapping machine did on one floor built one
+way with one ceiling under it, and it moves by fifty-five points between a bare
+concrete slab, which these pages rate 25, and the same slab under a wool
+carpet, which they rate 80.
+
+The two ratings are two quantities and no row carries both. A class is an
+absolute and an improvement is a difference between two of them, so adding the
+second to the first would be adding a difference to a rating with nothing in
+the arithmetic to say so, and the footnote on the improvements says that over a
+wood-joist floor they may be substantially smaller than printed. There is no
+spectrum here either: these pages print no impact sound pressure level per
+band, no reference curve and nothing that can be turned into one.
+
+The rows read in Spanish on both languages of this page, because the handbook
+they come from is a Spanish translation, and a construction is described rather
+than named: about a dozen of them lean on another row rather than repeating it,
+in phrases from `Igual que 1 salvo que` to `Parecido al 20` and `Mismo suelo
+estructural que el 18`, and the row they refer to is one lookup away. Every dimension is printed twice, in
+centimetres and in inches, and nineteen of the three hundred and twenty-one pairs
+are not each other. Those are registered in this project's errata, the printed
+description is kept whole, and the one misprint that reaches a quantity rather
+than prose leaves its cell empty rather than serving a number the registry
+calls wrong.
+
+<Catalogues catalogue="impactInsulation" lang="en" />
+
+## Duct walls
+
+Forty-six measurements of what the wall of a sheet metal duct does to the sound
+that crosses it, and the first thing to read on a row is which way it crossed.
+Breakout is the sound that leaves the duct through its wall, into the room the
+duct passes through. Break-in is the sound that enters the duct through the
+same wall and then travels along it to somewhere else. They are two different
+measurements of one wall and not two words for one number: the 305 mm by 305 mm
+duct in 24 gauge is 21 dB at 63 Hz on the way out and 16 dB on the way in, and
+27 against 16 at 250 Hz. Two rows that differ only in direction are two rows
+here, and the column says which.
+
+The rest of the row is what tells one duct from another. The shape is the
+chapter's own word, which is why the breakout table says round where the
+break-in table says circular for the same geometry. The gauge is the US sheet
+metal gauge as printed, keeping the asterisk that marks a duct lined
+internally, and the note on those rows says what the lining is. The size is the
+two sides or the diameter, in millimetres; two rows carry a diameter the page
+prints once over three consecutive rows, so those two are marked as worked out
+rather than read. Several cells are a lower bound and not a value, because the
+sound radiated was below the background in the room the duct was measured in,
+and a bound is published as one.
+
+<Catalogues catalogue="ductTransmissionLoss" lang="en" />
 
 ## Scattering coefficients
 
@@ -290,3 +421,23 @@ each beside the model or the standard that fixes it, and they disagree because
 each is the air its own document assumes.
 
 <Catalogues catalogue="fluids" lang="en" />
+
+## Air attenuation
+
+The six conditions the building standard's own room model tabulates the air
+attenuation for, and the coefficient in each of them, band by band. A room
+model needs one. The air in a hall absorbs, the absorption grows with frequency
+and with dryness, and by 8 kHz it is no longer a correction to the surfaces but
+a term that decides the answer, which is why the model has an air term at all.
+So the standard prints a short table of two temperatures crossed with three
+ranges of relative humidity, and names the one to assume when the room's own
+temperature and humidity are not known. That row carries a note here saying so.
+
+The coefficient is a power attenuation in neper per metre, which is what the
+standard's own air term takes, and it is not the decibel per metre an outdoor
+propagation model works in. The page prints it in thousandths of a neper per
+metre and so does this table. Six rows is all there is: this is a table to look
+a value up in and not a model to interpolate, and the standard says nothing
+about a room at 15 °C and 60 % that would let a row be made for it.
+
+<Catalogues catalogue="airAttenuation" lang="en" />

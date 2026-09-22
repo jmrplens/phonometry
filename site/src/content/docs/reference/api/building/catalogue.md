@@ -49,6 +49,17 @@ computes. So a row here is a published measurement of a construction of that
 description, useful for a sanity check and for an order of magnitude, and it
 is not a specification of any wall anybody will build.
 
+ASHRAE says as little and says it plainly: its nine machine equipment room
+constructions are "compiled from controlled laboratory tests and represent a
+condition typically superior to that found in field installations, because the
+in situ acoustical performance of any wall, floor, or ceiling is adversely
+affected by flanking paths, holes, penetrations, and other anomalies". No
+laboratory, standard or reference is named for any of them either. Those rows
+are here and the duct walls of the same chapter are not, because a duct wall is
+measured in two directions that are different numbers and is indexed by the
+duct's cross section, length and sheet gauge; it is published from
+[`phonometry.noise_control.duct_walls`](/phonometry/reference/api/noise_control/duct-walls/).
+
 > Auto-generated from the source docstrings by `scripts/generate_api_docs.py` (`make api-docs`). Do not edit by hand.
 
 ## PUBLISHED_TRANSMISSION_LOSS
@@ -90,7 +101,7 @@ TransmissionLossSpectrum(
     variant: str = '',
     approximate: frozenset[str] = frozenset(),
     derived: Mapping[str, str] = ...,
-    ranges: Mapping[str, tuple[float, float]] = ...,
+    ranges: Mapping[str, tuple[float | None, float | None]] = ...,
     bounded_above: frozenset[str] = frozenset(),
     bounded_below: frozenset[str] = frozenset(),
     reported: Mapping[str, tuple[float | tuple[float, float], ...]] = ...,
@@ -111,6 +122,7 @@ TransmissionLossSpectrum(
     transmission_loss_8000_db: float | None = None,
     thickness_mm: float | None = None,
     surface_density_kg_m2: float | None = None,
+    sound_transmission_class: float | None = None,
 )
 ```
 
@@ -130,15 +142,16 @@ One construction of a published table, with its loss in each band.
 | `transmission_loss_8000_db` | The same in the 8 kHz band. |
 | `thickness_mm` | The overall thickness of the construction, in millimetres, as the page prints it beside the description. It is the assembly's thickness and not a leaf's: a double wall prints the pair and the cavity together. |
 | `surface_density_kg_m2` | The mass per unit area, in kilograms per square metre, as printed. This is what the mass law takes, and what two rows of the same description are told apart by. |
+| `sound_transmission_class` | The single-number rating the page prints beside the spectrum, where it prints one. It is not a band value and it does not follow from the ones beside it: an STC is computed from third-octave data, so a table that prints octave bands and an STC is printing two readings of one measurement and this catalogue keeps both. Empty for a page that rates nothing, which is most of them. |
 | `name` | The material as the table names it, attribution stripped. |
 | `variant` | Which specimen or condition this row is, when the page prints several under one name: `"chemically pure"`, `"direction x"`, `"0.68 mm diameter"`. Empty when the page prints one. |
 | `source` | Document, table, PDF page and printed folio. |
 | `table` | The data file this row was read from, without the extension, which is also the first half of its key in the catalogue that holds it. |
 | `approximate` | Fields the page prints with a `~`. Not an estimate and not an interval: a number the author rounded on purpose. |
 | `derived` | Field to how it was computed, for the ones this library worked out from the cells the page did print. A derived value is never stored as if it had been read. |
-| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. |
+| `ranges` | `(low, high)` for each field the page prints as an interval rather than a value. One end is `None` only for a bound whose open side the quantity has no limit on; the end the page prints is always a number, and a two-sided interval has two. |
 | `bounded_above` | The subset of `ranges` the page prints as `< x` or `<= x`, where the low end is a floor and not a measurement. |
-| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. |
+| `bounded_below` | The subset of `ranges` the page prints as `> x` or `>= x`, where the high end is the ceiling the quantity cannot pass and not a measurement: Cox gives an aerogel a porosity of `>0.75`, and the 1 beside it is what a porosity is, not what anybody measured. A quantity with no such ceiling leaves that end `None` rather than borrowing a number for it: ASHRAE prints `>45` for a duct wall whose radiated sound the background swamped, and a transmission loss has no value it cannot pass, so the open end is empty. It is never an infinity, which is not a number the page has and not a token JSON can carry. |
 | `reported` | Field to the values the page lists for it, for a cell that prints several with no single one: `"25, 207, 230"` or `"96, 200-450"`, readings from as many studies. Each entry is a number or a `(low, high)` pair. Not a range, because the page did not print one, and not variants, because the page does not say which is which. |
 | `unquantified` | Field to what the page printed in place of a number, for a cell that is neither empty nor numeric: `"Varies with frequency"`, `"model"`, `"…"` for a row of dots. What the page printed, and never a sentence about why the number is missing: `why_missing` composes that sentence around it, so a caller and a published table both get the cell as it reads on the page. |
 | `uncertainty` | Field to the plus-or-minus the page prints beside the value, in the same unit. Cox prints an effective flow resistivity of `(540 +/- 92) x 10^3`, and two of his rows print an uncertainty as large as the value itself. What the interval means is not stated on the page, so it is not stated here either: it is the number the page prints beside the value and nothing more. |

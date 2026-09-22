@@ -17,6 +17,7 @@ module, where its clause can be cited beside it, exactly as for fluids.
 from __future__ import annotations
 
 from .catalogue import PUBLISHED_SOLIDS, SolidMaterial, solids_named
+from .damping import PUBLISHED_DAMPING, DampingMaterial, damping_named
 from .elastic import (
     DEFAULT_SPEED_OF_SOUND_M_S,
     beam_longitudinal_speed,
@@ -30,10 +31,13 @@ from .elastic import (
 
 __all__ = [
     "DEFAULT_SPEED_OF_SOUND_M_S",
+    "PUBLISHED_DAMPING",
     "PUBLISHED_SOLIDS",
+    "DampingMaterial",
     "SolidMaterial",
     "beam_longitudinal_speed",
     "bulk_longitudinal_speed",
+    "damping_named",
     "plate_longitudinal_speed",
     "solids_named",
     "thickness_critical_frequency_product",

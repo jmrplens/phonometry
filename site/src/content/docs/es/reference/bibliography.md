@@ -461,6 +461,15 @@ y Arau están aquí como fuentes de las cinco fórmulas de predicción y no como
 lectura, y vale la pena abrir cada uno para ver qué supuso su autor sobre cómo
 se reparte la absorción, que es justo donde discrepan los cinco.
 
+- Harris, C. M. (ed.). (1995). *Manual de medidas acústicas y control del
+  ruido* (3.ª ed.). McGraw-Hill.
+  La edición española del manual, citada en este árbol como Harris 3e y que no
+  hay que confundir con el artículo de ventanas de F. J. Harris, en Análisis de
+  señal. Su capítulo 32, «Aislamiento del sonido transmitido por estructuras»,
+  imprime en las tablas 32.1 a 32.8 la clase de aislamiento al impacto medida
+  de cuarenta y dos conjuntos de suelo-techo y la mejora que seis tratamientos
+  elásticos de superficie añaden sobre un suelo macizo, que es el único
+  aislamiento al impacto publicado que guarda esta biblioteca.
 - Long, M. (2014). *Architectural acoustics* (2.ª ed.). Academic Press.
   [doi:10.1016/C2012-0-03257-5](https://doi.org/10.1016/C2012-0-03257-5).
   El complemento de diseño arquitectónico a las normas de medición: las
@@ -1350,6 +1359,14 @@ EBU Tech aportan el comportamiento del medidor, el rango de sonoridad y la
 práctica de producción, junto con las señales de prueba con las que se valida la
 implementación.
 
+- ASHRAE (2019). *2019 ASHRAE handbook: Heating, ventilating, and
+  air-conditioning applications* (ed. SI), capítulo 49, «Noise and vibration
+  control». ASHRAE. ISBN 978-1-947192-13-3.
+  El capítulo de diseño del que esta biblioteca lee sus paredes de conducto:
+  las tablas 29 a 34, la pérdida por transmisión hacia fuera y hacia dentro de
+  una pared de conducto rectangular, circular y oval plana banda a banda, y la
+  tabla 40, nueve paredes, suelos y techos de sala de máquinas con su clase de
+  transmisión sonora.
 - Fahy, F. J. (1995). *Sound intensity* (2.ª ed.). E&FN Spon.
   ISBN 978-0-419-19810-9.
   [doi:10.4324/9780203475386](https://doi.org/10.4324/9780203475386).
